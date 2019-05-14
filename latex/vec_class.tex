@@ -1,0 +1,634 @@
+% !TEX root = sycl-1.2.1.tex
+
+%*******************************************************************************
+% Vector types
+%*******************************************************************************
+%\subsection{Vector types}
+%\label{sec:vector.type}
+
+SYCL provides a cross-platform class template that works
+efficiently on SYCL devices as well as in host C++ code. This type
+allows sharing of vectors between the host and its SYCL devices. The
+vector supports methods that allow construction of a new vector from a
+swizzled set of component elements.
+
+\tclass{vec}{\tf{typename} dataT, \tf{int} numElements} is a vector type that
+compiles down to the OpenCL built-in vector types on OpenCL devices, where
+possible, and provides compatible support on the host. The \codeinline{vec}
+class is templated on its number of elements and its element type. The number of
+elements parameter, \tf{numElements}, can be one of: 1, 2, 3, 4, 8 or 16. Any
+other value should produce a compilation failure. The element type parameter,
+\tf{dataT}, must be one of the basic scalar types supported in device code.
+
+The SYCL \codeinline{vec} class template provides interoperability with the
+underlying OpenCL vector type defined by \codeinline{vector_t} which is
+available only when compiled for the device. The SYCL \codeinline{vec} class can
+be constructed from an instance of \codeinline{vector_t} and can implicitly
+convert to an instance of \codeinline{vector_t} in order to support
+interoperability with OpenCL C functions from a SYCL kernel function.
+
+An instance of the SYCL \codeinline{vec} class template can also be
+implicitly converted to an instance of the data type when the number of
+elements is \codeinline{1} in order to allow single element vectors and
+scalars to be convertible with each other.
+
+\subsubsection{Vec interface}
+
+The constructors, member functions and non-member functions of the SYCL \codeinline{vec} class template are listed in Tables~\ref{table.constructors.vec}, \ref{table.members.vec} and \ref{table.functions.vec} respectively.
+
+%Interface for class: vec
+\lstinputlisting{headers/vec.h}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes {Constructors of the SYCL \codeinline{vec} class template}
+{table.constructors.vec}
+  \addRow
+    {vec()}
+    {
+      Default construct a vector with element type \codeinline{dataT} and
+      with \codeinline{numElements} dimensions by default construction of
+      each of its elements.
+    }
+  \addRow
+    {explicit vec(const dataT \&arg)}
+    {
+      Construct a vector of element type \codeinline{dataT} and
+      \codeinline{numElements} dimensions by setting each value to \codeinline{arg} by
+      assignment.
+    }
+  \addRowTwoL
+    {template <typename... argTN>}
+    {vec(const argTN\&... args)}
+    {
+      Construct a SYCL \codeinline{vec} instance from any combination of scalar and SYCL \codeinline{vec} parameters of the same element type, providing the total number of elements for all parameters sum to \codeinline{numElements} of this \codeinline{vec} specialization.
+    }    
+  \addRow
+    {vec(const vec<dataT, numElements> \&rhs)}
+    {
+      Construct a vector of element type \codeinline{dataT} and number of elements \codeinline{numElements} by copy from another similar vector.
+    }
+  \addRow
+    {vec(vector_t openclVector)}
+    {
+      Available only when: compiled for the device.
+      \newline
+      Constructs a SYCL \codeinline{vec} instance from an instance of the underlying OpenCL vector type defined by \codeinline{vector_t}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions for the SYCL \codeinline{vec} class template}
+{table.members.vec}
+  \addRow
+  {operator vector_t() const}
+  {
+    Available only when: compiled for the device.
+    \newline
+    Converts this SYCL \codeinline{vec} instance to the underlying OpenCL vector type
+    defined by \codeinline{vector_t}.
+  }
+  \addRow
+  {operator dataT() const}
+  {
+    Available only when: \codeinline{numElements == 1}.
+    Converts this SYCL \codeinline{vec} instance to an instance of \codeinline{dataT} with
+    the value of the single element in this SYCL \codeinline{vec} instance.
+  }
+  \addRow
+  {size_t get_count() const}
+  {
+    Returns the number of elements of this SYCL \codeinline{vec}.
+  }
+  \addRow
+  {size_t get_size() const}
+  {
+    Returns the size of this SYCL \codeinline{vec} in bytes.
+    \newline
+    3-element vector size matches 4-element vector size to provide
+    interoperability with OpenCL vector types. The same rule applies to vector
+    alignment as described in \ref{memory-layout-and-alignment}.
+  }
+  \addRowTwoL
+  {template<typename convertT, rounding_mode roundingMode>}
+  {vec<convertT, numElements> convert() const}
+  {
+    Converts this SYCL \codeinline{vec} to a SYCL \codeinline{vec} of a different element type specified by \codeinline{convertT} using the rounding mode specified by \codeinline{roundingMode}. The new SYCL \codeinline{vec} type must have the same number of elements as this SYCL \codeinline{vec}. The different rounding modes are described in Table~\ref{table.vec.roundingmodes}.
+  }
+  \addRowTwoL
+  {template<typename asT>}
+  {asT as() const}
+  {
+    Bitwise reinterprets this SYCL \codeinline{vec} as a SYCL \codeinline{vec} of a different element type and number of elements specified by \codeinline{asT}. The new SYCL \codeinline{vec} type must have the same storage size in bytes as this SYCL \codeinline{vec}.
+  }
+  \addRowTwoL
+    { template<int... swizzleIndexes> }
+    {\__swizzled_vec__ swizzle() const}
+    {
+      Return an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
+    }
+  \addRow
+    {\__swizzled_vec__ XYZW_ACCESS() const}
+    {
+      Available only when \codeinline{numElements <= 4}.
+      \newline \newline
+      Returns an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
+      \newline \newline
+      Where \codeinline{XYZW_ACCESS} is: \codeinline{x} for \codeinline{numElements == 1}, \codeinline{x, y} for \codeinline{numElements == 2}, \codeinline{x, y, z} for \codeinline{numElements == 3} and \codeinline{x, y, z, w} for \codeinline{numElements == 4}.
+    }
+  \addRow
+    {\__swizzled_vec__ RGBA_ACCESS() const}
+    {
+      Available only when \codeinline{numElements == 4}.
+      \newline \newline
+      Returns an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
+      \newline \newline
+      Where \codeinline{RGBA_ACCESS} is: \codeinline{r, g, b, a}.
+    }
+  \addRow
+    {\__swizzled_vec__ INDEX_ACCESS() const}
+    {
+      Returns an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
+      \newline \newline
+      Where \codeinline{INDEX_ACCESS} is: \codeinline{s0} for \codeinline{numElements == 1}, \codeinline{s0, s1} for \codeinline{numElements == 2}, \codeinline{s0, s1, s2} for \codeinline{numElements == 3}, \codeinline{s0, s1, s2, s3} for \codeinline{numElements == 4}, \codeinline{s0, s1, s2, s3, s4, s5, s6, s7, s8} for \codeinline{numElements == 8} and \codeinline{s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD, sE, sF} for \codeinline{numElements == 16}.
+    }
+  \addRow
+    {\__swizzled_vec__ XYZW_SWIZZLE() const}
+    {
+      Available only when \codeinline{numElements <= 4}, and when the macro \codeinline{SYCL_SIMPLE_SWIZZLES} is defined before including \codeinline{cl/sycl.hpp}.
+      \newline \newline
+      Returns an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
+    \newline \newline
+    Where XYZW\_SWIZZLE is all permutations with repetition of \codeinline{x, y} for \codeinline{numElements == 2}, \codeinline{x, y, z} for \codeinline{numElements == 3} and \codeinline{x, y, z, w} for \codeinline{numElements == 4}. For example \codeinline{xzyw} and \codeinline{xyyy}.
+    }
+  \addRow
+    {\__swizzled_vec__ RGBA_SWIZZLE() const}
+    {
+      Available only when \codeinline{numElements == 4}, and when the macro \codeinline{SYCL_SIMPLE_SWIZZLES} is defined before including \codeinline{cl/sycl.hpp}.
+      \newline \newline
+      Returns an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
+    \newline \newline
+    Where RGBA\_SWIZZLE is all permutations with repetition of \codeinline{r, g, b, a}. For example \codeinline{bgra} and \codeinline{rrba}.
+    }
+  \addRow
+    {\__swizzled_vec__ lo() const}
+    {
+      Available only when: \codeinline{numElements > 1}.
+      Return an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence made up of the lower half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}. When \codeinline{numElements == 3} this SYCL \codeinline{vec} is treated as though \codeinline{numElements == 4} with the fourth element undefined.
+    }
+  \addRow
+    {\__swizzled_vec__ hi() const}
+    {
+      Available only when: \codeinline{numElements > 1}.
+      Return an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence made up of the upper half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}. When \codeinline{numElements == 3} this SYCL \codeinline{vec} is treated as though \codeinline{numElements == 4} with the fourth element undefined.
+    }
+  \addRow
+    {\__swizzled_vec__ odd() const}
+    {
+      Available only when: \codeinline{numElements > 1}.
+      Return an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence made up of the odd indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}. When \codeinline{numElements == 3} this SYCL \codeinline{vec} is treated as though \codeinline{numElements == 4} with the fourth element undefined.
+    }    
+  \addRow
+    {\__swizzled_vec__ even() const}
+    {
+      Available only when: \codeinline{numElements > 1}.
+      Return an instance of the implementation defined intermediate class template \codeinline{\_\_swizzled_vec\_\_} representing an index sequence made up of the even indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}. When \codeinline{numElements == 3} this SYCL \codeinline{vec} is treated as though \codeinline{numElements == 4} with the fourth element undefined.
+    }
+  \addRowTwoL
+  {template <access::address_space addressSpace>}
+  {void load(size_t offset, multi_ptr<const dataT, addressSpace> ptr)}
+  {
+    Loads the values at the address of \codeinline{ptr} offset in elements of type \codeinline{dataT} by \codeinline{numElements * offset}, into the components of this SYCL \codeinline{vec}.
+  }
+  \addRowTwoL
+  {template <access::address_space addressSpace>}
+  {void store(size_t offset, multi_ptr<dataT, addressSpace> ptr) const}
+  {
+    Stores the components of this SYCL \codeinline{vec} into the values at the address of \codeinline{ptr} offset in elements of type \codeinline{dataT} by \codeinline{numElements * offset}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> operatorOP(}
+  {  const vec<dataT, numElements> \&rhs) const}
+  {
+    When \codeinline{OP} is \codeinline{\%} available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} arithmetic operation between each element of this SYCL \codeinline{vec} and each element of the \codeinline{rhs} SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*}, \codeinline{/}, \codeinline{\%}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> operatorOP(}
+  {  const dataT \&rhs) const}
+  {
+    When \codeinline{OP} is \codeinline{\%} available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} arithmetic operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*}, \codeinline{/}, \codeinline{\%}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> \&operatorOP(}
+  {  const vec<dataT, numElements> \&rhs)}
+  {
+    When \codeinline{OP} is \codeinline{\%=} available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Perform an in-place element-wise \codeinline{OP} arithmetic operation between each element of this SYCL \codeinline{vec} and each element of the \codeinline{rhs} SYCL \codeinline{vec} and return a reference to this SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=}, \codeinline{*=}, \codeinline{/=}, \codeinline{\%=}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> \&operatorOP(}
+  {  const dataT \&rhs)}
+  {
+    When \codeinline{OP} is \codeinline{\%=} available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Perform an in-place element-wise \codeinline{OP} arithmetic operation between each element of this SYCL \codeinline{vec} and \codeinline{rhs} scalar and return a reference to this SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=}, \codeinline{*=}, \codeinline{/=}, \codeinline{\%=}.
+  }
+  \addRow
+  {vec<dataT, numElements> \&operatorOP()}
+  {
+    Perform an in-place element-wise \codeinline{OP} prefix arithmetic operation on each element of this SYCL \codeinline{vec}, assigning the result of each element to the corresponding element of this SYCL \codeinline{vec} and return a reference to this SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{++}, \codeinline{--}. 
+  }
+  
+  \addRow
+  {vec<dataT, numElements> operatorOP(int)}
+  {
+    Perform an in-place element-wise \codeinline{OP} post-fix arithmetic operation on each element of this SYCL \codeinline{vec}, assigning the result of each element to the corresponding element of this SYCL \codeinline{vec} and returns a copy of this SYCL \codeinline{vec} before the operation is performed.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{++}, \codeinline{--}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> operatorOP(}
+  {  const vec<dataT, numElements> \&rhs) const}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} bitwise operation between each element of this SYCL \codeinline{vec} and each element of the \codeinline{rhs} SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&}, \codeinline{\|}, \codeinline{\^}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> operatorOP(}
+  {  const dataT \&rhs) const}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} bitwise operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&}, \codeinline{\|}, \codeinline{\^}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> \&operatorOP(}
+  {  const vec<dataT, numElements> \&rhs)}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Perform an in-place element-wise \codeinline{OP} bitwise operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} SYCL \codeinline{vec} and return a reference to this SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&=}, \codeinline{\|=}, \codeinline{\^=}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> \&operatorOP(}
+  {  const dataT \&rhs)}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Perform an in-place element-wise \codeinline{OP} bitwise operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar and return a reference to this SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&=}, \codeinline{\|=}, \codeinline{\^=}. 
+  }
+  \addRowTwoL
+  {vec<RET, numElements> operatorOP(}
+  {  const vec<dataT, numElements> \&rhs) const}
+  {
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} logical operation between each element of this SYCL \codeinline{vec} and each element of the \codeinline{rhs} SYCL \codeinline{vec}.
+    \newline \newline
+    The \codeinline{dataT} template parameter of the constructed SYCL \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET} must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET} must be \codeinline{cl_long}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&\&}, \codeinline{\|\|}.
+  }
+  \addRowTwoL
+  {vec<RET, numElements> operatorOP(}
+  {  const dataT \&rhs) const}
+  {
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} logical operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar.
+    \newline \newline
+    The \codeinline{dataT} template parameter of the constructed SYCL \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET} must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET} must be \codeinline{cl_long}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&\&}, \codeinline{\|\|}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> operatorOP(}
+  {  const vec<dataT, numElements> \&rhs) const}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} bitshift operation between each element of this SYCL \codeinline{vec} and each element of the \codeinline{rhs} SYCL \codeinline{vec}. If \codeinline{OP} is \codeinline{>>}, \codeinline{dataT} is a signed type and this SYCL \codeinline{vec} has a negative value any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{1}, otherwise any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{0}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{<<}, \codeinline{>>}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> operatorOP(}
+  {  const dataT \&rhs) const}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} bitshift operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar. If \codeinline{OP} is \codeinline{>>}, \codeinline{dataT} is a signed type and this SYCL \codeinline{vec} has a negative value any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{1}, otherwise any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{0}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{<<}, \codeinline{>>}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> \&operatorOP(}
+  {  const vec<dataT, numElements> \&rhs)}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Perform an in-place element-wise \codeinline{OP} bitshift operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} SYCL \codeinline{vec} and returns a reference to this SYCL \codeinline{vec}. If \codeinline{OP} is \codeinline{>>\=}, \codeinline{dataT} is a signed type and this SYCL \codeinline{vec} has a negative value any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{1}, otherwise any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{0}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{<<\=}, \codeinline{>>\=}.
+  }
+  \addRowTwoL
+  {vec<dataT, numElements> \&operatorOP(}
+  {  const dataT \&rhs)}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Perform an in-place element-wise \codeinline{OP} bitshift operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar and returns a reference to this SYCL \codeinline{vec}. If \codeinline{OP} is \codeinline{>>\=}, \codeinline{dataT} is a signed type and this SYCL \codeinline{vec} has a negative value any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{1}, otherwise any vacated bits viewed as an unsigned integer must be assigned the value \codeinline{0}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{<<\=}, \codeinline{>>\=}.
+  }
+  \addRow
+    {vec<RET, numElements> operatorOP(const vec<dataT, numElements> \&rhs) const}
+    {
+      Construct a new instance of the SYCL \codeinline{vec} class template with the element type \codeinline{RET} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} relational operation between each element of this SYCL \codeinline{vec} and each element of the \codeinline{rhs} SYCL \codeinline{vec}. Each element of the SYCL \codeinline{vec} that is returned must be \codeinline{-1} if the operation results in \codeinline{true} and \codeinline{0} if the operation results in \codeinline{false} or either this SYCL \codeinline{vec} or the \codeinline{rhs} SYCL \codeinline{vec} is a NaN.
+      \newline \newline
+      The \codeinline{dataT} template parameter of the constructed SYCL \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET} must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET} must be \codeinline{cl_long}.
+      \newline \newline
+      Where \codeinline{OP} is: \codeinline{==}, \codeinline{!=}, \codeinline{<}, \codeinline{>}, \codeinline{<=}, \codeinline{>=}.
+    }
+  \addRow
+    {vec<RET, numElements> operatorOP(const dataT \&rhs) const}
+    {
+      Construct a new instance of the SYCL \codeinline{vec} class template with the \codeinline{dataT} parameter of \codeinline{RET} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} relational operation between each element of this SYCL \codeinline{vec} and the \codeinline{rhs} scalar. Each element of the SYCL \codeinline{vec} that is returned must be \codeinline{-1} if the operation results in \codeinline{true} and \codeinline{0} if the operation results in \codeinline{false} or either this SYCL \codeinline{vec} or the \codeinline{rhs} SYCL \codeinline{vec} is a NaN.
+      \newline \newline
+      The \codeinline{dataT} template parameter of the constructed SYCL \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET} must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET} must be \codeinline{cl_long}.
+      \newline \newline
+      Where \codeinline{OP} is: \codeinline{==}, \codeinline{!=}, \codeinline{<}, \codeinline{>}, \codeinline{<=}, \codeinline{>=}. 
+    }
+  \addRowTwoL
+    {vec<dataT, numElements> \&operator=(}
+    {  const vec<dataT, numElements> \&rhs)}
+    {
+      Assign each element of the \codeinline{rhs} SYCL \codeinline{vec} to each element of this SYCL \codeinline{vec} and return a reference to this SYCL \codeinline{vec}.
+    }
+  \addRowTwoL
+    {vec<dataT, numElements> \&operator=(}
+    {  const dataT \&rhs)}
+    {
+      Assign each element of the \codeinline{rhs} scalar to each element of this SYCL \codeinline{vec} and return a reference to this SYCL \codeinline{vec}.
+    }
+  \addRow
+  {vec<dataT, numElements> operator~()}
+  {
+    Available only when: \codeinline{dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} bitwise operation on each element of this SYCL \codeinline{vec}.
+  }
+  \addRow
+  {vec<RET, numElements> operator!()}
+  {
+    Construct a new instance of the SYCL \codeinline{vec} class template with the same template parameters as this SYCL \codeinline{vec} with each element of the new SYCL \codeinline{vec} instance the result of an element-wise \codeinline{OP} logical operation on each element of this SYCL \codeinline{vec}. Each element of the SYCL \codeinline{vec} that is returned must be \codeinline{-1} if the operation results in \codeinline{true} and \codeinline{0} if the operation results in \codeinline{false} or this SYCL \codeinline{vec} is a NaN.
+      \newline \newline
+      The \codeinline{dataT} template parameter of the constructed SYCL \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET} must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET} must be \codeinline{cl_long}.
+  }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Non-member function}
+\addFootNotes{Non-member functions of the \codeinline{vec} class template}
+{table.functions.vec}
+  \addRowThreeL
+  { vec<dataT, numElements> operatorOP( }
+  { const dataT \&lhs, }
+  { const vec<dataT, numElements> \&rhs) }
+  {
+    When \codeinline{OP} is \codeinline{\%} available only when: \codeinline{
+    dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with
+    the same template parameters as the \codeinline{rhs} SYCL \codeinline{vec}
+    with each element of the new SYCL \codeinline{vec} instance the result of
+    an element-wise \codeinline{OP} arithmetic operation between the
+    \codeinline{lhs} scalar and each element of the \codeinline{rhs} SYCL
+    \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
+    \codeinline{/}, \codeinline{\%}.
+  }
+  \addRowThreeL
+  { vec<dataT, numElements> operatorOP( }
+  { const dataT \&lhs, }
+  { const vec<dataT, numElements> \&rhs) }
+  {
+    Available only when: \codeinline{
+    dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with
+    the same template parameters as the \codeinline{rhs} SYCL \codeinline{vec}
+    with each element of the new SYCL \codeinline{vec} instance the result of
+    an element-wise \codeinline{OP} bitwise operation between the \codeinline{
+    lhs} scalar and each element of the \codeinline{rhs} SYCL \codeinline{vec}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&}, \codeinline{|}, \codeinline{^}.
+  }
+  \addRowThreeL
+  { vec<RET, numElements> operatorOP( }
+  { const dataT \&lhs, }
+  { const vec<dataT, numElements> \&rhs) }
+  {
+    Available only when: \codeinline{
+    dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+    \newline
+    Construct a new instance of the SYCL \codeinline{vec} class template with
+    the same template parameters as the \codeinline{rhs} SYCL \codeinline{vec}
+    with each element of the new SYCL \codeinline{vec} instance the result of
+    an element-wise \codeinline{OP} logical operation between the \codeinline{
+    lhs} scalar and each element of the \codeinline{rhs} SYCL \codeinline{vec}.
+    \newline \newline
+    The \codeinline{dataT} template parameter of the constructed SYCL \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET} must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET} must be \codeinline{cl_long}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{\&\&}, \codeinline{||}.
+  }
+  \addRowThreeL
+  { vec<dataT, numElements> operatorOP( }
+  { const dataT \&lhs, }
+  { const vec<dataT, numElements> \&rhs) }
+  {
+    Construct a new instance of the SYCL \codeinline{vec} class template with
+    the same template parameters as the \codeinline{rhs} SYCL \codeinline{vec}
+    with each element of the new SYCL \codeinline{vec} instance the result of
+    an element-wise \codeinline{OP} bitshift operation between the \codeinline{
+    lhs} scalar and each element of the \codeinline{rhs} SYCL \codeinline{vec}.
+    If \codeinline{OP} is \codeinline{>>}, \codeinline{dataT} is a signed type
+    and this SYCL \codeinline{vec} has a negative value any vacated bits viewed
+    as an unsigned integer must be assigned the value \codeinline{1}, otherwise
+    any vacated bits viewed as an unsigned integer must be assigned the value
+    \codeinline{0}.
+    \newline \newline
+    Where \codeinline{OP} is: \codeinline{<<}, \codeinline{>>}.
+  }
+  \addRowThreeL
+    { vec<RET, numElements> operatorOP( }
+    { const dataT \&lhs, }
+    { const vec<dataT, numElements> \&rhs) }
+    {
+      Available only when: \codeinline{
+      dataT != cl_float \&\& dataT != cl_double \&\& dataT != cl_half}.
+      \newline
+      Construct a new instance of the SYCL \codeinline{vec} class template with
+      the element type \codeinline{RET} with each element of the new SYCL
+      \codeinline{vec} instance the result of an element-wise \codeinline{OP}
+      relational operation between the \codeinline{lhs} scalar and each element
+      of the \codeinline{rhs} SYCL \codeinline{vec}. Each element of the SYCL
+      \codeinline{vec} that is returned must be \codeinline{-1} if the operation
+      results in \codeinline{true} and \codeinline{0} if the operation results
+      in \codeinline{false} or either this SYCL \codeinline{vec} or the
+      \codeinline{rhs} SYCL \codeinline{vec} is a NaN.
+      \newline \newline
+      The \codeinline{dataT} template parameter of the constructed SYCL
+      \codeinline{vec}, \codeinline{RET}, varies depending on the \codeinline{
+      dataT} template parameter of this SYCL \codeinline{vec}. For a SYCL
+      \codeinline{vec} with \codeinline{dataT} of type \codeinline{cl_char} or
+      \codeinline{cl_uchar} \codeinline{RET} must be \codeinline{cl_char}. For a
+      SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{
+      cl_short}, \codeinline{cl_ushort} or \codeinline{cl_half} \codeinline{RET}
+      must be \codeinline{cl_short}. For a SYCL \codeinline{vec} with
+      \codeinline{dataT} of type \codeinline{cl_int}, \codeinline{cl_uint} or
+      \codeinline{cl_float} \codeinline{RET} must be \codeinline{cl_int}. For a
+      SYCL \codeinline{vec} with \codeinline{dataT} of type \codeinline{
+      cl_long}, \codeinline{cl_ulong} or \codeinline{cl_double} \codeinline{RET}
+      must be \codeinline{cl_long}.
+      \newline \newline
+      Where \codeinline{OP} is: \codeinline{==}, \codeinline{!=}, \codeinline{<}, \codeinline{>}, \codeinline{<=}, \codeinline{>=}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+\subsubsection{Aliases}
+
+SYCL provides aliases for \codeinline{vec<dataT, numElements>} as \codeinline{
+<dataT><numElements>} for the data types: \codeinline{char}, \codeinline{short},
+\codeinline{int}, \codeinline{long}, \codeinline{float}, \codeinline{double},
+\codeinline{half}, \codeinline{cl_char}, \codeinline{cl_uchar}, \codeinline{
+cl_short}, \codeinline{cl_ushort}, \codeinline{cl_int}, \codeinline{cl_uint},
+\codeinline{cl_long}, \codeinline{cl_ulong}, \codeinline{cl_float}, \codeinline{
+cl_double} and \codeinline{cl_half} and the data types: \codeinline{signed char}
+, \codeinline{unsigned char}, \codeinline{unsigned short},
+\codeinline{unsigned int}, \codeinline{unsigned long}, \codeinline{long long}
+and \codeinline{unsigned long long} represented with the short hand \codeinline{
+schar}, \codeinline{uchar}, \codeinline{ushort}, \codeinline{uint}, \codeinline{
+ulong}, \codeinline{longlong} and \codeinline{ulonglong} respectively, for
+number of elements: \codeinline{2}, \codeinline{3}, \codeinline{4}, \codeinline{
+8}, \codeinline{16}. For example \codeinline the alias to \codeinline{
+vec<float, 4>} would be \codeinline{float4}.
+
+\subsubsection{Swizzles}
+
+Swizzle operations can be performed in two ways. Firstly by calling the \codeinline{swizzle} member function template, which takes a variadic number of integer template arguments between \codeinline{0} and \codeinline{numElements-1}, specifying swizzle indexes. Secondly by calling one of the simple swizzle member functions defined in \ref{table.members.vec} as \codeinline{XYZW_SWIZZLE} and \codeinline{RGBA_SWIZZLE}. Note that the simple swizzle functions are only available for up to 4 element vectors and are only available when the macro \codeinline{SYCL_SIMPLE_SWIZZLES} is defined before including \codeinline{CL/sycl.hpp}.
+
+In both cases the return type is always an instance of \codeinline{\__swizzled_vec__}, an implementation defined temporary class representing a swizzle of the original SYCL \codeinline{vec} instance. Both kinds of swizzle member functions must not perform the swizzle operation themselves, instead the swizzle operation must be performed by the returned instance of \codeinline{\__swizzled_vec__} when used within an expression, meaning if the returned \codeinline{\__swizzled_vec__} is never used in an expression no swizzle operation is performed.
+
+Both the \codeinline{swizzle} member function template and the simple swizzle member functions allow swizzle indexes to be repeated.
+
+A series of static constexpr values are provided within the \codeinline{elem} struct to allow specifying named swizzle indexes when calling the \codeinline{swizzle} member function template.
+
+\subsubsection{Swizzled vec class}
+\label{swizzled-vec-class}
+
+The \codeinline{\__swizzled_vec__} class must define an unspecified temporary which provides the entire interface of the SYCL \codeinline{vec} class template, including swizzled member functions, with the additions and alterations described below:
+
+\begin{itemize}
+
+\item The \codeinline{\__swizzled_vec__} class template must be readable as an r-value reference on the RHS of an expression. In this case the swizzle operation is performed on the RHS of the expression and then the result is applied to the LHS of the expression.
+
+\item The \codeinline{\__swizzled_vec__} class template must be assignable as an l-value reference on the LHS of an expression. In this case the RHS of the expression is applied to the original SYCL \codeinline{vec} which the \codeinline{\__swizzled_vec__} represents via the swizzle operation. Note that a \codeinline{\__swizzled_vec__} that is used in an l-value expression may not contain any repeated element indexes. \newline For example: \codeinline{f4.xxxx() = fx.wzyx()} would not be valid.
+
+\item The \codeinline{\__swizzled_vec__} class template must be convertible to an instance of SYCL \codeinline{vec} with the type \codeinline{dataT} and number of elements specified by the swizzle member function, if \codeinline{numElements > 1}, and must be convertible to an instance of type \codeinline{dataT}, if \codeinline{numElements == 1}.
+
+\item The \codeinline{\__swizzled_vec__} class template must be non-copyable, non-moveable, non-user constructible and may not be bound to a l-value or escape the expression it was constructed in. For example \codeinline{auto x = f4.x()} would not be valid.
+
+\item The \codeinline{\__swizzled_vec__} class template should return \codeinline{\__swizzled_vec__ \&} for each operator inhetired from the \codeinline{vec} class template interface which would return  \codeinline{vec<dataT, numElements> \&}.
+
+\end{itemize}
+
+\subsubsection{Rounding modes}
+
+The various rounding modes that can be used in the \codeinline{as} member function template are described in Table~\ref{table.vec.roundingmodes}.
+
+%-------------------------------------------------------------------------------
+\startTable{Rounding mode}
+\addFootNotes{Rounding modes for the SYCL \codeinline{vec} class template}
+{table.vec.roundingmodes}
+  \addRow
+    {automatic}
+    {
+      Default rounding mode for the SYCL \codeinline{vec} class element type element type, \codeinline{rtz} (round toward zero) for integer types and \codeinline{rte} (round to nearest even) for floating-point types.
+    }
+  \addRow
+    {rte}
+    {
+      Round to nearest even.
+    }
+  \addRow
+    {rtz}
+    {
+      Round toward zero.
+    }
+  \addRow
+    {rtp}
+    {
+      Round toward positive infinity.
+    }
+  \addRow
+    {rtn}
+    {
+      Round toward negative infinity.
+    }  
+  \completeTable
+%------------------------------------------------------------------------------------------
+
+\subsubsection{Memory layout and alignment}
+\label{memory-layout-and-alignment}
+
+The elements of an instance of the SYCL \codeinline{vec} class template are stored in memory sequentially and contiguously and are aligned to the size of the element type in bytes multiplied by the number of elements:
+
+\begin{equation}
+\label{vec-memory-alignment}
+\texttt{sizeof}(\texttt{dataT}) \cdot \texttt{numElements}
+\end{equation}
+
+The exception to this is when the number of element is three in which case the SYCL \codeinline{vec} is aligned to the size of the element type in bytes multiplied by four:
+
+\begin{equation}
+\label{vec3-memory-alignment}
+\texttt{sizeof}(\texttt{dataT}) \cdot 4
+\end{equation}
+
+This is true for both host and device code in order to allow for instances of the \codeinline{vec} class template to be passed to SYCL kernel functions.
+
+\subsubsection{Considerations for endianness}
+
+As SYCL supports both big-endian and little-endian on OpenCL devices, users must
+take care to ensure kernel arguments are processed correctly. This is
+particularly true for SYCL \codeinline{vec} arguments as the order in which a
+SYCL \codeinline{vec} is loaded differs between big-endian and little-endian.
+
+Users should consult vendor documentation for guidance on how to handle kernel
+arguments in these situations.

@@ -1,0 +1,87 @@
+\begin{multicols}{2}
+
+\textbf{SYCL Application Enqueue Order}
+\vspace{1cm}
+
+\flushleft
+{
+\fontfamily{qcr}\selectfont
+cl::sycl::queue q1(context1);
+cl::sycl::queue q2(context2);
+q1.submit($CG_a(b1_{RW})$);
+q2.submit($CG_b(b2_{RW})$);
+q1.submit($CG_c(b1_{RW},b2_{RW})$);
+}
+\columnbreak
+
+\textbf{SYCL Kernel Execution Order}
+\vspace{1cm}
+
+\begin{tikzpicture}[auto] \small
+\tikzset{Base/.style={align=center}, %, minimum height=2ex},
+  Line/.style={draw, very thick, >=latex', black},
+  LineHost/.style={draw, dashed, >=latex', black},
+  MemoryObject/.style={draw, Base, black},
+  CommandGroup/.style={draw, Base, rounded corners, black},
+  Notice/.style  = {draw, above, rounded corners, rectangle callout, text width=6cm,
+    callout absolute pointer={#1} },
+  Action/.style = {very thick, solid, draw, rectangle callout, rounded corners, black, Base}
+    }
+
+\matrix (binmat) [ampersand replacement=\&, column sep=0.5em, row sep=2em]
+  {\node  (empty) {}; \& 
+    \node (empty) {};  \& 
+    \node [MemoryObject] (Host) {Host memory};  \&
+    \node (empty) {};  \\
+    \node (empty) {};  \&
+    \node [CommandGroup] (CGA)  {$CG_a(b1_{RW})$}; \& 
+    \node (empty) {};  \& 
+    \node [CommandGroup, style=dotted] (CGB)  {$CG_b(b2_{RW})$}; \\
+    \node (empty) {};  \&
+    \& \node [CommandGroup] (CGC)  {$CG_c(b1_{RW},b2_{RW})$}; \\
+    \node (empty) {};  \&
+    \& \node (empty) {}; \\
+};
+  \path [LineHost, ->] (Host) -- node[blue, left=0.2, near start] {$A(b1_{RW})$} (CGA);
+  \path [LineHost, ->] (Host) -- node[blue, right=0.2, near start] {$A(b2_{RW})$} (CGB);
+  \path [Line, ->] (CGA) -- node[blue, left=0.2, near end] {$A'(b1_{RW})$} (CGC);
+  \path [Line, ->] (CGB) -- node[blue, right=0.2, near end] {$A'(b2_{RW})$} (CGC);
+\end{tikzpicture}
+
+\end{multicols}
+
+\textbf{Possible implementation by a SYCL Runtime}
+\vspace{1cm}
+
+\begin{tikzpicture}[auto] \small
+\tikzset{Base/.style={align=center}, %, minimum height=2ex},
+  Line/.style={draw, very thick, >=latex', black},
+  LineHost/.style={draw, dashed, >=latex', black},
+  MemoryObject/.style={draw, Base, black},
+  CommandGroup/.style={draw, Base, rounded corners, black},
+  Notice/.style  = {draw, above, rounded corners, rectangle callout, text width=6cm,
+    callout absolute pointer={#1} },
+  Action/.style = {very thick, solid, draw, rectangle callout, rounded corners, black, Base}
+    }
+
+\matrix (binmat) [ampersand replacement=\&, column sep=0.5em, row sep=2em]
+  {\node  (empty) {}; \& 
+    \node (empty) {};  \& 
+    \node [MemoryObject] (Host) {Host memory (ptr)};  \&
+    \node (empty) {};  \\
+    \node (empty) {};  \&
+    \node [CommandGroup] (CGA)  {$CG_a(b1_{RW})$}; \& 
+    \node (empty) {};  \& 
+    \node [CommandGroup, style=dotted] (CGB)  {$CG_b(b2_{RW})$}; \\
+    \node (empty) {};  \&
+    \& \node [CommandGroup] (CGC)  {$CG_c(b1_{RW},b2_{RW})$}; \\
+    \node (empty) {};  \&
+    \& \node (empty) {}; \\
+};
+  \path [LineHost, ->] (Host) -- node[blue, left=0.3, near start] {clEnqueueWriteBuffer(q1, ptr, b1\_c1)} (CGA);
+  \path [LineHost, ->] (Host) -- node[blue, right=0.3, near start] {clEnqueueWriteBuffer(q2, ptr, b2\_c2)} (CGB);
+  \path [Line, ->] (CGA) -- node[blue, left=0.2, near end] {} (CGC);
+  \path [Line, ->] (CGB) -- node[blue, right=0.5, near end, align=left] {clEnqueueReadBuffer(q2, b2\_c2, ptr);\\ clEnqueueReadBuffer(q1, b2\_c1, ptr)} (CGC);
+\end{tikzpicture}
+
+

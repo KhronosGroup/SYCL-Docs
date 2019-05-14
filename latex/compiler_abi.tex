@@ -1,0 +1,511 @@
+% !TEX root = sycl-1.2.1.tex
+
+%*******************************************************************************
+% SYCL Device Compiler
+%*******************************************************************************
+\chapter{SYCL Device Compiler}
+\label{chapter.device.compiler}
+
+This section specifies the requirements of the SYCL device compiler.
+Most features described in this section relate to underlying OpenCL
+capabilities of target devices and limiting the requirements of device
+code to ensure portability.
+
+%*******************************************************************************
+% Offline compilation of SYCL source files
+%*******************************************************************************
+\section{Offline compilation of SYCL source files}
+
+There are two alternatives for a SYCL \gls{device-compiler}: a 
+\keyword{single-source device compiler} and a device compiler that supports
+the technique of \gls{smcp}.
+
+A SYCL device compiler takes in a C++ source file, extracts only
+the SYCL kernels and outputs the device code in a form that can be enqueued
+from host code by the associated \gls{sycl-runtime}. How the \gls{sycl-runtime} invokes the
+kernels is implementation defined, but a typical approach is for a device
+compiler to produce a header file with the compiled kernel contained within it.
+By providing a command-line option to the host compiler, it would cause the
+implementation's SYCL header files to \tf{\#include} the generated header file.
+The SYCL specification has been written to allow this as an implementation
+approach in order to allow \gls{smcp}. However, any of the
+mechanisms needed from the SYCL compiler, the \gls{sycl-runtime} and build system are
+implementation defined, as they can vary depending on the platform and approach.
+
+A SYCL single-source device compiler takes in a C++ source file and compiles
+both host and device code at the same time. This specification specifies how
+a SYCL single-source device compiler sees and outputs device code for kernels,
+but does not specify the host compilation.
+
+\section{Naming of kernels}
+\label{sec:naming.kernels}
+SYCL kernels are extracted from C++ source files and stored in an implementation-
+defined format. In the case of the shared-source compilation model, the kernels
+have to be uniquely identified by both host and device compiler. This is
+required in order for the host runtime to be able to load the kernel by using
+the OpenCL host runtime interface.
+
+From this requirement the following rules apply for naming the kernels:
+
+\begin{itemize}
+\item The kernel name is a \keyword{C++ typename}.
+\item The kernel needs to have a \emph{globally-visible} name. In the case of a
+named function object type, the name can be the typename of the function object, as long as it is
+globally-visible. In the case where it isn't, a globally-visible name has to be
+provided, as template parameter to the kernel invoking interface, as described
+in~\ref{subsec:invokingkernels}. In C++11, lambdas\footnote{C++14 lambdas have
+the same naming rules as C++11 lambdas.} do not have a globally-visible name, so
+a globally-visible typename has to be provided in the kernel invoking interface,
+as described in~\ref{subsec:invokingkernels}.
+\item The kernel name has to be a unique identifier in the program.
+\end{itemize}
+
+In both single-source and shared-source implementations, a device compiler should
+detect the kernel invocations (e.g. \codeinline{parallel_for<kernelname>})
+in the source code and compile the enclosed kernels, storing them with their
+associated type name.
+
+The format of the kernel and the compilation techniques are implementation
+defined. The interface between the compiler and the runtime for extracting and
+executing SYCL kernels on the device is implementation defined.
+
+%*******************************************************************************
+% Language restrictions for kernels
+%*******************************************************************************
+\section{Language restrictions for kernels}
+\label{sec:language.restrictions.kernels}
+
+The extracted SYCL kernels need to be compiled by an OpenCL online or offline
+compiler and be executed by the OpenCL 1.2 runtime. The extracted kernels
+need to be OpenCL 1.2 compliant kernels and as such there are certain
+restrictions that apply to them.
+
+The following restrictions are applied to device functions and kernels:
+
+\begin{itemize}
+  \item
+    Structures containing pointers may be shared but the value of any pointer
+    passed between SYCL devices or between the host and a SYCL device is
+    undefined.
+  \item
+    Memory storage allocation is not allowed in kernels. All memory allocation
+    for the device is done on the host using accessor classes.
+    Consequently, the default allocation \codeinline{operator new} overloads that
+    allocate storage are disallowed in a SYCL kernel. The placement
+    \codeinline{new} operator and any user-defined overloads that do not
+    allocate storage are permitted.
+  \item
+    The odr-use of polymorphic classes and classes with virtual inheritance is allowed.
+    However, no virtual member functions are allowed to be called in a SYCL kernel or any functions called by the kernel.
+  \item
+    No function pointers or references are allowed to be called in a SYCL kernel
+    or any functions called by the kernel.
+  \item
+    RTTI is disabled inside kernels.
+  \item
+    No variadic functions are allowed to be called in
+    a SYCL kernel or any functions called by the kernel.
+  \item
+    Exception-handling cannot be used inside a SYCL kernel or any
+    code called from the kernel. But of course \lstinline{noexcept} is
+    allowed.
+  \item
+    Recursion is not allowed in a SYCL kernel or any
+    code called from the kernel.
+  \item
+    Variables with thread storage duration are not allowed to be odr-used in
+    kernel code
+  \item
+    Variables with static storage duration that are odr-used inside a kernel
+    must be \lstinline{const} or \lstinline{constexpr} and zero-initialized or
+    constant-initialized.
+  \item
+    The rules for kernels apply to both the kernel function objects themselves
+    and all functions, operators, member functions, constructors and destructors
+    called by the kernel. This means that kernels can only use library functions
+    that have been adapted to work with SYCL. Implementations are not required
+    to support any library routines in kernels beyond those explicitly mentioned
+    as usable in kernels in this spec. Developers should refer to the SYCL
+    built-in functions in~\ref{sycl:builtins} to find functions that are
+    specified to be usable in kernels.
+  \item
+     Interacting with a special \gls{sycl-runtime} class (i.e. SYCL \codeinline{accessor}, \codeinline{sampler} or \codeinline{stream}) that is stored within a C++ union is undefined behavior.
+\end{itemize}
+
+%*******************************************************************************
+% Compilation of functions
+%*******************************************************************************
+\section{Compilation of functions}
+
+The SYCL device compiler parses an entire C++ source file supplied by the user.
+This also includes C++ header files, using \tf{\#include} directives. From this
+source file, the SYCL device compiler must compile kernels for the device, as
+well as any functions that the kernels call.
+
+In SYCL, kernels are invoked using a kernel invoke function (e.g.
+\codeinline{parallel_for}). The kernel invoke functions are templated by their
+kernel parameter, which is a function object.
+The code inside the function object that is invoked as a kernel is called
+the ``kernel function''. The ``kernel function'' must always return void. Any
+function called by the kernel function is compiled for device and called a
+``device function''. Recursively, any function called by a device function is
+itself compiled as a device function.
+
+For example, this source code shows three functions and a kernel invoke with
+comments explaining which functions need to be compiled for device.
+
+\begin{code}
+void f ()
+{
+    // function "f" is not compiled for device
+
+    single_task<class kernel_name>([=] ()
+        {
+            // This code compiled for device
+            g (); // this line forces "g" to be compiled for device
+        });
+}
+
+void g ()
+{
+    // called from kernel, so "g" is compiled for device
+}
+
+void h ()
+{
+    // not called from a device function, so not compiled for device
+}
+\end{code}
+
+In order for the SYCL device compiler to correctly compile device functions, all
+functions in the source file, whether device functions or not, must be
+syntactically correct functions according to this specification. A syntactically
+correct function is a function that matches at least the C++11 specification,
+plus any extensions from the C++14 specification.
+
+%*******************************************************************************
+% Compilation of functions
+%*******************************************************************************
+\section{Built-in scalar data types}
+\label{subsection:scalartypes}
+In a SYCL device compiler, the standard C++ fundamental types, including
+\codeinline{int}, \codeinline{short}, \codeinline{long},
+\codeinline{long long int} need to be configured so that the device
+definitions of those types match the host definitions of those types. A device
+compiler may have this preconfigured so that it can match them based on the
+definitions of those types on the platform. Or there may be a necessity for a
+device compiler command-line option to ensure the types are the same.
+
+The standard C++ fixed width types, e.g. \codeinline{int8_t},
+\codeinline{int16_t}, \codeinline{int32_t},\codeinline{int64_t},
+should have the same size as defined by the C++ standard for host and
+device.
+\ifx\showtodos\true
+To ensure that pointer types and \codeinline{size_t} use the same amount of
+storage on host and device when inside structures, SYCL also requires that
+device compilers use the host sizes for pointers or \codeinline{size_t}. Devices
+may be using a smaller size internally for pointers and \codeinline{size_t},
+but this should not impact the programming model for users. In the case where
+devices use larger pointer size internally than the host, then
+\codeinline{size_t} will match the \gls{host-pointer} size. For structures shared
+between host and device it is recommended to use fixed width types for pointers.
+Scalar data types for a SYCL device compiler are described in
+Table~\ref{table.types.fundamental}.
+\fi
+
+%-------------------------------------------------------------------------------
+\startTable{Fundamental data type}
+\addFootNotes{Fundamental data types supported by SYCL}{table.types.fundamental}
+\addRow
+{
+  bool
+}
+{
+  A conditional data type which can be either true or false. The value
+  true expands to the integer constant 1 and the value false expands to the
+  integer constant 0.
+}
+\addRow
+{
+  char
+}
+{
+  A signed or unsigned 8-bit integer, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  signed char
+}
+{
+  A signed 8-bit integer, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  unsigned char
+}
+{
+  An unsigned 8-bit integer, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  short int
+}
+{
+  A signed integer of at least 16-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  unsigned short int
+}
+{
+  An unsigned integer of at least 16-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  int
+}
+{
+  A signed integer of at least 16-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  unsigned int
+}
+{
+  An unsigned integer of at least 16-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  long int
+}
+{
+  A signed integer of at least 32-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  unsigned long int
+}
+{
+  An unsigned integer of at least 32-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  long long int
+}
+{
+  An integer of at least 64-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  unsigned long long int
+}
+{
+  An unsigned integer of at least 64-bits, as defined by the C++11 ISO Standard
+}
+\addRow
+{
+  size_t
+}
+{
+  An unsigned integer type which is the result of the \codeinline{sizeof}
+  operator on host.
+}
+\addRow
+{
+  float
+}
+{
+  A 32-bit floating-point. The float data type must conform to the IEEE 754
+  single precision storage format.
+}
+\addRow
+{
+ double
+}
+{
+  A 64-bit floating-point. The double data type must conform to the IEEE 754
+  double precision storage format.
+}
+\addRow
+{
+  half
+}
+{
+  A 16-bit floating-point. The half data type must conform to the IEEE 754-2008
+  half precision storage format. A SYCL \codeinline{feature_not_supported}
+  exception must be thrown if the \codeinline{half} type is used in a SYCL
+  kernel fucntion which executes on a SYCL \codeinline{device} that does not
+  support the extension \codeinline{khr_fp16}.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Preprocessor directives and macros
+%*******************************************************************************
+\section{Preprocessor directives and macros}
+
+The standard C++ preprocessing directives and macros are supported.
+
+\begin{itemize}
+\item \texttt{CL_SYCL_LANGUAGE_VERSION} substitutes an integer reflecting
+  the version number of the SYCL language being supported by the device
+  compiler. The version of SYCL defined in this document will have
+  \texttt{CL_SYCL_LANGUAGE_VERSION} substitute the integer \SYCLLANGVERSION;
+
+\item \texttt{__FAST_RELAXED_MATH__} is used to determine if the
+  \tf{-cl-fast-relaxed-math} optimization option is specified in the build
+  options given to the SYCL device compiler. This is an integer constant
+  of 1 if the option is specified and unspecified otherwise;
+
+\item \texttt{__SYCL_DEVICE_ONLY__} is defined to 1 if the source file is
+  being compiled with a SYCL device compiler which does not produce host
+  binary;
+
+\item \texttt{__SYCL_SINGLE_SOURCE__} is defined to 1 if the source file
+  is being compiled with a SYCL single-source compiler which produces host
+  as well as device binary;
+
+\item \texttt{SYCL_EXTERNAL} is an optional macro which enables external
+  linkage of SYCL functions and methods to be included in a SYCL kernel.
+  The macro is only defined if the implementation supports external linkage.
+  For more details see~\ref{subsec:syclexternal}
+
+\end{itemize}
+
+%*******************************************************************************
+% Attributes
+%*******************************************************************************
+\section{Attributes}
+The \tf{attribute} syntax defined in the OpenCL C specification is supported by the SYCL device compiler.
+The C++11 attribute specifier can be used in which case these attributes are available in the \tf{cl} namespace.
+For instance \codeinline{\__attribute__((vec_type_hint(int2)))} and \codeinline{[[cl::vec_type_hint(int2)]]} are equivalent.
+
+The \tf{vec_type_hint}, \tf{work_group_size_hint} and \tf{reqd_work_group_size}
+kernel attributes in OpenCL C apply to kernel functions, but this is not
+syntactically possible in SYCL. In SYCL, these attributes are legal on device
+functions and their specification is propagated down to any caller of those
+device functions, such that the kernel attributes are the sum of all the kernel
+attributes of all device functions called. If there are any conflicts between
+different kernel attributes, then the behavior is undefined.
+
+%*******************************************************************************
+% Address-space deduction
+%*******************************************************************************
+\section{Address-space deduction}
+
+In SYCL, there are several different types of pointer, or reference:
+\begin{itemize}
+\item Accessors give access to shared data. They can be bound to a memory object
+ in a command group and passed into a kernel. Accessors are used in scheduling
+ of kernels to define ordering. Accessors to buffers have a compile-time OpenCL
+ address space based on their access mode.
+\item Explicit pointer classes (e.g. \codeinline{global_ptr}) contain an OpenCL
+ address space. This allows the compiler to determine whether the pointer
+ references global, local, constant or private memory.
+\item C++ pointer and reference types (e.g. \codeinline{int*}) are allowed
+ within SYCL kernels. They can be constructed from the address of local
+ variables, from explicit pointer classes, or from accessors. In all cases, a
+ SYCL device compiler will need to auto-deduce the address space.
+\end{itemize}
+
+Inside kernels, explicit pointer classes and C++ pointers are allowed as long as
+they reference the same data type and have compatible qualifiers and address spaces.
+
+If a kernel function or device function contains a pointer or reference type,
+then address-space deduction must be attempted using the following rules:
+
+\begin{itemize}
+\item If an explicit pointer class is converted into a C++ pointer value, then
+ the C++ pointer value will have the address space of the explicit pointer
+ class.
+\item If a variable is declared as a pointer type, but initialized in its
+ declaration to a pointer value with an already-deduced address space, then that
+ variable will have the same address space as its initializer.
+\item If a function parameter is declared as a pointer type, and the argument is
+ a pointer value with a deduced address space, then the function will be
+ compiled as if the parameter had the same address space as its argument. It is
+ legal for a function to be called in different places with different address
+ spaces for its arguments: in this case the function is said to be
+ ``duplicated'' and compiled multiple times. Each duplicated instance of the
+ function must compile legally in order to have defined behavior.
+\item If a function return type is declared as a pointer type and return statements use
+ address space deduced expressions, then the function will be compiled as if the return type
+ had the same address space. To compile legally, all return expressions must deduce to the same
+ address space.
+\item The rules for pointer types also apply to reference types. i.e. a
+ reference variable takes its address space from its initializer. A function
+ with a reference parameter takes its address space from its argument.
+\item If no other rule above can be applied to a declaration of a pointer, then
+ it is assumed to be in the \tf{private} address space. This default assumption
+ is expected to change to be the \codeinline{generic} address space for OpenCL
+ versions that support the generic address space.
+\end{itemize}
+
+It is illegal to assign a pointer value of one address space to a pointer
+variable of a different address space.
+
+%*******************************************************************************
+% SYCL offline linking
+%*******************************************************************************
+\section{SYCL offline linking}
+\fixme{Update add offline external linking}
+%*******************************************************************************
+% SYCL functions and methods linkage
+%*******************************************************************************
+\subsection{SYCL functions and methods linkage}
+\label{subsec:syclexternal}
+The default behavior in SYCL applications is that all the definitions and
+declarations of the functions and methods are available to the SYCL compiler,
+in the same translation unit. When this is not the case, all the symbols that
+need to be exported to a SYCL library or from a C++ library to a SYCL
+application need to be defined using the macro: \texttt{SYCL_EXTERNAL}.
+
+The \texttt{SYCL_EXTERNAL} macro will only be defined if the implementation
+supports offline linking. The macro is implementation-defined, but the following
+restrictions apply:
+\begin{itemize}
+\item \texttt{SYCL_EXTERNAL} can only be used on functions;
+\item the function cannot use raw pointers as parameter or return types.
+  Explicit pointer classes must be used instead;
+\item externally defined functions cannot call a
+  \codeinline{cl::sycl::parallel_for_work_item} method;
+\item externally defined functions cannot be called from a
+  \codeinline{cl::sycl::parallel_for_work_group} scope.
+\end{itemize}
+
+The SYCL linkage mechanism is optional and implementation defined.
+
+%*******************************************************************************
+% Linking with OpenCL C libraries
+%*******************************************************************************
+\subsection{Offline linking with OpenCL C libraries}
+
+SYCL supports linking \glspl{sycl-kernel-function} with OpenCL C libraries
+during offline compilation or during online compilation by the
+\gls{sycl-runtime} within a SYCL application.
+
+Linking with OpenCL C kernel functions offline is an optional feature and is
+unspecified. Linking with OpenCL C kernel functions online is performed by
+using the SYCL \codeinline{program} class to compile and link an OpenCL C source;
+using the \codeinline{compile_with_source} or \codeinline{build_with_source}
+member functions.
+
+OpenCL C functions that are linked with, using either offline or online
+compilation must be declared as an extern ``C'' function declarations. The function
+parameters of these function declarations must be defined as the OpenCL C
+interoperability aliases; \codeinline{pointer_t} and \codeinline{
+const_pointer_t}, of the \codeinline{multi_ptr} class template, \codeinline{
+vector_t} of the \codeinline{vec} class template and scalar data type aliases described in Table~\ref{table.types.aliases}.
+
+For example:
+
+\lstinputlisting{headers/openclcInterop.h}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

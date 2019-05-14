@@ -1,0 +1,55 @@
+\begin{multicols}{2}
+
+\textbf{SYCL Application Enqueue Order}
+\vspace{1cm}
+
+\newcommand{\cga}{$CG_a(b1_{RW})$}
+\newcommand{\cgb}{$CG_b(b2_{RW})$}
+\newcommand{\hostA}{$H(b1_{RW})$}
+\newcommand{\cgc}{$CG_c(b1_{RW}, b2_{RW})$}
+
+\flushleft
+{
+\fontfamily{qcr}\selectfont
+cl::sycl::queue q1;
+q1.submit(\cga);
+q1.submit(\cgb);
+
+\hostA;
+
+q1.submit(\cgc);
+}
+\columnbreak
+
+\textbf{SYCL Kernel Execution Order}
+\vspace{1cm}
+
+\begin{tikzpicture}[auto] \small
+\tikzset{Base/.style={align=center}, %, minimum height=2ex},
+  Line/.style={draw, very thick, >=latex', black},
+  LineHost/.style={draw, dashed, >=latex', black},
+  MemoryObject/.style={draw, Base, black},
+  HostAcc/.style={draw, Base, black, cylinder},
+  CommandGroup/.style={draw, Base, rounded corners, black},
+  Notice/.style  = {draw, above, rounded corners, rectangle callout, text width=6cm,
+    callout absolute pointer={#1} },
+    }
+
+\matrix (binmat) [ampersand replacement=\&, column sep=0.5em, row sep=2em]
+{
+    \node [CommandGroup] (CGA)  {\cga}; \& 
+    \node (empty) {};  \& 
+    \node (empty) {};  \\
+    \node [CommandGroup] (CGB)  {\cgb}; \&
+    \node [MemoryObject] (HA) {\hostA};  \\
+    \& \node [CommandGroup] (CGC)  {\cgc}; \\
+    \node (empty) {};  \&
+
+    \& \node (empty) {}; \\
+};
+\path [Line, ->] (CGA) -- (HA);
+\path [Line, ->] (CGB) -- (CGC);
+\path [Line, ->] (HA) -- (CGC);
+\end{tikzpicture}
+
+\end{multicols}

@@ -1,0 +1,1097 @@
+%***********************************************************************************
+% Accessors
+%***********************************************************************************
+
+An \gls{accessor} is defined by the SYCL \codeinline{accessor} class template.
+An \codeinline{accessor} provides access to the data managed by a \gls{buffer}
+or \gls{image}, or to shared \gls{local-memory} allocated by the runtime. An
+\gls{accessor} allows users to define \textbf{requirements} to memory objects
+(see Section~\ref{sub.section.memmodel.app}).
+
+The SYCL \codeinline{accessor} class template takes five template parameters:
+
+\begin{itemize}
+\item A typename specifying the data type that the \codeinline{accessor} is
+providing access to.
+\item An integer specifying the dimensionality of the accessor.
+\item A value of \codeinline{access::mode} specifying the mode of access the
+\codeinline{accessor} is providing.
+\item A value of \codeinline{access::target} specifying the target of access
+the \codeinline{accessor} is providing.
+\item A value of \codeinline{access::placeholder} specifying whether the
+\codeinline{accessor} is a placeholder accessor.
+\end{itemize}
+
+The parameters described above determine the data an \codeinline{accessor}
+provides access to and the way in which that access is provided. This separation
+allows a \gls{sycl-runtime} implementation to choose an efficient way to provide
+access to the data within an execution schedule.
+
+Because of this the interface of the \codeinline{accessor} will
+be different depending on the possible combinations of those parameters. There
+are three main categories of accessor; buffer accesors (see Section
+~\ref{sub.section.accessors.buffer}), local accessors (see Section
+~\ref{sub.section.accessors.local}) and image accessors (see Section
+~\ref{sub.section.accessors.image}).
+
+%*******************************************************************************
+% Access targets
+%*******************************************************************************
+
+\subsubsection{Access targets}
+\label{sub.section.access.targets}
+
+The access target of an \codeinline{accessor} specifies what the accessor is
+providing access to.
+
+The \codeinline{access::target} enumeration, shown in
+Table~\ref{interfaces.accesstarget.description}, describes the potential targets
+of an \codeinline{accessor}.
+
+\lstinputlisting{headers/accessTarget.h}
+
+%-------------------------------------------------------------------------------
+\startTable{access::target}
+\addFootNotes{Enumeration of access modes available to accessors}
+{interfaces.accesstarget.description}
+\addRow
+    {access::target::global_buffer}{Access \codeinline{buffer} via \gls{global-memory}.}
+  \addRow
+    {access::target::constant_buffer}{Access \codeinline{buffer} via \gls{constant-memory}.}
+  \addRow
+    {access::target::local}{Access work-group \gls{local-memory}.}
+  \addRow
+    {access::target::image}{Access an \codeinline{image}.}
+  \addRow
+    {access::target::host_buffer}{Access a \codeinline{buffer} immediately in host code.}
+  \addRow
+    {access::target::host_image}{Access an \codeinline{image} immediately in host code.}
+  \addRow
+    {access::target::image_array}{Access an array of \codeinline{image}s on a device.}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Access modes
+%*******************************************************************************
+
+\subsubsection{Access modes}
+\label{sub.section.access.mode}
+
+The access mode of an \codeinline{accessor} specifies the kind of access that is
+being provided. This information is used by the runtime to ensure that any
+data dependencies are resolved by enqueuing any data transfers before
+or after the execution of a kernel. If a command group contains only
+\keyword{discard write mode} accesses to a buffer, then the previous contents
+of the buffer (or sub-range of the buffer, if provided) are not
+preserved. If a user wants to modify only certain parts of a buffer,
+preserving other parts of the buffer, then the user should specify the
+exact sub-range of modification of the buffer. 
+Atomic access is only valid to \codeinline{local}, \codeinline{global\_buffer}
+and \codeinline{host\_buffer} targets (see next section).
+
+The \codeinline{access::mode} enumeration, shown in Table~\ref{interfaces.accessmode.description}, describes the potential modes of an \codeinline{accessor}.
+
+\lstinputlisting{headers/accessMode.h}
+
+%-------------------------------------------------------------------------------
+\startTable{access::mode}
+\addFootNotes{Enumeration of access modes available to accessors}
+{interfaces.accessmode.description}
+ \addRow
+    {access::mode::read}
+    {%
+      Read-only access.
+    }
+  \addRow
+    {access::mode::write}
+    {%
+     Write-only access.
+     Previous contents not discarded.
+    }
+  \addRow
+    {access::mode::read_write}
+    {%
+      Read and write access.
+    }
+  \addRow
+    {access::mode::discard_write}
+    {%
+      Write-only access.
+      Previous contents discarded.
+    }
+  \addRow
+    {access::mode::discard_read_write}
+    {%
+      Read and write access.
+      Previous contents discarded.
+    }
+  \addRow
+    {access::mode::atomic}
+    {%
+      Read and write atomic access.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Device and host accessors
+%*******************************************************************************
+
+\subsubsection{Device and host accessors}
+
+A SYCL \codeinline{accessor} can be a device accessor in which case it provides
+access to data within a SYCL kernel function, or a host accessor in which case
+it provides immediate access on the host.
+
+If an \codeinline{accessor} has the access target \codeinline{
+access::target::global_buffer}, \codeinline{access::target::constant_buffer},
+\codeinline{access::target::local}, \codeinline{access::target::image} or
+\codeinline{access::target::image_array} then it is considered a device
+accessor, and therefore can only be used within a SYCL kernel function and must
+be associated with a \gls{command-group}. Creating a device accessor is a
+non-blocking operation which defines a requirement on the device and adds the
+requirement to the queue.
+
+If an \codeinline{accessor} has the access target \codeinline{
+access::target::host_buffer} or \codeinline{access::target::host_image} then it
+is considered a host accessor and can only be used on the \gls{host}. Creating a
+host accessor is a blocking operation which defines a requirement on the host
+and blocks the caller until the requirement is satisfied.
+
+A host accessor provides immediate access and continues to provide access until
+it is destroyed.
+
+%*******************************************************************************
+% Placeholder accessor
+%*******************************************************************************
+
+\subsubsection{Placeholder accessor}
+\label{sub.section.access.placeholder}
+
+A placeholder accessor can be constructed outside of a command group and then
+later bound to a command group. A SYCL \codeinline{accessor} is considered a
+placeholder accessor if it has the access placeholder \codeinline{
+access::placeholder::true_t}.
+
+Accessors can optionally be defined as \keyword{placeholder} accessors.
+A \keyword{placeholder} accessor defines an accessor instance that is
+not bound to a specific \gls{command-group}. The accessor defines only
+the type of the accessor (target memory, access mode, base type, \ldots).
+When associated with a a command group using the appropriate
+handler interface, it defines a \textbf{requirement} for the command group.
+The same placeholder accessor can be required by multiple command groups.
+
+The \codeinline{access::placeholder} enumeration, shown in
+Table~\ref{interfaces.placeholder.description}, describes the potential
+placeholder values of an \codeinline{accessor}.
+
+%-------------------------------------------------------------------------------
+\startTable{placeholder::mode}
+ \addFootNotes{Enumeration of placeholder values available to accessors}
+ {interfaces.placeholder.description}
+ \addRow
+    {access::placeholder::false_t}
+    {
+      Non-placeholder accessor.
+    }
+  \addRow
+    {access::placeholder::true_t}
+    {
+      Placeholder accessor.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Buffer accessor
+%*******************************************************************************
+
+\subsubsection{Buffer accessor}
+\label{sub.section.accessors.buffer}
+
+A buffer accessor provides access to a SYCL \codeinline{buffer} instance. A SYCL \codeinline{accessor} is considered a buffer accessor if it has the access
+target \codeinline{access::target::global_buffer}, \codeinline{
+access::target::constant_buffer} or \codeinline{access::target::host_buffer}.
+
+A buffer accessor can provide access to memory managed by a SYCL \codeinline{
+buffer} class via either \gls{global-memory} or \gls{constant-memory},
+corresponding to the access targets \codeinline{access::target::global_buffer}
+and \codeinline{access::target::constant_buffer} respectively. A buffer accessor
+accessing a SYCL \codeinline{buffer} via \gls{constant-memory} is restricted by
+the available \gls{constant-memory} available on the SYCL \codeinline{device}
+being executed on.
+
+Alternatively a buffer accessor can provide access to memory managed by a SYCL
+\codeinline{buffer} immediately on the \gls{host}, using the access target
+\codeinline{access::target::host_buffer}. If the SYCL \codeinline{buffer} this
+SYCL \codeinline{accessor} is accessing was constructed with the property 
+\codeinline{property::buffer::use_host_ptr} the address of the memory accessed
+on the \gls{host} must be the address the SYCL \codeinline{buffer} was
+constructed with, otherwise the \gls{sycl-runtime} is free to allocate temporary
+memory to provide access on the \gls{host}.
+
+The data type of a buffer accessor must match that of the SYCL \codeinline{
+buffer} which it is accessing.
+
+The dimensionality of a buffer accessor must match that of the SYCL \codeinline{
+buffer} which it is accessing, with the exception of \codeinline{0} in which
+case the dimensionality of the SYCL \codeinline{buffer} must be \codeinline{1}.
+
+There are three ways a SYCL \codeinline{accessor} can provide access to the
+elements of a SYCL \codeinline{buffer}. Firstly by passing a SYCL \codeinline{
+id} instance of the same dimensionality as the SYCL \codeinline{accessor}
+subscript operator. Secondly by passing a single \codeinline{size_t} value to
+multiple consecutive subscript operators (one for each dimension of the SYCL
+\codeinline{accessor}, for example \codeinline{acc[id1][id2][id3]}). Finally, in the
+case of the SYCL \codeinline{accessor} being \codeinline{0} dimensions, by
+triggering the implicit conversion operator. Whenever a multi-dimensional index
+is passed to a SYCL \codeinline{accessor} the linear index is calculated based
+on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL
+\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+ordering as follows:
+
+\begin{equation}
+\label{row-major-equation-buffer}
+ id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+\end{equation}
+
+A buffer accessor can optionally provide access to a sub range of a SYCL
+\codeinline{buffer} by providing a range and offset on construction. In this
+case the \gls{sycl-runtime} will only guarantee the latest copy of the data is
+available in that given range and any modifications outside that range are
+considered undefined behavior. This allows the \gls{sycl-runtime} to perform
+optimizations such as reducing copies between devices. The indexing performed
+when a SYCL \codeinline{accessor} provides access to the elements of a SYCL
+\codeinline{buffer} is unaffected, i.e, the accessor will continue to index
+from \codeinline{\{0,0,0\}}. This allows the offset to be provided either
+manually or via the \codeinline{parallel_for} as in
+\ref{listing.accessors.range}.
+
+\begin{lstlisting}[label=listing.accessors.range]
+    myQueue.submit([&](handler &cgh) {
+      auto singleRange = range<3>(8, 16, 16);
+      auto offset = id<3>(8, 0, 0);
+      // We define the subset of the accessor we require for the kernel
+      accessor<int, 1, access::mode::read_write, access::target::global_buffer>
+          ptr(syclBuffer, cgh, singleRange, offset);
+      // We offset the kernel by the same value to match indexes
+      cgh.parallel_for<kernel>(singleRange, offset, [=](item<3> itemID) {
+        ptr[itemID.get_linear_id()] = 2;
+      });
+    });
+\end{lstlisting}
+
+A buffer accessor with access target \codeinline{access::target::global_buffer}
+can optionally provide atomic access to a SYCL \codeinline{buffer}, using the
+access mode \codeinline{access::mode::atomic}, in which case all operators which
+return an element of the SYCL \codeinline{buffer} return an instance of the SYCL
+\codeinline{atomic} class.
+
+The full list of capabilities that buffer accessors can support is described
+in~\ref{table.accessors.buffer.capabilities}.
+
+%-------------------------------------------------------------------------------
+\begin{table}[!h]
+    \setlength{\extrarowheight}{5pt}\scriptsize
+    \begin{tabular}{| p{0.8 in} || p{0.4 in} | p{1.0 in} | p{1.4 in} | p{0.9 in} | p{0.6 in} |}
+      \hline
+        \cellcolor{lightgray} \textbf{Access target}
+        & \cellcolor{lightgray} \textbf{Accessor type}
+        & \cellcolor{lightgray} \textbf{Access modes}
+        & \cellcolor{lightgray} \textbf{Data types}
+        & \cellcolor{lightgray} \textbf{Dimensionalities}        
+        & \cellcolor{lightgray} \textbf{Placeholder modes} \\
+      \hline
+        \tf{global_buffer}
+        & device
+        & \nlineVI{\tf{read}}{\tf{write}}{\tf{read\_write}}{\tf{discard\_write}} {\tf{discard\_read_write}}{\tf{atomic}}
+        & The data type of the SYCL buffer being accessed.
+        & Between \tf{0} and \tf{3} (inclusive).
+        & \nlineII{\tf{false_t}}{\tf{true_t}} \\
+      \hline
+        \tf{constant_buffer}
+        & device
+        & \tf{read}
+        & The data type of the SYCL buffer being accessed.
+        & Between \tf{0} and \tf{3} (inclusive).
+        & \nlineII{\tf{false_t}}{\tf{true_t}} \\
+      \hline
+        \tf{host_buffer}
+        & host
+        & \nlineV{\tf{read}}{\tf{write}}{\tf{read\_write}}{\tf{discard\_write}} {\tf{discard\_read_write}}
+        & The data type of the SYCL buffer being accessed.
+        & Between \tf{0} and \tf{3} (inclusive).
+        & \nline{\tf{false_t}} \\
+      \hline
+    \end{tabular}
+    \caption{Description of all the buffer accessor capabilities}
+    \label{table.accessors.buffer.capabilities}
+\end{table}
+%-------------------------------------------------------------------------------
+
+\subsubsection{Buffer accessor interface}
+
+A synopsis of the SYCL \codeinline{accessor} class template buffer
+specialization is provided below. The constructors and member functions of the
+SYCL \codeinline{accessor} class template buffer specialization are listed in
+Tables~\ref{table.constructors.accessor.buffer} and
+\ref{table.members.accessor.buffer} respectively. The additional common special
+member functions and common member functions are listed in
+\ref{sec:reference-semantics} in
+Tables~\ref{table.specialmembers.common.reference} and
+\ref{table.members.common.reference}, respectively.
+
+%Interface for class: accessor
+\lstinputlisting[captionpos=b,caption=Accessor class for buffers, label=accessor.buffer.interface]
+{headers/accessorBuffer.h}
+\lstset{captionpos=b}
+
+%------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the \codeinline{accessor} class template buffer
+  specialization}
+{table.constructors.accessor.buffer}
+  \addRow
+    { accessor(buffer<dataT, 1> \&bufferRef) }
+    {
+      Available only when: \codeinline{((isPlaceholder ==
+      access::placeholder::false_t \&\& accessTarget ==
+      access::target::host_buffer) || (isPlaceholder ==
+      access::placeholder::true_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer))) \&\& dimensions == 0}.
+      \newline
+      If \codeinline{isPlaceholder == access::placeholder::false_t}, constructs
+      a SYCL \codeinline{accessor} instance for accessing a single element of a
+      SYCL \codeinline{buffer} immediately on the host. If \codeinline{
+      isPlaceholder == access::placeholder::true_t}, constructs a SYCL
+      placeholder \codeinline{accessor}.
+    }
+  \addRowTwoL
+    { accessor(buffer<dataT, 1> \&bufferRef, }
+    { handler \&commandGroupHandlerRef) }
+    {
+      Available only when: \codeinline{(isPlaceholder ==
+      access::placeholder::false_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer)) \&\& dimensions == 0}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a single
+      element of a SYCL \codeinline{buffer} within a SYCL kernel function on
+      the SYCL \codeinline{queue} associated with \codeinline{
+      commandGroupHandlerRef}.
+    }
+  \addRow
+    { accessor(buffer<dataT, dimensions> \&bufferRef) }
+    {
+      Available only when: \codeinline{((isPlaceholder ==
+      access::placeholder::false_t \&\& accessTarget ==
+      access::target::host_buffer) || (isPlaceholder ==
+      access::placeholder::true_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer))) \&\& dimensions > 0}.
+      \newline
+      If \codeinline{isPlaceholder == access::placeholder::false_t}, constructs
+      a SYCL \codeinline{accessor} instance for accessing a SYCL \codeinline{
+      buffer} immediately on the host. If \codeinline{isPlaceholder ==
+      access::placeholder::true_t}, constructs a SYCL placeholder \codeinline{
+      accessor}.
+    }
+  \addRowTwoL
+    { accessor(buffer<dataT, dimensions> \&bufferRef, }
+    { handler \&commandGroupHandlerRef) }
+    {
+      Available only when: \codeinline{(isPlaceholder ==
+      access::placeholder::false_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer)) \&\& dimensions > 0}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
+      \codeinline{buffer} within a SYCL kernel function on the SYCL
+      \codeinline{queue} associated with \codeinline{commandGroupHandlerRef}.
+    }
+  \addRowThreeL
+    { accessor( buffer<dataT, dimensions> \&bufferRef, }
+    { range<dimensions> accessRange, id<dimensions> }
+    { accessOffset = \{\}) }
+    {
+      Available only when: \codeinline{(isPlaceholder ==
+      access::placeholder::false_t \&\& accessTarget ==
+      access::target::host_buffer) ||  (isPlaceholder ==
+      access::placeholder::true_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer)) \&\& dimensions > 0}.
+      \newline
+      If \codeinline{isPlaceholder == access::placeholder::false_t}, constructs
+      a SYCL \codeinline{accessor} instance for accessing a range of a SYCL
+      \codeinline{buffer} immediately on the host. If \codeinline{
+      isPlaceholder == access::placeholder::true_t}, constructs a SYCL
+      placeholder \codeinline{accessor}.
+    }
+  \addRowFourL
+    { accessor( buffer<dataT, dimensions> \&bufferRef, }
+    { handler \&commandGroupHandlerRef, }
+    { range<dimensions> accessRange, }
+    { id<dimensions> accessOffset = \{\}) }
+    {
+      Available only when: \codeinline{(isPlaceholder ==
+      access::placeholder::false_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer)) \&\& dimensions > 0}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a range of
+      SYCL \codeinline{buffer} within a SYCL kernel function on the SYCL
+      \codeinline{queue} associated with \codeinline{commandGroupHandlerRef},
+      specified by \codeinline{accessRange} and \codeinline{accessOffset}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the \codeinline{accessor} class template
+  buffer specialization}
+{table.members.accessor.buffer}
+  \addRow
+    { constexpr bool is_placeholder() const }
+    {
+      Returns \codeinline{true} if \codeinline{isPlaceholder ==
+      access::placeholder::true_t} otherwise returns \codeinline{false}.
+    }
+  \addRow
+    { size_t get_size() const }
+    {
+      Returns the size in bytes of the SYCL \codeinline{buffer} this SYCL
+      \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { size_t get_count() const }
+    {
+      Returns the number of elements of the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { range<dimensions> get_range() const }
+    {
+      Available only when: \codeinline{dimensions > 0}.
+      \newline
+      Returns the range of this SYCL \codeinline{accessor}.
+    }
+  \addRow
+    { id<dimensions> get_offset() const }
+    {
+      Available only when: \codeinline{dimensions > 0}.
+      \newline
+      Returns the offset of this SYCL \codeinline{accessor}.
+    }
+  \addRow
+    { operator dataT \&() const }
+    {
+      Available only when: \codeinline{(accessMode == access::mode::write ||
+      accessMode == access::mode::read_write || accessMode ==
+      access::mode::discard_write || accessMode ==
+      access::mode::discard_read_write) \&\& dimensions == 0)}.
+      \newline
+      Returns a reference to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { dataT \&operator[](id<dimensions> index) const }
+    {
+      Available only when: \codeinline{(accessMode == access::mode::write ||
+      accessMode == access::mode::read_write || accessMode ==
+      access::mode::discard_write || accessMode ==
+      access::mode::discard_read_write) \&\& dimensions > 0)}.
+      \newline
+      Returns a reference to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRow
+    { dataT \&operator[](size_t index) const }
+    {
+      Available only when: \codeinline{(accessMode == access::mode::write ||
+      accessMode == access::mode::read_write || accessMode ==
+      access::mode::discard_write || accessMode ==
+      access::mode::discard_read_write) \&\& dimensions == 1)}.
+      \newline
+      Returns a reference to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRow
+    { operator dataT() const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::read \&\&
+      dimensions == 0)}.
+      \newline
+      Returns the value of the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { dataT operator[](id<dimensions> index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::read \&\&
+      dimensions > 0)}.
+      \newline
+      Returns the value of the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRow
+    { dataT operator[](size_t index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::read \&\&
+      dimensions == 1)}.
+      \newline
+      Returns the value of the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }    
+  \addRowTwoL
+    { operator atomic<dataT, }
+    { access::address_space::global_space> () const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::atomic \&\&
+      dimensions == 0)}.
+      \newline
+      Returns an instance of SYCL \codeinline{atomic} of type \codeinline{dataT}
+      providing atomic access to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRowTwoL
+    { atomic<dataT, access::address_space::global_space> }
+    { operator[](id<dimensions> index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::atomic \&\&
+      dimensions > 0)}.
+      \newline
+      Returns an instance of SYCL \codeinline{atomic} of type \codeinline{dataT}
+      providing atomic access to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRowTwoL
+    { atomic<dataT, access::address_space::global_space> }
+    { operator[](size_t index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::atomic \&\&
+      dimensions == 1)}.
+      \newline
+      Returns an instance of SYCL \codeinline{atomic} of type \codeinline{dataT}
+      providing atomic access to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRow
+    { \_\_unspecified\_\_ \&operator[](size_t index) const }
+    {
+      Available only when: \codeinline{dimensions > 1}.  
+      \newline
+      Returns an instance of an undefined intermediate type representing a
+      a SYCL \codeinline{accessor} of the same type as this SYCL \codeinline{
+      accessor}, with the dimensionality \codeinline{dimensions-1} and
+      containing an implicit SYCL \codeinline{id} with index \codeinline{
+      dimensions} set to \codeinline{index}. The intermediate type returned
+      must provide all available subscript operators which take a \codeinline{
+      size_t} parameter defined by the SYCL \codeinline{accessor} class that
+      are appropriate for the type it represents (including this subscript
+      operator).
+    }
+  \addRow
+    { dataT *get_pointer() const}
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::host_buffer}.
+      Returns a pointer to the memory this SYCL \codeinline{accessor} memory is
+      accessing.
+    }
+  \addRow
+    { global_ptr<dataT> get_pointer() const}
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::global_buffer}.
+      Returns a pointer to the memory this SYCL \codeinline{accessor} memory is
+      accessing.
+    }
+  \addRow
+    { constant_ptr<dataT> get_pointer() const}
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::global_buffer}.
+      Returns a pointer to the memory this SYCL \codeinline{accessor} memory is
+      accessing.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Local accessor
+%*******************************************************************************
+
+\subsubsection{Local accessor}
+\label{sub.section.accessors.local}
+
+A local accessor provides access to \gls{sycl-runtime} allocated shared memory via
+\gls{local-memory}. A SYCL \codeinline{accessor} is considered a local accessor
+if it has the access target \codeinline{access::target::local}.
+The memory allocated by a local accessor is non-initialised
+so it is the user's responsibility to construct and destroy objects explicitly
+if required. The \gls{local-memory} that is allocated is shared between
+all \glspl{work-item} of a \gls{work-group}.
+
+A local accessor does not provide access on the \gls{host} and the
+memory can not be copied back to the \gls{host}.
+
+The data type of a local accessor can be any valid SYCL kernel argument (see
+Section~\ref{sec:kernel.parameter.passing}.
+
+The size of memory allocated by the \gls{sycl-runtime} is specified by a SYCL
+\codeinline{range} provided on construction. The dimensionality of the SYCL
+\codeinline{range} provided must match the SYCL \codeinline{accessor}, with the
+exception of \codeinline{0} in which case the dimensionality of the SYCL
+\codeinline{range} must be \codeinline{0}.
+
+There are three ways that a SYCL \codeinline{accessor} can provide access to the
+elements of the allocated memory. Firstly by passing a SYCL \codeinline{
+id} instance of the same dimensionality as the SYCL \codeinline{accessor}
+subscript operator. Secondly by passing a single \codeinline{size_t} value to
+multiple consecutive subscript operators (one for each dimension of the SYCL
+\codeinline{accessor}, for example \codeinline{acc[z][y][x]}). Finally, in the
+case of the SYCL \codeinline{accessor} having \codeinline{0} dimensions, by
+triggering the implicit conversion operator. Whenever a multi-dimensional index
+is passed to a SYCL \codeinline{accessor}, the linear index is calculated based
+on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL 
+\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+ordering as follows:
+
+\begin{equation}
+\label{row-major-equation-local}
+ id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+\end{equation}
+
+A local accessor can optionally provide atomic access to allocated memory,
+using the access mode \codeinline{access::mode::atomic}, in which case all
+operators which return an element of the allocated memory return an instance of
+the SYCL \codeinline{atomic} class.
+
+Local accessors are not valid in the \codeinline{single_task} or basic 
+\codeinline{parallel_for} SYCL kernel function invocations, due the fact that
+local \glspl{work-group} are implicitly created, and the implementation is free
+to choose any size.
+
+The full list of capabilities that local accessors can support is described
+in~\ref{table.accessors.local.capabilities}.
+
+%-------------------------------------------------------------------------------
+\begin{table}[!h]
+    \setlength{\extrarowheight}{5pt}\scriptsize
+    \begin{tabular}{| p{0.8 in} || p{0.4 in} | p{1.0 in} | p{1.4 in} | p{0.9 in} | p{0.6 in} |}
+      \hline
+        \cellcolor{lightgray} \textbf{Access target}
+        & \cellcolor{lightgray} \textbf{Accessor type}
+        & \cellcolor{lightgray} \textbf{Access modes}
+        & \cellcolor{lightgray} \textbf{Data types}
+        & \cellcolor{lightgray} \textbf{Dimensionalities}        
+        & \cellcolor{lightgray} \textbf{Placeholder modes} \\
+      \hline
+        \tf{local}
+        & device
+        & \nlineII{\tf{read\_write}}{\tf{atomic}}
+        & All available data types supported in a SYCL kernel function.
+        & Between \tf{0} and \tf{3} (inclusive).
+        & \tf{false_t} \\
+      \hline
+    \end{tabular}
+    \caption{Description of all the local accessor capabilities}
+    \label{table.accessors.local.capabilities}
+\end{table}
+%-------------------------------------------------------------------------------
+
+\subsubsection{Local accessor interface}
+
+A synopsis of the SYCL \codeinline{accessor} class template local
+specialization is provided below. The constructors and member functions of the
+SYCL \codeinline{accessor} class template local specialization are listed in
+Tables~\ref{table.constructors.accessor.local} and
+\ref{table.members.accessor.local} respectively. The additional common special
+member functions and common member functions are listed in
+\ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and
+\ref{table.members.common.reference}, respectively.
+
+%Interface for class: accessor
+\lstinputlisting[captionpos=b,caption=Accessor class for locals, label=accessor.local.interface]
+{headers/accessorLocal.h}
+\lstset{captionpos=b}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes {Constructors of the \codeinline{accessor} class template local
+  specialization}
+{table.constructors.accessor.local}
+  \addRow
+    { accessor(handler \&commandGroupHandlerRef) }
+    {
+      Available only when: \codeinline{dimensions == 0}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing runtime
+      allocated shared local memory of a single element within a SYCL kernel
+      function on the SYCL \codeinline{queue} associated with \codeinline{
+      commandGroupHandlerRef}.
+    }
+  \addRowTwoL
+    { accessor(range<dimensions> allocationSize, }
+    { handler \&commandGroupHandlerRef) }
+    {
+      Available only when: \codeinline{dimensions > 0}.
+      \newline      
+      Constructs a SYCL \codeinline{accessor} instance for accessing runtime
+      allocated shared local memory of size specified by \codeinline{
+      allocationSize} within a SYCL kernel function on the SYCL \codeinline{
+      queue} associated with \codeinline{commandGroupHandlerRef}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the \codeinline{accessor} class template
+  local specialization}
+{table.members.accessor.local}
+  \addRow
+    { size_t get_size() const }
+    {
+      Returns the size in bytes of the SYCL \codeinline{buffer} this SYCL
+      \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { size_t get_count() const }
+    {
+      Returns the number of elements of the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { operator dataT \&() const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::read_write
+      \&\& dimensions == 0)}.
+      \newline
+      Returns a reference to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { dataT \&operator[](id<dimensions> index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::read_write
+      \&\& dimensions > 0)}.
+      \newline
+      Returns a reference to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRow
+    { dataT \&operator[](size_t index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::read_write
+      \&\& dimensions == 1)}.
+      \newline
+      Returns a reference to the element stored within the SYCL \codeinline{
+      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      specified by \codeinline{index}.
+    }
+  \addRowTwoL
+    { operator atomic<dataT, }
+    { access::address_space::local_space> \&() const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::atomic \&\&
+      dimensions == 0)}.
+      \newline
+      Returns a reference to an instance of SYCL \codeinline{atomic} of type
+      \codeinline{dataT} providing atomic access to the element stored within
+      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRowTwoL
+    { atomic<dataT, access::address_space::local_space> \& }
+    { operator[](id<dimensions> index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::atomic \&\&
+      dimensions > 0)}.
+      \newline
+      Returns a reference to an instance of SYCL \codeinline{atomic} of type
+      \codeinline{dataT} providing atomic access to the element stored within
+      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing
+      at the index specified by \codeinline{index}.
+    }
+  \addRowTwoL
+    { atomic<dataT, access::address_space::local_space> \& }
+    { operator[](size_t index) const }
+    {
+      Available only when: \codeinline{accessMode == access::mode::atomic \&\&
+      dimensions == 1)}.
+      \newline
+      Returns a reference to an instance of SYCL \codeinline{atomic} of type
+      \codeinline{dataT} providing atomic access to the element stored within
+      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing
+      at the index specified by \codeinline{index}.
+    }
+  \addRow
+    { \_\_unspecified\_\_ \&operator[](size_t index) const }
+    {
+      Available only when: \codeinline{dimensions > 1}.  
+      \newline
+      Returns an instance of an undefined intermediate type representing a
+      a SYCL \codeinline{accessor} of the same type as this SYCL \codeinline{
+      accessor}, with the dimensionality \codeinline{dimensions-1} and
+      containing an implicit SYCL \codeinline{id} with index \codeinline{
+      dimensions} set to \codeinline{index}. The intermediate type returned
+      must provide all available subscript operators which take a \codeinline{
+      size_t} parameter defined by the SYCL \codeinline{accessor} class that
+      are appropriate for the type it represents (including this subscript
+      operator).
+    }
+  \addRow
+    { local_ptr<dataT> get_pointer() const}
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::local}.
+      Returns a pointer to the memory this SYCL \codeinline{accessor} memory is
+      accessing.
+    }
+\completeTable
+%------------------------------------------------------------------------------
+
+%******************************************************************************
+% Image accessor
+%******************************************************************************
+
+\subsubsection{Image accessor}
+\label{sub.section.accessors.image}
+
+An image accessor provides access to a SYCL \codeinline{image} instance. A SYCL \codeinline{accessor} is considered an image accessor if it has the access
+target \codeinline{access::target::image}, \codeinline{
+access::target::image_array} or \codeinline{access::target::host_image}.
+      
+An image accessor can provide access to memory managed by a SYCL \codeinline{
+image} class, using the access target \codeinline{access::target::image} or
+\codeinline{access::target::image_array}.
+
+Alternatively an image accessor can provide access to memory managed by a SYCL
+\codeinline{image} immediately on the \gls{host}, using the access target
+\codeinline{access::target::host_image}. If the SYCL \codeinline{image} this
+SYCL \codeinline{accessor} is accessing was constructed with the property 
+\codeinline{property::image::use_host_ptr} the address of the memory accessed
+on the \gls{host} must be the address the SYCL \codeinline{image} was
+constructed with, otherwise the \gls{sycl-runtime} is free to allocate
+temporary memory to provide access on the \gls{host}.
+
+The data type of an image accessor must be either \codeinline{cl_int4}, \codeinline{
+cl_uint4}, \codeinline{cl_float4} or \codeinline{cl_half4}.
+
+The dimensionality of an image accessor must match that of the SYCL
+\codeinline{image} which it is providing access to, with the exception of when
+the access target is \codeinline{access::target::image_array}, in which case
+the dimensionality of the SYCL \codeinline{accessor} must be \codeinline{1}
+less.
+
+An image accessor with the access target \codeinline{access::target::image} or
+\codeinline{access::target::host_image} can provide access to the elements of a
+SYCL \codeinline{image} by passing a SYCL \codeinline{cl_int4} or \codeinline{
+cl_float4} instance to the \codeinline{read} or \codeinline{write} member
+functions. The \codeinline{read} member function optionally takes a SYCL
+\codeinline{sampler} instance to perform a sampled read of the image. For
+example \codeinline{acc.read(coords, sampler)}.
+
+An image accessor with the access target \codeinline{
+access::target::image_array} can provide access to a slice of an image array by
+passing a \codeinline{size_t} value to the subscript operator. This returns an
+instance of \codeinline{\__image_array_slice__}, an unspecified type providing
+the interface of \codeinline{accessor<dataT, dimensions, mode,
+access::target::image, access::placeholder::false_t>} which will provide access
+to a slice of the image array specified by \codeinline{index}. The
+\codeinline{\__image_array_slice__} returned can then provide access via the
+\codeinline{read} or \codeinline{write} member functions as described above. For
+example \codeinline{acc[arrayIndex].read(coords, sampler)}.
+
+The full list of capabilities that image accessors can support is described
+in~\ref{table.accessors.image.capabilities}.
+
+%-------------------------------------------------------------------------------
+\begin{table}[!h]
+    \setlength{\extrarowheight}{5pt}\scriptsize
+    \begin{tabular}{| p{0.8 in} || p{0.4 in} | p{1.0 in} | p{1.4 in} | p{0.9 in} | p{0.6 in} |}
+      \hline
+        \cellcolor{lightgray} \textbf{Access target}
+        & \cellcolor{lightgray} \textbf{Accessor type}
+        & \cellcolor{lightgray} \textbf{Access modes}
+        & \cellcolor{lightgray} \textbf{Data types}
+        & \cellcolor{lightgray} \textbf{Dimensionalities}        
+        & \cellcolor{lightgray} \textbf{Placeholder modes} \\
+      \hline
+        \tf{image}
+        & device
+        & \tf{\nlineIII{read}{write}{discard_write}}
+        & \nlineIV{\tf{cl\_int4}}{\tf{cl\_uint4}}{\tf{cl\_float4}}{\tf{cl\_half4}}
+        & Between \tf{1} and \tf{3} (inclusive).
+        & \tf{false_t} \\
+      \hline
+        \tf{image_array}
+        & device
+        & \tf{\nlineIII{read}{write}{discard_write}}
+        & \nlineIV{\tf{cl\_int4}}{\tf{cl\_uint4}}{\tf{cl\_float4}}{\tf{cl\_half4}}
+        & Between \tf{1} and \tf{2} (inclusive).
+        & \tf{false_t} \\
+      \hline
+        \tf{host_image}
+        & host
+        & \tf{\nlineIII{read}{write}{discard_write}}
+        & \nlineIV{\tf{cl\_int4}}{\tf{cl\_uint4}}{\tf{cl\_float4}}{\tf{cl\_half4}}
+        & Between \tf{1} and \tf{3} (inclusive).
+        & \tf{false_t} \\
+      \hline
+    \end{tabular}
+    \caption{Description of all the image accessor capabilities}
+    \label{table.accessors.image.capabilities}
+\end{table}
+%-------------------------------------------------------------------------------
+
+\subsubsection{Image accessor interface}
+
+A synopsis of the SYCL \codeinline{accessor} class template image
+specialization is provided below. The constructors and member functions of the
+SYCL \codeinline{accessor} class template image specialization are listed in
+Tables~\ref{table.constructors.accessor.image} and
+\ref{table.members.accessor.image} respectively. The additional common special
+member functions and common member functions are listed in
+\ref{sec:reference-semantics} in
+Tables~\ref{table.specialmembers.common.reference} and
+\ref{table.members.common.reference}, respectively.
+
+\lstinputlisting[caption=Accessor interface for images,label=images.listing1]{headers/accessorImage.h}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes {Constructors of the \codeinline{accessor} class template
+  image specialization}
+{table.constructors.accessor.image}
+  \addRowThreeL
+    { template <typename AllocatorT> }
+    { accessor(image<dimensions, AllocatorT> }
+    { \&imageRef) }
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::host_image}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
+      \codeinline{image} immediately on the host.
+    }
+  \addRowThreeL
+    { template <typename AllocatorT> }
+    { accessor(image<dimensions, AllocatorT> }
+    { \&imageRef, handler \&commandGroupHandlerRef) }
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::image}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
+      \codeinline{image} within a SYCL kernel function on the SYCL
+      \codeinline{queue} associated with \codeinline{commandGroupHandlerRef}.
+    }
+  \addRowThreeL
+    { template <typename AllocatorT> }
+    { accessor(image<dimensions + 1, AllocatorT> }
+    { \&imageRef, handler \&commandGroupHandlerRef) }
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::image_array \&\& dimensions < 3}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
+      \codeinline{image} as an array of images, within a SYCL kernel function on
+      the SYCL \codeinline{queue} associated with \codeinline{
+      commandGroupHandlerRef}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+  \addFootNotes{Member functions of the \codeinline{accessor} class template
+    image specialization}
+  {table.members.accessor.image}
+  \addRow
+    { size_t get_size() const }
+    {
+      Returns the size in bytes of the SYCL \codeinline{image} this SYCL
+      \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { size_t get_count() const }
+    {
+      Returns the number of elements of the SYCL \codeinline{image} this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRowTwoSL
+    { template <typename coordT> }
+    { dataT read(const coordT \&coords) const }
+    {
+      Available only when: \codeinline{(accessTarget == access::target::image ||
+      accessTarget == access::target::host_image) \&\& accessMode ==
+      access::mode::read}.
+      \newline
+      Reads and returns an element of the image at the coordinates specified by \codeinline{coords}. Permitted types for \codeinline{coordT} are \codeinline{
+      cl_int} and \codeinline{cl_float} when \codeinline{dimensions == 1}, \codeinline{cl_int2} and \codeinline{cl_float2} when \codeinline{dimensions ==
+      2} and \codeinline{cl_int4} and \codeinline{cl_float4} when \codeinline{
+      dimensions == 3}.
+    }
+  \addRowTwoSL
+    { template <typename coordT> }
+    { dataT read(const coordT \&coords, const sampler \&smpl) const }
+    {
+      Available only when: \codeinline{(accessTarget == access::target::image ||
+      accessTarget == access::target::host_image) \&\& accessMode ==
+      access::mode::read}.
+      \newline
+      Reads and returns a sampled element of the image at the coordinates
+      specified by \codeinline{coords} using the sampler specified by
+      \codeinline{smpl}. Permitted types for \codeinline{coordT} are
+      \codeinline{cl_int} and \codeinline{cl_float} when \codeinline{dimensions
+      == 1}, \codeinline{cl_int2} and \codeinline{cl_float2} when \codeinline{
+      dimensions == 2} and \codeinline{cl_int4} and \codeinline{cl_float4} when
+      \codeinline{dimensions == 3}.
+    }
+  \addRowTwoSL
+    { template <typename coordT> }    
+    { void write(const coordT \&coords, const dataT \&color) const }
+    {
+      Available only when: \codeinline{accessTarget == access::target::image ||
+      accessTarget == access::target::host_image) \&\& accessMode ==
+      access::mode::write || accessMode == access::mode::discard_write}.
+      \newline
+      Writes the value specified by \codeinline{color} to the element of the
+      image at the coordinates specified by \codeinline{coords}. Permitted types
+      for \codeinline{coordT} are \codeinline{cl_int} when \codeinline{
+      dimensions == 1}, \codeinline{cl_int2} when \codeinline{dimensions == 2}
+      and \codeinline{cl_int4} when \codeinline{dimensions == 3}.
+    }
+  \addRowTwoL
+    { \_\_image\_array\_slice\_\_ }
+    { operator[](size_t index) const }
+    {
+      Available only when: \codeinline{accessTarget ==
+      access::target::image_array \&\& dimensions < 3}.
+      \newline
+      Returns an instance of \codeinline{\__image_array_slice__}, an
+      unspecified type which provides the interface of \codeinline{accessor<
+      dataT, dimensions, mode, access::target::image, access::placeholder::
+      false_>} which will provide access to a slice of the image array specified
+      by \codeinline{index}.
+    }
+\completeTable
+
+\clearpage
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

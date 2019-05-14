@@ -1,0 +1,3782 @@
+% !TEX root = sycl-1.2.1.tex
+\def \debugging{false}
+
+%*********************************************************************
+% SYCL Programming Interface
+%*********************************************************************
+\chapter{SYCL Programming Interface}
+\label{chapter:sycl-programming-interface}
+
+The SYCL programming interface provides a C++ abstraction to OpenCL
+1.2 functionality and feature set. This section describes all the
+available classes and interfaces of SYCL, focusing on the C++
+interface of the underlying runtime. In this section, we are defining
+all the classes and member functions for the SYCL API, which are available for
+SYCL host and OpenCL devices. This section also describes the
+synchronization rules and OpenCL API interoperability rules which
+guarantee that all the member functions and special member functions of the SYCL
+classes are thread safe.
+
+It is assumed that the OpenCL API is also available to the developer
+at the same time as SYCL.
+
+%*********************************************************************
+% Header files and namespaces
+%*********************************************************************
+\section{Header files and namespaces}
+\label{sec:headers-and-namespaces}
+
+SYCL provides one standard header file: \codeinline{"CL/sycl.hpp"},
+which needs to be included in every SYCL program.
+
+All SYCL classes, constants, types and functions defined by this
+specification should exist within the \codeinline{cl::sycl} namespace.
+
+Any SYCL classes, constants, types and functions defined as an extension
+to this specification should exist within the
+\codeinline{cl::sycl::<vendor_name>} namespace.
+
+The \codeinline{cl::sycl::detail} namespace is reserved for
+implementation details.
+
+\section{Class availability}
+
+In SYCL some \gls{sycl-runtime} classes are available to the host application, some are 
+available within a \gls{sycl-kernel-function} and some available on both and can
+be passed as parameters to a \gls{sycl-kernel-function}.
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{device_selector},
+\codeinline{platform}, \codeinline{device}, \codeinline{context}, \codeinline{
+queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event},
+\codeinline{buffer}, \codeinline{image}, \codeinline{sampler}, \codeinline{
+stream}, \codeinline{handler}, \codeinline{nd_range}, \codeinline{range},
+\codeinline{id}, \codeinline{vec}, \codeinline{buffer_allocator}, \codeinline{
+image_allocator} and \codeinline{exception} must be available to the host application.
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{accessor}, \codeinline{sampler}, \codeinline{stream}, \codeinline{vec}, \codeinline{multi_ptr} \codeinline{device_event}, \codeinline{id}, \codeinline{range}, \codeinline{item}, \codeinline{nd_item}, \codeinline{h_item}, \codeinline{group} and \codeinline{atomic}
+must be available within a \gls{sycl-kernel-function}.
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{accessor}, \codeinline{sampler}, \codeinline{stream}, \codeinline{vec}, \codeinline{id} and \codeinline{range} are permitted as parameters to a \gls{sycl-kernel-function}.
+
+\section{Common interface}
+
+When a dimension template parameter is used in SYCL classes, it is
+defaulted as 1 in most cases.
+
+\subsection{OpenCL interoperability}
+\label{sec:opencl-interoperability}
+
+Many of the \gls{sycl-runtime} classes encapsulate an associated OpenCL opaque type and provide facilities for interoperating between the SYCL classes and the OpenCL opaque types they encapsulate in order to allow interoperability between SYCL and OpenCL applications.
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{platform},
+\codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image}, \codeinline{sampler} and \codeinline{stream} must obey the following statements, where \codeinline{T} is the runtime class type:
+
+\begin{itemize}
+
+\item \codeinline{T} on the host application must encapsulate at least one valid instance of the associated OpenCL opaque type if the SYCL class instance is an OpenCL instance and must not encapsulate any instance of the associated OpenCL opaque type if this instance of T is a host instance.
+
+\item \codeinline{T} must provide an interoperability constructor on the host application which takes as a parameter, a valid instance of the associated OpenCL opaque type, which must be retained on construction of an instance of \codeinline{T}, where applicable. The constructed instance of T must be an OpenCL instance and must encapsulate only the single instance of the associated OpenCL opaque type provided during construction.
+
+\item \codeinline{T} must provide a \codeinline{get()} member function on the host application which returns an encapsulated instance of the associated OpenCL opaque type if this instance of \codeinline{T} is an OpenCL instance, and must throw an \codeinline{invalid_object_error} SYCL exception if this instance of \codeinline{T} is a host instance. The instance of the associated OpenCL type must be retained before returning and must always be the same instance, where applicable.
+
+\item \codeinline{T} must release each encapsulated instance of the associated OpenCL opaque type on destruction on the host application, where applicable.
+
+\end{itemize}
+
+The only exceptions to these rules are the SYCL \codeinline{buffer}, \codeinline{image} and \codeinline{sampler} classes which do not require a \codeinline{get()} member function.
+
+For more details regarding these facilities and considerations for their use see section \ref{sec:interfacing-with-opencl}.
+
+\subsection{Common reference semantics}
+\label{sec:reference-semantics}
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image}, \codeinline{sampler}, \codeinline{accessor} and \codeinline{stream} must obey the following statements, where \codeinline{T} is the runtime class type:
+
+\begin{itemize}
+
+\item \codeinline{T} must be copy constructible and copy assignable on the host application and within SYCL kernel functions in the case that \codeinline{T} is a valid kernel argument. Any instance of \codeinline{T} that is constructed as a copy of another instance, via either the copy constructor or copy assignment operator, must behave as-if it were the original instance and as-if any action performed on it were also performed on the original instance and if said instance is not a host object must represent and continue to represent the same underlying OpenCL objects as the original instance where applicable.
+
+\item \codeinline{T} must be destructible on the host application and within SYCL kernel functions in the case that \codeinline{T} is a valid kernel argument. When any instance of \codeinline{T} is destroyed, including as a result of the copy assignment operator, any behavior specific to \codeinline{T} that is specified as performed on destruction is only performed if this instance is the last remaining host copy, in accordance with the above definition of a copy and the destructor requirements described in \ref{sec:opencl-interoperability} where applicable.
+
+\item \codeinline{T} must be move constructible and move assignable on the host application and within SYCL kernel functions in the case that T is a valid kernel argument. Any instance of T that is constructed as a move of another instance, via either the move constructor or move assignment operator, must replace the original instance rendering said instance invalid and if said instance is not a host object must represent and continue to represent the same underlying OpenCL objects as the original instance where applicable.
+
+\item \codeinline{T} must be equality comparable on the host application. Equality between two instances of \codeinline{T} (i.e. \codeinline{a == b}) must be true if one instance is a copy of the other and non-equality between two instances of \codeinline{T} (i.e. \codeinline{a != b}) must be true if neither instance is a copy of the other, in accordance with the above definition of a copy, unless either instance has become invalidated by a move operation. By extension of the requirements above, equality on \codeinline{T} must guarantee to be reflexive (i.e. \codeinline{a == a}), symmetric (i.e. \codeinline{a == b} implies \codeinline{b == a} and \codeinline{a != b} implies \codeinline{b != a}) and transitive (i.e. \codeinline{a == b && b == c} implies \codeinline{c == a}).
+
+\item A specialization of \codeinline{hash_class} for \codeinline{T} must exist on the host application that returns a unique value such that if two instances of T are equal, in accordance with the above definition, then their resulting hash values are also equal and subsequently if two hash values are not equal, then their corresponding instances are also not equal, in accordance with the above definition.
+
+\end{itemize}
+
+Some \gls{sycl-runtime} classes will have additional behavior associated with copy, movement, assignment or destruction semantics. If these are specified they are in addition to those specified above unless stated otherwise.
+
+Each of the runtime classes mentioned above must provide a common interface of special member functions and member functions in order to fulfil the copy, move, destruction and equality requirements.
+
+These common special member functions and member functions are described in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference} respectively.
+
+\lstinputlisting{headers/common-reference.h}
+
+\startTable{Special member function}
+\addFootNotes{Common special member functions for reference semantics}
+{table.specialmembers.common.reference}
+  \addRow
+    {T(const T \&rhs)}
+    {
+      Constructs a \codeinline{T} instance as a copy of the RHS SYCL \codeinline{T} in accordance with the requirements set out above.
+    }
+  \addRow
+    {T(T \&\&rhs)}
+    {
+      Constructs a SYCL \codeinline{T} instance as a move of the RHS SYCL \codeinline{T} in accordance with the requirements set out above.
+    }  
+   \addRow
+   {T \&operator=(const T \&rhs)}
+   {
+     Assigns this SYCL \codeinline{T} instance with a copy of the RHS SYCL \codeinline{T} in accordance with the requirements set out above.
+   }
+   \addRow
+   {T \&operator=(T \&\&rhs)}
+   {
+     Assigns this SYCL \codeinline{T} instance with a move of the RHS SYCL \codeinline{T} in accordance with the requirements set out above.
+   }
+   \addRow
+   {\~T()}
+   {
+     Destroys this SYCL \codeinline{T} instance in accordance with the requirements set out in \ref{sec:reference-semantics}.
+     Must release a reference to the associated OpenCL object if this SYCL \codeinline{T} instance was constructed with the interoperability constructor.
+   }
+\completeTable
+
+\startTable{Member function}
+\addFootNotes{Common member functions for reference semantics}
+{table.members.common.reference}
+   \addRow
+   {bool operator==(const T \&rhs) const}
+   {
+     Returns true if this SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+   }
+   \addRow
+   {bool operator!=(const T \&rhs) const}
+   {
+     Returns true if this SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+   }
+\completeTable
+
+\subsection{Common by-value semantics}
+\label{sec:byval-semantics}
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{id}, \codeinline{range}, \codeinline{item}, \codeinline{nd_item}, \codeinline{h_item}, \codeinline{group} and \codeinline{nd_range} must follow the following statements, where \codeinline{T} is the runtime class type:
+
+\begin{itemize}
+
+\item \codeinline{T} must be default copy constructible and copy assignable on the host application and within SYCL kernel functions.
+
+\item \codeinline{T} must be default destructible on the host application and within SYCL kernel functions.
+
+\item \codeinline{T} must be default move constructible and default move assignable on the host application and within SYCL kernel functions.
+
+\item \codeinline{T} must be equality comparable on the host application and within SYCL kernel functions. Equality between two instances of \codeinline{T} (i.e. \codeinline{a == b}) must be true if the value of all members are equal and non-equality between two instances of \codeinline{T} (i.e. \codeinline{a != b}) must be true if the value of any members are not equal, unless either instance has become invalidated by a move operation. By extension of the requirements above, equality on \codeinline{T} must guarantee to be reflexive (i.e. \codeinline{a == a}), symmetric (i.e. \codeinline{a == b} implies \codeinline{b == a} and \codeinline{a != b} implies \codeinline{b != a}) and transitive (i.e. \codeinline{a == b && b == c} implies \codeinline{c == a}).
+
+\end{itemize}
+
+Some \gls{sycl-runtime} classes will have additional behavior associated with copy, movement, assignment or destruction semantics. If these are specified they are in addition to those specified above unless stated otherwise.
+
+Each of the runtime classes mentioned above must provide a common interface of special member functions and member functions in order to fulfil the copy, move, destruction and equality requirements.
+
+These common special member functions and member functions are described in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+
+\lstinputlisting{headers/common-byval.h}
+
+\startTable{Special member function}
+\addFootNotes{Common special member functions for by-value semantics}
+{table.specialmembers.common.byval}
+  \addRow
+    {T(const T \&rhs) = default}
+    {
+      Default copy constructor.  
+    }
+  \addRow
+    {T(T \&\&rhs) = default}
+    {
+      Default move constructor.
+    }  
+   \addRow
+   {T \&operator=(const T \&rhs) = default}
+   {
+     Default copy assignment operator.
+   }
+   \addRow
+   {T \&operator=(T \&\&rhs) = default}
+   {
+     Default move assignment operator.
+   }
+   \addRow
+   {\~T() = default}
+   {
+     Default destructor.
+   }
+\completeTable
+
+\startTable{Member function}
+\addFootNotes{Common member functions for by-value semantics}
+{table.members.common.byval}
+   \addRow
+   {bool operator==(const T \&rhs) const}
+   {
+     Returns true if this SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+   }
+   \addRow
+   {bool operator!=(const T \&rhs) const}
+   {
+     Returns true if this SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+   }
+\completeTable
+
+%*********************************************************************
+% Properties
+%*********************************************************************
+\subsection{Properties}
+
+Each of the following \gls{sycl-runtime} classes: \codeinline{buffer}, \codeinline{image} and \codeinline{queue} provide an optional parameter in each of their constructors to provide a \codeinline{property_list} which contains zero or more properties. Each of those properties augments the semantics of the class with a particular feature. Each of those classes must also provide \codeinline{has_property} and \codeinline{get_property} member functions for querying for a particular property.
+
+The listing below illustrates the usage of various buffer properties, described in \ref{sec:buffer-properties}.
+
+The example illustrates how using properties does not affect the type
+of the object, thus, does not prevent the usage of SYCL objects in
+containers.
+
+\lstinputlisting{code/propertyExample.cpp}
+
+Each property is represented by a unique class and an instance of a property is an instance of that type. Some properties can be default constructed while other will require an argument on construction. A property may be applicable to more than one class, however some properties may not be compatible with each other. See the requirements for the properties of the SYCL \codeinline{buffer} class and SYCL \codeinline{image} class in Table~\ref{table.properties.buffer} and Table~\ref{table.properties.image} respectively.
+
+Any property that is provided to a \gls{sycl-runtime} class via an instance of the SYCL \codeinline{property_list} class must become encapsulated by that class and therefore shared between copies of that class. As a result properties must inherit the copy and move semantics of that class as described in \ref{sec:reference-semantics}.
+
+A SYCL implementation may provide additional properties other than those defined here, provided they are defined in accordance with the requirements described in \ref{sec:headers-and-namespaces}.
+
+\subsubsection{Properties interface}
+
+Each of the runtime classes mentioned above must provide a common interface of member functions in order to fulfil the property interface requirements.
+
+A synopsis of the common properties interface, the SYCL \codeinline{property_list} class and the SYCL property classes is provided below. The member functions of the common properties interface are listed in Table~\ref{table.members.propertyinterface}. The constructors of the SYCL \codeinline{property_list} class are listed in Table~\ref{table.constructors.propertylist}.
+
+\lstinputlisting{headers/properties.h}
+
+%---------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Common member functions of the SYCL property interface}
+{table.members.propertyinterface}
+  \addRowTwoSL
+    { template <typename propertyT> }  
+    { bool has_property() const }
+    {
+      Returns true if \codeinline{T} was constructed with the property
+      specified by \codeinline{propertyT}. Returns false if it was
+      not.
+    }
+  \addRowTwoSL
+    { template <typename propertyT> }  
+    { propertyT get_property() const }
+    {
+      Returns a copy of the property of type \codeinline{propertyT}
+      that \codeinline{T} was constructed with. Must throw an
+      \codeinline{invalid_object_error} SYCL exception if \codeinline{
+      T} was not constructed with the \codeinline{propertyT} property.
+    }
+\completeTable
+%---------------------------------------------------------------------
+
+%---------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the SYCL \codeinline{property_list} class}
+{table.constructors.propertylist}
+\addRowTwoSL
+{ template <typename... propertyTN> }
+{ property_list(propertyTN... props) }
+{
+  Construct a SYCL \codeinline{property_list} with zero or more properties.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+%*********************************************************************
+% Param traits class
+%*********************************************************************
+\section{Param traits class}
+\label{sec:param-traits}
+
+The class \codeinline{param_traits} is a C++ type trait for providing an alias to the return type associated with each info parameter. An implementation must provide a specialization of the \codeinline{param_traits} class for every info
+parameter with the associated return type as defined in the info
+parameter tables.
+
+\lstinputlisting{headers/paramTraits.h}
+
+%*********************************************************************
+% C++ Standard library classes required for the interface
+%*********************************************************************
+\section{C++ Standard library classes required for the interface}
+\label{sec:stlclasses}
+
+The SYCL programming interfaces make extensive use of vectors, strings
+and function objects to carry information. Moreover, smart pointer
+and mutex classes allow extending the SYCL programming interface in
+terms of host data management. SYCL will default to using the STL
+string, vector, function, mutex and smart pointer classes, unless
+defined otherwise.
+
+A SYCL implementation must provide aliases for the STL types that 
+are used on the interface. 
+These types are exposed internally as
+\codeinline{vector_class},
+\codeinline{string_class},
+\codeinline{function_class},
+\codeinline{mutex_class},
+\codeinline{shared_ptr_class},
+\codeinline{weak_ptr_class},
+\codeinline{hash_class} and
+\codeinline{exception_ptr_class}.
+
+Typically, the SYCL types will be aliases to the system 
+STL library, as shown in the listing below:
+
+\lstinputlisting{headers/stlclasses.h}
+
+However, a SYCL implementation may provide a custom implementation 
+of any of these objects. 
+This enables SYCL implementations to use optimized classes for specific
+platforms.
+To guarantee interoperability with the implementation types, users should
+use the aliases on the SYCL namespace instead of the standard types.
+Implementations must provide their own implicit conversion operations from the 
+standard types into the custom defined types if they are not the same
+as the ones provided by the default standard template library of the system.
+
+%***********************************************************************************
+% SYCL runtime classes
+%***********************************************************************************
+\section{SYCL runtime classes}
+
+
+%***********************************************************************************
+% Device selection class
+%***********************************************************************************
+\subsection{Device selection class}
+\label{sec:device-selector}
+
+The SYCL \codeinline{device_selector} class is an
+object which enables the \gls{sycl-runtime} to choose the best device based
+on heuristics specified by the user, or by one of the built-in device
+selectors. The built-in device selectors are listed in Table
+~\ref{table.device.selectors}.
+
+The constructors and member functions of the SYCL \codeinline{device_selector} class are described in Tables~\ref{table.constructors.deviceSelector} and \ref{table.members.deviceSelector} respectively.
+
+All member functions of the \codeinline{device_selector} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+
+\subsubsection{Device selector interface}
+
+The function call operator; \codeinline{operator()} of the SYCL \codeinline{device_selector} is an abstract member function which takes a reference to a SYCL \codeinline{device} and returns an integer score.  This abstract member function can be implemented in a derived class in order to provide a logic for selecting a SYCL \codeinline{device}.
+
+At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{device}, the system will call the \codeinline{select_device()} member functions, which will query all available SYCL \codeinline{device}s in the system, pass each to this function call operator and select the one which returns the highest highest score. If a negative score is returned the the corresponding SYCL \codeinline{device} will never be chosen. The SYCL \codeinline{device}s that are provided to the SYCL \codeinline{device_selector} can be any number of OpenCL devices but must contain a single host device.
+
+\lstinputlisting{headers/deviceSelectorInterface.h}
+%---------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the \codeinline{device_selector} class}
+{table.constructors.deviceSelector}
+\addRow
+{device_selector()}
+{
+  Constructs a SYCL\codeinline{device_selector} instance.
+}
+\addRow
+{device_selector(const device_selector \&rhs)}
+{
+  Constructs a SYCL \codeinline{device_selector} instance from another instance.
+}
+\addRow
+{device_selector \&operator=(const device_selector \&rhs)}
+{
+  Assigns this SYCL \codeinline{device_selector} instance with another instance.
+}
+\addRow
+{virtual ~device_selector()}
+{
+  Destroys this SYCL \codeinline{device_selector} instance.
+}
+\completeTable
+
+%---------------------------------------------------------------------
+
+\startTable{Member function}
+\addFootNotes{Member functions for the \codeinline{device_selector} class}
+{table.members.deviceSelector}
+\addRow
+{device select_device() const}
+{
+  Returns a SYCL \codeinline{device} that has been selected based on the highest score returned by the function call operator for all available SYCL \codeinline{device}s in the system.
+}
+\addRow
+{virtual int operator()(const device \&device) const}
+{
+  Pure virtual member function, required to be implemented in a derived class to provide a logic for selecting a SYCL \codeinline{device}.
+  Returns an integer score for the \codeinline{device} parameter based on the logic defined within it.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+\subsubsection{Derived device selector classes}
+
+As the SYCL \codeinline{device_selector} is an abstract class, it must be derived from with a valid implementation of the function call operator in order to be used by the \gls{sycl-runtime}.
+
+Any class which derives from the \codeinline{device_selector}, in order to
+be used polymorphically, must have a valid copy constructor,
+copy assignment operator and destructor and it must implement the
+abstract function call operator.
+
+The system provides a number of built-in derived \codeinline{device_selector} types, including a selectors type which chooses a SYCL \codeinline{device} based on the default behavior of the \gls{sycl-runtime}, known as the \codeinline{default_selector}. It is important to note that the behavior of the \codeinline{default_selector} may be restricted by the platforms that the implementation chooses to target, and it must select a host device if no other suitable OpenCL device can be found. The SYCL \codeinline{default_selector} is used in some cases as the default SYCL \codeinline{device_selector} if one if not provided.
+
+%---------------------------------------------------------------------
+\startTable{SYCL device selectors}
+\addFootNotes{Standard device selectors included with all SYCL
+  implementations}{table.device.selectors}
+  \addRow
+    {default_selector}
+    {
+      Derived SYCL \codeinline{device_selector} which selects a SYCL \codeinline{device} based on an implementation defined heuristic. Must select a host device if no other suitable OpenCL device can be found.
+    }
+  \addRow
+    {gpu_selector}
+    {
+      Derived SYCL \codeinline{device_selector} which selects a SYCL \codeinline{device} for which the device type is \codeinline{info::device::device_type::gpu}. Must throw a \codeinline{runtime_error} SYCL exception if no OpenCL device matching this requirement can be found.
+    }
+  \addRow
+    {accelerator_selector}
+    {
+      Derived SYCL \codeinline{device_selector} which selects a SYCL \codeinline{device} for which the device type is \codeinline{info::device::device_type::accelerator}. Must throw a \codeinline{runtime_error} SYCL exception if no OpenCL device matching this requirement can be found.
+    }
+  \addRow
+    {cpu_selector}
+    {
+      Derived SYCL \codeinline{device_selector} which selects a SYCL \codeinline{device} for which the device type is \codeinline{info::device::device_type::cpu}. Must throw a \codeinline{runtime_error} SYCL exception if no OpenCL device matching this requirement can be found.    
+    }
+  \addRow
+    {host_selector}
+    {
+      Derived SYCL \codeinline{device_selector} which selects a SYCL \codeinline{device} that is a host device. Must always return a valid SYCL \codeinline{device}.
+    }
+
+\completeTable
+%---------------------------------------------------------------------
+
+%*********************************************************************
+% Platform class
+%*********************************************************************
+\subsection{Platform class}
+
+\label{sec:platform-class}
+
+The SYCL \codeinline{platform} class encapsulates a single SYCL platform on which SYCL kernel functions may be executed. A SYCL platform may be an OpenCL platform in which case it must encapsulate a valid underlying OpenCL \codeinline{cl_platform_id}, or it may be a SYCL host platform in which case it must not.
+
+A SYCL \codeinline{platform} is also associated with one or more SYCL \codeinline{device}s. These can be any number of OpenCL devices or exactly one host device.
+
+All member functions of the \codeinline{platform} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+
+The default constructor of the SYCL \codeinline{platform} class will construct
+a host platform. The explicit constructor of the SYCL \codeinline{platform}
+class which takes a \codeinline{device_selector} will construct a host platform
+if \codeinline{select_device} returns a host device, otherwise will construct
+an OpenCL platform. The OpenCL interop constructor of the SYCL
+\codeinline{platform} class will construct an OpenCL platform.
+
+The SYCL \codeinline{platform} class provides the common reference semantics
+(see Section~\ref{sec:reference-semantics}).
+
+\subsubsection{Platform interface}
+
+A synopsis of the SYCL \codeinline{platform} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{platform} class are listed in Tables~\ref{table.constructors.platform}, \ref{table.members.platform} and \ref{table.staticmembers.platform} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference} respectively.
+
+%Interface of platform class
+\lstinputlisting{headers/platform.h}
+
+%-------------------------------------------------------------------------------
+\startTableDim{Constructor}{6.7cm}{8.3cm}
+\addFootNotes{Constructors of the SYCL \codeinline{platform} class}
+{table.constructors.platform}
+  \addRow
+    {platform()}
+    {
+      Constructs a SYCL \codeinline{platform} instance as a host platform.
+    }
+  \addRow
+    {explicit platform(cl_platform_id platformID)}
+    {    
+     Constructs a SYCL \codeinline{platform} instance from an OpenCL \codeinline{cl_platform_id} in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+    }
+  \addRow
+    {explicit platform(const device_selector \&deviceSelector)}
+    {
+      Constructs a SYCL \codeinline{platform} instance using the the \codeinline{deviceSelector} parameter. One of the SYCL \codeinline{device}s that is associated with the constructed SYCL \codeinline{platform} instance must be the SYCL \codeinline{device} that is produced from the \codeinline{deviceSelector} parameter.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the SYCL \codeinline{platform} class}{table.members.platform}
+  \addRow
+    {cl_platform_id get() const}
+    {  
+      Returns a valid \codeinline{cl_platform_id} instance in accordance with the requirements described in \ref{sec:opencl-interoperability}.    
+    }
+  \addRowThreeL
+    {template <info::platform param>}
+    {  typename info::param_traits<info::platform, param>::return_type}
+    {  get_info() const}
+    {
+      Queries this SYCL \codeinline{platform} for information requested by the template parameter \codeinline{param}.
+      Specializations of \codeinline{info::param_traits} must be defined in accordance with the info parameters in Table~\ref{table.device.info} to facilitate returning the type associated with the \codeinline{param} parameter.
+    }
+  \addRow
+    {bool has_extension(const string_class \& extension) const}
+    {
+      Returns true if this SYCL \codeinline{platform} supports the extension queried by the \codeinline{extension} parameter. A SYCL \codeinline{platform} can only support an extension if all associated SYCL \codeinline{device}s support that extension.
+    }
+  \addRow
+    {bool is_host() const}
+    {
+      Returns true if this SYCL \codeinline{platform} is a host platform.
+    }
+  \addRowTwoL
+    {vector_class<device> get_devices(}
+    {  info::device_type = info::device_type::all) const}
+    {
+      Returns a vector_class containing all SYCL \codeinline{device}s associated with this SYCL \codeinline{platform}. The returned vector_class must contain only a single SYCL \codeinline{device} that is a host device if this SYCL \codeinline{platform} is a host platform.
+      Must return an empty \codeinline{vector_class} instance if there are no
+      devices that match the given \codeinline{info::device_type}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Static member function}
+\addFootNotes{Static member functions of the SYCL \codeinline{platform} class}{table.staticmembers.platform}
+  \addRow
+    {static vector_class<platform> get_platforms()}
+    {
+      Returns a \codeinline{vector_class} containing all SYCL \codeinline{platform}s available in the system. The returned vector_class must contain a single SYCL \codeinline{platform} that is a host platform.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+\subsubsection{Platform information descriptors}
+
+A SYCL \codeinline{platform} can be queried for all of the following information using the \codeinline{get_info} member function. All SYCL \codeinline{platform}s must have valid values for every query, including a host platform. The information that can be queried is described in Table~\ref{table.platform.info}. The interface for all information types and enumerations are described in appendix~\ref{appendix.platform.descriptors}.
+
+%-------------------------------------------------------------------------------
+
+\startInfoTableDims{Platform descriptors}{5cm}{2cm}{7cm}
+\addInfoFootNotes{Platform information descriptors}{table.platform.info}
+
+  \addInfoRow
+    {info::platform::profile}
+    {string_class}
+    {
+      Returns the OpenCL profile as a \codeinline{string_class}, if this SYCL \codeinline{platform} is an OpenCL platform. The value returned can be one of the following strings:
+      \begin{itemize}
+        \item \codeinline{"FULL_PROFILE"} --- if the platform supports the OpenCL specification (functionality defined as part of the core specification and does not require any extensions to be supported).
+        \item \codeinline{"EMBEDDED_PROFILE"} --- if the platform supports the OpenCL embedded profile.
+      \end{itemize}
+    Must return a \codeinline{string_class} with the value \codeinline{"FULL PROFILE"} if this is a host platform.
+    }
+    \addInfoRow
+    {info::platform::version}
+    {string_class}
+    {
+      Returns the OpenCL software driver version as a \codeinline{string_class} in the form: major_number.minor_number, if this SYCL \codeinline{platform} is an OpenCL platform. Must return a \codeinline{string_class} with the value \codeinline{"1.2"} if this SYCL \codeinline{platform} is a host platform.
+    }
+  \addInfoRow
+    {info::platform::name}
+    {string_class}
+    {
+      Returns the device name of this SYCL \codeinline{platform}.
+    }
+  \addInfoRow
+    {info::platform::vendor}
+    {string_class}
+    {
+      Returns the vendor of this SYCL \codeinline{platform}.
+    }
+  \addInfoRow
+    {info::platform::extensions}
+    {vector_class<string_class>}
+    {
+      Returns a \codeinline{vector_class} of extension names (the extension names do not contain any spaces) supported by this SYCL \codeinline{platform}. An extension can only be returned here if it is supported by all associated SYCL \codeinline{device}s.
+    }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+
+%***********************************************************************************
+% Context class
+%***********************************************************************************
+\subsection{Context class}
+\label{sec:interface.context.class}
+
+The \gls{context} class represents a SYCL \gls{context} on which SYCL kernel functions may be executed. A SYCL \gls{context} may be an OpenCL context, in which case it must encapsulate a valid underlying OpenCL \codeinline{cl_context}, or it may be a SYCL host context, in which case it must not. A SYCL \codeinline{context} must encapsulate a single SYCL \gls{platform} and a collection of SYCL \gls{device}s all of which are associated with said \gls{platform}.
+
+The SYCL \codeinline{context} class provides the common reference semantics
+(see Section~\ref{sec:reference-semantics}).
+
+%***********************************************************************************
+% Context interface
+%***********************************************************************************
+
+\subsubsection{Context interface}
+
+The constructors and member functions of the SYCL \codeinline{context} class are listed in Tables~\ref{table.constructors.context} and \ref{table.members.context}, respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+All member functions of the \gls{context} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+
+All constructors of the SYCL \gls{context} class, excluding the interoperability constructor, will construct either an OpenCL context or a host context, determined by the constructor parameters or, in the case of the default constructor, the SYCL \codeinline{device} produced by the \codeinline{default_selector}. If the SYCL \codeinline{platform} or SYCL \codeinline{device} is a host platform or host device respectively then the constructed SYCL \codeinline{context} is a host context. Subsequently if the constructed SYCL \codeinline{context} is a host context, then the associated SYCL \codeinline{platform} must be a host platform and the constructed SYCL \codeinline{context} must have a single associated SYCL \codeinline{device} that is a host device.
+
+A SYCL \codeinline{context} can optionally be constructed with an \codeinline{async_handler} parameter. In this case the \codeinline{async_handler} provided is passed on to a SYCL \codeinline{queue} to be used to report asynchronous SYCL exceptions.
+
+Information about a SYCL \gls{context} may be queried through the \codeinline{get_info()}
+member function.
+
+%Interface for class: context
+\lstinputlisting{headers/context.h}
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the SYCL \codeinline{context} class} {table.constructors.context}
+  \addRow
+  {explicit context(async_handler asyncHandler = \{\})}
+  {
+    Constructs a SYCL \codeinline{context} instance using an instance of \codeinline{default_selector} to select the associated SYCL \codeinline{platform} and \codeinline{device}(s). One of the SYCL \codeinline{device}s that is associated with this SYCL \codeinline{context} must be the SYCL \codeinline{device} that is produced from the \codeinline{default_selector} instance. The constructed SYCL \codeinline{context} will use the \codeinline{asyncHandler} parameter to handle exceptions.
+  }
+  \addRowTwoL
+  {context(const device \&dev,}
+  {async_handler asyncHandler = \{\})}
+  {
+     Constructs a SYCL \codeinline{context} instance using the \codeinline{dev} parameter as the associated SYCL \codeinline{device} and the SYCL \codeinline{platform} associated with the \codeinline{dev} parameter as the associated SYCL \codeinline{platform}. The constructed SYCL \codeinline{context} will use the \codeinline{asyncHandler} parameter to handle exceptions.
+  }
+  \addRowTwoL
+  {context(const platform \&plt,}
+  {async_handler asyncHandler = \{\})}
+  {
+     Constructs a SYCL \codeinline{context} instance using the \codeinline{plt} parameter as the associated SYCL \codeinline{platform} and the SYCL \codeinline{device}(s) associated with the \codeinline{plt} parameter as the associated SYCL \codeinline{device}(s). The constructed SYCL \codeinline{context} will use the \codeinline{asyncHandler} parameter to handle exceptions.
+  }   
+  \addRowTwoL
+  {context(const vector_class<device> \& deviceList,}
+  {async_handler asyncHandler = \{\})}
+  {
+     Constructs a SYCL \codeinline{context} instance using the SYCL \codeinline{device}(s) in the \codeinline{deviceList} parameter as the associated SYCL \codeinline{device}(s) and the SYCL \codeinline{platform} associated with each SYCL \codeinline{device} in the \codeinline{deviceList} parameter as the associated SYCL \codeinline{platform}. This requires that all SYCL \codeinline{device}s in the \codeinline{deviceList} parameter have the same associated SYCL \codeinline{platform}. The constructed SYCL \codeinline{context} will use the \codeinline{asyncHandler} parameter to handle exceptions.
+  } 
+  \addRowTwoL
+    {context (cl_context clContext,}
+    {async_handler asyncHandler = \{\})}
+    {    
+      Constructs a SYCL \codeinline{context} instance from an OpenCL \codeinline{cl_context} in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+    }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the \codeinline{context} class}
+{table.members.context}
+  \addRow
+    {cl_context get () const}
+    { 
+      Returns a valid \codeinline{cl_context} instance in accordance with the requirements described in \ref{sec:opencl-interoperability}.  
+    }
+  \addRow
+    {bool is_host () const}
+    {
+      Returns true if this SYCL \codeinline{context} is a host context.
+    }
+  \addRowTwoL
+    {template <info::context param> typename info::param_traits<info::context, param>::return_type}
+    {  get_info() const}
+    {
+      Queries this SYCL \codeinline{context} for information requested by the template parameter \codeinline{param} using the \codeinline{param_traits} class template to facilitate returning the appropriate type associated with the \codeinline{param} parameter.
+    }
+  \addRow
+    {platform get_platform() const}
+    {
+      Returns the SYCL \codeinline{platform} that is associated with this SYCL \codeinline{context}. The value returned must be equal to that returned by \codeinline{get_info<info::context::platform>()}.
+    }
+  \addRowTwoL
+    {vector_class<device>}
+    {get_devices() const}
+    {
+      Returns a \codeinline{vector_class} containing all SYCL \codeinline{device}s that are associated with this SYCL \codeinline{context}. The value returned must be equal to that returned by \codeinline{get_info<info::context::devices>()}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Context information descriptors
+%*******************************************************************************
+
+\subsubsection{Context information descriptors}
+
+A SYCL \codeinline{context} can be queried for all of the following information using the
+\codeinline{get_info} member function. All SYCL \codeinline{context}s have valid devices for them, including the SYCL host context. The available information is in Table~\ref{table.context.info}. The interface of all available context descriptors in the appendix~\ref{appendix.context.descriptors}.
+
+%-------------------------------------------------------------------------------
+
+\startInfoTableDims{Context Descriptors}{5cm}{4.4cm}{5cm}
+\addInfoFootNotes{Context information descriptors}{table.context.info}
+\addInfoRow
+{info::context::reference_count}
+{cl_uint}
+{
+  Returns the reference count of the underlying OpenCL \codeinline{cl_context} if this SYCL \codeinline{context} is an OpenCL context. Returns \codeinline{0} if this SYCL \codeinline{context} is a host context.
+}
+\addInfoRow
+{info::context::platform}
+{platform}
+{
+  Returns the SYCL \codeinline{platform} associated with this SYCL \codeinline{context}.
+}
+\addInfoRow
+{info::context::devices}
+{vector_class<device>}
+{
+  Returns a \codeinline{vector_class} containing the SYCL \codeinline{device}s associated with this SYCL \codeinline{context}.
+}
+\completeInfoTable
+
+%------------------------------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Device class
+%***********************************************************************************
+% \subsection{Device class}
+% \label{sec:interface.device.class}
+\input{device_class}
+
+%***********************************************************************************
+% Queue class
+%***********************************************************************************
+\subsection{Queue class}
+\label{sec:interface.queue.class}
+\input{queue_class}
+
+%***********************************************************************************
+% Event class
+%***********************************************************************************
+\subsection{Event class}
+
+An \keyword{event} in SYCL abstracts the \codeinline{cl_event} object in OpenCL. In
+OpenCL the events mechanism is comprised of low-level event objects that
+the developer uses to synchronize memory transfers,
+enqueues of kernels and signaling barriers.
+
+In SYCL, events are an abstraction of the OpenCL event objects, but they
+retain the features and functionality of the OpenCL event mechanism. They
+accommodate synchronization between different contexts, devices and platforms.
+It is the responsibility of the SYCL implementation to ensure that when SYCL
+events are used in OpenCL queues, the correct synchronization points are
+created to allow cross-platform or cross-device synchronization.
+
+Since data management and storage is handled by the \gls{sycl-runtime}, the
+\codeinline{event} class is used for providing the appropriate interface for
+OpenCL/SYCL interoperability. In the case where SYCL objects contain
+OpenCL memory objects created outside of the SYCL mechanism, then events
+can be used to provide the \gls{sycl-runtime} with the initial events that it has
+to synchronize against. However, the events mechanism does not provide
+full interoperability with OpenCL during SYCL code execution.
+Interoperability is achieved by using the synchronization rules with the
+\codeinline{buffer} and \codeinline{image} classes.
+
+A SYCL event can be constructed from an OpenCL event or can return an OpenCL
+event.
+A SYCL event can also be returned by the submission of a \gls{command-group}.
+The dependencies of the event returned via the submission of the command group
+are the implementation-defined actions associated with the \gls{command-group}
+execution. 
+
+The SYCL \codeinline{event} class provides the common reference semantics
+(see Section~\ref{sec:reference-semantics}).
+
+The constructors and member functions of the SYCL \codeinline{event} class are listed in Tables~\ref{table.constructors.event} and \ref{table.members.event}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+%Interface for class: event.h
+\lstinputlisting{headers/event.h}
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the \codeinline{event} class}
+{table.constructors.event}
+  \addRow
+    {event ()}
+    {  
+      Constructs a ready SYCL \codeinline{event}. If the constructed SYCL \codeinline{event} is waited on it will complete immediately.
+    }
+  \addRow
+    {event (cl_event clEvent, const context\& syclContext)}
+    {  
+      Constructs a SYCL \codeinline{event} instance from an OpenCL \codeinline{cl_event} in accordance with the requirements described in \ref{sec:opencl-interoperability}.    
+      The \codeinline{syclContext} must match the OpenCL context associated
+      with the clEvent.
+    }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions for the \codeinline{event} class}{table.members.event}
+  \addRow
+    {cl_event get()}
+    {  
+      Returns a valid \codeinline{cl_event} instance in accordance with the requirements described in \ref{sec:opencl-interoperability}.      
+    }
+  \addRow
+    {bool is_host() const}
+    {  
+      Returns true if this SYCL \codeinline{event} is a host event.     
+    }
+  \addRow
+    {vector_class<event> get_wait_list()}
+    {
+      Return the list of events that this event waits for in
+      the dependence graph.  Only direct dependencies are returned,
+      and not transitive dependencies that direct dependencies wait on.
+      Whether already completed events are included in the returned list
+      is implementation defined.
+    }
+  \addRow
+    {void wait()}
+    {
+      Wait for the event and the command associated with
+      it to complete.
+    }
+  \addRow
+    {void wait_and_throw()}
+    {
+      Wait for the event and the command associated with
+      it to complete.
+
+      If any uncaught asynchronous errors
+      occurred on the context (or contexts) that the event
+      is waiting on executions from, then will also call
+      that context's asynchronous error handler with those
+      errors.
+    }
+  \addRowTwoL
+    {static void wait(}
+    {  const vector_class<event> \&eventList)}
+    {
+      Synchronously wait on a list of events.
+    }
+  \addRowTwoL
+    {static void wait_and_throw(}
+    {const vector_class<event> \&eventList)}
+    {
+      Synchronously wait on a list of events.
+      If any uncaught asynchronous errors occurred on
+      the context (or contexts) that the events are waiting
+      on executions from, then will also call those contexts'
+      asynchronous error handlers with those errors.
+    }
+
+  \addRowFourL
+    {template <info::event param>}
+    {  typename info::param_traits}
+    {  <info::event, param>::return_type}
+    {  get_info() const }
+    {
+      Queries this SYCL \codeinline{event} for information requested by the
+      template parameter \codeinline{param}.
+      Specializations of \codeinline{info::param_traits} must be defined in
+      accordance with the info parameters in Table~\ref{table.event.info} to
+      facilitate returning the type associated with the \codeinline{param}
+      parameter.
+    }
+  \addRowFourL
+    {template <info::event_profiling param>}
+    {  typename info::param_traits}
+    {  <info::event_profiling, param>::return_type}
+    {  get_profiling_info () const }
+    {
+      Queries this SYCL \codeinline{event} for profiling information requested
+      by the parameter \codeinline{param}. If the requested profiling information
+      is unavailable when \codeinline{get_profiling_info} is called due to
+      incompletion of \glspl{command-group} associated with the \codeinline{event},
+      then the call to \codeinline{get_profiling_info} will block until
+      the requested profiling information is available. An example is asking for
+      \codeinline{info::event_profiling::command_end} when the associated
+      \gls{command-group} has yet to finish execution.
+      Calls to \codeinline{get_profiling_info} must throw an 
+      \codeinline{invalid_object_error} SYCL exception if the SYCL 
+      \codeinline{queue} which submitted the \gls{command-group} this 
+      SYCL \codeinline{event} is associated with was not constructed with 
+      the \codeinline{property::queue::enable_profiling} property.
+      Specializations of \codeinline{info::param_traits} must be defined in
+      accordance with the info parameters in
+      Table~\ref{table.event.profilinginfo} to facilitate returning the type
+      associated with the \codeinline{param} parameter.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+\subsubsection{Event information and profiling descriptors}
+A SYCL event can be queried for all of the following information using the
+\codeinline{get_info} function. The available information is in
+Table~\ref{table.event.info}. Profiling information available is in
+Table~\ref{table.event.profilinginfo}. The interface of all available event and
+profiling descriptors is in appendix~\ref{appendix.event.descriptors}.
+
+\fixme{info table consistency changes: add namespace and enum class to the
+descriptor.}
+
+%-------------------------------------------------------------------------------
+\startInfoTable{Event Descriptors}
+\addInfoFootNotes{Event class information descriptors}{table.event.info}
+\addInfoRow
+{info::event::command_execution_status} {info::event_command_status}
+{
+    Returns the event status of the command group associated with this SYCL \codeinline{event} or the event status of the underlying OpenCL event if this SYCL \codeinline{event} instance was constructed with the interoperability constructor. 
+}
+
+\addInfoRow
+{info::event::reference_count}
+{cl_uint}
+{Return the reference count of the event.}
+
+\completeInfoTable
+%-------------------------------------------------------------------------------
+\startInfoTable{Event information profiling descriptor}
+\addInfoFootNotes{Profiling information descriptors for the SYCL
+  \codeinline{event} class}
+{table.event.profilinginfo}
+
+\addInfoRow
+{info::event_profiling::command_submit}
+{cl_ulong}
+{
+    Returns an implementation defined 64-bit value describing the time in
+    nanoseconds when the associated \gls{command-group} was submitted.
+}
+
+\addInfoRow
+{info::event_profiling::command_start}
+{cl_ulong}
+{
+    Returns an implementation defined 64-bit value describing the time in
+    nanoseconds when the associated \gls{command-group} started executing.
+}
+
+\addInfoRow
+{info::event_profiling::command_end}
+{cl_ulong}
+{
+    Returns an implementation defined 64-bit value describing the time in
+    nanoseconds when the associated \gls{command-group} finished executing.
+}
+\completeInfoTable
+%-------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Data access and storage in SYCL
+%***********************************************************************************
+\section{Data access and storage in SYCL}
+\label{sec:data.access.and.storage}
+
+In SYCL, data storage and access are handled by separate classes.
+\keyword{Buffers} and \keyword{images} handle
+storage and ownership of the data, whereas \keyword{\glspl{accessor}} handle access to
+the data. Buffers and images in SYCL are different from OpenCL buffers and images
+in that they can be bound to more than one device or context and they get
+destroyed when they go out-of-scope. They also handle ownership of the
+data, while allowing exception handling for blocking
+and non-blocking data transfers. Accessors manage data transfers between the host
+and all of the devices in the system, as well as tracking of data dependencies.
+
+%***********************************************************************************
+% Host allocation
+%***********************************************************************************
+\subsection{Host allocation}
+
+A \gls{sycl-runtime} may need to allocate temporary objects on the host
+to handle some operations (such as copying data from one context to 
+another).
+Allocation on the host is managed using an allocator object, following the
+standard C++ allocator class definition.
+The default allocator for memory objects is implementation defined,
+but the user can supply their own allocator class.
+
+\begin{code}
+{
+  buffer<int, 1, UserDefinedAllocator<int> > b(d);
+}
+\end{code}
+
+When an allocator returns a nullptr, the runtime could not create data on the
+host. Note that in this case the runtime will raise an error if it requires
+host memory but it is not available (e.g when moving data across OpenCL
+contexts).
+
+The definition of allocators extends the current functionality of SYCL,
+ensuring that users can define allocator functions for specific hardware or
+certain complex shared memory mechanisms (e.g. NUMA), and improves
+interoperability with STL-based libraries (e.g, Intel's TBB provides an
+allocator).
+
+
+%***********************************************************************************
+% Default Allocators
+%***********************************************************************************
+\subsubsection{Default Allocators}
+\label{subsec:default.allocators}
+A default allocator is always defined by the implementation, and it is
+guaranteed to return non-\codeinline{nullptr} and new memory positions every call.
+The default allocator for const buffers will remove the const-ness of the
+type (therefore, the default allocator for a buffer of type ''const int'' will
+be an \codeinline{Allocator<int>}).
+This implies that host \glspl{accessor} will not synchronize with the pointer given
+by the user in the buffer/image constructor, but will use the memory
+returned by the \codeinline{Allocator} itself for that purpose.
+The user can implement an allocator that returns the same address as the
+one passed in the buffer constructor, but it is the responsibility of the
+user to handle the potential race conditions.
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Allocators}
+\addFootNotes{SYCL Default Allocators}{table.default.allocators}
+\addRow{buffer_allocator}
+{
+It is the default buffer allocator used by the runtime, when no allocator is
+defined by the user.
+}
+\addRow{image_allocator}
+{
+It is the default allocator used by the runtime for the SYCL \codeinline{image} class when no allocator is provided by the user.
+The \codeinline{image_allocator} is required allocate in elements of \codeinline{byte}.
+}
+\completeTable
+%------------------------------------------------------------------------------------------------------
+See Section \ref{Mutex} for details on manual host-device synchronization.
+
+%***********************************************************************************
+% Buffers
+%***********************************************************************************
+
+\subsection{Buffers}
+\label{subsec:buffers}
+
+The \codeinline{buffer} class defines a shared array of one, two or three
+dimensions that can be used by kernels in queues and has to be accessed using
+\gls{accessor} classes. Buffers are templated on both the type of their data,
+and the number of dimensions that the data is stored and accessed through.
+
+A \codeinline{buffer} does not map to only one OpenCL buffer
+object, and all OpenCL buffer memory objects may be temporary for use
+within a command group on a specific device. The only exception to
+this rule is when a buffer is constructed from a \codeinline{cl_mem}
+object to interoperate with OpenCL. Use of an interoperability
+buffer on a queue mapping to a context other than that in which the
+\codeinline{cl_mem} was created is an error.
+
+Note that if no source data is provided for a buffer, the buffer uses
+uninitialized memory for performance reasons. So it is up to the
+programmer to explicitly construct the objects in this case if
+required.
+
+More generally, since the value type of a buffer is required to be
+trivially copyable, there is no constructor or destructor called in
+any case.
+
+A SYCL \codeinline{buffer} can construct an instance of a SYCL \codeinline{buffer}
+that reinterprets the original SYCL \codeinline{buffer} with a different
+type, dimensionality and range using the member function
+\codeinline{reinterpret}. The reinterpreted SYCL \codeinline{buffer} that is
+constructed must behave as though it were a copy of the SYCL \codeinline{buffer}
+that constructed it (see sec \ref{sec:reference-semantics}) with the exception
+that the type, dimensionality and range of the reinterpreted SYCL
+\codeinline{buffer} must reflect the type, dimensionality and range specified
+when calling the \codeinline{reinterpret} member function. By extension of this
+the class member types \codeinline{value_type}, \codeinline{reference} and
+\codeinline{const_reference}, and the member functions \codeinline{get_range}
+and \codeinline{get_count} of the reinterpreted SYCL \codeinline{buffer} must
+reflect the new type, dimensionality and range. The data that the original SYCL
+\codeinline{buffer} and the reinterpreted SYCL \codeinline{buffer} manage
+remains unaffected, though the representation of the data when accessed through
+the reinterpreted SYCL \codeinline{buffer} may alter to reflect the new type,
+dimensionality and range. It is important to note that a reinterpreted SYCL
+\codeinline{buffer} is a copy of the original SYCL \codeinline{buffer} only,
+and not a new SYCL \codeinline{buffer}. Constructing more than one SYCL
+\codeinline{buffer} managing the same host pointer is still undefined behavior.
+
+The SYCL \codeinline{buffer} class template provides the common reference
+semantics (see Section~\ref{sec:reference-semantics}).
+
+%***********************************************************************************
+% Buffer Interface
+%***********************************************************************************
+
+\subsubsection{Buffer Interface}
+
+The constructors and member functions of the SYCL \codeinline{buffer} class template are listed in Tables~\ref{table.constructors.buffer} and \ref{table.members.buffer}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+Each constructor excluding the interoperability constructor takes as the last parameter an optional SYCL \codeinline{property_list} to provide properties to the SYCL \codeinline{buffer}.
+
+The SYCL \codeinline{buffer} class template takes a template parameter \codeinline{AllocatorT} for specifying an allocator which is used by the \gls{sycl-runtime} when allocating temporary memory on the host. If no template argument is provided then the default allocator for the SYCL \codeinline{buffer} class \codeinline{buffer_allocator} will be used (see~\ref{subsec:default.allocators}).
+
+%Interface for class: buffer
+
+\lstinputlisting{headers/buffer.h}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the \codeinline{buffer} class}
+{table.constructors.buffer}
+  \addRowTwoSL
+    {  buffer(const range<dimensions> \& bufferRange, }
+    {  const property_list \&propList = \{\}) }
+    {
+       Construct a SYCL \codeinline{buffer} instance with uninitialized memory.      
+       The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowThreeSL
+    {  buffer(const range<dimensions> \& bufferRange, }
+    {  AllocatorT allocator, }
+    {  const property_list \&propList = \{\}) }
+    {
+       Construct a SYCL \codeinline{buffer} instance with uninitialized memory.      
+       The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+       The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+     }
+  \addRowThreeSL
+   { buffer(T* hostData,}
+   { const range<dimensions> \& bufferRange, }
+   { const property_list \&propList = \{\}) }
+   {
+       Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of it's lifetime.
+       The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowFourSL
+   { buffer(T* hostData,}
+   { const range<dimensions> \& bufferRange, }
+   { AllocatorT allocator, }
+   { const property_list \&propList = \{\}) }
+   {
+       Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of it's lifetime.
+       The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+   }
+  \addRowThreeSL
+    {  buffer(const T* hostData, }
+    {  const range<dimensions> \& bufferRange, }
+    {  const property_list \&propList = \{\}) }
+    {
+       Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of it's lifetime.
+       The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+      The host address is \codeinline{const T}, so the host accesses can be read-only. However, the \tf{typename T} is not const so the device accesses can be both read and write accesses. Since, the \tf{hostData} is const, this buffer is only initialized with this memory and there is no write after its destruction, unless there is another final data address given after construction of the buffer.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowFourSL
+    {  buffer(const T* hostData, }
+    {  const range<dimensions> \& bufferRange,}
+    {  AllocatorT allocator, }
+    {  const property_list \&propList = \{\}) }
+    {
+       Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of it's lifetime.
+       The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.       
+      The host address is \codeinline{const T}, so the host accesses can be read-only. However, the \tf{typename T} is not const so the device accesses can be both read and write accesses. Since, the \tf{hostData} is const, this buffer is only initialized with this memory and there is no write after its destruction, unless there is another final data address given after construction of the buffer.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowThreeSL
+   { buffer(const shared_ptr_class<T> \&hostData,}
+   { const range<dimensions> \& bufferRange, }
+   { const property_list \&propList = \{\}) }
+   {
+       Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of it's lifetime.
+       The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowFourSL
+   { buffer(const shared_ptr_class<void> \&hostData,}
+   { const range<dimensions> \& bufferRange, }
+   { AllocatorT allocator, }
+   { const property_list \&propList = \{\}) }
+   {
+       Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of it's lifetime.
+       The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
+       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+   }
+  \addRowThreeSL
+    { template <typename InputIterator> }
+    { buffer(InputIterator first, InputIterator last, }
+    { const property_list \&propList = \{\}) }
+    {
+      Create a new allocated 1D buffer initialized from the given elements
+      ranging from \codeinline{first} up to one before \codeinline{last}.
+      The data is copied to an intermediate memory position by the runtime.
+      Data is written back to the same iterator set if the iterator is not
+      a const iterator.
+      The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+      Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowFourSL
+    { template <typename InputIterator> }
+    { buffer(InputIterator first, InputIterator last, }
+    { AllocatorT allocator = \{\}, }
+    { const property_list \&propList = \{\}) }
+    {
+      Create a new allocated 1D buffer initialized from the given elements
+      ranging from \codeinline{first} up to one before \codeinline{last}.
+      The data is copied to an intermediate memory position by the runtime.
+      Data is written back to the same iterator set if the iterator is not
+      a const iterator.
+      The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+      Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
+    }
+  \addRowThreeSL
+    { buffer(buffer<T, dimensions, AllocatorT> \&b, }
+    { const id<dimensions> \& baseIndex, }
+    { const range<dimensions> \& subRange) }
+    {
+      Create a new sub-buffer without allocation to have separate
+      accessors later. \codeinline{b} is the buffer with the real data.
+      \codeinline{baseIndex} specifies the origin of the sub-buffer inside the
+      buffer \codeinline{b}. \codeinline{subRange} specifies the size of the sub-buffer.
+      The offset and range specified by \codeinline{baseIndex} and \codeinline{subRange} together must represent a contiguous region of the original SYCL \codeinline{buffer}.
+      The total size of the sub-\codeinline{buffer} being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
+      This value is retrievable via the SYCL \codeinline{device} class info query \codeinline{info::device::mem_base_addr_align}.
+    }
+    \addRowThreeSL
+      { buffer(cl_mem clMemObject, }
+      { const context \&syclContext, }
+      { event availableEvent = \{\}) }
+      {
+        Available only when: \codeinline{dimensions == 1}.
+        \newline
+        Constructs a SYCL \codeinline{buffer} instance from an OpenCL \codeinline{cl_mem} in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+        The instance of the SYCL \codeinline{buffer} class template being constructed must wait for the SYCL \codeinline{event} parameter, if one is provided, \codeinline{availableEvent} to signal that the \codeinline{cl_mem} instance is ready to be used.
+        The SYCL \codeinline{context} parameter \codeinline{syclContext} is the context associated with the memory object.
+      } 
+\completeInfoTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions for the \codeinline{buffer} class}{table.members.buffer}
+  \addRow
+    {range<dimensions> get_range() const}
+    {
+      Return a range object representing the
+      size of the buffer in terms of number
+      of elements in each dimension as passed
+      to the constructor.
+    }
+  \addRow
+    {size_t get_count() const}
+    {
+      Returns the total number of elements in the buffer.
+      Equal to \codeinline{get_range()[0] * ... * get_range()[dimensions-1]}.
+    }
+  \addRow
+    {size_t get_size() const}
+    {
+      Returns the size of the buffer storage in bytes.
+      Equal to \codeinline{get_count()*sizeof(T)}.
+    }
+  \addRow
+    {AllocatorT get_allocator() const}
+    {
+      Returns the allocator provided to the buffer.
+    }
+  \addRowThreeSL
+    {template<access::mode mode, access::target target = access::target::global_buffer>}
+    {accessor<T, dimensions, mode, target> }
+    {get_access(handler \&commandGroupHandler)}
+    {
+      Returns a valid accessor to the buffer with the specified
+      access mode and target in the command group buffer.
+      The value of target can be
+      \mbox{\codeinline{access::target::global_buffer}} or
+      \codeinline{access::constant_buffer}.
+    }
+  \addRowThreeSL
+    {template<access::mode mode>}
+    {accessor<T, dimensions, mode, access::target::host_buffer> }
+    {get_access()}
+    {
+      Returns a valid host accessor to the buffer with the specified
+      access mode and target.
+    }
+  \addRowThreeSL
+    {template<access::mode mode, access::target target=access::target::global_buffer>}
+    {accessor<T, dimensions, mode, target> }
+    {get_access(handler \&commandGroupHandler, range<dimensions> accessRange,
+       id<dimensions> accessOffset = \{\})}
+    {
+      Returns a valid accessor to the buffer with the specified
+      access mode and target in the command group buffer.
+      Only the values starting from the given offset and up to the given 
+      range are guaranteed to be updated.
+      The value of target can be
+      \mbox{\codeinline{access::target::global_buffer}} or
+      \codeinline{access::constant_buffer}.
+    }
+  \addRowThreeSL
+    {template<access::mode mode>}
+    {accessor<T, dimensions, mode, access::target::host_buffer> }
+    {get_access(range<dimensions> accessRange, id<dimensions> accessOffset = \{\})}
+    {
+      Returns a valid host accessor to the buffer with the specified
+      access mode and target. 
+      Only the values starting from the given offset and up to the given 
+      range are guaranteed to be updated.
+      The value of target can only be
+      \codeinline{access::target::host_buffer}.
+    }
+
+   \addRowTwoL
+    {template <typename Destination = std::nullptr_t>}
+    {void set_final_data(Destination finalData = std::nullptr)}
+    {
+      The \codeinline{finalData} points to where the outcome of all
+      the buffer processing is going to be copied to at destruction
+      time, if the buffer was involved with a write accessor.
+
+      Destination can be either an output iterator or a
+      \codeinline{weak_ptr_class<T>}.
+
+      Note that a raw pointer is a special case of output iterator and
+      thus defines the host memory to which the result is to be
+      copied.
+
+      In the case of a weak pointer, the output is not updated if the
+      weak pointer has expired.
+
+      If \codeinline{Destination} is \codeinline{std::nullptr_t}, then
+      the copy back will not happen.
+    }
+
+   \addRow
+    {void set_write_back(bool flag = true)}
+    {
+      This method allows dynamically forcing or canceling the
+      write-back of the data of a buffer on destruction according to
+      the value of \codeinline{flag}.
+
+      Forcing the write-back is similar to what happens during a
+      normal write-back as described in \S~\ref{sec:buf-sync-rules}
+      and \ref{sec:sharing-host-memory-with-dm}.
+
+      If there is nowhere to write-back, using this function does not
+      have any effect.
+    }
+   \addRow
+    {bool is_sub_buffer() const}
+    {
+      Returns true if this SYCL \codeinline{buffer} is a sub-buffer, otherwise
+      returns false.
+    }
+   \addRowThreeL
+     { template <typename ReinterpretT, int ReinterpretDim> }
+     { buffer<ReinterpretT, ReinterpretDim, AllocatorT> }
+     { reinterpret(range<ReinterpretDim> reinterpretRange) const }
+     {
+       Creates and returns a reinterpreted SYCL \codeinline{buffer} with the
+       type specified by \codeinline{ReinterpretT}, dimensions specified by
+       \codeinline{ReinterpretDim} and range specified by
+       \codeinline{reinterpretRange}. Must throw an
+       \codeinline{invalid_object_error} SYCL exception if the total size in
+       bytes represented by the type and range of the reinterpreted SYCL
+       \codeinline{buffer} does not equal the total size in bytes represented by
+       the type and range of this SYCL \codeinline{buffer}.
+     }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+\subsubsection{Buffer Properties}
+\label{sec:buffer-properties}
+
+The properties that can be provided when constructing the SYCL \codeinline{buffer} class are describe in Table~\ref{table.properties.buffer}.
+
+%---------------------------------------------------------------------
+\startTable{Property}
+\addFootNotes{Properties supported by the SYCL \codeinline{buffer} class} {table.properties.buffer}
+
+\addRow
+  { property::buffer::use_host_ptr }
+  {
+    The \codeinline{use_host_ptr} property adds the requirement that the \gls{sycl-runtime} must not allocate any memory for the SYCL \codeinline{buffer} and instead uses the provided host pointer directly. This prevents the \gls{sycl-runtime} from allocating additional temporary storage on the host.
+  }
+\addRow
+  { property::buffer::use_mutex }
+  {
+    The \codeinline{use_mutex} property is valid for the SYCL \codeinline{buffer} and \codeinline{image} classes. The property adds the requirement that the memory which is owned by the SYCL \codeinline{buffer} can be shared with the application via a \codeinline{mutex_class} provided to the property. The mutex \codeinline{m} is locked by the runtime whenever the data is in use and unlocked otherwise. Data is synchronized with \codeinline{hostData}, when the mutex is unlocked by the runtime.
+  }
+\addRow
+  { property::buffer::context_bound }
+  {
+    The \codeinline{context_bound} property adds the requirement that the SYCL \codeinline{buffer} can only be associated with a single SYCL \codeinline{context} that is provided to the property.
+  }
+\completeTable
+%---------------------------------------------------------------------
+
+The constructors and special member functions of the buffer property
+classes are listed in
+Tables~\ref{table.constructors.properties.buffer} and
+\ref{table.members.properties.buffer} respectively.
+
+%---------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the buffer property classes}
+{table.constructors.properties.buffer}
+\addRow
+{property::buffer::use_host_ptr::use_host_ptr()}
+{
+  Constructs a SYCL \codeinline{use_host_ptr} property instance.
+}
+\addRow
+{property::buffer::use_mutex::use_mutex(mutex_class \&mutexRef)}
+{
+  Constructs a SYCL \codeinline{use_mutex} property instance with a reference to \codeinline{mutexRef} parameter provided.
+}
+\addRow
+{property::buffer::context_bound::context_bound(context boundContext)}
+{
+  Constructs a SYCL \codeinline{context_bound} property instance with a copy of a SYCL \codeinline{context}.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+%---------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the buffer property classes}
+{table.members.properties.buffer}
+\addRow
+{mutex_class *property::buffer::use_mutex::get_mutex_ptr() const}
+{
+  Returns the \codeinline{mutex_class} which was specified when
+  constructing this SYCL \codeinline{use_mutex} property.
+}
+\addRow
+{context property::buffer::context_bound::get_context() const}
+{
+  Returns the \codeinline{context} which was specified when
+  constructing this SYCL \codeinline{context_bound} property.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+%***********************************************************************************
+% Buffer Synchronization Rules
+%***********************************************************************************
+\subsubsection{Buffer Synchronization Rules}
+\label{sec:buf-sync-rules}
+
+Buffers are reference-counted. When a buffer value is constructed
+from another buffer, the two values reference the same buffer and a
+reference count is incremented. When a buffer value is destroyed,
+the reference count is decremented. Only when there are no more
+buffer values that reference a specific buffer is the actual
+buffer destroyed and the buffer destruction behavior defined
+below is followed.
+
+If any error occurs on buffer destruction, it is reported
+via the associated queue's asynchronous error handling mechanism.
+
+The basic rule for the blocking behavior of a buffer destructor is
+that it blocks if there is some data to write back because a
+write-accessor on it has been created, or if the buffer was constructed
+with attached host memory and is still in use.
+
+More precisely:
+\begin{enumerate}
+  \item
+    A buffer can be constructed with just a size and using the default
+    buffer allocator.  The memory management for this type of buffer
+    is entirely handled by the SYCL system. The destructor for this
+    type of buffer never blocks, even if work on the buffer has not
+    completed. Instead, the SYCL system frees any storage required
+    for the buffer asynchronously when it is no longer in use in queues.
+    The initial contents of the buffer are unspecified.
+
+  \item
+    A buffer can be constructed with associated host memory and a default
+    buffer allocator. The buffer will use this host memory for its full lifetime, but the
+    contents of this host memory are unspecified for the lifetime of the
+    buffer. If the host memory is modified by the host, or mapped to
+    another buffer or image during the lifetime of this buffer, then
+    the results are undefined. The initial contents of the buffer will
+    be the contents of the host memory at the time of construction.
+
+    When the buffer is destroyed, the destructor will block until all
+    work in queues on the buffer have completed, then copy the contents
+    of the buffer back to the host memory (if required) and then
+    return.
+
+    \begin{enumerate}
+    \item
+    If the type of the host data is \codeinline{const}, then the buffer is
+    read-only; only read accessors are allowed on the buffer and
+    no-copy-back to host memory is performed (although the host memory
+    must still be kept available for use by SYCL). When using the default
+    buffer allocator, the const-ness of the type will be removed in order to
+    allow host allocation of memory, which will allow temporary host copies
+    of the data by the \gls{sycl-runtime}, for example for speeding up
+    host accesses.
+
+    When the buffer is destroyed, the destructor will block until all
+    work in queues on the buffer have completed and then return, as there
+    is no copy of data back to host.
+
+    \item
+
+      If the type of the host data is not \codeinline{const} but the
+      pointer to host data is \codeinline{const}, then the read-only
+      restriction applies only on host and not on device accesses.
+
+    When the buffer is destroyed, the destructor will block until all
+    work in queues on the buffer have completed.
+
+  \end{enumerate}
+
+  \item
+    A buffer can be constructed using a \codeinline{shared_ptr} to host data.
+    This pointer is shared between the SYCL application and the runtime. In order
+    to allow synchronization between the application and the runtime a
+    \codeinline{mutex} is used which will be locked by the runtime whenever the
+    data is in use, and unlocked when it is no longer needed.
+
+    The \codeinline{shared_ptr} reference counting is used in order to prevent
+    destroying the buffer host data prematurely. If the
+    \codeinline{shared_ptr} is deleted from the user application before buffer
+    destruction, the buffer can continue securely because the pointer
+    hasn't been destroyed yet.  It will not copy data back to the host before destruction, however,
+    as the application side has already deleted its copy.
+
+    Note that since there is an implicit conversion of a
+    \codeinline{unique_ptr_class} to a \codeinline{std::shared_ptr}, a
+    \codeinline{unique_ptr_class} can also be used to pass the
+    ownership to the \gls{sycl-runtime}.
+
+  \item
+    A buffer can be constructed from a pair of iterator values. In
+    this case, the buffer construction will copy the data from the
+    data range defined by the iterator pair. The destructor will
+    not copy back any data and will not block.
+    
+  \end{enumerate}
+
+If \codeinline{set_final_data()} is used to change where to write the
+data back to, then the destructor of the buffer will block if a
+write-accessor on it has been created.
+
+A sub-buffer object can be created which is a sub-range reference to a
+base buffer. This sub-buffer can be used to create accessors to the
+base buffer, which have access to the range specified at time
+of construction of the sub-buffer.
+
+%***********************************************************************************
+% Images
+%***********************************************************************************
+\subsection{Images}
+\label{subsec:images}
+
+The class \tclass{image}{\tf{int} dimensions}
+(Table~\ref{table.constructors.image}) defines shared image data of one,
+two or three dimensions, that can be used by kernels in queues and has to
+be accessed using \gls{accessor} classes with image accessor modes.
+
+The constructors and member functions of the SYCL \codeinline{image} class template are listed in Tables~\ref{table.constructors.image} and \ref{table.members.image}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+Where relevant, it is the
+responsibility of the user to ensure that the format of the data
+matches the format described by
+\codeinline{order} and \codeinline{type}.
+
+The allocator template parameter of the SYCL \codeinline{image} class can be any allocator type including a custom allocator, however it must allocate in units of \codeinline{byte}.
+
+If an image object is constructed from a \codeinline{cl_mem} object,
+then the image is created and initialized from the OpenCL memory
+object. The SYCL system may copy the data to the host, but must copy
+it back (if modified) at the point of destruction of the image.
+The user must provide a \codeinline{queue} and
+\codeinline{event}. The memory object is assumed to only be available to the
+\gls{sycl-runtime} after the event has signaled and is assumed to be
+currently resident on the context and device signified by the
+\codeinline{queue}.
+
+For any image that is constructed with the range $(r1, r2, r3)$ with a element
+type size in bytes of $s$, the image row pitch and image slice pitch should be
+calculated as follows:
+
+\begin{equation}
+\label{image-row-pitch}
+ r1 \cdot s
+\end{equation}
+
+\begin{equation}
+\label{image-slice-pitch}
+ r1 \cdot r2 \cdot s
+\end{equation}
+
+The SYCL \codeinline{image} class template provides the common reference
+semantics (see Section~\ref{sec:reference-semantics}).
+
+%***********************************************************************************
+% Image Interface
+%***********************************************************************************
+\subsubsection{Image Interface}
+
+Each constructor excluding the interoperability constructor takes as the last parameter an optional SYCL \codeinline{property_list} to provide properties to the SYCL \codeinline{image}.
+
+The SYCL \codeinline{image} class template takes a template parameter \codeinline{AllocatorT} for specifying an allocator which is used by the \gls{sycl-runtime} when allocating temporary memory on the host. If no template argument is provided the default allocator for the SYCL \codeinline{image} class \codeinline{image_allocator} will be used~\ref{subsec:default.allocators}.
+
+%Interface for class: image
+\lstinputlisting{headers/image.h}
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the \codeinline{image} class template}
+{table.constructors.image}
+    \addRowFourSL
+       { image(image_channel_order order, }
+       { image_channel_type type, }
+       { const range<dimensions> \& range, }
+       { const property_list \&propList = \{\}) }
+       {
+         Construct a SYCL \codeinline{image} instance with uninitialized memory.       
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+       }
+    \addRowFiveSL
+       { image(image_channel_order order, }
+       { image_channel_type type, }
+       { const range<dimensions> \& range, }
+       { AllocatorT allocator, }
+       { const property_list \&propList = \{\}) }
+       {
+         Construct a SYCL \codeinline{image} instance with uninitialized memory.       
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+       }       
+     \addRowFiveSL
+       {image<dimensions>(image_channel_order order, }
+       { image_channel_type type, }
+       { const range<dimensions> \& range, }
+       { const range<dimensions-1> \&pitch, }
+       { const property_list \&propList = \{\}) }
+       {
+          Available only when: \codeinline{dimensions > 1}.  
+          \newline    
+          Construct a SYCL \codeinline{image} instance with uninitialized memory.
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the \codeinline{pitch} parameter provided.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+        }
+     \addRowSixSL
+       {image<dimensions>(image_channel_order order, }
+       { image_channel_type type, }
+       { const range<dimensions> \& range, }
+       { const range<dimensions-1> \&pitch, }
+       { AllocatorT allocator, }
+       { const property_list \&propList = \{\}) }
+       {
+          Available only when: \codeinline{dimensions > 1}.  
+          \newline    
+          Construct a SYCL \codeinline{image} instance with uninitialized memory.
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the \codeinline{pitch} parameter provided.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+       }
+    \addRowFiveSL
+      {image(void *hostPointer, }
+      { image_channel_order order, }
+      { image_channel_type type, }
+      { const range<dimensions> \& range, }
+      { const property_list \&propList = \{\}) }
+      {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+    \addRowSixSL
+      {image(void *hostPointer, }
+      { image_channel_order order, }
+      { image_channel_type type, }
+      { const range<dimensions> \& range, }
+      { AllocatorT allocator, }
+      { const property_list \&propList = \{\}) }
+      {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.       
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The host address is \codeinline{const T}, so the host accesses can be read-only. However, the device accesses can be both read and write accesses. Since, the \tf{hostPointer} is const, this image is only initialized with this memory and there is no write after its destruction, unless there is another final data address given after construction of the image.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+      }
+    \addRowFiveSL
+      {image(const void *hostPointer, }
+      { image_channel_order order, }
+      { image_channel_type type, }
+      { const range<dimensions> \& range, }
+      { const property_list \&propList = \{\}) }
+      {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+         The host address is \codeinline{const T}, so the host accesses can be read-only. However, the device accesses can be both read and write accesses. Since, the \tf{hostPointer} is const, this image is only initialized with this memory and there is no write after its destruction, unless there is another final data address given after construction of the image.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+    \addRowSixSL
+      {image(const void *hostPointer, }
+      { image_channel_order order, }
+      { image_channel_type type, }
+      { const range<dimensions> \& range, }
+      { AllocatorT allocator, }
+      { const property_list \&propList = \{\}) }
+      {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.       
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+      }
+  \addRowSixSL
+    {image(void *hostPointer, }
+    { image_channel_order order, }
+    { image_channel_type type, }
+    { const range<dimensions> \& range, }
+    { const range<dimensions-1> \&pitch, }
+    { const property_list \&propList = \{\}) }
+    {
+         Available only when: \codeinline{dimensions > 1}.  
+         \newline    
+          Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.         
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the \codeinline{pitch} parameter provided.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+  \addRowSevenSL
+    {image(void *hostPointer, }
+    { image_channel_order order, }
+    { image_channel_type type, }
+    { const range<dimensions> \& range, }
+    { const range<dimensions-1> \&pitch, }
+    { AllocatorT allocator, }
+    { const property_list \&propList = \{\}) }
+    {
+         Available only when: \codeinline{dimensions > 1}.  
+         \newline    
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the \codeinline{pitch} parameter provided.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+    \addRowFiveSL
+    {image(shared_ptr_class<void>\& hostPointer, }
+    { image_channel_order order, }
+    { image_channel_type type, }
+    { const range<dimensions> \& range, }
+    { const property_list \&propList = \{\}) }
+    {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+    \addRowSixSL
+    {image(shared_ptr_class<void>\& hostPointer, }
+    { image_channel_order order, }
+    { image_channel_type type, }
+    { const range<dimensions> \& range, }
+    { AllocatorT allocator, }
+    { const property_list \&propList = \{\}) }
+    {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the default size determined by the \gls{sycl-runtime}.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }    
+  \addRowSixSL
+    {image(shared_ptr_class<void>\& hostPointer, }
+    { image_channel_order order, }
+    { image_channel_type type, }
+    { const range<dimensions> \& range, }
+    { const range<dimensions-1> \& pitch, }
+    { const property_list \&propList = \{\}) }
+    {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the \codeinline{pitch} parameter provided.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+  \addRowSevenSL
+    {image(shared_ptr_class<void>\& hostPointer, }
+    { image_channel_order order, }
+    { image_channel_type type, }
+    { const range<dimensions> \& range, }
+    { const range<dimensions-1> \& pitch, }
+    { AllocatorT allocator, }
+    { const property_list \&propList = \{\}) }
+    {
+         Construct a SYCL \codeinline{image} instance with the \codeinline{hostPointer} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{image} for the duration of it's lifetime.
+         The constructed SYCL \codeinline{image} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
+         The element size of the constructed SYCL \codeinline{image} will be derived from the \codeinline{order} and \codeinline{type} parameters.
+         The range of the constructed SYCL \codeinline{image} is specified by the \codeinline{range} parameter provided.
+         The pitch of the constructed SYCL \codeinline{image} will be the \codeinline{pitch} parameter provided.
+         Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer any memory allocated by the \gls{sycl-runtime} is written back to \codeinline{hostPointer}.
+         Zero or more properties can be provided to the constructed SYCL \codeinline{image} via an instance of \codeinline{property_list}.
+    }
+    \addRowThreeSL
+      { image(cl_mem clMemObject, }
+      { const context \&syclContext, }
+      { event availableEvent = \{\}) }
+      {   
+        Constructs a SYCL \codeinline{image} instance from an OpenCL \codeinline{cl_mem} in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+        The instance of the SYCL \codeinline{image} class template being constructed must wait for the SYCL \codeinline{event} parameter, if one is provided, \codeinline{availableEvent} to signal that the \codeinline{cl_mem} instance is ready to be used.
+        The SYCL \codeinline{context} parameter \codeinline{syclContext} is the context associated with the memory object.
+      }       
+\completeTable
+
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the \codeinline{image} class
+  template}
+{table.members.image}
+  \addRow
+    {range<dimensions> get_range() const}
+    {
+      Return a range object representing the
+      size of the image in terms of the number
+      of elements in each dimension as passed
+      to the constructor.
+    }
+
+  \addRow
+    {range<dimensions-1> get_pitch() const}
+    {
+      Available only when: \codeinline{dimensions > 1}.
+      \newline
+      Return a range object representing the
+      pitch of the image in bytes.
+    }
+
+  \addRow
+    {size_t get_count() const}
+    {
+      Returns the total number of elements in the image.
+      Equal to \codeinline{get_range()[0] * ... * get_range()[dimensions-1]}.
+    }
+
+  \addRow
+    {size_t get_size() const}
+    {
+      Returns the size of the image storage in bytes.  The number of
+      bytes may be greater than \codeinline{get_count()*element size}
+      due to padding of elements, rows and slices of the image for
+      efficient access.
+    }
+
+  \addRow
+    {AllocatorT get_allocator() const}
+    {
+      Returns the allocator provided to the image.
+    }
+
+  \addRowThreeSL
+    {template<typename dataT, access::mode accessMode>}
+    {accessor<dataT, dimensions, accessMode, access::target::image> }
+    {get_access(handler \& commandGroupHandler)}
+    {
+      Returns a valid accessor to the image with the specified
+      access mode and target. The only valid types for \codeinline{dataT} are \codeinline{cl_int4}, \codeinline{cl_uint4}, \codeinline{cl_float4} and \codeinline{cl_half4}.
+    }
+     \addRowThreeSL
+    {template<typename dataT, access::mode accessMode>}
+    {accessor<dataT, dimensions, accessMode, access::target::host_image> }
+    {get_access()}
+    {
+      Returns a valid accessor to the image with the specified
+      access mode and target. The only valid types for \codeinline{dataT} are \codeinline{cl_int4}, \codeinline{cl_uint4}, \codeinline{cl_float4} and \codeinline{cl_half4}.
+    }
+   \addRowTwoL
+    {template <typename Destination = std::nullptr_t>}
+    {void set_final_data(Destination finalData = std::nullptr)}
+    {
+
+      The \codeinline{finalData} points to where the output of all
+      the image processing is going to be copied to at destruction
+      time, if the image was involved with a write accessor.
+
+      Destination can be either an output iterator, a
+      \codeinline{weak_ptr_class<T>}.
+
+      Note that a raw pointer is a special case of output iterator and
+      thus defines the host memory to which the result is to be
+      copied.
+
+      In the case of a weak pointer, the output is not copied if the
+      weak pointer has expired.
+
+      If \codeinline{Destination} is \codeinline{std::nullptr_t}, then
+      the copy back will not happen.
+
+    }
+
+   \addRow
+    {void set_write_back(bool flag = true)}
+    {
+      This method allows dynamically forcing or canceling the
+      write-back of the data of an image on destruction according to
+      the value of \codeinline{flag}.
+
+      Forcing the write-back is similar to what happens during a
+      normal write-back as described in \S~\ref{sec:image-sync-rules}
+      and \ref{sec:sharing-host-memory-with-dm}.
+
+      If there is nowhere to write-back, using this function does not
+      have any effect.
+    }
+\completeInfoTable
+%------------------------------------------------------------------------------------------------------
+
+\subsubsection{Image Properties}
+\label{sec:image-properties}
+
+The properties that can be provided when constructing the SYCL \codeinline{image} class are describe in Table~\ref{table.properties.image}.
+
+%---------------------------------------------------------------------
+\startTable{Property}
+\addFootNotes{Properties supported by the SYCL \codeinline{image} class} {table.properties.image}
+
+\addRow
+  { property::image::use_host_ptr }
+  {
+    The \codeinline{use_host_ptr} property adds the requirement that the \gls{sycl-runtime} must not allocate any memory for the \codeinline{image} and instead uses the provided host pointer directly. This prevents the \gls{sycl-runtime} from allocating additional temporary storage on the host.
+  }
+\addRow
+  { property::image::use_mutex }
+  {
+    The \codeinline{use_mutex} property is valid for the SYCL \codeinline{image} and \codeinline{image} classes. The property adds the requirement that the memory which is owned by the SYCL \codeinline{image} can be shared with the application via a \codeinline{mutex_class} provided to the property. The \codeinline{mutex_class} \codeinline{m} is locked by the runtime whenever the data is in use and unlocked otherwise. Data is synchronized with \codeinline{hostData}, when the \codeinline{mutex_class} is unlocked by the runtime.
+  }
+\addRow
+  { property::image::context_bound }
+  {
+    The \codeinline{context_bound} property adds the requirement that the SYCL \codeinline{image} can only be associated with a single SYCL \codeinline{context} that is provided to the property.
+  }
+\completeTable
+%---------------------------------------------------------------------
+
+The constructors and member functions of the image property classes
+are listed in Tables~\ref{table.constructors.properties.image} and
+\ref{table.members.properties.image}
+
+%---------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the image property classes}
+{table.constructors.properties.image}
+\addRow
+{property::image::use_host_ptr::use_host_ptr()}
+{
+  Constructs a SYCL \codeinline{use_host_ptr} property instance.
+}
+\addRow
+{property::image::use_mutex::use_mutex(mutex_class \&mutexRef)}
+{
+  Constructs a SYCL \codeinline{use_mutex} property instance with a reference to \codeinline{mutexRef} parameter provided.
+}
+\addRow
+{property::image::context_bound::context_bound(context boundContext)}
+{
+  Constructs a SYCL \codeinline{context_bound} property instance with a copy of a SYCL \codeinline{context}.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+%---------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the image property classes}
+{table.members.properties.image}
+\addRow
+{mutex_class *property::image::use_mutex::get_mutex_ptr() const}
+{
+  Returns the \codeinline{mutex_class} which was specified when
+  constructing this SYCL \codeinline{use_mutex} property.
+}
+\addRow
+{context property::image::context_bound::get_context() const}
+{
+  Returns the \codeinline{context} which was specified when
+  constructing this SYCL \codeinline{context_bound} property.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+%***********************************************************************************
+% Image Synchronization Rules
+%***********************************************************************************
+
+\subsubsection{Image Synchronization Rules}
+\label{sec:image-sync-rules}
+
+The rules are similar to those described in
+\S~\ref{sec:buf-sync-rules}.
+
+For the lifetime of the image object, the associated host memory must
+be left available to the \gls{sycl-runtime} and the contents of the associated
+host memory is unspecified until the image object is destroyed. If an
+image object value is copied, then only a reference to the underlying
+image object is copied. The underlying image object is reference-counted.
+Only after all image value references to the underlying image object
+have been destroyed is the actual image object itself destroyed.
+
+If an image object is constructed with associated host memory, then
+its destructor blocks until all operations in all SYCL queues on
+that image object have completed. Any modifications to the image data
+will be copied back, if necessary, to the associated host memory.
+Any errors occurring during destruction are reported to any associated
+context's asynchronous error handler. If an image object is constructed
+with a storage object, then the storage object defines what
+synchronization or copying behavior occurs on image object destruction.
+
+
+%***********************************************************************************
+% Sharing Host Memory With The SYCL Data Management Classes
+%***********************************************************************************
+
+\subsection{Sharing Host Memory With The SYCL Data Management Classes}
+\label{sec:sharing-host-memory-with-dm}
+
+In order to allow the \gls{sycl-runtime} to do memory management and allow
+for data dependencies, there are two classes defined, buffer and image. The
+default behavior for them is that a ``raw'' pointer is given during the
+construction of the data management class, with full ownership to use it until
+the destruction of the SYCL object.
+
+In this section we go in greater detail on  sharing or explicitly not
+sharing host memory with the SYCL data classes, and we will use the buffer
+class as an example. The same rules will apply to images as well.
+
+%***********************************************************************************
+% Default Behavior
+%***********************************************************************************
+
+\subsubsection{Default behavior}
+
+When using a SYCL buffer, the ownership of the pointer passed to the constructor
+of the class is, by default, passed to \gls{sycl-runtime}, and that pointer cannot be used
+on the host side until the buffer or image is destroyed.
+A SYCL application can use memory managed by a SYCL buffer within the buffer scope
+by using a \codeinline{host accessor} as defined in~\ref{subsec:accessors}.
+However, there is no guarantee that the host accessor synchronizes with the 
+original host address used in its constructor.
+
+The pointer passed in is the one used to copy data back to the host, if needed,
+before buffer destruction.  The memory pointed by \gls{host-pointer}
+will not be de-allocated by the runtime,
+and the data is copied back from the device if there is
+a need for it.
+
+%***********************************************************************************
+% SYCL ownership of the host memory
+%***********************************************************************************
+
+\subsubsection{SYCL ownership of the host memory}
+
+In the case where there is host memory to be used for initialization of data
+but there is no intention of using that host memory after the buffer is
+destroyed, then the buffer can take full ownership of that host memory.
+
+When a buffer owns the \gls{host-pointer} there is no copy back, by default.
+In this situation the SYCL application may pass a unique pointer to the host data,
+which will be then used by the runtime internally to initialize the data in the device.
+
+If the pointer contained in the \codeinline{unique_ptr} is null, the pointer is initialized
+internally in the runtime but no data is copied in.
+This will be the generic case of a buffer constructor that takes no host
+pointer.
+
+For example, the following could be used:
+\begin{code}
+{
+  cl::sycl::unique_ptr_class<int> ptr { data };
+  buffer<int, 1> b { std::move(ptr) };
+  // ptr is not valid anymore
+  // There is nowhere to copy data back
+}
+\end{code}
+
+However, optionally the \codeinline{buffer::set_final_data()} can be
+set to a \codeinline{weak_ptr_class} to enable copying data
+back, to another host memory address that is going to be valid after
+buffer construction.
+
+\begin{code}
+{
+  cl::sycl::unique_ptr_class<int> ptr { data };
+  buffer<int, 1> b { std::move(ptr) };
+  // ptr is not valid anymore
+  // There is nowhere to copy data back
+  // To get copy back, a location can be specified:
+  b.set_final_data(weak_ptr_class<int> { .... })
+}
+\end{code}
+
+
+%***********************************************************************************
+% Shared SYCL ownership of the host memory
+%***********************************************************************************
+
+\subsubsection{Shared SYCL ownership of the host memory}
+
+When a \codeinline{shared_ptr} is passed to the buffer constructor, then the buffer object and the developer's application share the memory region. If the shared pointer is still used on the application's
+side then the data will be copied back from the buffer or image and will be available
+to the application after the buffer or image is destroyed.
+
+If the memory pointed to by the shared object is initialized to some data, then
+that data is used to initialize the buffer.
+If the shared pointer is null, the pointer is initialized by the runtime
+internally (and, therefore, the user can use it afterwards in the host).
+
+When the buffer is destroyed and the data have potentially been updated, if the number of copies of the shared pointer
+outside the runtime is 0, there is no user-side shared pointer to read the data.
+ Therefore the data is not copied out, and the buffer destructor does not need
+to wait for the data processes to be finished from OpenCL, as the outcome is not needed
+on the application's side.
+
+This behavior can be overiden using the \codeinline{set_final_data()} method of
+the buffer class, which will by any means force the buffer destructor to
+wait until the data is copied to wherever the \codeinline{set_final_data()} method has
+put the data (or not wait nor copy if set final data is
+\codeinline{std::nullptr}).
+
+\begin{code}
+{
+  cl::sycl::shared_ptr_class<int> ptr { data };
+  {
+    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
+    // update the data
+    [...]
+  } // Data is copied back because there is an user side shared_ptr
+}
+\end{code}
+
+\begin{code}
+{
+  cl::sycl::shared_ptr_class<int> ptr { data };
+  {
+    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
+    // update the data
+    [...]
+    ptr.reset();
+  } // Data is not copied back, there is no user side shared_ptr.
+}
+\end{code}
+
+
+%***********************************************************************************
+% Synchronization Primitives
+%***********************************************************************************
+
+\subsection{Synchronization Primitives}
+\label{Mutex}
+
+When the user wants to use the buffer simultaneously in the \gls{sycl-runtime}
+and their own code (e.g. a multi-threaded mechanism) and want to use manual
+synchonization without host \glspl{accessor}, a pointer to a \codeinline{mutex_class} can be
+passed to the buffer constructor.
+
+The runtime promises to lock the mutex whenever the data is in use and
+unlock it when it no longer needs it.
+
+\begin{code}
+{
+  cl::sycl::mutex_class m;
+  auto shD = std::make_shared<int> { 42 }
+  {
+    buffer<int, 1> b { shD, m };
+
+    std::lock_guard<mutex_class> lck { m };
+    // User accesses the data
+    do_something(shD);
+    /* m is unlock when lck goes out of scope, by normal end of this
+       block but also if an exception is thrown for example */
+  }
+}
+\end{code}
+
+When the runtime releases the mutex the user is guaranteed that the data was
+copied back on the shared pointer --- unless the final data destination has been
+changed using the member function \codeinline{set_final_data()}.
+
+%***********************************************************************************
+% Accessors
+%***********************************************************************************
+\subsection{Accessors}
+\label{subsec:accessors}
+
+\input{accessors}
+
+%***********************************************************************************
+% Address space classes
+%***********************************************************************************
+
+\subsection{Address space classes}
+
+In OpenCL, there are four different address spaces. These are: global,
+local, constant and private.  In OpenCL C, these address spaces are
+manually specified using OpenCL-specific keywords. In SYCL, the device
+compiler is expected to auto-deduce the address space for pointers in
+common situations of pointer usage. However, there are situations
+where auto-deduction is not possible. Here are the most common
+situations:
+\begin{itemize}
+  \item
+    When linking SYCL kernels with OpenCL C functions. In this case,
+    it is necessary to specify the address space for any pointer
+    parameters when declaring an \codeinline{extern \"C\"} function.
+
+  \item
+    When declaring data structures with pointers inside, it is not
+    possible for the SYCL compiler to deduce at the time of
+    declaration of the data structure what address space pointer
+    values assigned to members of the structure will be. So, in this
+    case, the address spaces will have to be explicitly declared by
+    the developer.
+
+  \item
+    When a pointer is declared as a variable, but not initialized,
+    then address space deduction is not automatic and so an explicit
+    pointer class should be used, or the pointer should be initialized
+    at declaration.
+\end{itemize}
+
+Direct declaration of pointers with address spaces is discouraged as the
+definition is implementation defined. Users must rely on the
+\codeinline{multi_ptr} class to handle address space boundaries and
+interoperability.
+
+%-------------------------------------------------------------------------------
+%*******************************************************************************
+% Multi-pointer class
+%*******************************************************************************
+
+\subsubsection{Multi-pointer class}
+\label{sec:multiptr}
+The multi-pointer class is the common interface for the explicit pointer
+classes, defined in \ref{sec:pointerclasses}.
+
+There are situations where a user may want to template a data structure by an
+address space. Or, a user may want to write templates that adapt to the address
+space of a pointer. An example might be wrapping a pointer inside a class, where
+a user may need to template the class according to the address space of the
+pointer the class is initialized with. In this case, the \codeinline{multi_ptr}
+class enables users to do this.
+
+In order to facilitate SYCL/OpenCL C
+interoperability, the \codeinline{pointer} type is provided. It is an
+implementation defined type which corresponds to the underlying OpenCL C
+pointer type and can be used in \codeinline{extern "C"} function
+declarations for OpenCL functions used in SYCL kernels.
+\codeinline{multi_ptr} class defines a \codeinline{get} member function that returns the underlying OpenCL C pointer.
+
+The \codeinline{multi_ptr} class provides constructors for address space qualified and non address space qualified pointers to allow interoperability between plain C++ and OpenCL C.
+Implementations should reject programs that try assign a pointer with an address space not consistent with the address space represented by the \codeinline{multi_ptr} specialization.
+
+It is possible to use the \codeinline{void} type for the \codeinline{multi_ptr}
+class, but in that case some functionality is disabled.
+\codeinline{multi_ptr<void>} does not provide the \codeinline{reference} or
+\codeinline{const_reference} types, the access operators
+(\codeinline{operator*()}, \codeinline{operator->()}), the arithmetic
+operators or \codeinline{prefetch} member function.
+Conversions from \codeinline{multi_ptr<void>} to any other
+\codeinline{multi_ptr} type of the same address space (and the other way around)
+are allowed, but must be explicit.
+The same rules apply to \codeinline{multi_ptr<const void>}.
+
+An overview of the interface provided for the \codeinline{multi_ptr} class
+follows.
+
+\lstinputlisting{headers/multipointer.h}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the SYCL \codeinline{multi_ptr} class template}
+{table.constructors.multiptr}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr()}
+{Default constructor.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr(const multi_ptr \&)}
+{Copy constructor.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr(multi_ptr\&\&)}
+{Move constructor.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr(pointer_t)}
+{Constructor that takes as an argument a pointer of type \codeinline{ElementType}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr(ElementType*)}
+{Constructor that takes as an argument a pointer of type \codeinline{ElementType}.
+An implementation should reject an argument if the deduced address space is not compatible with \codeinline{Space}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr(std::nullptr_t)}
+{Constructor from a \codeinline{nullptr}.}
+\addRowFourL
+{template <typename ElementType,
+access::address_space Space = access::address_space::global_space>}
+{template <int dimensions, access::mode Mode>}
+{multi_ptr(}
+{accessor<ElementType, dimensions, Mode, access::target::global_buffer>)}
+{Constructs a
+\codeinline{multi_ptr<ElementType, access::address_space::global_space>}
+from an accessor of \codeinline{access::target::global_buffer}.}
+\addRowFourL
+{template <typename ElementType,
+access::address_space Space = access::address_space::local_space>}
+{template <int dimensions, access::mode Mode>}
+{multi_ptr(}
+{accessor<ElementType, dimensions, Mode, access::target::local>)}
+{Constructs a
+\codeinline{multi_ptr<ElementType, access::address_space::local_space>}
+from an accessor of \codeinline{access::target::local}.}
+\addRowFourL
+{template <typename ElementType,
+access::address_space Space = access::address_space::constant_space>}
+{template <int dimensions, access::mode Mode>}
+{multi_ptr(}
+{accessor<ElementType, dimensions, Mode, access::target::constant_buffer>)}
+{Constructs a
+\codeinline{multi_ptr<ElementType, access::address_space::constant_space>}
+from an accessor of \codeinline{access::target::constant_buffer}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr<ElementType, Space> make_ptr(ElementType*)}
+{
+Global function to create a \codeinline{multi_ptr} instance depending
+on the address space of the \codeinline{pointer} type.
+An implementation must reject an argument if the deduced address space is not compatible with \codeinline{Space}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr<ElementType, Space> make_ptr(multi_ptr<ElementType, Space>::pointer_t)}
+{
+Global function to create a \codeinline{multi_ptr} instance from
+an OpenCL C \codeinline{pointer}.}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of \codeinline{multi_ptr} class}{table.multiptr.members}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr \&operator=(const multi_ptr\&)}
+{Copy assignment operator.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr \&operator=(multi_ptr\&\&)}
+{Move assignment operator.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr \&operator=(pointer_t)}
+{Assigns a pointer of \codeinline{ElementType} to the \codeinline{multi_ptr}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr \&operator=(ElementType*)}
+{Assigns a pointer of type \codeinline{ElementType}.
+An implementation should reject an argument if the deduced address space is not compatible with \codeinline{Space}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr \&operator=(std::nullptr_t)}
+{Assigns \codeinline{nullptr} to the \codeinline{multi_ptr}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{ElementType\& operator*() const}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Operator that returns a reference to the \codeinline{ElementType}
+of the \codeinline{multi_ptr} class.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{ElementType* operator->() const}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Returns the underlying pointer.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{pointer_t get() const}
+{Returns the underlying OpenCL C pointer.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{operator ElementType*() const}
+{Implicit conversion to the underlying pointer type.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{operator multi_ptr<void, Space>() const}
+{Available only when:
+\codeinline{!std::is_void<ElementType>::value \&\& !std::is_const<ElementType>::value}.
+\newline
+Implicit conversion to a \codeinline{multi_ptr} of type \codeinline{void}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{operator multi_ptr<const void, Space>() const}
+{Available only when:
+\codeinline{!std::is_void<ElementType>::value \&\& std::is_const<ElementType>::value}.
+\newline
+Implicit conversion to a \codeinline{multi_ptr} of type \codeinline{const void}.}
+\addRowTwoL
+{template <access::address_space Space>}
+{operator multi_ptr<const ElementType, Space>() const}
+{Implicit conversion to a \codeinline{multi_ptr}
+of type \codeinline{const ElementType}.}
+\addRowThreeL
+{template <access::address_space Space>}
+{template <typename ElementType>}
+{explicit operator multi_ptr<ElementType, Space>() const}
+{Available only for the \codeinline{multi_ptr<void>}
+and \codeinline{multi_ptr<const void>} specializations.
+\newline
+Explicit conversion of a \codeinline{multi_ptr<void>}
+or \codeinline{multi_ptr<const void>} pointer object to a
+\codeinline{multi_ptr} of type \codeinline{ElementType}.}
+The conversion must retain the \codeinline{const} qualifier.
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr\& operator++()}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Increments the pointer by 1.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr operator++(int)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Increments the pointer by 1 and returns a new \codeinline{multi_ptr}
+with the value of the previous pointer.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr\& operator--()}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Decrements the pointer by 1.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr operator--(int)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Decrements the pointer by 1 and returns a new \codeinline{multi_ptr}
+with the value of the previous pointer.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr\& operator+=(difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Moves the pointer forward by \codeinline{r}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr\& operator-=(difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Moves the pointer backward by \codeinline{r}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr operator+(difference_type r) const}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Creates a new \codeinline{multi_ptr} that points \codeinline{r} forward
+compared to \codeinline{*this}.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{multi_ptr operator-(difference_type r) const}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Creates a new \codeinline{multi_ptr} that points \codeinline{r} backward
+compared to \codeinline{*this}.}
+  \addRow
+    { void prefetch(size_t numElements) const }
+    {
+      Available only when: \codeinline{Space ==
+      access::address_space::global_space}.
+      \newline
+      Prefetches a number of elements specified by \codeinline{numElements} into
+      the \gls{global-memory} cache. This operation is an implementation defined
+      optimization and does not effect the functional  behavior of the SYCL
+      kernel function.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Non-member function}
+\addFootNotes{Non-member functions of the \codeinline{multi_ptr} class}
+{table.multipointer.nonmemberfunctions}
+\addRowThreeL
+{template <typename ElementType, access::address_space Space>}
+{bool operator==(const multi_ptr<ElementType, Space>\& lhs,}
+{                const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{==} for \codeinline{multi_ptr} class.}
+\addRowThreeL
+{template <typename ElementType, access::address_space Space>}
+{bool operator!=(const multi_ptr<ElementType, Space>\& lhs,}
+{                const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class.}
+\addRowThreeL
+{template <typename ElementType, access::address_space Space>}
+{bool operator<(const multi_ptr<ElementType, Space>\& lhs,}
+{               const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{<} for \codeinline{multi_ptr} class.}
+\addRowThreeL
+{template <typename ElementType, access::address_space Space>}
+{bool operator>(const multi_ptr<ElementType, Space>\& lhs,}
+               {const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class.}
+\addRowThreeL
+{template <typename ElementType, access::address_space Space>}
+{bool operator<=(const multi_ptr<ElementType, Space>\& lhs,}
+{                const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class.}
+\addRowThreeL
+{template <typename ElementType, access::address_space Space>}
+{bool operator>=(const multi_ptr<ElementType, Space>\& lhs,}
+                {const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{>=} for \codeinline{multi_ptr} class.}
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator!=(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator!=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator==(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+{Comparison operator \codeinline{==} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator==(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{==} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator>(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator>(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator<(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+{Comparison operator \codeinline{<} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator<(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{<} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator>=(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+{Comparison operator \codeinline{>=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator>=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{>=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator<=(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\addRowTwoL
+{template <typename ElementType, access::address_space Space>}
+{bool operator<=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+
+\completeTable
+%*******************************************************************************
+% Explicit pointer classes
+%*******************************************************************************
+\subsubsection{Explicit pointer aliases}
+\label{sec:pointerclasses}
+
+SYCL provides aliases to the \codeinline{multi_ptr} class template (see Section
+\ref{sec:multiptr}) for each specialization of \codeinline{
+access::address_space}.
+
+A synopsis of the SYCL \codeinline{multi_ptr} class template 
+aliases is provided below.
+
+%Interface of the explicit pointer classes
+\lstinputlisting{headers/pointer.h}
+
+%*******************************************************************************
+% Samplers
+%*******************************************************************************
+\subsection{Samplers}
+\label{subsec:samplers}
+
+The SYCL \codeinline{sampler} class encapsulates a configuration for sampling an image \codeinline{accessor}. A SYCL \codeinline{sampler} may be an OpenCL sampler, in which case it must encapsulate a valid underlying OpenCL \codeinline{cl_sampler}, or it may be a host sampler, in which case it must not.
+
+The constructors and member functions of the SYCL \codeinline{sampler} class are listed in Tables~\ref{table.constructors.sampler} and \ref{table.members.sampler}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+The members of the \codeinline{sampler} class that provide information on the sampler (\codeinline{get_addressing_mode()}, \codeinline{get_filtering_mode()}, \codeinline{get_coordinate_normalization_mode()}) are callable from host code.  Invoking these queries within device kernel code produces undefined results.
+
+% Interface of the sampler class
+\lstinputlisting{headers/sampler.h}
+
+%------------------------------------------------------------------------------------------------------
+\startTable{addressing_mode}
+  \addFootNotes{Addressing modes description}{table.addressing.mode.sampler}
+
+  \addRow
+  {mirrored_repeat}
+  {
+    Out of range coordinates will be flipped at every integer junction. This addressing mode
+    can only be used with normalized coordinates. If normalized coordinates are not used, this
+    addressing mode may generate image coordinates that are undefined.
+  }
+
+  \addRow
+  {repeat}
+  {
+    Out of range image coordinates are wrapped to the valid range. This addressing mode can only
+    be used with normalized coordinates. If normalized coordinates are not used, this
+    addressing mode may generate image coordinates that are undefined.
+  }
+
+  \addRow
+  {clamp_to_edge}
+  {
+    Out of range image coordinates are clamped to the extent.
+  }
+
+  \addRow
+  {clamp}
+  {
+    Out of range image coordinates will return a border color.
+  }
+
+  \addRow
+  {none}
+  {
+    For this addressing mode the programmer guarantees that the image coordinates used to
+    sample elements of the image refer to a location inside the image; otherwise the results are
+    undefined.
+  }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{filtering_mode}
+  \addFootNotes{Filtering modes description}{table.filtering.mode.sampler}
+  \addRow
+  {nearest}
+  {
+    Chooses a color of nearest pixel.
+  }
+  \addRow
+  {linear}
+  {
+    Performs a linear sampling of adjacent pixels.
+  }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{coordinate_normalization_mode}
+  \addFootNotes{Coordinate normalization modes description}{table.normalization.mode.sampler}
+  \addRow
+  {normalized}
+  {
+    Normalizes image coordinates.
+  }
+  \addRow
+  {unnormalized}
+  {
+    Does not normalize image coordinates.
+  }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes {Constructors the \codeinline{sampler} class}
+{table.constructors.sampler}
+  \addRowFourL
+    {sampler(}
+    {  coordinate_normalization_mode normalizationMode,}
+    {  addressing_mode addressingMode,}
+    {  filtering_mode filteringMode)}
+    {
+      Constructs a SYCL \codeinline{sampler} instance with address mode, filtering mode and coordinate normalization mode specified by the respective parameters.
+      It is not valid to construct a SYCL \codeinline{sampler} within a SYCL kernel function.
+    }
+  \addRowTwoL
+    { sampler(cl_sampler clSampler, }
+    { const context \&syclContext) }
+    {  
+      Constructs a SYCL \codeinline{sampler} instance from an OpenCL \codeinline{cl_sampler} in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+    }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions for the \codeinline{sampler} class}
+{table.members.sampler}
+  \addRow
+    {addressing_mode get_addressing_mode() const}
+    {
+       Return the addressing mode used to construct this SYCL \codeinline{sampler}.
+    }
+  \addRow
+    {filtering_mode get_filtering_mode() const}
+    {
+        Return the filtering mode used to construct this SYCL \codeinline{sampler}.
+    }
+  \addRow
+    {coordinate_normalization_mode get_coordinate_normalization_mode() const}
+    {
+       Return the coordinate normalization mode used to construct this SYCL \codeinline{sampler}.
+    }
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Expressing parallelism through kernels
+%***********************************************************************************
+\section{Expressing parallelism through kernels}
+\label{sec:expr-parall-thro}
+\input{expressingParallelism}
+
+%************************
+% Error Handling
+%************************
+
+\section{Error handling}
+\label{error-handling}
+
+\subsection{Error Handling Rules}
+
+Error handling in SYCL uses exceptions. If an error occurs, it can
+be propagated at the point of a function call. An exception will
+be thrown and may be caught by the user using standard C++ exception handling
+mechanisms. For example, any exception which is triggered from code executed on the
+host is able to be propagated at the call site and it will follow the standard
+C++ exception handling mechanisms.
+
+SYCL applications are asynchronous in the sense that host and device code executions
+are executed asynchronously. As a result of this, the errors that occur on a
+device cannot be propagated directly from the call site, and they will not be
+detected until the error-causing task executes or tries to execute.
+We refer to those errors as asynchronous errors.
+A good example of an asynchronous error is an out-of-bounds access error.
+In this case, if the kernel is enqueued on a SYCL OpenCL device, then the
+out-of-bounds error is asynchronous with respect to the SYCL host application,
+because it is executed on the device. The standard exception mechanisms
+will not be available as this is an asynchronous error.
+
+SYCL queues are by default asynchronous, as they schedule tasks on SYCL devices.
+The queue constructor can optionally get an asynchronous handler object
+\codeinline{async_handler}, which is a function class instance. If waiting and
+exception handling member functions are used on queues, the \gls{async-handler} receives
+a list of C++ exception objects.
+
+If an asynchronous error occurs in a queue that has no user-supplied
+asynchronous error handler object \codeinline{async_handler}, then no exception
+is thrown and the error is not available to the user in any specified way.
+Implementations may provide extra debugging information to users to trap and handle
+asynchronous errors. If a synchronous error occurs in a SYCL application and it
+is not handled, the application will exit abnormally.
+
+If an error occurs when running or enqueuing a command group which has
+a secondary queue specified, then the command group may be enqueued
+to the secondary queue instead of the primary queue. The error handling in this
+case is also configured using the \keyword{async_handler} provided for both
+queues. If there is no \keyword{async_handler} given on any of the queues,
+then no asynchronous error reporting is done and no exceptions are thrown. If
+the primary queue fails and there is an \keyword{async_handler} given at
+this queue's construction, which populates the \codeinline{exception_list}
+parameter, then any errors will be added and can be thrown whenever the user
+chooses to handle those exceptions. Since there were errors on the primary
+queue and a secondary queue was given, then the execution of the kernel is
+re-scheduled to the secondary queue and any error reporting for the kernel
+execution on that queue is done through that queue, in the same way as
+described above. The secondary queue may fail as well, and the errors will be
+thrown if there is an \keyword{async_handler} and either
+\codeinline{wait_and_throw()} or \codeinline{throw()} are called on that queue.
+The \gls{command-group-function-object} event returned by that function will be
+relevant to the queue where the kernel has been enqueued.
+
+\subsection{Exception Class Interface}
+\label{subsec:exception.class}
+\lstset{
+       style=nonumbers,
+       basicstyle=\ttfamily\small,
+       backgroundcolor=\color{white},
+       frame=none,
+     }
+\lstinputlisting{headers/exception.h}
+
+The SYCL \codeinline{exception_ptr_class}
+class is used to store SYCL \codeinline{exception} objects and allows
+exception objects to be transferred between threads. It is equivalent to the
+\codeinline{exception_ptr_class} class. The SYCL \codeinline{exception_list}
+class is also available in order to provide a list of synchronous and
+asynchronous exceptions.
+
+There are two categories of errors, the \codeinline{runtime_error}
+that refers to the scheduling errors that may happen during execution, and the
+\codeinline{device_error} that refers to the execution errors on a SYCL device.
+
+Errors can occur both in the SYCL library and SYCL host side, as well as the
+OpenCL runtime and device side. The member functions on these exceptions provide the
+corresponding information.
+If there is an OpenCL error associated with the exception triggered, then the
+OpenCL error code will be given by the method \codeinline{get_cl_code()}.
+In the case where there is no OpenCL error associated with the exception
+triggered, the OpenCL error code will be 0.
+
+The asynchronous handler object \codeinline{async_handler} is a
+\codeinline{function_class} with an \codeinline{exception_list} as a parameter.
+The asynchronous handler is an optional parameter to a constructor of the
+\codeinline{queue} class and it is the only way to handle asynchronous errors
+occurring on a SYCL device. The asynchronous handler may be a named function object
+type, a lambda function or a \codeinline{function_class},
+that can be given to the queue and 
+will be executed on error. The \codeinline{exception_list} object is constructed
+from the \gls{sycl-runtime} and is populated with the errors caught during the
+execution of all the kernels running on the same queue.
+
+
+%---------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the SYCL \codeinline{exception} class}
+{table.members.exception}
+  \addRow
+    {const char *what() const}
+    {Returns an implementation defined non-null constant C-style string that describes the error that triggered the exception.}
+  \addRow
+    {bool has_context() const}
+    {Returns \codeinline{true} if this SYCL \codeinline{exception} has an associated SYCL \codeinline{context} and \codeinline{false} if it does not.}
+  \addRow
+    {context get_context() const}
+    {Returns the SYCL \codeinline{context} that is associated with this SYCL \codeinline{exception} if one is available. Must throw an \codeinline{invalid_object_error} SYCL exception if this SYCL \codeinline{exception} does not have a SYCL \codeinline{context}.
+    }
+  \addRow
+    {cl_int get_cl_code() const}
+    {
+      Returns the OpenCL error code if the exception was thrown as an OpenCL error, otherwise returns \codeinline{CL_SUCCESS}.
+    }
+\completeTable
+
+%------------------------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------------------------------
+\startTable{Member function}
+
+\addFootNotes{Member functions of the \codeinline{exception_list}}
+{table.members.exceptionlist}
+
+\addRow
+{ size_t size() const }
+{ Returns the size of the list }
+\addRow
+ {iterator begin() const }
+ {Returns an iterator to the beginning of the list of asynchronous exceptions.}
+\addRow
+ {iterator end() const}
+ {Returns an iterator to the end of the list of asynchronous exceptions.}
+
+\completeTable
+%------------------------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------------------------------
+\startTable{Runtime Error Exception Type}
+\addFootNotes{Exceptions types that derive from the \codeinline{runtime_error} class}{table.runtime.error.types}
+\addRow
+{kernel_error}
+{Error that occurred before or while enqueuing the SYCL kernel.}
+\addRow
+{nd_range_error}
+{Error regarding the SYCL \codeinline{nd_range} specified for the SYCL kernel}
+\addRow
+{accessor_error}
+{Error regarding the SYCL \codeinline{accessor} objects defined.}
+\addRow
+{event_error}
+{Error regarding associated SYCL \codeinline{event} objects.}
+\addRow
+{invalid_parameter_error}
+{Error regarding parameters to the SYCL kernel, it may apply to any captured parameters
+to the kernel lambda.}
+\completeTable
+%------------------------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------------------------------
+\startTable{Device Error Exception Type}
+\addFootNotes{Exception types that derive from the SYCL \codeinline{device_error} class}{table.device.error.types}
+
+\addRow
+{compile_program_error}
+{Error while compiling the SYCL kernel to a SYCL device.}
+
+\addRow
+{link_program_error}
+{Error while linking the SYCL kernel to a SYCL device.}
+
+\addRow
+{invalid_object_error}
+{Error regarding any memory objects being used inside the kernel}
+
+\addRow
+{memory_allocation_error}
+{Error on memory allocation on the SYCL device for a SYCL kernel.}
+
+\addRow
+{platform_error}
+{The SYCL platform will trigger this exception on error.}
+
+\addRow
+{profiling_error}
+{The \gls{sycl-runtime} will trigger this error if there is an error when profiling info
+is enabled.}
+
+\addRow
+{feature_not_supported}
+{Exception thrown when an optional feature or extension is used in a kernel
+but its not available on the device the SYCL kernel is being enqueued on.}
+\completeTable
+%------------------------------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Data types
+%***********************************************************************************
+\section{Data types}
+
+SYCL as a C++11 programming model supports the C++11 ISO standard data types,
+and it also provides the ability for all SYCL applications to be executed on SYCL
+compatible devices, OpenCL and host devices. The scalar and vector data types that
+are supported by the SYCL system are defined below. More details about the SYCL
+device compiler support for fundamental and OpenCL interoperability types are found
+in~\ref{subsection:scalartypes}.
+
+%***********************************************************************************
+% Scalar data types
+%***********************************************************************************
+\subsection{Scalar data types}
+
+The fundamental C++ data types which are supported in SYCL are described in
+Table~\ref{table.types.fundamental}. Note these types are fundamental and therefore
+do not exist within the \codeinline{cl::sycl} namespace.
+
+Additional scalar data types which are supported by SYCL within the \codeinline{
+cl::sycl} namespace are described in Table~\ref{table.types.additional}.
+
+%-------------------------------------------------------------------------------
+\startTable{Scalar data type}
+\addFootNotes{Additional scalar data types supported by SYCL}{table.types.additional}
+\addRow
+{
+  byte
+}
+{
+  A signed or unsigned 8-bit integer, as defined by the C++11 ISO Standard.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+The OpenCL C language standard~\cite[\S 6.11]{opencl12} defines its own built-in
+scalar data types, and these have additional requirements in terms of size and
+signedness on top of what is guaranteed by ISO C++. For the purpose of interoperability and portability, SYCL defines a set of aliases to C++ types
+within the \codeinline{cl::sycl} namespace using the \codeinline{cl_} prefix.
+These aliases are described in Table~\ref{table.types.aliases}
+
+%-------------------------------------------------------------------------------
+\startTable{Scalar data type alias}
+\addFootNotes{Scalar data type aliases supported by SYCL}{table.types.aliases}
+\addRow
+{
+  cl_bool
+}
+{
+  Alias to a conditional data type which can be either true or false. The value
+  true expands to the integer constant 1 and the value false expands to the
+  integer constant 0.
+}
+\addRow
+{
+  cl_char
+}
+{
+  Alias to a signed 8-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+  cl_uchar
+}
+{
+  Alias to an unsigned 8-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+ cl_short
+}
+{
+  Alias to a signed 16-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+  cl_ushort
+}
+{
+  Alias to an unsigned 16-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+ cl_int
+}
+{
+  Alias to a signed 32-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+ cl_uint
+}
+{
+  Alias to an unsigned 32-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+ cl_long
+}
+{
+  Alias to a signed 64-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+ cl_ulong
+}
+{
+  Alias to an unsigned 64-bit integer, as defined by the C++11 ISO Standard.
+}
+\addRow
+{
+  cl_float
+}
+{
+  Alias to a 32-bit floating-point. The float data type must conform to the IEEE
+  754 single precision storage format.
+}
+\addRow
+{
+ cl_double
+}
+{
+  Alias to a 64-bit floating-point. The double data type must conform to the IEEE
+  754 double precision storage format.
+}
+\addRow
+{
+  cl_half
+}
+{
+  Alias to a 16-bit floating-point. The half data type must conform to the IEEE
+  754-2008 half precision storage format. A SYCL \codeinline{feature_not_supported}
+  exception must be thrown if the \codeinline{half} type is used in a SYCL kernel
+  fucntion which executes on a SYCL \codeinline{device} that does not support the
+  extension \codeinline{khr_fp16}.
+}
+\completeTable
+%-----------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Vector types
+%***********************************************************************************
+\subsection{Vector types}
+\label{sec:vector.type}
+\input{vec_class}
+
+%***********************************************************************************
+% Synchronization and atomics
+%***********************************************************************************
+\section{Synchronization and atomics}
+
+\fixme{UPDATE: moved it in this part of the specification, as it seemed too early
+to discuss atomics right at the start of the programming interface before any of
+the interfaces were introduced.}
+
+The SYCL specification offers the same set of synchronization
+operations that are available to OpenCL C programs, for compatibility
+and portability across OpenCL devices. The available features are:
+\begin{itemize}
+  \item
+    Accessor classes: Accessor classes specify acquisition and release
+    of buffer and image data structures to provide points at which
+    underlying queue synchronization primitives must be generated.
+  \item
+    Atomic operations: OpenCL 1.2 devices only support the equivalent
+    of relaxed C++ atomics and SYCL uses the C++11 library syntax to
+    make this available. This is provided for forward compatibility
+    with future SYCL versions.
+  %\item
+  %  Fences:
+  \item
+    Barriers: Barrier primitives are made available to synchronize
+    sets of work-items within individual work-groups. They are exposed
+    through the \codeinline{nd_item} class that abstracts the current
+    point in the overall iteration space.
+  \item
+    Hierarchical parallel dispatch: In the hierarchical parallelism
+    model of describing computations, synchronization within the
+    work-group is made explicit through multiple instances of the
+    \codeinline{parallel_for_work_item} function call, rather than
+    through the use of explicit \gls{work-group-barrier} operations.
+\end{itemize}
+
+A \gls{work-group-barrier} or \gls{work-group-mem-fence} may provide ordering semantics over the local address space, global address space or both. All memory operations initiated before the \gls{work-group-barrier} or \gls{work-group-mem-fence} operation in the specified address space(s) will be completed before any memory operation after the operation. Address spaces are specified using the \codeinline{fence_space} enum class:
+
+\lstinputlisting{headers/synchronization.h}
+
+The SYCL specification provides atomic operations based on the C++11
+library syntax. The only available ordering, due to constraints of the
+OpenCL 1.2 memory model, is \codeinline{memory_order_relaxed}. No
+default order is supported because a default order would imply
+sequential consistency. The SYCL atomic library may map directly to
+the underlying C++11 library in host code, and must interact safely
+with the host C++11 atomic library when used in host code. The SYCL
+library must be used in device code to ensure that only the limited
+subset of functionality is available. SYCL 1.2.1 device compilers should
+give a compilation error on use of the \codeinline{std::atomic}
+classes and functions in device code.
+
+The template parameter \codeinline{addressSpace} is permitted to be
+\codeinline{access::address_space::global_space} or \codeinline{
+access::address_space::local_space}.
+
+The data type \codeinline{T} is permitted to be \codeinline{int}, \codeinline{
+unsigned int}, \codeinline{long}, \codeinline{unsigned long}, \codeinline{
+long long}, \codeinline{unsigned long long} and \codeinline{float}. Though
+\codeinline{float} is only available for the \codeinline{store}, \codeinline{
+load} and \codeinline{exchange} member functions. For any data type
+\codeinline{T} which is 64bit, the member functions of the \codeinline{atomic}
+class are required to compile however are only guaranteed to execute if the
+64bit atomic extension \codeinline{cl_khr_int64_base_atomics} or \codeinline{
+cl_khr_int64_extended_atomics} (depending on which extension provides support
+for each given member function) is supported by the SYCL \codeinline{device}
+which is executing the SYCL kernel function. If a member function is called with
+a 64bit data type and the necessary extension is not supported by the SYCL
+\codeinline{device} which is executing the SYCL kernel function, the
+\gls{sycl-runtime} must throw a SYCL \codeinline{feature_not_supported}
+exception. For more detail see Section~\ref{sec:extension.64bit-atomics}.
+
+The atomic types are defined as follows, the constructors and member functions
+for the SYCL \codeinline{atomic} class are listed in Tables~
+\ref{table.atomics.constructors} and~\ref{table.atomics.members} respectively.
+
+\lstinputlisting{headers/atomic.h}
+
+As well as the member functions, a matching set of operations on atomic types
+is provided by the SYCL library. As in the previous case, the only available
+memory order is \codeinline{memory_order::relaxed}. The global functions are as
+follows and described in Table~\ref{table.atomics.functions}.
+
+\lstinputlisting{headers/atomicoperations.h}
+
+The atomic operations and member functions behave as described in the C++11
+specification, barring the restrictions discussed above. Note that care
+must be taken when using \codeinline{compare_exchange_strong} to
+perform many of the operations that would be expected of it in
+standard CPU code due to the lack of forward progress guarantees
+between work-items in SYCL. No work-item may be dependent on another
+work-item to make progress if the code is to be portable.
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the SYCL \codeinline{atomic} class
+  template}
+{table.atomics.constructors}
+  \addRowTwoSL
+    { template <typename pointerT> }
+    { atomic(multi_ptr<pointerT, addressSpace> ptr) }
+    {
+      Permitted data types for \codeinline{pointerT} are any valid scalar data
+      type which is the same size in bytes as \codeinline{T}. Constructs an
+      instance of SYCL \codeinline{atomic} which is associated with the pointer
+      \codeinline{ptr}, converted to a pointer of data type \codeinline{T}.
+    }
+\completeInfoTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions available on an object of type
+  \codeinline{atomic<T>}}
+{table.atomics.members}
+  \addRowTwoL
+    { void store(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Atomically stores the value \codeinline{operand} at the address of the
+      \codeinline{multi_ptr} associated with this SYCL \codeinline{atomic}. The
+      memory order of this atomic operation must be \codeinline{
+      memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T load(memory_order memoryOrder = }
+    { memory_order::relaxed) const }
+    {
+      Atomically loads the value at the address of the \codeinline{multi_ptr}
+      associated with this SYCL \codeinline{atomic}. Returns the value at the
+      address of the \codeinline{multi_ptr} associated with this SYCL
+      \codeinline{atomic} before the call. The memory order of this atomic
+      operation must be \codeinline{memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T exchange(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Atomically replaces the value at the address of the \codeinline{multi_ptr}
+      associated with this SYCL \codeinline{atomic} with value \codeinline{
+      operand} and returns the value at the address of the \codeinline{
+      multi_ptr} associated with this SYCL \codeinline{atomic} before the call.
+      The memory order of this atomic operation must be \codeinline{
+      memory_order::relaxed}.
+    }
+  \addRowFiveL
+    { bool compare_exchange_strong(T \&expected, T desired, }
+    { memory_order successMemoryOrder = }
+    { memory_order::relaxed, }
+    { memory_order failMemoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically compares the value at the address of the \codeinline{multi_ptr}
+      associated with this SYCL \codeinline{atomic} against the value of
+      \codeinline{expected}. If the values are equal replaces value at address
+      of the \codeinline{multi_ptr} associated with this SYCL \codeinline{
+      atomic} with the value of \codeinline{desired}, otherwise assigns the
+      original value at the address of the \codeinline{multi_ptr} associated
+      with this SYCL \codeinline{atomic} to \codeinline{expected}. Returns
+      \codeinline{true} if the comparison operation was successful. The memory
+      order of this atomic operation must be \codeinline{
+      memory_order::relaxed} for both success and fail.
+    }
+  \addRowTwoL
+    { T fetch_add(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically adds the value \codeinline{operand} to the value at the address
+      of the \codeinline{multi_ptr} associated with this SYCL \codeinline{
+      atomic} and assigns the result to the value at the address of the
+      \codeinline{multi_ptr} associated with this SYCL \codeinline{atomic}.
+      Returns the value at the address of the \codeinline{multi_ptr} associated
+      with this SYCL \codeinline{atomic} before the call. The memory order of
+      this atomic operation must be \codeinline{memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T fetch_sub(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically subtracts the value \codeinline{operand} to the value at the
+      address of the \codeinline{multi_ptr} associated with this SYCL
+      \codeinline{atomic} and assigns the result to the value at the address of
+      the \codeinline{multi_ptr} associated with this SYCL \codeinline{atomic}.
+      Returns the value at the address of the \codeinline{multi_ptr} associated
+      with this SYCL \codeinline{atomic} before the call. The memory order of
+      this atomic operation must be \codeinline{memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T fetch_and(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically performs a bitwise AND between the value \codeinline{operand}
+      and the value at the address of the \codeinline{multi_ptr} associated with
+      this SYCL \codeinline{atomic} and assigns the result to the value at the
+      address of the \codeinline{multi_ptr} associated with this SYCL
+      \codeinline{atomic}. Returns the value at the address of the \codeinline{
+      multi_ptr} associated with this SYCL \codeinline{atomic} before the call.
+      The memory order of this atomic operation must be \codeinline{
+      memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T fetch_or(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically performs a bitwise OR between the value \codeinline{operand}
+      and the value at the address of the \codeinline{multi_ptr} associated with
+      this SYCL \codeinline{atomic} and assigns the result to the value at the
+      address of the \codeinline{multi_ptr} associated with this SYCL
+      \codeinline{atomic}. Returns the value at the address of the \codeinline{
+      multi_ptr} associated with this SYCL \codeinline{atomic} before the call.
+      The memory order of this atomic operation must be \codeinline{
+      memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T fetch_xor(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically performs a bitwise XOR between the value \codeinline{operand}
+      and the value at the address of the \codeinline{multi_ptr} associated with
+      this SYCL \codeinline{atomic} and assigns the result to the value at the
+      address of the \codeinline{multi_ptr} associated with this SYCL
+      \codeinline{atomic}. Returns the value at the address of the \codeinline{
+      multi_ptr} associated with this SYCL \codeinline{atomic} before the call.
+      The memory order of this atomic operation must be \codeinline{
+      memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T fetch_min(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Atomically computes the minimum of the value \codeinline{operand} and the
+      value at the address of the \codeinline{multi_ptr} associated with this
+      SYCL \codeinline{atomic} and assigns the result to the value at the address
+      of the \codeinline{multi_ptr} associated with this SYCL \codeinline{
+      atomic}. Returns the value at the address of the \codeinline{multi_ptr}
+      associated with this SYCL \codeinline{atomic} before the call. The memory
+      order of this atomic operation must be \codeinline{memory_order::relaxed}.
+    }
+  \addRowTwoL
+    { T fetch_max(T operand, memory_order memoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Available only when: \codeinline{T != float}.
+      \newline
+      Atomically computes the maximum of the value \codeinline{operand} and the
+      value at the address of the \codeinline{multi_ptr} associated with this
+      SYCL \codeinline{atomic} and assigns the result to the value at the address
+      of the \codeinline{multi_ptr} associated with this SYCL \codeinline{
+      atomic}. Returns the value at the address of the \codeinline{multi_ptr}
+      associated with this SYCL \codeinline{atomic} before the call. The memory
+      order of this atomic operation must be \codeinline{memory_order::relaxed}.
+    }
+\completeInfoTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Functions}
+\addFootNotes{Global functions available on atomic types}
+{table.atomics.functions}
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_load(atomic<T, addressSpace> object, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.load(memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { void atomic_store(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.store(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_exchange(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.exchange(operand, memoryOrder)}.
+    }
+  \addRowSevenSL
+    { template <typename T, access::address_space addressSpace> }
+    { bool atomic_compare_exchange_strong( }
+    { atomic<T, addressSpace> object, T \&expected, T desired,}
+    { memory_order successMemoryOrder = }
+    { memory_order::relaxed }
+    { memory_order failMemoryOrder = }
+    { memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{
+      object.compare_exchange_strong(expected, desired, successMemoryOrder, failMemoryOrders)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_add(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_add(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_sub(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_sub(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_and(atomic<T> operand, T object, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_add(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_or(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_or(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_xor(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_xor(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_min(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_min(operand, memoryOrder)}.
+    }
+  \addRowThreeSL
+    { template <typename T, access::address_space addressSpace> }
+    { T atomic_fetch_max(atomic<T, addressSpace> object, T operand, }
+    { memory_order memoryOrder = memory_order::relaxed) }
+    {
+      Equivalent to calling \codeinline{object.fetch_max(operand, memoryOrder)}.
+    }
+\completeTable
+%-----------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Stream class
+%***********************************************************************************
+\section{Stream class}
+\label{subsection:stream}
+
+The SYCL \codeinline{stream} class is a buffered output stream that allows outputting the values of built-in, vector and SYCL types to the console. The implementation of how values are streamed is left as an implementation detail.
+
+The way in which values are output by an instance of the SYCL \codeinline{stream} class can also be altered using a range of manipulators.
+
+An instance of the SYCL \codeinline{stream} class has a maximum buffer size that specifies maximum size of the character stream that can be output in bytes and a maximum statement size that specifies the maximum size of the character stream that can be output in a single statement in bytes.
+
+All member functions of the \codeinline{stream} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+
+The SYCL \codeinline{stream} class provides the common reference semantics
+(see Section~\ref{sec:reference-semantics}).
+
+%***********************************************************************************
+% Stream interface
+%***********************************************************************************
+\subsection{Stream class interface}
+
+The constructors and member functions of the SYCL \codeinline{stream} class are listed in Tables~\ref{table.constructors.stream}, \ref{table.members.stream}, and \ref{table.globals.stream} respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+The operand types that are supported by the SYCL \codeinline{stream} class \codeinline{operator<<()} operator are listed in Table~\ref{table.operands.stream}.
+
+The manipulators that are supported by the SYCL \codeinline{stream} class \codeinline{operator<<()} operator are listed in Table~\ref{table.manipulators.stream}.
+
+% Interface of the device class
+\lstinputlisting{headers/stream.h}
+
+%-------------------------------------------------------------------------------------------
+\startTable{Stream operand type}
+\addFootNotes{Operand types supported by the \codeinline{stream} class}{table.operands.stream}
+\addRow
+{
+  char, signed char, unsigned char, int, unsigned int, short, unsigned short, long int, unsigned long int, long long int, unsigned long long int, cl_char, cl_uchar, cl_int, cl_uint, cl_short, cl_ushort, cl_long, cl_ulong, byte
+}
+{
+  Outputs the value as a stream of characters.
+}
+\addRow
+{
+  float, double, half, cl_float, cl_double, cl_half
+}
+{
+  Outputs the value according to the precision of the current statement as a stream of characters.
+}
+\addRow
+{
+  char *, const char *
+}
+{
+  Outputs the string.
+}
+\addRow
+{
+  T *, const T *, multi_ptr
+}
+{
+  Outputs the address of the pointer as a stream of characters.
+}
+\addRow
+{
+  vec
+}
+{
+  Outputs the value of each component of the vector as a stream of characters.
+}
+\addRow
+{
+  id, range, item, nd_item, group, nd_range, h_item
+}
+{
+  Outputs the value of each component of each id or range as a stream of characters.
+}
+\completeTable
+%-------------------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------------------
+\startTable{Stream manipulator}
+\addFootNotes{Manipulators supported by the \codeinline{stream} class}{table.manipulators.stream}
+\addRow
+{
+  endl
+}
+{
+  Outputs a new-line character.
+}
+\addRow
+{
+  dec
+}
+{
+  Outputs any subsequent values in the current statement in decimal base.
+}
+\addRow
+{
+  hex
+}
+{
+  Outputs any subsequent values in the current statement in hexadecimal base.
+}
+\addRow
+{
+  oct
+}
+{
+  Outputs any subsequent values in the current statement in octal base.
+}
+\addRow
+{
+  noshowbase
+}
+{
+  Outputs any subsequent values without the base prefix.
+}
+\addRow
+{
+  showbase
+}
+{
+  Outputs any subsequent values with the base prefix.
+}
+\addRow
+{
+  noshowpos
+}
+{
+  Outputs any subsequent values without a plus sign if the value is positive.
+}
+\addRow
+{
+  showpos
+}
+{
+  Outputs any subsequent values with a plus sign if the value is positive.
+}
+\addRow
+{
+  setw(int)
+}
+{
+  Sets the field width of any subsequent values in the current statement.
+}
+\addRow
+{
+  setprecision(int)
+}
+{
+  Sets the precision of any subsequent values in the current statement.
+}
+\addRow
+{
+  fixed
+}
+{
+  Outputs any subsequent floating-point values in the current statement in fixed notation.
+}
+\addRow
+{
+  scientific
+}
+{
+  Outputs any subsequent floating-point values in the current statement in scientific notation.
+}
+\addRow
+{
+  hexfloat
+}
+{
+  Outputs any subsequent floating-point values in the current statement in hexadecimal notation.
+}
+\addRow
+{
+  defaultfloat
+}
+{
+  Outputs any subsequent floating-point values in the current statement in the default notation.
+}
+\completeTable
+%-------------------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+    \addFootNotes{Constructors of the \codeinline{stream} class}{table.constructors.stream}
+  \addRow
+    {stream(size\_t bufferSize, size\_t maxStatementSize, handler\& cgh)}
+    {
+      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size specified by the parameter \codeinline{bufferSize} and a maximum statement size specified by the parameter \codeinline{maxStatementSize}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+  \addFootNotes{Member functions of the \codeinline{stream} class}{table.members.stream}
+  \addRow
+    {size_t get_size() const}
+    {
+      Returns the maximum buffer size.
+    }
+  \addRow
+    {size_t get_max_statement_size() const}
+    {
+      Returns the maximum statement size.
+    }
+\completeTable
+%-------------------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Global function}
+\addFootNotes{Global functions of the \codeinline{stream} class}
+{table.globals.stream}
+  \addRow
+    {template <typename T> const stream\& operator<<(const stream\& os, const T \&rhs)}
+    {
+      Outputs any valid values (see~\ref{table.operands.stream}) as a stream of characters and applies any valid manipulator (see~\ref{table.manipulators.stream}) to the current statements.
+    }
+\completeTable
+%-------------------------------------------------------------------------------------------
+
+\subsection{Synchronization}
+
+An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator within a SYCL kernel function by the time that the kernel function finishes execution. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
+
+In the case that an instance of the SYCL \codeinline{stream} class is used across multiple work items concurrently, there is no guarantee of ordering of outputs.
+
+If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a OpenCL context, there is no guarantee that statements are output in their entirety. If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a host context, then the SYCL \codeinline{stream} class is required to output each statement in full without mixing with statements of other work items.
+
+\subsection{Performance note}
+
+The usage of the \codeinline{stream} class is designed for debugging purposes and is therefore not recommended for performance critical applications.
+
+%***********************************************************************************
+% SYCL built-in functions for SYCL host and device
+%***********************************************************************************
+\section{SYCL built-in functions for SYCL host and device}
+\label{sycl:builtins}
+\input{builtin_functions}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

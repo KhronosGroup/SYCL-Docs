@@ -1,0 +1,528 @@
+%\chapter{Glossary}
+
+%The purpose of this glossary is to define the key concepts involved in
+%specifying OpenCL SYCL. This section includes definitions of terminology used
+%throughout the specification document.
+\makenoidxglossaries
+\glstoctrue
+%\makeglossaries
+\newglossaryentry{accessor}
+{
+  name=accessor,
+  description={An accessor is a class which allows a
+               \gls{sycl-kernel-function} to access data managed by a \gls{buffer} or
+               \gls{image} class. Accessors are used to express the dependencies
+               among the different \glspl{command-group}. For the full
+               description please refer to section [\ref{subsec:accessors}]}
+}
+
+\newglossaryentry{application-scope}
+{
+  name={application scope},
+  description={The application scope starts with the
+               construction first \gls{sycl-runtime} class object and
+               finishes with the destruction of the last one.
+               Application refers to the C++ \gls{sycl-application} and not
+               the \gls{sycl-runtime}}
+}
+
+\newglossaryentry{async-handler}
+{
+  name={async\_handler},
+  description={An asynchronous error handler object is a function class instance
+               providing necessary code for handling all the asynchronous
+               exceptions triggered from the execution of command groups on a
+               queue, within a context or an associated event. For the full
+               description please refer to section [\ref{subsec:exception.class}]}
+}
+
+\newglossaryentry{buffer}
+{
+  name=buffer,
+  description={The buffer class manages data for the SYCL C++ host
+               application and the SYCL device kernels. The buffer class
+               may acquire ownership of some host pointers passed to its
+               constructors according to the constructor kind.
+               %
+               \glspar
+               %
+               The buffer class, together with the accessor class,
+               is responsible for tracking memory transfers and guaranteeing
+               data consistency among the different kernels.
+               The \gls{sycl-runtime} manages the memory allocations
+               on both the host and the \gls{device} within the
+               lifetime of the buffer object. For the full
+               description please refer to section [\ref{subsec:buffers}]}
+}
+
+\newglossaryentry{work-group-mem-fence}
+{
+  name={work-group mem-fence},
+  description={The work-group mem-fence guarantees that any access on the
+               corresponding memory address space before the barrier, must
+               complete before continuing to process any data from that memory
+               space after the barrier}
+}
+
+\newglossaryentry{barrier}
+{
+  name=barrier,
+  description={A barrier is either a \gls{queue-barrier} or a
+               kernel execution \gls{work-group-barrier} depending on whether it is
+               a synchronization point on the command queue or on
+               the work-groups of a kernel execution}
+}
+
+\newglossaryentry{queue-barrier}
+{
+  name={command queue barrier},
+  description={The SYCL API provides two variants for functions that force
+               synchronization on a SYCL command queue. The
+               \codeinline{cl::sycl::queue::wait()} and
+               \codeinline{cl::sycl::queue::wait_and_throw()}
+               functions force the SYCL command queue to wait for the
+               execution of the \gls{command-group-function-object} before it is able to
+               continue executing}
+}
+
+\newglossaryentry{work-group-barrier}
+{
+  name={work-group barrier},
+  description={The work-group barrier, cl::sycl::nd_item::barrier, is a 
+               synchronization function within a \gls{work-group}. All the
+               \glspl{work-item} of a work-group must execute the barrier construct before any \gls{work-item}
+               continues execution beyond the barrier. Additionally the work-
+               group barrier performs a \gls{work-group-mem-fence}. Note: In
+               OpenCL 1.2 there is no synchronization between different work-
+               groups}
+}
+
+\newglossaryentry{command-group}
+{
+  name={command group},
+  description={In SYCL, the operations required to process data on a
+    \gls{device} are represented using a \gls{command-group-function-object}.
+    Each \gls{command-group-function-object} is given a unique \gls{handler} object
+    to perform all the necessary work required to correctly process data
+    on a \gls{device} using a kernel. In this way, the group of commands for
+               transferring and processing data is enqueued as a command
+               group on a \gls{device} for execution. A command group is submitted
+               atomically to a SYCL queue}
+}
+
+\newglossaryentry{command-group-function-object}
+{
+  name={command group function object},
+  description={A type which is callable with `operator()` that takes a reference
+  to a\gls{handler}, that defines a \gls{command-group} which can be submitted
+  by a \gls{queue}. The function object can be a named type, lambda function or
+  \codeinline{function_class}}
+}
+
+\newglossaryentry{command-group-scope}
+{
+  name={command group scope},
+  description={The command group scope is the function scope defined by the
+               \gls{command-group-function-object}. The command group \gls{handler} object lifetime
+               is restricted to the command group scope. For more details
+               please see [\ref{sec:command.group.scope}]}
+}
+
+\newglossaryentry{queue}
+{
+  name={command queue},
+  description={A SYCL command queue is an object that holds command
+                groups to be executed on a SYCL \gls{device}. SYCL provides a
+                heterogeneous platform integration using device queue, which is
+                the minimum requirement for a SYCL application to run on a
+                SYCL \gls{device}. For the full description please refer to
+            section [\ref{sec:interface.queue.class}]}
+}
+
+\newglossaryentry{handler}
+{
+  name={command group handler},
+  description={The command group handler class provides the interface for the
+               commands that can be executed inside the
+               \gls{command-group-scope}. It is provided as a scoped object
+               to all of the data access requests within the command group scope.
+               For the full description please refer to section
+         [\ref{sec:handlerClass}]}
+}
+
+\newglossaryentry{constant-memory}
+{
+  name={constant memory},
+  description={A region of global memory that remains constant during the
+               execution of a kernel. The \gls{sycl-runtime}
+               allocates and initializes memory objects placed into constant
+               memory}
+}
+
+\newglossaryentry{device}
+{
+  name=device,
+  description={A SYCL device encapsulates an OpenCL device or the SYCL
+               host device, which can run SYCL kernels on host}
+}
+
+\newglossaryentry{device-compiler}
+{
+  name={device compiler},
+  description={A SYCL device compiler is a compiler that produces OpenCL
+               \gls{device} binaries from a valid \gls{sycl-application}.
+               For the full description please refer to section
+         [\ref{chapter.device.compiler}]}
+}
+
+\newglossaryentry{global-id}
+{
+  name={global id},
+  description={As in OpenCL, a global ID is used to uniquely identify a
+               \gls{work-item} and is derived from the number of
+               global \glspl{work-item}
+               specified when executing a kernel. A global ID is a one, two or
+               three-dimensional value that starts at 0 per dimension}
+}
+
+\newglossaryentry{global-memory}
+{
+  name={global memory},
+  description={Global memory is a memory region accessible to all \glspl{work-item}
+               executing on a \gls{device}}
+}
+
+\newglossaryentry{group}
+{
+  name={group},
+  description={A unique identifier representing a single \gls{work-group}
+  within the index space of a SYCL kernel execution. Can be one, two or three
+  dimensional. In the SYCL interface a \gls{group} is represented by the
+  \codeinline{group} class (see Section~\ref{group-class})}
+}
+
+\newglossaryentry{work-group-id}
+{
+  name={work-group id},
+  description={As in OpenCL, SYCL kernels execute in work groups. The group
+               ID is the ID of the work group that a work item is executing within.
+               A group ID is an one, two or three dimensional value that starts
+               at 0 per dimension}
+}
+
+\newglossaryentry{work-group-range}
+{
+  name={work-group range},
+  description={a group range is the size of the work-group for every dimension}
+}
+
+\newglossaryentry{h-item}
+{
+  name={h-item},
+  description={A unique identifier representing a single \gls{work-item} within
+  the index space of a SYCL kernel hierarchical execution. Can be one, two or
+  three dimensional. In the SYCL interface a \gls{h-item} is represented by the
+  \codeinline{h_item} class (see Section~\ref{hitem-class})}
+}
+
+\newglossaryentry{host}
+{
+  name=host,
+  description={Host is the system that executes the C++ application including
+               the SYCL API}
+}
+
+\newglossaryentry{host-pointer}
+{
+  name={host pointer},
+  description={A pointer to memory on the host.
+        Cannot be accessed directly from a \gls{device}}
+}
+
+\newglossaryentry{id}
+{
+  name=id,
+  description={It is a unique identifier of an item in an index space. It can
+               be one, two or three dimensional index space, since the SYCL
+               Kernel execution model is an nd-range. It is one of the index
+               space classes. For the full description please refer to section
+         \ref{id-class}}
+}
+
+\newglossaryentry{image}
+{
+  name=image,
+  description={Images in SYCL, like buffers, are abstractions of the OpenCL
+               equivalent. As in OpenCL, an image stores a two- or
+               three-dimensional structured array. The \gls{sycl-runtime} will make
+               available images in OpenCL contexts in order to execute
+               semantically correct kernels in different OpenCL contexts.
+               For the full description please refer to section [\ref{id-class}]}
+}
+
+\newglossaryentry{implementation-defined}
+{
+  name={implementation defined},
+  description={Behavior that is explicitly allowed to vary between
+               conforming implementations of SYCL. A SYCL
+               implementer is required to document the
+               implementation defined behavior}
+}
+
+\newglossaryentry{index-space-classes}
+{
+  name={index space classes},
+  description={The OpenCL Kernel Execution Model defines an nd-range index
+              space. The \gls{sycl-runtime} class that defines an nd-range is the 
+              \codeinline{cl::sycl::nd\_range}, which takes as input the sizes
+              of global and local work-items, represented using the 
+              \codeinline{cl::sycl::range} class. The kernel library classes
+              for indexing in the defined nd-range are the following classes: 
+              \begin{itemize}
+              \item \codeinline{cl::sycl::id} : The basic index class 
+                 representing a \gls{id}. 
+              \item \codeinline{cl::sycl::item} : The index class that contains
+                 the \gls{global-id} and \gls{local-id}. 
+              \item \codeinline{cl::sycl::nd\_item} : The index class that
+                 contains the \gls{global-id}, \gls{local-id} and the
+                 \gls{work-group-id}.
+              \item \codeinline{cl::sycl::group} : The group class that contains
+                 the \gls{work-group-id} and the methods on a work-group.
+              \end{itemize}
+              % Since there is already a dot at the end of the
+              % previous item, do not output a final dot again
+              \nopostdesc
+             }
+}
+
+\newglossaryentry{item}
+{
+  name={item},
+  description={An item id is an interface used to retrieve the \gls{global-id},
+        \gls{work-group-id} and \gls{local-id}. For further details see
+              [\ref{subsec:item.class}]}
+}
+
+\newglossaryentry{kernel}
+{
+  name=kernel,
+  description={A SYCL kernel which can be executed on a \gls{device},
+  including the \gls{host-device}. Is created implicitly when defining a
+  \gls{sycl-kernel-function} (See~\ref{sec:expr-parall-thro}) but can also be
+  created manually in order to pre-compile \glspl{sycl-kernel-function}}
+}
+
+\newglossaryentry{kernel-name}
+{
+  name={kernel name},
+  description={A kernel name is a class type that is used to assign a name to
+               the kernel function, used to link the host system with the
+               kernel object output by the device compiler. For details on naming
+               kernels please see [\ref{sec:naming.kernels}]}
+}
+
+\newglossaryentry{sycl-kernel-function}
+{
+  name={SYCL kernel function},
+  description={A type which is callable with `operator()` that takes a \gls{id},
+  \gls{item}, \gls{nd-item} or \gls{group} which can be passed to kernel
+  enqueue member functions of the \gls{handler}. A \gls{sycl-kernel-function}
+  defines an entry point to a \gls{kernel}. The function object can be a named
+  standard layout type or lambda function}
+}
+
+\newglossaryentry{kernel-scope}
+{
+  name={kernel scope},
+  description={The function scope of the \tf{operator()} on a \gls{sycl-kernel-function}. Note
+               that any function or method called from the kernel is also
+               compiled in kernel scope. The kernel scope allows C++ language
+               extensions as well as restrictions to reflect the capabilities of
+               OpenCL devices. The extensions and restrictions are defined in
+               the SYCL device compiler specification}
+}
+
+\newglossaryentry{local-id}
+{
+  name={local id},
+  description={A unique identifier of a work-item among other work-items of a
+               work-group}
+}
+
+\newglossaryentry{local-memory}
+{
+  name={local memory},
+  description={Local memory is a memory region associated with a work-group
+               and accessible only by work-items in that work-group}
+}
+
+\newglossaryentry{nd-item}
+{
+  name={nd-item},
+  description={A unique identifier representing a single \gls{work-item} and
+  \gls{work-group} within the index space of a SYCL kernel execution. Can be
+  one, two or three dimensional. A \gls{nd-item} is capable of performing
+  \glspl{work-group-barrier} and \glspl{work-group-mem-fence}. In the SYCL
+  interface a \gls{nd-item} is represented by the \codeinline{nd_item} class
+  (seeSection~\ref{nditem-class})}
+}
+
+\newglossaryentry{nd-range}
+{
+  name={nd-range},
+  description={A representation of the index space of a SYCL kernel execution,
+  the distribution of \glspl{work-item} within into \glspl{work-group}.
+  Contains a \gls{range} specifying the number of global \glspl{work-item}, a
+  \gls{range} specifying the number of local \glspl{work-item} and a \gls{id}
+  specifying the global offset. Can be one, two or three dimensional. The
+  minimum size of each \gls{range} within the \gls{nd-range} is 1 per
+  dimension. In the SYCL interface an \gls{nd-range} is represented by the
+  \codeinline{nd_range} class (see Section~\ref{subsubsec:nd-range-class})}
+}
+
+\newglossaryentry{platform}
+{
+  name=platform,
+  description={The host together or a collection of \glspl{device} managed by the OpenCL
+               framework that allow an application to share resources and
+               execute kernels on \glspl{device} in the platform. A SYCL application
+               can target one or multiple OpenCL platforms provided by
+               OpenCL \gls{device} vendors~\cite{opencl12}}
+}
+
+\newglossaryentry{private-memory}
+{
+  name={private memory},
+  description={A region of memory private to a work-item. Variables defined in
+               one workitem’s private memory are not visible to another
+               work-item. \cite{opencl12}.
+               The \codeinline{cl::sycl::private_memory} class provides access to
+               the work-item's private memory for the hierarchical API as it is
+               described at [\ref{paragraph.private.memory}]}
+}
+
+\newglossaryentry{program-object}
+{
+  name={program object},
+  description={A program object in SYCL is an OpenCL program object 
+               encapsulated in A SYCL class. It contains OpenCL kernels and 
+               functions compiled to execute on OpenCL \glspl{device}. A program object
+               can be generated from SYCL C++ kernels by the \gls{sycl-runtime}, or 
+               obtained from an OpenCL implementation. For furthen details
+               on the \codeinline{cl::sycl::program} class see 
+         [\ref{sec:interfaces.program.class}]}
+}
+
+\newglossaryentry{range}
+{
+  name={range},
+  description={A representation of a number of \glspl{work-item} or
+  \gls{work-group} within the index space of a SYCL kernel execution. Can be
+  one, two or three dimensional. In the SYCL interface a \gls{group} is
+  represented by the \codeinline{group} class (see Section~\ref{group-class}
+  )}
+}
+
+\newglossaryentry{smcp}
+{
+  name={SMCP},
+  description={The single-source multiple compiler-passes (SMCP) technique allows
+         a single source file to be parsed by multiple compilers for
+         building native programs per compilation target.
+         For example, a standard C++ CPU compiler
+               for targeting \gls{host} will parse the  \gls{sycl-file} to create the
+               C++ \gls{sycl-application} which offloads parts of the computation to
+               other \glspl{device}. A SYCL device compiler will parse the same
+               source file and target only SYCL kernels},
+  first={single-source multiple compiler-passes (SMCP)}
+}
+
+\newglossaryentry{host-device}
+{
+  name={SYCL host device},
+  description={The SYCL host device is a native C++
+               implementation of a \gls{device}. It does not have an OpenCL
+               \codeinline{cl_device_id} and it will only appear in the 
+               available SYCL devices, as it is not an OpenCL device. It has
+               full SYCL capabilities and reports them through the SYCL 
+               information retrieval interface. The SYCL host device is 
+               mandatory for every SYCL implementation and is always available,
+               but may not achieve the same performance as an OpenCL CPU device.
+               Any C++ application debugger can be used for debugging SYCL
+               kernels executing on a SYCL host device}
+}
+
+\newglossaryentry{sycl-library}
+{
+  name={SYCL C++ Template Library},
+  description={The template library is a set of C++ templated classes which provide
+               the programming interface to the SYCL developer}
+}
+
+\newglossaryentry{sycl-runtime}
+{
+  name={SYCL runtime},
+  description={A SYCL runtime is an implementation of the SYCL API
+               specification. The SYCL runtime manages the different OpenCL
+               platforms, \glspl{device}, contexts as well as memory handling of data
+               between host and OpenCL contexts to enable semantically
+               correct execution of SYCL programs}
+}
+
+\newglossaryentry{sycl-file}
+{
+  name={SYCL File},
+  description={A SYCL C++ source file that contains SYCL API calls}
+}
+
+\newglossaryentry{work-group}
+{
+  name={work-group},
+  description={The SYCL work-group (\codeinline{cl::sycl::group} class) is a
+               representation of an OpenCL work group. A collection of related
+               work-items that execute on a single compute unit. The
+               work-items in the group execute the same kernel-instance and
+               share local memory and workgroup functions \cite{opencl12}. For
+               further details for the \codeinline{cl::sycl::group} class see
+               [\ref{group-class}]}
+}
+
+\newglossaryentry{work-item}
+{
+  name={work-item},
+  description={The SYCL work-item (\codeinline{cl::sycl::nd\_item} class) is a
+               representation of an OpenCL work item. One of a collection of
+               parallel executions of a kernel invoked on a \gls{device} by a
+               command. A work-item is executed by one or more processing
+               elements as part of a work-group executing on a compute unit. A
+               work-item is distinguished from other work-items by its global ID
+               or the combination of its work-group ID and its local ID within a
+               work-group \cite{opencl12}}
+}
+
+\newglossaryentry{context}
+{
+  name={context},
+  description={A SYCL context is an encapsulation of an OpenCL context. In OpenCL,
+         any OpenCL resource is attached to a context. A context contains a
+         collection of \glspl{device} of the same \gls{platform}. The context is
+         defined as the \codeinline{cl::sycl::context} class, for further
+               details please see [\ref{sec:interface.context.class}]}
+}
+
+\newglossaryentry{sycl-application}
+{
+  name={SYCL application},
+  description={A SYCL application is a C++ application which uses the SYCL
+         programming model in order to execute \glspl{kernel} on
+         \glspl{device}}
+}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

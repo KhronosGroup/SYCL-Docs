@@ -1,0 +1,110 @@
+% !TEX root = sycl-1.2.1.tex
+%*******************************************************************************
+% SYCL support of non-core OpenCL features
+%*******************************************************************************
+\chapter{SYCL Support of Non-Core OpenCL Features}
+
+In addition to the OpenCL core features, SYCL also provides support for OpenCL
+extensions which provide features in OpenCL via khr extensions.
+
+Some extensions are natively supported within the SYCL interface, however some
+can only be used via the OpenCL interoperability interface. The SYCL interface
+required for native extensions must be available. However if the respective
+extension is not supported by the executing SYCL \codeinline{device}, the
+\gls{sycl-runtime} must throw a \codeinline{feature_not_supported} exception.
+
+A SYCL \codeinline{platform} or SYCL \codeinline{device} can be queried for
+extension support by calling the \codeinline{has_extension} member function.
+
+The level of support for the OpenCL extensions are listed in
+Table~\ref{table.extensionsupport}.
+
+%-------------------------------------------------------------------------------
+\begin{longtable}[!h]
+ {|>{\raggedright\arraybackslash}p{2.0 in} | p{1.5 in} | p{1.5 in} |}
+  \hline
+  \cellcolor{lightgray}\textbf{Extension}
+  & \cellcolor{lightgray}\textbf{SYCL interface}
+  & \cellcolor{lightgray}\textbf{OpenCL interoperability interface} \\\hline
+  \endhead
+\addInfoFootNotes{SYCL support for OpenCL 1.2 extensions}
+{table.extensionsupport}
+  \addInfoRow
+    {cl_khr_int64_base_atomics} {Yes} {Yes}
+  \addInfoRow
+    {cl_khr_int64_extended_atomics} {Yes} {Yes}
+  \addInfoRow
+    {cl_khr_fp16} {Yes} {Yes}
+  \addInfoRow
+    {cl_khr_3d_image_writes} {Yes} {Yes}
+  \addInfoRow
+    {cl_khr_gl_sharing} {No} {Yes}
+  \addInfoRow
+    {cl_apple_gl_sharing} {No} {Yes}
+  \addInfoRow
+    {cl_khr_d3d10_sharing} {No} {Yes}
+  \addInfoRow
+    {cl_khr_d3d11_sharing} {No} {Yes}
+  \addInfoRow
+    {cl_khr_dx9_media_sharing} {No} {Yes}
+\end{longtable}
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Half Precision Floating-Point
+%*******************************************************************************
+\section{Half Precision Floating-Point}
+\label{sec:extension-fp16}
+
+The half scalar data type: \codeinline{half} and the half vector data types: \codeinline{half1}, \codeinline{half2}, \codeinline{half3}, \codeinline{half4}, \codeinline{half8} and \codeinline{half16} must be available at compile-time. However if any of the above types are used in a SYCL kernel function, executing on a device which does not support the extension \codeinline{khr_fp16}, the \gls{sycl-runtime} must throw a \codeinline{feature_not_supported} exception.
+
+The conversion rules for half precision types follow the same rules as in the OpenCL 1.2 extensions specification \cite[par. 9.5.1]{openclext12}.
+
+The math functions for half precision types follow the same rules as in the OpenCL 1.2 extensions specification \cite[par. 9.5.2, 9.5.3, 9.5.4, 9.5.5]{openclext12}. The allowed error in ULP(Unit in the Last Place) is less than  8192, corresponding to Table 6.9 of the OpenCL 1.2 specification \cite{opencl12}.
+
+%*******************************************************************************
+% 64 bit atomics
+%*******************************************************************************
+\section{64 Bit Atomics}
+\label{sec:extension.64bit-atomics}
+
+The SYCL \codeinline{atomic} class can support 64 bit data types if the 64 bit
+extensions \codeinline{cl_khr_int64_base_atomics} and \codeinline{
+cl_khr_int64_extended_atomics} are supported by the SYCL \codeinline{device}
+which is executing the SYCL kernel function.
+
+The extension \codeinline{cl_khr_int64_base_atomics} adds support for the
+\codeinline{load}, \codeinline{store}, \codeinline{fetch_add},
+\codeinline{fetch_sub}, \codeinline{exchange} and
+\codeinline{compare_exchange_strong} member functions with 64 bit data types.
+
+The extension \codeinline{cl_khr_int64_extended_atomics} adds support for the
+\codeinline{fetch_min}, \codeinline{fetch_max}, \codeinline{fetch_and},
+\codeinline{fetch_or} and \codeinline{fetch_xor} member functions with 64 bit
+data types.
+
+%*******************************************************************************
+% Writting to 3D image memory objects
+%*******************************************************************************
+\section{Writing to 3D image memory objects}
+
+The \codeinline{accessor} class for target
+\codeinline{access::target::image} in SYCL support member functions for writing
+3D image memory objects, but this functionality is \keyword{only
+allowed} on a device if the extension \tf{cl_khr_3d_image_writes} is
+supported on that \keyword{device}.
+
+\section{Interoperability with OpenGL}
+
+Interoperability between SYCL and OpenGL is not directly provided by the SYCL interface,
+however can be achieved via the SYCL OpenCL interoperability interface.
+
+\clearpage
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

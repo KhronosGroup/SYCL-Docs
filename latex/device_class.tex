@@ -1,0 +1,732 @@
+% !TEX root = sycl-1.2.1.tex
+
+%***********************************************************************************
+% Device class
+%***********************************************************************************
+
+\subsection{Device class}
+
+The SYCL \codeinline{device} class encapsulates a single SYCL device on which kernels may be executed. A SYCL device may be an OpenCL device in which case it must encapsulate a valid underlying OpenCL \codeinline{cl_device_id}, or it may be a SYCL host device in which case it must not.
+
+All member functions of the \codeinline{device} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+
+The default constructor of the SYCL \codeinline{device} class will construct a
+host device. The explicit constructor of the SYCL \codeinline{device} class
+which takes a \codeinline{device_selector} will construct a host device if
+\codeinline{select_device} returns a host device, otherwise will construct an
+OpenCL device. The OpenCL interop constructor of the SYCL \codeinline{device}
+class will construct an OpenCL device.
+
+A SYCL \codeinline{device} can be partitioned into multiple SYCL devices, by calling the \codeinline{create_sub_devices()} member function template. The resulting SYCL \codeinline{device}s are considered sub devices, and it is valid to partition these sub devices further. The range of support for this feature is implementation defined and can be queried for through \codeinline{get_info()}.
+
+For convenience there are member functions that check the device type. The member function \codeinline{is_host()} returns true if the SYCL \codeinline{device} is a host device and the member functions \codeinline{is_cpu()}, \codeinline{is_gpu()} and \codeinline{is_accelerator()} return true if the device type is \codeinline{info::device_type::cpu}, \codeinline{info::device_type::gpu} or \codeinline{info::device_type::accelerator} respectively.
+
+The SYCL \codeinline{device} class provides the common reference semantics
+(see Section~\ref{sec:reference-semantics}).
+
+\subsubsection{Device interface}
+
+A synopsis of the SYCL \codeinline{device} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{device} class are listed in Tables~\ref{table.constructors.device}, \ref{table.members.device} and \ref{table.staticmembers.device} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+
+% Interface of the device class
+\lstinputlisting{headers/device.h}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+    \addFootNotes{Constructors of the SYCL \codeinline{device} class}{table.constructors.device}
+  \addRow
+    {device()}
+    {
+      Constructs a SYCL \codeinline{device} instance as a host device.
+    }
+  \addRow
+    {explicit device(const device_selector \&deviceSelector)}
+    {
+      Constructs a SYCL \codeinline{device} instance using the device selected by the \codeinline{deviceSelector} provided.
+    }
+  \addRow
+    {explicit device(cl_device_id deviceId)}
+    {    
+     Constructs a SYCL \codeinline{device} instance from an OpenCL \codeinline{cl_device_id} in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+  \addFootNotes{Member functions of the SYCL \codeinline{device} class}{table.members.device}
+  \addRow
+    {cl_device_id get() const}
+    { 
+      Returns a valid \codeinline{cl_device_id} instance in accordance with the requirements described in \ref{sec:opencl-interoperability}.
+    }
+  \addRow
+   {platform get_platform() const}
+   {
+     Returns the associated SYCL \codeinline{platform}. If this SYCL \codeinline{device} is an OpenCL device then the SYCL \codeinline{platform} must encapsulate the OpenCL \codeinline{cl_plaform_id} associated with the underlying OpenCL \codeinline{cl_device_id} of this SYCL \codeinline{device}. If this SYCL \codeinline{device} is a host device then the SYCL \codeinline{platform} must be a host platform. The value returned must be equal to that returned by \codeinline{get_info<info::device::platform>()}.
+   }
+  \addRow
+    {bool is_host() const}
+    {
+      Returns true if this SYCL \codeinline{device} is a host device.
+    }
+   \addRow
+    {bool is_cpu() const}
+    {
+      Returns true if this SYCL \codeinline{device} is an OpenCL device and the device type is \codeinline{info::device_type::cpu}.
+    }
+   \addRow
+    {bool is_gpu() const}
+    {
+      Returns true if this SYCL \codeinline{device} is an OpenCL device and the device type is \codeinline{info::device_type::gpu}.
+    }
+   \addRow
+    {bool is_accelerator() const}
+    {
+      Returns true if this SYCL \codeinline{device} is an OpenCL device and the device type is \codeinline{info::device_type::accelerator}.
+    }
+  \addRowTwoL
+    {template <info::device param> typename info::param_traits<info::device, param>::return_type}
+    {  get_info() const}
+    {
+      Queries this SYCL \codeinline{device} for information requested by the template parameter \codeinline{param}.
+      Specializations of \codeinline{info::param_traits} must be defined in accordance with the info parameters in Table~\ref{table.device.info} to facilitate returning the type associated with the \codeinline{param} parameter.
+    }
+  \addRow
+    {bool has_extension (const string_class \&extension) const}
+    {
+      Returns true if this SYCL \codeinline{device} supports the extension queried by the \codeinline{extension} parameter.     
+    }
+  \addRowThreeSL
+    {template <info::partition_property prop>}
+    {vector_class<device> create_sub_devices(}
+    { size_t nbSubDev) const}
+    {
+      Available only when prop is \codeinline{info::partition_property::partition_equally}.
+      Returns a vector_class of sub devices partitioned from this SYCL \codeinline{device} equally based on the \codeinline{nbSubDev} parameter.   
+      If this SYCL \codeinline{device} does not support \codeinline{info::partition_property::partition_equally} a \codeinline{feature_not_supported} exception must be thrown.
+    }
+  \addRowThreeSL
+    {template <info::partition_property prop>}
+    {vector_class<device> create_sub_devices(}
+    { const vector_class<size_t> \&counts) const}
+    {
+      Available only when prop is
+      \codeinline{info::partition_property::partition_by_count}.
+      Returns a vector_class of sub devices partitioned from this SYCL \codeinline{device} by count sizes based on the \codeinline{counts} parameter.      
+      If the SYCL \codeinline{device} does not support \codeinline{info::partition_property::partition_by_count} a \codeinline{feature_not_supported} exception must be thrown.
+    }
+  \addRowThreeSL
+    {template <info::partition_property prop>}
+    {vector_class<device> create_sub_devices(}
+    { info::affinity_domain affinityDomain) const}
+    {
+      Available only when prop is
+      \codeinline{info::partition_property::partition_by_affinity_domain}.
+      Returns a vector_class of sub devices partitioned from this SYCL \codeinline{device} by affinity domain based on the \codeinline{affinityDomain} parameter.
+      Partitions the device into sub devices based upon the affinity domain.
+      If the SYCL \codeinline{device} does not support \codeinline{info::partition_property::partition_by_affinity_domain} or the SYCL \codeinline{device} does not support \codeinline{info::affinity_domain} provided a \codeinline{feature_not_supported} exception must be thrown.
+    }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Static member function}
+  \addFootNotes{Static member functions of the SYCL \codeinline{device} class}{table.staticmembers.device}
+  \addRowFourL
+   {static vector_class<device>}
+   {  get_devices(}
+   {  info::device_type deviceType = }
+   {  info::device_type::all)}
+   {
+     Returns a \codeinline{vector_class} containing all SYCL \codeinline{device}s available in the system of the device type specified by the parameter \codeinline{deviceType}. The returned \codeinline{vector_class} must contain a single SYCL \codeinline{device} that is a host device, permitted by the \codeinline{deviceType} parameter.
+   }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%***********************************************************************************
+% Device information descriptors
+%***********************************************************************************
+\subsubsection{Device information descriptors}
+
+A SYCL \codeinline{device} can be queried for all of the following information using the \codeinline{get_info} member function. All SYCL \codeinline{device}s must have valid values for every query, including a host device. The information that can be queried is described in Table~\ref{table.device.info}. The interface for all information types and enumerations are described in appendix~\ref{appendix.device.descriptors}.
+
+\fixme{UPDATE: info::device::address_bits changed from unsigned int to cl_uint.}
+\fixme{info tables consistency changes. Table description changed to Device
+information descriptors.}
+
+%-------------------------------------------------------------------------------
+\startInfoTableDims{Device descriptors}{5cm}{2.5cm}{6.5cm}
+\addInfoFootNotes{Device information descriptors}{table.device.info}
+    \addInfoRow
+      {info::device::device_type} {info::device_type}
+      {
+        Returns the device type. Must not return \codeinline{info::device_type::all}.
+        }
+
+    \addInfoRow
+      {info::device::vendor_id}
+      {cl_uint}
+      {
+        Returns a unique vendor device identifier. An example of a unique
+        device identifier could be the PCIe ID.
+     }
+
+    \addInfoRow
+      {info::device::max_compute_units} {cl_uint}
+      {
+         Returns the number of parallel compute units available. 
+         The minimum value is 1.
+         }
+
+    \addInfoRow
+       {info::device::max_work_item_dimensions } {cl_uint}
+       {
+         Returns the maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model.
+         The minimum value is 3 if this SYCL \codeinline{device} is not of device type \codeinline{info::device_type::custom}.
+         }
+
+     \addInfoRow
+       {info::device::max_work_item_sizes} {id<3>}
+       {
+         Returns the maximum number of work-items that are permitted in each
+           dimension of the work-group of the \codeinline{nd_range}. The minimum value
+           is $(1, 1, 1)$ for \codeinline{device}s that are not of device type
+           \codeinline{info::device_type::custom}.
+       }
+
+     \addInfoRow
+       {info::device::max_work_group_size}
+       {size_t }
+       {
+         Returns the maximum number of work-items that are permitted in a work-group executing a kernel on a single compute unit.
+         The minimum value is 1.
+       }
+
+     \addInfoRow
+       {
+         info::device::preferred_vector_width_char
+         info::device::preferred_vector_width_short
+         info::device::preferred_vector_width_int
+         info::device::preferred_vector_width_long
+         info::device::preferred_vector_width_float
+         info::device::preferred_vector_width_double
+         info::device::preferred_vector_width_half
+       }
+       {cl_uint}
+       {
+         Returns the preferred native vector width size for built-in scalar types that can be put into vectors. The vector width is defined as the number of scalar elements that can be stored in the vector. Must return 0 for \codeinline{info::device::preferred_width_double} if the \codeinline{cl_khr_fp64} extension is not supported by this SYCL \codeinline{device} and must return 0 for  \codeinline{info::device::preferred_vector_width_half} if the \codeinline{cl_khr_fp16} extension is not supported by this SYCL \codeinline{device}.
+       }
+     \addInfoRow
+    {
+         info::device::native_vector_width_char
+         info::device::native_vector_width_short
+         info::device::native_vector_width_int
+         info::device::native_vector_width_long
+         info::device::native_vector_width_float
+         info::device::native_vector_width_double
+         info::device::native_vector_width_half
+       }
+       {cl_uint}
+       {
+    Returns the native ISA vector width. The vector width is defined as the number of scalar elements that can be stored in the vector. Must return 0 for \codeinline{info::device::preferred_width_double} if the \codeinline{cl_khr_fp64} extension is not supported by this SYCL \codeinline{device} and must return 0 for  \codeinline{info::device::preferred_vector_width_half} if the \codeinline{cl_khr_fp16} extension is not supported by this SYCL \codeinline{device}.
+      }
+   \addInfoRow
+     {info::device::max_clock_frequency}
+     {cl_uint}
+     {
+         Returns the maximum configured clock frequency of this SYCL \codeinline{device} in MHz.
+     }
+
+   \addInfoRow
+     {info::device::address_bits} {cl_uint}
+     {
+   Returns the default compute device address space size specified as an unsigned integer value in bits. Must return either 32 or 64.
+     }
+
+    \addInfoRow
+     {info::device::max_mem_alloc_size}
+     {cl_ulong}
+     {
+      Returns the maximum size of memory object allocation in  bytes. The minimum value is max (1/4th of \codeinline{info::device::global_mem_size},128*1024*1024) if this SYCL \codeinline{device} is not of device type \codeinline{info::device_type::custom}.
+     }
+
+   \addInfoRow
+     {info::device::image_support}
+     {bool}
+     {Returns true if images are supported by this SYCL \codeinline{device} and false if they are not. }
+
+   \addInfoRow
+     {info::device::max_read_image_args}
+     {cl_uint}
+     {
+      Returns the maximum number of simultaneous image objects that can be read from by a kernel. The minimum value is 128 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+        }
+
+   \addInfoRow
+     {info::device::max_write_image_args}
+     {cl_uint}
+     {
+    Returns the maximum number of simultaneous image objects that can be written to by a kernel. The minimum value is 8 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+     }
+
+   \addInfoRow
+     {info::device::image2d_max_width}
+     {size_t}
+     {
+    Returns the maximum width of a 2D image or 1D image in pixels. The minimum value is 8192 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+     }
+
+   \addInfoRow
+     {info::device::image2d_max_height}
+     {size_t}
+     {
+    Returns the maximum height of a 2D image in pixels. The minimum value is 8192 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+     }
+
+   \addInfoRow
+     {info::device::image3d_max_width}
+     {size_t}
+     {
+     Returns the maximum width of a 3D image in pixels. The minimum value is 2048 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+     }
+
+   \addInfoRow
+     {info::device::image3d_max_height}
+     {size_t}
+     {
+     Returns the maximum height of a 3D image in pixels. The minimum value is 2048 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+     }
+
+  \addInfoRow
+  {info::device::image3d_max_depth}
+  {size_t}
+  {
+    Returns the maximum depth of a 3D image in pixels. The minimum value is 2048 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+  }
+  
+  \addInfoRow
+  {info::device::image_max_buffer_size}
+  {size_t}
+  {
+      Returns the number of pixels for a 1D image created from a buffer object. The minimum value is 65536 if \codeinline{info::device::image_support} if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}. Note that this information is intended for OpenCL interoperability only as this feature is not supported in SYCL.
+  }
+
+  \addInfoRow
+  {info::device::image_max_array_size}
+  {size_t}
+  {
+   Returns the maximum number of images in a 1D or 2D image array. The minimum value is 2048 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+   }
+
+  \addInfoRow
+  {info::device::max_samplers}
+  {cl_uint}
+  {
+   Returns the maximum number of samplers that can be used in a kernel.  The minimum value is 16 if \codeinline{info::device::image_support} returns true for this SYCL \codeinline{device}.
+    }
+
+  \addInfoRow
+  {info::device::max_parameter_size}
+  {size_t}
+  {
+   Returns the maximum size in bytes of the arguments that can be passed to a kernel. The minimum value is 1024 if this SYCL \codeinline{device} is not of device type \codeinline{info::device_type::custom}. For this minimum value, only a maximum of 128 arguments can be passed to a kernel.
+    }
+
+  \addInfoRow
+  {info::device::mem_base_addr_align}
+  {cl_uint}
+  {
+   Returns the minimum value in bits of the largest supported SYCL built-in
+    data type if this SYCL \codeinline{device} is not of device type \codeinline{info::device_type::custom}.
+    }
+
+  \addInfoRow
+  {info::device::half_fp_config}
+  {vector_class<info::fp_config>}
+  {
+    Returns a \codeinline{vector_class} of \codeinline{info::fp_config} describing the half precision floating-point capability of this SYCL \codeinline{device}. The \codeinline{vector_class} may contain zero or more of the following values:
+  \begin{itemize}
+  \item \codeinline{info::fp_config::denorm}: denorms are supported.
+  \item \codeinline{info::fp_config::inf_nan}: INF and quiet NaNs are
+  supported.
+  \item \codeinline{info::fp_config::round_to_nearest}: round to
+  nearest even rounding mode is supported.
+  \item \codeinline{info::fp_config::round_to_zero}: round to zero
+  rounding mode is supported.
+  \item \codeinline{info::fp_config::round_to_inf}: round to positive
+  and negative infinity rounding modes are supported.
+  \item \codeinline{info::fp_config::fma}: IEEE754-2008 fused multiply add
+  is supported.
+  \item \codeinline{info::fp_config::correctly_rounded_divide_sqrt}: divide and sqrt
+        are correctly rounded as defined by the IEEE754 specification.
+    \item \codeinline{info::fp_config::soft_float}: basic floating-point operations
+        (such as addition, subtraction, multiplication) are implemented in software.
+   \end{itemize}
+    If half precision is supported by this SYCL \codeinline{device} (i.e. the \codeinline{cl_khr_fp16} extension is supported) there is no minimum floating-point capability. If half support is not supported the returned \codeinline{vector_class} must be empty.
+  }
+
+  \addInfoRow
+  {info::device::single_fp_config}
+  {vector_class<info::fp_config>}
+  {
+    Returns a vector_class of \codeinline{info::fp_config} describing the single precision floating-point capability of this SYCL \codeinline{device}. The \codeinline{vector_class} must contain one or more of the following values:
+  \begin{itemize}
+  \item \codeinline{info::fp_config::denorm}: denorms are supported.
+  \item \codeinline{info::fp_config::inf_nan}: INF and quiet NaNs are
+  supported.
+  \item \codeinline{info::fp_config::round_to_nearest}: round to
+  nearest even rounding mode is supported.
+  \item \codeinline{info::fp_config::round_to_zero}: round to zero
+  rounding mode is supported.
+  \item \codeinline{info::fp_config::round_to_inf}: round to positive
+  and negative infinity rounding modes are supported.
+  \item \codeinline{info::fp_config::fma}: IEEE754-2008 fused multiply add
+  is supported.
+  \item \codeinline{info::fp_config::correctly_rounded_divide_sqrt}: divide and sqrt
+        are correctly rounded as defined by the IEEE754 specification.
+    \item \codeinline{info::fp_config::soft_float}: basic floating-point operations
+        (such as addition, subtraction, multiplication) are implemented in software.
+   \end{itemize}
+    If this SYCL \codeinline{device} is not of type \codeinline{info::device_type::custom} then the minimum floating-point capability must be:
+    \codeinline{info::fp_config::round_to_nearest} and \codeinline{info::fp_config::inf_nan}.
+  }
+
+  \addInfoRow
+  {info::device::double_fp_config}
+  {vector_class<info::fp_config>}
+  {
+  Returns a vector_class of \codeinline{info::fp_config} describing the single precision floating-point capability of this SYCL \codeinline{device}. The \codeinline{vector_class} may contain zero or more of the following values:
+  \begin{itemize}
+    \item \codeinline{info::fp_config::denorm}: denorms are
+    supported.
+    \item \codeinline{info::fp_config::inf_nan}: INF and NaNs are
+    supported.
+    \item \codeinline{info::fp_config::round_to_nearest}: round to
+    nearest even rounding mode is supported.
+    \item \codeinline{info::fp_config::round_to_zero}: round to
+    zero rounding mode is supported.
+    \item \codeinline{info::fp_config::round_to_inf}: round to
+    positive and negative infinity rounding modes are supported.
+    \item \codeinline{info::fp_config::fma}: IEEE754-2008 fused
+    multiply-add is supported.
+    \item \codeinline{info::fp_config::soft_float}: basic
+    floating-point operations (such as addition, subtraction, multiplication) are implemented in software.
+  \end{itemize}
+  If double precision is supported by this SYCL \codeinline{device} (i.e. the \codeinline{cl_khr_fp64} extension is supported) and this SYCL \codeinline{device} is not of type \codeinline{info::device_type::custom} then the minimum floating-point capability must be:
+  \codeinline{info::fp_config::fma}, \codeinline{info::fp_config::round_to_nearest}, \codeinline{info::fp_config::round_to_zero}, \codeinline{info::fp_config::round_to_inf}, \codeinline{info::fp_config::inf_nan} and \codeinline{info::fp_config::denorm}. If double support is not supported the returned \codeinline{vector_class} must be empty.
+  }
+
+  \addInfoRow
+  {info::device::global_mem_cache_type}
+  {info::global_mem_cache\-_type}
+  { 
+    Returns the type of global memory cache supported.
+  }
+
+  \addInfoRow
+  {info::device::global_mem_cache_line_size}
+  {cl_uint}
+  {
+    Returns the size of global memory cache line in bytes.
+  }
+
+  \addInfoRow
+  {info::device::global_mem_cache_size}
+  {cl_ulong}
+  {Returns the size of global memory cache in bytes.}
+
+  \addInfoRow
+  {info::device::global_mem_size}
+  {cl_ulong}
+  {Returns the size of global device memory in bytes.}
+
+  \addInfoRow
+  {info::device::max_constant_buffer_size}
+  {cl_ulong}
+  {
+  Returns the maximum size in bytes of a constant buffer allocation. The minimum value is 64 KB if this SYCL \codeinline{device} is not of type \codeinline{info::device_type::custom}.
+  }
+
+  \addInfoRow
+  {info::device::max_constant_args}
+  {cl_uint}
+  {
+  Returns the maximum number of constant arguments that can be declared in a kernel. The minimum value is 8 if this SYCL \codeinline{device} is not of type \codeinline{info::device_type::custom}.
+  }
+
+  \addInfoRow
+  {info::device::local_mem_type}
+  {info::local_mem_type}
+  {
+   Returns the type of local memory supported. This can
+  be \codeinline{info::local_mem_type::local} implying dedicated
+  local memory storage such as SRAM, or \codeinline{info::local_mem_type::global}.
+  If this SYCL \codeinline{device} is of type \codeinline{info::device_type::custom} this can also be \codeinline{info::local_mem_type::none}, indicating local memory is not supported.
+  }
+
+  \addInfoRow
+  {info::device::local_mem_size}
+  {cl_ulong}
+  {
+  Returns the size of local memory arena in bytes. The minimum value is 32 KB if this SYCL \codeinline{device} is not of type \codeinline{info::device_type::custom}.
+  }
+
+  \addInfoRow
+  {info::device::error_correction_support}
+  {bool}
+  {
+   Returns true if the device implements error correction for all accesses to
+  compute device memory (global and constant). Returns false if the device does
+  not implement such error correction.
+  }
+
+  \addInfoRow
+  {info::device::host_unified_memory}
+  {bool}
+  {
+   Returns true if the device and the host have a unified memory subsystem and
+  returns false otherwise.
+  }
+
+  \addInfoRow
+  {info::device::profiling_timer_resolution}
+  {size_t}
+  {
+  Returns the resolution of device timer in nanoseconds.
+  }
+
+  \addInfoRow
+  {info::device::is_endian_little}
+  {bool}
+  {
+  Returns true if this SYCL \codeinline{device} is a little endian device and returns false otherwise.
+  }
+
+  \addInfoRow
+  {info::device::is_available}
+  {bool}
+  {
+  Returns true if the SYCL \codeinline{device} is available and returns false if the device is not
+  available.
+  }
+
+  \addInfoRow
+  {info::device::is_compiler_available}
+  {bool}
+  {
+  Returns false if the implementation does not have a compiler available to
+  compile the program source. An OpenCL device that conforms to the OpenCL Embedded Profile may not have an online compiler available.
+  }
+
+  \addInfoRow
+  {info::device::is_linker_available}
+  {bool}
+  {
+  Returns false if the implementation does not have a linker available.  An
+  OpenCL device that conforms to the OpenCL Embedded Profile may not have a linker
+  available. However, it needs to be true if \codeinline{info::device::is_compiler_available} returns true for this SYCL \codeinline{device}.
+  }
+  
+    \addInfoRow
+  {info::device::execution_capabilities}
+  {vector_class<info::execution_\-capability>}
+  {
+    Returns a \codeinline{vector_class} of the \codeinline{info::execution_capability} describing the supported execution capabilities.
+    Note that this information is intended for OpenCL interoperability only as  SYCL only supports \codeinline{info::execution_capability::exec_kernel}.
+    }
+    
+    \addInfoRow
+    {info::device::queue_profiling}
+    {bool}
+    {
+      Returns true if this \codeinline{device} supports queue profiling.
+    }
+
+  \addInfoRow
+  {info::device::built_in_kernels}
+  {vector_class<string_class>}
+  { Returns a vector_class of built-in OpenCL
+  kernels supported by this SYCL \codeinline{device}.
+  }
+
+  \addInfoRow
+  {info::device::platform}
+  {platform}
+  {Returns the SYCL \codeinline{platform} associated with this SYCL \codeinline{device}.}
+
+  \addInfoRow
+  {info::device::name}
+  {string_class}
+  {Returns the device name of this SYCL \codeinline{device}.}
+
+  \addInfoRow
+  {info::device::vendor}
+  {string_class}
+  {Returns the vendor of this SYCL \codeinline{device}.}
+
+  \addInfoRow
+  {info::device::driver_version}
+  {string_class}
+  { Returns the OpenCL software driver version as a \codeinline{string_class} in the form: major_number.minor_number, if this SYCL \codeinline{device} is an OpenCL device. Must return a string_class with the value \codeinline{"1.2"} if this SYCL \codeinline{device} is a host device.
+  }
+
+  \addInfoRow
+  {info::device::profile}
+  {string_class}
+  {
+  Returns the OpenCL profile as a \codeinline{string_class}, if this SYCL \codeinline{device} is an OpenCL device. The value returned can be one of the following strings:
+  \begin{itemize}
+    \item FULL_PROFILE - if the device supports
+    the OpenCL specification (functionality
+    defined as part of the core specification and
+    does not require any extensions to be
+    supported).
+    \item EMBEDDED_PROFILE - if the device
+    supports the OpenCL embedded profile.
+  \end{itemize}
+  Must return a \codeinline{string_class} with the value "FULL PROFILE" if this is a host device.
+  }
+
+  \addInfoRow
+  {info::device::version}
+  {string_class}
+  {
+   Returns the SYCL version as a \codeinline{string_class} in the form:
+  \codeinline{<major_version>.<minor_version>}.
+  If this SYCL \codeinline{device} is a host device, the <major_version>.<minor_version> value returned must be \codeinline{"1.2"}.
+  }
+  
+  \addInfoRow
+  {info::device::opencl_c_version}
+  {string_class}
+  {
+      Returns a \codeinline{string_class} describing the OpenCL C version that is supported by the OpenCL C compiler of this \codeinline{device}.
+      Note that this information is intended for OpenCL interoperability only as SYCL kernel functions are compiled offline.
+    }
+
+  \addInfoRow
+  {info::device::extensions}
+  {vector_class<string_class>}
+  {
+         Returns a \codeinline{vector_class} of extension names (the extension names
+         do not contain any spaces) supported by this SYCL \codeinline{device}. The extension names returned can be vendor supported extension names and one or more of the following Khronos approved extension names:
+  \begin{itemize}
+    \item \codeinline{cl_khr_int64_base_atomics}
+    \item \codeinline{cl_khr_int64_extended_atomics}
+    \item \codeinline{cl_khr_3d_image_writes}
+    \item \codeinline{cl_khr_fp16}
+    \item \codeinline{cl_khr_gl_sharing}
+    \item \codeinline{cl_khr_gl_event}
+    \item \codeinline{cl_khr_d3d10_sharing}
+    \item \codeinline{cl_khr_dx9_media_sharing}
+    \item \codeinline{cl_khr_d3d11_sharing}
+    \item \codeinline{cl_khr_depth_images}
+    \item \codeinline{cl_khr_gl_depth_images}
+    \item \codeinline{cl_khr_gl_msaa_sharing}
+    \item \codeinline{cl_khr_image2d_from_buffer}
+    \item \codeinline{cl_khr_initialize_memory}
+    \item \codeinline{cl_khr_context_abort}
+    \item \codeinline{cl_khr_spir}
+  \end{itemize}
+  If this SYCL \codeinline{device} is an OpenCL device then following approved Khronos extension names must be returned by all device that support OpenCL C 1.2:
+  \begin{itemize}
+    \item \codeinline{cl_khr_global_int32_base_atomics}
+    \item \codeinline{cl_khr_global_int32_extended_atomics}
+    \item \codeinline{cl_khr_local_int32_base_atomics}
+    \item \codeinline{cl_khr_local_int32_extended_atomics}
+    \item \codeinline{cl_khr_byte_addressable_store}
+    \item \codeinline{cl_khr_fp64} (for backward compatibility if
+    double precision is supported)
+  \end{itemize}
+  Please refer to the OpenCL 1.2 Extension
+  Specification for a detailed description of
+  these extensions.
+  }
+
+  \addInfoRow
+  {info::device::printf_buffer_size}
+  {size_t}
+  {
+         Returns the maximum size of the internal buffer that holds the output of printf calls from a kernel. The minimum value is 1 MB if \codeinline{info::device::profile} returns true for this SYCL \codeinline{device}.
+  }
+
+  \addInfoRow
+  {info::device::preferred_interop_user_sync}
+  {bool}
+  {
+  Returns true if the preference for this SYCL \codeinline{device} is for the user to be responsible for synchronization, when sharing memory objects between OpenCL and other APIs  such as DirectX, false if the device/implementation has a performant path for performing synchronization of memory object shared between OpenCL and other APIs such as DirectX.
+  }
+
+  \addInfoRow
+  {info::device::parent_device}
+  {device}
+  {
+  Returns the parent SYCL \codeinline{device} to which this sub-device is a child if this is a sub-device.
+  Must throw a \codeinline{invalid_object_error} SYCL exception if this SYCL \codeinline{device} is not a sub device.
+  }
+
+  \addInfoRow
+  {info::device::partition_max_sub_devices}
+  {cl_uint}
+  {
+  Returns the maximum number of subdevices that can be created when this SYCL \codeinline{device} is partitioned. The value returned cannot exceed the value returned by \codeinline{info::device::device_max_compute_units}.
+  }
+
+  \addInfoRow
+  {info::device::partition_properties}
+  {vector_class<info::partition_prop\-erty>}
+  {
+  Returns the partition properties supported by this SYCL \codeinline{device}; a vector of \codeinline{info::partition_property}. If this SYCL \codeinline{device} cannot be partitioned into at least two sub devices then the returned vector must be empty.
+  }
+
+  \addInfoRow
+  {info::device::partition_affinity_domains}
+  {vector_class<info::parition_affini\-ty_domain>}
+  {
+  Returns a vector_class of the partition affinity domains supported by this SYCL \codeinline{device} when partitioning with \codeinline{info::partition_property::parition_by_affinity_domain}.
+  }
+
+  \addInfoRow
+  {info::device::partition_type_property}
+  {info::partition_prop\-erty}
+  {
+  Returns the partition property of this SYCL \codeinline{device}. If this SYCL \codeinline{device} is not a sub device then the the return value must be \codeinline{info::partition_property::no_partition}, otherwise it must be one of the following values:
+  \begin{itemize}
+    \item info::partition_property::partition_equally
+    \item info::partition_property::partition_by_counts
+    \item info::partition_property::partition_by_affinity_domain
+  \end{itemize}
+  }
+  
+  \addInfoRow
+  {info::device::partition_type_affinity_domain}
+  {info::partition_affi-nity_domain}
+  {
+  Returns the partition affinity domain of this SYCL \codeinline{device}. If this SYCL \codeinline{device} is not a sub device or the sub device was not partitioned with \codeinline{info::partition_type::partition_by_affinity_domain} then the the return value must be \codeinline{info::partition_affinity_domain::not_applicable}, otherwise it must be one of the following values:
+  \begin{itemize}
+    \item info::partition_affinity_domain::numa
+    \item info::partition_affinity_domain::L4_cache
+    \item info::partition_affinity_domain::L3_cache
+    \item info::partition_affinity_domain::L2_cache
+    \item info::partition_affinity_domain::L1_cache
+    \item info::partition_affinity_domain::next_partitionable
+  \end{itemize}
+  }
+
+  \addInfoRow
+  {info::device::reference_count}
+  {cl_uint}
+  {
+  Returns the device reference count. If the device is not a sub-device the value returned must be 1.
+  }
+\completeTable
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

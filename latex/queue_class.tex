@@ -1,0 +1,356 @@
+% !TEX root = sycl-1.2.1.tex
+
+%*******************************************************************************
+% Queue class
+%*******************************************************************************
+
+The SYCL \codeinline{queue} class encapsulates a single SYCL queue which
+schedules kernels on a SYCL device. A SYCL queue may be an OpenCL queue in
+which case it must encapsulate at least one valid underlying OpenCL
+\codeinline{cl_command_queue}, or it may be a SYCL host queue in which case it
+must not. The underlying OpenCL \codeinline{cl_command_queue}(s) may execute 
+either in-order or out-of-order, however the SYCL \codeinline{queue}
+must behave as an out-of-order queue.
+
+A SYCL \codeinline{queue} can be used to submit \glspl{command-group} to be
+executed by the \gls{sycl-runtime} using the \codeinline{submit} member
+function.
+
+All member functions of the \codeinline{queue} class are synchronous and errors
+are handled by throwing synchronous SYCL exceptions. The \codeinline{submit}
+member function schedules \glspl{command-group} asynchronously, so any errors
+in the submission of a \gls{command-group} are handled by throwing synchronous
+SYCL exceptions. Any exceptions from the \gls{command-group} after it has
+been submitted are handled by throwing asynchronous SYCL exceptions to an
+\gls{async-handler} on calling \codeinline{throw_asynchronous} or \codeinline{
+wait_and_throw}, or on destruction of the SYCL \codeinline{queue}, if one was
+provided when the SYCL \codeinline{queue} was constructed.
+
+A SYCL \codeinline{queue} can wait for all \glspl{command-group} that it has
+submitted by calling \codeinline{wait} or \codeinline{wait_and_throw}.
+
+The default constructor of the SYCL \codeinline{queue} class will construct a
+queue based on the SYCL \codeinline{device} returned from the \codeinline{default_selector} (see Section~\ref{sec:device-selector}), therefore
+the constructed SYCL \codeinline{queue} could be either a host queue or a device
+queue. All other constructors construct a host or device queue, determined by the
+parameters provided. All constructors will implicitly construct a SYCL
+\codeinline{platform}, \codeinline{device} and \codeinline{context} in order to
+facilitate the construction of the queue.
+
+With the exception of the interoperability constructor, each constructor takes as the last
+parameter an optional SYCL \codeinline{property_list} to provide properties to
+the SYCL \codeinline{queue}.
+
+The SYCL \codeinline{queue} class provides the common reference semantics
+(see Section~\ref{sec:reference-semantics}).
+
+%*******************************************************************************
+% Queue interface
+%*******************************************************************************
+\subsubsection{Queue interface}
+
+A synopsis of the SYCL \codeinline{queue} class is provided below. The
+constructors and member functions of the SYCL \codeinline{queue} class are
+listed in Tables~\ref{table.constructors.queue} and \ref{table.members.queue}
+respectively. The additional common special member functions and common member
+functions are listed in \ref{sec:reference-semantics} in
+Tables~\ref{table.specialmembers.common.reference} and
+\ref{table.members.common.reference}, respectively.
+
+%Interface for class: queue
+\lstinputlisting{headers/queue.h}
+
+%-------------------------------------------------------------------------------
+\startTable{Constructor}
+  \addFootNotes{Constructors of the \codeinline{queue} class}
+  {table.constructors.queue}
+  \addRow
+    { explicit queue(const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance using the device returned by
+      an instance of \codeinline{default_selector}. Zero or more properties can
+      be provided to the constructed SYCL \codeinline{queue} via an instance of
+      \codeinline{property_list}.
+    }
+  \addRowTwoL
+    { queue(const async_handler \&asyncHandler, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance with an \codeinline{
+      async_handler} using the device returned by an instance of \codeinline{
+      default_selector}. Zero or more properties can be provided to the
+      constructed SYCL \codeinline{queue} via an instance of \codeinline{
+      property_list}.
+    }
+  \addRowTwoL
+    { queue(const device_selector \&deviceSelector, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance using the device returned by
+      the \codeinline{deviceSelector} provided. Zero or more properties can be
+      provided to the constructed SYCL \codeinline{queue} via an instance of
+      \codeinline{property_list}.
+    }
+  \addRowThreeL
+    { queue(const device_selector \&deviceSelector, }
+    { const async_handler \&asyncHandler, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance with an \codeinline{
+      async_handler} using the device returned by the \codeinline{deviceSelector
+      } provided. Zero or more properties can be provided to the constructed
+      SYCL \codeinline{queue} via an instance of \codeinline{property_list}.
+    }
+  \addRowTwoL
+    { queue(const device \&syclDevice, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance using the \codeinline{
+      syclDevice} provided. Zero or more properties can be provided to the
+      constructed SYCL \codeinline{queue} via an instance of \codeinline{
+      property_list}.
+    }
+  \addRowThreeL
+    { queue(const device \&syclDevice, }
+    { const async_handler \&asyncHandler, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance with an \codeinline{
+      async_handler} using the \codeinline{syclDevice} provided. Zero or more
+      properties can be provided to the constructed SYCL \codeinline{queue}
+      via an instance of \codeinline{property_list}.
+    }
+  \addRowThreeL
+    { queue(const context \&syclContext, }
+    { const device_selector \&deviceSelector, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance that is associated with the
+      \codeinline{syclContext} provided, using the device returned by the
+      \codeinline{deviceSelector} provided. Must throw an
+      \codeinline{invalid_object_error} SYCL exception if
+      \codeinline{syclContext} does not encapsulate the SYCL
+      \codeinline{device} returned by \codeinline{deviceSelector}. Zero or more
+      properties can be provided to the constructed SYCL \codeinline{queue}
+      via an instance of \codeinline{property_list}.
+    }
+  \addRowFourL
+    { queue(const context \&syclContext, }
+    { const device_selector \&deviceSelector, }
+    { const async_handler \&asyncHandler, }
+    { const property_list \&propList = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance with an \codeinline{
+      async_handler} that is associated with the \codeinline{syclContext}
+      provided, using the device returned by the \codeinline{deviceSelector}
+      provided. Must throw an \codeinline{invalid_object_error} SYCL exception
+      if \codeinline{syclContext} does not encapsulate the SYCL
+      \codeinline{device} returned by \codeinline{deviceSelector}. Zero or more
+      properties can be provided to the constructed SYCL \codeinline{queue} via
+      an instance of \codeinline{property_list}.
+    }
+  \addRowThreeL
+    { queue(cl_command_queue clQueue,}
+    { const context \&syclContext, }
+    { const async_handler \&asyncHandler = \{\}) }
+    {
+      Constructs a SYCL \codeinline{queue} instance with an optional
+      \codeinline{async_handler} from an OpenCL \codeinline{cl_command_queue}
+      in accordance with the requirements described
+      in~\ref{sec:opencl-interoperability}.
+    }
+\completeInfoTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+  \addFootNotes{Member functions for class queue}{table.members.queue}
+  \addRow
+    {cl_command_queue get() const}
+    {   
+      Returns a valid \codeinline{cl_command_queue} instance in accordance with the requirements described in \ref{sec:opencl-interoperability}.    
+    }
+  \addRow
+    {context get_context () const}
+    {
+      Returns the SYCL queue's context.
+      Reports errors using SYCL exception classes.
+      The value returned must be equal to that returned by \codeinline{get_info<info::queue::context>()}.
+    }
+  \addRow
+    {device get_device () const}
+    {
+      Returns the SYCL device the queue is associated with.
+      Reports errors using SYCL exception classes.
+      The value returned must be equal to that returned by \codeinline{get_info<info::queue::devices>()}.
+    }
+  \addRow
+   {bool is_host () const}
+   {
+      Returns whether the queue is executing on a SYCL host device.
+   }
+  \addRow
+    {void wait() }
+    {
+      Performs a blocking wait for the completion all enqueued tasks
+      in the queue.  Synchronous errors will be reported through SYCL
+      exceptions.
+    }
+  \addRow
+    {void wait_and_throw () }
+    {
+      Performs a blocking wait for the completion all enqueued tasks
+      in the queue.  Synchronous errors will be reported via SYCL
+      exceptions. Asynchronous errors will be passed to the
+      \gls{async-handler} passed to the queue on
+      construction. If no \codeinline{async\_handler} was provided then
+      asynchronous exceptions will be lost.
+    }
+  \addRow
+    {void throw_asynchronous () }
+    {
+      Checks to see if any asynchronous errors have been produced by
+      the queue and if so reports them by passing them to the
+      \gls{async-handler} passed to the queue on
+      construction. If no \codeinline{async\_handler} was provided then
+      asynchronous exceptions will be lost.
+    }
+  \addRowFourL
+    { template <info::queue param> }
+    {  typename info::param_traits}
+    {  <info::queue, param>::return_type}
+    {  get\_info ()  const}
+    {Queries the platform for \keyword{cl_command_queue_info}}
+  \addRowTwoL
+    {template <typename T>}
+    {event submit(T cgf)}
+    {Submit a \gls{command-group-function-object} to the queue, in order to be scheduled
+    for execution on the device.}
+  \addRowThreeL
+    {template <typename T>}
+    {event submit(T cgf,}
+    {             queue \& secondaryQueue)}
+    {Submit a \gls{command-group-function-object} to the queue, in order to be scheduled
+    for execution on the device. On a kernel error, this \gls{command-group-function-object},
+    is then scheduled for execution on the secondary queue. Returns an
+    event, which corresponds to the queue the \gls{command-group-function-object}
+    is being enqueued on.}
+\completeTable
+%-------------------------------------------------------------------------------
+
+\subsubsection{Queue information descriptors}
+
+A SYCL \gls{queue} can be queried for all of the following information using the
+\codeinline{get_info} function. All SYCL queues have valid queries for them,
+including the SYCL host queue. The available information is in
+Table~\ref{table.queue.info}. The interface of all available device descriptors is
+in appendix~\ref{appendix.queue.descriptors}.
+
+\startInfoTable{Queue Descriptors}
+\addInfoFootNotes{Queue information descriptors}{table.queue.info}
+\addInfoRow
+{info::queue::context}
+{context}
+{
+  Returns the SYCL \codeinline{context} associated with this SYCL \codeinline{queue}.
+}
+\addInfoRow
+{info::queue::device}
+{device}
+{
+  Returns the SYCL \gls{device} associated with this SYCL \codeinline{queue}.
+}
+\addInfoRow
+{info::queue::reference_count}
+{cl_uint}
+{Return the command-queue reference count.}
+\completeTable
+
+\subsubsection{Queue Properties}
+\label{sec:queue-properties}
+
+The properties that can be provided when constructing the SYCL
+\codeinline{queue} class are describe in
+Table~\ref{table.properties.queue}.
+
+%---------------------------------------------------------------------
+\startTable{Property}
+\addFootNotes{Properties supported by the SYCL \codeinline{queue} class} {table.properties.queue}
+
+\addRow
+  { property::queue::enable_profiling }
+  {
+    The \codeinline{enable_profiling} property adds the requirement
+    that the \gls{sycl-runtime} must capture profiling information for
+    the \glspl{command-group} that are submitted from this SYCL
+    \codeinline{queue} and provide said information via the SYCL
+    \codeinline{event} class \codeinline{get_profiling_info} member
+    function, if the associated SYCL \codeinline{device} supports
+    queue profiling (i.e. the \codeinline{
+    info::device::queue_profiling} info parameter returns \codeinline{
+    true}).
+  }
+\completeTable
+%---------------------------------------------------------------------
+
+The constructors of the queue property classes are listed in Table~\ref{table.constructors.properties.queue}.
+
+%---------------------------------------------------------------------
+\startTable{Constructor}
+\addFootNotes{Constructors of the queue property classes}
+{table.constructors.properties.queue}
+\addRow
+{property::queue::enable_profiling::enable_profiling()}
+{
+  Constructs a SYCL \codeinline{enable_profiling} property instance.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+\subsubsection{Queue error handling}
+\label{sec:interface.queue.errors}
+
+Queue errors come in two forms:
+\begin{itemize}
+
+  \item
+    \textbf{Synchronous Errors} are those that we would expect to be
+    reported directly at the point of waiting on an event, and hence
+    waiting for a queue to complete, as well as any immediate errors
+    reported by enqueuing work onto a queue. Such errors are returned
+    through exceptions.
+
+  \item
+    \textbf{Asynchronous errors} are those that are produced through
+    callback functions only. These will be stored within the queue's
+    context until they are dispatched to the context's asynchronous
+    error handler, the \gls{async-handler}. If a queue is constructed 
+    with a user-supplied context, then it is this context's asynchronous error
+    handler to which asynchronous errors are reported. If a queue is constructed
+    without a user-supplied context, then the queue's constructor
+    can be supplied with a queue-specific asynchronous error handler
+    which will be used to construct the queue's context.
+    To ensure that such errors are
+    processed predictably in a known host thread, these errors are only
+    passed to the asynchronous error handler on request when either
+    \codeinline{wait_and_throw} is called or when
+    \codeinline{throw_asynchronous} is called. If no
+    asynchronous error handler is passed to the queue or its context
+    on construction, then such errors go unhandled, much as they would
+    if no callback were passed to an OpenCL context.
+
+\end{itemize}
+
+Note that if there are exceptions to be processed when a queue
+using an asynchronous handler is destructed, the handler is called and
+this might delay or block the destruction, according to the behavior
+of the handler.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

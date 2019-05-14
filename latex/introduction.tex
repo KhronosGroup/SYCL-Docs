@@ -1,0 +1,132 @@
+% !TEX root = sycl-1.2.1.tex
+
+\chapter{Introduction}
+
+SYCL (pronounced ``sickle'') is a
+royalty-free, cross-platform abstraction C++ programming model for
+OpenCL. SYCL builds on the underlying concepts, portability and
+efficiency of OpenCL while adding much of the ease of use and
+flexibility of single-source C++.
+Developers using SYCL are able to write standard
+C++ code, with many of the techniques they are accustomed to, such as
+inheritance and templating. At the same time developers have access to
+the full range of capabilities of OpenCL both through the features of
+the SYCL libraries and, where necessary, through interoperation with
+code written directly to the OpenCL APIs.
+
+SYCL implements a \gls{smcp}  design which offers the power of source
+integration while allowing toolchains to remain flexible. The \gls{smcp}
+design supports embedding of code intended to be compiled for an OpenCL device,
+for example a GPU, inline with host code. This embedding of code offers three
+primary benefits:
+\begin{description}
+\item[Simplicity]
+  For novice programmers, the separation of host and device source code in
+  OpenCL can become complicated to deal with, particularly when similar kernel
+  code is used for multiple different operations. A single compiler flow and
+  integrated tool chain combined with libraries that perform a lot of simple
+  tasks simplifies initial OpenCL programs to a minimum complexity. This reduces
+  the learning curve for programmers new to OpenCL and allows them to
+  concentrate on parallelization techniques rather than syntax.
+\item[Reuse]
+  C++'s type system allows for complex interactions between different code units
+  and supports efficient abstract interface design and reuse of library code.
+  For example, a \keyword{transform} or \keyword{map} operation applied to an
+  array of data may allow specialization on both the operation applied to each
+  element of the array and on the type of the data. The \gls{smcp} design of
+  SYCL enables this interaction to bridge the host code/device code boundary
+  such that the device code to be specialized on both of these factors directly
+  from the host code.
+\item[Efficiency]
+  Tight integration with the type system and reuse of library code enables a
+  compiler to perform inlining of code and to produce efficient specialized
+  device code based on decisions made in the host code without having to
+  generate kernel source strings dynamically.
+\end{description}
+
+SYCL is designed to allow a compilation flow where the source file is passed
+through multiple different compilers, including a standard C++ host compiler of
+the developer's choice, and where the resulting application combines the results
+of these compilation passes. This is distinct from a single-source flow that
+might use language extensions that preclude the use of a standard host compiler.
+The SYCL standard does not preclude the use of a single compiler flow, but is
+designed to not require it.
+
+The advantages of this design are two-fold. First, it offers better integration
+with existing tool chains. An application that already builds using a chosen
+compiler can continue to do so when SYCL code is added. Using the SYCL tools on
+a source file within a project will both compile for an OpenCL device and let
+the same source file be compiled using the same host compiler that the rest of
+the project is compiled with. Linking and library relationships are unaffected.
+This design simplifies porting of pre-existing applications to SYCL. Second, the
+design allows the optimal compiler to be chosen for each device where different
+vendors may provide optimized tool-chains.
+
+SYCL is designed to be as close to standard C++ as possible. In practice, this
+means that as long as no dependence is created on SYCL's integration with
+OpenCL, a standard C++ compiler can compile the SYCL programs and they will run
+correctly on host CPU. Any use of specialized low-level features can be masked
+using the C pre-processor in the same way that compiler-specific intrinsics may
+be hidden to ensure portability between different host compilers.
+
+SYCL retains the execution model, runtime feature set and device capabilities of
+the underlying OpenCL standard. The OpenCL C specification imposes some
+limitations on the full range of C++ features that SYCL is able to support. This
+ensures portability of device code across as wide a range of devices as
+possible. As a result, while the code can be written in standard C++ syntax with
+interoperability with standard C++ programs, the entire set of C++ features is
+not available in SYCL device code. In particular, SYCL  device code, as defined
+by this specification, does not support virtual function calls, function
+pointers in general, exceptions, runtime type information or the full set of C++
+libraries that may depend on these features or on features of a particular host
+compiler.
+
+The use of C++ features such as templates and inheritance on top of the OpenCL
+execution model opens a wide scope for innovation in software design for
+heterogeneous systems. Clean integration of device and host code within a single
+C++ type system enables the development of modern, templated libraries that
+build simple, yet efficient, interfaces to offer more developers access to
+OpenCL capabilities and devices. SYCL is intended to serve as a foundation for
+innovation in programming models for heterogeneous systems, that builds on an
+open and widely implemented standard foundation in the form of OpenCL.
+
+
+To reduce programming effort and increase the flexibility with which developers
+can write code, SYCL extends the underlying OpenCL model in two ways beyond the
+general use of C++ features:
+\begin{itemize}
+  \item
+    The hierarchical parallelism syntax offers a way of expressing the
+    data-parallel OpenCL execution model in an easy-to-understand C++ form.
+    It more cleanly layers parallel loops and synchronization points to avoid
+    fragmentation of code and to more efficiently map to CPU-style
+    architectures.
+  \item
+    Data access in SYCL is separated from data storage. By relying on the
+    C++-style resource acquisition is initialization (RAII) idiom to capture
+    data dependencies between device code blocks, the runtime library can track
+    data movement and provide correct behavior without the complexity of
+    manually managing event dependencies between kernel instances and without
+    the programming having to explicitly move data. This approach enables the
+    data-parallel task-graphs that are already part of the OpenCL execution
+    model to be built up easily and safely by SYCL programmers.
+\end{itemize}
+
+To summarize, SYCL enables OpenCL kernels to be written inside C++
+source files. This means that software developers can develop and use generic
+algorithms and data structures using standard C++ template techniques, while
+still supporting the multi-platform, multi-device heterogeneous execution of
+OpenCL. The specification has been designed to enable implementation across as
+wide a variety of platforms as possible as well as ease of integration with
+other platform-specific technologies, thereby letting both users and
+implementers build on top of SYCL as an open platform for heterogeneous
+processing innovation.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

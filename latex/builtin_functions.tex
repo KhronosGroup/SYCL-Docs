@@ -1,0 +1,1259 @@
+% !TEX root = sycl-1.2.1.tex
+
+%***********************************************************************************
+% SYCL built-in functions for SYCL host and device
+%***********************************************************************************
+%\section{SYCL built-in functions for SYCL host and device}
+%\label{sycl:builtins}
+
+SYCL kernels may execute on any SYCL device, specifically an OpenCL device or SYCL host, which requires the functions used in the kernels to be compiled and linked for both device and host. In the SYCL system the OpenCL built-ins are available for the SYCL host and device within the \codeinline{cl::sycl} namespace, although, their semantics may be different. This section follows the OpenCL 1.2 specification document \cite[ch. 6.12]{opencl12} and describes the behavior of these functions for SYCL host and device.
+
+The SYCL built-in functions are available throughout the SYCL application, and depending on where they execute, they are either implemented using their host implementation or the device implementation. The SYCL system guarantees that all of the built-in functions fulfill the same requirements for both host and device.
+
+%***********************************************************************************
+% Description of the built-in types available for SYCL host and device
+%***********************************************************************************
+\subsection{Description of the built-in types available for SYCL host and device  }
+All of the OpenCL built-in types are available in the namespace \keyword{cl::sycl}. For the
+purposes of this document we use generic type names for describing sets of valid SYCL types. The generic type names themselves are not valid SYCL types, but they represent a set of valid types, as defined in
+Tables~\ref{table.gentypes}. Each generic type within a section is comprised of
+a combination of scalar and/or SYCL \codeinline{vec} class specializations. Note
+that any reference to the base type refers to the type of a scalar or the element
+type of a SYCL \codeinline{vec} specialization.
+
+In the OpenCL 1.2 specification document\cite[ch. 6.12.1]{opencl12} in Table 6.7 the work-item
+functions are defined where they provide the size of the enqueued kernel NDRange. These
+functions are
+available in SYCL through the item and group classes see
+sections~\ref{subsec:item.class}, \ref{nditem-class} and
+\ref{group-class}.
+
+---------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------------------------------
+\startTable{Generic type name } \addFootNotes{Generic type name
+  description, which serves as a description for all valid types of
+  parameters to kernel functions \cite{opencl12}}
+{table.gentypes}
+
+\addRow{floatn}
+{\codeinline{float2, float3, float4, float8, float16}
+}
+
+\addRow{genfloatf}
+{\codeinline{float, floatn}
+}
+
+\addRow{doublen}
+{\codeinline{double2, double3, double4, double8, double16}
+}
+
+\addRow{genfloatd}
+{\codeinline{double, doublen}
+}
+
+\addRow{halfn}
+{\codeinline{half2, half3, half4, half8, half16}
+}
+
+\addRow{genfloath}
+{\codeinline{half, halfn}
+}
+
+\addRow{genfloat}
+{\codeinline{genfloatf, genfloatd, genfloath}
+}
+
+\addRow{sgenfloat}
+{\codeinline{float, double, half}
+}
+
+\addRow{gengeofloat}
+{\codeinline{float, float2, float3, float4}
+}
+
+\addRow{gengeodouble}
+{\codeinline{double, double2, double3, double4}
+}
+
+\addRow {charn}
+{\codeinline{char2, char3, char4, char8, char16}
+}
+
+\addRow {scharn}
+{\codeinline{schar2, schar3, schar4, schar8, schar16}
+}
+
+\addRow{ucharn}
+{\codeinline{uchar2, uchar3, uchar4, uchar8, uchar16}
+}
+
+\addRow{igenchar}
+{\codeinline{signed char, scharn}
+}
+
+\addRow{ugenchar}
+{\codeinline{unsigned char, ucharn}
+}
+
+\addRow{genchar}
+{\codeinline{char, charn, igenchar, ugenchar}
+}
+
+\addRow{shortn}
+{\codeinline{short2, short3, short4, short8, short16}
+}
+
+\addRow{genshort}
+{\codeinline{short, shortn}
+}
+
+\addRow{ushortn}
+{\codeinline{ushort2, ushort3, ushort4, ushort8, ushort16}
+}
+
+\addRow{ugenshort}
+{\codeinline{unsigned short, ushortn}
+}
+
+
+\addRow{uintn}
+{\codeinline{uint2, uint3, uint4, uint8, uint16}
+}
+
+\addRow{ugenint}
+{\codeinline{unsigned int, uintn}
+}
+
+\addRow{intn}
+{\codeinline{int2, int3, int4, int8, int16}
+}
+
+\addRow{genint}
+{\codeinline{int, intn}
+}
+
+\addRow{ulongn}
+{\codeinline{ulong2, ulong3, ulong4, ulong8, ulong16}
+}
+
+\addRow{ugenlong}
+{\codeinline{unsigned long int, ulongn}
+}
+
+\addRow{longn}
+{\codeinline{long2, long3, long4, long8, long16}
+}
+
+\addRow{genlong}
+{\codeinline{long int, longn}
+}
+
+\addRow{ulonglongn}
+{\codeinline{ulonglong2, ulonglong3, ulonglong4, ulonglong8, ulonglong16}
+}
+
+\addRow{ugenlonglong}
+{\codeinline{unsigned long long int, ulonglongn}
+}
+
+\addRow{longlongn}
+{\codeinline{longlong2, longlong3, longlong4, longlong8, longlong16}
+}
+\addRow{genlonglong}
+{\codeinline{long long int, longlongn}
+}
+
+\addRow{igenlonginteger}
+{\codeinline{genlong, genlonglong}
+}
+
+\addRow{ugenlonginteger}
+{\codeinline{ugenlong, ugenlonglong}
+}
+
+\addRow{geninteger}
+{\codeinline{genchar, genshort, ugenshort, genint, ugenint, igenlonginteger, ugenlonginteger}
+}
+
+\addRow{genintegerNbit}
+{\codeinline{All types within geninteger whose base type are N bits in size, where N = 8, 16, 32, 64.}
+}
+
+\addRow{igeninteger}
+{\codeinline{igenchar, genshort, genint, igenlonginteger}
+}
+
+\addRow{igenintegerNbit}
+{\codeinline{All types within igeninteger whose base type are N bits in size, where N = 8, 16, 32, 64.}
+}
+
+\addRow{ugeninteger}
+{\codeinline{ugenchar, ugenshort, ugenint, ugenlonginteger}
+}
+
+\addRow{ugenintegerNbit}
+{\codeinline{All types within ugeninteger whose base type are N bits in size, where N = 8, 16, 32, 64.}
+}
+
+\addRow{sgeninteger}
+{\codeinline{char, signed char, unsigned char, short, unsigned short, int, unsigned int, long int, unsigned long int, long long int, unsigned long long int}
+}
+
+\addRow{gentype}
+{\codeinline{genfloat, geninteger}
+}
+\addRow{genfloatptr}
+{
+  All permutations of \codeinline{multi_ptr<dataT, addressSpace>} where \codeinline{dataT} is all types within \codeinline{genfloat} and \codeinline{addressSpace} is \codeinline{access::address_space::global_space}, \codeinline{access::address_space::local_space} and \codeinline{access::address_space::private_space}.
+}
+\addRow{genintptr}
+{
+    All permutations of \codeinline{multi_ptr<dataT, addressSpace>} where \codeinline{dataT} is all types within \codeinline{genint} and \codeinline{addressSpace} is \codeinline{access::address_space::global_space}, \codeinline{access::address_space::local_space} and \codeinline{access::address_space::private_space}.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Work-item functions
+%*******************************************************************************
+\subsection{Work-item functions}
+
+In the OpenCL 1.2 specification document\cite[ch. 6.12.1]{opencl12} in Table 6.7
+the work-item functions are defined where they provide the size of the enqueued
+kernel NDRange. These functions are available in SYCL through the
+\codeinline{nd_item} and \codeinline{group} classes see
+section~\ref{nditem-class} and \ref{group-class}.
+
+%***********************************************************************************
+% Math functions
+%***********************************************************************************
+\subsection{Math functions}
+
+In SYCL the OpenCL math functions are available in the namespace
+\keyword{cl::sycl} on host and device with the same precision guarantees as
+defined in the OpenCL 1.2 specification document
+\cite[ch. 7]{opencl12} for host and device. For a SYCL platform the numerical
+requirements for host need to match the numerical requirements of the OpenCL
+math built-in functions. The built-in functions can take as input float or
+optionally double and their \keyword{vec} counterparts, for dimensions 1, 2, 3, 4,
+8 and 16. On the host the vector types use the \keyword{vec}
+class and on an OpenCL device use the corresponding OpenCL
+vector types.
+
+The built-in functions available for SYCL host and device, with the same
+precision requirements for both host and device, are described in
+Table~\ref{table.math.functions}.
+
+%-------------------------------------------------------------------------------
+\startTable{Math Function}
+\addFootNotes{Math functions which work on SYCL Host and device. They correspond
+to Table 6.7 of the OpenCL 1.2 specification\cite{opencl12}}
+{table.math.functions}
+\addRow{ genfloat acos (genfloat x)} {Inverse cosine function.}
+\addRow{ genfloat acosh (genfloat x)} {Inverse hyperbolic cosine.}
+\addRow{ genfloat acospi (genfloat x)} {Compute $acos{x}/\pi$}
+\addRow{ genfloat asin (genfloat x)} {Inverse sine function.}
+\addRow{ genfloat asinh (genfloat x)} {Inverse hyperbolic sine.}
+\addRow{ genfloat asinpi (genfloat x)} {Compute $asin{x}/\pi$}
+\addRow{ genfloat atan (genfloat y_over_x)} {Inverse tangent function.}
+\addRow{ genfloat atan2 (genfloat y, genfloat x)} {Compute atan( y / x).}
+\addRow{ genfloat atanh (genfloat x)} { Hyperbolic inverse tangent.}
+\addRow{ genfloat atanpi (genfloat x)} {Compute atan (x) / $\pi$.}
+\addRow{ genfloat atan2pi (genfloat y, genfloat x)} {Compute atan2 (y, x) / $\pi$.}
+\addRow{ genfloat cbrt (genfloat x)} { Compute cube-root.}
+\addRow{ genfloat ceil (genfloat x)} {Round to integral value using the round to positive infinity
+rounding mode.}
+\addRow{ genfloat copysign (genfloat x, genfloat y)} {Returns x with its sign changed to match
+the sign of y.}
+
+\addRow{ genfloat cos (genfloat x)} {Compute cosine.}
+\addRow{ genfloat cosh (genfloat x)} {Compute hyperbolic cosine.}
+\addRow{ genfloat cospi (genfloat x)} { Compute cos ($\pi  x$).}
+\addRow{ genfloat erfc (genfloat x)} {Complementary error function.}
+\addRow{ genfloat erf (genfloat x)} {Error function encountered in integrating the normal
+distribution.}
+\addRow{ genfloat exp (genfloat x )} { Compute the base-e exponential of x.}
+\addRow{ genfloat exp2 (genfloat x)} {Exponential base 2 function.}
+\addRow{ genfloat exp10 (genfloat x)} {Exponential base 10 function.}
+\addRow{ genfloat expm1 (genfloat x)} { Compute $\exp{(x)}-1.0$.}
+\addRow{ genfloat fabs (genfloat x)} {Compute absolute value of a floating-point number.}
+\addRow{ genfloat fdim (genfloat x, genfloat y)} {$ x - y$  if $ x > y$,$ +0$ if x is less than or
+equal to y.}
+\addRow{ genfloat floor (genfloat x)} {Round to integral value using the round to negative infinity
+rounding mode.}
+\addRow{ genfloat fma (genfloat a, genfloat b, genfloat c)}
+{
+Returns the correctly rounded floating-point
+representation of the sum of c with the infinitely
+precise product of a and b. Rounding of
+intermediate products shall not occur. Edge case
+behavior is per the IEEE 754-2008 standard.
+}
+\addRowTwoSL
+{  genfloat fmax (genfloat x, genfloat y)}
+{  genfloat fmax (genfloat x, sgenfloat y)}
+{
+Returns y if $x < y$, otherwise it returns x. If one
+argument is a NaN, fmax() returns the other
+argument. If both arguments are NaNs, fmax()
+returns a NaN.
+}
+\addRowTwoSL
+{ genfloat fmin (genfloat x, genfloat y)}
+{ genfloat fmin (genfloat x, sgenfloat y)}
+{
+Returns y if $y < x$, otherwise it returns x. If one
+argument is a NaN, fmin() returns the other
+argument. If both arguments are NaNs, fmin()
+returns a NaN.
+}
+\addRow{
+   genfloat fmod (genfloat x, genfloat y)
+ }
+ {
+  Modulus. Returns $x – y * trunc (x/y)$.
+  }
+\addRow
+{ genfloat fract (genfloat x, genfloatptr iptr)}
+{
+  Returns fmin( x $-$ floor (x), nextafter(genfloat(1.0), genfloat(0.0)) ). floor(x) is returned in iptr.
+}
+\addRow
+{ genfloat frexp (genfloat x,  genintptr exp)}
+{
+Extract mantissa and exponent from x. For each
+component the mantissa returned is a float with
+magnitude in the interval [1/2, 1) or 0. Each
+component of x equals mantissa returned * 2exp.
+}
+\addRow{
+  genfloat hypot (genfloat x, genfloat y)
+}
+{
+  Compute the value of the square root of x2+ y2 without undue overflow or underflow.
+}
+\addRow
+{genint ilogb (genfloat x)}
+{
+  Return the exponent as an integer value.
+}
+\addRowTwoSL
+{  genfloat ldexp (genfloat x, genint k) }
+{  genfloat ldexp (genfloat x, int k) }
+{
+  Multiply x by 2 to the power k.
+}
+
+\addRow
+{
+  genfloat lgamma (genfloat x)
+}
+{
+  Log gamma function. Returns the natural
+logarithm of the absolute value of the gamma
+function. The sign of the gamma function is
+returned in the signp argument of lgamma\_r.
+}
+\addRow
+{
+  genfloat lgamma\_r (genfloat x, genintptr signp)
+}
+{
+  Log gamma function. Returns the natural
+logarithm of the absolute value of the gamma
+function. The sign of the gamma function is
+returned in the signp argument of lgamma\_r.
+}
+
+
+\addRow{
+genfloat log (genfloat x)
+}
+{
+ Compute natural logarithm.
+ }
+\addRow{
+genfloat log2 (genfloat x)
+}
+{
+ Compute a base 2 logarithm.
+ }
+\addRow{
+genfloat log10 (genfloat x)
+}
+{
+Compute a base 10 logarithm.
+}
+\addRow{
+genfloat log1p (genfloat x)
+ }
+ {
+ Compute $loge(1.0 + x)$.
+ }
+\addRow{
+genfloat logb (genfloat x)
+}
+{
+Compute the exponent of x, which is the integral
+part of logr ($| x |$).
+}
+\addRow{
+genfloat mad (genfloat a,genfloat b, genfloat c)
+}
+{
+mad approximates a * b + c. Whether or how the
+product of a * b is rounded and how supernormal or
+subnormal intermediate products are handled is not
+defined. mad is intended to be used where speed is
+preferred over accuracy.
+}
+\addRow{
+ genfloat maxmag (genfloat x, genfloat y)
+ }
+{
+Returns x if $| x |  >  | y |$, y if $| y | > | x |$, otherwise
+fmax(x, y).
+}
+\addRow{genfloat minmag (genfloat x, genfloat y)}
+{
+Returns x if $| x | < | y |$, y if $| y | < | x |$, otherwise
+fmin(x, y).
+}
+\addRow{
+genfloat modf (genfloat x, genfloatptr iptr)
+}
+{
+Decompose a floating-point number. The modf
+function breaks the argument x into integral and
+fractional parts, each of which has the same sign as
+the argument. It stores the integral part in the object
+pointed to by iptr.
+}
+\addRowTwoSL
+{ genfloatf nan (ugenint nancode)}
+{ genfloatd nan (ugenlonginteger nancode)}
+{
+Returns a quiet NaN. The nancode may be placed
+in the significand of the resulting NaN.
+}
+\addRow{genfloat nextafter (genfloat x,
+genfloat y)
+}
+{
+Computes the next representable single-precision
+floating-point value following x in the direction of
+y. Thus, if y is less than x, nextafter() returns the
+largest representable floating-point number less
+than x.}
+
+\addRow{
+genfloat pow (genfloat x, genfloat y)
+}
+{
+ Compute x to the power y.
+}
+\addRow
+{
+genfloat pown (genfloat x, genint y)
+}
+{
+Compute x to the power y, where y is an integer.
+}
+\addRow
+{
+genfloat powr (genfloat x, genfloat y)
+}
+{
+Compute x to the power y, where $ x > = 0 $.
+}
+\addRow{
+genfloat remainder (genfloat x, genfloat y)
+}
+{
+Compute the value r such that r = x - n*y, where n
+is the integer nearest the exact value of x/y. If there
+are two integers closest to x/y, n shall be the even
+one. If r is zero, it is given the same sign as x.
+}
+\addRow{
+genfloat remquo (genfloat x, genfloat y, genintptr quo)
+}
+{
+The remquo function computes the value r such
+that r = x - k*y, where k is the integer nearest the
+exact value of x/y. If there are two integers closest
+to x/y, k shall be the even one. If r is zero, it is
+given the same sign as x. This is the same value
+that is returned by the remainder function.
+remquo also calculates the lower seven bits of the
+integral quotient x/y, and gives that value the same
+sign as x/y. It stores this signed value in the object
+pointed to by quo.
+}
+\addRow{
+genfloat rint (genfloat x)
+}
+{
+Round to integral value (using round to nearest
+even rounding mode) in floating-point format.
+Refer to section 7.1 of the OpenCL 1.2 specification
+document\cite{opencl12} for description of rounding
+modes.
+}
+\addRow{
+genfloat rootn (genfloat x, genint y)
+}
+{
+Compute x to the power 1/y.
+}
+\addRow{
+genfloat round (genfloat x)
+}
+{
+ Return the integral value nearest to x rounding
+halfway cases away from zero, regardless of the
+current rounding direction.
+}
+\addRow{
+genfloat rsqrt (genfloat x)
+}
+{
+Compute inverse square root.
+}
+\addRow{
+genfloat sin (genfloat x)
+}
+{
+ Compute sine.
+}
+\addRow{
+genfloat sincos (genfloat x, genfloatptr cosval)
+}
+{
+Compute sine and cosine of x. The computed sine
+is the return value and computed cosine is returned
+in cosval.
+}
+\addRow{genfloat sinh (genfloat x)}{ Compute hyperbolic sine.}
+\addRow{genfloat sinpi (genfloat x)}{ Compute sin ($\pi$ x).}
+\addRow{genfloat sqrt (genfloat x)}{ Compute square root.}
+\addRow{genfloat tan (genfloat x)}{ Compute tangent.}
+\addRow{genfloat tanh (genfloat x)}{Compute hyperbolic tangent.}
+\addRow{genfloat tanpi (genfloat x)}{ Compute tan ($\pi$ x).}
+\addRow{genfloat tgamma (genfloat x)}{Compute the gamma function.}
+\addRow{genfloat trunc (genfloat x)}{Round to integral value using the round to zero
+rounding mode.}
+\completeTable
+%-------------------------------------------------------------------------------
+
+In SYCL the implementation defined precision math functions  are defined in the
+namespace \keyword{cl::sycl::native}. The functions that are available within
+this namespace are specified in Tables~\ref{table.native.math.functions}.
+
+%-------------------------------------------------------------------------------
+
+\startTable{Native Math Function}
+\addFootNotes{Native math functions}{table.native.math.functions}
+
+\addRow
+{
+genfloatf cos (genfloatf x)
+}
+{
+Compute cosine over an implementation-defined range.
+The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf divide (genfloatf x, genfloatf y)
+}
+{
+Compute x / y over an implementation-defined range.
+The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf exp (genfloatf x)
+}
+{
+ Compute the base- e exponential of x over an
+implementation-defined range. The maximum error is
+implementation-defined.
+}
+\addRow
+{
+genfloatf exp2 (genfloatf x)
+}
+{
+Compute the base- 2 exponential of x over an
+implementation-defined range. The maximum error is
+implementation-defined.
+}
+\addRow
+{
+genfloatf exp10 (genfloatf x)
+}
+{
+ Compute the base- 10 exponential of x over an
+implementation-defined range. The maximum error is
+implementation-defined.
+}
+\addRow
+{
+genfloatf log (genfloatf x)
+}
+{
+ Compute natural logarithm over an implementation defined range.
+ The maximum error is implementation-defined.
+ }
+\addRow
+{
+ genfloatf log2 (genfloatf x)
+ }
+ {
+ Compute a base 2 logarithm over an implementation-defined
+range. The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf log10 (genfloatf x)
+}
+{
+Compute a base 10 logarithm over an implementation-defined
+range. The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf powr (genfloatf x, genfloatf y)
+}
+{
+Compute x to the power y, where $ x > = 0$. The range of
+x and y are implementation-defined. The maximum error
+is implementation-defined.
+}
+\addRow
+{
+genfloatf recip (genfloatf x)
+}
+{
+Compute reciprocal over an implementation-defined
+range. The maximum error is implementation-defined.
+}
+
+\addRow
+{
+genfloatf rsqrt (genfloatf x)
+}
+{
+Compute inverse square root over an implementation-defined
+range. The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf sin (genfloatf x)
+}
+{
+ Compute sine over an implementation-defined range.
+The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf sqrt (genfloatf x)
+}
+{
+Compute square root over an implementation-defined
+range. The maximum error is implementation-defined.
+}
+\addRow
+{
+genfloatf tan (genfloatf x)
+}
+{
+Compute tangent over an implementation-defined range.
+The maximum error is implementation-defined.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+In SYCL the half precision math functions are defined in \keyword{cl::sycl::half_precision}. The functions that are available within this namespace are specified in Tables~\ref{table.half.math.functions}. These
+functions are implemented with a minimum of 10-bits of accuracy i.e. an ULP value is less than or equal to 8192 ulp.
+
+%-------------------------------------------------------------------------------
+\startTable{Half Math function}
+\addFootNotes{Half precision math functions}
+{table.half.math.functions}
+
+\addRow{
+genfloatf cos (genfloatf x)
+}
+{
+Compute cosine. x must be in the range -216 to +216.
+}
+\addRow{
+genfloatf divide (genfloatf x, genfloatf y)
+}
+{
+Compute x / y.
+}
+\addRow{genfloatf exp (genfloatf x) }{Compute the base- e exponential of x.}
+\addRow{genfloatf exp2 (genfloatf x) }{Compute the base- 2 exponential of x.}
+\addRow{genfloatf exp10 (genfloatf x) }{Compute the base- 10 exponential of x.}
+\addRow{genfloatf log (genfloatf x) }{Compute natural logarithm.}
+\addRow{genfloatf log2 (genfloatf x) }{Compute a base 2 logarithm.}
+\addRow{genfloatf log10 (genfloatf x) }{Compute a base 10 logarithm.}
+\addRow{genfloatf powr (genfloatf x, genfloatf y)}
+{
+Compute x to the power y, where $x >= 0$.
+}
+\addRow{genfloatf recip (genfloatf x)}{Compute reciprocal.}
+\addRow{genfloatf rsqrt (genfloatf x)}{ Compute inverse square root.}
+\addRow{genfloatf sin (genfloatf x) }{Compute sine. x must be in the range -216
+to +216.}
+\addRow{genfloatf sqrt (genfloatf x)}{ Compute square root.}
+\addRow{genfloatf tan (genfloatf x) }{Compute tangent. x must be in the range
+-216 to +216.}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Integer functions
+%*******************************************************************************
+\subsection{Integer functions}
+In SYCL the OpenCL integer math functions are available in the namespace
+\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
+document\cite[par. 6.12.3] {opencl12}. The built-in functions can take as input
+char, unsigned char, short, unsigned short, int, unsigned int, long long int,
+unsigned long long int and their \keyword{vec} counterparts, for dimensions 2,
+3, 4, 8 and 16. On the host the vector types use the
+\keyword{vec} class and on an OpenCL device use the
+corresponding OpenCL vector types. The supported integer math functions are
+described in Table~\ref{table.integer.functions}.
+
+%-------------------------------------------------------------------------------
+\startTable{Integer Function}
+\addFootNotes{Integer functions which work on SYCL Host and device, are
+available in the \codeinline{cl::sycl} namespace. They correspond to Table 6.10 of
+the OpenCL 1.2 specification \cite{opencl12}}{table.integer.functions}
+\addRow
+{
+ugeninteger abs (geninteger x)
+}
+{
+Returns $| x |$.
+}
+\addRow { ugeninteger abs_diff (geninteger x, geninteger y)}
+{ Returns $| x - y |$  without modulo overflow.}
+
+\addRow { geninteger add_sat (geninteger x, geninteger y)}
+{ Returns $x + y$ and saturates the result.}
+
+\addRow { geninteger hadd (geninteger x, geninteger y)}
+{
+ Returns $(x + y) >> 1$. The intermediate sum does
+not modulo overflow.
+}
+\addRow { geninteger rhadd (geninteger x, geninteger y)}
+ {
+ Returns $(x + y + 1) >> 1$. The intermediate sum
+does not modulo overflow.
+}
+
+\addRowTwoL
+{geninteger clamp (geninteger x, geninteger minval, geninteger maxval)}
+{geninteger clamp (geninteger x, sgeninteger minval, sgeninteger maxval)}
+{
+ Returns min(max(x, minval), maxval).
+ Results are undefined if minval $>$ maxval.
+}
+
+\addRow { geninteger clz (geninteger x) }
+{
+ Returns the number of leading 0-bits in x, starting
+ at the most significant bit position.
+}
+
+\addRowTwoL {  geninteger mad_hi (}
+{geninteger a, geninteger b, geninteger c)}
+ {Returns mul\_hi(a, b) + c. }
+
+\addRowTwoL { geninteger mad_sat (geninteger a,}
+{geninteger b, geninteger c)}
+{Returns a * b + c and saturates the result.}
+
+\addRowTwoSL
+{geninteger max (geninteger x, geninteger y)}
+{geninteger max (geninteger x, sgeninteger y)}
+{Returns y if $x < y$, otherwise it returns x.}
+
+
+\addRowTwoSL
+{geninteger min (geninteger x, geninteger y)}
+{geninteger min (geninteger x, sgeninteger y)}
+{Returns y if $y < x$, otherwise it returns x.}
+
+\addRow {geninteger mul_hi (geninteger x, geninteger y) }
+{
+Computes x * y and returns the high half of the
+product of x and y.
+}
+
+\addRow {geninteger rotate (geninteger v, geninteger i) }
+{
+For each element in v, the bits are shifted left by
+the number of bits given by the corresponding
+element in i (subject to usual shift modulo rules
+described in section 6.3). Bits shifted off the left
+side of the element are shifted back in from the
+right.
+}
+
+\addRow {geninteger sub_sat (geninteger x, geninteger y)}
+{ Returns $x - y$ and saturates the result.}
+
+\addRow{ ugeninteger16bit upsample (ugeninteger8bit hi, ugeninteger8bit lo)}
+{\codeinline{result[i] = ((ushort)hi[i] << 8) | lo[i]}}
+
+\addRow {igeninteger16bit upsample (igeninteger8bit hi, ugeninteger8bit lo)}
+{\codeinline{result[i] = ((short)hi[i] << 8) | lo[i]}}
+
+\addRow {ugeninteger32bit upsample (ugeninteger16bit hi, ugeninteger16bit lo)}
+{\codeinline{result[i] = ((uint)hi[i] << 16) | lo[i]}}
+
+\addRow {igeninteger32bit upsample (igeninteger16bit hi, ugeninteger16bit lo)}
+{\codeinline{result[i] = ((int)hi[i] << 16) | lo[i]}}
+
+\addRow {ugeninteger64bit upsample (ugeninteger32bit hi, ugeninteger32bit lo)}
+{\codeinline{result[i] = ((ulonglong)hi[i] << 32) | lo[i]}}
+
+\addRow {igeninteger64bit upsample (igeninteger32bit hi, ugeninteger32bit lo)}
+{\codeinline{result[i] = ((longlong)hi[i] << 32) | lo[i]}}
+
+\addRow {geninteger popcount (geninteger x)}
+{ Returns the number of non-zero bits in x.}
+
+\addRow
+{geninteger32bit mad24 (geninteger32bit x, geninteger32bit y, geninteger32bit z)}
+{
+Multipy two 24-bit integer values x and y and add
+the 32-bit integer result to the 32-bit integer z.
+Refer to definition of mul24 to see how the 24-bit
+integer multiplication is performed.
+}
+\addRow
+{geninteger32bit mul24 (geninteger32bit x, geninteger32bit y)}
+{
+Multiply two 24-bit integer values x and y. x and y
+are 32-bit integers but only the low 24-bits are used
+to perform the multiplication. mul24 should only
+be used when values in x and y are in the range [-
+223, 223-1] if x and y are signed integers and in the
+range [0, 224-1] if x and y are unsigned integers. If
+x and y are not in this range, the multiplication
+result is implementation-defined.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Common functions
+%*******************************************************************************
+\subsection{Common functions}
+In SYCL the OpenCL \keyword{common} functions are available in the namespace
+\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
+document\cite[par. 6.12.4]{opencl12}. They are described here in
+Table~\ref{table.common.functions}. The built-in functions can take as input
+float or optionally double and their \keyword{vec} counterparts, for dimensions
+2, 3, 4, 8 and 16. On the host the vector types use the
+\keyword{vec} class and on an OpenCL device use the
+corresponding OpenCL vector types.
+
+%-------------------------------------------------------------------------------
+\startTable{Common Function} \addFootNotes{Common functions which work
+  on SYCL Host and device, are available in the \codeinline{cl::sycl}
+  namespace. They correspond to Table 6.12 of the OpenCL 1.2
+  specification \cite{opencl12}}{table.common.functions}
+\addRowThreeSL
+{genfloat clamp (genfloat x, genfloat minval, genfloat maxval)}
+{genfloatf clamp (genfloatf x, float minval, float maxval)}
+{genfloatd clamp (genfloatd x, double minval, double maxval)}
+{
+Returns fmin(fmax(x, minval), maxval).
+Results are undefined if $minval > maxval$.
+}
+
+\addRow
+{genfloat degrees (genfloat radians)}
+{
+ Converts radians to degrees,
+i.e.$ (180 / \pi) *radians$.
+}
+
+\addRowThreeSL
+ {genfloat max (genfloat x, genfloat y)}
+ {genfloatf max (genfloatf x, float y)}
+ {genfloatd max (genfloatd x, double y)}
+{
+Returns y if $x < y$, otherwise it returns x. If x or y
+are infinite or NaN, the return values are undefined.
+}
+
+\addRowThreeSL
+{genfloat min (genfloat x, genfloat y)}
+{genfloatf min (genfloatf x, float y)}
+{genfloatd min (genfloatd x, double y)}
+{
+Returns y if $y < x$, otherwise it returns x. If x or y
+are infinite or NaN, the return values are undefined.
+}
+
+\addRowThreeSL
+{genfloat mix (genfloat x, genfloat y, genfloat a)}
+{genfloatf mix (genfloatf x, genfloatf y, float a)}
+{genfloatd mix (genfloatd x, genfloatd y, double a)}
+{
+Returns the linear blend of $x \& y$ implemented as:
+$x + (y - x) * a$.
+\keyword{a} must be a value in the range 0.0 ... 1.0. If a is not
+in the range 0.0 ... 1.0, the return values are
+undefined.
+}
+\addRow
+{genfloat radians (genfloat degrees) }
+{
+Converts degrees to radians, i.e. $(\pi / 180) * degrees$.
+}
+\addRowThreeSL
+{genfloat step (genfloat edge, genfloat x)}
+{genfloatf step (float edge, genfloatf x)}
+{genfloatd step (double edge, genfloatd x)}
+{
+Returns 0.0 if $x < edge$, otherwise it returns 1.0.
+}
+
+\addRowThreeSL
+{genfloat smoothstep (genfloat edge0,
+genfloat edge1, genfloat x)}
+{genfloatf smoothstep (float edge0,
+float edge1, genfloatf x)}
+{genfloatd smoothstep (double edge0,
+double edge1, genfloatd x)}
+{
+Returns $0.0$ if $x <= edge0$ and $1.0$ if $x >= edge1$ and
+performs smooth Hermite interpolation between 0
+and 1 when $edge0 < x < edge1$. This is useful in
+cases where you would want a threshold function
+with a smooth transition.
+
+This is equivalent to:\newline
+\codeinline{gentype t;}\newline
+\codeinline{t = clamp ((x <= edge0) / (edge1 >= edge0), 0, 1);}\newline
+\codeinline{return t * t * (3 - 2 * t);}\newline
+
+Results are undefined if $edge0 >= edge1$ or if x,
+edge0 or edge1 is a NaN.
+}
+\addRow {genfloat sign (genfloat x) }
+{
+Returns $1.0$ if $x > 0$, $-0.0$ if $x = -0.0$, $+0.0$ if $x =+0.0$, or $-1.0$
+if $x < 0$. Returns $0.0$ if x is a NaN.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Geometric functions
+%*******************************************************************************
+\subsection{Geometric Functions}
+
+In SYCL the OpenCL \keyword{geometric} functions are available in the namespace
+\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
+document \cite[par. 6.12.5]{opencl12}. The built-in functions can take as input
+float or optionally double and their \keyword{vec} counterparts, for dimensions
+2, 3 and 4. On the host the vector types use the
+\keyword{vec} class and on an OpenCL device use the
+corresponding OpenCL vector types. All of the geometric functions use
+round-to-nearest-even rounding mode. Table~\ref{table.geometric.functions}
+contains the definitions of supported geometric functions.
+
+%-------------------------------------------------------------------------------
+\startTable{Geometric Function} \addFootNotes{Geometric functions
+  which work on SYCL Host and device, are available in the
+  \codeinline{cl::sycl} namespace. They correspond to Table 6.13 of
+  the OpenCL 1.2 specification \cite{opencl12}}
+{table.geometric.functions}
+
+\addRowFourSL
+{float4 cross (float4 p0, float4 p1)}
+{float3 cross (float3 p0, float3 p1)}
+{double4 cross (double4 p0, double4 p1)}
+{double3 cross (double3 p0, double3 p1)}
+{
+Returns the cross product of p0.xyz and p1.xyz. The
+$w$ component of float4 result returned will be 0.0.
+}
+\addRowTwoSL
+{ float dot (gengeofloat p0, gengeofloat p1)}
+{ double dot (gengeodouble p0, gengeodouble p1) }
+{
+Compute dot product.
+}
+\addRowTwoSL
+{float distance (gengeofloat p0, gengeofloat p1)}
+{double distance (gengeodouble p0, gengeodouble p1)}
+{
+Returns the distance between p0 and p1. This is
+calculated as \codeinline{length(p0 - p1)}.
+}
+\addRowTwoSL
+{float length (gengeofloat p)}
+{double length (gengeodouble p)}
+{
+Return the length of vector p, i.e.,
+$\sqrt{ p.x^2 + p.y^2 + ...}$
+}
+\addRowTwoSL
+{gengeofloat normalize (gengeofloat p)}
+{gengeodouble normalize (gengeodouble p)}
+{
+Returns a vector in the same direction as p but with a
+length of 1.
+}
+
+\addRow{float fast_distance (gengeofloat p0, gengeofloat p1)}
+{
+Returns \codeinline{fast_length(p0 - p1)}.
+}
+\addRow{float fast_length (gengeofloat p) }
+{
+Returns the length of vector p computed as:
+\codeinline{sqrt((half)(pow(p.x,2) + pow(p.y,2) + ...))}
+}
+\addRow {gengeofloat fast_normalize (gengeofloat p) }
+{
+Returns a vector in the same direction as p but with a
+length of 1. fast_normalize is computed as:
+\codeinline{p * rsqrt((half) (pow(p.x,2) + pow(p.y,2) + ... ))}\newline
+The result shall be within 8192 ulps error from the
+infinitely precise result of
+\codeinline{if (all(p == 0.0f))}\newline
+\codeinline{result = p;}\newline
+\codeinline{else}\newline
+\codeinline{result = p / sqrt (pow(p.x,2) + pow(p.y,2) + ... );}\newline
+with the following exceptions:
+\begin{enumerate}
+\item If the sum of squares is greater than FLT\_MAX
+then the value of the floating-point values in the
+result vector are undefined.
+
+\item If the sum of squares is less than FLT\_MIN then
+the implementation may return back p.
+
+\item If the device is in ``denorms are flushed to zero''
+mode, individual operand elements with magnitude
+less than \codeinline{sqrt(FLT_MIN)} may be flushed to zero
+before proceeding with the calculation.
+\end{enumerate}
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Relational functions
+%*******************************************************************************
+\subsection{Relational functions}
+
+In SYCL the OpenCL \keyword{relational} functions are available in the namespace
+\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
+document \cite[par. 6.12.6]{opencl12}. The built-in functions can take as input
+char, unsigned char, short, unsigned short, int, unsigned int, long, unsigned
+long, float or optionally double and their \keyword{vec} counterparts, for
+dimensions 2,3,4,8, and 16. On the host the vector types use
+the \keyword{vec} class and on an OpenCL device use the
+corresponding OpenCL vector types.
+The relational operators are available on both host and device.  The
+relational functions are provided in addition to the the operators and will
+return 0 if the conditional
+is \keyword{false} and 1 otherwise.
+The available built-in functions are described in
+Tables~\ref{table.relational.functions}
+
+\fixme{fixed typo originating from the OpenCL 1.2 spec: when those functions
+take double as a parameter they should return longlong. }
+
+
+%-------------------------------------------------------------------------------
+\startTable{Relational Function}
+\addFootNotes{ Relational functions which work on SYCL Host and device, are
+available in the \codeinline{cl::sycl} namespace. They correspond to Table 6.14
+of the OpenCL 1.2 specification \cite{opencl12}}{table.relational.functions}
+\addRowTwoSL
+{igeninteger32bit isequal (genfloatf x, genfloatf y)}
+{igeninteger64bit isequal (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of $x == y$.
+}
+\addRowTwoSL
+{igeninteger32bit isnotequal (genfloatf x, genfloatf y)}
+{igeninteger64bit isnotequal (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of $x != y$.
+}
+\addRowTwoSL
+{igeninteger32bit isgreater (genfloatf x, genfloatf y)}
+{igeninteger64bit isgreater (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of $x > y$.
+}
+\addRowTwoSL
+{igeninteger32bit isgreaterequal (genfloatf x, genfloatf y)}
+{igeninteger64bit isgreaterequal (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of $x >= y$.
+}
+\addRowTwoSL
+{igeninteger32bit isless (genfloatf x, genfloatf y)}
+{igeninteger64bit isless (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of $x < y$.
+}
+
+\addRowTwoSL
+{igeninteger32bit islessequal (genfloatf x, genfloatf y)}
+{igeninteger64bit islessequal (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of $x <= y$.
+}
+\addRowTwoSL
+{igeninteger32bit islessgreater (genfloatf x, genfloatf y)}
+{igeninteger64bit islessgreater (genfloatd x, genfloatd y)}
+{
+Returns the component-wise compare of
+$(x < y) || (x > y) $.
+}
+
+\addRowTwoSL
+{igeninteger32bit isfinite (genfloatf x)}
+{igeninteger64bit isfinite (genfloatd x)}
+{
+Test for finite value.
+}
+\addRowTwoSL
+{igeninteger32bit isinf (genfloatf x)}
+{igeninteger64bit isinf (genfloatd x)}
+{
+Test for infinity value (positive or negative) .
+}
+\addRowTwoSL
+{igeninteger32bit isnan (genfloatf x)}
+{igeninteger64bit isnan (genfloatd x)}
+{
+Test for a NaN.
+}
+\addRowTwoSL
+{igeninteger32bit isnormal (genfloatf x)}
+{igeninteger64bit isnormal (genfloatd x)}
+{
+Test for a normal value.
+}
+\addRowTwoSL
+{igeninteger32bit isordered (genfloatf x, genfloatf y)}
+{igeninteger64bit isordered (genfloatd x, genfloatd y)}
+{
+Test if arguments are ordered. isordered() takes
+arguments x and y, and returns the result
+isequal(x, x) $\&\&$ isequal(y, y).
+}
+\addRowTwoSL
+{igeninteger32bit isunordered (genfloatf x, genfloatf y)}
+{igeninteger64bit isunordered (genfloatd x, genfloatd y)}
+{
+Test if arguments are unordered. isunordered()
+takes arguments x and y, returning non-zero if x or
+y is NaN, and zero otherwise.
+}
+
+\addRowTwoSL
+{igeninteger32bit signbit (genfloatf x)}
+{igeninteger64bit signbit (genfloatd x)}
+{
+Test for sign bit. The scalar version of the
+function returns a 1 if the sign bit in the float is set
+else returns 0.
+
+The vector version of the function
+returns the following for each component in \keyword{floatn}:
+
+-1 (i.e all bits set) if the sign bit in the float is set
+else returns 0.
+}
+
+\addRow{int any (igeninteger x)}
+{
+Returns 1 if the most significant bit in any
+component of x is set; otherwise returns 0.
+}
+\addRow {int all (igeninteger x) }
+{
+Returns 1 if the most significant bit in all
+components of x is set; otherwise returns 0.
+}
+\addRow
+{gentype bitselect (gentype a, gentype b, gentype c) }
+{
+Each bit of the result is the corresponding bit of a
+if the corresponding bit of c is 0. Otherwise it is
+the corresponding bit of b.
+}
+\addRowSixSL
+{geninteger select (geninteger a, geninteger b, igeninteger c)}
+{geninteger select (geninteger a, geninteger b, ugeninteger c)}
+{genfloatf select (genfloatf a, genfloatf b, genint c)}
+{genfloatf select (genfloatf a, genfloatf b, ugenint c)}
+{genfloatd select (genfloatd a, genfloatd b, igeninteger64 c)}
+{genfloatd select (genfloatd a, genfloatd b, ugeninteger64 c)}
+{
+For each component of a vector type:\newline
+\codeinline{result[i] =  (MSB of c[i] is set) ? b[i] : a[i].}\newline
+For a scalar type:\newline
+\codeinline{result = c ? b : a}.\newline
+\codeinline{geninteger} must have the same number
+of elements and bits as \codeinline{gentype}.
+}
+\completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Vector data and store functions
+%*******************************************************************************
+\subsection{Vector data load and store functions}
+
+The functionality from the OpenCL functions as defined in the OpenCL 1.2
+specification document\cite[par. 6.12.7]{opencl12} is available in SYCL through
+the \keyword{vec} class in section \ref{sec:vector.type}.
+
+\subsection{Synchronization Functions}
+
+In SYCL the OpenCL \keyword{synchronization} functions are available through the
+\codeinline{nd_item} class~\ref{nditem-class}, as they are applied to work-items for local
+or global address spaces. Please see~\ref{table.members.nditem}.
+
+%*******************************************************************************
+% printf function
+%*******************************************************************************
+\subsection{\texttt{printf} function}
+
+The functionality of the \texttt{printf} function is covered by the
+\codeinline{stream} class~\ref{subsection:stream}, which has the
+capability to print to standard output all of the SYCL classes and primitives,
+and covers the capabilities defined in the OpenCL 1.2 specification
+document\cite[par. 6.12.13]{opencl12}.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "american"
+%%% End:

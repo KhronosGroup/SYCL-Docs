@@ -1,0 +1,628 @@
+% !TEX root = sycl-1.2.1.tex
+
+%\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[left=1.25in, right=1.0in, top=1.0in, bottom=1.5in]{geometry}
+\usepackage{verbatim}
+
+\def\SYCLVERSION{1.2.1}
+\def\SYCLLANGVERSION{121}
+\def\DOCUMENTVERSION{5}
+\def\SYCLNAME{SYCL}
+\def\OPENCLVERSION{1.2}
+
+\usepackage[pdftex,bookmarksnumbered=true,plainpages=false,
+  pdftitle={Khronos Group \SYCLNAME{} \SYCLVERSION{} Specification},
+  colorlinks=true,linktocpage,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[pdftex]{graphicx} \usepackage{titletoc}
+\usepackage{titlesec}
+
+\usepackage{glossaries}
+
+\usepackage{enumerate,framed,multicol,longtable,url}
+\usepackage{verbatim,wasysym,fancyhdr,pdfcolmk,multirow}
+\usepackage[breakwords,fit]{truncate}
+\usepackage[normalem]{ulem}
+\def\func#1{{\bf #1}}
+\usepackage{layout}
+\usepackage{marginnote}
+\usepackage{tabularx}
+% Use colortbl package mode
+% svgnames https://www.w3.org/TR/SVG11/types.html#ColorKeywords
+% But everything is described in
+% /usr/share/doc/texlive-doc/latex/xcolor/xcolor.pdf
+\usepackage[dvipsnames,svgnames,x11names,table]{xcolor}
+\usepackage{indentfirst}
+\usepackage{cite}
+%\usepackage{titlesec}
+%\usepackage{hhline}
+\usepackage{parskip}
+\usepackage{ulem}
+\usepackage{array}
+
+% For the \textregistered, \texttrademark... symbols
+\usepackage{textcomp}
+
+% https://tex.stackexchange.com/questions/27661/how-to-prevent-last-period-in-captions-from-appearing-in-the-list-of-figures
+% To have a "." added at the end of the captions but not in the caption
+% lists of the table-of-content
+\usepackage[textformat=period]{caption}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+%\usetikzlibrary{backgrounds}
+\usetikzlibrary{calc}
+%\usetikzlibrary{decorations.markings}
+%\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{fit}
+%\usetikzlibrary{mindmap}
+\usetikzlibrary{patterns}
+\usetikzlibrary{positioning}
+\usetikzlibrary{scopes}
+\usetikzlibrary{shapes}
+
+% Problems with this package on local machine
+\usepackage{txfonts}
+
+% Tweak to match OpenCL spec
+\renewcommand*\rmdefault{ptm}
+\titleformat{\chapter}
+  {\normalfont\rmfamily\LARGE\bfseries\color{black}}
+  {\thechapter.}{40pt}{\LARGE}
+\titleformat{\section}
+  {\normalfont\sffamily\LARGE\bfseries\color{black}}
+  {\thesection}{40pt}{\Large}
+\titleformat{\subsection}
+  {\normalfont\sffamily\Large\bfseries\color{black}}
+  {\thesubsection}{40pt}{}
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+
+
+%\hypersetup{
+%    colorlinks,
+%    citecolor=black,
+%    filecolor=black,
+%    linkcolor=red,
+%    urlcolor=black
+%}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage{listings}
+\lstloadlanguages{C++}
+
+\lstnewenvironment{code}
+    {\lstset{}%
+       \csname lst@SetFirstLabel\endcsname}
+     {\csname lst@SaveFirstLabel\endcsname}
+     \lstset{
+       xleftmargin=9pt,
+       basicstyle=\ttfamily,
+       flexiblecolumns=true,
+       basewidth={0.5em,0.45em},
+       literate={<~}{{$\leftsquigarrow$}}2,
+       numbers=left
+     }
+
+% \begin{lstlisting}[style=nonumbers,basicstyle=\ttfamily\small,backgroundcolor=\color{white},frame=]
+
+\lstset{language=C++}
+
+% Some missing C++ keywords
+\lstset{
+morekeywords=[1]{
+ constexpr,
+ mutex,
+ size_t,
+ shared_ptr,
+ std,
+ unique_ptr,
+}
+}
+
+% terminology (NDRange, Compute Unit, ...)
+\lstset{
+morekeywords=[2]{
+ accelerator_selector,
+ accessor,
+ access,
+ async_exception,
+ atomic,
+ buffer,
+ constant_ptr,
+ context,
+ cpu_selector,
+ default_selector,
+ device,
+ device_event,
+ device_selector,
+ event,
+ exception,
+ exception_list,
+ exception_ptr,
+ exception_ptr_class,
+ function_class,
+ global_ptr,
+ gpu_selector,
+ group,
+ handler,
+ hash_class,
+ h_item,
+ host_selector,
+ id,
+ image,
+ item,
+ kernel,
+ local_ptr,
+ multi_ptr,
+ mutex_class,
+ nd_item,
+ nd_range,
+ platform,
+ private_memory,
+ private_ptr,
+ program,
+ property,
+ property_list,
+ queue,
+ range,
+ sampler,
+ shared_ptr_class,
+ stream,
+ string_class,
+ sycl,
+ vec,
+ vector_class,
+ weak_ptr_class,
+}
+}
+
+% structural keywords and functions (parallel_for)
+\lstset{
+ morekeywords=[3]{
+ barrier,
+ get,
+ get_access,
+ parallel_for,
+ parallel_for_work_group,
+ parallel_for_work_item,
+ single_task,
+ submit,
+}
+}
+
+% data types (int4)
+\lstset{
+ morekeywords=[4]{
+ char2, char3, char4, char8, char16,
+ double2,double3,double4,double8,double16,
+ float2,float3,float4,float8,float16,
+ half,half2,half3,half4,half8,half16,
+ int2,int3,int4,int8,int16,
+ long2,long3,long4,long8,long16,
+ longlong2,longlong3,longlong4,longlong8,longlong16,
+ schar2, schar3, schar4, schar8, schar16,
+ short2, short3, short4, short8, short16,
+ uchar2, uchar3, uchar4, uchar8, uchar16,
+ uint2,uint3,uint4,uint8,uint16,
+ ulong2,ulong3,ulong4,ulong8,ulong16,
+ ulonglong2,ulonglong3,ulonglong4,ulonglong8,ulonglong16,
+ ushort2, ushort3, ushort4, ushort8, ushort16,
+}
+}
+
+% Generic types (Gen, SGen, GenVec, ...)
+\lstset{
+ morekeywords=[5]{
+ genchar, charn,
+ genfloatd, doublen,
+ genfloatf, floatn,
+ genfloath, halfn,
+ genfloat, sgenfloat,
+ gengeofloat, gengeodouble,
+ geninteger32bit, geninteger64bit,
+ geninteger8bit, geninteger16bit,
+ geninteger, sgeninteger, genintegerNbit,
+ genint, intn,
+ genlonglong, longlongn,
+ genlong, longn,
+ genshort, shortn,
+ gentype, genhalf, genvector,
+ igenchar, scharn,
+ igeninteger32bit, igeninteger64bit,
+ igeninteger8bit, igeninteger16bit,
+ igeninteger, igenintegerNbit,
+ igenlonginteger, ugenlonginteger,
+ ugenchar, ucharn,
+ ugeninteger32bit, ugeninteger64bit,
+ ugeninteger8bit, ugeninteger16bit,
+ ugeninteger, ugenintegerNbit,
+ ugenint, uintn,
+ ugenlonglong, ulonglongn,
+ ugenlong, ulongn,
+ ugenshort, ushortn,
+}
+}
+
+% OpenCL compatibility (cl_bool...)
+\lstset{
+ morekeywords=[6]{
+ __kernel,
+ __read_only,
+ __write_only,
+ __read_write,
+ cl,
+ cl_bool,
+ cl_char,
+ cl_char16,
+ cl_char2,
+ cl_char3,
+ cl_char4,
+ cl_char8,
+ cl_command_queue,
+ cl_double,
+ cl_double16,
+ cl_double2,
+ cl_double3,
+ cl_double4,
+ cl_double8,
+ cl_event,
+ cl_exception,
+ cl_float,
+ cl_float16,
+ cl_float2,
+ cl_float3,
+ cl_float4,
+ cl_float8,
+ cl_half,
+ cl_half16,
+ cl_half2,
+ cl_half3,
+ cl_half4,
+ cl_half8,
+ cl_int,
+ cl_int16,
+ cl_int2,
+ cl_int3,
+ cl_int4,
+ cl_int8,
+ cl_kernel,
+ cl_long,
+ cl_long16,
+ cl_long2,
+ cl_long3,
+ cl_long4,
+ cl_long8,
+ cl_mem,
+ cl_pipe,
+ cl_program,
+ cl_sampler,
+ cl_short,
+ cl_short16,
+ cl_short2,
+ cl_short3,
+ cl_short4,
+ cl_short8,
+ cl_uchar,
+ cl_uchar16,
+ cl_uchar2,
+ cl_uchar3,
+ cl_uchar4,
+ cl_uchar8,
+ cl_uint,
+ cl_uint16,
+ cl_uint2,
+ cl_uint3,
+ cl_uint4,
+ cl_uint8,
+ cl_ulong,
+ cl_ulong16,
+ cl_ulong2,
+ cl_ulong4,
+ cl_ulong8,
+ cl_ushort,
+ cl_ushort16,
+ cl_ushort2,
+ cl_ushort3,
+ cl_ushort4,
+ cl_ushort8,
+ event_t
+}
+}
+
+
+% Macros
+\lstset{
+morekeywords=[7]{
+ SYCL_EXTERNAL,
+}
+}
+
+
+\lstset{
+literate={~} {$\sim$}{1}
+}
+
+\lstset{
+backgroundcolor=\color[rgb]{0.95, 0.95, 0.95},
+tabsize=2,
+rulecolor=,
+%basicstyle=\scriptsize,
+upquote=true,
+aboveskip={1.5\baselineskip},
+columns=fixed,
+showstringspaces=false,
+extendedchars=true,
+breaklines=true,
+%prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+frame=single,
+showtabs=false,
+showspaces=false,
+showstringspaces=false,
+identifierstyle=\ttfamily,
+% Normal C++ keywords
+keywordstyle=[1]\color[rgb]{0,0,0.75},
+% terminology (NDRange, Compute Unit, ...)
+keywordstyle=[2]\color{VioletRed1},
+% structural keywords and functions (parallel_for)
+keywordstyle=[3]\color{Turquoise3},
+% data types (int4)
+keywordstyle=[4]\color{DarkOrchid3},
+% Generic types (Gen, SGen, GenVec, ...)
+keywordstyle=[5]\color{Magenta1},
+% OpenCL compatibility (cl_bool...)
+keywordstyle=[6]\color{OrangeRed1},
+% Macros
+keywordstyle=[7]\color{OliveDrab2},
+commentstyle=\color[rgb]{0.133,0.545,0.133},
+stringstyle=\color[rgb]{0.639,0.082,0.082},
+}
+
+
+\newcommand{\keyword}[1]{\textit{#1}}
+
+
+
+\def \showtodos{false}
+\def \true{true}
+\def \showdiffs{false}
+
+%% Attention:
+%% Uncomment this line in order to enable comments, i.e. show the todos and
+%% comments in the produced pdf file.
+%% \def\showtodos{true}
+
+\ifx\showtodos\true
+\usepackage[draft]{todonotes}
+\else
+\usepackage[disable]{todonotes}
+\fi
+
+%% Uncomment to show diffs from the version of the specification voted on at the Phoenix F2F 2014
+%% differences shown as red in the pdf file
+%\def\showdiffs{true}
+
+
+
+\usepackage{setspace}
+\newcommand{\fixme}[1]{\todo[inline]{#1}}
+
+
+\newcounter{mycomment}
+\newcommand{\mycomment}[2][]{%
+% initials of the author (optional) + note in the margin
+\refstepcounter{mycomment}%
+{%
+\setstretch{0.7}% spacing
+\todo[color={cyan!100!green!33},size=\scriptsize]{%
+Comment [#1\themycomment]:~\newline #2}%
+}}
+
+
+% Define the page style with header & footer
+\pagestyle{fancy}
+% Reorganize the chapter and section mark to avoid collisions
+\fancyhead{}
+\fancyhead[LO,RE]{SYCL \SYCLVERSION{}}
+\fancyhead[RO,LE]{\rightmark}% The section name
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,RE]{\leftmark}% The chapter name
+% Since the \chapter page uses always the plain style, redefine plain style
+\fancypagestyle{plain}{%
+  \fancyhf{}% Clear all header and footer fields
+  \fancyfoot[LE,RO]{\thepage}% The page as usual
+}
+
+\def\tm{\texttrademark}
+% Commands for printing out templated classes and functions and keywords
+\newcommand{\tf}{\texttt}
+\newcommand{\tbf}{\textbf}
+\newcommand{\tfb}[1]{\textbf{\texttt{#1}}}
+\newcommand{\tclass}[2]{\texttt{#1}$<$#2$>$}
+\newcommand{\tbclass}[2]{\texttt{\textbf{#1}}$<$#2$>$}
+\newcommand{\nline}[1]{#1 \newline }
+\newcommand{\nlineII}[2]{#1 \newline #2 \newline }
+\newcommand{\nlineIII}[3]{#1 \newline #2 \newline #3 \newline }
+\newcommand{\nlineIV}[4]{#1 \newline #2 \newline #3 \newline #4 \newline }
+\newcommand{\nlineV}[5]{#1 \newline #2 \newline #3 \newline #4 \newline #5 \newline }
+\newcommand{\nlineVI}[6]{#1 \newline #2 \newline #3 \newline #4 \newline #5 \newline #6 \newline }
+\newcommand{\codeinline}[1]{\lstinline[basicstyle=\ttfamily\small]$#1$}
+\newcommand{\scriptinline}[1]{\lstinline[basicstyle=\ttfamily\scriptsize]$#1$}
+\lstdefinestyle{nonumbers}{numbers=none}
+
+\newcommand{\twoLinesOfCode}[2]{\codeinline{#1} \newline \hspace*{2em}\codeinline{#2}}
+\newcommand{\threeLinesOfCode}[3]{\twoLinesOfCode{#1}{#2} \newline \hspace*{2em}\codeinline{#3}}
+\newcommand{\fourLinesOfCode}[4]{\threeLinesOfCode{#1}{#2}{#3} \newline \hspace*{2em}\codeinline{#4}}
+\newcommand{\fiveLinesOfCode}[5]{\fourLinesOfCode{#1}{#2}{#3}{#4} \newline \hspace*{2em}\codeinline{#5}}
+\newcommand{\sixLinesOfCode}[6]{\fiveLinesOfCode{#1}{#2}{#3}{#4}{#5} \newline \hspace*{2em}\codeinline{#6}}
+\newcommand{\sevenLinesOfCode}[7]{\sixLinesOfCode{#1}{#2}{#3}{#4}{#5}{#6} \newline \hspace*{2em}\codeinline{#7}}
+\newcommand{\eightLinesOfCode}[8]{\sevenLinesOfCode{#1}{#2}{#3}{#4}{#5}{#6}{#7} \newline \hspace*{2em}\codeinline{#8}}
+
+\newcommand{\twoLinesSCode}[2]{\codeinline{#1} \newline \codeinline{#2}}
+\newcommand{\threeLinesSCode}[3]{\twoLinesSCode{#1}{#2} \newline \hspace*{2em}\codeinline{#3}}
+\newcommand{\fourLinesSCode}[4]{\threeLinesSCode{#1}{#2}{#3} \newline \hspace*{2em} \codeinline{#4}}
+\newcommand{\fiveLinesSCode}[5]{\fourLinesSCode{#1}{#2}{#3}{#4} \newline \hspace*{2em} \codeinline{#5}}
+\newcommand{\sixLinesSCode}[6]{\fiveLinesSCode{#1}{#2}{#3}{#4}{#5} \newline \hspace*{2em} \codeinline{#6}}
+\newcommand{\sevenLinesSCode}[7]{\sixLinesSCode{#1}{#2}{#3}{#4}{#5}{#6} \newline \hspace*{2em} \codeinline{#7}}
+\newcommand{\eightLinesSCode}[8]{\sevenLinesSCode{#1}{#2}{#3}{#4}{#5}{#6}{#7} \newline \hspace*{2em} \codeinline{#8}}
+
+ \lstnewenvironment{interface}
+    {\lstset{}%
+       \csname lst@SetFirstLabel\endcsname}
+     {\csname lst@SaveFirstLabel\endcsname}
+     \lstset{
+       style=nonumbers,
+       basicstyle=\ttfamily\small,
+       backgroundcolor=\color{white},
+       frame=none,
+     }
+
+
+% Commands for describing tables of enums
+% Used for error tables etc throughout the text
+\newcommand{\startEnumTable}[1]{\begingroup\begin{table}[!h]\setlength{\extrarowheight}{5pt}\small\centering\begin{tabular}[b]{|p{8cm} | p{6cm} |}\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{Description}\\ \hline}
+\newcommand{\enumTableRow}[2]{\lstinline$#1$ & #2\\ \hline}
+\newcommand{\enumTableRowEn}[3]{\lstinline$#1$ & #3 \\ \lstinline$#2$ & \\ \hline}
+\newcommand{\enumTableRowEnhanced}[4]{\lstinline$#1$ & #4 \\ \lstinline$#2$ & \\ \lstinline$#3$ & \\\hline}
+\newcommand{\completeEnumTabular}[0]{\end{tabular}}
+\newcommand{\captionEnumTable}[1]{\caption{#1}}
+\newcommand{\labelEnumTable}[1]{\label{#1}}
+\newcommand{\completeEnumTable}[0]{\end{table}\endgroup}
+
+
+%\newcommand{\startTable}[1]{\begingroup\begin{table}[!h]\setlength{\extrarowheight}{5pt}\small\centering\begin{tabular}[b]{|p{8.8cm} | p{6.2cm} |}\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{Description}\\ \hline}
+\newcommand{\addRowNC}[2]{{#1} & {#2}\\ \hline} 
+\newcommand{\addRow}[2]{\codeinline{#1} & {#2}\\ \hline}
+\newcommand{\addRowB}[2]{\codeinlineB{#1} & {#2}\\ \hline}
+\newcommand{\addRowTwoL}[3]{\twoLinesOfCode{#1}{#2} & #3 \\ \hline}
+\newcommand{\addRowThreeL}[4]{\threeLinesOfCode{#1}{#2}{#3} & #4 \\ \hline}
+\newcommand{\addRowFourL}[5]{\fourLinesOfCode{#1}{#2}{#3}{#4} & #5 \\ \hline}
+\newcommand{\addRowFiveL}[6]{\fiveLinesOfCode{#1}{#2}{#3}{#4}{#5} & #6 \\ \hline}
+\newcommand{\addRowSixL}[7]{\sixLinesOfCode{#1}{#2}{#3}{#4}{#5}{#6} & #7 \\ \hline}
+\newcommand{\addRowSevenL}[8]{\sevenLinesOfCode{#1}{#2}{#3}{#4}{#5}{#6}{#7} & #8\\ \hline}
+\newcommand{\addRowEightL}[9]{\eightLinesOfCode{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8} & #9\\ \hline}
+
+\newcommand{\addRowTwoSL}[3]{\twoLinesSCode{#1}{#2} & #3 \\ \hline}
+\newcommand{\addRowThreeSL}[4]{\threeLinesSCode{#1}{#2}{#3} & #4 \\ \hline}
+\newcommand{\addRowFourSL}[5]{\fourLinesSCode{#1}{#2}{#3}{#4} & #5 \\ \hline}
+\newcommand{\addRowFiveSL}[6]{\fiveLinesSCode{#1}{#2}{#3}{#4}{#5} & #6 \\ \hline}
+\newcommand{\addRowSixSL}[7]{\sixLinesSCode{#1}{#2}{#3}{#4}{#5}{#6} & #7 \\ \hline}
+\newcommand{\addRowSevenSL}[8]{\sevenLinesSCode{#1}{#2}{#3}{#4}{#5}{#6}{#7} & #8\\ \hline}
+\newcommand{\addRowEightSL}[9]{\eightLinesSCode{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8} & #9\\ \hline}
+
+\newcommand{\completeTabular}[0]{\end{tabular}}
+\newcommand{\captionTable}[1]{\caption{#1}}
+\newcommand{\labelTable}[1]{\label{#1}}
+%\newcommand{\completeTable}[0]{\end{table}\endgroup}
+
+\newcommand{\startTable}[1]{\begingroup\begin{longtable}[!h]{|>{\raggedright\arraybackslash}p{8.8cm} | p{6.2cm} |}\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{Description}\\ \hline \endhead}
+\newcommand{\startTableDim}[3]{\begingroup\begin{longtable}[!h]{|>{\raggedright\arraybackslash}p{#2} | p{#3} |}\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{Description}\\ \hline \endhead}
+\newcommand{\addFootNotes}[2]{\hline\multicolumn{2}{|r|}{{Continued on next page}} \\ \hline
+\caption{#1} \\ \endfoot \hline\multicolumn{2}{|r|}{{End of table}}\\\hline\caption{#1}  \labelTable{#2}\endlastfoot}
+\newcommand{\completeTable}[0]{\end{longtable}\endgroup}
+
+\newcommand{\startInfoTable}[1]{\begingroup\begin{longtable}{| p{5.6cm} | p{3cm} | p{6.6cm} |}
+\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{Return type} & \cellcolor{lightgray}\textbf{Description}\\ \hline \endhead}
+
+\newcommand{\startInfoTableDims}[4]{\begingroup\begin{longtable}{| p{#2} | p{#3} | p{#4} |}
+\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{Return type} & \cellcolor{lightgray}\textbf{Description}\\ \hline \endhead}
+
+\newcommand{\addInfoRow}[3]{\codeinline{#1} & \codeinline{#2} &{#3}\\ \hline}
+\newcommand{\captionInfoTable}[1]{\caption{#1}}
+\newcommand{\labelInfoTable}[1]{\label{#1}}
+
+\newcommand{\addInfoFootNotes}[2]{\hline\multicolumn{3}{|r|}{{Continued on next page}} \\ \hline
+\caption{#1} \\ \endfoot \hline\multicolumn{3}{|r|}{{End of table}}\\\hline\caption{#1}  \labelTable{#2}\endlastfoot}
+
+\newcommand{\completeInfoTable}[0]{\end{longtable}\endgroup}
+
+\newcommand{\startGenericTable}[2]{\begingroup\begin{table}[!h]\setlength{\extrarowheight}{5pt}\small\centering\begin{tabular}[b]{|p{8.8cm} | p{6.2cm} |}\hline\cellcolor{lightgray}\textbf{#1} & \cellcolor{lightgray}\textbf{#2}\\ \hline}
+\newcommand{\genericRow}[2]{\codeinline{#1} & #2\\ \hline}
+\newcommand{\genericRowTwoL}[3]{\twoLinesOfCode{#1}{#2} & #3 \\ \hline}
+\newcommand{\genericRowThreeL}[4]{\threeLinesOfCode{#1}{#2}{#3} & #4 \\ \hline}
+\newcommand{\completeGenericTabular}[0]{\end{tabular}}
+\newcommand{\captionGenericTable}[1]{\caption{#1}}
+\newcommand{\labelGenericTable}[1]{\label{#1}}
+\newcommand{\completeGenericTable}[0]{\end{table}\endgroup}
+
+\newcommand{\startMethodTable}[0]{\begingroup\scriptsize\centering\begin{tabular}[c]{|p{1.5cm}|p{2cm}|p{3cm}|p{4cm}|p{4cm}|}\hline\cellcolor{gray}\textbf{Access} & \cellcolor{gray}\textbf{Return} & \cellcolor{gray}\textbf{Name} & \cellcolor{gray}\textbf{Parameters} & \cellcolor{gray}\textbf{Description}\\ \hline}
+\newcommand{\methodTableRow}[5]{\lstinline$#1$ & \lstinline$#2$ & \lstinline$#3$ & \lstinline$#4$ & #5\\ \hline}
+\newcommand{\completeMethodTable}[0]{\end{tabular}\endgroup}
+
+
+\newcommand{\startInterfaceTable}[0]{\begingroup
+        \begin{tabular}[c]{|c|p{8cm}|c|c|}
+        \hline
+        \cellcolor{gray}\textbf{Object} & \multicolumn{1}{c}{\cellcolor{gray}\textbf{Description}} & \multicolumn{2}{|c|}{\cellcolor{gray}\textbf{Visibility}}\\\hhline{|>{\arrayrulecolor{gray}}-->{\arrayrulecolor{black}}--}
+        \cellcolor{gray}& \cellcolor{gray}& \cellcolor{gray}\textbf{Host} & \cellcolor{gray}\textbf{Device}\\ \hline}
+%\newcommand{\startInterfaceTable}[0]{\begingroup
+%        \begin{tabular}[c]{|c|p{8cm}|c|c|}
+%        \hline
+%        \cellcolor{gray}\textbf{Object} & \multicolumn{1}{c}{\cellcolor{gray}\textbf{Description}} & \multicolumn{2}{|c|}{\cellcolor{gray}\textbf{Visibility}}\\\arrayrulecolor{gray}\hline\arrayrulecolor{black}
+%        \cellcolor{gray}& \cellcolor{gray}& \cellcolor{gray}\textbf{Host} & \cellcolor{gray}\textbf{Device}\\ \hline}
+\newcommand{\interfaceTableRow}[4]{\lstinline$#1$ & #2 & #3 & #4\\ \hline}
+\newcommand{\completeInterfaceTable}[0]{\end{tabular}\endgroup}
+
+
+%\setlength{\parindent}{15pt}
+%\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+
+
+
+\usepackage{framed,color}
+\definecolor{shadecolor}{gray}{0.9}
+\definecolor{Gray}{gray}{0.9}
+
+
+% Use a special tabbing environment that does not add too much
+% vertical spacing before and after.
+% I looked for example at
+% http://tex.stackexchange.com/questions/16383/removing-vertical-space-before-and-after-tabbing-environment
+% but it does not work in the tabular environments...
+
+% So start back from the source
+% ftp://ftp.dante.de/pub/tex/macros/latex/unpacked/lttab.dtx
+% /usr/share/texlive/texmf-dist/tex/latex/base/latex.ltx
+% and apply some modifications:
+\makeatletter
+\gdef\nstabbing{\lineskip \z@skip\let\>\@rtab\let\<\@ltab\let\=\@settab
+     \let\+\@tabplus\let\-\@tabminus\let\`\@tabrj\let\'\@tablab
+     \let\\=\@tabcr
+     \@hightab\@firsttab
+     \global\@nxttabmar\@firsttab
+     \dimen\@firsttab\@totalleftmargin
+     \global\@tabpush\z@ \global\@rjfieldfalse
+     % Remove the trivlist and the \vskip that may insert vertical space
+     %\trivlist \item\relax
+     %\if@minipage\else\vskip\parskip\fi
+     %\setbox\@tabfbox\hbox{%
+     %  \rlap{\hskip\@totalleftmargin\indent\the\everypar}}%
+     \def\@itemfudge{\box\@tabfbox}%
+     \@startline\ignorespaces}
+\gdef\endnstabbing{%
+  \@stopline\ifnum\@tabpush >\z@ \@badpoptabs \fi
+  % \endtrivlist
+}
+
+% Do not cross the right margin
+\sloppy
+
+% Consider '_' as a (almost) normal character
+\usepackage[strings]{underscore}
+
+
+%%% SYCL Algebraic definitions
+\DeclareMathOperator{\SYCLeval}{Satisfied}
+\DeclareMathOperator{\SYCLperform}{Perform}
+
+% Read the git description file if any
+% (Use a LaTeX package such as gitinfo2 if something more complex is required)
+\newcommand{\GitDescribe}{\InputIfFileExists{git_description}{}{}}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "sycl-1.2.1"
+%%% End:

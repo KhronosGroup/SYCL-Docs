@@ -1,0 +1,119 @@
+\subsection{SYCL functions for explicit memory operations}
+\label{subsec:explicitmemory}
+
+In addition to \glspl{kernel}, \gls{command-group} objects can also be used to
+perform manual operations on host and device memory by using the 
+\keyword{copy} API of the \gls{handler}.
+Manual copy operations can be seen as specialized kernels executing on the 
+device, except that typically this operations will be implemented using the
+OpenCL host API (e.g, enqueue copy operations).
+
+The SYCL memory objects involved in a copy operation are specified using
+accessors.
+Explicit copy operations have a source and a destination. 
+When an accessor is the \textit{source} of the operation, the destination can be 
+a host pointer or another accessor. 
+The \textit{source} accessor can have either  \textbf{read} or \textbf{read\_write} access 
+mode. 
+
+When an accessor is the \textit{destination} of the explicit copy operation,
+the source can be a host pointer or another accessor.
+The \textit{destination} accessor can have either 
+\textbf{write}, \textbf{read\_write}, \textbf{discard\_write}, 
+\textbf{discard\_read\_write} access modes.
+
+When accessors are both the origin and the destination,
+the operation is executed on objects controlled by the SYCL runtime.
+The SYCL runtime is allowed to not perfom an explicit in-copy operation
+if a different path to update the data is available according to
+the SYCL Application Memory Model.
+
+The most recent copy of the memory object may reside on any context controlled
+by the SYCL runtime, or on the host in a pointer controlled by the
+SYCL runtime.  The SYCL runtime will ensure that data is copied to the destination
+once the \gls{command-group} has completed execution.
+
+Whenever a host pointer is used as either the host or the destination of these
+explicit memory operations, it is the responsibility
+of the user for that pointer to have at least as much memory allocated as
+the accessor is giving access to, e.g: if an accessor accesses a range
+of 10 elements of \codeinline{int} type, the host pointer must at least have 
+\codeinline{10 * sizeof(int)} bytes of memory allocated.
+
+A special case is the \codeinline{update_host} method. 
+This method only requires an accessor, and instructs the runtime to update
+the internal copy of the data in the host, if any. This is particularly
+useful when users use manual synchronization with host pointers, e.g.\ 
+via mutex objects on the \codeinline{buffer} constructors.
+
+Table~\ref{table.members.handler.copy} describes the interface for the 
+explicit copy operations.
+
+%-------------------------------------------------------------------------------
+\startTable{Member function}
+\addFootNotes{Member functions of the \codeinline{handler} class}
+{table.members.handler.copy}
+  \addRowThreeL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void copy(accessor<T, dim, mode, tgt> src,}
+    { shared_ptr_class<T> dest)}
+    { Copies the contents of the memory pointed to by \codeinline{src} into the
+      memory object accessed by \codeinline{dest}.
+      \codeinline{src} must have at least as many bytes as the 
+      range accessed by \codeinline{dest}.}
+  \addRowThreeL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void copy(shared_ptr_class<T> src}
+    { accessor<T, dim, mode, tgt> dest)}
+    { Copies the contents of the memory object accessed via \codeinline{src} 
+      into the memory pointed to by \codeinline{dest}.
+      \codeinline{dest} must have at least as many bytes as the 
+      range accessed by \codeinline{src}.}
+  \addRowThreeL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void copy(accessor<T, dim, mode, tgt> src,}
+    { T * dest)}
+    { Copies the contents of the memory pointed to by \codeinline{src} into the
+      memory object accessed by \codeinline{dest}.
+      \codeinline{src} must have at least as many bytes as the 
+      range accessed by \codeinline{dest}.}
+  \addRowThreeL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void copy(const T * src}
+    { accessor<T, dim, mode, tgt> dest)}
+    { Copies the contents of the memory object accessed via \codeinline{src} 
+      into the memory pointed to by \codeinline{dest}.
+      \codeinline{dest} must have at least as many bytes as the 
+      range accessed by \codeinline{src}.}
+  \addRowThreeL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void copy(accessor<T, dim, mode, tgt> src}
+    { accessor<T, dim, mode, tgt> dest)}
+    { Copies the contents of the memory object accessed by \codeinline{src} 
+      into the memory object accessed by \codeinline{dest}.
+      \codeinline{src} must have at least as many bytes as the 
+      range accessed by \codeinline{dest}.}
+  \addRowTwoL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void update_host(accessor<T, dim, mode, tgt> acc)}
+    { The contents of the memory object accessed via \codeinline{acc} 
+      on the host are guaranteed to be up-to-date after this 
+      \gls{command-group} object execution is complete.}
+  \addRowThreeL
+    {template <typename T, int dim, access::mode mode, access::target tgt>}
+    {void fill(accessor<T, dim, mode, tgt> dest,}
+    {          const T\& src)}
+    {Replicates the value of \codeinline{src} into the
+      memory object accessed by \codeinline{dest}.
+      T must be an integral scalar value or a SYCL vector type.
+    }
+
+\completeTable
+
+The listing below illustrates how to use explicit copy 
+operations in SYCL. The example copies half of the contents of 
+a \codeinline{vector_class} into the device, leaving the rest of the 
+contents of the buffer on the device unchanged.
+
+\lstinputlisting{code/explicitcopy.cpp}
+
