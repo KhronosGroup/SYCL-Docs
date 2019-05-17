@@ -1,7 +1,8 @@
 namespace cl {
 namespace sycl {
 template <int dimensions = 1, bool with_offset = true>
-struct item {
+class item {
+public:
   item() = delete;
 
    /* -- common interface members -- */

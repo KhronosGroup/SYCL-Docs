@@ -1,7 +1,8 @@
 namespace cl {
 namespace sycl {
 template <int dimensions>
-struct h_item {
+class h_item {
+public:
   h_item() = delete;
 
   /* -- common interface members -- */

@@ -1,7 +1,8 @@
 namespace cl {
 namespace sycl {
 template <int dimensions = 1>
-struct id {
+class id {
+public:
   id();
 
   /* The following constructor is only available in the id class
