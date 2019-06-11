@@ -15,7 +15,7 @@ run on either an OpenCL device or on the \gls{host}.
 
 The terminology used for SYCL inherits that of OpenCL with some
 SYCL-specific additions. A function object that can execute on either
-an OpenCL \keyword{device} or a \gls{host} \gls{device} is called a
+an OpenCL \gls{device} or a \gls{host} \gls{device} is called a
 \gls{sycl-kernel-function}.
 
 To ensure maximum backward-compatibility, a software developer can produce
@@ -89,32 +89,37 @@ kernel to the host code.
 The \codeinline{parallel_for} method creates an instance of a kernel object.
 The kernel object is the entity that will be enqueued within a
 command group.  In the case of \codeinline{parallel_for} the
-\keyword{kernel function} will be executed over the given range from 0 to 1023.
-The different methods to execute kernels can be found in Section~\ref{subsec:invokingkernels}.
+\gls{sycl-kernel-function} will be executed over the given range from 0 to 1023.
+The different methods to
+execute kernels can be found in Section~\ref{subsec:invokingkernels}.
 
-A \keyword{kernel function} can only be defined within a \keyword{command group
-scope}, and a \keyword{command group scope} may include only a single \keyword{kernel
-function}. Command group scope is the syntactic scope wrapped by the construction
-of a \gls{command-group-function-object} as seen on line 20. The \gls{command-group-function-object} takes as a parameter a command group \codeinline{handler} which is
-a runtime constructed object. 
-All the requirements for a kernel to execute are defined in this 
-\keyword{command group scope}, as described in Section~\ref{sec:executionmodel}.
-In this case the constructor used for \lstinline$myQueue$ on line 14 is the default
-constructor, which allows the queue to select the best underlying device to
-execute on, leaving the decision up to the runtime.
+A \gls{sycl-kernel-function} can only be defined within a
+\gls{command-group-scope}, and a \gls{command-group-scope} may include
+only a single \gls{sycl-kernel-function}. Command group scope is the
+syntactic scope wrapped by the construction of a
+\gls{command-group-function-object} as seen on line 20. The
+\gls{command-group-function-object} takes as a parameter a command
+group \codeinline{handler} which is a runtime constructed object.
 
-In SYCL, data that is required within a \keyword{kernel function} must
-be contained within a \keyword{buffer} or \keyword{image}, as described in
+All the requirements for a kernel to execute are defined in this
+\gls{command-group-scope}, as described in
+Section~\ref{sec:executionmodel}.  In this case the constructor used
+for \codeinline{myQueue} on line 14 is the default constructor, which
+allows the queue to select the best underlying device to execute on,
+leaving the decision up to the runtime.
+
+In SYCL, data that is required within a \gls{sycl-kernel-function} must
+be contained within a \gls{buffer} or \gls{image}, as described in
 Section~\ref{sec:memory.model}. We
-construct a buffer on line 17. Access to the \keyword{buffer} is controlled via
+construct a buffer on line 17. Access to the \gls{buffer} is controlled via
 an \gls{accessor} which is constructed on line 22 through the
 \codeinline{get_access} method of the buffer. The \gls{buffer} is used to
 keep track of access to the data and the \gls{accessor} is used to request
 access to the data on a queue, as well as to track the dependencies between
-\keyword{kernel functions}. In this example the \keyword{accessor} is used to
-write to the data buffer on line 26. All \keyword{buffers} must be constructed
-in the application-scope, whereas all \keyword{accessors}
-must be constructed in the \keyword{command group scope}.
+\gls{sycl-kernel-function}. In this example the \gls{accessor} is used to
+write to the data buffer on line 26. All \glspl{buffer} must be constructed
+in the application-scope, whereas all \glspl{accessor}
+must be constructed in the \gls{command-group-scope}.
 
 
 \section{The SYCL Platform Model}
@@ -174,11 +179,12 @@ compile-time macro: \codeinline{CL_SYCL_LANGUAGE_VERSION}.
 
 \section{SYCL Execution Model}
 
-The execution of a SYCL program occurs in two parts: 
-\glspl{sycl-kernel-function} and a \keyword{application} that executes on the \gls{host}.
-The SYCL \glspl{kernel} execution is governed by the \textit{SYCL 
-Kernel Execution Model}, whereas the SYCL application that executes
-on the \gls{host} is governed by the \textit{SYCL Application Execution Model}.
+The execution of a SYCL program occurs in two parts:
+\glspl{sycl-kernel-function} and a \gls{sycl-application} that
+executes on the \gls{host}.  The SYCL \glspl{kernel} execution is
+governed by the \textit{SYCL Kernel Execution Model}, whereas the
+\gls{sycl-application} that executes on the \gls{host} is governed by
+the \textit{SYCL Application Execution Model}.
 
 Like OpenCL, SYCL is capable of running kernels on multiple device types. 
 However, SYCL adds functionality on top of OpenCL due to the integration into a host
@@ -201,18 +207,18 @@ The kernels are executed as soon as their requirements have been satisfied.
 
 \subsubsection{OpenCL resources managed by SYCL Application}
 
-In OpenCL, a developer must create a \keyword{context} to be able to execute
-commands on a device. Creating a context involves choosing a \keyword{platform}
-and a list of \keyword{devices}. In SYCL, contexts, platforms and devices all
+In OpenCL, a developer must create a \gls{context} to be able to execute
+commands on a device. Creating a context involves choosing a \gls{platform}
+and a list of \glspl{device}. In SYCL, contexts, platforms and devices all
 exist, but the user can choose whether to specify them or have the SYCL
 implementation create them automatically.  The minimum required object for
-submitting work to devices in SYCL is the \keyword{queue}, which contains
+submitting work to devices in SYCL is the \gls{queue}, which contains
 references to a platform, device and context internally.
 
 The resources managed by SYCL are:
 
 \begin{enumerate}
-\item \Glspl{platform}: All features of OpenCL are implemented by platforms.
+\item \Glspl{platform}: all features of OpenCL are implemented by platforms.
 A platform can be viewed as a given hardware vendor's runtime and the devices
 accessible through it. Some devices will only be accessible to one vendor's
 runtime and hence multiple platforms may be present. SYCL manages the different
@@ -220,7 +226,7 @@ platforms for the user. In SYCL, a platform resource is accessible through a
 \codeinline{cl::sycl::platform} object. SYCL also provides a host platform
 object, which only contains a single host device.
 
-\item \Glspl{context}: Any OpenCL resource that is acquired by the user is
+\item \Glspl{context}: any OpenCL resource that is acquired by the user is
 attached to a context. A context contains a collection of devices that the host
 can use and manages memory objects that can be shared between the devices. Data
 movement between devices within a context may be efficient and hidden by the
@@ -229,7 +235,7 @@ may involve the host. A given context can only wrap devices owned
 by a single platform. In SYCL, a context resource is accessible through a \codeinline{cl::sycl::context}
 object.
 
-\item \Glspl{device}: Platforms provide one or more devices for executing
+\item \Glspl{device}: platforms provide one or more devices for executing
 kernels. In SYCL, a device is accessible through a \codeinline{cl::sycl::device}
 object. SYCL provides the abstract \codeinline{cl::sycl::device_selector} class
 which the user can subclass to define how the runtime should select the best
@@ -239,7 +245,7 @@ that select devices based on common criteria, such as type of device. SYCL,
 unlike OpenCL, defines a host device, which means any work that uses the host
 device will execute on the host and not on any OpenCL device.
 
-\item \Glspl{kernel}: The SYCL functions that run on SYCL devices (i.e.\ 
+\item \Glspl{kernel}: the SYCL functions that run on SYCL devices (i.e.\ 
 either an OpenCL device, or the host device) are defined as C++ function
 objects (a named function object type or a lambda function).
 In SYCL, all kernels must have a \gls{kernel-name}, which must be a
@@ -247,8 +253,8 @@ globally-accessible C++ type name. This is required to enable kernels compiled
 with one compiler to be linked to host code compiled with a different compiler.
 
 For named function objects, the type name of the function object is sufficient
-as the \keyword{kernel name}, but for C++11 lambda functions, the user must
-provide a user-defined type name as the \keyword{kernel name}.
+as the \gls{kernel-name}, but for C++ lambda functions, the user must
+provide a user-defined type name as the \gls{kernel-name}.
 
 \item \Glspl{program-object}: OpenCL objects that store implementation data
 for the SYCL kernels. These objects are only required for advanced use in SYCL
@@ -585,7 +591,7 @@ The Memory Model for SYCL Devices is based on the OpenCL Memory model.
 Work-items executing in a kernel have access to four distinct memory regions:
 
 \begin{itemize}
-    \item \keyword{Global memory} is accessible to all work-items in all
+    \item \Gls{global-memory} is accessible to all work-items in all
 work-groups. Work-items can read from or write to any element of a global memory
 object. Reads and writes to global memory may be cached depending on the
 capabilities of the device. Global memory is persistent across kernel
@@ -593,20 +599,20 @@ invocations, however there is no guarantee that two concurrently executing
 kernels can simultaneously write to the same memory object and expect correct
 results.
 
-    \item \keyword{Constant memory} is a region of global memory that remains
+    \item \Gls{constant-memory} is a region of global memory that remains
 constant during the execution of a kernel. The host allocates and initializes
 memory objects placed into constant memory.
 
-    \item \keyword{Local memory} is a distinct memory region shared between
+    \item \Gls{local-memory} is a distinct memory region shared between
 work-items in a single work-group and inaccessible to work-items in other
 work-groups. This memory region can be used to allocate variables that are
 shared by all work-items in a work-group. Work-group-level visibility allows
 local memory to be implemented as dedicated regions of memory on an OpenCL
 device where this is appropriate.
 
-    \item \keyword{Private memory} is a region of memory private to a work-item.
+    \item \Gls{private-memory} is a region of memory private to a work-item.
 Variables defined in one work-item's private memory are not visible to another
-work-item. 
+work-item.
 \end{itemize}
 
 \subsubsection{Access to memory}
@@ -1027,8 +1033,8 @@ Note that an instance of the SYCL \codeinline{buffer} or SYCL \codeinline{image}
 
 \section{Memory objects}
 
-Memory objects in SYCL fall into one of two categories: \keyword{buffer} objects
-and \keyword{image} objects. A buffer object stores a one-, two- or
+Memory objects in SYCL fall into one of two categories: \gls{buffer} objects
+and \gls{image} objects. A buffer object stores a one-, two- or
 three-dimensional collection of elements that are stored linearly directly back
 to back in the same way C or C++ stores arrays. An image object is used to store
 a one-, two- or three-dimensional texture, frame-buffer or image that may be
@@ -1124,7 +1130,7 @@ computer system. The framework contains the following components:
      OpenCL implementation is available, then the SYCL implementation provides only
      the \gls{host-device} to run kernels on. 
    \item
-      \keyword{SYCL Device Compiler(s)}: The SYCL \glspl{device-compiler} compile SYCL C++
+      SYCL \glspl{device-compiler}: The SYCL \glspl{device-compiler} compile SYCL C++
        kernels into a format which can be executed on an OpenCL device at runtime.
        There may be more than one SYCL device compiler in a SYCL implementation. The
        format of the compiled SYCL kernels is not defined.  A SYCL device compiler may,

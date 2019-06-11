@@ -13,13 +13,19 @@ The SYCL built-in functions are available throughout the SYCL application, and d
 %***********************************************************************************
 % Description of the built-in types available for SYCL host and device
 %***********************************************************************************
-\subsection{Description of the built-in types available for SYCL host and device  }
-All of the OpenCL built-in types are available in the namespace \keyword{cl::sycl}. For the
-purposes of this document we use generic type names for describing sets of valid SYCL types. The generic type names themselves are not valid SYCL types, but they represent a set of valid types, as defined in
-Tables~\ref{table.gentypes}. Each generic type within a section is comprised of
-a combination of scalar and/or SYCL \codeinline{vec} class specializations. Note
-that any reference to the base type refers to the type of a scalar or the element
-type of a SYCL \codeinline{vec} specialization.
+\subsection{Description of the built-in types available for SYCL host
+  and device }
+
+All of the OpenCL built-in types are available in the namespace
+\codeinline{cl::sycl}. For the purposes of this document we use
+generic type names for describing sets of valid SYCL types. The
+generic type names themselves are not valid SYCL types, but they
+represent a set of valid types, as defined in
+Tables~\ref{table.gentypes}. Each generic type within a section is
+comprised of a combination of scalar and/or SYCL \codeinline{vec}
+class specializations. Note that any reference to the base type refers
+to the type of a scalar or the element type of a SYCL \codeinline{vec}
+specialization.
 
 In the OpenCL 1.2 specification document\cite[ch. 6.12.1]{opencl12} in Table 6.7 the work-item
 functions are defined where they provide the size of the enqueued kernel NDRange. These
@@ -231,15 +237,15 @@ section~\ref{nditem-class} and \ref{group-class}.
 \subsection{Math functions}
 
 In SYCL the OpenCL math functions are available in the namespace
-\keyword{cl::sycl} on host and device with the same precision guarantees as
-defined in the OpenCL 1.2 specification document
-\cite[ch. 7]{opencl12} for host and device. For a SYCL platform the numerical
-requirements for host need to match the numerical requirements of the OpenCL
-math built-in functions. The built-in functions can take as input float or
-optionally double and their \keyword{vec} counterparts, for dimensions 1, 2, 3, 4,
-8 and 16. On the host the vector types use the \keyword{vec}
-class and on an OpenCL device use the corresponding OpenCL
-vector types.
+\codeinline{cl::sycl} on host and device with the same precision
+guarantees as defined in the OpenCL 1.2 specification document
+\cite[ch. 7]{opencl12} for host and device. For a SYCL platform the
+numerical requirements for host need to match the numerical
+requirements of the OpenCL math built-in functions. The built-in
+functions can take as input float or optionally double and their
+\codeinline{vec} counterparts, for dimensions 1, 2, 3, 4, 8 and 16. On
+the host the vector types use the \codeinline{vec} class and on an
+OpenCL device use the corresponding OpenCL vector types.
 
 The built-in functions available for SYCL host and device, with the same
 precision requirements for both host and device, are described in
@@ -547,9 +553,10 @@ rounding mode.}
 \completeTable
 %-------------------------------------------------------------------------------
 
-In SYCL the implementation defined precision math functions  are defined in the
-namespace \keyword{cl::sycl::native}. The functions that are available within
-this namespace are specified in Tables~\ref{table.native.math.functions}.
+In SYCL the implementation defined precision math functions are
+defined in the namespace \codeinline{cl::sycl::native}. The functions
+that are available within this namespace are specified in
+Tables~\ref{table.native.math.functions}.
 
 %-------------------------------------------------------------------------------
 
@@ -676,8 +683,12 @@ The maximum error is implementation-defined.
 \completeTable
 %-------------------------------------------------------------------------------
 
-In SYCL the half precision math functions are defined in \keyword{cl::sycl::half_precision}. The functions that are available within this namespace are specified in Tables~\ref{table.half.math.functions}. These
-functions are implemented with a minimum of 10-bits of accuracy i.e. an ULP value is less than or equal to 8192 ulp.
+In SYCL the half precision math functions are defined in
+\codeinline{cl::sycl::half_precision}. The functions that are
+available within this namespace are specified in
+Tables~\ref{table.half.math.functions}. These functions are
+implemented with a minimum of 10-bits of accuracy i.e. an ULP value is
+less than or equal to 8192 ulp.
 
 %-------------------------------------------------------------------------------
 \startTable{Half Math function}
@@ -720,15 +731,19 @@ to +216.}
 % Integer functions
 %*******************************************************************************
 \subsection{Integer functions}
-In SYCL the OpenCL integer math functions are available in the namespace
-\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
-document\cite[par. 6.12.3] {opencl12}. The built-in functions can take as input
-char, unsigned char, short, unsigned short, int, unsigned int, long long int,
-unsigned long long int and their \keyword{vec} counterparts, for dimensions 2,
-3, 4, 8 and 16. On the host the vector types use the
-\keyword{vec} class and on an OpenCL device use the
-corresponding OpenCL vector types. The supported integer math functions are
-described in Table~\ref{table.integer.functions}.
+
+In SYCL the OpenCL integer math functions are available in the
+namespace \codeinline{cl::sycl} on host and device as defined in the
+OpenCL 1.2 specification document\cite[par. 6.12.3] {opencl12}. The
+built-in functions can take as input \codeinline{char},
+\codeinline{unsigned char}, \codeinline{short}, \codeinline{unsigned
+  short}, \codeinline{int}, \codeinline{unsigned int},
+\codeinline{long long int}, \codeinline{unsigned long long int} and
+their \codeinline{vec} counterparts, for dimensions 2, 3, 4, 8 and
+16. On the host the vector types use the \codeinline{vec} class and on
+an OpenCL device use the corresponding OpenCL vector types. The
+supported integer math functions are described in
+Table~\ref{table.integer.functions}.
 
 %-------------------------------------------------------------------------------
 \startTable{Integer Function}
@@ -859,14 +874,15 @@ result is implementation-defined.
 % Common functions
 %*******************************************************************************
 \subsection{Common functions}
-In SYCL the OpenCL \keyword{common} functions are available in the namespace
-\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
-document\cite[par. 6.12.4]{opencl12}. They are described here in
-Table~\ref{table.common.functions}. The built-in functions can take as input
-float or optionally double and their \keyword{vec} counterparts, for dimensions
-2, 3, 4, 8 and 16. On the host the vector types use the
-\keyword{vec} class and on an OpenCL device use the
-corresponding OpenCL vector types.
+In SYCL the OpenCL \keyword{common} functions are available in the
+namespace \codeinline{cl::sycl} on host and device as defined in the
+OpenCL 1.2 specification document\cite[par. 6.12.4]{opencl12}. They
+are described here in Table~\ref{table.common.functions}. The built-in
+functions can take as input \codeinline{float} or optionally
+\codeinline{double} and their \codeinline{vec} counterparts, for
+dimensions 2, 3, 4, 8 and 16. On the host the vector types use the
+\codeinline{vec} class and on an OpenCL device use the corresponding
+OpenCL vector types.
 
 %-------------------------------------------------------------------------------
 \startTable{Common Function} \addFootNotes{Common functions which work
@@ -966,15 +982,16 @@ if $x < 0$. Returns $0.0$ if x is a NaN.
 %*******************************************************************************
 \subsection{Geometric Functions}
 
-In SYCL the OpenCL \keyword{geometric} functions are available in the namespace
-\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
-document \cite[par. 6.12.5]{opencl12}. The built-in functions can take as input
-float or optionally double and their \keyword{vec} counterparts, for dimensions
-2, 3 and 4. On the host the vector types use the
-\keyword{vec} class and on an OpenCL device use the
-corresponding OpenCL vector types. All of the geometric functions use
-round-to-nearest-even rounding mode. Table~\ref{table.geometric.functions}
-contains the definitions of supported geometric functions.
+In SYCL the OpenCL \keyword{geometric} functions are available in the
+namespace \codeinline{cl::sycl} on host and device as defined in the
+OpenCL 1.2 specification document \cite[par. 6.12.5]{opencl12}. The
+built-in functions can take as input float or optionally double and
+their \codeinline{vec} counterparts, for dimensions 2, 3 and 4. On the
+host the vector types use the \codeinline{vec} class and on an OpenCL
+device use the corresponding OpenCL vector types. All of the geometric
+functions use round-to-nearest-even rounding
+mode. Table~\ref{table.geometric.functions} contains the definitions
+of supported geometric functions.
 
 %-------------------------------------------------------------------------------
 \startTable{Geometric Function} \addFootNotes{Geometric functions
@@ -1063,19 +1080,21 @@ before proceeding with the calculation.
 %*******************************************************************************
 \subsection{Relational functions}
 
-In SYCL the OpenCL \keyword{relational} functions are available in the namespace
-\keyword{cl::sycl} on host and device as defined in the OpenCL 1.2 specification
-document \cite[par. 6.12.6]{opencl12}. The built-in functions can take as input
-char, unsigned char, short, unsigned short, int, unsigned int, long, unsigned
-long, float or optionally double and their \keyword{vec} counterparts, for
-dimensions 2,3,4,8, and 16. On the host the vector types use
-the \keyword{vec} class and on an OpenCL device use the
-corresponding OpenCL vector types.
-The relational operators are available on both host and device.  The
-relational functions are provided in addition to the the operators and will
-return 0 if the conditional
-is \keyword{false} and 1 otherwise.
-The available built-in functions are described in
+In SYCL the OpenCL \keyword{relational} functions are available in the
+namespace \codeinline{cl::sycl} on host and device as defined in the
+OpenCL 1.2 specification document \cite[par. 6.12.6]{opencl12}. The
+built-in functions can take as input \codeinline{char},
+\codeinline{unsigned char}, \codeinline{short}, \codeinline{unsigned
+  short}, \codeinline{int}, \codeinline{unsigned int},
+\codeinline{long}, \codeinline{unsigned long}, \codeinline{float} or
+optionally \codeinline{double} and their \codeinline{vec}
+counterparts, for dimensions 2,3,4,8, and 16. On the host the vector
+types use the \codeinline{vec} class and on an OpenCL device use the
+corresponding OpenCL vector types.  The relational operators are
+available on both host and device.  The relational functions are
+provided in addition to the the operators and will return 0 if the
+conditional is \codeinline{false} and 1 otherwise.  The available
+built-in functions are described in
 Tables~\ref{table.relational.functions}
 
 \fixme{fixed typo originating from the OpenCL 1.2 spec: when those functions
@@ -1230,7 +1249,7 @@ of elements and bits as \codeinline{gentype}.
 
 The functionality from the OpenCL functions as defined in the OpenCL 1.2
 specification document\cite[par. 6.12.7]{opencl12} is available in SYCL through
-the \keyword{vec} class in section \ref{sec:vector.type}.
+the \codeinline{vec} class in section \ref{sec:vector.type}.
 
 \subsection{Synchronization Functions}
 

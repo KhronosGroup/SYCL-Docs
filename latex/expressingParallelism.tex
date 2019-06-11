@@ -277,7 +277,7 @@ A synopsis of the SYCL \codeinline{nd_range} class is provided below. The constr
 \label{id-class}
 
 \tclass{id}{\tf{int} dimensions} is a vector of dimensions that is used to
-represent an \keyword{index} into a global or local
+represent an \gls{id} into a global or local
 \codeinline{range}. It can be used as an index in an accessor of the
 same rank. The \tf{[n]} operator returns the component \tf{n} as an
 \tf{size_t}.
@@ -1208,7 +1208,7 @@ abstraction and flexibility in the parallel programming models that can be
 implemented on top of SYCL.
 
 The \gls{command-group-function-object} and the \codeinline{handler} class
-serve as an interface for the encapsulation of \keyword{command group scope}.
+serve as an interface for the encapsulation of \gls{command-group-scope}.
 A \gls{sycl-kernel-function} is defined as a function object. All the device data accesses are
 defined inside this group and any transfers are managed by the \gls{sycl-runtime}. The
 rules for the data transfers regarding device and
@@ -1241,7 +1241,7 @@ execution.
 The command group \codeinline{handler} class provides the interface
 for all of the member functions that are able to be executed inside the command group
 scope, and it is also provided as a scoped object to all of the data access
-requests. The \keyword{command group handler} class provides the interface
+requests. The \gls{handler} class provides the interface
 in which every command in the command group scope will be submitted to a queue.
 
 %***********************************************************************************
@@ -1253,7 +1253,7 @@ in which every command in the command group scope will be submitted to a queue.
 
 A \gls{handler} object can only be constructed by the SYCL
 runtime. All of the accessors defined in \gls{command-group-scope} take as a
-parameter an instance of the \keyword{command group handler}, and all the
+parameter an instance of the \gls{handler}, and all the
 kernel invocation functions are member functions of this class.
 
 The constructors of the SYCL \codeinline{handler} class are described in Table~\ref{table.constructors.handler}.
@@ -1308,8 +1308,8 @@ handler methods.
 \label{subsec:invokingkernels}
 
 \Glspl{kernel} can be invoked as \keyword{single tasks}, basic
-\keyword{data-parallel kernels}, OpenCL-style \keyword{nd-range} in
-\keyword{work-groups}, or SYCL \keyword{hierarchical parallelism}.
+\keyword{data-parallel} \glspl{kernel}, OpenCL-style \gls{nd-range} in
+\glspl{work-group}, or SYCL \keyword{hierarchical parallelism}.
 
 Each function takes a kernel name template parameter. The \gls{kernel-name}
 must be a datatype that is unique for each kernel invocation. If a
@@ -1401,7 +1401,7 @@ Table~\ref{table.members.handler.kernel} lists all the members of the
     {
       Defines and invokes a \gls{sycl-kernel-function} as a lambda function
       or a named function object type,
-      for the specified \keyword{nd_range} and given an \keyword{nd_item}
+      for the specified \gls{nd-range} and given an \gls{nd-item}
       for indexing in the indexing space defined by the \gls{nd-range}.
       If it is a named function object and the function object type is globally
       visible there is no need for the developer
@@ -1582,7 +1582,7 @@ the developer may also pass an offset. An offset is an
 instance of the \codeinline{id} class added to the identifier 
 for each point in the range.
 
-In all of these cases the underlying \keyword{nd_range} will be created
+In all of these cases the underlying \gls{nd-range} will be created
 and the kernel defined as a function object will be created and enqueued
 as part of the command group scope.
 
@@ -1708,7 +1708,7 @@ The \codeinline{kernel} class is an abstraction of a \gls{kernel} object
 in SYCL. In the
 most common case the kernel object will contain the compiled version of a kernel
 invoked inside a command group using one of the parallel interface functions as
-described in~\ref{subsec:invokingkernels}. The \keyword{\gls{sycl-runtime}} will create 
+described in~\ref{subsec:invokingkernels}. The \gls{sycl-runtime} will create
 a kernel object, when it needs to enqueue the kernel on a command queue.
 
 In the case where a developer would like to pre-compile a kernel or compile and
@@ -2117,9 +2117,10 @@ A SYCL \codeinline{program} can be queried for all of the following information 
 \subsection{Defining kernels}
 \fixme{updated text for kernel functions.}
 In SYCL functions that are executed in parallel on a SYCL device are referred to
-as \keyword{kernel functions}. A \keyword{kernel} containing such a
-\keyword{kernel function} is enqueued on a device queue in order to be executed on
-that particular device. The return type of the \keyword{kernel function} is
+as \gls{sycl-kernel-function}. A \gls{kernel} containing such a
+\gls{sycl-kernel-function} is enqueued on a device queue in order to
+be executed on
+that particular device. The return type of the \gls{sycl-kernel-function} is
 \tf{void}, and all kernel accesses between host and device are defined using the
 accessor class~\ref{subsec:accessors}.
 
@@ -2163,7 +2164,7 @@ Usual restrictions of passing parameters to kernels apply.
 
 In C++11, function objects can be defined using lambda functions. We allow lambda
 functions to define kernels in SYCL, but we have an extra requirement to
-\keyword{name lambda functions} in order to enable the linking of the SYCL
+name \keyword{lambda functions} in order to enable the linking of the SYCL
 device kernels with the host code to invoke them. The name of a lambda function
 in SYCL is a C++ class. If the lambda function relies on template arguments,
 then the name of the lambda function must contain those template arguments. The
@@ -2191,7 +2192,7 @@ as a named function object
 \ref{sec:interfaces.kernels.as.function-objects} or lambda function
 \ref{sec:interfaces.kernels.as.lambdas}. The user can obtain a program
 object for the kernel with the \codeinline{get_kernel} method. This
-method is templated by the \keyword{kernel name}, so that the user
+method is templated by the \gls{kernel-name}, so that the user
 can specify the kernel whose associated kernel they wish to obtain.
 
 In the following example, the kernel is defined as a lambda function.
@@ -2200,11 +2201,11 @@ and then passes it to the \codeinline{parallel_for}.
 
 \lstinputlisting{code/myprogram.cpp}
 
-In the above example, the \keyword{kernel function} is defined in the
+In the above example, the \gls{sycl-kernel-function} is defined in the
 \codeinline{parallel_for} invocation as part of a lambda function which is named
 using the type of the forward declared class ``myKernel''. The type of the
 function object and the program object enable the compilation and linking of the kernel
-in the program class, \keyword{a priori} of its actual invocation as a kernel
+in the program class, \emph{a priori} of its actual invocation as a kernel
 object. For more details on the SYCL device compiler please refer to
 chapter~\ref{chapter.device.compiler}.
 
@@ -2223,8 +2224,8 @@ called in a \codeinline{parallel_for}.
 In OpenCL C \cite{opencl12} program and kernel objects can be created
 using the OpenCL C API, which is available in the SYCL
 system. Interoperability of OpenCL C kernels and the SYCL system is
-achieved by allowing the creation of a \keyword{SYCL kernel} object from
-an \keyword{OpenCL kernel} object.
+achieved by allowing the creation of a SYCL \codeinline{kernel} object from
+an OpenCL \gls{kernel} object.
 
 The constructor using kernel objects from \ref{table.constructors.kernel}:
 \begin{lstlisting}[style=nonumbers]
