@@ -985,8 +985,8 @@ descriptor.}
 \label{sec:data.access.and.storage}
 
 In SYCL, data storage and access are handled by separate classes.
-\keyword{Buffers} and \keyword{images} handle
-storage and ownership of the data, whereas \keyword{\glspl{accessor}} handle access to
+\Glspl{buffer} and \glspl{image} handle
+storage and ownership of the data, whereas \glspl{accessor} handle access to
 the data. Buffers and images in SYCL are different from OpenCL buffers and images
 in that they can be bound to more than one device or context and they get
 destroyed when they go out-of-scope. They also handle ownership of the
@@ -2872,10 +2872,10 @@ is not handled, the application will exit abnormally.
 If an error occurs when running or enqueuing a command group which has
 a secondary queue specified, then the command group may be enqueued
 to the secondary queue instead of the primary queue. The error handling in this
-case is also configured using the \keyword{async_handler} provided for both
-queues. If there is no \keyword{async_handler} given on any of the queues,
+case is also configured using the \gls{async-handler} provided for both
+queues. If there is no \gls{async-handler} given on any of the queues,
 then no asynchronous error reporting is done and no exceptions are thrown. If
-the primary queue fails and there is an \keyword{async_handler} given at
+the primary queue fails and there is an \gls{async-handler} given at
 this queue's construction, which populates the \codeinline{exception_list}
 parameter, then any errors will be added and can be thrown whenever the user
 chooses to handle those exceptions. Since there were errors on the primary
@@ -2883,7 +2883,7 @@ queue and a secondary queue was given, then the execution of the kernel is
 re-scheduled to the secondary queue and any error reporting for the kernel
 execution on that queue is done through that queue, in the same way as
 described above. The secondary queue may fail as well, and the errors will be
-thrown if there is an \keyword{async_handler} and either
+thrown if there is an \gls{async-handler} and either
 \codeinline{wait_and_throw()} or \codeinline{throw()} are called on that queue.
 The \gls{command-group-function-object} event returned by that function will be
 relevant to the queue where the kernel has been enqueued.
@@ -3718,7 +3718,7 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 \startTable{Constructor}
     \addFootNotes{Constructors of the \codeinline{stream} class}{table.constructors.stream}
   \addRow
-    {stream(size\_t bufferSize, size\_t maxStatementSize, handler\& cgh)}
+    {stream(size_t bufferSize, size_t maxStatementSize, handler\& cgh)}
     {
       Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size specified by the parameter \codeinline{bufferSize} and a maximum statement size specified by the parameter \codeinline{maxStatementSize}.
     }

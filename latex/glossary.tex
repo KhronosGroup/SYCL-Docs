@@ -1,5 +1,11 @@
 %\chapter{Glossary}
 
+
+% \todo 2019/06/10
+% Look at the remaining \keyword macro in the document and add the
+% lacking entries here
+
+
 %The purpose of this glossary is to define the key concepts involved in
 %specifying OpenCL SYCL. This section includes definitions of terminology used
 %throughout the specification document.
@@ -28,7 +34,17 @@
 
 \newglossaryentry{async-handler}
 {
-  name={async\_handler},
+  % Do not use this because it looks like MacOS X Preview 10.1
+  % (944.6.16.1) cannot search it
+  % name={\texttt{async\_handler}},
+  %
+  % This one seems better on Mac. But Safari 12.1.1 (14607.2.6.1.1)
+  % has still some problems
+  % in both cases to find all the 43 occurrences. Actually 33 are found
+  % forward and 10 found backward... I find this... awkward :-(
+  name={\texttt{async\string_handler}},
+  % Add a sorting key to counter-act the LaTeX formatting
+  sort=async-handler,
   description={An asynchronous error handler object is a function class instance
                providing necessary code for handling all the asynchronous
                exceptions triggered from the execution of command groups on a
@@ -257,7 +273,7 @@
                three-dimensional structured array. The \gls{sycl-runtime} will make
                available images in OpenCL contexts in order to execute
                semantically correct kernels in different OpenCL contexts.
-               For the full description please refer to section [\ref{id-class}]}
+               For the full description please refer to section [\ref{subsec:images}]}
 }
 
 \newglossaryentry{implementation-defined}
@@ -274,7 +290,7 @@
   name={index space classes},
   description={The OpenCL Kernel Execution Model defines an nd-range index
               space. The \gls{sycl-runtime} class that defines an nd-range is the 
-              \codeinline{cl::sycl::nd\_range}, which takes as input the sizes
+              \codeinline{cl::sycl::nd_range}, which takes as input the sizes
               of global and local work-items, represented using the 
               \codeinline{cl::sycl::range} class. The kernel library classes
               for indexing in the defined nd-range are the following classes: 
@@ -283,7 +299,7 @@
                  representing a \gls{id}. 
               \item \codeinline{cl::sycl::item} : The index class that contains
                  the \gls{global-id} and \gls{local-id}. 
-              \item \codeinline{cl::sycl::nd\_item} : The index class that
+              \item \codeinline{cl::sycl::nd_item} : The index class that
                  contains the \gls{global-id}, \gls{local-id} and the
                  \gls{work-group-id}.
               \item \codeinline{cl::sycl::group} : The group class that contains
@@ -308,7 +324,7 @@
   name=kernel,
   description={A SYCL kernel which can be executed on a \gls{device},
   including the \gls{host-device}. Is created implicitly when defining a
-  \gls{sycl-kernel-function} (See~\ref{sec:expr-parall-thro}) but can also be
+  \gls{sycl-kernel-function} (see~\ref{sec:expr-parall-thro}) but can also be
   created manually in order to pre-compile \glspl{sycl-kernel-function}}
 }
 
@@ -490,7 +506,7 @@
 \newglossaryentry{work-item}
 {
   name={work-item},
-  description={The SYCL work-item (\codeinline{cl::sycl::nd\_item} class) is a
+  description={The SYCL work-item (\codeinline{cl::sycl::nd_item} class) is a
                representation of an OpenCL work item. One of a collection of
                parallel executions of a kernel invoked on a \gls{device} by a
                command. A work-item is executed by one or more processing

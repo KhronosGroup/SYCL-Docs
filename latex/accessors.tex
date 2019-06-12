@@ -29,9 +29,9 @@ access to the data within an execution schedule.
 
 Because of this the interface of the \codeinline{accessor} will
 be different depending on the possible combinations of those parameters. There
-are three main categories of accessor; buffer accesors (see Section
-~\ref{sub.section.accessors.buffer}), local accessors (see Section
-~\ref{sub.section.accessors.local}) and image accessors (see Section
+are three main categories of accessor; buffer accesors (see Section%
+~\ref{sub.section.accessors.buffer}), local accessors (see Section%
+~\ref{sub.section.accessors.local}) and image accessors (see Section%
 ~\ref{sub.section.accessors.image}).
 
 %*******************************************************************************
@@ -86,9 +86,9 @@ or after the execution of a kernel. If a command group contains only
 of the buffer (or sub-range of the buffer, if provided) are not
 preserved. If a user wants to modify only certain parts of a buffer,
 preserving other parts of the buffer, then the user should specify the
-exact sub-range of modification of the buffer. 
-Atomic access is only valid to \codeinline{local}, \codeinline{global\_buffer}
-and \codeinline{host\_buffer} targets (see next section).
+exact sub-range of modification of the buffer.
+Atomic access is only valid to \codeinline{local}, \codeinline{global_buffer}
+and \codeinline{host_buffer} targets (see next section).
 
 The \codeinline{access::mode} enumeration, shown in Table~\ref{interfaces.accessmode.description}, describes the potential modes of an \codeinline{accessor}.
 
@@ -305,7 +305,7 @@ in~\ref{table.accessors.buffer.capabilities}.
       \hline
         \tf{global_buffer}
         & device
-        & \nlineVI{\tf{read}}{\tf{write}}{\tf{read\_write}}{\tf{discard\_write}} {\tf{discard\_read_write}}{\tf{atomic}}
+        & \nlineVI{\tf{read}}{\tf{write}}{\tf{read_write}}{\tf{discard_write}} {\tf{discard_read_write}}{\tf{atomic}}
         & The data type of the SYCL buffer being accessed.
         & Between \tf{0} and \tf{3} (inclusive).
         & \nlineII{\tf{false_t}}{\tf{true_t}} \\
@@ -319,7 +319,7 @@ in~\ref{table.accessors.buffer.capabilities}.
       \hline
         \tf{host_buffer}
         & host
-        & \nlineV{\tf{read}}{\tf{write}}{\tf{read\_write}}{\tf{discard\_write}} {\tf{discard\_read_write}}
+        & \nlineV{\tf{read}}{\tf{write}}{\tf{read_write}}{\tf{discard_write}} {\tf{discard_read_write}}
         & The data type of the SYCL buffer being accessed.
         & Between \tf{0} and \tf{3} (inclusive).
         & \nline{\tf{false_t}} \\
@@ -584,9 +584,9 @@ Tables~\ref{table.specialmembers.common.reference} and
       specified by \codeinline{index}.
     }
   \addRow
-    { \_\_unspecified\_\_ \&operator[](size_t index) const }
+    { \__unspecified__ \&operator[](size_t index) const }
     {
-      Available only when: \codeinline{dimensions > 1}.  
+      Available only when: \codeinline{dimensions > 1}.
       \newline
       Returns an instance of an undefined intermediate type representing a
       a SYCL \codeinline{accessor} of the same type as this SYCL \codeinline{
@@ -697,7 +697,7 @@ in~\ref{table.accessors.local.capabilities}.
       \hline
         \tf{local}
         & device
-        & \nlineII{\tf{read\_write}}{\tf{atomic}}
+        & \nlineII{\tf{read_write}}{\tf{atomic}}
         & All available data types supported in a SYCL kernel function.
         & Between \tf{0} and \tf{3} (inclusive).
         & \tf{false_t} \\
@@ -834,9 +834,9 @@ member functions and common member functions are listed in
       at the index specified by \codeinline{index}.
     }
   \addRow
-    { \_\_unspecified\_\_ \&operator[](size_t index) const }
+    { \__unspecified__ \&operator[](size_t index) const }
     {
-      Available only when: \codeinline{dimensions > 1}.  
+      Available only when: \codeinline{dimensions > 1}.
       \newline
       Returns an instance of an undefined intermediate type representing a
       a SYCL \codeinline{accessor} of the same type as this SYCL \codeinline{
@@ -929,21 +929,21 @@ in~\ref{table.accessors.image.capabilities}.
         \tf{image}
         & device
         & \tf{\nlineIII{read}{write}{discard_write}}
-        & \nlineIV{\tf{cl\_int4}}{\tf{cl\_uint4}}{\tf{cl\_float4}}{\tf{cl\_half4}}
+        & \nlineIV{\tf{cl_int4}}{\tf{cl_uint4}}{\tf{cl_float4}}{\tf{cl_half4}}
         & Between \tf{1} and \tf{3} (inclusive).
         & \tf{false_t} \\
       \hline
         \tf{image_array}
         & device
         & \tf{\nlineIII{read}{write}{discard_write}}
-        & \nlineIV{\tf{cl\_int4}}{\tf{cl\_uint4}}{\tf{cl\_float4}}{\tf{cl\_half4}}
+        & \nlineIV{\tf{cl_int4}}{\tf{cl_uint4}}{\tf{cl_float4}}{\tf{cl_half4}}
         & Between \tf{1} and \tf{2} (inclusive).
         & \tf{false_t} \\
       \hline
         \tf{host_image}
         & host
         & \tf{\nlineIII{read}{write}{discard_write}}
-        & \nlineIV{\tf{cl\_int4}}{\tf{cl\_uint4}}{\tf{cl\_float4}}{\tf{cl\_half4}}
+        & \nlineIV{\tf{cl_int4}}{\tf{cl_uint4}}{\tf{cl_float4}}{\tf{cl_half4}}
         & Between \tf{1} and \tf{3} (inclusive).
         & \tf{false_t} \\
       \hline
@@ -1071,7 +1071,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       and \codeinline{cl_int4} when \codeinline{dimensions == 3}.
     }
   \addRowTwoL
-    { \_\_image\_array\_slice\_\_ }
+    { \__image_array_slice__ }
     { operator[](size_t index) const }
     {
       Available only when: \codeinline{accessTarget ==
