@@ -1,7 +1,8 @@
 namespace cl {
 namespace sycl {
 template <int dimensions = 1>
-struct nd_range {
+class nd_range {
+public:
 
    /* -- common interface members -- */
 

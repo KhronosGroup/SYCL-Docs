@@ -1,7 +1,8 @@
 namespace cl {
 namespace sycl {
 template <int dimensions = 1>
-struct group {
+class group {
+public:
 
    /* -- common interface members -- */
 
