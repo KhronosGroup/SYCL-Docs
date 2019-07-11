@@ -31,18 +31,20 @@ class accessor {
   size_t get_count() const;
 
   /* Available only when: (accessTarget == access::target::image || accessTarget
-  == access::target::host_image) && accessMode == access::mode::read */
+  == access::target::host_image) && (accessMode == access::mode::read ||
+  accessMode == access::mode::read_write) */
   template <typename coordT>
   dataT read(const coordT &coords) const;
 
   /* Available only when: (accessTarget == access::target::image || accessTarget
-  == access::target::host_image) && accessMode == access::mode::read */
+  == access::target::host_image) && (accessMode == access::mode::read ||
+  accessMode == access::mode::read_write) */
   template <typename coordT>
   dataT read(const coordT &coords, const sampler &smpl) const;
 
   /* Available only when: (accessTarget == access::target::image || accessTarget
-  == access::target::host_image) && accessMode == access::mode::write ||
-  accessMode == access::mode::discard_write */
+  == access::target::host_image) && (accessMode == access::mode::write ||
+  accessMode == access::mode::discard_write || accessMode == access::mode::read_write) */
   template <typename coordT>
   void write(const coordT &coords, const dataT &color) const;
 
