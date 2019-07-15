@@ -1047,7 +1047,9 @@ templated type (\codeinline{cl::sycl::buffer}), parameterized by the element
 type and number of dimensions. An \gls{image} object is stored in one of a limited
 number of formats. The elements of an image object are selected from a list of
 predefined image formats which are provided by an underlying OpenCL
-implementation.  Images are encapsulated in the \codeinline{cl::sycl::image}
+implementation.  If there are multiple OpenCL implementations available which
+differ in the supported image formats, then the set of supported image formats
+is implementation defined.  Images are encapsulated in the \codeinline{cl::sycl::image}
 type, which is templated by the number of dimensions in the image. The minimum
 number of elements in a memory object is one.
 
@@ -1300,8 +1302,7 @@ same rules as the OpenCL devices.
 Kernel math library functions on the host must conform to OpenCL math precision
 requirements. The SYCL host device needs to be queried for the capabilities it provides.
 
-The range of image formats supported by the host device is implementation-defined, 
-but must match the minimum requirements of the OpenCL specification.
+The range of image formats supported by the host device is implementation-defined.
 
 Some of the OpenCL extensions and optional features may be available on a SYCL
 host device, but since these are optional features and vendor specific
