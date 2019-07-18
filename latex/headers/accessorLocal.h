@@ -1,10 +1,11 @@
 namespace cl {
 namespace sycl {
 template <typename dataT, int dimensions, access::mode accessmode,
-          access::target accessTarget = access::target::global_buffer,
           access::placeholder isPlaceholder = access::placeholder::false_t>
-class accessor {
- public:
+class accessor <dataT, dimensions, accessmode,
+          access::target accessTarget = access::target::local,
+          isPlaceholder> {
+public:
   using value_type = dataT;
   using reference = dataT &;
   using const_reference = const dataT &;
