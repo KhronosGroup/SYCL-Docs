@@ -3,7 +3,7 @@ namespace sycl {
 template <typename dataT, int dimensions, access::mode accessmode,
           access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor <dataT, dimensions, accessmode,
-          access::target accessTarget = access::target::local,
+          access::target::local,
           isPlaceholder> {
 public:
   using value_type = dataT;
