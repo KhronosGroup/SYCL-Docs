@@ -50,5 +50,11 @@ class accessor {
   /* Available only when: accessTarget == access::target::local */
   local_ptr<dataT> get_pointer() const;
 };
+
+/* Alias to make local memory accessors less verbose */
+template <typename dataT, int dimensions = 1>
+using local_accessor = accessor<dataT, dimensions, access::mode::read_write
+  access::target::local>;
+
 }  // namespace sycl
 }  // namespace cl
