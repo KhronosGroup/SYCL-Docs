@@ -1955,7 +1955,8 @@ A synopsis of the SYCL \codeinline{program} class is provided below. The constru
     {vector_class<program> programList,}
     {string_class linkOptions = "")}
     {
-      Constructs an instance of SYCL \codeinline{program} in the \codeinline{program_state::linked} by linking together each SYCL \codeinline{program} instance in \codeinline{programList}. Each SYCL \codeinline{program} in \codeinline{programList} must be in the \codeinline{program_state::compiled} state and must be associated with the same SYCL \codeinline{context}. Otherwise must throw an \codeinline{invalid_object_error} SYCL exception.
+      Constructs an instance of SYCL \codeinline{program} in the \codeinline{program_state::linked} by linking together each SYCL \codeinline{program} instance in \codeinline{programList}. Each SYCL \codeinline{program} in \codeinline{programList} must be in the \codeinline{program_state::compiled} state and must be associated with the same SYCL \codeinline{context}. Otherwise must throw an \codeinline{invalid_object_error} SYCL exception.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be linked for returns \codeinline{false} for the device information query \codeinline{info::device::is_linker_available}.
+
     }
   \addRowThreeL
     {program (}
@@ -1985,31 +1986,32 @@ A synopsis of the SYCL \codeinline{program} class is provided below. The constru
     {void compile_with_kernel_type(}
     {string_class compileOptions = "")}
     {
-      Compiles the SYCL kernel function defined by the type \codeinline{kernelT} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{compileOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::compiled}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must return a  \codeinline{compile_program_error} SYCL exception if the compilation fails.
+      Compiles the SYCL kernel function defined by the type \codeinline{kernelT} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{compileOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::compiled}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must throw a  \codeinline{compile_program_error} SYCL exception if the compilation fails.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be compiled for returns \codeinline{false} for the device information query \codeinline{info::device::is_compiler_available}.
     }
   \addRowTwoL
     {void compile_with_source(string_class kernelSource, }
     {string_class compileOptions = "")}
     {
-      Compiles the OpenCL C kernel function defined by \codeinline{kernelSource} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{compileOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::compiled}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must return a  \codeinline{compile_program_error} SYCL exception if the compilation fails.
+      Compiles the OpenCL C kernel function defined by \codeinline{kernelSource} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{compileOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::compiled}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must throw a  \codeinline{compile_program_error} SYCL exception if the compilation fails.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be compiled for returns \codeinline{false} for the device information query \codeinline{info::device::is_compiler_available}.
     }
   \addRowThreeL
     {template<typename kernelT>}
     {void build_with_kernel_type(}
     {string_class buildOptions = "")}
     {
-      Builds the SYCL kernel function defined by the type \codeinline{kernelT} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{buildOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::linked}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must return a  \codeinline{compile_program_error} SYCL exception if the compilation fails.
+      Builds the SYCL kernel function defined by the type \codeinline{kernelT} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{buildOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::linked}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must throw a  \codeinline{compile_program_error} SYCL exception if the compilation fails.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be built for returns \codeinline{false} for the device information queries \codeinline{info::device::is_compiler_available} or \codeinline{info::device::is_linker_available}.
+
     }
   \addRowTwoL
     {void build_with_source(string_class kernelSource, }
     {string_class buildOptions = "")}
     {
-      Builds the OpenCL C kernel function defined by \codeinline{kernelSource} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{buildOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::linked}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must return a  \codeinline{compile_program_error} SYCL exception if the compilation fails.
+      Builds the OpenCL C kernel function defined by \codeinline{kernelSource} into the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{buildOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::linked}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::none} state when called. Must throw a  \codeinline{compile_program_error} SYCL exception if the compilation fails.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be built for returns \codeinline{false} for the device information queries \codeinline{info::device::is_compiler_available} or \codeinline{info::device::is_linker_available}.
     }
   \addRow
     {void link(string_class linkOptions = "")}
     {
-      Links the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{linkOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::linked}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::compiled} state when called. Must return a  \codeinline{compile_program_error} SYCL exception if the linking fails.
+      Links the encapsulated \codeinline{cl_program} with the compiler options specified by \codeinline{linkOptions}, if this SYCL \codeinline{program} is an OpenCL program. Sets the state of this SYCL \codeinline{program} to \codeinline{program_state::linked}. Must throw an \codeinline{invalid_object_error} SYCL exception if this \codeinline{program} was not in the \codeinline{program_state::compiled} state when called. Must throw a \codeinline{compile_program_error} SYCL exception if the linking fails.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be linked for returns \codeinline{false} for the device information query \codeinline{info::device::is_linker_available}.
     }
   \addRowTwoL
     {template <typename kernelT>}
