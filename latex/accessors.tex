@@ -942,7 +942,7 @@ in~\ref{table.accessors.image.capabilities}.
       \hline
         \tf{host_image}
         & host
-        & \tf{\nlineIII{read}{write}{discard_write}}
+        & \tf{\nlineIV{read}{write}{read_write}{discard_write}}
         & \nlineIV{\tf{cl_int4}}{\tf{cl_uint4}}{\tf{cl_float4}}{\tf{cl_half4}}
         & Between \tf{1} and \tf{3} (inclusive).
         & \tf{false_t} \\
@@ -1031,9 +1031,9 @@ Tables~\ref{table.specialmembers.common.reference} and
     { template <typename coordT> }
     { dataT read(const coordT \&coords) const }
     {
-      Available only when: \codeinline{(accessTarget == access::target::image ||
-      accessTarget == access::target::host_image) \&\& accessMode ==
-      access::mode::read}.
+      Available only when: \codeinline{(accessTarget == access::target::image \&\&
+      accessMode == access::mode::read) || (accessTarget == access::target::host_image \&\&
+      (accessMode == access::mode::read || accessMode == access::mode::read_write))}.
       \newline
       Reads and returns an element of the image at the coordinates specified by \codeinline{coords}. Permitted types for \codeinline{coordT} are \codeinline{
       cl_int} and \codeinline{cl_float} when \codeinline{dimensions == 1}, \codeinline{cl_int2} and \codeinline{cl_float2} when \codeinline{dimensions ==
@@ -1044,9 +1044,9 @@ Tables~\ref{table.specialmembers.common.reference} and
     { template <typename coordT> }
     { dataT read(const coordT \&coords, const sampler \&smpl) const }
     {
-      Available only when: \codeinline{(accessTarget == access::target::image ||
-      accessTarget == access::target::host_image) \&\& accessMode ==
-      access::mode::read}.
+      Available only when: \codeinline{(accessTarget == access::target::image \&\&
+      accessMode == access::mode::read) || (accessTarget == access::target::host_image \&\&
+      (accessMode == access::mode::read || accessMode == access::mode::read_write))}.
       \newline
       Reads and returns a sampled element of the image at the coordinates
       specified by \codeinline{coords} using the sampler specified by
@@ -1060,9 +1060,11 @@ Tables~\ref{table.specialmembers.common.reference} and
     { template <typename coordT> }    
     { void write(const coordT \&coords, const dataT \&color) const }
     {
-      Available only when: \codeinline{accessTarget == access::target::image ||
-      accessTarget == access::target::host_image) \&\& accessMode ==
-      access::mode::write || accessMode == access::mode::discard_write}.
+      Available only when: \codeinline{(accessTarget == access::target::image \&\&
+      (accessMode == access::mode::write || accessMode == access::mode::discard_write)) || 
+      (accessTarget == access::target::host_image \&\& (accessMode ==
+      access::mode::write || accessMode == access::mode::discard_write ||
+      accessMode == access::mode::read_write))}.
       \newline
       Writes the value specified by \codeinline{color} to the element of the
       image at the coordinates specified by \codeinline{coords}. Permitted types
