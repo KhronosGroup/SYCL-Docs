@@ -14,7 +14,7 @@ myQueue.submit([&](handler &cgh) {
   // Retrieve a ranged write accessor to a global buffer with access to the
   // first half of the buffer
   accessor<int, 1, access::mode::write, access::target::global_buffer>
-      acc(b, range<1>(nElems / 2), id<1>(0));
+      acc(b, cgh, range<1>(nElems / 2), id<1>(0));
   // Copy the first five elements of the vector into the buffer associated with
   // the accessor
   cgh.copy(v.data(), acc);
