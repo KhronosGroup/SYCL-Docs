@@ -46,7 +46,7 @@ the internal copy of the data in the host, if any. This is particularly
 useful when users use manual synchronization with host pointers, e.g.\ 
 via mutex objects on the \codeinline{buffer} constructors.
 
-Table~\ref{table.members.handler.copy} describes the interface for the 
+Table~\ref{table.members.handler.copy} describes the interface for the
 explicit copy operations.
 
 %-------------------------------------------------------------------------------
@@ -57,47 +57,47 @@ explicit copy operations.
     {template <typename T, int dim, access::mode mode, access::target tgt>}
     {void copy(accessor<T, dim, mode, tgt> src,}
     { shared_ptr_class<T> dest)}
-    { Copies the contents of the memory pointed to by \codeinline{src} into the
-      memory object accessed by \codeinline{dest}.
-      \codeinline{src} must have at least as many bytes as the 
-      range accessed by \codeinline{dest}.}
+    { Copies the contents of the memory object accessed by
+      \codeinline{src} into the memory pointed to by \codeinline{dest}.
+      \codeinline{dest} must have at least as many bytes as the
+      range accessed by \codeinline{src}.}
   \addRowThreeL
     {template <typename T, int dim, access::mode mode, access::target tgt>}
     {void copy(shared_ptr_class<T> src}
     { accessor<T, dim, mode, tgt> dest)}
-    { Copies the contents of the memory object accessed via \codeinline{src} 
-      into the memory pointed to by \codeinline{dest}.
-      \codeinline{dest} must have at least as many bytes as the 
-      range accessed by \codeinline{src}.}
+    { Copies the contents of the memory pointed to by \codeinline{src}
+      into the memory object accessed by \codeinline{dest}.
+      \codeinline{src} must have at least as many bytes as the
+      range accessed by \codeinline{dest}.}
   \addRowThreeL
     {template <typename T, int dim, access::mode mode, access::target tgt>}
     {void copy(accessor<T, dim, mode, tgt> src,}
     { T * dest)}
-    { Copies the contents of the memory pointed to by \codeinline{src} into the
-      memory object accessed by \codeinline{dest}.
-      \codeinline{src} must have at least as many bytes as the 
-      range accessed by \codeinline{dest}.}
+    { Copies the contents of the memory object accessed by
+      \codeinline{src} into the memory pointed to by \codeinline{dest}.
+      \codeinline{dest} must have at least as many bytes as the
+      range accessed by \codeinline{src}.}
   \addRowThreeL
     {template <typename T, int dim, access::mode mode, access::target tgt>}
     {void copy(const T * src}
     { accessor<T, dim, mode, tgt> dest)}
-    { Copies the contents of the memory object accessed via \codeinline{src} 
-      into the memory pointed to by \codeinline{dest}.
-      \codeinline{dest} must have at least as many bytes as the 
-      range accessed by \codeinline{src}.}
+    { Copies the contents of the memory pointed to by \codeinline{src}
+      into the memory object accessed by \codeinline{dest}.
+      \codeinline{src} must have at least as many bytes as the
+      range accessed by \codeinline{dest}.}
   \addRowThreeL
     {template <typename T, int dim, access::mode mode, access::target tgt>}
     {void copy(accessor<T, dim, mode, tgt> src}
     { accessor<T, dim, mode, tgt> dest)}
-    { Copies the contents of the memory object accessed by \codeinline{src} 
+    { Copies the contents of the memory object accessed by \codeinline{src}
       into the memory object accessed by \codeinline{dest}.
-      \codeinline{src} must have at least as many bytes as the 
+      \codeinline{src} must have at least as many bytes as the
       range accessed by \codeinline{dest}.}
   \addRowTwoL
     {template <typename T, int dim, access::mode mode, access::target tgt>}
     {void update_host(accessor<T, dim, mode, tgt> acc)}
-    { The contents of the memory object accessed via \codeinline{acc} 
-      on the host are guaranteed to be up-to-date after this 
+    { The contents of the memory object accessed via \codeinline{acc}
+      on the host are guaranteed to be up-to-date after this
       \gls{command-group} object execution is complete.}
   \addRowThreeL
     {template <typename T, int dim, access::mode mode, access::target tgt>}
@@ -110,9 +110,9 @@ explicit copy operations.
 
 \completeTable
 
-The listing below illustrates how to use explicit copy 
-operations in SYCL. The example copies half of the contents of 
-a \codeinline{vector_class} into the device, leaving the rest of the 
+The listing below illustrates how to use explicit copy
+operations in SYCL. The example copies half of the contents of
+a \codeinline{vector_class} into the device, leaving the rest of the
 contents of the buffer on the device unchanged.
 
 \lstinputlisting{code/explicitcopy.cpp}
