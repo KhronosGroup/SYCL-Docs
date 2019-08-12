@@ -26,8 +26,6 @@ class accessor {
 
   /* -- common interface members -- */
 
-  size_t get_size() const;
-
   size_t get_count() const;
 
   /* Available only when: (accessTarget == access::target::image && 
