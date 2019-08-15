@@ -1,0 +1,32 @@
+linux: &linux
+   os: linux
+   dist: xenial
+   language: python
+   python: "3.7"
+
+matrix:
+   include:
+      - <<: *linux
+
+install:
+  - chmod +x .travis/install.sh
+  - .travis/install.sh
+
+script:
+  - chmod +x .travis/run.sh
+  - .travis/run.sh
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then
+      chmod +x .travis/deploy.sh;
+      .travis/deploy.sh;
+    fi
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: "TODO_NEED_TOKEN"
+    file: "build/latex/sycl-1.2.1.pdf"
+    skip_cleanup: true
+    on:
+      tags: true

@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-DOCUMENT=sycl-1.2.1
+include ../sycl_version.txt
 
-all: git_description
+DOCUMENT=sycl-$(SYCLVERSION)
+
+
+all: git_description version_config
 	pdflatex $(DOCUMENT)
 	bibtex $(DOCUMENT)
 	pdflatex $(DOCUMENT)
@@ -36,7 +39,18 @@ git_description:
 	# Use a LaTeX package such as gitinfo2 if something more complex is required,
 	# but it would require using hooks (or not).
 	# For now just use git describe on the worktree
-	git describe --all --dirty --long > git_description.tex
+
+	# Use printf for more consistent escaping behavior across different shells
+	printf "\\\newcommand{\\\GitDescribe}{%s}\n" `git describe --all --dirty --long` > git_description.tex
+
+version_config:
+	printf \
+	"\\\def\\\SYCLVERSION{$(SYCLVERSION)} \n\
+	\\\def\\\SYCLLANGVERSION{$(SYCLLANGVERSION)} \n\
+	\\\def\\\DOCUMENTVERSION{$(SYCLREVISION)} \n\
+	\\\def\\\SYCLNAME{$(SYCLNAME)} \n\
+	\\\def\\\OPENCLVERSION{$(OPENCLVERSION)}" > version_config.tex
+
 
 clean:
-	rm -f *.aux *.bbl *.blg *.lof *.log *.lot *.out *.toc
+	rm -f sycl-1.2.1.pdf *.aux *.bbl *.blg *.lof *.log *.lot *.out *.toc git_description.tex version_config.tex
