@@ -1506,7 +1506,7 @@ More precisely:
     A buffer can be constructed with just a size and using the default
     buffer allocator.  The memory management for this type of buffer
     is entirely handled by the SYCL system. The destructor for this
-    type of buffer never blocks, even if work on the buffer has not
+    type of buffer does not need to block, even if work on the buffer has not
     completed. Instead, the SYCL system frees any storage required
     for the buffer asynchronously when it is no longer in use in queues.
     The initial contents of the buffer are unspecified.
@@ -1574,7 +1574,7 @@ More precisely:
     A buffer can be constructed from a pair of iterator values. In
     this case, the buffer construction will copy the data from the
     data range defined by the iterator pair. The destructor will
-    not copy back any data and will not block.
+    not copy back any data and does not need to block.
     
   \end{enumerate}
 
