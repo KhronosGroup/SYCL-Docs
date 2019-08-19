@@ -735,9 +735,9 @@ member functions and common member functions are listed in
       Available only when: \codeinline{dimensions == 0}.
       \newline
       Constructs a SYCL \codeinline{accessor} instance for accessing runtime
-      allocated shared local memory of a single element within a SYCL kernel
-      function on the SYCL \codeinline{queue} associated with \codeinline{
-      commandGroupHandlerRef}.
+      allocated shared local memory of a single element (of type \codeinline{dataT}) within
+      a SYCL kernel function on the SYCL \codeinline{queue} associated with \codeinline{
+      commandGroupHandlerRef}.  The allocation is per work-group.
     }
   \addRowTwoL
     { accessor(range<dimensions> allocationSize, }
@@ -748,7 +748,11 @@ member functions and common member functions are listed in
       Constructs a SYCL \codeinline{accessor} instance for accessing runtime
       allocated shared local memory of size specified by \codeinline{
       allocationSize} within a SYCL kernel function on the SYCL \codeinline{
-      queue} associated with \codeinline{commandGroupHandlerRef}.
+      queue} associated with \codeinline{commandGroupHandlerRef}.  \codeinline{allocationSize}
+      defines the number of elements of type \codeinline{dataT} to be allocated.  The allocation
+      is per work-group, and if multiple work-groups execute simultaneously in an
+      implementation, each work-group will receive its own functionally independent
+      allocation of size \codeinline{allocationSize} elements of type \codeinline{dataT}.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -761,13 +765,14 @@ member functions and common member functions are listed in
   \addRow
     { size_t get_size() const }
     {
-      Returns the size in bytes of the SYCL \codeinline{buffer} this SYCL
-      \codeinline{accessor} is accessing.
+      Returns the size in bytes of the local memory allocation, per work-group,
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { size_t get_count() const }
     {
-      Returns the number of elements of the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+      Returns the number of \codeinline{dataT} elements in the local memory allocation, per work-group,
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { operator dataT \&() const }
@@ -775,8 +780,8 @@ member functions and common member functions are listed in
       Available only when: \codeinline{accessMode == access::mode::read_write
       \&\& dimensions == 0)}.
       \newline
-      Returns a reference to the element stored within the SYCL \codeinline{
-      buffer} this SYCL \codeinline{accessor} is accessing.
+      Returns a reference to the single element stored within the work-group's local memory
+      allocation that this \codeinline{accessor} is accessing.
     }
   \addRow
     { dataT \&operator[](id<dimensions> index) const }
@@ -784,8 +789,8 @@ member functions and common member functions are listed in
       Available only when: \codeinline{accessMode == access::mode::read_write
       \&\& dimensions > 0)}.
       \newline
-      Returns a reference to the element stored within the SYCL \codeinline{
-      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      Returns a reference to the element stored within the work-group's local memory
+      allocation that this SYCL \codeinline{accessor} is accessing, at the index
       specified by \codeinline{index}.
     }
   \addRow
@@ -794,8 +799,8 @@ member functions and common member functions are listed in
       Available only when: \codeinline{accessMode == access::mode::read_write
       \&\& dimensions == 1)}.
       \newline
-      Returns a reference to the element stored within the SYCL \codeinline{
-      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      Returns a reference to the element stored within the work-group's local memory
+      allocation that this SYCL \codeinline{accessor} is accessing at the index
       specified by \codeinline{index}.
     }
   \addRowTwoL
@@ -807,7 +812,8 @@ member functions and common member functions are listed in
       \newline
       Returns a reference to an instance of SYCL \codeinline{atomic} of type
       \codeinline{dataT} providing atomic access to the element stored within
-      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+      the work-group's local memory allocation that this SYCL \codeinline{accessor}
+      is accessing.
     }
   \addRowTwoL
     { atomic<dataT, access::address_space::local_space> \& }
@@ -818,8 +824,8 @@ member functions and common member functions are listed in
       \newline
       Returns a reference to an instance of SYCL \codeinline{atomic} of type
       \codeinline{dataT} providing atomic access to the element stored within
-      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing
-      at the index specified by \codeinline{index}.
+      the work-group's local memory allocation that this SYCL \codeinline{accessor}
+      is accessing, at the index specified by \codeinline{index}.
     }
   \addRowTwoL
     { atomic<dataT, access::address_space::local_space> \& }
@@ -830,8 +836,8 @@ member functions and common member functions are listed in
       \newline
       Returns a reference to an instance of SYCL \codeinline{atomic} of type
       \codeinline{dataT} providing atomic access to the element stored within
-      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing
-      at the index specified by \codeinline{index}.
+      the work-group's local memory allocation that this SYCL \codeinline{accessor}
+      is accessing, at the index specified by \codeinline{index}.
     }
   \addRow
     { \__unspecified__ \&operator[](size_t index) const }
@@ -853,8 +859,8 @@ member functions and common member functions are listed in
     {
       Available only when: \codeinline{accessTarget ==
       access::target::local}.
-      Returns a pointer to the memory this SYCL \codeinline{accessor} memory is
-      accessing.
+      Returns a pointer to the work-group's local memory allocation that this
+      SYCL \codeinline{accessor} is accessing.
     }
 \completeTable
 %------------------------------------------------------------------------------
