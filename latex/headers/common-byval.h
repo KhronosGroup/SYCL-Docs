@@ -5,15 +5,17 @@ class T {
   ...
 
  public:
-  T(const T &rhs) = default;
+  // Rule of Zero: the following five special member functions should not be explicitly declared
 
-  T(T &&rhs) = default;
+  // T(const T &rhs) = default;
 
-  T &operator=(const T &rhs) = default;
+  // T(T &&rhs) = default;
 
-  T &operator=(T &&rhs) = default;
+  // T &operator=(const T &rhs) = default;
 
-  ~T() = default;
+  // T &operator=(T &&rhs) = default;
+
+  // ~T() = default;
 
   bool operator==(const T &rhs) const;
 
