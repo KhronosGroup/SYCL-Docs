@@ -15,9 +15,11 @@ class T {
 
   ~T() = default;
 
-  bool operator==(const T &rhs) const;
+  ...
 
-  bool operator!=(const T &rhs) const;
+  friend bool operator==(const T &lhs, const T &rhs) { /* ... */ }
+
+  friend bool operator!=(const T &lhs, const T &rhs) { /* ... */ }
 
   ...
 };
