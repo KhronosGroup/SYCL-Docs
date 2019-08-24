@@ -108,9 +108,11 @@ Each of the following \gls{sycl-runtime} classes: \codeinline{device}, \codeinli
 
 Some \gls{sycl-runtime} classes will have additional behavior associated with copy, movement, assignment or destruction semantics. If these are specified they are in addition to those specified above unless stated otherwise.
 
-Each of the runtime classes mentioned above must provide a common interface of special member functions and member functions in order to fulfil the copy, move, destruction and equality requirements.
+Each of the runtime classes mentioned above must provide a common interface of special member functions in order to fulfil the copy, move, destruction requirements and hidden friend functions in order to fulfil the equality requirements.
 
-These common special member functions and member functions are described in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference} respectively.
+A hidden friend function is a function first declared via a friend declaration with no additional out of class or namespace scope declarations, because such functions are only visible to ADL (Argument Dependent Lookup) and are hidden from qualified and unqualified lookup.  (Hidden friend functions have the benefits of avoiding accidental implicit conversions and faster compilation.)
+
+These common special member functions and member functions are described in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference} respectively.
 
 \lstinputlisting{headers/common-reference.h}
 
@@ -145,18 +147,18 @@ These common special member functions and member functions are described in Tabl
    }
 \completeTable
 
-\startTable{Member function}
-\addFootNotes{Common member functions for reference semantics}
-{table.members.common.reference}
+\startTable{Hidden friend functions}
+\addFootNotes{Hidden friend functions for reference semantics}
+{table.hiddenfriends.common.reference}
    \addRow
-   {bool operator==(const T \&rhs) const}
+   {friend bool operator==(const T \&lhs, const T \&rhs)}
    {
-     Returns true if this SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+     Returns true if this LHS SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
    }
    \addRow
-   {bool operator!=(const T \&rhs) const}
+   {friend bool operator==(const T \&lhs, const T \&rhs)}
    {
-     Returns true if this SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+     Returns true if this LHS SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
    }
 \completeTable
 
@@ -491,7 +493,7 @@ The SYCL \codeinline{platform} class provides the common reference semantics
 
 \subsubsection{Platform interface}
 
-A synopsis of the SYCL \codeinline{platform} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{platform} class are listed in Tables~\ref{table.constructors.platform}, \ref{table.members.platform} and \ref{table.staticmembers.platform} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference} respectively.
+A synopsis of the SYCL \codeinline{platform} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{platform} class are listed in Tables~\ref{table.constructors.platform}, \ref{table.members.platform} and \ref{table.staticmembers.platform} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference} respectively.
 
 %Interface of platform class
 \lstinputlisting{headers/platform.h}
@@ -631,7 +633,7 @@ The SYCL \codeinline{context} class provides the common reference semantics
 
 \subsubsection{Context interface}
 
-The constructors and member functions of the SYCL \codeinline{context} class are listed in Tables~\ref{table.constructors.context} and \ref{table.members.context}, respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{context} class are listed in Tables~\ref{table.constructors.context} and \ref{table.members.context}, respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 All member functions of the \gls{context} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
 
@@ -800,7 +802,7 @@ execution.
 The SYCL \codeinline{event} class provides the common reference semantics
 (see Section~\ref{sec:reference-semantics}).
 
-The constructors and member functions of the SYCL \codeinline{event} class are listed in Tables~\ref{table.constructors.event} and \ref{table.members.event}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{event} class are listed in Tables~\ref{table.constructors.event} and \ref{table.members.event}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: event.h
 \lstinputlisting{headers/event.h}
@@ -1118,7 +1120,7 @@ semantics (see Section~\ref{sec:reference-semantics}).
 
 \subsubsection{Buffer Interface}
 
-The constructors and member functions of the SYCL \codeinline{buffer} class template are listed in Tables~\ref{table.constructors.buffer} and \ref{table.members.buffer}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{buffer} class template are listed in Tables~\ref{table.constructors.buffer} and \ref{table.members.buffer}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 Each constructor excluding the interoperability constructor takes as the last parameter an optional SYCL \codeinline{property_list} to provide properties to the SYCL \codeinline{buffer}.
 
@@ -1598,7 +1600,7 @@ The class \tclass{image}{\tf{int} dimensions}
 two or three dimensions, that can be used by kernels in queues and has to
 be accessed using \gls{accessor} classes with image accessor modes.
 
-The constructors and member functions of the SYCL \codeinline{image} class template are listed in Tables~\ref{table.constructors.image} and \ref{table.members.image}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{image} class template are listed in Tables~\ref{table.constructors.image} and \ref{table.members.image}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 Where relevant, it is the
 responsibility of the user to ensure that the format of the data
@@ -2699,7 +2701,7 @@ aliases is provided below.
 
 The SYCL \codeinline{sampler} class encapsulates a configuration for sampling an image \codeinline{accessor}. A SYCL \codeinline{sampler} may be an OpenCL sampler, in which case it must encapsulate a valid underlying OpenCL \codeinline{cl_sampler}, or it may be a host sampler, in which case it must not.
 
-The constructors and member functions of the SYCL \codeinline{sampler} class are listed in Tables~\ref{table.constructors.sampler} and \ref{table.members.sampler}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{sampler} class are listed in Tables~\ref{table.constructors.sampler} and \ref{table.members.sampler}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 The members of the \codeinline{sampler} class that provide information on the sampler (\codeinline{get_addressing_mode()}, \codeinline{get_filtering_mode()}, \codeinline{get_coordinate_normalization_mode()}) are callable from host code.  Invoking these queries within device kernel code produces undefined results.
 
@@ -3555,7 +3557,7 @@ The SYCL \codeinline{stream} class provides the common reference semantics
 %***********************************************************************************
 \subsection{Stream class interface}
 
-The constructors and member functions of the SYCL \codeinline{stream} class are listed in Tables~\ref{table.constructors.stream}, \ref{table.members.stream}, and \ref{table.globals.stream} respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{stream} class are listed in Tables~\ref{table.constructors.stream}, \ref{table.members.stream}, and \ref{table.globals.stream} respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 The operand types that are supported by the SYCL \codeinline{stream} class \codeinline{operator<<()} operator are listed in Table~\ref{table.operands.stream}.
 
