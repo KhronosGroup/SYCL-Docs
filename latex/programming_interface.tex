@@ -374,7 +374,9 @@ All member functions of the \codeinline{device_selector} class are synchronous a
 
 The function call operator; \codeinline{operator()} of the SYCL \codeinline{device_selector} is an abstract member function which takes a reference to a SYCL \codeinline{device} and returns an integer score.  This abstract member function can be implemented in a derived class in order to provide a logic for selecting a SYCL \codeinline{device}.
 
-At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{device}, the system will call the \codeinline{select_device()} member functions, which will query all available SYCL \codeinline{device}s in the system, pass each to this function call operator and select the one which returns the highest highest score. If a negative score is returned the the corresponding SYCL \codeinline{device} will never be chosen. The SYCL \codeinline{device}s that are provided to the SYCL \codeinline{device_selector} can be any number of OpenCL devices but must contain a single host device.
+At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{device} through an explicit \codeinline{device_selector} specialization or through the implicit \codeinline{default_selector}, the system will call the \codeinline{select_device()} member function, which will query all available SYCL \codeinline{device}s in the system, pass each to this function call operator and select the one which returns the highest score. If a negative score is returned then the corresponding SYCL \codeinline{device} will never be chosen. The SYCL \codeinline{device}s that are provided to the SYCL \codeinline{device_selector} can be any number of OpenCL devices but must contain a single host device.
+
+If all devices that \codeinline{select_device()} passes to the a selector's function call operator return a negative value (never select), then \codeinline{select_device()} must throw an \codeinline{runtime_error} SYCL exception.
 
 \lstinputlisting{headers/deviceSelectorInterface.h}
 %---------------------------------------------------------------------
@@ -411,7 +413,7 @@ At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{dev
 \addRow
 {device select_device() const}
 {
-  Returns a SYCL \codeinline{device} that has been selected based on the highest score returned by the function call operator for all available SYCL \codeinline{device}s in the system.
+  Returns a SYCL \codeinline{device} that has been selected based on the highest score returned by the function call operator for all available SYCL \codeinline{device}s in the system.  If the function call operator returns a negative score for all available devices, then a \codeinline{runtime_error} SYCL exception must be thrown.
 }
 \addRow
 {virtual int operator()(const device \&device) const}
