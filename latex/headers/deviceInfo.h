@@ -80,13 +80,13 @@ enum class device : int {
 };
 
 enum class device_type : unsigned int {
-  cpu,
-  gpu,
-  accelerator,
-  custom,
-  automatic,
+  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
+  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
+  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
+  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
+  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
   host,
-  all
+  all          // Maps to OpenCL CL_DEVICE_TYPE_ALL
 };
 
 enum class partition_property : int {
