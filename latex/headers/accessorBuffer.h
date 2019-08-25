@@ -13,36 +13,42 @@ class accessor {
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
   access::placeholder::true_t && (accessTarget == access::target::global_buffer
   || accessTarget == access::target::constant_buffer))) && dimensions == 0 */
-  accessor(buffer<dataT, 1> &bufferRef);
+  template <typename AllocatorT>
+  accessor(buffer<dataT, 1, AllocatorT> &bufferRef);
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions == 0 */
-  accessor(buffer<dataT, 1> &bufferRef, handler &commandGroupHandlerRef);
+  template <typename AllocatorT>
+  accessor(buffer<dataT, 1, AllocatorT> &bufferRef, handler &commandGroupHandlerRef);
 
   /* Available only when: ((isPlaceholder == access::placeholder::false_t &&
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
   access::placeholder::true_t && (accessTarget == access::target::global_buffer
   || accessTarget == access::target::constant_buffer))) && dimensions > 0 */
-  accessor(buffer<dataT, dimensions> &bufferRef);
+  template <typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef);
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
-  accessor(buffer<dataT, dimensions> &bufferRef,
+  template <typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef);
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
   access::placeholder::true_t && (accessTarget == access::target::global_buffer
   || accessTarget == access::target::constant_buffer)) && dimensions > 0 */
-  accessor(buffer<dataT, dimensions> &bufferRef, range<dimensions> accessRange,
+  template <typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef, range<dimensions> accessRange,
     id<dimensions> accessOffset = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
-  accessor(buffer<dataT, dimensions> &bufferRef,
+  template <typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef, range<dimensions> accessRange,
     id<dimensions> accessOffset = {});
 
