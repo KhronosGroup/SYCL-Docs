@@ -1253,12 +1253,16 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
     { const range<dimensions> \& subRange) }
     {
       Create a new sub-buffer without allocation to have separate
-      accessors later. \codeinline{b} is the buffer with the real data.
+      accessors later. \codeinline{b} is the buffer with the real data, which must not be a sub-buffer.
       \codeinline{baseIndex} specifies the origin of the sub-buffer inside the
       buffer \codeinline{b}. \codeinline{subRange} specifies the size of the sub-buffer.
-      The offset and range specified by \codeinline{baseIndex} and \codeinline{subRange} together must represent a contiguous region of the original SYCL \codeinline{buffer}.
-      The total size of the sub-\codeinline{buffer} being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
+      The sum of \codeinline{baseIndex} and \codeinline{subRange} in any dimension must not
+      exceed the parent buffer (\codeinline{b}) size (\codeinline{bufferRange}) in that dimension,
+      and an \codeinline{invalid_object_error} SYCL exception must be thrown if violated.
+      The offset and range specified by \codeinline{baseIndex} and \codeinline{subRange} together must represent a contiguous region of the original SYCL \codeinline{buffer}.  This contiguous region restriction avoids runtime overhead on top of one-dimensional sub-buffers exposed by OpenCL.  If a non-contiguous region of a buffer is requested when constructing a sub-buffer, then an \codeinline{invalid_object_error} SYCL exception must be thrown.
+      The total size of the sub-buffer being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
       This value is retrievable via the SYCL \codeinline{device} class info query \codeinline{info::device::mem_base_addr_align}.
+      Must throw an \codeinline{invalid_object_error} SYCL exception if \codeinline{b} is already a sub-buffer.
     }
     \addRowThreeSL
       { buffer(cl_mem clMemObject, }
@@ -1398,11 +1402,16 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
        Creates and returns a reinterpreted SYCL \codeinline{buffer} with the
        type specified by \codeinline{ReinterpretT}, dimensions specified by
        \codeinline{ReinterpretDim} and range specified by
-       \codeinline{reinterpretRange}. Must throw an
+       \codeinline{reinterpretRange}.  The buffer object being reinterpreted can
+       be a SYCL sub-buffer that was created from a SYCL \codeinline{buffer}.  Must throw an
        \codeinline{invalid_object_error} SYCL exception if the total size in
        bytes represented by the type and range of the reinterpreted SYCL
-       \codeinline{buffer} does not equal the total size in bytes represented by
-       the type and range of this SYCL \codeinline{buffer}.
+       \codeinline{buffer} (or sub-buffer) does not equal the total
+       size in bytes represented by the type and range of this SYCL
+       \codeinline{buffer} (or sub-buffer).  Reinterpreting a sub-buffer provides
+       a reinterpreted view of the sub-buffer only, and does not change the
+       offset or size of the sub-buffer view (in bytes) relative to the parent
+       \codeinline{buffer}.
      }
 \completeTable
 %------------------------------------------------------------------------------------------------------
@@ -1587,7 +1596,16 @@ write-accessor on it has been created.
 A sub-buffer object can be created which is a sub-range reference to a
 base buffer. This sub-buffer can be used to create accessors to the
 base buffer, which have access to the range specified at time
-of construction of the sub-buffer.
+of construction of the sub-buffer.  Sub-buffers cannot be created from
+sub-buffers, but only from a base buffer which is not already a sub-buffer.
+
+Sub-buffers must be constructed from a contiguous region of memory in a buffer.  This
+requirement is potentially non-intuitive when working with buffers that have dimensionality
+larger than one, but maps to one-dimensional OpenCL sub-buffers without performance cost
+from index mapping math.  For example:
+
+\lstinputlisting{code/subbuffer.cpp}
+
 
 %***********************************************************************************
 % Images
