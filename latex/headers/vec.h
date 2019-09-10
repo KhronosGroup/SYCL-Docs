@@ -168,7 +168,6 @@ class vec {
   friend vec operator~(const vec &v) { /* ... */ }
   friend vec<RET, numElements> operator!(const vec &v) { /* ... */ }
   
-    
   // OP is: +, -, *, /, %
   /* operator% is only available when: dataT != cl_float && dataT != cl_double &&
   dataT != cl_half. */
@@ -180,7 +179,7 @@ class vec {
   friend vec operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
     
   // OP is: &&, ||
-  friend vec operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
+  friend vec<RET, numElements> operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
     
   // OP is: <<, >>
   /* Available only when: dataT != cl_float && dataT != cl_double
