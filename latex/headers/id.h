@@ -25,16 +25,17 @@ public:
   size_t operator[](int dimension) const;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  id<dimensions> operatorOP(const id<dimensions> &rhs) const;
-  id<dimensions> operatorOP(const size_t &rhs) const;
+    friend id operatorOP(const id &lhs, const id &rhs) { /* ... */ }
+    friend id operatorOP(const id &lhs, const size_t &rhs) { /* ... */ }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
-  id<dimensions> &operatorOP(const id<dimensions> &rhs);
-  id<dimensions> &operatorOP(const size_t &rhs);
+    friend id &operatorOP(id &lhs, const id &rhs) { /* ... */ }
+    friend id &operatorOP(id &lhs, const size_t &rhs) { /* ... */ }
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^
+    friend id operatorOP(const size_t &lhs, const id &rhs) { /* ... */ }
+
 };
 
-// OP is: +, -, *, /, %, <<, >>, &, |, ^
-template <int dimensions>
-id<dimensions> operatorOP(const size_t &lhs, const id<dimensions> &rhs);
 }  // namespace sycl
 }  // namespace cl

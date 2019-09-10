@@ -355,8 +355,15 @@ tables of other classes. No actual interface change.}
         Return the value of the requested dimension of the \codeinline{id}
         object.
     }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Hidden friend function}
+\addFootNotes{Hidden friend functions of the \codeinline{id} class template}
+{table.functions.id}
   \addRow
-    { id<dimensions> operatorOP(const id<dimensions> \&rhs) const }
+    { id operatorOP(const id \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -373,7 +380,7 @@ tables of other classes. No actual interface change.}
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> operatorOP(const size_t \&rhs) const }
+    { id operatorOP(const id \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -390,7 +397,7 @@ tables of other classes. No actual interface change.}
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> \&operatorOP(const id<dimensions> \&rhs) }
+    { id \&operatorOP(id \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
@@ -404,7 +411,7 @@ tables of other classes. No actual interface change.}
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> \&operatorOP(const size_t \&rhs) }
+    { id \&operatorOP(id \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
@@ -416,17 +423,9 @@ tables of other classes. No actual interface change.}
       and returns a reference to this SYCL \codeinline{id}. If the operator
       returns a \codeinline{bool} the result is the cast to \codeinline{size_t}.
     }
-\completeTable
-%-------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes{Non-member functions of the \codeinline{id} class template}
-{table.functions.id}
-  \addRowThreeL
-    { template <int dimensions> }
-    { id<dimensions> operatorOP(const size_t \&lhs, }
-    { const id<dimensions> \&rhs }
+  \addRow
+    { id operatorOP(const size_t \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
