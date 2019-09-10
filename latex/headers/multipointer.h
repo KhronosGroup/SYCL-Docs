@@ -39,7 +39,7 @@ class multi_ptr {
   multi_ptr &operator=(pointer_t);
   multi_ptr &operator=(ElementType*);
   multi_ptr &operator=(std::nullptr_t);
-  ElementType& operator*() const;
+  friend ElementType& operator*(const multi_ptr& mp) { /* ... */ }
   ElementType* operator->() const;
 
   // Only if Space == global_space
@@ -72,12 +72,12 @@ class multi_ptr {
   operator multi_ptr<const ElementType, Space>() const;
 
   // Arithmetic operators
-  multi_ptr& operator++();
-  multi_ptr operator++(int);
-  multi_ptr& operator--();
-  multi_ptr operator--(int);
-  multi_ptr& operator+=(difference_type r);
-  multi_ptr& operator-=(difference_type r);
+  friend multi_ptr& operator++(multi_ptr& mp) { /* ... */ }
+  friend multi_ptr operator++(multi_ptr& mp, int) { /* ... */ }
+  friend multi_ptr& operator--(multi_ptr& mp) { /* ... */ }
+  friend multi_ptr operator--(multi_ptr& mp, int) { /* ... */ }
+  friend multi_ptr& operator+=(multi_ptr& lhs, difference_type r) { /* ... */ }
+  friend multi_ptr& operator-=(multi_ptr& lhs, difference_type r) { /* ... */ }
   friend multi_ptr operator+(const multi_ptr& lhs, difference_type r) { /* ... */ }
   friend multi_ptr operator-(const multi_ptr& lhs, difference_type r) { /* ... */ }
 

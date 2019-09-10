@@ -2456,13 +2456,6 @@ An implementation should reject an argument if the deduced address space is not 
 {Assigns \codeinline{nullptr} to the \codeinline{multi_ptr}.}
 \addRowTwoL
 {template <typename ElementType, access::address_space Space>}
-{ElementType\& operator*() const}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Operator that returns a reference to the \codeinline{ElementType}
-of the \codeinline{multi_ptr} class.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
 {ElementType* operator->() const}
 {Available only when: \codeinline{!std::is_void<ElementType>::value}.
 \newline
@@ -2505,59 +2498,7 @@ Explicit conversion of a \codeinline{multi_ptr<void>}
 or \codeinline{multi_ptr<const void>} pointer object to a
 \codeinline{multi_ptr} of type \codeinline{ElementType}.}
 The conversion must retain the \codeinline{const} qualifier.
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator++()}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Increments the pointer by 1.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator++(int)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Increments the pointer by 1 and returns a new \codeinline{multi_ptr}
-with the value of the previous pointer.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator--()}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Decrements the pointer by 1.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator--(int)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Decrements the pointer by 1 and returns a new \codeinline{multi_ptr}
-with the value of the previous pointer.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator+=(difference_type r)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Moves the pointer forward by \codeinline{r}.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator-=(difference_type r)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Moves the pointer backward by \codeinline{r}.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator+(difference_type r) const}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Creates a new \codeinline{multi_ptr} that points \codeinline{r} forward
-compared to \codeinline{*this}.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator-(difference_type r) const}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Creates a new \codeinline{multi_ptr} that points \codeinline{r} backward
-compared to \codeinline{*this}.}
-  \addRow
+ \addRow
     { void prefetch(size_t numElements) const }
     {
       Available only when: \codeinline{Space ==
@@ -2575,6 +2516,59 @@ compared to \codeinline{*this}.}
 \startTable{Non-member function}
 \addFootNotes{Non-member functions of the \codeinline{multi_ptr} class}
 {table.multipointer.nonmemberfunctions}
+
+\addRow
+{ElementType\& operator*(const multi_ptr\& mp)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Operator that returns a reference to the \codeinline{ElementType}
+of  \codeinline{mp}.}
+
+\addRow
+{multi_ptr\& operator++(multi_ptr\& mp)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Increments \codeinline{mp} by \codeinline{1} and returns  \codeinline{mp}.}
+\addRow
+{multi_ptr operator++(multi_ptr\& mp, int)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Increments \codeinline{mp} by \codeinline{1} and returns a new \codeinline{multi_ptr}
+with the value of the original \codeinline{mp}.}
+\addRow
+{multi_ptr\& operator--(multi_ptr\& mp)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Decrements \codeinline{mp} by \codeinline{1} and returns \codeinline{mp}.}
+\addRow
+{multi_ptr operator--(multi_ptr\& mp, int)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Decrements \codeinline{mp} by \codeinline{1} and returns a new \codeinline{multi_ptr}
+with the value of the original \codeinline{mp}.}
+\addRow
+{multi_ptr\& operator+=(multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Moves \codeinline{mp} forward by \codeinline{r} and returns  \codeinline{lhs}.}
+\addRow
+{multi_ptr\& operator-=(multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Moves \codeinline{mp} backward by \codeinline{r} and returns  \codeinline{lhs}.}
+\addRow
+{multi_ptr operator+(const multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Creates a new \codeinline{multi_ptr} that points \codeinline{r} forward
+compared to \codeinline{lhs}.}
+\addRow
+{multi_ptr operator-(const multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Creates a new \codeinline{multi_ptr} that points \codeinline{r} backward
+compared to \codeinline{lhs}.}
+
 \addRow
 {bool operator==(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{==} for \codeinline{multi_ptr} class.}
