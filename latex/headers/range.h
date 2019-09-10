@@ -19,16 +19,17 @@ public:
   size_t size() const;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  range<dimensions> operatorOP(const range<dimensions> &rhs) const;
-  range<dimensions> operatorOP(const size_t &rhs) const;
+  friend range operatorOP(const range &lhs, const range &rhs) { /* ... */ }
+  friend range operatorOP(const range &lhs, const size_t &rhs) { /* ... */ }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
-  range<dimensions> &operatorOP(const range<dimensions> &rhs);
-  range<dimensions> &operatorOP(const size_t &rhs);
+  friend range & operatorOP(const range &lhs, const range &rhs) { /* ... */ }
+  friend range & operatorOP(const range &lhs, const size_t &rhs) { /* ... */ }
+    
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^
+  friend range operatorOP(const size_t &lhs, const range &rhs) { /* ... */ }
+
 };
 
-// OP is: +, -, *, /, %, <<, >>, &, |, ^
-template <int dimensions>
-range<dimensions> operatorOP(const size_t &lhs, const range<dimensions> &rhs);
 }  // sycl
 }  // cl

@@ -113,8 +113,16 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
     {
         Return the size of the range computed as dimension0*...*dimensionN.
     }
-  \addRow
-    { range<dimensions> operatorOP(const range<dimensions> \&rhs) const }
+
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Hidden friend function}
+\addFootNotes {Hidden friend functions of the SYCL \codeinline{range} class
+  template}{table.functions.range}
+    \addRow
+    { range operatorOP(const range \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -123,15 +131,15 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{range} class
-      template with the same dimensionality as this SYCL \codeinline{range},
+      template with the same dimensionality as \codeinline{lhs} \codeinline{range},
       where each element of the new SYCL \codeinline{range} instance is the
       result of an element-wise \codeinline{OP} operator between each element of
-      this SYCL \codeinline{range} and each element of the \codeinline{rhs}
+      \codeinline{lhs} \codeinline{range} and each element of the \codeinline{rhs}
       \codeinline{range}. If the operator returns a \codeinline{bool} the result
       is the cast to \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> operatorOP(const size_t \&rhs) const }
+    { range operatorOP(const range \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -140,7 +148,7 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{range} class
-      template with the same dimensionality as this SYCL \codeinline{range},
+      template with the same dimensionality as \codeinline{lhs} \codeinline{range},
       where each element of the new SYCL \codeinline{range} instance is the result
       of an element-wise \codeinline{OP} operator between each element of this
       SYCL \codeinline{range} and the \codeinline{rhs} \codeinline{size_t}. If
@@ -148,44 +156,35 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> \&operatorOP(const range<dimensions> \&rhs) }
+    { range \&operatorOP(range \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{range} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{range} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{range} and each element of the \codeinline{rhs}
-      \codeinline{range} and returns a reference to this SYCL \codeinline{
+      of \codeinline{lhs} \codeinline{range} and each element of the \codeinline{rhs}
+      \codeinline{range} and returns \codeinline{lhs} \codeinline{
       range}. If the operator returns a \codeinline{bool} the result is the cast
       to \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> \&operatorOP(const size_t \&rhs) }
+    { range \&operatorOP(range \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{range} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{range} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{range} and the \codeinline{rhs} \codeinline{
-      size_t} and returns a reference to this SYCL \codeinline{range}. If the
+      of \codeinline{lhs} \codeinline{range} and the \codeinline{rhs} \codeinline{
+      size_t} and returns \codeinline{lhs} \codeinline{range}. If the
       operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
-\completeTable
-%-------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes {Non-member functions of the SYCL \codeinline{range} class
-  template}{table.functions.range}
-  \addRowThreeL
-    { template <int dimensions> }
-    { range<dimensions> operatorOP(const size_t \&lhs, }
-    { const range<dimensions> \&rhs) }
+  \addRow
+    { range operatorOP(const size_t \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
