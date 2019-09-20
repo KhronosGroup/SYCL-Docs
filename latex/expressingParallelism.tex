@@ -33,7 +33,7 @@ written in row-major format.
   \addRow {item} {Pairing of an \codeinline{id} (specific point) and the \codeinline{range} that it is bounded by}
   \addRow {nd_range} {Encapsules both global and local (work-group size) \mbox{\codeinline{range}s} over which work-item \mbox{\codeinline{id}s} will vary}
   \addRow {nd_item} {Encapsulates two \mbox{\codeinline{item}s}, one for global \codeinline{id} and \codeinline{range}, and one for local \codeinline{id} and \codeinline{range}}
-  \addRow {h_item} {Index point queries within hierarchical parallelism (\codeinline{parallel_for_work_item}).  Encapsulates physical global and local \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}, as well as a logical/flexible local \codeinline{id} and \codeinline{range} defined by hierarchical parallelism}
+  \addRow {h_item} {Index point queries within hierarchical parallelism (\codeinline{parallel_for_work_item}).  Encapsulates physical global and local \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}, as well as a logical local \codeinline{id} and \codeinline{range} defined by hierarchical parallelism}
   \addRow {group} {Work-group queries within hierarchical parallelism (\codeinline{parallel_for_work_group}), and exposes the \codeinline{parallel_for_work_item} construct that identifies code to be executed by each work-item.  Encapsulates work-group \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}}
 \completeTable
 %-------------------------------------------------------------------------------
@@ -777,7 +777,7 @@ call or to the corresponding \codeinline{parallel_for_work_group} call if no \co
 is passed to the \codeinline{parallel_for_work_item} call.
 It encapsulates enough information to identify the \gls{work-item}'s local and global \glspl{item}
 according to the information given to \codeinline{parallel_for_work_group} (physical ids)
-as well as the \gls{work-item}'s logical local \glspl{item} in the flexible range.
+as well as the \gls{work-item}'s logical local \glspl{item} in the logical local range.
 All returned \glspl{item} objects are offset-less.
 Instances of the \codeinline{h_item<int dimensions>} class are not
 user-constructible and are passed by the runtime to each instance of the
@@ -812,7 +812,7 @@ A synopsis of the SYCL \codeinline{h_item} class is provided below. The member f
         work-item's position in the local iteration space as provided upon the invocation of the
         \codeinline{group::parallel_for_work_item}.
 
-        If the \codeinline{group::parallel_for_work_item} was called without any flexible local range
+        If the \codeinline{group::parallel_for_work_item} was called without any logical local range
         then the member function returns the physical local \gls{item}.
 
         A physical id can be computed from a logical id by getting the reminder of the integer division
@@ -1026,24 +1026,24 @@ operation.
   \addRowThreeL
     {template <typename workItemFunctionT>}
     {void parallel_for_work_item(range<dimensions> }
-    { flexibleRange, workItemFunctionT func) const}
+    { logicalRange, workItemFunctionT func) const}
     {
       Launch the work-items for this work-group using a logical local range.
       The function object \codeinline{func} is executed as if the kernel where
-      invoked with \codeinline{flexibleRange} as the local range. This new local
+      invoked with \codeinline{logicalRange} as the local range. This new local
       range is emulated and may not map one-to-one with the physical range.
       
-      \codeinline{flexibleRange} is the new local range to be used.
+      \codeinline{logicalRange} is the new local range to be used.
       This range can be smaller or larger than the one used to invoke the kernel.
       \codeinline{func} is a function object type with a public member function
       \codeinline{void F::operator()(h_item<dimensions>)}
       representing the work-item computation.
 
-      Note that the flexible range does not need to be uniform
-      across all work-groups in a kernel.  For example the flexible range may depend on
+      Note that the logical range does not need to be uniform
+      across all work-groups in a kernel.  For example the logical range may depend on
       a work-group varying query (e.g. \codeinline{group::get_linear_id}),
       such that different work-groups in the same kernel invocation execute
-      different flexible range sizes.
+      different logical range sizes.
 
       This member function can only be invoked within a
       \codeinline{parallel_for_work_group} context.
