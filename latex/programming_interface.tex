@@ -3742,7 +3742,7 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   \addRow
     {stream(size_t bufferSize, size_t maxStatementSize, handler\& cgh)}
     {
-      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size specified by the parameter \codeinline{bufferSize} and a maximum statement size specified by the parameter \codeinline{maxStatementSize}.
+      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size specified by the parameter \codeinline{bufferSize} and a maximum statement size specified by the parameter \codeinline{maxStatementSize}.  \codeinline{bufferSize} and \codeinline{maxStatementSize} relate to memory storage size in that they are the term \codeinline{n} in \codeinline{alloc_size = n*sizeof(char)}.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -3777,11 +3777,11 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 
 \subsection{Synchronization}
 
-An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator within a SYCL kernel function by the time that the kernel function finishes execution. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
+An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator (that doesn't exceed the \codeinline{maxStatementSize} or \codeinline{bufferSize} limits) within a SYCL kernel function by the time that the kernel function finishes execution. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
 
-In the case that an instance of the SYCL \codeinline{stream} class is used across multiple work items concurrently, there is no guarantee of ordering of outputs.
+In the case that an instance of the SYCL \codeinline{stream} class is used across multiple work items concurrently, there is no guarantee of output ordering between work items.
 
-If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a OpenCL context, there is no guarantee that statements are output in their entirety. If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a host context, then the SYCL \codeinline{stream} class is required to output each statement in full without mixing with statements of other work items.
+There is no guarantee that a statement is output in its entirety if it exceeds \codeinline{maxStatementSize}. The SYCL \codeinline{stream} class is required to output each statement (up to \codeinline{maxStatementSize}) without mixing with statements of other work items.  If a statement exceeds \codeinline{maxStatementSize}, then it is implementation defined whether the remainder of the statement is discarded or output, and whether any remainder output may be interleaved with output of statements from other work items.  If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a host context, then the SYCL \codeinline{stream} class is required to output all statements (each up to \codeinline{maxStatementSize}) from a work item in full and without mixing with any statements of another work item (all outputs not exceeding \codeinline{maxStatementSize} from one work item appear before any outputs from a different work item).
 
 \subsection{Performance note}
 
