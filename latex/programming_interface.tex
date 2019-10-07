@@ -1260,7 +1260,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
       exceed the parent buffer (\codeinline{b}) size (\codeinline{bufferRange}) in that dimension,
       and an \codeinline{invalid_object_error} SYCL exception must be thrown if violated.
       The offset and range specified by \codeinline{baseIndex} and \codeinline{subRange} together must represent a contiguous region of the original SYCL \codeinline{buffer}.  This contiguous region restriction avoids runtime overhead on top of one-dimensional sub-buffers exposed by OpenCL.  If a non-contiguous region of a buffer is requested when constructing a sub-buffer, then an \codeinline{invalid_object_error} SYCL exception must be thrown.
-      The total size of the sub-buffer being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
+      The origin (based on \codeinline{baseIndex}) of the sub-buffer being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
       This value is retrievable via the SYCL \codeinline{device} class info query \codeinline{info::device::mem_base_addr_align}.
       Must throw an \codeinline{invalid_object_error} SYCL exception if \codeinline{b} is already a sub-buffer.
     }
