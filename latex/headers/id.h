@@ -24,7 +24,7 @@ public:
   size_t &operator[](int dimension);
   size_t operator[](int dimension) const;
 
-  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, <, >, <=, >=
   id<dimensions> operatorOP(const id<dimensions> &rhs) const;
   id<dimensions> operatorOP(const size_t &rhs) const;
 

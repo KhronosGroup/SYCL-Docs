@@ -18,7 +18,7 @@ public:
 
   size_t size() const;
 
-  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, <, >, <=, >=
   range<dimensions> operatorOP(const range<dimensions> &rhs) const;
   range<dimensions> operatorOP(const size_t &rhs) const;
 
