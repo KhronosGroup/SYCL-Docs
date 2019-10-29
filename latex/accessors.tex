@@ -243,17 +243,17 @@ elements of a SYCL \codeinline{buffer}. Firstly by passing a SYCL \codeinline{
 id} instance of the same dimensionality as the SYCL \codeinline{accessor}
 subscript operator. Secondly by passing a single \codeinline{size_t} value to
 multiple consecutive subscript operators (one for each dimension of the SYCL
-\codeinline{accessor}, for example \codeinline{acc[id1][id2][id3]}). Finally, in the
+\codeinline{accessor}, for example \codeinline{acc[id0][id1][id2]}). Finally, in the
 case of the SYCL \codeinline{accessor} being \codeinline{0} dimensions, by
 triggering the implicit conversion operator. Whenever a multi-dimensional index
 is passed to a SYCL \codeinline{accessor} the linear index is calculated based
-on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL
-\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+on the index \codeinline{\{id0, id1, id2\}} provided and the range of the SYCL
+\codeinline{accessor} \codeinline{\{r0, r1, r2\}} according to row-major
 ordering as follows:
 
 \begin{equation}
 \label{row-major-equation-buffer}
- id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+ id2 + (id1 \cdot r2) + (id0 \cdot r2 \cdot r1)
 \end{equation}
 
 A buffer accessor can optionally provide access to a sub range of a SYCL
@@ -661,13 +661,13 @@ multiple consecutive subscript operators (one for each dimension of the SYCL
 case of the SYCL \codeinline{accessor} having \codeinline{0} dimensions, by
 triggering the implicit conversion operator. Whenever a multi-dimensional index
 is passed to a SYCL \codeinline{accessor}, the linear index is calculated based
-on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL 
-\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+on the index \codeinline{\{id0, id1, id2\}} provided and the range of the SYCL 
+\codeinline{accessor} \codeinline{\{r0, r1, r2\}} according to row-major
 ordering as follows:
 
 \begin{equation}
 \label{row-major-equation-local}
- id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+ id2 + (id1 \cdot r2) + (id0 \cdot r2 \cdot r1)
 \end{equation}
 
 A local accessor can optionally provide atomic access to allocated memory,

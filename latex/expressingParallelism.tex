@@ -2249,6 +2249,66 @@ user code should call \codeinline{clReleaseKernel} if the
 \codeinline{cl_kernel} is no longer needed in the calling context.
 
 
+%*******************************************************************************
+% OpenCL Kernel Conventions and SYCL
+%*******************************************************************************
+\subsection{OpenCL Kernel Conventions and SYCL}
+\label{sec:opencl_kern_conventions_and_sycl}
+
+OpenCL and SYCL use opposite conventions for the unit stride dimension.  SYCL
+aligns with C++ conventions, which is important to understand from a performance
+perspective when porting code to SYCL.
+
+When specifying a \codeinline{range} as the global or local size
+in a \codeinline{parallel_for} that invokes an OpenCL interop kernel (through
+\codeinline{cl_kernel} interop or \codeinline{compile_with_source}/
+\codeinline{build_with_source}),
+the highest dimension of the range in SYCL will map to the
+lowest dimension within the OpenCL kernel.  That statement applies to both
+an underlying enqueue operation such as \codeinline{clEnqueueNDRangeKernel}
+in OpenCL, and also ID and size queries within the OpenCL kernel.
+For example, a global range specified in SYCL as:
+
+\begin{lstlisting}[style=nonumbers]
+range<3> R{r0,r1,r2};
+\end{lstlisting}
+
+maps to an \codeinline{clEnqueueNDRangeKernel} \codeinline{global_work_size} argument
+of:
+
+\begin{lstlisting}[style=nonumbers]
+size_t cl_interop_range[3] = {r2,r1,r0};
+\end{lstlisting}
+
+Work-item and work-group ID and range queries have the same reversed convention for unit
+stride dimension between SYCL and OpenCL.  For example, with a three dimensional SYCL
+global range of \codeinline{range<3> R\{r0,r1,r2\}} specified for a kernel enqueue, OpenCL
+and SYCL kernel code queries relate to the range as:
+
+\startGenericThreeColTable{8cm}{3cm}{3cm}{SYCL kernel query}{OpenCL kernel query}{Returned Value}
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(2)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_range(1) / item::get_range(1)}{get_global_size(1)}{\codeinline{r1}}
+\genericThreeColRow {nd_item::get_global_range(2) / item::get_range(2)}{get_global_size(0)}{\codeinline{r2}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(2)}{Value in range 0..(\codeinline{r0}-1)}
+\genericThreeColRow {nd_item::get_global_id(1) / item::get_id(1)}{get_global_id(1)}{Value in range 0..(\codeinline{r1}-1)}
+\genericThreeColRow {nd_item::get_global_id(2) / item::get_id(2)}{get_global_id(0)}{Value in range 0..(\codeinline{r2}-1)}
+\completeGenericTabular
+\captionGenericTable{Example range mapping from SYCL enqueued three dimensional global \codeinline{range} to OpenCL and SYCL queries}
+\completeGenericTable
+
+Likewise, for a two dimensional global range \codeinline{range<2> R\{r0,r1\}}, OpenCL and SYCL kernel code queries relate to the range as:
+
+\startGenericThreeColTable{8cm}{3cm}{3cm}{SYCL kernel query}{OpenCL kernel query}{Returned Value}
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(1)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_range(1) / item::get_range(1)}{get_global_size(0)}{\codeinline{r1}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(1)}{Value in range 0..(\codeinline{r0}-1)}
+\genericThreeColRow {nd_item::get_global_id(1) / item::get_id(1)}{get_global_id(0)}{Value in range 0..(\codeinline{r1}-1)}
+\completeGenericTabular
+\captionGenericTable{Example range mapping from SYCL enqueued two dimensional global \codeinline{range} to OpenCL and SYCL queries}
+\completeGenericTable
+
+
+
 %***********************************************************************************
 % Rules for parameter passing to kernels
 %***********************************************************************************
