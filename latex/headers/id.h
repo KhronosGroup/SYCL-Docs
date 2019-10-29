@@ -33,7 +33,7 @@ public:
   id<dimensions> &operatorOP(const size_t &rhs);
 };
 
-// OP is: +, -, *, /, %, <<, >>, &, |, ^
+// OP is: +, -, *, /, %, <<, >>, &, |, ^, <, >, <=, >=
 template <int dimensions>
 id<dimensions> operatorOP(const size_t &lhs, const id<dimensions> &rhs);
 }  // namespace sycl

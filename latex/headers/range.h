@@ -27,7 +27,7 @@ public:
   range<dimensions> &operatorOP(const size_t &rhs);
 };
 
-// OP is: +, -, *, /, %, <<, >>, &, |, ^
+// OP is: +, -, *, /, %, <<, >>, &, |, ^, <, >, <=, >=
 template <int dimensions>
 range<dimensions> operatorOP(const size_t &lhs, const range<dimensions> &rhs);
 }  // sycl
