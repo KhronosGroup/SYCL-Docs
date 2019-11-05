@@ -59,8 +59,8 @@ class stream {
 
   size_t get_work_item_buffer_size() const;
 
-  /* get_max_statement_size() is an alias for get_work_item_buffer_size(), and
-     is provided for backward compatibility */
+  /* get_max_statement_size() has the same functionality as get_work_item_buffer_size(),
+     and is provided for backward compatibility */
   size_t get_max_statement_size() const;
 };
 

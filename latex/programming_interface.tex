@@ -3565,6 +3565,8 @@ The way in which values are output by an instance of the SYCL \codeinline{stream
 
 An instance of the SYCL \codeinline{stream} class has a maximum buffer size (\codeinline{totalBufferSize}) that specifies maximum size of the overall character stream that can be output in characters (a character is of size \codeinline{sizeof(char)} bytes) during a kernel invocation, and a maximum stream size (\codeinline{workItemBufferSize}) that specifies the maximum size of the character stream (number of characters) that can be output within a work item before a flush must be performed (a character is of size \codeinline{sizeof(char)} bytes).  \codeinline{totalBufferSize} must be sufficient to contain the characters output by all stream statements during execution of a kernel invocation (the aggregate of outputs from all work items), and \codeinline{workItemBufferSize} must be sufficient to contain the characters output within a work item between stream flush operations.
 
+A stream flush operation is defined that synchronizes the work item stream buffer with the global stream buffer, and then empties the work item stream buffer.  A flush can be explicitly triggered using the \codeinline{flush} stream manipulator, or implicitly triggered by the \codeinline{endl} stream manipulator or by kernel completion (from the perspective of each completing work item).
+
 If the \codeinline{totalBufferSize} or \codeinline{workItemBufferSize} limits are exceeded, it is implementation defined whether the streamed characters exceeding the limit are output, or silently ignored/discarded, and if output it is implementation defined whether those extra characters exceeding the \codeinline{workItemBufferSize} limit count toward the \codeinline{totalBufferSize} limit.  Regardless of this implementations defined behavior of output exceeding the limits, no undefined or erroneous behavior is permitted of an implementation when the limits are exceeded.  Unused characters within \codeinline{workItemBufferSize} (any portion of the \codeinline{workItemBufferSize} capacity that has not been used at the time of a stream flush) do not count toward the \codeinline{totalBufferSize} limit, in that only characters flushed count toward the \codeinline{totalBufferSize} limit.
 
 The SYCL \codeinline{stream} class provides the common reference semantics
@@ -3640,8 +3642,8 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   flush
 }
 {
-  Triggers a flush operation, that synchronizes the work item stream buffer with the global
-  stream buffer, and that empties the work item stream buffer.  After a flush, the full
+  Triggers a flush operation, which synchronizes the work item stream buffer with the global
+  stream buffer, and then empties the work item stream buffer.  After a flush, the full
   \codeinline{workItemBufferSize} is available again for subsequent streaming within the work item.
 }
 \addRow
@@ -3649,7 +3651,7 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   endl
 }
 {
-  Outputs a new-line character and then generates a flush.
+  Outputs a new-line character and then triggers a flush operation.
 }
 \addRow
 {
@@ -3769,6 +3771,12 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
     {
       Returns the buffer size per work item, in characters.
     }
+  \addRow
+    {size_t get_max_statement_size() const}
+    {
+      Same functionality as \codeinline{get_work_item_buffer_size()}.  Provided for
+      backward compatibility of code using an older (deprecated) name for the query.
+    }
 \completeTable
 %-------------------------------------------------------------------------------------------
 
@@ -3786,7 +3794,7 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 
 \subsection{Synchronization}
 
-An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator (that doesn't exceed the \codeinline{workItemBufferSize} or \codeinline{totalBufferSize} limits) within a SYCL kernel function by the time that the event associated with a command group submission enters the completed state. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
+An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator before a flush operation (that doesn't exceed the \codeinline{workItemBufferSize} or \codeinline{totalBufferSize} limits) within a SYCL kernel function by the time that the event associated with a command group submission enters the completed state. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
 
 The SYCL \codeinline{stream} class is required to output the content of each stream, between flushes (up to \codeinline{workItemBufferSize}), without mixing with content from the same stream in other work items.  There are no other output order guarantees between work items or between streams.  The stream flush operation therefore delimits the unit of output that is guaranteed to be displayed without mixing with other work items, with respect to a single stream.
 
