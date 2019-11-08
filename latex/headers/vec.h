@@ -67,7 +67,7 @@ class vec {
 
   size_t get_size() const;
 
-  template <typename convertT, rounding_mode roundingMode>
+  template <typename convertT, rounding_mode roundingMode = rounding_mode::automatic>
   vec<convertT, numElements> convert() const;
 
   template <typename asT>
