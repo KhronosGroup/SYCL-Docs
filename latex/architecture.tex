@@ -1044,12 +1044,52 @@ through specialized operations.
 Elements of a buffer object can be a scalar data type (such as an int, float),
 vector data type, or a user-defined structure. In SYCL, a \gls{buffer} object is a
 templated type (\codeinline{cl::sycl::buffer}), parameterized by the element
-type and number of dimensions. An \gls{image} object is stored in one of a limited
-number of formats. The elements of an image object are selected from a list of
-predefined image formats which are provided by an underlying OpenCL
-implementation.  Images are encapsulated in the \codeinline{cl::sycl::image}
-type, which is templated by the number of dimensions in the image. The minimum
-number of elements in a memory object is one.
+type and number of dimensions.
+
+An \gls{image} is represented by the \codeinline{cl::sycl::image} class
+template, parametrized by the dimensionality. The minimum number of elements in
+a memory object is one. Elements of an \gls{image}, are stored in memory
+according one of a limited number of image formats described by a combination of
+\codeinline{cl::sycl::image_channel_order} and
+\codeinline{cl::sycl::image_channel_type}. An \gls{image} can be constructed
+with any one of these image formats, however whether that \gls{image} can be
+passed to a \gls{sycl-kernel-function} is subject to the target \gls{device}
+supporting that image format. The image formats supported by a \gls{device} is
+implementation defined, however if the \gls{device} is reported as supporting
+images it must support the minimum image formats as described below:
+
+\begin{itemize}
+  \item
+    \codeinline{cl::sycl::image_channel_order::rgba}
+    \begin{itemize}
+      \item
+        \codeinline{cl::sycl::image_channel_type::unorm_int8}
+      \item
+        \codeinline{cl::sycl::image_channel_type::unorm_int16}
+      \item
+        \codeinline{cl::sycl::image_channel_type::signed_int8}
+      \item
+        \codeinline{cl::sycl::image_channel_type::signed_int16}
+      \item
+        \codeinline{cl::sycl::image_channel_type::signed_int32}
+      \item
+        \codeinline{cl::sycl::image_channel_type::unsigned_int8}
+      \item
+        \codeinline{cl::sycl::image_channel_type::unsigned_int16}
+      \item
+        \codeinline{cl::sycl::image_channel_type::unsigned_int32}
+      \item
+        \codeinline{cl::sycl::image_channel_type::fp16}
+      \item
+        \codeinline{cl::sycl::image_channel_type::fp32}
+    \end{itemize}
+  \item
+    \codeinline{cl::sycl::image_channel_order::bgra}
+    \begin{itemize}
+      \item
+        \codeinline{cl::sycl::image_channel_type::unorm_int8}
+    \end{itemize}
+\end{itemize}
 
 The fundamental differences between a buffer and an image object are:
 \begin{itemize}
@@ -1300,8 +1340,8 @@ same rules as the OpenCL devices.
 Kernel math library functions on the host must conform to OpenCL math precision
 requirements. The SYCL host device needs to be queried for the capabilities it provides.
 
-The range of image formats supported by the host device is implementation-defined, 
-but must match the minimum requirements of the OpenCL specification.
+The \gls{host-device} must report as supporting images and therefore support
+the minimum image formats.
 
 Some of the OpenCL extensions and optional features may be available on a SYCL
 host device, but since these are optional features and vendor specific
