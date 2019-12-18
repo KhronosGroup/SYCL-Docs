@@ -28,10 +28,12 @@ class T {
   T &operator=(T &&rhs);
 
   ~T();
+    
+  ...
 
-  bool operator==(const T &rhs) const;
+  friend bool operator==(const T &lhs, const T &rhs) { /* ... */ }
 
-  bool operator!=(const T &rhs) const;
+  friend bool operator!=(const T &lhs, const T &rhs) { /* ... */ }
 
   ...
 };

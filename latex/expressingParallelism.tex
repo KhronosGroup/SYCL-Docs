@@ -59,7 +59,7 @@ constructed from integers.
 The SYCL \codeinline{range} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{range} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{range} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.range} and \ref{table.functions.range} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{range} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{range} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.range} and \ref{table.functions.range} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 \lstinputlistingSkipLicense{headers/range.h}
 
@@ -119,8 +119,16 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
     {
         Return the size of the range computed as dimension0*...*dimensionN.
     }
-  \addRow
-    { range<dimensions> operatorOP(const range<dimensions> \&rhs) const }
+
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Hidden friend function}
+\addFootNotes {Hidden friend functions of the SYCL \codeinline{range} class
+  template}{table.functions.range}
+    \addRow
+    { range operatorOP(const range \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -129,15 +137,15 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{range} class
-      template with the same dimensionality as this SYCL \codeinline{range},
+      template with the same dimensionality as \codeinline{lhs} \codeinline{range},
       where each element of the new SYCL \codeinline{range} instance is the
       result of an element-wise \codeinline{OP} operator between each element of
-      this SYCL \codeinline{range} and each element of the \codeinline{rhs}
+      \codeinline{lhs} \codeinline{range} and each element of the \codeinline{rhs}
       \codeinline{range}. If the operator returns a \codeinline{bool} the result
       is the cast to \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> operatorOP(const size_t \&rhs) const }
+    { range operatorOP(const range \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -146,7 +154,7 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{range} class
-      template with the same dimensionality as this SYCL \codeinline{range},
+      template with the same dimensionality as \codeinline{lhs} \codeinline{range},
       where each element of the new SYCL \codeinline{range} instance is the result
       of an element-wise \codeinline{OP} operator between each element of this
       SYCL \codeinline{range} and the \codeinline{rhs} \codeinline{size_t}. If
@@ -154,44 +162,35 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> \&operatorOP(const range<dimensions> \&rhs) }
+    { range \&operatorOP(range \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{range} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{range} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{range} and each element of the \codeinline{rhs}
-      \codeinline{range} and returns a reference to this SYCL \codeinline{
+      of \codeinline{lhs} \codeinline{range} and each element of the \codeinline{rhs}
+      \codeinline{range} and returns \codeinline{lhs} \codeinline{
       range}. If the operator returns a \codeinline{bool} the result is the cast
       to \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> \&operatorOP(const size_t \&rhs) }
+    { range \&operatorOP(range \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{range} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{range} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{range} and the \codeinline{rhs} \codeinline{
-      size_t} and returns a reference to this SYCL \codeinline{range}. If the
+      of \codeinline{lhs} \codeinline{range} and the \codeinline{rhs} \codeinline{
+      size_t} and returns \codeinline{lhs} \codeinline{range}. If the
       operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
-\completeTable
-%-------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes {Non-member functions of the SYCL \codeinline{range} class
-  template}{table.functions.range}
-  \addRowThreeL
-    { template <int dimensions> }
-    { range<dimensions> operatorOP(const size_t \&lhs, }
-    { const range<dimensions> \&rhs) }
+  \addRow
+    { range operatorOP(const size_t \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -227,7 +226,7 @@ group.
 The SYCL \codeinline{nd_range} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{nd_range} class is provided below. The constructors and member functions of the SYCL \codeinline{nd_range} class are listed in Tables~\ref{table.constructors.ndrange} and \ref{table.members.ndrange} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{nd_range} class is provided below. The constructors and member functions of the SYCL \codeinline{nd_range} class are listed in Tables~\ref{table.constructors.ndrange} and \ref{table.members.ndrange} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 \fixme{UPDATE: change parameter naming to match interface}
 %------------------------------------------------------------------------------------------------------
@@ -291,7 +290,7 @@ same rank. The \tf{[n]} operator returns the component \tf{n} as an
 The SYCL \codeinline{id} class template provides the common by-value semantics
 (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{id} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{id} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.id} and \ref{table.functions.id} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{id} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{id} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.id} and \ref{table.functions.id} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 \lstinputlistingSkipLicense{headers/id.h}
 
@@ -362,8 +361,15 @@ tables of other classes. No actual interface change.}
         Return the value of the requested dimension of the \codeinline{id}
         object.
     }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Hidden friend function}
+\addFootNotes{Hidden friend functions of the \codeinline{id} class template}
+{table.functions.id}
   \addRow
-    { id<dimensions> operatorOP(const id<dimensions> \&rhs) const }
+    { id operatorOP(const id \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -372,15 +378,15 @@ tables of other classes. No actual interface change.}
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{id} class
-      template with the same dimensionality as this SYCL \codeinline{id}, where
+      template with the same dimensionality as \codeinline{lhs} \codeinline{id}, where
       each element of the new SYCL \codeinline{id} instance is the result of an
-      element-wise \codeinline{OP} operator between each element of this SYCL
+      element-wise \codeinline{OP} operator between each element of \codeinline{lhs}
       \codeinline{id} and each element of the \codeinline{rhs} \codeinline{id}.
       If the operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> operatorOP(const size_t \&rhs) const }
+    { id operatorOP(const id \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -389,51 +395,43 @@ tables of other classes. No actual interface change.}
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{id} class
-      template with the same dimensionality as this SYCL \codeinline{id}, where
+      template with the same dimensionality as \codeinline{lhs} \codeinline{id}, where
       each element of the new SYCL \codeinline{id} instance is the result of an
-      element-wise \codeinline{OP} operator between each element of this SYCL
+      element-wise \codeinline{OP} operator between each element of \codeinline{lhs}
       \codeinline{id} and the \codeinline{rhs} \codeinline{size_t}. If the
       operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> \&operatorOP(const id<dimensions> \&rhs) }
+    { id \&operatorOP(id \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{id} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{id} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{id} and each element of the \codeinline{rhs}
-      \codeinline{id} and returns a reference to this SYCL \codeinline{id}. If
+      of \codeinline{lhs} \codeinline{id} and each element of the \codeinline{rhs}
+      \codeinline{id} and returns \codeinline{lhs} \codeinline{id}. If
       the operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> \&operatorOP(const size_t \&rhs) }
+    { id \&operatorOP(id \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{id} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{id} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{id} and the \codeinline{rhs} \codeinline{size_t}
-      and returns a reference to this SYCL \codeinline{id}. If the operator
+      of \codeinline{lhs} \codeinline{id} and the \codeinline{rhs} \codeinline{size_t}
+      and returns \codeinline{lhs} \codeinline{id}. If the operator
       returns a \codeinline{bool} the result is the cast to \codeinline{size_t}.
     }
-\completeTable
-%-------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes{Non-member functions of the \codeinline{id} class template}
-{table.functions.id}
-  \addRowThreeL
-    { template <int dimensions> }
-    { id<dimensions> operatorOP(const size_t \&lhs, }
-    { const id<dimensions> \&rhs }
+  \addRow
+    { id operatorOP(const size_t \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -471,7 +469,7 @@ The SYCL \codeinline{item} class template provides the common by-value semantics
 
 \subsubsection{Item interface}
 
-A synopsis of the SYCL \codeinline{item} class is provided below. The member functions of the SYCL \codeinline{item} class are listed in Table~\ref{table.members.id}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{item} class is provided below. The member functions of the SYCL \codeinline{item} class are listed in Table~\ref{table.members.id}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 %Interface for class: item
 \lstinputlistingSkipLicense{headers/item.h}
@@ -559,7 +557,7 @@ function object.
 The SYCL \codeinline{nd_item} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{nd_item} class is provided below. The member functions of the SYCL \codeinline{nd_item} class are listed in Table~\ref{table.members.nditem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{nd_item} class is provided below. The member functions of the SYCL \codeinline{nd_item} class are listed in Table~\ref{table.members.nditem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 %interface for nd_item class
 \lstinputlistingSkipLicense{headers/nditem.h}
@@ -792,7 +790,7 @@ function object.
 The SYCL \codeinline{h_item} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{h_item} class is provided below. The member functions of the SYCL \codeinline{h_item} class are listed in Table~\ref{table.members.hitem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{h_item} class is provided below. The member functions of the SYCL \codeinline{h_item} class are listed in Table~\ref{table.members.hitem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 \lstinputlistingSkipLicense{headers/hitem.h}
 
@@ -940,7 +938,7 @@ executing work-group, even through the abstracted iteration range of the
 The SYCL \codeinline{group} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{group} class is provided below. The member functions of the SYCL \codeinline{group} class are listed in Table~\ref{table.members.group}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{group} class is provided below. The member functions of the SYCL \codeinline{group} class are listed in Table~\ref{table.members.group}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 The \codeinline{group} class also provides the \codeinline{
 mem_fence} member function for performing a \gls{work-group-mem-fence}
@@ -1733,7 +1731,7 @@ kernel object. The kernel information descriptor interface is described in%
 ~\ref{appendix.kernel.descriptors} and the description is in the
 Table~\ref{table.kernel.info}.
 
-The constructors and member functions of the SYCL \codeinline{kernel} class are listed in Tables~\ref{table.constructors.kernel} and \ref{table.members.kernel}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{kernel} class are listed in Tables~\ref{table.constructors.kernel} and \ref{table.members.kernel}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: kernel
 \lstinputlistingSkipLicense{headers/kernelWIP.h}
@@ -1930,7 +1928,7 @@ The SYCL \codeinline{program} class provides the common reference semantics
 \subsubsection{Program interface}
 
 A synopsis of the SYCL \codeinline{program} class is provided below. The constructors and member functions of the SYCL \codeinline{program} class are listed in Tables~\ref{table.constructors.program} and \ref{table.members.program} respectively. The additional common special member functions and common member functions are listed in
-\ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+\ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: program
 \lstinputlistingSkipLicense{headers/programWIP.h}

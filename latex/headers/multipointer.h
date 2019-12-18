@@ -53,7 +53,7 @@ class multi_ptr {
   multi_ptr &operator=(pointer_t);
   multi_ptr &operator=(ElementType*);
   multi_ptr &operator=(std::nullptr_t);
-  ElementType& operator*() const;
+  friend ElementType& operator*(const multi_ptr& mp) { /* ... */ }
   ElementType* operator->() const;
 
   // Only if Space == global_space
@@ -86,16 +86,38 @@ class multi_ptr {
   operator multi_ptr<const ElementType, Space>() const;
 
   // Arithmetic operators
-  multi_ptr& operator++();
-  multi_ptr operator++(int);
-  multi_ptr& operator--();
-  multi_ptr operator--(int);
-  multi_ptr& operator+=(difference_type r);
-  multi_ptr& operator-=(difference_type r);
-  multi_ptr operator+(difference_type r) const;
-  multi_ptr operator-(difference_type r) const;
+  friend multi_ptr& operator++(multi_ptr& mp) { /* ... */ }
+  friend multi_ptr operator++(multi_ptr& mp, int) { /* ... */ }
+  friend multi_ptr& operator--(multi_ptr& mp) { /* ... */ }
+  friend multi_ptr operator--(multi_ptr& mp, int) { /* ... */ }
+  friend multi_ptr& operator+=(multi_ptr& lhs, difference_type r) { /* ... */ }
+  friend multi_ptr& operator-=(multi_ptr& lhs, difference_type r) { /* ... */ }
+  friend multi_ptr operator+(const multi_ptr& lhs, difference_type r) { /* ... */ }
+  friend multi_ptr operator-(const multi_ptr& lhs, difference_type r) { /* ... */ }
 
   void prefetch(size_t numElements) const;
+    
+  friend bool operator==(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator!=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+
+  friend bool operator==(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator!=(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator<(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator>(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator<=(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator>=(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+
+  friend bool operator==(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator!=(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<=(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>=(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+
 };
 
 // Specialization of multi_ptr for void and const void
@@ -154,6 +176,28 @@ class multi_ptr<VoidType, Space> {
 
   // Implicit conversion to multi_ptr<const void, Space>
   operator multi_ptr<const void, Space>() const;
+    
+  friend bool operator==(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator!=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
+
+  friend bool operator==(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator!=(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator<(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator>(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator<=(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+  friend bool operator>=(const multi_ptr& lhs, std::nullptr_t) { /* ... */ }
+
+  friend bool operator==(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator!=(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator<=(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+  friend bool operator>=(std::nullptr_t, const multi_ptr& rhs) { /* ... */ }
+
 };
 
 template <typename ElementType, access::address_space Space>
@@ -161,49 +205,6 @@ multi_ptr<ElementType, Space> make_ptr(multi_ptr<ElementType, Space>::pointer_t)
 
 template <typename ElementType, access::address_space Space>
 multi_ptr<ElementType, Space> make_ptr(ElementType*);
-
-template <typename ElementType, access::address_space Space>
-bool operator==(const multi_ptr<ElementType, Space>& lhs,
-                const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator!=(const multi_ptr<ElementType, Space>& lhs,
-                const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator<(const multi_ptr<ElementType, Space>& lhs,
-               const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator>(const multi_ptr<ElementType, Space>& lhs,
-               const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator<=(const multi_ptr<ElementType, Space>& lhs,
-                const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator>=(const multi_ptr<ElementType, Space>& lhs,
-                const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator!=(const multi_ptr<ElementType, Space>& lhs, std::nullptr_t rhs);
-template <typename ElementType, access::address_space Space>
-bool operator!=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator==(const multi_ptr<ElementType, Space>& lhs, std::nullptr_t rhs);
-template <typename ElementType, access::address_space Space>
-bool operator==(std::nullptr_t lhs, const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator>(const multi_ptr<ElementType, Space>& lhs, std::nullptr_t rhs);
-template <typename ElementType, access::address_space Space>
-bool operator>(std::nullptr_t lhs, const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator<(const multi_ptr<ElementType, Space>& lhs, std::nullptr_t rhs);
-template <typename ElementType, access::address_space Space>
-bool operator<(std::nullptr_t lhs, const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator>=(const multi_ptr<ElementType, Space>& lhs, std::nullptr_t rhs);
-template <typename ElementType, access::address_space Space>
-bool operator>=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>& rhs);
-template <typename ElementType, access::address_space Space>
-bool operator<=(const multi_ptr<ElementType, Space>& lhs, std::nullptr_t rhs);
-template <typename ElementType, access::address_space Space>
-bool operator<=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>& rhs);
 
 }  // namespace sycl
 }  // namespace cl
