@@ -1,3 +1,8 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
 
 % !TEX root = sycl-1.2.1.tex
 \def \debugging{false}
@@ -70,7 +75,7 @@ defaulted as 1 in most cases.
 Many of the \gls{sycl-runtime} classes encapsulate an associated OpenCL opaque type and provide facilities for interoperating between the SYCL classes and the OpenCL opaque types they encapsulate in order to allow interoperability between SYCL and OpenCL applications.
 
 Each of the following \gls{sycl-runtime} classes: \codeinline{platform},
-\codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image}, \codeinline{sampler} and \codeinline{stream} must obey the following statements, where \codeinline{T} is the runtime class type:
+\codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image} and \codeinline{sampler} must obey the following statements, where \codeinline{T} is the runtime class type:
 
 \begin{itemize}
 
@@ -91,7 +96,7 @@ For more details regarding these facilities and considerations for their use see
 \subsection{Common reference semantics}
 \label{sec:reference-semantics}
 
-Each of the following \gls{sycl-runtime} classes: \codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image}, \codeinline{sampler}, \codeinline{accessor} and \codeinline{stream} must obey the following statements, where \codeinline{T} is the runtime class type:
+Each of the following \gls{sycl-runtime} classes: \codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image}, \codeinline{sampler} and \codeinline{accessor} must obey the following statements, where \codeinline{T} is the runtime class type:
 
 \begin{itemize}
 
@@ -115,7 +120,7 @@ A hidden friend function is a function first declared via a \codeinline{friend} 
 
 These common special member functions and hidden friend functions are described in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference} respectively.
 
-\lstinputlisting{headers/common-reference.h}
+\lstinputlistingSkipLicense{headers/common-reference.h}
 
 \startTable{Special member function}
 \addFootNotes{Common special member functions for reference semantics}
@@ -186,7 +191,7 @@ Each of the runtime classes mentioned above must provide a common interface of s
 
 These common special member functions and hidden friend functions are described in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
-\lstinputlisting{headers/common-byval.h}
+\lstinputlistingSkipLicense{headers/common-byval.h}
 
 \startTable{Special member function}
 \addFootNotes{Common special member functions for by-value semantics}
@@ -246,7 +251,7 @@ The example illustrates how using properties does not affect the type
 of the object, thus, does not prevent the usage of SYCL objects in
 containers.
 
-\lstinputlisting{code/propertyExample.cpp}
+\lstinputlistingSkipLicense{code/propertyExample.cpp}
 
 Each property is represented by a unique class and an instance of a property is an instance of that type. Some properties can be default constructed while other will require an argument on construction. A property may be applicable to more than one class, however some properties may not be compatible with each other. See the requirements for the properties of the SYCL \codeinline{buffer} class and SYCL \codeinline{image} class in Table~\ref{table.properties.buffer} and Table~\ref{table.properties.image} respectively.
 
@@ -260,7 +265,7 @@ Each of the runtime classes mentioned above must provide a common interface of m
 
 A synopsis of the common properties interface, the SYCL \codeinline{property_list} class and the SYCL property classes is provided below. The member functions of the common properties interface are listed in Table~\ref{table.members.propertyinterface}. The constructors of the SYCL \codeinline{property_list} class are listed in Table~\ref{table.constructors.propertylist}.
 
-\lstinputlisting{headers/properties.h}
+\lstinputlistingSkipLicense{headers/properties.h}
 
 %---------------------------------------------------------------------
 \startTable{Member function}
@@ -309,7 +314,7 @@ The class \codeinline{param_traits} is a C++ type trait for providing an alias t
 parameter with the associated return type as defined in the info
 parameter tables.
 
-\lstinputlisting{headers/paramTraits.h}
+\lstinputlistingSkipLicense{headers/paramTraits.h}
 
 %*********************************************************************
 % C++ Standard library classes required for the interface
@@ -339,7 +344,7 @@ These types are exposed internally as
 Typically, the SYCL types will be aliases to the system 
 STL library, as shown in the listing below:
 
-\lstinputlisting{headers/stlclasses.h}
+\lstinputlistingSkipLicense{headers/stlclasses.h}
 
 However, a SYCL implementation may provide a custom implementation 
 of any of these objects. 
@@ -377,9 +382,11 @@ All member functions of the \codeinline{device_selector} class are synchronous a
 
 The function call operator; \codeinline{operator()} of the SYCL \codeinline{device_selector} is an abstract member function which takes a reference to a SYCL \codeinline{device} and returns an integer score.  This abstract member function can be implemented in a derived class in order to provide a logic for selecting a SYCL \codeinline{device}.
 
-At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{device}, the system will call the \codeinline{select_device()} member functions, which will query all available SYCL \codeinline{device}s in the system, pass each to this function call operator and select the one which returns the highest highest score. If a negative score is returned the the corresponding SYCL \codeinline{device} will never be chosen. The SYCL \codeinline{device}s that are provided to the SYCL \codeinline{device_selector} can be any number of OpenCL devices but must contain a single host device.
+At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{device} through an explicit \codeinline{device_selector} specialization or through the implicit \codeinline{default_selector}, the system will call the \codeinline{select_device()} member function, which will query all available SYCL \codeinline{device}s in the system, pass each to this function call operator and select the one which returns the highest score. If a negative score is returned then the corresponding SYCL \codeinline{device} will never be chosen.  If the high score is obtained by more than one device, then one of the tied devices will be returned, but which one is not defined and may depend on enumeration order, for example, outside the control of the SYCL runtime. The SYCL \codeinline{device}s that are provided to the SYCL \codeinline{device_selector} can be any number of OpenCL devices but must contain a single host device.
 
-\lstinputlisting{headers/deviceSelectorInterface.h}
+If all devices that \codeinline{select_device()} passes to the a selector's function call operator return a negative value (never select), then \codeinline{select_device()} must throw an \codeinline{runtime_error} SYCL exception.
+
+\lstinputlistingSkipLicense{headers/deviceSelectorInterface.h}
 %---------------------------------------------------------------------
 \startTable{Constructor}
 \addFootNotes{Constructors of the \codeinline{device_selector} class}
@@ -414,7 +421,7 @@ At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{dev
 \addRow
 {device select_device() const}
 {
-  Returns a SYCL \codeinline{device} that has been selected based on the highest score returned by the function call operator for all available SYCL \codeinline{device}s in the system.
+  Returns a SYCL \codeinline{device} that has been selected based on the highest score returned by the function call operator for all available SYCL \codeinline{device}s in the system.  If more than one device receives the high score then one of those tied devices will be returned, but which of the devices from the tied set is to be returned is not defined.  If the function call operator returns a negative score for all available devices, then a \codeinline{runtime_error} SYCL exception must be thrown.
 }
 \addRow
 {virtual int operator()(const device \&device) const}
@@ -497,7 +504,7 @@ The SYCL \codeinline{platform} class provides the common reference semantics
 A synopsis of the SYCL \codeinline{platform} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{platform} class are listed in Tables~\ref{table.constructors.platform}, \ref{table.members.platform} and \ref{table.staticmembers.platform} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference} respectively.
 
 %Interface of platform class
-\lstinputlisting{headers/platform.h}
+\lstinputlistingSkipLicense{headers/platform.h}
 
 %-------------------------------------------------------------------------------
 \startTableDim{Constructor}{6.7cm}{8.3cm}
@@ -646,7 +653,7 @@ Information about a SYCL \gls{context} may be queried through the \codeinline{ge
 member function.
 
 %Interface for class: context
-\lstinputlisting{headers/context.h}
+\lstinputlistingSkipLicense{headers/context.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -806,7 +813,7 @@ The SYCL \codeinline{event} class provides the common reference semantics
 The constructors and member functions of the SYCL \codeinline{event} class are listed in Tables~\ref{table.constructors.event} and \ref{table.members.event}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: event.h
-\lstinputlisting{headers/event.h}
+\lstinputlistingSkipLicense{headers/event.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -1129,7 +1136,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
 
 %Interface for class: buffer
 
-\lstinputlisting{headers/buffer.h}
+\lstinputlistingSkipLicense{headers/buffer.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -1254,12 +1261,16 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
     { const range<dimensions> \& subRange) }
     {
       Create a new sub-buffer without allocation to have separate
-      accessors later. \codeinline{b} is the buffer with the real data.
+      accessors later. \codeinline{b} is the buffer with the real data, which must not be a sub-buffer.
       \codeinline{baseIndex} specifies the origin of the sub-buffer inside the
       buffer \codeinline{b}. \codeinline{subRange} specifies the size of the sub-buffer.
-      The offset and range specified by \codeinline{baseIndex} and \codeinline{subRange} together must represent a contiguous region of the original SYCL \codeinline{buffer}.
-      The total size of the sub-\codeinline{buffer} being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
+      The sum of \codeinline{baseIndex} and \codeinline{subRange} in any dimension must not
+      exceed the parent buffer (\codeinline{b}) size (\codeinline{bufferRange}) in that dimension,
+      and an \codeinline{invalid_object_error} SYCL exception must be thrown if violated.
+      The offset and range specified by \codeinline{baseIndex} and \codeinline{subRange} together must represent a contiguous region of the original SYCL \codeinline{buffer}.  This contiguous region restriction avoids runtime overhead on top of one-dimensional sub-buffers exposed by OpenCL.  If a non-contiguous region of a buffer is requested when constructing a sub-buffer, then an \codeinline{invalid_object_error} SYCL exception must be thrown.
+      The origin (based on \codeinline{baseIndex}) of the sub-buffer being constructed must be a multiple of the memory base address alignment of each SYCL \codeinline{device} that is executed on, otherwise the \gls{sycl-runtime} must throw an asynchronous \codeinline{invalid_object_error} SYCL exception.
       This value is retrievable via the SYCL \codeinline{device} class info query \codeinline{info::device::mem_base_addr_align}.
+      Must throw an \codeinline{invalid_object_error} SYCL exception if \codeinline{b} is already a sub-buffer.
     }
     \addRowThreeSL
       { buffer(cl_mem clMemObject, }
@@ -1399,11 +1410,16 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
        Creates and returns a reinterpreted SYCL \codeinline{buffer} with the
        type specified by \codeinline{ReinterpretT}, dimensions specified by
        \codeinline{ReinterpretDim} and range specified by
-       \codeinline{reinterpretRange}. Must throw an
+       \codeinline{reinterpretRange}.  The buffer object being reinterpreted can
+       be a SYCL sub-buffer that was created from a SYCL \codeinline{buffer}.  Must throw an
        \codeinline{invalid_object_error} SYCL exception if the total size in
        bytes represented by the type and range of the reinterpreted SYCL
-       \codeinline{buffer} does not equal the total size in bytes represented by
-       the type and range of this SYCL \codeinline{buffer}.
+       \codeinline{buffer} (or sub-buffer) does not equal the total
+       size in bytes represented by the type and range of this SYCL
+       \codeinline{buffer} (or sub-buffer).  Reinterpreting a sub-buffer provides
+       a reinterpreted view of the sub-buffer only, and does not change the
+       offset or size of the sub-buffer view (in bytes) relative to the parent
+       \codeinline{buffer}.
      }
 \completeTable
 %------------------------------------------------------------------------------------------------------
@@ -1588,7 +1604,16 @@ write-accessor on it has been created.
 A sub-buffer object can be created which is a sub-range reference to a
 base buffer. This sub-buffer can be used to create accessors to the
 base buffer, which have access to the range specified at time
-of construction of the sub-buffer.
+of construction of the sub-buffer.  Sub-buffers cannot be created from
+sub-buffers, but only from a base buffer which is not already a sub-buffer.
+
+Sub-buffers must be constructed from a contiguous region of memory in a buffer.  This
+requirement is potentially non-intuitive when working with buffers that have dimensionality
+larger than one, but maps to one-dimensional OpenCL sub-buffers without performance cost
+from index mapping math.  For example:
+
+\lstinputlisting{code/subbuffer.cpp}
+
 
 %***********************************************************************************
 % Images
@@ -1647,7 +1672,7 @@ Each constructor excluding the interoperability constructor takes as the last pa
 The SYCL \codeinline{image} class template takes a template parameter \codeinline{AllocatorT} for specifying an allocator which is used by the \gls{sycl-runtime} when allocating temporary memory on the host. If no template argument is provided the default allocator for the SYCL \codeinline{image} class \codeinline{image_allocator} will be used~\ref{subsec:default.allocators}.
 
 %Interface for class: image
-\lstinputlisting{headers/image.h}
+\lstinputlistingSkipLicense{headers/image.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -2356,7 +2381,7 @@ The same rules apply to \codeinline{multi_ptr<const void>}.
 An overview of the interface provided for the \codeinline{multi_ptr} class
 follows.
 
-\lstinputlisting{headers/multipointer.h}
+\lstinputlistingSkipLicense{headers/multipointer.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -2653,7 +2678,7 @@ A synopsis of the SYCL \codeinline{multi_ptr} class template
 aliases is provided below.
 
 %Interface of the explicit pointer classes
-\lstinputlisting{headers/pointer.h}
+\lstinputlistingSkipLicense{headers/pointer.h}
 
 %*******************************************************************************
 % Samplers
@@ -2668,7 +2693,7 @@ The constructors and member functions of the SYCL \codeinline{sampler} class are
 The members of the \codeinline{sampler} class that provide information on the sampler (\codeinline{get_addressing_mode()}, \codeinline{get_filtering_mode()}, \codeinline{get_coordinate_normalization_mode()}) are callable from host code.  Invoking these queries within device kernel code produces undefined results.
 
 % Interface of the sampler class
-\lstinputlisting{headers/sampler.h}
+\lstinputlistingSkipLicense{headers/sampler.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{addressing_mode}
@@ -2856,13 +2881,8 @@ relevant to the queue where the kernel has been enqueued.
 
 \subsection{Exception Class Interface}
 \label{subsec:exception.class}
-\lstset{
-       style=nonumbers,
-       basicstyle=\ttfamily\small,
-       backgroundcolor=\color{white},
-       frame=none,
-     }
-\lstinputlisting{headers/exception.h}
+
+\lstinputlistingSkipLicense{headers/exception.h}
 
 The SYCL \codeinline{exception_ptr_class}
 class is used to store SYCL \codeinline{exception} objects and allows
@@ -3127,7 +3147,7 @@ These aliases are described in Table~\ref{table.types.aliases}
   Alias to a 16-bit floating-point. The half data type must conform to the IEEE
   754-2008 half precision storage format. A SYCL \codeinline{feature_not_supported}
   exception must be thrown if the \codeinline{half} type is used in a SYCL kernel
-  fucntion which executes on a SYCL \codeinline{device} that does not support the
+  function which executes on a SYCL \codeinline{device} that does not support the
   extension \codeinline{khr_fp16}.
 }
 \completeTable
@@ -3179,7 +3199,7 @@ and portability across OpenCL devices. The available features are:
 
 A \gls{work-group-barrier} or \gls{work-group-mem-fence} may provide ordering semantics over the local address space, global address space or both. All memory operations initiated before the \gls{work-group-barrier} or \gls{work-group-mem-fence} operation in the specified address space(s) will be completed before any memory operation after the operation. Address spaces are specified using the \codeinline{fence_space} enum class:
 
-\lstinputlisting{headers/synchronization.h}
+\lstinputlistingSkipLicense{headers/synchronization.h}
 
 The SYCL specification provides atomic operations based on the C++11
 library syntax. The only available ordering, due to constraints of the
@@ -3217,14 +3237,14 @@ The atomic types are defined as follows, the constructors and member functions
 for the SYCL \codeinline{atomic} class are listed in Tables~
 \ref{table.atomics.constructors} and~\ref{table.atomics.members} respectively.
 
-\lstinputlisting{headers/atomic.h}
+\lstinputlistingSkipLicense{headers/atomic.h}
 
 As well as the member functions, a matching set of operations on atomic types
 is provided by the SYCL library. As in the previous case, the only available
 memory order is \codeinline{memory_order::relaxed}. The global functions are as
 follows and described in Table~\ref{table.atomics.functions}.
 
-\lstinputlisting{headers/atomicoperations.h}
+\lstinputlistingSkipLicense{headers/atomicoperations.h}
 
 The atomic operations and member functions behave as described in the C++11
 specification, barring the restrictions discussed above. Note that care
@@ -3503,13 +3523,15 @@ work-item to make progress if the code is to be portable.
 \section{Stream class}
 \label{subsection:stream}
 
-The SYCL \codeinline{stream} class is a buffered output stream that allows outputting the values of built-in, vector and SYCL types to the console. The implementation of how values are streamed is left as an implementation detail.
+The SYCL \codeinline{stream} class is a buffered output stream that allows outputting the values of built-in, vector and SYCL types to the console. The implementation of how values are streamed to the console is left as an implementation detail.
 
 The way in which values are output by an instance of the SYCL \codeinline{stream} class can also be altered using a range of manipulators.
 
-An instance of the SYCL \codeinline{stream} class has a maximum buffer size that specifies maximum size of the character stream that can be output in bytes and a maximum statement size that specifies the maximum size of the character stream that can be output in a single statement in bytes.
+An instance of the SYCL \codeinline{stream} class has a maximum buffer size (\codeinline{totalBufferSize}) that specifies maximum size of the overall character stream that can be output in characters (a character is of size \codeinline{sizeof(char)} bytes) during a kernel invocation, and a maximum stream size (\codeinline{workItemBufferSize}) that specifies the maximum size of the character stream (number of characters) that can be output within a work item before a flush must be performed (a character is of size \codeinline{sizeof(char)} bytes).  \codeinline{totalBufferSize} must be sufficient to contain the characters output by all stream statements during execution of a kernel invocation (the aggregate of outputs from all work items), and \codeinline{workItemBufferSize} must be sufficient to contain the characters output within a work item between stream flush operations.
 
-All member functions of the \codeinline{stream} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+A stream flush operation is defined that synchronizes the work item stream buffer with the global stream buffer, and then empties the work item stream buffer.  A flush can be explicitly triggered using the \codeinline{flush} stream manipulator, or implicitly triggered by the \codeinline{endl} stream manipulator or by kernel completion (from the perspective of each completing work item).
+
+If the \codeinline{totalBufferSize} or \codeinline{workItemBufferSize} limits are exceeded, it is implementation defined whether the streamed characters exceeding the limit are output, or silently ignored/discarded, and if output it is implementation defined whether those extra characters exceeding the \codeinline{workItemBufferSize} limit count toward the \codeinline{totalBufferSize} limit.  Regardless of this implementations defined behavior of output exceeding the limits, no undefined or erroneous behavior is permitted of an implementation when the limits are exceeded.  Unused characters within \codeinline{workItemBufferSize} (any portion of the \codeinline{workItemBufferSize} capacity that has not been used at the time of a stream flush) do not count toward the \codeinline{totalBufferSize} limit, in that only characters flushed count toward the \codeinline{totalBufferSize} limit.
 
 The SYCL \codeinline{stream} class provides the common reference semantics
 (see Section~\ref{sec:reference-semantics}).
@@ -3526,7 +3548,7 @@ The operand types that are supported by the SYCL \codeinline{stream} class \code
 The manipulators that are supported by the SYCL \codeinline{stream} class \codeinline{operator<<()} operator are listed in Table~\ref{table.manipulators.stream}.
 
 % Interface of the device class
-\lstinputlisting{headers/stream.h}
+\lstinputlistingSkipLicense{headers/stream.h}
 
 %-------------------------------------------------------------------------------------------
 \startTable{Stream operand type}
@@ -3581,10 +3603,19 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 \addFootNotes{Manipulators supported by the \codeinline{stream} class}{table.manipulators.stream}
 \addRow
 {
+  flush
+}
+{
+  Triggers a flush operation, which synchronizes the work item stream buffer with the global
+  stream buffer, and then empties the work item stream buffer.  After a flush, the full
+  \codeinline{workItemBufferSize} is available again for subsequent streaming within the work item.
+}
+\addRow
+{
   endl
 }
 {
-  Outputs a new-line character.
+  Outputs a new-line character and then triggers a flush operation.
 }
 \addRow
 {
@@ -3684,9 +3715,9 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 \startTable{Constructor}
     \addFootNotes{Constructors of the \codeinline{stream} class}{table.constructors.stream}
   \addRow
-    {stream(size_t bufferSize, size_t maxStatementSize, handler\& cgh)}
+    {stream(size_t totalBufferSize, size_t workItemBufferSize, handler\& cgh)}
     {
-      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size specified by the parameter \codeinline{bufferSize} and a maximum statement size specified by the parameter \codeinline{maxStatementSize}.
+      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size in characters per kernel invocation specified by the parameter \codeinline{totalBufferSize}, and a maximum stream size that can be buffered by a work item between stream flushes specified by the parameter \codeinline{workItemBufferSize}.  \codeinline{totalBufferSize} and \codeinline{workItemBufferSize} relate to memory storage size in that they are the term \codeinline{n} in \codeinline{alloc_size = n*sizeof(char)}.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -3697,12 +3728,17 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   \addRow
     {size_t get_size() const}
     {
-      Returns the maximum buffer size.
+      Returns the total buffer size, in characters.
+    }
+  \addRow
+    {size_t get_work_item_buffer_size() const}
+    {
+      Returns the buffer size per work item, in characters.
     }
   \addRow
     {size_t get_max_statement_size() const}
     {
-      Returns the maximum statement size.
+      Deprecated query with same functionality as \codeinline{get_work_item_buffer_size()}.
     }
 \completeTable
 %-------------------------------------------------------------------------------------------
@@ -3714,18 +3750,19 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   \addRow
     {template <typename T> const stream\& operator<<(const stream\& os, const T \&rhs)}
     {
-      Outputs any valid values (see~\ref{table.operands.stream}) as a stream of characters and applies any valid manipulator (see~\ref{table.manipulators.stream}) to the current statements.
+      Outputs any valid values (see~\ref{table.operands.stream}) as a stream of characters and applies any valid manipulator (see~\ref{table.manipulators.stream}) to the current stream.
     }
 \completeTable
 %-------------------------------------------------------------------------------------------
 
 \subsection{Synchronization}
 
-An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator within a SYCL kernel function by the time that the kernel function finishes execution. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
+An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator before a flush operation (that doesn't exceed the \codeinline{workItemBufferSize} or \codeinline{totalBufferSize} limits) within a SYCL kernel function by the time that the event associated with a command group submission enters the completed state. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
 
-In the case that an instance of the SYCL \codeinline{stream} class is used across multiple work items concurrently, there is no guarantee of ordering of outputs.
+The SYCL \codeinline{stream} class is required to output the content of each stream, between flushes (up to \codeinline{workItemBufferSize}), without mixing with content from the same stream in other work items.  There are no other output order guarantees between work items or between streams.  The stream flush operation therefore delimits the unit of output that is guaranteed to be displayed without mixing with other work items, with respect to a single stream.
 
-If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a OpenCL context, there is no guarantee that statements are output in their entirety. If an instance of the SYCL \codeinline{stream} class is used on a SYCL kernel function executed on a host context, then the SYCL \codeinline{stream} class is required to output each statement in full without mixing with statements of other work items.
+\subsection{Implicit flush}
+There is guaranteed to be an implicit flush of each stream used by a kernel, at the end of kernel execution, from the perspective of each work item.  There is also an implicit flush when the endl stream manipulator is executed.  No other implicit flushes are permitted in an implementation. 
 
 \subsection{Performance note}
 

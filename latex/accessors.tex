@@ -1,3 +1,9 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
+
 %***********************************************************************************
 % Accessors
 %***********************************************************************************
@@ -48,7 +54,7 @@ The \codeinline{access::target} enumeration, shown in
 Table~\ref{interfaces.accesstarget.description}, describes the potential targets
 of an \codeinline{accessor}.
 
-\lstinputlisting{headers/accessTarget.h}
+\lstinputlistingSkipLicense{headers/accessTarget.h}
 
 %-------------------------------------------------------------------------------
 \startTable{access::target}
@@ -92,7 +98,7 @@ and \codeinline{host_buffer} targets (see next section).
 
 The \codeinline{access::mode} enumeration, shown in Table~\ref{interfaces.accessmode.description}, describes the potential modes of an \codeinline{accessor}.
 
-\lstinputlisting{headers/accessMode.h}
+\lstinputlistingSkipLicense{headers/accessMode.h}
 
 %-------------------------------------------------------------------------------
 \startTable{access::mode}
@@ -243,17 +249,17 @@ elements of a SYCL \codeinline{buffer}. Firstly by passing a SYCL \codeinline{
 id} instance of the same dimensionality as the SYCL \codeinline{accessor}
 subscript operator. Secondly by passing a single \codeinline{size_t} value to
 multiple consecutive subscript operators (one for each dimension of the SYCL
-\codeinline{accessor}, for example \codeinline{acc[id1][id2][id3]}). Finally, in the
+\codeinline{accessor}, for example \codeinline{acc[id0][id1][id2]}). Finally, in the
 case of the SYCL \codeinline{accessor} being \codeinline{0} dimensions, by
 triggering the implicit conversion operator. Whenever a multi-dimensional index
 is passed to a SYCL \codeinline{accessor} the linear index is calculated based
-on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL
-\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+on the index \codeinline{\{id0, id1, id2\}} provided and the range of the SYCL
+\codeinline{accessor} \codeinline{\{r0, r1, r2\}} according to row-major
 ordering as follows:
 
 \begin{equation}
 \label{row-major-equation-buffer}
- id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+ id2 + (id1 \cdot r2) + (id0 \cdot r2 \cdot r1)
 \end{equation}
 
 A buffer accessor can optionally provide access to a sub range of a SYCL
@@ -343,9 +349,8 @@ Tables~\ref{table.specialmembers.common.reference} and
 \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: accessor
-\lstinputlisting[captionpos=b,caption=Accessor class for buffers, label=accessor.buffer.interface]
+\lstinputlistingSkipLicense[captionpos=b,caption=Accessor class for buffers, label=accessor.buffer.interface]
 {headers/accessorBuffer.h}
-\lstset{captionpos=b}
 
 %------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -353,7 +358,7 @@ Tables~\ref{table.specialmembers.common.reference} and
   specialization}
 {table.constructors.accessor.buffer}
   \addRow
-    { accessor(buffer<dataT, 1> \&bufferRef) }
+    { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef) }
     {
       Available only when: \codeinline{((isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -369,7 +374,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       placeholder \codeinline{accessor}.
     }
   \addRowTwoL
-    { accessor(buffer<dataT, 1> \&bufferRef, }
+    { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef) }
     {
       Available only when: \codeinline{(isPlaceholder ==
@@ -383,7 +388,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       commandGroupHandlerRef}.
     }
   \addRow
-    { accessor(buffer<dataT, dimensions> \&bufferRef) }
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef) }
     {
       Available only when: \codeinline{((isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -399,7 +404,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       accessor}.
     }
   \addRowTwoL
-    { accessor(buffer<dataT, dimensions> \&bufferRef, }
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef) }
     {
       Available only when: \codeinline{(isPlaceholder ==
@@ -412,7 +417,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       \codeinline{queue} associated with \codeinline{commandGroupHandlerRef}.
     }
   \addRowThreeL
-    { accessor( buffer<dataT, dimensions> \&bufferRef, }
+    { accessor( buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { range<dimensions> accessRange, id<dimensions> }
     { accessOffset = \{\}) }
     {
@@ -430,7 +435,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       placeholder \codeinline{accessor}.
     }
   \addRowFourL
-    { accessor( buffer<dataT, dimensions> \&bufferRef, }
+    { accessor( buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef, }
     { range<dimensions> accessRange, }
     { id<dimensions> accessOffset = \{\}) }
@@ -462,13 +467,14 @@ Tables~\ref{table.specialmembers.common.reference} and
   \addRow
     { size_t get_size() const }
     {
-      Returns the size in bytes of the SYCL \codeinline{buffer} this SYCL
-      \codeinline{accessor} is accessing.
+      Returns the size in bytes of the region of a SYCL \codeinline{buffer}
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { size_t get_count() const }
     {
-      Returns the number of elements of the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+      Returns the number of elements in the region of a SYCL \codeinline{buffer}
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { range<dimensions> get_range() const }
@@ -661,13 +667,13 @@ multiple consecutive subscript operators (one for each dimension of the SYCL
 case of the SYCL \codeinline{accessor} having \codeinline{0} dimensions, by
 triggering the implicit conversion operator. Whenever a multi-dimensional index
 is passed to a SYCL \codeinline{accessor}, the linear index is calculated based
-on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL 
-\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+on the index \codeinline{\{id0, id1, id2\}} provided and the range of the SYCL 
+\codeinline{accessor} \codeinline{\{r0, r1, r2\}} according to row-major
 ordering as follows:
 
 \begin{equation}
 \label{row-major-equation-local}
- id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+ id2 + (id1 \cdot r2) + (id0 \cdot r2 \cdot r1)
 \end{equation}
 
 A local accessor can optionally provide atomic access to allocated memory,
@@ -720,9 +726,8 @@ member functions and common member functions are listed in
 \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: accessor
-\lstinputlisting[captionpos=b,caption=Accessor class for locals, label=accessor.local.interface]
+\lstinputlistingSkipLicense[captionpos=b,caption=Accessor class for locals, label=accessor.local.interface]
 {headers/accessorLocal.h}
-\lstset{captionpos=b}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -971,7 +976,7 @@ member functions and common member functions are listed in
 Tables~\ref{table.specialmembers.common.reference} and
 \ref{table.hiddenfriends.common.reference}, respectively.
 
-\lstinputlisting[caption=Accessor interface for images,label=images.listing1]{headers/accessorImage.h}
+\lstinputlistingSkipLicense[caption=Accessor interface for images,label=images.listing1]{headers/accessorImage.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}

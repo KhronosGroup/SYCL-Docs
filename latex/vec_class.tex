@@ -1,3 +1,9 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
+
 % !TEX root = sycl-1.2.1.tex
 
 %*******************************************************************************
@@ -37,7 +43,7 @@ scalars to be convertible with each other.
 The constructors, member functions and non-member functions of the SYCL \codeinline{vec} class template are listed in Tables~\ref{table.constructors.vec}, \ref{table.members.vec} and \ref{table.functions.vec} respectively.
 
 %Interface for class: vec
-\lstinputlisting{headers/vec.h}
+\lstinputlistingSkipLicense{headers/vec.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -112,7 +118,7 @@ The constructors, member functions and non-member functions of the SYCL \codeinl
     alignment as described in \ref{memory-layout-and-alignment}.
   }
   \addRowTwoL
-  {template<typename convertT, rounding_mode roundingMode>}
+  {template<typename convertT, rounding_mode roundingMode = rounding_mode::automatic>}
   {vec<convertT, numElements> convert() const}
   {
     Converts this SYCL \codeinline{vec} to a SYCL \codeinline{vec} of a different element type specified by \codeinline{convertT} using the rounding mode specified by \codeinline{roundingMode}. The new SYCL \codeinline{vec} type must have the same number of elements as this SYCL \codeinline{vec}. The different rounding modes are described in Table~\ref{table.vec.roundingmodes}.
@@ -161,7 +167,7 @@ The constructors, member functions and non-member functions of the SYCL \codeinl
       \newline \newline
       Returns an instance of the implementation defined intermediate class template \codeinline{\__swizzled_vec__} representing an index sequence which can be used to apply the swizzle in a valid expression as described in~\ref{swizzled-vec-class}.
     \newline \newline
-    Where XYZW\_SWIZZLE is all permutations with repetition of \codeinline{x, y} for \codeinline{numElements == 2}, \codeinline{x, y, z} for \codeinline{numElements == 3} and \codeinline{x, y, z, w} for \codeinline{numElements == 4}. For example \codeinline{xzyw} and \codeinline{xyyy}.
+      Where XYZW\_SWIZZLE is all permutations with repetition, of any subset with length greater than \codeinline{1}, of \codeinline{x, y} for \codeinline{numElements == 2}, \codeinline{x, y, z} for \codeinline{numElements == 3} and \codeinline{x, y, z, w} for \codeinline{numElements == 4}. For example a four element \codeinline{vec} provides permutations including \codeinline{xzyw}, \codeinline{xyyy} and \codeinline{xz}.
     }
   \addRow
     {\__swizzled_vec__ RGBA_SWIZZLE() const}
@@ -170,7 +176,8 @@ The constructors, member functions and non-member functions of the SYCL \codeinl
       \newline \newline
       Returns an instance of the implementation defined intermediate class template \codeinline{\__swizzled_vec__} representing an index sequence which can be used to apply the swizzle in a valid expression as described in \ref{swizzled-vec-class}.
     \newline \newline
-    Where RGBA\_SWIZZLE is all permutations with repetition of \codeinline{r, g, b, a}. For example \codeinline{bgra} and \codeinline{rrba}.
+    Where RGBA\_SWIZZLE is all permutations with repetition, of any subset with length greater than \codeinline{1}, of \codeinline{r, g, b, a}.
+    For example a four element \codeinline{vec} provides permutations including \codeinline{rbga}, \codeinline{rggg} and \codeinline{rb}.
     }
   \addRow
     {\__swizzled_vec__ lo() const}
@@ -581,7 +588,7 @@ The various rounding modes that can be used in the \codeinline{as} member functi
   \addRow
     {automatic}
     {
-      Default rounding mode for the SYCL \codeinline{vec} class element type element type, \codeinline{rtz} (round toward zero) for integer types and \codeinline{rte} (round to nearest even) for floating-point types.
+      Default rounding mode for the SYCL \codeinline{vec} class element type. \codeinline{rtz} (round toward zero) for integer types and \codeinline{rte} (round to nearest even) for floating-point types.
     }
   \addRow
     {rte}
