@@ -1,3 +1,17 @@
+// Copyright (c) 2012-2020 The Khronos Group Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 namespace cl {
 namespace sycl {
 template <int dimensions = 1>
@@ -25,16 +39,17 @@ public:
   size_t operator[](int dimension) const;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  id<dimensions> operatorOP(const id<dimensions> &rhs) const;
-  id<dimensions> operatorOP(const size_t &rhs) const;
+    friend id operatorOP(const id &lhs, const id &rhs) { /* ... */ }
+    friend id operatorOP(const id &lhs, const size_t &rhs) { /* ... */ }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
-  id<dimensions> &operatorOP(const id<dimensions> &rhs);
-  id<dimensions> &operatorOP(const size_t &rhs);
+    friend id &operatorOP(id &lhs, const id &rhs) { /* ... */ }
+    friend id &operatorOP(id &lhs, const size_t &rhs) { /* ... */ }
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^
+    friend id operatorOP(const size_t &lhs, const id &rhs) { /* ... */ }
+
 };
 
-// OP is: +, -, *, /, %, <<, >>, &, |, ^
-template <int dimensions>
-id<dimensions> operatorOP(const size_t &lhs, const id<dimensions> &rhs);
 }  // namespace sycl
 }  // namespace cl

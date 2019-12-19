@@ -1,3 +1,9 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
+
 \subsection{SYCL functions for explicit memory operations}
 \label{subsec:explicitmemory}
 
@@ -53,59 +59,54 @@ explicit copy operations.
 \startTable{Member function}
 \addFootNotes{Member functions of the \codeinline{handler} class}
 {table.members.handler.copy}
-  \addRowThreeL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void copy(accessor<T, dim, mode, tgt> src,}
-    { shared_ptr_class<T> dest)}
+  \addRowTwoL
+    {template <typename T_src, int dim_src, access::mode mode_src, access::target tgt_src, typename T_dest, access::placeholder isPlaceholder>}
+    {void copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src, shared_ptr_class<T_dest> dest)}
     { Copies the contents of the memory object accessed by
       \codeinline{src} into the memory pointed to by \codeinline{dest}.
       \codeinline{dest} must have at least as many bytes as the
       range accessed by \codeinline{src}.}
-  \addRowThreeL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void copy(shared_ptr_class<T> src}
-    { accessor<T, dim, mode, tgt> dest)}
+  \addRowTwoL
+    {template <typename T_src, typename T_dest, int dim_dest, access::mode mode_dest, access::target tgt_dest, access::placeholder isPlaceholder>}
+    {void copy(shared_ptr_class<T_src> src, accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest)}
     { Copies the contents of the memory pointed to by \codeinline{src}
       into the memory object accessed by \codeinline{dest}.
       \codeinline{src} must have at least as many bytes as the
       range accessed by \codeinline{dest}.}
-  \addRowThreeL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void copy(accessor<T, dim, mode, tgt> src,}
-    { T * dest)}
+  \addRowTwoL
+    {template <typename T_src, int dim_src, access::mode mode_src, access::target tgt_src, typename T_dest, access::placeholder isPlaceholder>}
+    {void copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src, T_dest * dest)}
     { Copies the contents of the memory object accessed by
       \codeinline{src} into the memory pointed to by \codeinline{dest}.
       \codeinline{dest} must have at least as many bytes as the
       range accessed by \codeinline{src}.}
-  \addRowThreeL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void copy(const T * src}
-    { accessor<T, dim, mode, tgt> dest)}
+  \addRowTwoL
+    {template <typename T_src, typename T_dest, int dim_dest, access::mode mode_dest, access::target tgt_dest, access::placeholder isPlaceholder>}
+    {void copy(const T_src * src, accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest)}
     { Copies the contents of the memory pointed to by \codeinline{src}
       into the memory object accessed by \codeinline{dest}.
       \codeinline{src} must have at least as many bytes as the
       range accessed by \codeinline{dest}.}
-  \addRowThreeL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void copy(accessor<T, dim, mode, tgt> src}
-    { accessor<T, dim, mode, tgt> dest)}
+  \addRowTwoL
+    {template <typename T_src, int dim_src, access::mode mode_src, access::target tgt_src, access::placeholder isPlaceholder_src, typename T_dest, int dim_dest, access::mode mode_dest, access::target tgt_dest, access::placeholder isPlaceholder_dest>}
+    {void copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder_src> src, accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder_dest> dest)}
     { Copies the contents of the memory object accessed by \codeinline{src}
       into the memory object accessed by \codeinline{dest}.
       \codeinline{src} must have at least as many bytes as the
       range accessed by \codeinline{dest}.}
   \addRowTwoL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void update_host(accessor<T, dim, mode, tgt> acc)}
+    {template <typename T, int dim, access::mode mode, access::target tgt, access::placeholder isPlaceholder>}
+    {void update_host(accessor<T, dim, mode, tgt, isPlaceholder> acc)}
     { The contents of the memory object accessed via \codeinline{acc}
       on the host are guaranteed to be up-to-date after this
       \gls{command-group} object execution is complete.}
   \addRowThreeL
-    {template <typename T, int dim, access::mode mode, access::target tgt>}
-    {void fill(accessor<T, dim, mode, tgt> dest,}
+    {template <typename T, int dim, access::mode mode, access::target tgt, access::placeholder isPlaceholder>}
+    {void fill(accessor<T, dim, mode, tgt, isPlaceholder> dest,}
     {          const T\& src)}
     {Replicates the value of \codeinline{src} into the
       memory object accessed by \codeinline{dest}.
-      T must be an integral scalar value or a SYCL vector type.
+      T must be a scalar value or a SYCL vector type.
     }
 
 \completeTable
@@ -115,7 +116,7 @@ operations in SYCL. The example copies half of the contents of
 a \codeinline{vector_class} into the device, leaving the rest of the
 contents of the buffer on the device unchanged.
 
-\lstinputlisting{code/explicitcopy.cpp}
+\lstinputlistingSkipLicense{code/explicitcopy.cpp}
 
 
 %%% Local Variables:

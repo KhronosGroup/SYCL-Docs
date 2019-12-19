@@ -1,3 +1,9 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
+
 %!TEX root = sycl-1.2.1.tex
 %***********************************************************************************
 % Expressing parallelism through kernels
@@ -33,7 +39,7 @@ written in row-major format.
   \addRow {item} {Pairing of an \codeinline{id} (specific point) and the \codeinline{range} that it is bounded by}
   \addRow {nd_range} {Encapsules both global and local (work-group size) \mbox{\codeinline{range}s} over which work-item \mbox{\codeinline{id}s} will vary}
   \addRow {nd_item} {Encapsulates two \mbox{\codeinline{item}s}, one for global \codeinline{id} and \codeinline{range}, and one for local \codeinline{id} and \codeinline{range}}
-  \addRow {h_item} {Index point queries within hierarchical parallelism (\codeinline{parallel_for_work_item}).  Encapsulates physical global and local \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}, as well as a logical/flexible local \codeinline{id} and \codeinline{range} defined by hierarchical parallelism}
+  \addRow {h_item} {Index point queries within hierarchical parallelism (\codeinline{parallel_for_work_item}).  Encapsulates physical global and local \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}, as well as a logical local \codeinline{id} and \codeinline{range} defined by hierarchical parallelism}
   \addRow {group} {Work-group queries within hierarchical parallelism (\codeinline{parallel_for_work_group}), and exposes the \codeinline{parallel_for_work_item} construct that identifies code to be executed by each work-item.  Encapsulates work-group \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}}
 \completeTable
 %-------------------------------------------------------------------------------
@@ -53,9 +59,9 @@ constructed from integers.
 The SYCL \codeinline{range} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{range} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{range} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.range} and \ref{table.functions.range} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{range} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{range} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.range} and \ref{table.functions.range} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
-\lstinputlisting{headers/range.h}
+\lstinputlistingSkipLicense{headers/range.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -113,8 +119,16 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
     {
         Return the size of the range computed as dimension0*...*dimensionN.
     }
-  \addRow
-    { range<dimensions> operatorOP(const range<dimensions> \&rhs) const }
+
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Hidden friend function}
+\addFootNotes {Hidden friend functions of the SYCL \codeinline{range} class
+  template}{table.functions.range}
+    \addRow
+    { range operatorOP(const range \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -123,15 +137,15 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{range} class
-      template with the same dimensionality as this SYCL \codeinline{range},
+      template with the same dimensionality as \codeinline{lhs} \codeinline{range},
       where each element of the new SYCL \codeinline{range} instance is the
       result of an element-wise \codeinline{OP} operator between each element of
-      this SYCL \codeinline{range} and each element of the \codeinline{rhs}
+      \codeinline{lhs} \codeinline{range} and each element of the \codeinline{rhs}
       \codeinline{range}. If the operator returns a \codeinline{bool} the result
       is the cast to \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> operatorOP(const size_t \&rhs) const }
+    { range operatorOP(const range \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -140,7 +154,7 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{range} class
-      template with the same dimensionality as this SYCL \codeinline{range},
+      template with the same dimensionality as \codeinline{lhs} \codeinline{range},
       where each element of the new SYCL \codeinline{range} instance is the result
       of an element-wise \codeinline{OP} operator between each element of this
       SYCL \codeinline{range} and the \codeinline{rhs} \codeinline{size_t}. If
@@ -148,44 +162,35 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
       \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> \&operatorOP(const range<dimensions> \&rhs) }
+    { range \&operatorOP(range \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{range} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{range} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{range} and each element of the \codeinline{rhs}
-      \codeinline{range} and returns a reference to this SYCL \codeinline{
+      of \codeinline{lhs} \codeinline{range} and each element of the \codeinline{rhs}
+      \codeinline{range} and returns \codeinline{lhs} \codeinline{
       range}. If the operator returns a \codeinline{bool} the result is the cast
       to \codeinline{size_t}.
     }
   \addRow
-    { range<dimensions> \&operatorOP(const size_t \&rhs) }
+    { range \&operatorOP(range \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{range} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{range} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{range} and the \codeinline{rhs} \codeinline{
-      size_t} and returns a reference to this SYCL \codeinline{range}. If the
+      of \codeinline{lhs} \codeinline{range} and the \codeinline{rhs} \codeinline{
+      size_t} and returns \codeinline{lhs} \codeinline{range}. If the
       operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
-\completeTable
-%-------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes {Non-member functions of the SYCL \codeinline{range} class
-  template}{table.functions.range}
-  \addRowThreeL
-    { template <int dimensions> }
-    { range<dimensions> operatorOP(const size_t \&lhs, }
-    { const range<dimensions> \&rhs) }
+  \addRow
+    { range operatorOP(const size_t \&lhs, const range \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -210,7 +215,7 @@ A synopsis of the SYCL \codeinline{range} class is provided below. The construct
 \label{subsubsec:nd-range-class}
 
 %Interface for class: nd_range
-\lstinputlisting{headers/ndRange.h}
+\lstinputlistingSkipLicense{headers/ndRange.h}
 
 \tclass{nd_range}{\tf{int} dimensions} defines the iteration domain of both
 the work-groups and the overall dispatch. To define this the
@@ -221,7 +226,7 @@ group.
 The SYCL \codeinline{nd_range} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{nd_range} class is provided below. The constructors and member functions of the SYCL \codeinline{nd_range} class are listed in Tables~\ref{table.constructors.ndrange} and \ref{table.members.ndrange} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{nd_range} class is provided below. The constructors and member functions of the SYCL \codeinline{nd_range} class are listed in Tables~\ref{table.constructors.ndrange} and \ref{table.members.ndrange} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 \fixme{UPDATE: change parameter naming to match interface}
 %------------------------------------------------------------------------------------------------------
@@ -285,9 +290,9 @@ same rank. The \tf{[n]} operator returns the component \tf{n} as an
 The SYCL \codeinline{id} class template provides the common by-value semantics
 (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{id} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{id} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.id} and \ref{table.functions.id} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{id} class is provided below. The constructors, member functions and non-member functions of the SYCL \codeinline{id} class are listed in Tables~\ref{table.constructors.id}, \ref{table.members.id} and \ref{table.functions.id} respectively. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
-\lstinputlisting{headers/id.h}
+\lstinputlistingSkipLicense{headers/id.h}
 
 \fixme{UPDATE: remove un-needed templates in the table, for consistency with
 tables of other classes. No actual interface change.}
@@ -356,8 +361,15 @@ tables of other classes. No actual interface change.}
         Return the value of the requested dimension of the \codeinline{id}
         object.
     }
+\completeTable
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+\startTable{Hidden friend function}
+\addFootNotes{Hidden friend functions of the \codeinline{id} class template}
+{table.functions.id}
   \addRow
-    { id<dimensions> operatorOP(const id<dimensions> \&rhs) const }
+    { id operatorOP(const id \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -366,15 +378,15 @@ tables of other classes. No actual interface change.}
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{id} class
-      template with the same dimensionality as this SYCL \codeinline{id}, where
+      template with the same dimensionality as \codeinline{lhs} \codeinline{id}, where
       each element of the new SYCL \codeinline{id} instance is the result of an
-      element-wise \codeinline{OP} operator between each element of this SYCL
+      element-wise \codeinline{OP} operator between each element of \codeinline{lhs}
       \codeinline{id} and each element of the \codeinline{rhs} \codeinline{id}.
       If the operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> operatorOP(const size_t \&rhs) const }
+    { id operatorOP(const id \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -383,51 +395,43 @@ tables of other classes. No actual interface change.}
       \codeinline{>=}.
       \newline
       Constructs and returns a new instance of the SYCL \codeinline{id} class
-      template with the same dimensionality as this SYCL \codeinline{id}, where
+      template with the same dimensionality as \codeinline{lhs} \codeinline{id}, where
       each element of the new SYCL \codeinline{id} instance is the result of an
-      element-wise \codeinline{OP} operator between each element of this SYCL
+      element-wise \codeinline{OP} operator between each element of \codeinline{lhs}
       \codeinline{id} and the \codeinline{rhs} \codeinline{size_t}. If the
       operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> \&operatorOP(const id<dimensions> \&rhs) }
+    { id \&operatorOP(id \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{id} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{id} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{id} and each element of the \codeinline{rhs}
-      \codeinline{id} and returns a reference to this SYCL \codeinline{id}. If
+      of \codeinline{lhs} \codeinline{id} and each element of the \codeinline{rhs}
+      \codeinline{id} and returns \codeinline{lhs} \codeinline{id}. If
       the operator returns a \codeinline{bool} the result is the cast to
       \codeinline{size_t}.
     }
   \addRow
-    { id<dimensions> \&operatorOP(const size_t \&rhs) }
+    { id \&operatorOP(id \&lhs, const size_t \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+=}, \codeinline{-=},\codeinline{
       *=}, \codeinline{/=}, \codeinline{\%=}, \codeinline{<<=}, \codeinline{
       >>=}, \codeinline{\&=}, \codeinline{|=}, \codeinline{^=}.
       \newline
-      Assigns each element of this SYCL \codeinline{id} instance with the
+      Assigns each element of \codeinline{lhs} \codeinline{id} instance with the
       result of an element-wise \codeinline{OP} operator between each element
-      of this SYCL \codeinline{id} and the \codeinline{rhs} \codeinline{size_t}
-      and returns a reference to this SYCL \codeinline{id}. If the operator
+      of \codeinline{lhs} \codeinline{id} and the \codeinline{rhs} \codeinline{size_t}
+      and returns \codeinline{lhs} \codeinline{id}. If the operator
       returns a \codeinline{bool} the result is the cast to \codeinline{size_t}.
     }
-\completeTable
-%-------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes{Non-member functions of the \codeinline{id} class template}
-{table.functions.id}
-  \addRowThreeL
-    { template <int dimensions> }
-    { id<dimensions> operatorOP(const size_t \&lhs, }
-    { const id<dimensions> \&rhs }
+  \addRow
+    { id operatorOP(const size_t \&lhs, const id \&rhs) }
     {
       Where \codeinline{OP} is: \codeinline{+}, \codeinline{-}, \codeinline{*},
       \codeinline{/}, \codeinline{\%}, \codeinline{<<}, \codeinline{>>},
@@ -465,10 +469,10 @@ The SYCL \codeinline{item} class template provides the common by-value semantics
 
 \subsubsection{Item interface}
 
-A synopsis of the SYCL \codeinline{item} class is provided below. The member functions of the SYCL \codeinline{item} class are listed in Table~\ref{table.members.id}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{item} class is provided below. The member functions of the SYCL \codeinline{item} class are listed in Table~\ref{table.members.id}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 %Interface for class: item
-\lstinputlisting{headers/item.h}
+\lstinputlistingSkipLicense{headers/item.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Member function}
@@ -553,10 +557,10 @@ function object.
 The SYCL \codeinline{nd_item} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{nd_item} class is provided below. The member functions of the SYCL \codeinline{nd_item} class are listed in Table~\ref{table.members.nditem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{nd_item} class is provided below. The member functions of the SYCL \codeinline{nd_item} class are listed in Table~\ref{table.members.nditem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 %interface for nd_item class
-\lstinputlisting{headers/nditem.h}
+\lstinputlistingSkipLicense{headers/nditem.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Member function}
@@ -777,7 +781,7 @@ call or to the corresponding \codeinline{parallel_for_work_group} call if no \co
 is passed to the \codeinline{parallel_for_work_item} call.
 It encapsulates enough information to identify the \gls{work-item}'s local and global \glspl{item}
 according to the information given to \codeinline{parallel_for_work_group} (physical ids)
-as well as the \gls{work-item}'s logical local \glspl{item} in the flexible range.
+as well as the \gls{work-item}'s logical local \glspl{item} in the logical local range.
 All returned \glspl{item} objects are offset-less.
 Instances of the \codeinline{h_item<int dimensions>} class are not
 user-constructible and are passed by the runtime to each instance of the
@@ -786,9 +790,9 @@ function object.
 The SYCL \codeinline{h_item} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{h_item} class is provided below. The member functions of the SYCL \codeinline{h_item} class are listed in Table~\ref{table.members.hitem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{h_item} class is provided below. The member functions of the SYCL \codeinline{h_item} class are listed in Table~\ref{table.members.hitem}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
-\lstinputlisting{headers/hitem.h}
+\lstinputlistingSkipLicense{headers/hitem.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Member function}
@@ -812,10 +816,10 @@ A synopsis of the SYCL \codeinline{h_item} class is provided below. The member f
         work-item's position in the local iteration space as provided upon the invocation of the
         \codeinline{group::parallel_for_work_item}.
 
-        If the \codeinline{group::parallel_for_work_item} was called without any flexible local range
+        If the \codeinline{group::parallel_for_work_item} was called without any logical local range
         then the member function returns the physical local \gls{item}.
 
-        A physical id can be computed from a logical id by getting the reminder of the integer division
+        A physical id can be computed from a logical id by getting the remainder of the integer division
         of the logical id and the physical range:
         \codeinline{get_logical_local().get() \% get_physical_local.get_range() == get_physical_local().get()}.
     }
@@ -934,14 +938,14 @@ executing work-group, even through the abstracted iteration range of the
 The SYCL \codeinline{group} class template provides the common by-value
 semantics (see Section~\ref{sec:byval-semantics}).
 
-A synopsis of the SYCL \codeinline{group} class is provided below. The member functions of the SYCL \codeinline{group} class are listed in Table~\ref{table.members.group}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+A synopsis of the SYCL \codeinline{group} class is provided below. The member functions of the SYCL \codeinline{group} class are listed in Table~\ref{table.members.group}. The additional common special member functions and common member functions are listed in \ref{sec:byval-semantics} in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
 The \codeinline{group} class also provides the \codeinline{
 mem_fence} member function for performing a \gls{work-group-mem-fence}
 operation.
 
 %Interface for class: group
-\lstinputlisting{headers/group.h}
+\lstinputlistingSkipLicense{headers/group.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Member function}
@@ -972,6 +976,7 @@ operation.
     {range<dimensions> get_local_range() const}
     {
         Return a SYCL \codeinline{range} representing all dimensions of the local range.
+        This local range may have been provided by the programmer, or chosen by the \gls{sycl-runtime}.
     }
   \addRow
     {size_t get_local_range(int dimension) const}
@@ -981,9 +986,7 @@ operation.
   \addRow
     {range<dimensions> get_group_range() const}
     {
-        Return a \codeinline{range} representing the dimensions of the
-        current group.  This local range may have been provided by the
-        programmer, or chosen by the \gls{sycl-runtime}.
+        Return a \codeinline{range} representing the number of \glspl{work-group} in the \codeinline{nd_range}.
     }
   \addRow
     {size_t get_group_range(int dimension) const}
@@ -1026,24 +1029,24 @@ operation.
   \addRowThreeL
     {template <typename workItemFunctionT>}
     {void parallel_for_work_item(range<dimensions> }
-    { flexibleRange, workItemFunctionT func) const}
+    { logicalRange, workItemFunctionT func) const}
     {
       Launch the work-items for this work-group using a logical local range.
       The function object \codeinline{func} is executed as if the kernel where
-      invoked with \codeinline{flexibleRange} as the local range. This new local
+      invoked with \codeinline{logicalRange} as the local range. This new local
       range is emulated and may not map one-to-one with the physical range.
       
-      \codeinline{flexibleRange} is the new local range to be used.
+      \codeinline{logicalRange} is the new local range to be used.
       This range can be smaller or larger than the one used to invoke the kernel.
       \codeinline{func} is a function object type with a public member function
       \codeinline{void F::operator()(h_item<dimensions>)}
       representing the work-item computation.
 
-      Note that the flexible range does not need to be uniform
-      across all work-groups in a kernel.  For example the flexible range may depend on
+      Note that the logical range does not need to be uniform
+      across all work-groups in a kernel.  For example the logical range may depend on
       a work-group varying query (e.g. \codeinline{group::get_linear_id}),
       such that different work-groups in the same kernel invocation execute
-      different flexible range sizes.
+      different logical range sizes.
 
       This member function can only be invoked within a
       \codeinline{parallel_for_work_group} context.
@@ -1156,7 +1159,7 @@ are listed in Table~\ref{table.constructors.device-event} and
 \ref{table.members.device-event} respectively.
 
 %Interface of device event class
-\lstinputlisting{headers/deviceEvent.h}
+\lstinputlistingSkipLicense{headers/deviceEvent.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Member function}
@@ -1261,7 +1264,7 @@ The constructors of the SYCL \codeinline{handler} class are described in Table~\
 It is disallowed for an instance of the SYCL \codeinline{handler} class to be moved or copied.
 
 %Interface for class: handler
-\lstinputlisting{headers/commandGroupHandler.h}
+\lstinputlistingSkipLicense{headers/commandGroupHandler.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -1479,7 +1482,7 @@ Table~\ref{table.members.handler.kernel} lists all the members of the
 \completeTable
 
 %Interface for apis
-%\lstinputlisting{headers/parallelFor.h}
+%\lstinputlistingSkipLicense{headers/parallelFor.h}
 
 %***********************************************************************************
 % single_task invoke
@@ -1501,7 +1504,7 @@ same command group.
 
 Local accessors are disallowed for single task invocations.
 
-\lstinputlisting{code/singletask.cpp}
+\lstinputlistingSkipLicense{code/singletask.cpp}
 
 For single tasks, the kernel method takes no parameters, as there
 is no need for \gls{index-space-classes} in a unary index space.
@@ -1531,7 +1534,7 @@ and passing a SYCL \codeinline{id} parameter. In this case only the global id is
 \codeinline{parallel_for} is designed for when it is not necessary to query the global range of the index space
 being executed across, or the local (work-group) size chosen by the implementation.
 
-\lstinputlisting{code/basicparallelfor.cpp}
+\lstinputlistingSkipLicense{code/basicparallelfor.cpp}
 
 Below is an example of invoking a SYCL kernel function with \codeinline{parallel_for} using a lambda function
 and passing a SYCL \codeinline{item} parameter. In this case both the global id and global range are queryable.
@@ -1539,7 +1542,7 @@ This variant of \codeinline{parallel_for} is designed for when it is necessary t
 which the global id will vary.  No information is queryable on the local (work-group) size chosen by the
 implementation.
 
-\lstinputlisting{code/basicParallelForItem.cpp}
+\lstinputlistingSkipLicense{code/basicParallelForItem.cpp}
 
 For SYCL kernel functions invoked via the above described overload of the \codeinline{parallel_for} member function,
 it is disallowed to use local accessors or to use a \gls{work-group-barrier} or \gls{work-group-mem-fence} operation.
@@ -1549,7 +1552,7 @@ over a 3D grid, with 3 elements in each dimension. In the first case
 work-item ids range from 0 to 2 inclusive, and in the second case
 work-item ids run from 1 to 3.
 
-\lstinputlisting{code/parallelfor.cpp}
+\lstinputlistingSkipLicense{code/parallelfor.cpp}
 
 The last case of a parallel_for invocation enables
 low-level functionality of work-items and work-groups. This becomes
@@ -1575,7 +1578,7 @@ in a three-dimensional grid with four in each dimension, and divided
 into eight work-groups. Each group of work-items synchronizes with a
 \gls{work-group-barrier}.
 
-\lstinputlisting{code/parallelforbarrier.cpp}
+\lstinputlistingSkipLicense{code/parallelforbarrier.cpp}
 
 Optionally, in any of these variations of parallel_for invocations,
 the developer may also pass an offset. An offset is an
@@ -1627,7 +1630,7 @@ to grab the correct data.
 
 The \codeinline{private_memory} class has the following interface:
 \label{paragraph.private.memory}
-\lstinputlisting{headers/priv.h}
+\lstinputlistingSkipLicense{headers/priv.h}
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
 \addFootNotes{Constructor of the \codeinline{private_memory} class}
@@ -1670,7 +1673,7 @@ parallel executions the work-group synchronizes. As a result the pair
 of \codeinline{parallel_for_work_item} calls in the code below is
 equivalent to the parallel execution with a \gls{work-group-barrier} in the earlier example.
 
-\lstinputlisting{code/parallelforworkgroup.cpp}
+\lstinputlistingSkipLicense{code/parallelforworkgroup.cpp}
 
 It is valid to use more flexible dimensions of the work-item loops. In
 the following example we issue 8 work-groups but let the runtime
@@ -1682,7 +1685,7 @@ and the compiler generating an appropriate iteration space to fill the
 gap. In this case, the \codeinline{h_item} provides access to local ids and
 ranges that reflect both kernel and \codeinline{parallel_for_work_item} invocation ranges.
 
-\lstinputlisting{code/parallelforworkgroup2.cpp}
+\lstinputlistingSkipLicense{code/parallelforworkgroup2.cpp}
 
 This interface offers a more intuitive way for tiling parallel
 programming paradigms. In summary, the hierarchical model allows a
@@ -1728,10 +1731,10 @@ kernel object. The kernel information descriptor interface is described in%
 ~\ref{appendix.kernel.descriptors} and the description is in the
 Table~\ref{table.kernel.info}.
 
-The constructors and member functions of the SYCL \codeinline{kernel} class are listed in Tables~\ref{table.constructors.kernel} and \ref{table.members.kernel}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{kernel} class are listed in Tables~\ref{table.constructors.kernel} and \ref{table.members.kernel}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: kernel
-\lstinputlisting{headers/kernelWIP.h}
+\lstinputlistingSkipLicense{headers/kernelWIP.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -1869,8 +1872,10 @@ descriptor.}
 {info::kernel_work_group::preferred_work_group_size_multiple}
 {size_t}
 {
-  Returns the preferred work-group size for executing a kernel on a particular
-  device.
+  Returns a value, of which work-group size is preferred to be a multiple,
+  for executing a kernel on a particular device.  This is a performance
+  hint.  The value must be less than or equal to that returned by
+  \codeinline{info::kernel_work_group::work_group_size}.
 }
 
 \addInfoRow
@@ -1923,10 +1928,10 @@ The SYCL \codeinline{program} class provides the common reference semantics
 \subsubsection{Program interface}
 
 A synopsis of the SYCL \codeinline{program} class is provided below. The constructors and member functions of the SYCL \codeinline{program} class are listed in Tables~\ref{table.constructors.program} and \ref{table.members.program} respectively. The additional common special member functions and common member functions are listed in
-\ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+\ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: program
-\lstinputlisting{headers/programWIP.h}
+\lstinputlistingSkipLicense{headers/programWIP.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -2156,7 +2161,7 @@ function object and therefore will be parameters to the device kernel.
 Usual restrictions of passing parameters to kernels apply.
 
 
-\lstinputlisting{code/myfunctor.cpp}
+\lstinputlistingSkipLicense{code/myfunctor.cpp}
 
 %*******************************************************************************
 % Defining kernels as lambda functions
@@ -2180,7 +2185,7 @@ user as a template parameter to the kernel invoke function.
 The kernel function for the lambda function is the lambda function itself.
 The kernel lambda must use copy for all of its captures (i.e.\ \tf{[=]}).
 
-\lstinputlisting{code/mykernel.cpp}
+\lstinputlistingSkipLicense{code/mykernel.cpp}
 
 %*******************************************************************************
 % Defining kernels using program objects
@@ -2201,7 +2206,7 @@ In the following example, the kernel is defined as a lambda function.
 The example obtains the program object for the lambda function kernel
 and then passes it to the \codeinline{parallel_for}.
 
-\lstinputlisting{code/myprogram.cpp}
+\lstinputlistingSkipLicense{code/myprogram.cpp}
 
 In the above example, the \gls{sycl-kernel-function} is defined in the
 \codeinline{parallel_for} invocation as part of a lambda function which is named
@@ -2215,7 +2220,7 @@ In the next example, a SYCL kernel is linked with an existing pre-compiled
 OpenCL C program object to create a combined program object, which is then
 called in a \codeinline{parallel_for}.
 
-\lstinputlisting{code/myprogramlink.cpp}
+\lstinputlistingSkipLicense{code/myprogramlink.cpp}
 
 %*******************************************************************************
 % Defining kernels using OpenCL C kernel objects
@@ -2248,6 +2253,86 @@ OpenCL API objects, constructing a \codeinline{kernel} from
 a \codeinline{cl_kernel} will retain a reference to the kernel and the
 user code should call \codeinline{clReleaseKernel} if the
 \codeinline{cl_kernel} is no longer needed in the calling context.
+
+
+%*******************************************************************************
+% OpenCL Kernel Conventions and SYCL
+%*******************************************************************************
+\subsection{OpenCL Kernel Conventions and SYCL}
+\label{sec:opencl_kern_conventions_and_sycl}
+
+OpenCL and SYCL use opposite conventions for the unit stride dimension.  SYCL
+aligns with C++ conventions, which is important to understand from a performance
+perspective when porting code to SYCL.  The unit stride dimension, at least for data, is implicit in the
+linearization equations in SYCL (Equation~\ref{row-major-equation-buffer}) and OpenCL.  SYCL aligns with C++ array subscript ordering
+\codeinline{arr[a][b][c]}, in that range constructor dimension ordering used to launch a kernel
+(e.g. \codeinline{range<3> R\{a,b,c\}}) and range and ID queries within a kernel, are ordered in
+the same way as the C++ multi-dimensional subscript operators (unit stride on the right).
+
+When specifying a \codeinline{range} as the global or local size
+in a \codeinline{parallel_for} that invokes an OpenCL interop kernel (through
+\codeinline{cl_kernel} interop or \codeinline{compile_with_source}/
+\codeinline{build_with_source}),
+the highest dimension of the range in SYCL will map to the
+lowest dimension within the OpenCL kernel.  That statement applies to both
+an underlying enqueue operation such as \codeinline{clEnqueueNDRangeKernel}
+in OpenCL, and also ID and size queries within the OpenCL kernel.
+For example, a 3D global range specified in SYCL as:
+
+\begin{lstlisting}[style=nonumbers]
+range<3> R{r0,r1,r2};
+\end{lstlisting}
+
+maps to an \codeinline{clEnqueueNDRangeKernel} \codeinline{global_work_size} argument
+of:
+
+\begin{lstlisting}[style=nonumbers]
+size_t cl_interop_range[3] = {r2,r1,r0};
+\end{lstlisting}
+
+Likewise, a 2D global range specified in SYCL as:
+
+\begin{lstlisting}[style=nonumbers]
+range<2> R{r0,r1};
+\end{lstlisting}
+
+maps to an \codeinline{clEnqueueNDRangeKernel} \codeinline{global_work_size} argument
+of:
+
+\begin{lstlisting}[style=nonumbers]
+size_t cl_interop_range[2] = {r1,r0};
+\end{lstlisting}
+
+The mapping of highest dimension in SYCL to lowest dimension in OpenCL applies to all
+operations where a multi-dimensional construct must be mapped, such as when mapping SYCL
+explicit memory operations to OpenCL APIs like \codeinline{clEnqueueCopyBufferRect}.
+
+Work-item and work-group ID and range queries have the same reversed convention for unit
+stride dimension between SYCL and OpenCL.  For example, with three, two, or one dimensional SYCL
+global ranges, OpenCL and SYCL kernel code queries relate to the range as shown in Table~\ref{table.syclOpenCL.mapping}.
+The ``SYCL kernel query'' column applies for SYCL-defined kernels, and the ``OpenCL kernel query'' column
+applies for kernels defined through OpenCL interop.
+
+\startGenericThreeColTable{8cm}{3cm}{3cm}{SYCL kernel query}{OpenCL kernel query}{Returned Value}
+\multicolumn{3}{|c|}{\cellcolor{Gray}With enqueued 3D SYCL global \codeinline{range} of \codeinline{range<3> R\{r0,r1,r2\}}} \\ \hline
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(2)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_range(1) / item::get_range(1)}{get_global_size(1)}{\codeinline{r1}}
+\genericThreeColRow {nd_item::get_global_range(2) / item::get_range(2)}{get_global_size(0)}{\codeinline{r2}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(2)}{Value in range 0..(\codeinline{r0}-1)}
+\genericThreeColRow {nd_item::get_global_id(1) / item::get_id(1)}{get_global_id(1)}{Value in range 0..(\codeinline{r1}-1)}
+\genericThreeColRow {nd_item::get_global_id(2) / item::get_id(2)}{get_global_id(0)}{Value in range 0..(\codeinline{r2}-1)}
+\multicolumn{3}{|c|}{\cellcolor{Gray}With enqueued 2D SYCL global \codeinline{range} of \codeinline{range<2> R\{r0,r1\}}} \\ \hline
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(1)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_range(1) / item::get_range(1)}{get_global_size(0)}{\codeinline{r1}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(1)}{Value in range 0..(\codeinline{r0}-1)}
+\genericThreeColRow {nd_item::get_global_id(1) / item::get_id(1)}{get_global_id(0)}{Value in range 0..(\codeinline{r1}-1)}
+\multicolumn{3}{|c|}{\cellcolor{Gray}With enqueued 1D SYCL global \codeinline{range} of \codeinline{range<1> R\{r0\}}} \\ \hline
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(0)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(0)}{Value in range 0..(\codeinline{r0}-1)}
+\completeGenericTabular
+\captionGenericTable{Example range mapping from SYCL enqueued three dimensional global \codeinline{range} to OpenCL and SYCL queries}
+\label{table.syclOpenCL.mapping}
+\completeGenericTable
 
 
 %***********************************************************************************

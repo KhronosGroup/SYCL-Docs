@@ -1,3 +1,17 @@
+// Copyright (c) 2012-2020 The Khronos Group Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 namespace cl {
 namespace sycl {
 
@@ -67,7 +81,7 @@ class vec {
 
   size_t get_size() const;
 
-  template <typename convertT, rounding_mode roundingMode>
+  template <typename convertT, rounding_mode roundingMode = rounding_mode::automatic>
   vec<convertT, numElements> convert() const;
 
   template <typename asT>
@@ -115,90 +129,81 @@ class vec {
   // OP is: +, -, *, /, %
   /* When OP is % available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> operatorOP(const vec<dataT, numElements> &rhs) const;
-  vec<dataT, numElements> operatorOP(const dataT &rhs) const;
+  friend vec operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec operatorOP(const vec &lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: +=, -=, *=, /=, %=
   /* When OP is %= available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> &operatorOP(const vec<dataT, numElements> &rhs);
-  vec<dataT, numElements> &operatorOP(const dataT &rhs);
+  friend vec &operatorOP(vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec &operatorOP(vec &lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: ++, --
-  vec<dataT, numElements> &operatorOP();
-  vec<dataT, numElements> operatorOP(int);
+  friend vec &operatorOP(vec &lhs) { /* ... */ }
+  friend vec operatorOP(vec& lhs, int) { /* ... */ }
 
   // OP is: &, |, ^
   /* Available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> operatorOP(const vec<dataT, numElements> &rhs) const;
-  vec<dataT, numElements> operatorOP(const dataT &rhs) const;
+  friend vec operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec operatorOP(const vec &lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: &=, |=, ^=
   /* Available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> &operatorOP(const vec<dataT, numElements> &rhs);
-  vec<dataT, numElements> &operatorOP(const dataT &rhs);
+  friend vec &operatorOP(vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec &operatorOP(vec &lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: &&, ||
-  vec<RET, numElements> operatorOP(const vec<dataT, numElements> &rhs) const;
-  vec<RET, numElements> operatorOP(const dataT &rhs) const;
+  friend vec<RET, numElements> operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec<RET, numElements> operatorOP(const vec& lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: <<, >>
   /* Available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> operatorOP(const vec<dataT, numElements> &rhs) const;
-  vec<dataT, numElements> operatorOP(const dataT &rhs) const;
+  friend vec operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec operatorOP(const vec &lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: <<=, >>=
   /* Available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> &operatorOP(const vec<dataT, numElements> &rhs);
-  vec<dataT, numElements> &operatorOP(const dataT &rhs);
+  friend vec &operatorOP(vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec &operatorOP(vec &lhs, const dataT &rhs) { /* ... */ }
 
   // OP is: ==, !=, <, >, <=, >=
-  vec<RET, numElements> operatorOP(const vec<dataT, numElements> &rhs) const;
-  vec<RET, numElements> operatorOP(const dataT &rhs) const;
+  friend vec<RET, numElements> operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
+  friend vec<RET, numElements> operatorOP(const vec &lhs, const dataT &rhs) { /* ... */ }
 
   vec<dataT, numElements> &operator=(const vec<dataT, numElements> &rhs);
   vec<dataT, numElements> &operator=(const dataT &rhs);
 
   /* Available only when: dataT != cl_float && dataT != cl_double
   && dataT != cl_half. */
-  vec<dataT, numElements> operator~() const;
+  friend vec operator~(const vec &v) { /* ... */ }
+  friend vec<RET, numElements> operator!(const vec &v) { /* ... */ }
+  
+  // OP is: +, -, *, /, %
+  /* operator% is only available when: dataT != cl_float && dataT != cl_double &&
+  dataT != cl_half. */
+  friend vec operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
 
-  vec<RET, numElements> operator!() const;
+  // OP is: &, |, ^
+  /* Available only when: dataT != cl_float && dataT != cl_double
+  && dataT != cl_half. */
+  friend vec operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
+    
+  // OP is: &&, ||
+  friend vec<RET, numElements> operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
+    
+  // OP is: <<, >>
+  /* Available only when: dataT != cl_float && dataT != cl_double
+  && dataT != cl_half. */
+  friend vec operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
+    
+  // OP is: ==, !=, <, >, <=, >=
+  friend vec<RET, numElements> operatorOP(const dataT &lhs, const vec &rhs) { /* ... */ }
+
 };
 
-// OP is: +, -, *, /, %
-/* operator% is only available when: dataT != cl_float && dataT != cl_double &&
-dataT != cl_half. */
-template <typename dataT, int numElements>
-vec<dataT, numElements> operatorOP(const dataT &lhs,
-  const vec<dataT, numElements> &rhs);
-
-// OP is: &, |, ^
-/* Available only when: dataT != cl_float && dataT != cl_double
-  && dataT != cl_half. */
-template <typename dataT, int numElements>
-vec<dataT, numElements> operatorOP(const dataT &lhs,
-  const vec<dataT, numElements> &rhs);
-
-// OP is: &&, ||
-template <typename dataT, int numElements>
-vec<RET, numElements> operatorOP(const dataT &lhs,
-  const vec<dataT, numElements> &rhs);
-
-// OP is: <<, >>
-/* Available only when: dataT != cl_float && dataT != cl_double
-  && dataT != cl_half. */
-template <typename dataT, int numElements>
-vec<dataT, numElements> operatorOP(const dataT &lhs,
-    const vec<dataT, numElements> &rhs);
-
-// OP is: ==, !=, <, >, <=, >=
-template <typename dataT, int numElements>
-vec<RET, numElements> operatorOP(const dataT &lhs,
-    const vec<dataT, numElements> &rhs);
 }  // namespace sycl
 }  // namespace cl
