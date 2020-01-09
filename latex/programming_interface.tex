@@ -1,3 +1,9 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
+
 % !TEX root = sycl-1.2.1.tex
 \def \debugging{false}
 
@@ -69,7 +75,7 @@ defaulted as 1 in most cases.
 Many of the \gls{sycl-runtime} classes encapsulate an associated OpenCL opaque type and provide facilities for interoperating between the SYCL classes and the OpenCL opaque types they encapsulate in order to allow interoperability between SYCL and OpenCL applications.
 
 Each of the following \gls{sycl-runtime} classes: \codeinline{platform},
-\codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image}, \codeinline{sampler} and \codeinline{stream} must obey the following statements, where \codeinline{T} is the runtime class type:
+\codeinline{device}, \codeinline{context}, \codeinline{queue}, \codeinline{program}, \codeinline{kernel}, \codeinline{event}, \codeinline{buffer}, \codeinline{image} and \codeinline{sampler} must obey the following statements, where \codeinline{T} is the runtime class type:
 
 \begin{itemize}
 
@@ -108,11 +114,13 @@ Each of the following \gls{sycl-runtime} classes: \codeinline{device}, \codeinli
 
 Some \gls{sycl-runtime} classes will have additional behavior associated with copy, movement, assignment or destruction semantics. If these are specified they are in addition to those specified above unless stated otherwise.
 
-Each of the runtime classes mentioned above must provide a common interface of special member functions and member functions in order to fulfil the copy, move, destruction and equality requirements.
+Each of the runtime classes mentioned above must provide a common interface of special member functions in order to fulfil the copy, move, destruction requirements and hidden friend functions in order to fulfil the equality requirements.
 
-These common special member functions and member functions are described in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference} respectively.
+A hidden friend function is a function first declared via a \codeinline{friend} declaration with no additional out of class or namespace scope declarations.  Hidden friend functions are only visible to ADL (Argument Dependent Lookup) and are hidden from qualified and unqualified lookup.  Hidden friend functions have the benefits of avoiding accidental implicit conversions and faster compilation.
 
-\lstinputlisting{headers/common-reference.h}
+These common special member functions and hidden friend functions are described in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference} respectively.
+
+\lstinputlistingSkipLicense{headers/common-reference.h}
 
 \startTable{Special member function}
 \addFootNotes{Common special member functions for reference semantics}
@@ -145,18 +153,18 @@ These common special member functions and member functions are described in Tabl
    }
 \completeTable
 
-\startTable{Member function}
-\addFootNotes{Common member functions for reference semantics}
-{table.members.common.reference}
+\startTable{Hidden friend function}
+\addFootNotes{Common hidden friend functions for reference semantics}
+{table.hiddenfriends.common.reference}
    \addRow
-   {bool operator==(const T \&rhs) const}
+   {bool operator==(const T \&lhs, const T \&rhs)}
    {
-     Returns true if this SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+     Returns true if this LHS SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
    }
    \addRow
-   {bool operator!=(const T \&rhs) const}
+   {bool operator==(const T \&lhs, const T \&rhs)}
    {
-     Returns true if this SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+     Returns true if this LHS SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
    }
 \completeTable
 
@@ -179,11 +187,11 @@ Each of the following \gls{sycl-runtime} classes: \codeinline{id}, \codeinline{r
 
 Some \gls{sycl-runtime} classes will have additional behavior associated with copy, movement, assignment or destruction semantics. If these are specified they are in addition to those specified above unless stated otherwise.
 
-Each of the runtime classes mentioned above must provide a common interface of special member functions and member functions in order to fulfil the copy, move, destruction and equality requirements.
+Each of the runtime classes mentioned above must provide a common interface of special member functions in order to fulfil the copy, move, destruction requirements and hidden friend functions to satisfy the equality requirements.
 
-These common special member functions and member functions are described in Tables~\ref{table.specialmembers.common.byval} and \ref{table.members.common.byval} respectively.
+These common special member functions and hidden friend functions are described in Tables~\ref{table.specialmembers.common.byval} and \ref{table.hiddenfriends.common.byval} respectively.
 
-\lstinputlisting{headers/common-byval.h}
+\lstinputlistingSkipLicense{headers/common-byval.h}
 
 \startTable{Special member function}
 \addFootNotes{Common special member functions for by-value semantics}
@@ -215,18 +223,18 @@ These common special member functions and member functions are described in Tabl
    }
 \completeTable
 
-\startTable{Member function}
-\addFootNotes{Common member functions for by-value semantics}
-{table.members.common.byval}
+\startTable{Hidden friend function}
+\addFootNotes{Common hidden friend functions for by-value semantics}
+{table.hiddenfriends.common.byval}
    \addRow
-   {bool operator==(const T \&rhs) const}
+   {bool operator==(const T \&lhs, const T \&rhs)}
    {
-     Returns true if this SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+     Returns true if this LHS SYCL \codeinline{T} is equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
    }
    \addRow
-   {bool operator!=(const T \&rhs) const}
+   {bool operator!=(const T \&lhs, const T \&rhs)}
    {
-     Returns true if this SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
+     Returns true if this LHS SYCL \codeinline{T} is not equal to the RHS SYCL \codeinline{T} in accordance with the requirements set out above, otherwise returns false.
    }
 \completeTable
 
@@ -243,7 +251,7 @@ The example illustrates how using properties does not affect the type
 of the object, thus, does not prevent the usage of SYCL objects in
 containers.
 
-\lstinputlisting{code/propertyExample.cpp}
+\lstinputlistingSkipLicense{code/propertyExample.cpp}
 
 Each property is represented by a unique class and an instance of a property is an instance of that type. Some properties can be default constructed while other will require an argument on construction. A property may be applicable to more than one class, however some properties may not be compatible with each other. See the requirements for the properties of the SYCL \codeinline{buffer} class and SYCL \codeinline{image} class in Table~\ref{table.properties.buffer} and Table~\ref{table.properties.image} respectively.
 
@@ -257,7 +265,7 @@ Each of the runtime classes mentioned above must provide a common interface of m
 
 A synopsis of the common properties interface, the SYCL \codeinline{property_list} class and the SYCL property classes is provided below. The member functions of the common properties interface are listed in Table~\ref{table.members.propertyinterface}. The constructors of the SYCL \codeinline{property_list} class are listed in Table~\ref{table.constructors.propertylist}.
 
-\lstinputlisting{headers/properties.h}
+\lstinputlistingSkipLicense{headers/properties.h}
 
 %---------------------------------------------------------------------
 \startTable{Member function}
@@ -306,7 +314,7 @@ The class \codeinline{param_traits} is a C++ type trait for providing an alias t
 parameter with the associated return type as defined in the info
 parameter tables.
 
-\lstinputlisting{headers/paramTraits.h}
+\lstinputlistingSkipLicense{headers/paramTraits.h}
 
 %*********************************************************************
 % C++ Standard library classes required for the interface
@@ -336,7 +344,7 @@ These types are exposed internally as
 Typically, the SYCL types will be aliases to the system 
 STL library, as shown in the listing below:
 
-\lstinputlisting{headers/stlclasses.h}
+\lstinputlistingSkipLicense{headers/stlclasses.h}
 
 However, a SYCL implementation may provide a custom implementation 
 of any of these objects. 
@@ -378,7 +386,7 @@ At any point where the \gls{sycl-runtime} needs to select a SYCL \codeinline{dev
 
 If all devices that \codeinline{select_device()} passes to the a selector's function call operator return a negative value (never select), then \codeinline{select_device()} must throw an \codeinline{runtime_error} SYCL exception.
 
-\lstinputlisting{headers/deviceSelectorInterface.h}
+\lstinputlistingSkipLicense{headers/deviceSelectorInterface.h}
 %---------------------------------------------------------------------
 \startTable{Constructor}
 \addFootNotes{Constructors of the \codeinline{device_selector} class}
@@ -493,10 +501,10 @@ The SYCL \codeinline{platform} class provides the common reference semantics
 
 \subsubsection{Platform interface}
 
-A synopsis of the SYCL \codeinline{platform} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{platform} class are listed in Tables~\ref{table.constructors.platform}, \ref{table.members.platform} and \ref{table.staticmembers.platform} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference} respectively.
+A synopsis of the SYCL \codeinline{platform} class is provided below. The constructors, member functions and static member functions of the SYCL \codeinline{platform} class are listed in Tables~\ref{table.constructors.platform}, \ref{table.members.platform} and \ref{table.staticmembers.platform} respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference} respectively.
 
 %Interface of platform class
-\lstinputlisting{headers/platform.h}
+\lstinputlistingSkipLicense{headers/platform.h}
 
 %-------------------------------------------------------------------------------
 \startTableDim{Constructor}{6.7cm}{8.3cm}
@@ -633,7 +641,7 @@ The SYCL \codeinline{context} class provides the common reference semantics
 
 \subsubsection{Context interface}
 
-The constructors and member functions of the SYCL \codeinline{context} class are listed in Tables~\ref{table.constructors.context} and \ref{table.members.context}, respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{context} class are listed in Tables~\ref{table.constructors.context} and \ref{table.members.context}, respectively. The additional common special member functions and common member functions are listed in \ref{sec:reference-semantics} in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 All member functions of the \gls{context} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
 
@@ -645,7 +653,7 @@ Information about a SYCL \gls{context} may be queried through the \codeinline{ge
 member function.
 
 %Interface for class: context
-\lstinputlisting{headers/context.h}
+\lstinputlistingSkipLicense{headers/context.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -802,10 +810,10 @@ execution.
 The SYCL \codeinline{event} class provides the common reference semantics
 (see Section~\ref{sec:reference-semantics}).
 
-The constructors and member functions of the SYCL \codeinline{event} class are listed in Tables~\ref{table.constructors.event} and \ref{table.members.event}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{event} class are listed in Tables~\ref{table.constructors.event} and \ref{table.members.event}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 %Interface for class: event.h
-\lstinputlisting{headers/event.h}
+\lstinputlistingSkipLicense{headers/event.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -1120,7 +1128,7 @@ semantics (see Section~\ref{sec:reference-semantics}).
 
 \subsubsection{Buffer Interface}
 
-The constructors and member functions of the SYCL \codeinline{buffer} class template are listed in Tables~\ref{table.constructors.buffer} and \ref{table.members.buffer}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{buffer} class template are listed in Tables~\ref{table.constructors.buffer} and \ref{table.members.buffer}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 Each constructor excluding the interoperability constructor takes as the last parameter an optional SYCL \codeinline{property_list} to provide properties to the SYCL \codeinline{buffer}.
 
@@ -1128,7 +1136,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
 
 %Interface for class: buffer
 
-\lstinputlisting{headers/buffer.h}
+\lstinputlistingSkipLicense{headers/buffer.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -1618,7 +1626,7 @@ The class \tclass{image}{\tf{int} dimensions}
 two or three dimensions, that can be used by kernels in queues and has to
 be accessed using \gls{accessor} classes with image accessor modes.
 
-The constructors and member functions of the SYCL \codeinline{image} class template are listed in Tables~\ref{table.constructors.image} and \ref{table.members.image}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{image} class template are listed in Tables~\ref{table.constructors.image} and \ref{table.members.image}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 Where relevant, it is the
 responsibility of the user to ensure that the format of the data
@@ -1664,7 +1672,7 @@ Each constructor excluding the interoperability constructor takes as the last pa
 The SYCL \codeinline{image} class template takes a template parameter \codeinline{AllocatorT} for specifying an allocator which is used by the \gls{sycl-runtime} when allocating temporary memory on the host. If no template argument is provided the default allocator for the SYCL \codeinline{image} class \codeinline{image_allocator} will be used~\ref{subsec:default.allocators}.
 
 %Interface for class: image
-\lstinputlisting{headers/image.h}
+\lstinputlistingSkipLicense{headers/image.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -2373,7 +2381,7 @@ The same rules apply to \codeinline{multi_ptr<const void>}.
 An overview of the interface provided for the \codeinline{multi_ptr} class
 follows.
 
-\lstinputlisting{headers/multipointer.h}
+\lstinputlistingSkipLicense{headers/multipointer.h}
 
 %-------------------------------------------------------------------------------
 \startTable{Constructor}
@@ -2473,13 +2481,6 @@ An implementation should reject an argument if the deduced address space is not 
 {Assigns \codeinline{nullptr} to the \codeinline{multi_ptr}.}
 \addRowTwoL
 {template <typename ElementType, access::address_space Space>}
-{ElementType\& operator*() const}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Operator that returns a reference to the \codeinline{ElementType}
-of the \codeinline{multi_ptr} class.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
 {ElementType* operator->() const}
 {Available only when: \codeinline{!std::is_void<ElementType>::value}.
 \newline
@@ -2522,59 +2523,7 @@ Explicit conversion of a \codeinline{multi_ptr<void>}
 or \codeinline{multi_ptr<const void>} pointer object to a
 \codeinline{multi_ptr} of type \codeinline{ElementType}.}
 The conversion must retain the \codeinline{const} qualifier.
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator++()}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Increments the pointer by 1.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator++(int)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Increments the pointer by 1 and returns a new \codeinline{multi_ptr}
-with the value of the previous pointer.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator--()}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Decrements the pointer by 1.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator--(int)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Decrements the pointer by 1 and returns a new \codeinline{multi_ptr}
-with the value of the previous pointer.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator+=(difference_type r)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Moves the pointer forward by \codeinline{r}.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr\& operator-=(difference_type r)}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Moves the pointer backward by \codeinline{r}.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator+(difference_type r) const}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Creates a new \codeinline{multi_ptr} that points \codeinline{r} forward
-compared to \codeinline{*this}.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{multi_ptr operator-(difference_type r) const}
-{Available only when: \codeinline{!std::is_void<ElementType>::value}.
-\newline
-Creates a new \codeinline{multi_ptr} that points \codeinline{r} backward
-compared to \codeinline{*this}.}
-  \addRow
+ \addRow
     { void prefetch(size_t numElements) const }
     {
       Available only when: \codeinline{Space ==
@@ -2589,109 +2538,129 @@ compared to \codeinline{*this}.}
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-\startTable{Non-member function}
-\addFootNotes{Non-member functions of the \codeinline{multi_ptr} class}
-{table.multipointer.nonmemberfunctions}
-\addRowThreeL
-{template <typename ElementType, access::address_space Space>}
-{bool operator==(const multi_ptr<ElementType, Space>\& lhs,}
-{                const multi_ptr<ElementType, Space>\& rhs)}
+\startTable{Hidden friend function}
+\addFootNotes{Hidden friend functions of the \codeinline{multi_ptr} class}
+{table.multipointer.hiddenfriendfunctions}
+
+\addRow
+{ElementType\& operator*(const multi_ptr\& mp)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Operator that returns a reference to the \codeinline{ElementType}
+of  \codeinline{mp}.}
+
+\addRow
+{multi_ptr\& operator++(multi_ptr\& mp)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Increments \codeinline{mp} by \codeinline{1} and returns  \codeinline{mp}.}
+\addRow
+{multi_ptr operator++(multi_ptr\& mp, int)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Increments \codeinline{mp} by \codeinline{1} and returns a new \codeinline{multi_ptr}
+with the value of the original \codeinline{mp}.}
+\addRow
+{multi_ptr\& operator--(multi_ptr\& mp)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Decrements \codeinline{mp} by \codeinline{1} and returns \codeinline{mp}.}
+\addRow
+{multi_ptr operator--(multi_ptr\& mp, int)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Decrements \codeinline{mp} by \codeinline{1} and returns a new \codeinline{multi_ptr}
+with the value of the original \codeinline{mp}.}
+\addRow
+{multi_ptr\& operator+=(multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Moves \codeinline{mp} forward by \codeinline{r} and returns  \codeinline{lhs}.}
+\addRow
+{multi_ptr\& operator-=(multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Moves \codeinline{mp} backward by \codeinline{r} and returns  \codeinline{lhs}.}
+\addRow
+{multi_ptr operator+(const multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Creates a new \codeinline{multi_ptr} that points \codeinline{r} forward
+compared to \codeinline{lhs}.}
+\addRow
+{multi_ptr operator-(const multi_ptr\& lhs, difference_type r)}
+{Available only when: \codeinline{!std::is_void<ElementType>::value}.
+\newline
+Creates a new \codeinline{multi_ptr} that points \codeinline{r} backward
+compared to \codeinline{lhs}.}
+
+\addRow
+{bool operator==(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{==} for \codeinline{multi_ptr} class.}
-\addRowThreeL
-{template <typename ElementType, access::address_space Space>}
-{bool operator!=(const multi_ptr<ElementType, Space>\& lhs,}
-{                const multi_ptr<ElementType, Space>\& rhs)}
+\addRow
+{bool operator!=(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class.}
-\addRowThreeL
-{template <typename ElementType, access::address_space Space>}
-{bool operator<(const multi_ptr<ElementType, Space>\& lhs,}
-{               const multi_ptr<ElementType, Space>\& rhs)}
+\addRow
+{bool operator<(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{<} for \codeinline{multi_ptr} class.}
-\addRowThreeL
-{template <typename ElementType, access::address_space Space>}
-{bool operator>(const multi_ptr<ElementType, Space>\& lhs,}
-               {const multi_ptr<ElementType, Space>\& rhs)}
+\addRow
+{bool operator>(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{>} for \codeinline{multi_ptr} class.}
-\addRowThreeL
-{template <typename ElementType, access::address_space Space>}
-{bool operator<=(const multi_ptr<ElementType, Space>\& lhs,}
-{                const multi_ptr<ElementType, Space>\& rhs)}
+\addRow
+{bool operator<=(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class.}
-\addRowThreeL
-{template <typename ElementType, access::address_space Space>}
-{bool operator>=(const multi_ptr<ElementType, Space>\& lhs,}
-                {const multi_ptr<ElementType, Space>\& rhs)}
+\addRow
+{bool operator>-=(const multi_ptr\& lhs, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{>=} for \codeinline{multi_ptr} class.}
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator!=(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
-{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class with a
-\codeinline{std::nullptr_t}.}
 
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator!=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
-{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class with a
-\codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator==(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+\addRow
+{bool operator==(const multi_ptr\& lhs, std::nullptr_t)}
 {Comparison operator \codeinline{==} for \codeinline{multi_ptr} class with a
 \codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator==(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
-{Comparison operator \codeinline{==} for \codeinline{multi_ptr} class with a
+\addRow
+{bool operator!=(const multi_ptr\& lhs, std::nullptr_t)}
+{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class with a
 \codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator>(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
-{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class with a
-\codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator>(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
-{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class with a
-\codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator<(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+\addRow
+{bool operator<(const multi_ptr\& lhs, std::nullptr_t)}
 {Comparison operator \codeinline{<} for \codeinline{multi_ptr} class with a
 \codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator<(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
-{Comparison operator \codeinline{<} for \codeinline{multi_ptr} class with a
+\addRow
+{bool operator>(const multi_ptr\& lhs, std::nullptr_t)}
+{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class with a
 \codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator>=(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
+\addRow
+{bool operator<=(const multi_ptr\& lhs, std::nullptr_t)}
+{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+\addRow
+{bool operator>=(const multi_ptr\& lhs, std::nullptr_t)}
 {Comparison operator \codeinline{>=} for \codeinline{multi_ptr} class with a
 \codeinline{std::nullptr_t}.}
 
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator>=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
+\addRow
+{bool operator==(std::nullptr_t, const multi_ptr\& rhs)}
+{Comparison operator \codeinline{==} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+\addRow
+{bool operator!=(std::nullptr_t, const multi_ptr\& rhs)}
+{Comparison operator \codeinline{!=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+\addRow
+{bool operator<(std::nullptr_t, const multi_ptr\& rhs)}
+{Comparison operator \codeinline{<} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+\addRow
+{bool operator>(std::nullptr_t, const multi_ptr\& rhs)}
+{Comparison operator \codeinline{>} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+\addRow
+{bool operator<=(std::nullptr_t, const multi_ptr\& rhs)}
+{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class with a
+\codeinline{std::nullptr_t}.}
+\addRow
+{bool operator>=(std::nullptr_t, const multi_ptr\& rhs)}
 {Comparison operator \codeinline{>=} for \codeinline{multi_ptr} class with a
-\codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator<=(const multi_ptr<ElementType, Space>\& lhs, std::nullptr_t rhs)}
-{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class with a
-\codeinline{std::nullptr_t}.}
-
-\addRowTwoL
-{template <typename ElementType, access::address_space Space>}
-{bool operator<=(std::nullptr_t lhs, const multi_ptr<ElementType, Space>\& rhs)}
-{Comparison operator \codeinline{<=} for \codeinline{multi_ptr} class with a
 \codeinline{std::nullptr_t}.}
 
 \completeTable
@@ -2709,7 +2678,7 @@ A synopsis of the SYCL \codeinline{multi_ptr} class template
 aliases is provided below.
 
 %Interface of the explicit pointer classes
-\lstinputlisting{headers/pointer.h}
+\lstinputlistingSkipLicense{headers/pointer.h}
 
 %*******************************************************************************
 % Samplers
@@ -2719,12 +2688,12 @@ aliases is provided below.
 
 The SYCL \codeinline{sampler} class encapsulates a configuration for sampling an image \codeinline{accessor}. A SYCL \codeinline{sampler} may be an OpenCL sampler, in which case it must encapsulate a valid underlying OpenCL \codeinline{cl_sampler}, or it may be a host sampler, in which case it must not.
 
-The constructors and member functions of the SYCL \codeinline{sampler} class are listed in Tables~\ref{table.constructors.sampler} and \ref{table.members.sampler}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{sampler} class are listed in Tables~\ref{table.constructors.sampler} and \ref{table.members.sampler}, respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 The members of the \codeinline{sampler} class that provide information on the sampler (\codeinline{get_addressing_mode()}, \codeinline{get_filtering_mode()}, \codeinline{get_coordinate_normalization_mode()}) are callable from host code.  Invoking these queries within device kernel code produces undefined results.
 
 % Interface of the sampler class
-\lstinputlisting{headers/sampler.h}
+\lstinputlistingSkipLicense{headers/sampler.h}
 
 %------------------------------------------------------------------------------------------------------
 \startTable{addressing_mode}
@@ -2912,13 +2881,8 @@ relevant to the queue where the kernel has been enqueued.
 
 \subsection{Exception Class Interface}
 \label{subsec:exception.class}
-\lstset{
-       style=nonumbers,
-       basicstyle=\ttfamily\small,
-       backgroundcolor=\color{white},
-       frame=none,
-     }
-\lstinputlisting{headers/exception.h}
+
+\lstinputlistingSkipLicense{headers/exception.h}
 
 The SYCL \codeinline{exception_ptr_class}
 class is used to store SYCL \codeinline{exception} objects and allows
@@ -3235,7 +3199,7 @@ and portability across OpenCL devices. The available features are:
 
 A \gls{work-group-barrier} or \gls{work-group-mem-fence} may provide ordering semantics over the local address space, global address space or both. All memory operations initiated before the \gls{work-group-barrier} or \gls{work-group-mem-fence} operation in the specified address space(s) will be completed before any memory operation after the operation. Address spaces are specified using the \codeinline{fence_space} enum class:
 
-\lstinputlisting{headers/synchronization.h}
+\lstinputlistingSkipLicense{headers/synchronization.h}
 
 The SYCL specification provides atomic operations based on the C++11
 library syntax. The only available ordering, due to constraints of the
@@ -3273,14 +3237,14 @@ The atomic types are defined as follows, the constructors and member functions
 for the SYCL \codeinline{atomic} class are listed in Tables~
 \ref{table.atomics.constructors} and~\ref{table.atomics.members} respectively.
 
-\lstinputlisting{headers/atomic.h}
+\lstinputlistingSkipLicense{headers/atomic.h}
 
 As well as the member functions, a matching set of operations on atomic types
 is provided by the SYCL library. As in the previous case, the only available
 memory order is \codeinline{memory_order::relaxed}. The global functions are as
 follows and described in Table~\ref{table.atomics.functions}.
 
-\lstinputlisting{headers/atomicoperations.h}
+\lstinputlistingSkipLicense{headers/atomicoperations.h}
 
 The atomic operations and member functions behave as described in the C++11
 specification, barring the restrictions discussed above. Note that care
@@ -3559,13 +3523,15 @@ work-item to make progress if the code is to be portable.
 \section{Stream class}
 \label{subsection:stream}
 
-The SYCL \codeinline{stream} class is a buffered output stream that allows outputting the values of built-in, vector and SYCL types to the console. The implementation of how values are streamed is left as an implementation detail.
+The SYCL \codeinline{stream} class is a buffered output stream that allows outputting the values of built-in, vector and SYCL types to the console. The implementation of how values are streamed to the console is left as an implementation detail.
 
 The way in which values are output by an instance of the SYCL \codeinline{stream} class can also be altered using a range of manipulators.
 
-An instance of the SYCL \codeinline{stream} class has a maximum buffer size (\codeinline{bufferSize}) that specifies maximum size of the character stream that can be output by any single work item in characters (a character is of size \codeinline{sizeof(char)} bytes) during a kernel invocation, and a maximum statement size (\codeinline{maxStatementSize}) that specifies the maximum size of the character stream that can be output in a single statement in characters (a character is of size \codeinline{sizeof(char)} bytes).  \codeinline{bufferSize} must be sufficient to contain the characters output by statements during execution of a work item, and \codeinline{maxStatementSize} must be sufficient to contain the characters output by any specific statement, otherwise behavior is undefined.  Unused characters within \codeinline{maxStatementSize} (any portion of the \codeinline{maxStatementSize} that is not used/output by a statement) do not count toward the \codeinline{bufferSize} limit of a work item.
+An instance of the SYCL \codeinline{stream} class has a maximum buffer size (\codeinline{totalBufferSize}) that specifies maximum size of the overall character stream that can be output in characters (a character is of size \codeinline{sizeof(char)} bytes) during a kernel invocation, and a maximum stream size (\codeinline{workItemBufferSize}) that specifies the maximum size of the character stream (number of characters) that can be output within a work item before a flush must be performed (a character is of size \codeinline{sizeof(char)} bytes).  \codeinline{totalBufferSize} must be sufficient to contain the characters output by all stream statements during execution of a kernel invocation (the aggregate of outputs from all work items), and \codeinline{workItemBufferSize} must be sufficient to contain the characters output within a work item between stream flush operations.
 
-All member functions of the \codeinline{stream} class are synchronous and errors are handled by throwing synchronous SYCL exceptions.
+A stream flush operation is defined that synchronizes the work item stream buffer with the global stream buffer, and then empties the work item stream buffer.  A flush can be explicitly triggered using the \codeinline{flush} stream manipulator, or implicitly triggered by the \codeinline{endl} stream manipulator or by kernel completion (from the perspective of each completing work item).
+
+If the \codeinline{totalBufferSize} or \codeinline{workItemBufferSize} limits are exceeded, it is implementation defined whether the streamed characters exceeding the limit are output, or silently ignored/discarded, and if output it is implementation defined whether those extra characters exceeding the \codeinline{workItemBufferSize} limit count toward the \codeinline{totalBufferSize} limit.  Regardless of this implementations defined behavior of output exceeding the limits, no undefined or erroneous behavior is permitted of an implementation when the limits are exceeded.  Unused characters within \codeinline{workItemBufferSize} (any portion of the \codeinline{workItemBufferSize} capacity that has not been used at the time of a stream flush) do not count toward the \codeinline{totalBufferSize} limit, in that only characters flushed count toward the \codeinline{totalBufferSize} limit.
 
 The SYCL \codeinline{stream} class provides the common reference semantics
 (see Section~\ref{sec:reference-semantics}).
@@ -3575,14 +3541,14 @@ The SYCL \codeinline{stream} class provides the common reference semantics
 %***********************************************************************************
 \subsection{Stream class interface}
 
-The constructors and member functions of the SYCL \codeinline{stream} class are listed in Tables~\ref{table.constructors.stream}, \ref{table.members.stream}, and \ref{table.globals.stream} respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.members.common.reference}, respectively.
+The constructors and member functions of the SYCL \codeinline{stream} class are listed in Tables~\ref{table.constructors.stream}, \ref{table.members.stream}, and \ref{table.globals.stream} respectively. The additional common special member functions and common member functions are listed in Tables~\ref{table.specialmembers.common.reference} and \ref{table.hiddenfriends.common.reference}, respectively.
 
 The operand types that are supported by the SYCL \codeinline{stream} class \codeinline{operator<<()} operator are listed in Table~\ref{table.operands.stream}.
 
 The manipulators that are supported by the SYCL \codeinline{stream} class \codeinline{operator<<()} operator are listed in Table~\ref{table.manipulators.stream}.
 
 % Interface of the device class
-\lstinputlisting{headers/stream.h}
+\lstinputlistingSkipLicense{headers/stream.h}
 
 %-------------------------------------------------------------------------------------------
 \startTable{Stream operand type}
@@ -3637,10 +3603,19 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 \addFootNotes{Manipulators supported by the \codeinline{stream} class}{table.manipulators.stream}
 \addRow
 {
+  flush
+}
+{
+  Triggers a flush operation, which synchronizes the work item stream buffer with the global
+  stream buffer, and then empties the work item stream buffer.  After a flush, the full
+  \codeinline{workItemBufferSize} is available again for subsequent streaming within the work item.
+}
+\addRow
+{
   endl
 }
 {
-  Outputs a new-line character.
+  Outputs a new-line character and then triggers a flush operation.
 }
 \addRow
 {
@@ -3740,9 +3715,9 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
 \startTable{Constructor}
     \addFootNotes{Constructors of the \codeinline{stream} class}{table.constructors.stream}
   \addRow
-    {stream(size_t bufferSize, size_t maxStatementSize, handler\& cgh)}
+    {stream(size_t totalBufferSize, size_t workItemBufferSize, handler\& cgh)}
     {
-      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size per work item specified by the parameter \codeinline{bufferSize} and a maximum statement size specified by the parameter \codeinline{maxStatementSize}.  \codeinline{bufferSize} and \codeinline{maxStatementSize} relate to memory storage size in that they are the term \codeinline{n} in \codeinline{alloc_size = n*sizeof(char)}.
+      Constructs a SYCL \codeinline{stream} instance associated with the command group specified by \codeinline{cgh}, with a maximum buffer size in characters per kernel invocation specified by the parameter \codeinline{totalBufferSize}, and a maximum stream size that can be buffered by a work item between stream flushes specified by the parameter \codeinline{workItemBufferSize}.  \codeinline{totalBufferSize} and \codeinline{workItemBufferSize} relate to memory storage size in that they are the term \codeinline{n} in \codeinline{alloc_size = n*sizeof(char)}.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -3753,12 +3728,17 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   \addRow
     {size_t get_size() const}
     {
-      Returns the maximum buffer size.
+      Returns the total buffer size, in characters.
+    }
+  \addRow
+    {size_t get_work_item_buffer_size() const}
+    {
+      Returns the buffer size per work item, in characters.
     }
   \addRow
     {size_t get_max_statement_size() const}
     {
-      Returns the maximum statement size.
+      Deprecated query with same functionality as \codeinline{get_work_item_buffer_size()}.
     }
 \completeTable
 %-------------------------------------------------------------------------------------------
@@ -3770,16 +3750,19 @@ The manipulators that are supported by the SYCL \codeinline{stream} class \codei
   \addRow
     {template <typename T> const stream\& operator<<(const stream\& os, const T \&rhs)}
     {
-      Outputs any valid values (see~\ref{table.operands.stream}) as a stream of characters and applies any valid manipulator (see~\ref{table.manipulators.stream}) to the current statements.
+      Outputs any valid values (see~\ref{table.operands.stream}) as a stream of characters and applies any valid manipulator (see~\ref{table.manipulators.stream}) to the current stream.
     }
 \completeTable
 %-------------------------------------------------------------------------------------------
 
 \subsection{Synchronization}
 
-An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator (that doesn't exceed the \codeinline{maxStatementSize} or \codeinline{bufferSize} limits) within a SYCL kernel function by the time that the event associated with a command group submission enters the completed state. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
+An instance of the SYCL \codeinline{stream} class is required to synchronize with the host, and must output everything that is streamed to it via the \codeinline{operator<<()} operator before a flush operation (that doesn't exceed the \codeinline{workItemBufferSize} or \codeinline{totalBufferSize} limits) within a SYCL kernel function by the time that the event associated with a command group submission enters the completed state. The point at which this synchronization occurs and the method by which this synchronization is performed are implementation defined. For example it is valid for an implementation to use \codeinline{printf()}.
 
-The SYCL \codeinline{stream} class is required to output each statement (up to \codeinline{maxStatementSize}) without mixing with statements of other work items.  There are no other output order guarantees between work items.  It is undefined behavor if a statement exceeds \codeinline{maxStatementSize}, or if the sum of outputs from all statements within execution of a work item exceed \codeinline{bufferSize}.
+The SYCL \codeinline{stream} class is required to output the content of each stream, between flushes (up to \codeinline{workItemBufferSize}), without mixing with content from the same stream in other work items.  There are no other output order guarantees between work items or between streams.  The stream flush operation therefore delimits the unit of output that is guaranteed to be displayed without mixing with other work items, with respect to a single stream.
+
+\subsection{Implicit flush}
+There is guaranteed to be an implicit flush of each stream used by a kernel, at the end of kernel execution, from the perspective of each work item.  There is also an implicit flush when the endl stream manipulator is executed.  No other implicit flushes are permitted in an implementation. 
 
 \subsection{Performance note}
 
