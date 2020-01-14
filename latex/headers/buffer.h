@@ -126,6 +126,12 @@ class buffer {
   buffer<ReinterpretT, ReinterpretDim, AllocatorT>
   reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
+  // Only available when ReinterpretDim == 1
+  // or when (ReinterpretDim == dimensions) &&
+  //         (sizeof(ReinterpretT) == sizeof(T))
+  template <typename ReinterpretT, int ReinterpretDim = dimensions>
+  buffer<ReinterpretT, ReinterpretDim, AllocatorT>
+  reinterpret() const;
 };
 }  // namespace sycl
 }  // namespace cl

@@ -1421,6 +1421,28 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
        offset or size of the sub-buffer view (in bytes) relative to the parent
        \codeinline{buffer}.
      }
+   \addRowThreeL
+     { template <typename ReinterpretT, int ReinterpretDim = dimensions> }
+     { buffer<ReinterpretT, ReinterpretDim, AllocatorT> }
+     { reinterpret() const }
+     {
+       Creates and returns a reinterpreted SYCL \codeinline{buffer}
+       with the type specified by \codeinline{ReinterpretT} and
+       dimensions specified by \codeinline{ReinterpretDim}.
+       Only valid when \codeinline{(ReinterpretDim == 1)} or when
+       \codeinline{((ReinterpretDim == dimensions) && (sizeof(ReinterpretT) == sizeof(T)))}.
+       The buffer object being reinterpreted can be a SYCL sub-buffer
+       that was created from a SYCL \codeinline{buffer}.
+       Must throw an \codeinline{invalid_object_error} SYCL exception
+       if the total size in bytes represented by the type and range
+       of the reinterpreted SYCL \codeinline{buffer} (or sub-buffer)
+       does not equal the total size in bytes represented by the type and range
+       of this SYCL \codeinline{buffer} (or sub-buffer). 
+       Reinterpreting a sub-buffer provides a reinterpreted view
+       of the sub-buffer only,
+       and does not change the offset or size of the sub-buffer view (in bytes)
+       relative to the parent \codeinline{buffer}.
+     }
 \completeTable
 %------------------------------------------------------------------------------------------------------
 
