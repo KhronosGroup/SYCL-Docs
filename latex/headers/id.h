@@ -46,7 +46,7 @@ public:
     friend id &operatorOP(id &lhs, const id &rhs) { /* ... */ }
     friend id &operatorOP(id &lhs, const size_t &rhs) { /* ... */ }
 
-  // OP is: +, -, *, /, %, <<, >>, &, |, ^
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
     friend id operatorOP(const size_t &lhs, const id &rhs) { /* ... */ }
 
 };

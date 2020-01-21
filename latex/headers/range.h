@@ -39,8 +39,8 @@ public:
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend range & operatorOP(const range &lhs, const range &rhs) { /* ... */ }
   friend range & operatorOP(const range &lhs, const size_t &rhs) { /* ... */ }
-    
-  // OP is: +, -, *, /, %, <<, >>, &, |, ^
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend range operatorOP(const size_t &lhs, const range &rhs) { /* ... */ }
 
 };
