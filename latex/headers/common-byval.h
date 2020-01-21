@@ -19,17 +19,25 @@ class T {
   ...
 
  public:
-  // Rule of Zero: the following five special member functions should not be explicitly declared
+  // If any of the following five special member functions are not
+  
+  // public, inline or defaulted, then all five of them should be
+    
+  // explicitly declared (see rule of five).
+    
+  // Otherwise, none of them should be explicitly declared
+    
+  // (see rule of zero).
 
-  // T(const T &rhs) = default;
+  // T(const T &rhs);
 
-  // T(T &&rhs) = default;
+  // T(T &&rhs);
 
-  // T &operator=(const T &rhs) = default;
+  // T &operator=(const T &rhs);
 
-  // T &operator=(T &&rhs) = default;
+  // T &operator=(T &&rhs);
 
-  // ~T() = default;
+  // ~T();
 
   ...
 
