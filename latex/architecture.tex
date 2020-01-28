@@ -475,11 +475,12 @@ The order of execution of \gls{command-group} objects ensures a sequentially
 consistent access to the memory from the different devices to the memory
 objects.
 
-To access memory objects from inside a kernel, the user must create an
+To access a memory object, the user must create an
 \gls{accessor} object which parameterizes the type of access
-the kernel requires. 
+to the memory object that a kernel or the host requires.
 The \gls{accessor} object defines a requirement to access a memory
-object from a \gls{command-group}. 
+object, and this requirement is defined by
+construction of an accessor, regardless of whether there are any uses in a kernel or by the host.
 The \codeinline{cl::sycl::accessor} object specifies
 whether the access is via global memory, constant memory or image samplers and
 their associated access functions. The \gls{accessor} also specifies whether the
@@ -532,9 +533,36 @@ Note that the order of the definition of the accessors within the
 \gls{command-group} is irrelevant to the requirements they define.
 All accessors always apply to the entire \gls{command-group} object where
 they are defined.
-When multiple \glspl{accessor} in the same \gls{command-group} define requirements to the same memory object, the access mode is resolved as the union of
-all the different access modes, e.g. $CG(b1_{R},b1_{W})$ is equivalent
-to $CG(b1_{RW})$.
+
+When multiple \glspl{accessor} in the same \gls{command-group} define different
+access modes to the same memory object, the combined memory object requirement is
+resolved according to Table~\ref{table.access.mode.union}.
+The atomic access mode acts as if it was read-write (RW) when determining the combined requirement.
+The rules in Table~\ref{table.access.mode.union} are commutative and associative.
+
+\begin{table}[!h]
+\centering
+    \begin{tabular}{| p{1.5 in} | p{1.5 in} | p{1.5 in} |}
+      \hline
+        \cellcolor{lightgray} \textbf{One access mode}
+        & \cellcolor{lightgray} \textbf{Other access mode}
+        & \cellcolor{lightgray} \textbf{Combined requirement} \\
+      \hline
+        read (RO) & write (WO) & read-write (RW) \\
+        read (RO) & read-write (RW) & read-write (RW) \\
+        write (WO) & read-write (RW) & read-write (RW) \\
+        discard-write (DW) & discard-read-write (DRW) & discard-read-write (DRW) \\
+        discard-write (DW) & write (WO) & write (WO) \\
+        discard-write (DW) & read (RO) & read-write (RW) \\
+        discard-write (DW) & read-write (RW) & read-write (RW) \\
+        discard-read-write (DRW) & write (WO) & read-write (RW) \\
+        discard-read-write (DRW) & read (RO) & read-write (RW) \\
+        discard-read-write (DRW) & read-write (RW) & read-write (RW) \\
+      \hline
+    \end{tabular}
+    \caption{Combined requirement from two different accessor access modes within the same \gls{command-group}.  The rules are commutative and associative}
+    \label{table.access.mode.union}
+\end{table}
 
 A buffer created from a range of an existing buffer is called
 a \keyword{sub-buffer}.
