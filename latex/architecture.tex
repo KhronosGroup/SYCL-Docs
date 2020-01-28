@@ -636,13 +636,13 @@ scope will be allocated in local memory.
 
 Users can create accessors that reference sub-buffers as well as entire buffers.
 
-Within kernels, accessors can be implicitly cast to C++ pointer types. The
-pointer types will contain a compile-time deduced address space. So, for
-example, if an accessor to global memory is cast to a C++ pointer, the C++
-pointer type will have a global address space attribute attached to it. The
-address space attribute will be compile-time propagated to other pointer
-values when one pointer is initialized to another pointer value using a
-defined mechanism.
+Within kernels, the underlying C++ pointer types can be obtained from an
+accessor. The pointer types will contain a compile-time deduced address space.
+So, for example, if a C++ pointer is obtained from an accessor to global memory, 
+the C++ pointer type will have a global address space attribute attached to it. 
+The address space attribute will be compile-time propagated to other pointer
+values when one pointer is initialized to another pointer value using a defined
+mechanism.
 
 When developers need to explicitly state the address space of a pointer value,
 one of the explicit pointer classes can be used. There is a different explicit

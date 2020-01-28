@@ -30,7 +30,7 @@ public:
   void parallel_for_work_item(workItemFunctionT func) const;
 
   template<typename workItemFunctionT>
-  void parallel_for_work_item(range<dimensions> flexibleRange,
+  void parallel_for_work_item(range<dimensions> logicalRange,
     workItemFunctionT func) const;
 
   template <access::mode accessMode = access::mode::read_write>

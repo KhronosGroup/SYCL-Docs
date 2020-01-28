@@ -33,7 +33,7 @@ written in row-major format.
   \addRow {item} {Pairing of an \codeinline{id} (specific point) and the \codeinline{range} that it is bounded by}
   \addRow {nd_range} {Encapsules both global and local (work-group size) \mbox{\codeinline{range}s} over which work-item \mbox{\codeinline{id}s} will vary}
   \addRow {nd_item} {Encapsulates two \mbox{\codeinline{item}s}, one for global \codeinline{id} and \codeinline{range}, and one for local \codeinline{id} and \codeinline{range}}
-  \addRow {h_item} {Index point queries within hierarchical parallelism (\codeinline{parallel_for_work_item}).  Encapsulates physical global and local \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}, as well as a logical/flexible local \codeinline{id} and \codeinline{range} defined by hierarchical parallelism}
+  \addRow {h_item} {Index point queries within hierarchical parallelism (\codeinline{parallel_for_work_item}).  Encapsulates physical global and local \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}, as well as a logical local \codeinline{id} and \codeinline{range} defined by hierarchical parallelism}
   \addRow {group} {Work-group queries within hierarchical parallelism (\codeinline{parallel_for_work_group}), and exposes the \codeinline{parallel_for_work_item} construct that identifies code to be executed by each work-item.  Encapsulates work-group \mbox{\codeinline{id}s} and \mbox{\codeinline{range}s}}
 \completeTable
 %-------------------------------------------------------------------------------
@@ -777,7 +777,7 @@ call or to the corresponding \codeinline{parallel_for_work_group} call if no \co
 is passed to the \codeinline{parallel_for_work_item} call.
 It encapsulates enough information to identify the \gls{work-item}'s local and global \glspl{item}
 according to the information given to \codeinline{parallel_for_work_group} (physical ids)
-as well as the \gls{work-item}'s logical local \glspl{item} in the flexible range.
+as well as the \gls{work-item}'s logical local \glspl{item} in the logical local range.
 All returned \glspl{item} objects are offset-less.
 Instances of the \codeinline{h_item<int dimensions>} class are not
 user-constructible and are passed by the runtime to each instance of the
@@ -812,10 +812,10 @@ A synopsis of the SYCL \codeinline{h_item} class is provided below. The member f
         work-item's position in the local iteration space as provided upon the invocation of the
         \codeinline{group::parallel_for_work_item}.
 
-        If the \codeinline{group::parallel_for_work_item} was called without any flexible local range
+        If the \codeinline{group::parallel_for_work_item} was called without any logical local range
         then the member function returns the physical local \gls{item}.
 
-        A physical id can be computed from a logical id by getting the reminder of the integer division
+        A physical id can be computed from a logical id by getting the remainder of the integer division
         of the logical id and the physical range:
         \codeinline{get_logical_local().get() \% get_physical_local.get_range() == get_physical_local().get()}.
     }
@@ -972,6 +972,7 @@ operation.
     {range<dimensions> get_local_range() const}
     {
         Return a SYCL \codeinline{range} representing all dimensions of the local range.
+        This local range may have been provided by the programmer, or chosen by the \gls{sycl-runtime}.
     }
   \addRow
     {size_t get_local_range(int dimension) const}
@@ -981,9 +982,7 @@ operation.
   \addRow
     {range<dimensions> get_group_range() const}
     {
-        Return a \codeinline{range} representing the dimensions of the
-        current group.  This local range may have been provided by the
-        programmer, or chosen by the \gls{sycl-runtime}.
+        Return a \codeinline{range} representing the number of \glspl{work-group} in the \codeinline{nd_range}.
     }
   \addRow
     {size_t get_group_range(int dimension) const}
@@ -1026,24 +1025,24 @@ operation.
   \addRowThreeL
     {template <typename workItemFunctionT>}
     {void parallel_for_work_item(range<dimensions> }
-    { flexibleRange, workItemFunctionT func) const}
+    { logicalRange, workItemFunctionT func) const}
     {
       Launch the work-items for this work-group using a logical local range.
       The function object \codeinline{func} is executed as if the kernel where
-      invoked with \codeinline{flexibleRange} as the local range. This new local
+      invoked with \codeinline{logicalRange} as the local range. This new local
       range is emulated and may not map one-to-one with the physical range.
       
-      \codeinline{flexibleRange} is the new local range to be used.
+      \codeinline{logicalRange} is the new local range to be used.
       This range can be smaller or larger than the one used to invoke the kernel.
       \codeinline{func} is a function object type with a public member function
       \codeinline{void F::operator()(h_item<dimensions>)}
       representing the work-item computation.
 
-      Note that the flexible range does not need to be uniform
-      across all work-groups in a kernel.  For example the flexible range may depend on
+      Note that the logical range does not need to be uniform
+      across all work-groups in a kernel.  For example the logical range may depend on
       a work-group varying query (e.g. \codeinline{group::get_linear_id}),
       such that different work-groups in the same kernel invocation execute
-      different flexible range sizes.
+      different logical range sizes.
 
       This member function can only be invoked within a
       \codeinline{parallel_for_work_group} context.
@@ -1869,8 +1868,10 @@ descriptor.}
 {info::kernel_work_group::preferred_work_group_size_multiple}
 {size_t}
 {
-  Returns the preferred work-group size for executing a kernel on a particular
-  device.
+  Returns a value, of which work-group size is preferred to be a multiple,
+  for executing a kernel on a particular device.  This is a performance
+  hint.  The value must be less than or equal to that returned by
+  \codeinline{info::kernel_work_group::work_group_size}.
 }
 
 \addInfoRow
@@ -2248,6 +2249,86 @@ OpenCL API objects, constructing a \codeinline{kernel} from
 a \codeinline{cl_kernel} will retain a reference to the kernel and the
 user code should call \codeinline{clReleaseKernel} if the
 \codeinline{cl_kernel} is no longer needed in the calling context.
+
+
+%*******************************************************************************
+% OpenCL Kernel Conventions and SYCL
+%*******************************************************************************
+\subsection{OpenCL Kernel Conventions and SYCL}
+\label{sec:opencl_kern_conventions_and_sycl}
+
+OpenCL and SYCL use opposite conventions for the unit stride dimension.  SYCL
+aligns with C++ conventions, which is important to understand from a performance
+perspective when porting code to SYCL.  The unit stride dimension, at least for data, is implicit in the
+linearization equations in SYCL (Equation~\ref{row-major-equation-buffer}) and OpenCL.  SYCL aligns with C++ array subscript ordering
+\codeinline{arr[a][b][c]}, in that range constructor dimension ordering used to launch a kernel
+(e.g. \codeinline{range<3> R\{a,b,c\}}) and range and ID queries within a kernel, are ordered in
+the same way as the C++ multi-dimensional subscript operators (unit stride on the right).
+
+When specifying a \codeinline{range} as the global or local size
+in a \codeinline{parallel_for} that invokes an OpenCL interop kernel (through
+\codeinline{cl_kernel} interop or \codeinline{compile_with_source}/
+\codeinline{build_with_source}),
+the highest dimension of the range in SYCL will map to the
+lowest dimension within the OpenCL kernel.  That statement applies to both
+an underlying enqueue operation such as \codeinline{clEnqueueNDRangeKernel}
+in OpenCL, and also ID and size queries within the OpenCL kernel.
+For example, a 3D global range specified in SYCL as:
+
+\begin{lstlisting}[style=nonumbers]
+range<3> R{r0,r1,r2};
+\end{lstlisting}
+
+maps to an \codeinline{clEnqueueNDRangeKernel} \codeinline{global_work_size} argument
+of:
+
+\begin{lstlisting}[style=nonumbers]
+size_t cl_interop_range[3] = {r2,r1,r0};
+\end{lstlisting}
+
+Likewise, a 2D global range specified in SYCL as:
+
+\begin{lstlisting}[style=nonumbers]
+range<2> R{r0,r1};
+\end{lstlisting}
+
+maps to an \codeinline{clEnqueueNDRangeKernel} \codeinline{global_work_size} argument
+of:
+
+\begin{lstlisting}[style=nonumbers]
+size_t cl_interop_range[2] = {r1,r0};
+\end{lstlisting}
+
+The mapping of highest dimension in SYCL to lowest dimension in OpenCL applies to all
+operations where a multi-dimensional construct must be mapped, such as when mapping SYCL
+explicit memory operations to OpenCL APIs like \codeinline{clEnqueueCopyBufferRect}.
+
+Work-item and work-group ID and range queries have the same reversed convention for unit
+stride dimension between SYCL and OpenCL.  For example, with three, two, or one dimensional SYCL
+global ranges, OpenCL and SYCL kernel code queries relate to the range as shown in Table~\ref{table.syclOpenCL.mapping}.
+The ``SYCL kernel query'' column applies for SYCL-defined kernels, and the ``OpenCL kernel query'' column
+applies for kernels defined through OpenCL interop.
+
+\startGenericThreeColTable{8cm}{3cm}{3cm}{SYCL kernel query}{OpenCL kernel query}{Returned Value}
+\multicolumn{3}{|c|}{\cellcolor{Gray}With enqueued 3D SYCL global \codeinline{range} of \codeinline{range<3> R\{r0,r1,r2\}}} \\ \hline
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(2)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_range(1) / item::get_range(1)}{get_global_size(1)}{\codeinline{r1}}
+\genericThreeColRow {nd_item::get_global_range(2) / item::get_range(2)}{get_global_size(0)}{\codeinline{r2}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(2)}{Value in range 0..(\codeinline{r0}-1)}
+\genericThreeColRow {nd_item::get_global_id(1) / item::get_id(1)}{get_global_id(1)}{Value in range 0..(\codeinline{r1}-1)}
+\genericThreeColRow {nd_item::get_global_id(2) / item::get_id(2)}{get_global_id(0)}{Value in range 0..(\codeinline{r2}-1)}
+\multicolumn{3}{|c|}{\cellcolor{Gray}With enqueued 2D SYCL global \codeinline{range} of \codeinline{range<2> R\{r0,r1\}}} \\ \hline
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(1)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_range(1) / item::get_range(1)}{get_global_size(0)}{\codeinline{r1}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(1)}{Value in range 0..(\codeinline{r0}-1)}
+\genericThreeColRow {nd_item::get_global_id(1) / item::get_id(1)}{get_global_id(0)}{Value in range 0..(\codeinline{r1}-1)}
+\multicolumn{3}{|c|}{\cellcolor{Gray}With enqueued 1D SYCL global \codeinline{range} of \codeinline{range<1> R\{r0\}}} \\ \hline
+\genericThreeColRow {nd_item::get_global_range(0) / item::get_range(0)}{get_global_size(0)}{\codeinline{r0}}
+\genericThreeColRow {nd_item::get_global_id(0) / item::get_id(0)}{get_global_id(0)}{Value in range 0..(\codeinline{r0}-1)}
+\completeGenericTabular
+\captionGenericTable{Example range mapping from SYCL enqueued three dimensional global \codeinline{range} to OpenCL and SYCL queries}
+\label{table.syclOpenCL.mapping}
+\completeGenericTable
 
 
 %***********************************************************************************

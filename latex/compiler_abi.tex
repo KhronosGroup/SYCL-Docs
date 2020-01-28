@@ -95,6 +95,11 @@ The following restrictions are applied to device functions and kernels:
     \codeinline{new} operator and any user-defined overloads that do not
     allocate storage are permitted.
   \item
+    Kernel functions must always have a \codeinline{void} return type.  A kernel lambda
+    trailing-return-type that is not \codeinline{void} is therefore illegal, as is a return statement
+    (that would return from the kernel function) with an expression that does not convert
+    to \codeinline{void}.
+  \item
     The odr-use of polymorphic classes and classes with virtual inheritance is allowed.
     However, no virtual member functions are allowed to be called in a SYCL kernel or any functions called by the kernel.
   \item
@@ -188,12 +193,11 @@ plus any extensions from the C++14 specification.
 %*******************************************************************************
 \section{Built-in scalar data types}
 \label{subsection:scalartypes}
-In a SYCL device compiler, the standard C++ fundamental types, including
-\codeinline{int}, \codeinline{short}, \codeinline{long},
-\codeinline{long long int} need to be configured so that the device
-definitions of those types match the host definitions of those types. A device
+In a SYCL device compiler, the device definition of all standard C++ fundamental
+types from Table~\ref{table.types.fundamental} must match the host definition of those types, in both
+size and alignment. A device
 compiler may have this preconfigured so that it can match them based on the
-definitions of those types on the platform. Or there may be a necessity for a
+definitions of those types on the platform, or there may be a necessity for a
 device compiler command-line option to ensure the types are the same.
 
 The standard C++ fixed width types, e.g. \codeinline{int8_t},
@@ -334,7 +338,7 @@ Table~\ref{table.types.fundamental}.
   A 16-bit floating-point. The half data type must conform to the IEEE 754-2008
   half precision storage format. A SYCL \codeinline{feature_not_supported}
   exception must be thrown if the \codeinline{half} type is used in a SYCL
-  kernel fucntion which executes on a SYCL \codeinline{device} that does not
+  kernel function which executes on a SYCL \codeinline{device} that does not
   support the extension \codeinline{khr_fp16}.
 }
 \completeTable

@@ -28,6 +28,8 @@ class accessor {
 
   size_t get_count() const;
 
+  range<dimensions> get_range() const;
+
   /* Available only when: (accessTarget == access::target::image && 
   accessMode == access::mode::read) || (accessTarget ==
   access::target::host_image && (accessMode == access::mode::read ||

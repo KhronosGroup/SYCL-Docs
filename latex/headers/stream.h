@@ -2,6 +2,7 @@ namespace cl {
 namespace sycl {
 
 enum class stream_manipulator {
+  flush,
   dec,
   hex,
   oct,
@@ -15,6 +16,9 @@ enum class stream_manipulator {
   hexfloat,
   defaultfloat
 };
+
+
+const stream_manipulator flush = stream_manipulator::flush;
 
 const stream_manipulator dec = stream_manipulator::dec;
 
@@ -47,12 +51,17 @@ __width_manipulator__ setw(int width);
 class stream {
  public:
 
-  stream(size_t bufferSize, size_t maxStatementSize, handler& cgh);
+  stream(size_t totalBufferSize, size_t workItemBufferSize, handler& cgh);
 
   /* -- common interface members -- */
 
   size_t get_size() const;
 
+  size_t get_work_item_buffer_size() const;
+
+  /* get_max_statement_size() has the same functionality as get_work_item_buffer_size(),
+     and is provided for backward compatibility.  get_max_statement_size() is a deprecated
+     query. */
   size_t get_max_statement_size() const;
 };
 

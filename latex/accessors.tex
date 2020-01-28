@@ -243,17 +243,17 @@ elements of a SYCL \codeinline{buffer}. Firstly by passing a SYCL \codeinline{
 id} instance of the same dimensionality as the SYCL \codeinline{accessor}
 subscript operator. Secondly by passing a single \codeinline{size_t} value to
 multiple consecutive subscript operators (one for each dimension of the SYCL
-\codeinline{accessor}, for example \codeinline{acc[id1][id2][id3]}). Finally, in the
+\codeinline{accessor}, for example \codeinline{acc[id0][id1][id2]}). Finally, in the
 case of the SYCL \codeinline{accessor} being \codeinline{0} dimensions, by
 triggering the implicit conversion operator. Whenever a multi-dimensional index
 is passed to a SYCL \codeinline{accessor} the linear index is calculated based
-on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL
-\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+on the index \codeinline{\{id0, id1, id2\}} provided and the range of the SYCL
+\codeinline{accessor} \codeinline{\{r0, r1, r2\}} according to row-major
 ordering as follows:
 
 \begin{equation}
 \label{row-major-equation-buffer}
- id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+ id2 + (id1 \cdot r2) + (id0 \cdot r2 \cdot r1)
 \end{equation}
 
 A buffer accessor can optionally provide access to a sub range of a SYCL
@@ -353,7 +353,7 @@ Tables~\ref{table.specialmembers.common.reference} and
   specialization}
 {table.constructors.accessor.buffer}
   \addRow
-    { accessor(buffer<dataT, 1> \&bufferRef) }
+    { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef) }
     {
       Available only when: \codeinline{((isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -369,7 +369,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       placeholder \codeinline{accessor}.
     }
   \addRowTwoL
-    { accessor(buffer<dataT, 1> \&bufferRef, }
+    { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef) }
     {
       Available only when: \codeinline{(isPlaceholder ==
@@ -383,7 +383,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       commandGroupHandlerRef}.
     }
   \addRow
-    { accessor(buffer<dataT, dimensions> \&bufferRef) }
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef) }
     {
       Available only when: \codeinline{((isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -399,7 +399,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       accessor}.
     }
   \addRowTwoL
-    { accessor(buffer<dataT, dimensions> \&bufferRef, }
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef) }
     {
       Available only when: \codeinline{(isPlaceholder ==
@@ -412,7 +412,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       \codeinline{queue} associated with \codeinline{commandGroupHandlerRef}.
     }
   \addRowThreeL
-    { accessor( buffer<dataT, dimensions> \&bufferRef, }
+    { accessor( buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { range<dimensions> accessRange, id<dimensions> }
     { accessOffset = \{\}) }
     {
@@ -430,7 +430,7 @@ Tables~\ref{table.specialmembers.common.reference} and
       placeholder \codeinline{accessor}.
     }
   \addRowFourL
-    { accessor( buffer<dataT, dimensions> \&bufferRef, }
+    { accessor( buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef, }
     { range<dimensions> accessRange, }
     { id<dimensions> accessOffset = \{\}) }
@@ -462,27 +462,41 @@ Tables~\ref{table.specialmembers.common.reference} and
   \addRow
     { size_t get_size() const }
     {
-      Returns the size in bytes of the SYCL \codeinline{buffer} this SYCL
-      \codeinline{accessor} is accessing.
+      Returns the size in bytes of the region of a SYCL \codeinline{buffer}
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { size_t get_count() const }
     {
-      Returns the number of elements of the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+      Returns the number of elements in the region of a SYCL \codeinline{buffer}
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { range<dimensions> get_range() const }
     {
       Available only when: \codeinline{dimensions > 0}.
       \newline
-      Returns the range of this SYCL \codeinline{accessor}.
+      Returns a \codeinline{range} object which represents the number of
+      elements of \codeinline{dataT} per dimension that this
+      \codeinline{accessor} may access.
+      \newline
+      The \codeinline{range} object returned must equal to the
+      \codeinline{range} of the \codeinline{buffer} this \codeinline{accessor}
+      is associated with, unless a range was explicitly specified when this
+      \codeinline{accessor} was constructed.
     }
   \addRow
     { id<dimensions> get_offset() const }
     {
       Available only when: \codeinline{dimensions > 0}.
       \newline
-      Returns the offset of this SYCL \codeinline{accessor}.
+      Returns an \codeinline{id} object which represents the starting point in
+      number of elements of \codeinline{dataT} for the \codeinline{range} that
+      this \codeinline{accessor} may access.
+      \newline
+      The \codeinline{id} object returned must equal to
+      \codeinline{id\{0, 0, 0\}}, unless an offset was explicitly specified
+      when this \codeinline{accessor} was constructed.
     }
   \addRow
     { operator dataT \&() const }
@@ -661,13 +675,13 @@ multiple consecutive subscript operators (one for each dimension of the SYCL
 case of the SYCL \codeinline{accessor} having \codeinline{0} dimensions, by
 triggering the implicit conversion operator. Whenever a multi-dimensional index
 is passed to a SYCL \codeinline{accessor}, the linear index is calculated based
-on the index \codeinline{\{id1, id2, id3\}} provided and the range of the SYCL 
-\codeinline{accessor} \codeinline{\{r1, r2, r3\}} according to row-major
+on the index \codeinline{\{id0, id1, id2\}} provided and the range of the SYCL 
+\codeinline{accessor} \codeinline{\{r0, r1, r2\}} according to row-major
 ordering as follows:
 
 \begin{equation}
 \label{row-major-equation-local}
- id3 + (id2 \cdot r3) + (id1 \cdot r3 \cdot r2)
+ id2 + (id1 \cdot r2) + (id0 \cdot r2 \cdot r1)
 \end{equation}
 
 A local accessor can optionally provide atomic access to allocated memory,
@@ -735,9 +749,9 @@ member functions and common member functions are listed in
       Available only when: \codeinline{dimensions == 0}.
       \newline
       Constructs a SYCL \codeinline{accessor} instance for accessing runtime
-      allocated shared local memory of a single element within a SYCL kernel
-      function on the SYCL \codeinline{queue} associated with \codeinline{
-      commandGroupHandlerRef}.
+      allocated shared local memory of a single element (of type \codeinline{dataT}) within
+      a SYCL kernel function on the SYCL \codeinline{queue} associated with \codeinline{
+      commandGroupHandlerRef}.  The allocation is per work-group.
     }
   \addRowTwoL
     { accessor(range<dimensions> allocationSize, }
@@ -748,7 +762,11 @@ member functions and common member functions are listed in
       Constructs a SYCL \codeinline{accessor} instance for accessing runtime
       allocated shared local memory of size specified by \codeinline{
       allocationSize} within a SYCL kernel function on the SYCL \codeinline{
-      queue} associated with \codeinline{commandGroupHandlerRef}.
+      queue} associated with \codeinline{commandGroupHandlerRef}.  \codeinline{allocationSize}
+      defines the number of elements of type \codeinline{dataT} to be allocated.  The allocation
+      is per work-group, and if multiple work-groups execute simultaneously in an
+      implementation, each work-group will receive its own functionally independent
+      allocation of size \codeinline{allocationSize} elements of type \codeinline{dataT}.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -761,13 +779,23 @@ member functions and common member functions are listed in
   \addRow
     { size_t get_size() const }
     {
-      Returns the size in bytes of the SYCL \codeinline{buffer} this SYCL
-      \codeinline{accessor} is accessing.
+      Returns the size in bytes of the local memory allocation, per work-group,
+      that this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
     { size_t get_count() const }
     {
-      Returns the number of elements of the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+      Returns the number of \codeinline{dataT} elements in the local memory allocation, per work-group,
+      that this SYCL \codeinline{accessor} is accessing.
+    }
+  \addRow
+    { range<dimensions> get_range() const }
+    {
+      Available only when: \codeinline{dimensions > 0}.
+      \newline
+      Returns a \codeinline{range} object which represents the number of
+      elements of \codeinline{dataT} per dimension that this
+      \codeinline{accessor} may access, per work-group.
     }
   \addRow
     { operator dataT \&() const }
@@ -775,8 +803,8 @@ member functions and common member functions are listed in
       Available only when: \codeinline{accessMode == access::mode::read_write
       \&\& dimensions == 0)}.
       \newline
-      Returns a reference to the element stored within the SYCL \codeinline{
-      buffer} this SYCL \codeinline{accessor} is accessing.
+      Returns a reference to the single element stored within the work-group's local memory
+      allocation that this \codeinline{accessor} is accessing.
     }
   \addRow
     { dataT \&operator[](id<dimensions> index) const }
@@ -784,8 +812,8 @@ member functions and common member functions are listed in
       Available only when: \codeinline{accessMode == access::mode::read_write
       \&\& dimensions > 0)}.
       \newline
-      Returns a reference to the element stored within the SYCL \codeinline{
-      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      Returns a reference to the element stored within the work-group's local memory
+      allocation that this SYCL \codeinline{accessor} is accessing, at the index
       specified by \codeinline{index}.
     }
   \addRow
@@ -794,8 +822,8 @@ member functions and common member functions are listed in
       Available only when: \codeinline{accessMode == access::mode::read_write
       \&\& dimensions == 1)}.
       \newline
-      Returns a reference to the element stored within the SYCL \codeinline{
-      buffer} this SYCL \codeinline{accessor} is accessing at the index
+      Returns a reference to the element stored within the work-group's local memory
+      allocation that this SYCL \codeinline{accessor} is accessing at the index
       specified by \codeinline{index}.
     }
   \addRowTwoL
@@ -807,7 +835,8 @@ member functions and common member functions are listed in
       \newline
       Returns a reference to an instance of SYCL \codeinline{atomic} of type
       \codeinline{dataT} providing atomic access to the element stored within
-      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing.
+      the work-group's local memory allocation that this SYCL \codeinline{accessor}
+      is accessing.
     }
   \addRowTwoL
     { atomic<dataT, access::address_space::local_space> \& }
@@ -818,8 +847,8 @@ member functions and common member functions are listed in
       \newline
       Returns a reference to an instance of SYCL \codeinline{atomic} of type
       \codeinline{dataT} providing atomic access to the element stored within
-      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing
-      at the index specified by \codeinline{index}.
+      the work-group's local memory allocation that this SYCL \codeinline{accessor}
+      is accessing, at the index specified by \codeinline{index}.
     }
   \addRowTwoL
     { atomic<dataT, access::address_space::local_space> \& }
@@ -830,8 +859,8 @@ member functions and common member functions are listed in
       \newline
       Returns a reference to an instance of SYCL \codeinline{atomic} of type
       \codeinline{dataT} providing atomic access to the element stored within
-      the SYCL \codeinline{buffer} this SYCL \codeinline{accessor} is accessing
-      at the index specified by \codeinline{index}.
+      the work-group's local memory allocation that this SYCL \codeinline{accessor}
+      is accessing, at the index specified by \codeinline{index}.
     }
   \addRow
     { \__unspecified__ \&operator[](size_t index) const }
@@ -853,8 +882,8 @@ member functions and common member functions are listed in
     {
       Available only when: \codeinline{accessTarget ==
       access::target::local}.
-      Returns a pointer to the memory this SYCL \codeinline{accessor} memory is
-      accessing.
+      Returns a pointer to the work-group's local memory allocation that this
+      SYCL \codeinline{accessor} is accessing.
     }
 \completeTable
 %------------------------------------------------------------------------------
@@ -1021,6 +1050,17 @@ Tables~\ref{table.specialmembers.common.reference} and
     {
       Returns the number of elements of the SYCL \codeinline{image} this SYCL \codeinline{accessor} is accessing.
     }
+  \addRow
+    { range<dimensions> get_range() const }
+    {
+      Returns a \codeinline{range} object which represents the number of
+      elements of \codeinline{dataT} per dimension that this
+      \codeinline{accessor} may access.
+      \newline
+      The \codeinline{range} object returned must equal to the
+      \codeinline{range} of the \codeinline{image} this \codeinline{accessor}
+      is associated with.
+    }
   \addRowTwoSL
     { template <typename coordT> }
     { dataT read(const coordT \&coords) const }
@@ -1030,9 +1070,8 @@ Tables~\ref{table.specialmembers.common.reference} and
       (accessMode == access::mode::read || accessMode == access::mode::read_write))}.
       \newline
       Reads and returns an element of the image at the coordinates specified by \codeinline{coords}. Permitted types for \codeinline{coordT} are \codeinline{
-      cl_int} and \codeinline{cl_float} when \codeinline{dimensions == 1}, \codeinline{cl_int2} and \codeinline{cl_float2} when \codeinline{dimensions ==
-      2} and \codeinline{cl_int4} and \codeinline{cl_float4} when \codeinline{
-      dimensions == 3}.
+      cl_int} when \codeinline{dimensions == 1}, \codeinline{cl_int2} when \codeinline{dimensions ==
+      2} and \codeinline{cl_int4} when \codeinline{dimensions == 3}.
     }
   \addRowTwoSL
     { template <typename coordT> }
