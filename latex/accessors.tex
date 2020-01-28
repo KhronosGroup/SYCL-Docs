@@ -1057,8 +1057,25 @@ Tables~\ref{table.specialmembers.common.reference} and
       Returns the number of elements of the SYCL \codeinline{image} this SYCL \codeinline{accessor} is accessing.
     }
   \addRow
+    { range<dimensions+1> get_range() const }
+    {
+      Available only when:
+      \codeinline{accessTarget == access::target::image_array)}.
+      \newline
+      Returns a \codeinline{range} object which represents the number of
+      elements of \codeinline{dataT} per dimension that this
+      \codeinline{accessor} may access.
+      \newline
+      The \codeinline{range} object returned must equal to the
+      \codeinline{range} of the \codeinline{image} this \codeinline{accessor}
+      is associated with.
+    }
+  \addRow
     { range<dimensions> get_range() const }
     {
+      Available only when:
+      \codeinline{accessTarget != access::target::image_array)}.
+      \newline
       Returns a \codeinline{range} object which represents the number of
       elements of \codeinline{dataT} per dimension that this
       \codeinline{accessor} may access.
