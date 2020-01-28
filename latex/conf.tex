@@ -1,3 +1,9 @@
+% Copyright (c) 2012-2019 Khronos Group.
+%
+% This work is licensed under a Creative Commons Attribution 4.0
+% International License.
+% http://creativecommons.org/licenses/by/4.0/
+
 % !TEX root = sycl-1.2.1.tex
 
 %\usepackage[usenames,dvipsnames]{xcolor}
@@ -6,7 +12,7 @@
 
 \def\SYCLVERSION{1.2.1}
 \def\SYCLLANGVERSION{121}
-\def\DOCUMENTVERSION{6}
+\def\DOCUMENTVERSION{7}
 \def\SYCLNAME{SYCL}
 \def\OPENCLVERSION{1.2}
 
@@ -617,6 +623,24 @@ Comment [#1\themycomment]:~\newline #2}%
   \@stopline\ifnum\@tabpush >\z@ \@badpoptabs \fi
   % \endtrivlist
 }
+
+% To skip the Apache 2.0 license added in front of C++ files
+\usepackage{xparse}
+% Declare \lstinputlistingSkipLicense as a command accepting optional
+% [parameters] to keep them for the real \lstinputlisting
+\NewDocumentCommand{\lstinputlistingSkipLicense}
+                   {o}
+                   {\IfNoValueTF{#1}
+                    {%There was no optional [parameter]
+                     \lstinputlisting[% Skip the license text which is
+                                      % 14 line long:
+                                      firstline=15]}
+                    {%There were some optional [parameters]
+                     \lstinputlisting[% Skip the license text which is
+                                      % 14 line long:
+                                      firstline=15,
+                                      % Concatenate the provided options:
+                                      #1]}}
 
 % Do not cross the right margin
 \sloppy
