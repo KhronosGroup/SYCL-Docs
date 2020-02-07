@@ -38,6 +38,12 @@ class queue {
   queue(const context &syclContext, const device_selector &deviceSelector,
     const async_handler &asyncHandler, const property_list &propList = {});
 
+  queue(const context &syclContext, const device &syclDevice,
+    const property_list &propList = {});
+
+  queue(const context &syclContext, const device &syclDevice,
+    const async_handler &asyncHandler, const property_list &propList = {});
+
   queue(cl_command_queue clQueue, const context& syclContext,
     const async_handler &asyncHandler = {});
 
