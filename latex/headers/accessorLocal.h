@@ -35,6 +35,8 @@ class accessor {
 
   size_t get_count() const;
 
+  range<dimensions> get_range() const;
+
   /* Available only when: accessMode == access::mode::read_write && dimensions == 0) */
   operator dataT &() const;
 
