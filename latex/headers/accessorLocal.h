@@ -53,7 +53,7 @@ class accessor {
 
 /* Alias to make local memory accessors less verbose */
 template <typename dataT, int dimensions = 1>
-using local_accessor = accessor<dataT, dimensions, access::mode::read_write
+using local_accessor = accessor<dataT, dimensions, access::mode::read_write,
   access::target::local>;
 
 }  // namespace sycl
