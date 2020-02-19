@@ -1930,6 +1930,10 @@ This constructor links them together into a new SYCL \codeinline{program}.
 
 The encapsulated \codeinline{cl_program} of an OpenCL program can contain either SYCL kernel functions or OpenCL C kernel functions. When a \codeinline{program} instance is constructed using a non-OpenCL interoperability constructor, it is in the \codeinline{program_state::none} state and should then be compiled or built by specifying the SYCL kernel name (either the type of the function object or the explicit kernel name type specified when defining the SYCL kernel function). When a \codeinline{program} instance is constructed using an OpenCL interoperability constructor, it can be in either the \codeinline{program_state::compiled} or \codeinline{program_state::linked} state  and should not be compiled or built, only linked.
 
+With the exception of the interoperability constructor, each constructor takes as the last
+parameter an optional SYCL \codeinline{property_list} to provide properties to
+the SYCL \codeinline{program}.
+
 The compiler options that can be provided are described in the OpenCL specification \cite[p.~145, \S~5.6.4]{opencl12} and the linker options that can be provided are described in \cite[p.~148,\S~5.6.5]{opencl12}.
 
 The SYCL \codeinline{program} class provides the common reference semantics
@@ -2127,6 +2131,17 @@ A SYCL \codeinline{program} can be queried for all of the following information 
       Returns a \codeinline{vector_class} containing the SYCL \codeinline{device}s that this \codeinline{program} has been compiled for.
     }
 \completeInfoTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Program Properties
+%*******************************************************************************
+
+\subsubsection{Program properties}
+\label{sec:interfaces.program.properties}
+
+Construction of the SYCL \codeinline{program} class does not accept any properties.
+The \codeinline{property_list} constructor parameters are present for future extensibility.
 
 %*******************************************************************************
 % Defining kernels

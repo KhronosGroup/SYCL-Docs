@@ -24,15 +24,20 @@ class program {
  public:
   program() = delete;
 
-  explicit program(const context &context);
+  explicit program(const context &context,
+      const property_list &propList = {});
 
-  program(const context &context, vector_class<device> deviceList);
+  program(const context &context, vector_class<device> deviceList,
+      const property_list &propList = {});
 
-  program(vector_class<program> programList, string_class linkOptions = "");
+  program(vector_class<program> &programList, string_class linkOptions = "",
+      const property_list &propList = {});
 
   program(const context &context, cl_program clProgram);
 
   /* -- common interface members -- */
+
+  /* -- property interface members -- */
 
   cl_program get() const;
 

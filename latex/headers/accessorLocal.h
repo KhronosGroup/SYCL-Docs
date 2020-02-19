@@ -24,12 +24,16 @@ class accessor {
   using const_reference = const dataT &;
 
   /* Available only when: dimensions == 0 */
-  accessor(handler &commandGroupHandlerRef);
+  accessor(handler &commandGroupHandlerRef,
+      const property_list &propList = {});
 
   /* Available only when: dimensions > 0 */
-  accessor(range<dimensions> allocationSize, handler &commandGroupHandlerRef);
+  accessor(range<dimensions> allocationSize, handler &commandGroupHandlerRef,
+      const property_list &propList = {});
 
   /* -- common interface members -- */
+
+  /* -- property interface members -- */
 
   size_t get_size() const;
 

@@ -25,20 +25,23 @@ class accessor {
 
   /* Available only when: accessTarget == access::target::host_image */
   template <typename AllocatorT>
-  accessor(image<dimensions, AllocatorT> &imageRef);
+  accessor(image<dimensions, AllocatorT> &imageRef,
+      const property_list &propList = {});
 
   /* Available only when: accessTarget == access::target::image */
   template <typename AllocatorT>
   accessor(image<dimensions, AllocatorT> &imageRef,
-    handler &commandGroupHandlerRef);
+    handler &commandGroupHandlerRef, const property_list &propList = {});
 
   /* Available only when: accessTarget == access::target::image_array &&
   dimensions < 3 */
   template <typename AllocatorT>
   accessor(image<dimensions + 1, AllocatorT> &imageRef,
-    handler &commandGroupHandlerRef);
+    handler &commandGroupHandlerRef, const property_list &propList = {});
 
   /* -- common interface members -- */
+
+  /* -- property interface members -- */
 
   size_t get_count() const;
 

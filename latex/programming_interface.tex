@@ -243,7 +243,15 @@ These common special member functions and hidden friend functions are described 
 %*********************************************************************
 \subsection{Properties}
 
-Each of the following \gls{sycl-runtime} classes: \codeinline{buffer}, \codeinline{image} and \codeinline{queue} provide an optional parameter in each of their constructors to provide a \codeinline{property_list} which contains zero or more properties. Each of those properties augments the semantics of the class with a particular feature. Each of those classes must also provide \codeinline{has_property} and \codeinline{get_property} member functions for querying for a particular property.
+Each of the following \gls{sycl-runtime} classes: \codeinline{context},
+\codeinline{queue}, \codeinline{buffer}, \codeinline{image},
+\codeinline{accessor}, \codeinline{sampler}, and \codeinline{program} provide an
+optional parameter in each of their constructors to provide a
+\codeinline{property_list} which contains zero or more properties. Each of those
+properties augments the semantics of the class with a particular feature. Each
+of those classes must also provide \codeinline{has_property} and
+\codeinline{get_property} member functions for querying for a particular
+property.
 
 The listing below illustrates the usage of various buffer properties, described in \ref{sec:buffer-properties}.
 
@@ -647,6 +655,10 @@ All member functions of the \gls{context} class are synchronous and errors are h
 
 All constructors of the SYCL \gls{context} class, excluding the interoperability constructor, will construct either an OpenCL context or a host context, determined by the constructor parameters or, in the case of the default constructor, the SYCL \codeinline{device} produced by the \codeinline{default_selector}. If the SYCL \codeinline{platform} or SYCL \codeinline{device} is a host platform or host device respectively then the constructed SYCL \codeinline{context} is a host context. Subsequently if the constructed SYCL \codeinline{context} is a host context, then the associated SYCL \codeinline{platform} must be a host platform and the constructed SYCL \codeinline{context} must have a single associated SYCL \codeinline{device} that is a host device.
 
+With the exception of the interoperability constructor, each constructor takes as the last
+parameter an optional SYCL \codeinline{property_list} to provide properties to
+the SYCL \codeinline{context}.
+
 A SYCL \codeinline{context} can optionally be constructed with an \codeinline{async_handler} parameter. In this case the \codeinline{async_handler} provided is passed on to a SYCL \codeinline{queue} to be used to report asynchronous SYCL exceptions.
 
 Information about a SYCL \gls{context} may be queried through the \codeinline{get_info()}
@@ -758,6 +770,16 @@ A SYCL \codeinline{context} can be queried for all of the following information 
 \completeInfoTable
 
 %------------------------------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Context Properties
+%*******************************************************************************
+
+\subsubsection{Context properties}
+\label{sec:context-properties}
+
+Construction of the SYCL \codeinline{context} class does not accept any properties.
+The \codeinline{property_list} constructor parameters are present for future extensibility.
 
 %***********************************************************************************
 % Device class
@@ -1424,7 +1446,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
 \completeTable
 %------------------------------------------------------------------------------------------------------
 
-\subsubsection{Buffer Properties}
+\subsubsection{Buffer properties}
 \label{sec:buffer-properties}
 
 The properties that can be provided when constructing the SYCL \codeinline{buffer} class are describe in Table~\ref{table.properties.buffer}.
@@ -2022,7 +2044,7 @@ The SYCL \codeinline{image} class template takes a template parameter \codeinlin
 \completeInfoTable
 %------------------------------------------------------------------------------------------------------
 
-\subsubsection{Image Properties}
+\subsubsection{Image properties}
 \label{sec:image-properties}
 
 The properties that can be provided when constructing the SYCL \codeinline{image} class are describe in Table~\ref{table.properties.image}.
@@ -2773,14 +2795,16 @@ The members of the \codeinline{sampler} class that provide information on the sa
 \startTable{Constructor}
 \addFootNotes {Constructors the \codeinline{sampler} class}
 {table.constructors.sampler}
-  \addRowFourL
+  \addRowFiveL
     {sampler(}
     {  coordinate_normalization_mode normalizationMode,}
     {  addressing_mode addressingMode,}
-    {  filtering_mode filteringMode)}
+    {  filtering_mode filteringMode,}
+    {  const property_list \&propList = \{\})}
     {
       Constructs a SYCL \codeinline{sampler} instance with address mode, filtering mode and coordinate normalization mode specified by the respective parameters.
       It is not valid to construct a SYCL \codeinline{sampler} within a SYCL kernel function.
+      The optional \codeinline{property_list} parameters provides properties for the constructed SYCL \codeinline{sampler} object.
     }
   \addRowTwoL
     { sampler(cl_sampler clSampler, }
@@ -2812,6 +2836,16 @@ The members of the \codeinline{sampler} class that provide information on the sa
     }
 \completeTable
 %------------------------------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Sampler Properties
+%*******************************************************************************
+
+\subsection{Sampler properties}
+\label{sec:sampler-properties}
+
+Construction of the SYCL \codeinline{sampler} class does not accept any properties.
+The \codeinline{property_list} constructor parameters are present for future extensibility.
 
 %***********************************************************************************
 % Expressing parallelism through kernels

@@ -16,18 +16,32 @@ namespace cl {
 namespace sycl {
 class context {
  public:
-  explicit context(async_handler asyncHandler = {});
+  explicit context(const property_list &propList = {});
 
-  context(const device &dev, async_handler asyncHandler = {});
+  context(async_handler asyncHandler,
+      const property_list &propList = {});
 
-  context(const platform &plt, async_handler asyncHandler = {});
+  context(const device &dev, const property_list &propList = {});
+
+  context(const device &dev, async_handler asyncHandler,
+      const property_list &propList = {});
+
+  context(const platform &plt, const property_list &propList = {});
+
+  context(const platform &plt, async_handler asyncHandler,
+      const property_list &propList = {});
 
   context(const vector_class<device> &deviceList,
-    async_handler asyncHandler = {});
+      const property_list &propList = {});
+
+  context(const vector_class<device> &deviceList,
+      async_handler asyncHandler, const property_list &propList = {});
 
   context(cl_context clContext, async_handler asyncHandler = {});
 
   /* -- common interface members -- */
+
+  /* -- property interface members -- */
 
   cl_context get() const;
 
