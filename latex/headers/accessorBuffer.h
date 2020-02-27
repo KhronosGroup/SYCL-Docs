@@ -29,14 +29,14 @@ class accessor {
   || accessTarget == access::target::constant_buffer))) && dimensions == 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
-      const property_list &propList = {});
+           const property_list &propList = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions == 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
-      handler &commandGroupHandlerRef, const property_list &propList = {});
+           handler &commandGroupHandlerRef, const property_list &propList = {});
 
   /* Available only when: ((isPlaceholder == access::placeholder::false_t &&
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
@@ -44,14 +44,14 @@ class accessor {
   || accessTarget == access::target::constant_buffer))) && dimensions > 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-      const property_list &propList = {});
+           const property_list &propList = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-      handler &commandGroupHandlerRef, const property_list &propList = {});
+           handler &commandGroupHandlerRef, const property_list &propList = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
@@ -59,7 +59,7 @@ class accessor {
   || accessTarget == access::target::constant_buffer)) && dimensions > 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-      range<dimensions> accessRange, const property_list &propList = {});
+           range<dimensions> accessRange, const property_list &propList = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
@@ -67,24 +67,24 @@ class accessor {
   || accessTarget == access::target::constant_buffer)) && dimensions > 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-      range<dimensions> accessRange, id<dimensions> accessOffset,
-      const property_list &propList = {});
+           range<dimensions> accessRange, id<dimensions> accessOffset,
+           const property_list &propList = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-      handler &commandGroupHandlerRef, range<dimensions> accessRange,
-      const property_list &propList = {});
+           handler &commandGroupHandlerRef, range<dimensions> accessRange,
+           const property_list &propList = {});
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-      handler &commandGroupHandlerRef, range<dimensions> accessRange,
-      id<dimensions> accessOffset, const property_list &propList = {});
+           handler &commandGroupHandlerRef, range<dimensions> accessRange,
+           id<dimensions> accessOffset, const property_list &propList = {});
 
   /* -- common interface members -- */
 

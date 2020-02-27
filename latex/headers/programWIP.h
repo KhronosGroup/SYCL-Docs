@@ -25,13 +25,13 @@ class program {
   program() = delete;
 
   explicit program(const context &context,
-      const property_list &propList = {});
+                   const property_list &propList = {});
 
   program(const context &context, vector_class<device> deviceList,
-      const property_list &propList = {});
+          const property_list &propList = {});
 
   program(vector_class<program> &programList, string_class linkOptions = "",
-      const property_list &propList = {});
+          const property_list &propList = {});
 
   program(const context &context, cl_program clProgram);
 
@@ -46,12 +46,14 @@ class program {
   template <typename kernelT>
   void compile_with_kernel_type(string_class compileOptions = "");
 
-  void compile_with_source(string_class kernelSource, string_class compileOptions = "");
+  void compile_with_source(string_class kernelSource,
+                           string_class compileOptions = "");
 
   template <typename kernelT>
   void build_with_kernel_type(string_class buildOptions = "");
 
-  void build_with_source(string_class kernelSource, string_class buildOptions = "");
+  void build_with_source(string_class kernelSource,
+                         string_class buildOptions = "");
 
   void link(string_class linkOptions = "");
 

@@ -25,11 +25,11 @@ class accessor {
 
   /* Available only when: dimensions == 0 */
   accessor(handler &commandGroupHandlerRef,
-      const property_list &propList = {});
+           const property_list &propList = {});
 
   /* Available only when: dimensions > 0 */
   accessor(range<dimensions> allocationSize, handler &commandGroupHandlerRef,
-      const property_list &propList = {});
+           const property_list &propList = {});
 
   /* -- common interface members -- */
 
