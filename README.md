@@ -21,13 +21,12 @@ Packagers and distributors are advised to build the specification using this app
 pip install --upgrade conan
 conan user
 conan remote add conan-center https://api.bintray.com/conan/conan/conan-center
-conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 conan remote add mmha https://api.bintray.com/conan/mmha/public-conan
 
 # To actually build the spec in the top directory of the worktree:
 conan install . --install-folder build --profile default --profile conan/profiles/sycl-spec-buildtools
 conan build . --build-folder build
-conan package . --build-folder --profile package
+conan package . --build-folder build --profile package
 ```
 
 This generates the following tree:
@@ -38,8 +37,8 @@ package
     └── doc
         └── sycl
             ├── <version>
-            │   ├── sycl-<version>-<revision>.pdf
-            │   └── sycl-<version>.pdf -> sycl-<version>-<revision>.pdf
+            │   ├── sycl-<version>-<revision>.pdf
+            │   └── sycl-<version>.pdf -> sycl-<version>-<revision>.pdf
             └── sycl.pdf -> <version>/sycl-<version>.pdf
 ```
 

@@ -94,6 +94,7 @@ set(code
     parallelforworkgroup.cpp
     propertyExample.cpp
     singletask.cpp
+    subbuffer.cpp
     syclkernel.cpp
 )
 list(TRANSFORM code PREPEND code/)
