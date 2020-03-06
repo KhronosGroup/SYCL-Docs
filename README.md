@@ -26,7 +26,7 @@ conan remote add mmha https://api.bintray.com/conan/mmha/public-conan
 # To actually build the spec in the top directory of the worktree:
 conan install . --install-folder build --profile default --profile conan/profiles/sycl-spec-buildtools
 conan build . --build-folder build
-conan package . --build-folder build --profile package
+conan package . --build-folder build --package-folder package
 ```
 
 This generates the following tree:
