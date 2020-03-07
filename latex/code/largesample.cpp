@@ -45,7 +45,7 @@ int main() {
     // The kernel write b, so get a write accessor on it
     auto B = b.get_access<access::mode::write>(cgh);
     /* From the access pattern above, the SYCL runtime detect this
-       command_group is independant from the first one and can be
+       command_group is independent from the first one and can be
        scheduled independently */
 
     // Enqueue a parallel kernel iterating on a N*M 2D iteration space
