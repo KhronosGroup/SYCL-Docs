@@ -18,33 +18,33 @@ class queue {
  public:
   explicit queue(const property_list &propList = {});
 
-  queue(const async_handler &asyncHandler,
+  explicit queue(const async_handler &asyncHandler,
     const property_list &propList = {});
 
-  queue(const device_selector &deviceSelector,
+  explicit queue(const device_selector &deviceSelector,
     const property_list &propList = {});
 
-  queue(const device_selector &deviceSelector,
+  explicit queue(const device_selector &deviceSelector,
       const async_handler &asyncHandler, const property_list &propList = {});
 
-  queue(const device &syclDevice, const property_list &propList = {});
+  explicit queue(const device &syclDevice, const property_list &propList = {});
 
-  queue(const device &syclDevice, const async_handler &asyncHandler,
+  explicit queue(const device &syclDevice, const async_handler &asyncHandler,
     const property_list &propList = {});
 
-  queue(const context &syclContext, const device_selector &deviceSelector,
+  explicit queue(const context &syclContext, const device_selector &deviceSelector,
     const property_list &propList = {});
 
-  queue(const context &syclContext, const device_selector &deviceSelector,
+  explicit queue(const context &syclContext, const device_selector &deviceSelector,
     const async_handler &asyncHandler, const property_list &propList = {});
 
-  queue(const context &syclContext, const device &syclDevice,
+  explicit queue(const context &syclContext, const device &syclDevice,
     const property_list &propList = {});
 
-  queue(const context &syclContext, const device &syclDevice,
+  explicit queue(const context &syclContext, const device &syclDevice,
     const async_handler &asyncHandler, const property_list &propList = {});
 
-  queue(cl_command_queue clQueue, const context& syclContext,
+  explicit queue(cl_command_queue clQueue, const context& syclContext,
     const async_handler &asyncHandler = {});
 
   /* -- common interface members -- */
