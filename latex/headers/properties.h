@@ -14,6 +14,13 @@
 
 namespace cl {
 namespace sycl {
+
+template <typename propertyT>
+struct is_property;
+
+template <typename propertyT, typename syclObjectT>
+struct is_property_of;
+
 class T {
   ...
 
