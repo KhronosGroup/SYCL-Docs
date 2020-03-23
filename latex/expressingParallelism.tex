@@ -1956,26 +1956,68 @@ A synopsis of the SYCL \codeinline{program} class is provided below. The constru
     {
       Default constructor is deleted.
     }
-  \addRowTwoL
-    {explicit program (}
-    {const context \&context)}
-    {
-      Constructs an instance of SYCL \codeinline{program} in the \codeinline{program_state::none} state, associated with the \codeinline{context} provides and the SYCL \codeinline{device}s that are associated with the \codeinline{context}.
-    }
   \addRowThreeL
+    {explicit program (}
+    {const context \&context,}
+    {const property_list \&propList = \{\})}
+    {
+      Constructs an instance of SYCL \codeinline{program} in the
+      \codeinline{program_state::none} state, associated with the
+      \codeinline{context} provides and the SYCL \codeinline{device}s that are
+      associated with the \codeinline{context}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{program} object.
+    }
+  \addRowFourL
     {program (}
     {const context \&context,}
-    {vector_class<device> deviceList)}
+    {vector_class<device> deviceList,}
+    {const property_list \&propList = \{\})}
     {
-      Constructs an instance of SYCL \codeinline{program} in the \codeinline{program_state::none} state, associated with the \codeinline{context} provides and \codeinline{deviceList}.
+      Constructs an instance of SYCL \codeinline{program} in the
+      \codeinline{program_state::none} state, associated with the
+      \codeinline{context} provides and \codeinline{deviceList}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{program} object.
     }
   \addRowThreeL
     {program (}
     {vector_class<program> programList,}
-    {string_class linkOptions = "")}
+    {const property_list \&propList = \{\})}
     {
-      Constructs an instance of SYCL \codeinline{program} in the \codeinline{program_state::linked} by linking together each SYCL \codeinline{program} instance in \codeinline{programList}. Each SYCL \codeinline{program} in \codeinline{programList} must be in the \codeinline{program_state::compiled} state and must be associated with the same SYCL \codeinline{context}. Otherwise must throw an \codeinline{invalid_object_error} SYCL exception.  Must throw a \codeinline{feature_not_supported} SYCL exception if any device that the program is to be linked for returns \codeinline{false} for the device information query \codeinline{info::device::is_linker_available}.
-
+      Constructs an instance of SYCL \codeinline{program} in the
+      \codeinline{program_state::linked} by linking together each SYCL
+      \codeinline{program} instance in \codeinline{programList}. Each SYCL
+      \codeinline{program} in \codeinline{programList} must be in the
+      \codeinline{program_state::compiled} state and must be associated with the
+      same SYCL \codeinline{context}. Otherwise must throw an
+      \codeinline{invalid_object_error} SYCL exception.  Must throw a
+      \codeinline{feature_not_supported} SYCL exception if any device that the
+      program is to be linked for returns \codeinline{false} for the device
+      information query \codeinline{info::device::is_linker_available}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{program} object.
+    }
+  \addRowFourL
+    {program (}
+    {vector_class<program> programList,}
+    {string_class linkOptions,}
+    {const property_list \&propList = \{\})}
+    {
+      Constructs an instance of SYCL \codeinline{program} in the
+      \codeinline{program_state::linked} by linking together each SYCL
+      \codeinline{program} instance in \codeinline{programList} with the
+      compiler options specified by \codeinline{linkOptions}. Each SYCL
+      \codeinline{program} in \codeinline{programList} must be in the
+      \codeinline{program_state::compiled} state and must be associated with the
+      same SYCL \codeinline{context}. Otherwise must throw an
+      \codeinline{invalid_object_error} SYCL exception.
+      Must throw a \codeinline{feature_not_supported} SYCL exception if any
+      device that the program is to be linked for returns \codeinline{false} for
+      the device information query
+      \codeinline{info::device::is_linker_available}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{program} object.
     }
   \addRowThreeL
     {program (}
