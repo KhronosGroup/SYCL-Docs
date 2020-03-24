@@ -359,8 +359,9 @@ Tables~\ref{table.specialmembers.common.reference} and
 \addFootNotes{Constructors of the \codeinline{accessor} class template buffer
   specialization}
 {table.constructors.accessor.buffer}
-  \addRow
-    { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef) }
+  \addRowTwoL
+    { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{((isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -374,10 +375,13 @@ Tables~\ref{table.specialmembers.common.reference} and
       SYCL \codeinline{buffer} immediately on the host. If \codeinline{
       isPlaceholder == access::placeholder::true_t}, constructs a SYCL
       placeholder \codeinline{accessor}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
-  \addRowTwoL
+  \addRowThreeL
     { accessor(buffer<dataT, 1, AllocatorT> \&bufferRef, }
-    { handler \&commandGroupHandlerRef) }
+    { handler \&commandGroupHandlerRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{(isPlaceholder ==
       access::placeholder::false_t \&\& (accessTarget ==
@@ -388,9 +392,12 @@ Tables~\ref{table.specialmembers.common.reference} and
       element of a SYCL \codeinline{buffer} within a SYCL kernel function on
       the SYCL \codeinline{queue} associated with \codeinline{
       commandGroupHandlerRef}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
-  \addRow
-    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef) }
+  \addRowTwoL
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{((isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -404,10 +411,13 @@ Tables~\ref{table.specialmembers.common.reference} and
       buffer} immediately on the host. If \codeinline{isPlaceholder ==
       access::placeholder::true_t}, constructs a SYCL placeholder \codeinline{
       accessor}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
-  \addRowTwoL
+  \addRowThreeL
     { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
-    { handler \&commandGroupHandlerRef) }
+    { handler \&commandGroupHandlerRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{(isPlaceholder ==
       access::placeholder::false_t \&\& (accessTarget ==
@@ -417,11 +427,13 @@ Tables~\ref{table.specialmembers.common.reference} and
       Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
       \codeinline{buffer} within a SYCL kernel function on the SYCL
       \codeinline{queue} associated with \codeinline{commandGroupHandlerRef}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
   \addRowThreeL
-    { accessor( buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
-    { range<dimensions> accessRange, id<dimensions> }
-    { accessOffset = \{\}) }
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
+    { range<dimensions> accessRange, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{(isPlaceholder ==
       access::placeholder::false_t \&\& accessTarget ==
@@ -435,12 +447,54 @@ Tables~\ref{table.specialmembers.common.reference} and
       \codeinline{buffer} immediately on the host. If \codeinline{
       isPlaceholder == access::placeholder::true_t}, constructs a SYCL
       placeholder \codeinline{accessor}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
   \addRowFourL
-    { accessor( buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
+    { range<dimensions> accessRange, }
+    { id<dimensions> accessOffset, }
+    { const property_list \&propList = \{\}) }
+    {
+      Available only when: \codeinline{(isPlaceholder ==
+      access::placeholder::false_t \&\& accessTarget ==
+      access::target::host_buffer) ||  (isPlaceholder ==
+      access::placeholder::true_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer)) \&\& dimensions > 0}.
+      \newline
+      If \codeinline{isPlaceholder == access::placeholder::false_t}, constructs
+      a SYCL \codeinline{accessor} instance for accessing a range of a SYCL
+      \codeinline{buffer} immediately on the host. If \codeinline{
+      isPlaceholder == access::placeholder::true_t}, constructs a SYCL
+      placeholder \codeinline{accessor}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
+    }
+  \addRowFourL
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
     { handler \&commandGroupHandlerRef, }
     { range<dimensions> accessRange, }
-    { id<dimensions> accessOffset = \{\}) }
+    { const property_list \&propList = \{\}) }
+    {
+      Available only when: \codeinline{(isPlaceholder ==
+      access::placeholder::false_t \&\& (accessTarget ==
+      access::target::global_buffer || accessTarget ==
+      access::target::constant_buffer)) \&\& dimensions > 0}.
+      \newline
+      Constructs a SYCL \codeinline{accessor} instance for accessing a range of
+      SYCL \codeinline{buffer} within a SYCL kernel function on the SYCL
+      \codeinline{queue} associated with \codeinline{commandGroupHandlerRef},
+      specified by \codeinline{accessRange}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
+    }
+  \addRowFiveL
+    { accessor(buffer<dataT, dimensions, AllocatorT> \&bufferRef, }
+    { handler \&commandGroupHandlerRef, }
+    { range<dimensions> accessRange, }
+    { id<dimensions> accessOffset, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{(isPlaceholder ==
       access::placeholder::false_t \&\& (accessTarget ==
@@ -451,6 +505,8 @@ Tables~\ref{table.specialmembers.common.reference} and
       SYCL \codeinline{buffer} within a SYCL kernel function on the SYCL
       \codeinline{queue} associated with \codeinline{commandGroupHandlerRef},
       specified by \codeinline{accessRange} and \codeinline{accessOffset}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -647,6 +703,15 @@ Tables~\ref{table.specialmembers.common.reference} and
 %-------------------------------------------------------------------------------
 
 %*******************************************************************************
+% Buffer accessor Properties
+%*******************************************************************************
+
+\subsubsection{Buffer accessor properties}
+\label{sub.section.accessors.buffer.properties}
+
+The \codeinline{property_list} constructor parameters are present for extensibility.
+
+%*******************************************************************************
 % Local accessor
 %*******************************************************************************
 
@@ -749,8 +814,9 @@ member functions and common member functions are listed in
 \addFootNotes {Constructors of the \codeinline{accessor} class template local
   specialization}
 {table.constructors.accessor.local}
-  \addRow
-    { accessor(handler \&commandGroupHandlerRef) }
+  \addRowTwoL
+    { accessor(handler \&commandGroupHandlerRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{dimensions == 0}.
       \newline
@@ -758,13 +824,16 @@ member functions and common member functions are listed in
       allocated shared local memory of a single element (of type \codeinline{dataT}) within
       a SYCL kernel function on the SYCL \codeinline{queue} associated with \codeinline{
       commandGroupHandlerRef}.  The allocation is per work-group.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
-  \addRowTwoL
+  \addRowThreeL
     { accessor(range<dimensions> allocationSize, }
-    { handler \&commandGroupHandlerRef) }
+    { handler \&commandGroupHandlerRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{dimensions > 0}.
-      \newline      
+      \newline
       Constructs a SYCL \codeinline{accessor} instance for accessing runtime
       allocated shared local memory of size specified by \codeinline{
       allocationSize} within a SYCL kernel function on the SYCL \codeinline{
@@ -773,6 +842,7 @@ member functions and common member functions are listed in
       is per work-group, and if multiple work-groups execute simultaneously in an
       implementation, each work-group will receive its own functionally independent
       allocation of size \codeinline{allocationSize} elements of type \codeinline{dataT}.
+      The optional \codeinline{property_list} provides properties for the constructed SYCL \codeinline{accessor} object.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -894,6 +964,15 @@ member functions and common member functions are listed in
 \completeTable
 %------------------------------------------------------------------------------
 
+%*******************************************************************************
+% Local accessor Properties
+%*******************************************************************************
+
+\subsubsection{Local accessor properties}
+\label{sub.section.accessors.local.properties}
+
+The \codeinline{property_list} constructor parameters are present for extensibility.
+
 %******************************************************************************
 % Image accessor
 %******************************************************************************
@@ -1010,18 +1089,21 @@ Tables~\ref{table.specialmembers.common.reference} and
   \addRowThreeL
     { template <typename AllocatorT> }
     { accessor(image<dimensions, AllocatorT> }
-    { \&imageRef) }
+    { \&imageRef, const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{accessTarget ==
       access::target::host_image}.
       \newline
       Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
       \codeinline{image} immediately on the host.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
-  \addRowThreeL
+  \addRowFourL
     { template <typename AllocatorT> }
     { accessor(image<dimensions, AllocatorT> }
-    { \&imageRef, handler \&commandGroupHandlerRef) }
+    { \&imageRef, handler \&commandGroupHandlerRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{accessTarget ==
       access::target::image}.
@@ -1029,11 +1111,14 @@ Tables~\ref{table.specialmembers.common.reference} and
       Constructs a SYCL \codeinline{accessor} instance for accessing a SYCL
       \codeinline{image} within a SYCL kernel function on the SYCL
       \codeinline{queue} associated with \codeinline{commandGroupHandlerRef}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
-  \addRowThreeL
+  \addRowFourL
     { template <typename AllocatorT> }
     { accessor(image<dimensions + 1, AllocatorT> }
-    { \&imageRef, handler \&commandGroupHandlerRef) }
+    { \&imageRef, handler \&commandGroupHandlerRef, }
+    { const property_list \&propList = \{\}) }
     {
       Available only when: \codeinline{accessTarget ==
       access::target::image_array \&\& dimensions < 3}.
@@ -1042,6 +1127,8 @@ Tables~\ref{table.specialmembers.common.reference} and
       \codeinline{image} as an array of images, within a SYCL kernel function on
       the SYCL \codeinline{queue} associated with \codeinline{
       commandGroupHandlerRef}.
+      The optional \codeinline{property_list} provides properties for the
+      constructed SYCL \codeinline{accessor} object.
     }
 \completeTable
 %-------------------------------------------------------------------------------
@@ -1113,11 +1200,11 @@ Tables~\ref{table.specialmembers.common.reference} and
       \codeinline{dimensions == 3}.
     }
   \addRowTwoSL
-    { template <typename coordT> }    
+    { template <typename coordT> }
     { void write(const coordT \&coords, const dataT \&color) const }
     {
       Available only when: \codeinline{(accessTarget == access::target::image \&\&
-      (accessMode == access::mode::write || accessMode == access::mode::discard_write)) || 
+      (accessMode == access::mode::write || accessMode == access::mode::discard_write)) ||
       (accessTarget == access::target::host_image \&\& (accessMode ==
       access::mode::write || accessMode == access::mode::discard_write ||
       accessMode == access::mode::read_write))}.
@@ -1142,6 +1229,16 @@ Tables~\ref{table.specialmembers.common.reference} and
       by \codeinline{index}.
     }
 \completeTable
+%-------------------------------------------------------------------------------
+
+%*******************************************************************************
+% Image accessor Properties
+%*******************************************************************************
+
+\subsubsection{Image accessor properties}
+\label{sub.section.accessors.image.properties}
+
+The \codeinline{property_list} constructor parameters are present for extensibility.
 
 \clearpage
 

@@ -35,12 +35,15 @@ enum class coordinate_normalization_mode : unsigned int {
 
 class sampler {
  public:
-  sampler(coordinate_normalization_mode normalizationMode, addressing_mode addressingMode,
-          filtering_mode filteringMode);
+  sampler(coordinate_normalization_mode normalizationMode,
+          addressing_mode addressingMode, filtering_mode filteringMode,
+          const property_list &propList = {});
 
   sampler(cl_sampler clSampler, const context &syclContext);
 
   /* -- common interface members -- */
+
+  /* -- property interface members -- */
 
   addressing_mode get_addressing_mode() const;
 
