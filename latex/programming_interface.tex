@@ -1149,7 +1149,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
        Construct a SYCL \codeinline{buffer} instance with uninitialized memory.      
        The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
         The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
-       Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+       Data is not written back to the host on destruction of the \codeinline{buffer} unless the \codeinline{buffer} has a valid non-null pointer specified via the member function \codeinline{set_final_data()}.
        Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
     }
   \addRowThreeSL
@@ -1160,7 +1160,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
        Construct a SYCL \codeinline{buffer} instance with uninitialized memory.      
        The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
        The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
-       Unless the member function \codeinline{set_final_data()} is called with a valid non-null pointer there will be no write back on destruction.
+       Data is not written back to the host on destruction of the \codeinline{buffer} unless the \codeinline{buffer} has a valid non-null pointer specified via the member function \codeinline{set_final_data()}.
        Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
      }
   \addRowThreeSL
@@ -1191,7 +1191,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
     {
        Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of its lifetime.
        The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
-      The host address is \codeinline{const T}, so the host accesses can be read-only. However, the \tf{typename T} is not const so the device accesses can be both read and write accesses. Since, the \tf{hostData} is const, this buffer is only initialized with this memory and there is no write after its destruction, unless there is another final data address given after construction of the buffer.
+      The host address is \codeinline{const T}, so the host accesses can be read-only. However, the \tf{typename T} is not const so the device accesses can be both read and write accesses. Since the \tf{hostData} is const, this buffer is only initialized with this memory and there is no write back after its destruction, unless the \codeinline{buffer} has another valid non-null final data address specified via the member function \codeinline{set_final_data{}} after construction of the \codeinline{buffer}.
         The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
        Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
     }
@@ -1203,7 +1203,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
     {
        Construct a SYCL \codeinline{buffer} instance with the \codeinline{hostData} parameter provided. The ownership of this memory is given to the constructed SYCL \codeinline{buffer} for the duration of its lifetime.
        The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.       
-      The host address is \codeinline{const T}, so the host accesses can be read-only. However, the \tf{typename T} is not const so the device accesses can be both read and write accesses. Since, the \tf{hostData} is const, this buffer is only initialized with this memory and there is no write after its destruction, unless there is another final data address given after construction of the buffer.
+      The host address is \codeinline{const T}, so the host accesses can be read-only. However, the \tf{typename T} is not const so the device accesses can be both read and write accesses. Since, the \tf{hostData} is const, this buffer is only initialized with this memory and there is no write back after its destruction, unless the \codeinline{buffer} has another valid non-null final data address specified via the member function \codeinline{set_final_data()} after construction of the \codeinline{buffer}.
         The range of the constructed SYCL \codeinline{buffer} is specified by the \codeinline{bufferRange} parameter provided.
        Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
     }
@@ -1236,8 +1236,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
       Create a new allocated 1D buffer initialized from the given elements
       ranging from \codeinline{first} up to one before \codeinline{last}.
       The data is copied to an intermediate memory position by the runtime.
-      Data is written back to the same iterator set if the iterator is not
-      a const iterator.
+      Data is not written back to the same iterator set provided. However, if the \codeinline{buffer} has a valid non-const iterator specified via the member function \codeinline{set_final_data()}, data will be copied back to that iterator. 
       The constructed SYCL \codeinline{buffer} will use a default constructed \codeinline{AllocatorT} when allocating memory on the host.
       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
     }
@@ -1250,8 +1249,7 @@ The SYCL \codeinline{buffer} class template takes a template parameter \codeinli
       Create a new allocated 1D buffer initialized from the given elements
       ranging from \codeinline{first} up to one before \codeinline{last}.
       The data is copied to an intermediate memory position by the runtime.
-      Data is written back to the same iterator set if the iterator is not
-      a const iterator.
+      Data is not written back to the same iterator set provided. However, if the \codeinline{buffer} has a valid non-const iterator specified via the member function \codeinline{set_final_data()}, data will be copied back to that iterator. 
       The constructed SYCL \codeinline{buffer} will use the \codeinline{allocator} parameter provided when allocating memory on the host.
       Zero or more properties can be provided to the constructed SYCL \codeinline{buffer} via an instance of \codeinline{property_list}.
     }
