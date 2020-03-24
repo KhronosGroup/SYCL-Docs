@@ -16,9 +16,9 @@
   context myContext;
 
   std::vector<buffer<int, 1>> bufferList {
-    buffer<int, 1>{},
-    buffer<int, 1>{property::use_host_ptr{}},
-    buffer<int, 1>{property::context_bound{myContext}}
+    buffer<int, 1>{ptr, rng},
+    buffer<int, 1>{ptr, rng, property::use_host_ptr{}},
+    buffer<int, 1>{ptr, rng, property::context_bound{myContext}}
   };
 
   for(auto& buf : bufferList) {

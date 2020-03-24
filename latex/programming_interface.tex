@@ -268,6 +268,40 @@ A synopsis of the common properties interface, the SYCL \codeinline{property_lis
 \lstinputlistingSkipLicense{headers/properties.h}
 
 %---------------------------------------------------------------------
+\startTable{Traits}
+\addFootNotes{Traits for properties}
+{table.traits.properties}
+\addRowTwoSL
+{ template <typename propertyT> }
+{ struct is_property }
+{
+  An explicit specialization of \codeinline{is_property} that inherits
+  from \codeinline{std::true_type} must be provided for each property,
+  where \codeinline{propertyT} is the class defining the property.
+  This includes both standard properties described in this
+  specification and any additional non-standard properties defined by
+  an implementation. All other specializations of
+  \codeinline{is_property} must inherit from
+  \codeinline{std::false_type}.
+}
+\addRowTwoSL
+{ template <typename propertyT, syclObjectT> }
+{ struct is_property_of }
+{
+  An explicit specialization of \codeinline{is_property_of} that
+  inherits from \codeinline{std::true_type} must be provided for each
+  property that can be used in constructing a given SYCL class, where
+  \codeinline{propertyT} is the class defining the property and
+  \codeinline{syclObjectT} is the SYCL class. This includes both
+  standard properties described in this specification and any
+  additional non-standard properties defined by an implementation. All
+  other specializations of \codeinline{is_property_of} must inherit
+  from \codeinline{std::false_type}.
+}
+\completeTable
+%---------------------------------------------------------------------
+
+%---------------------------------------------------------------------
 \startTable{Member function}
 \addFootNotes{Common member functions of the SYCL property interface}
 {table.members.propertyinterface}
@@ -299,6 +333,10 @@ A synopsis of the common properties interface, the SYCL \codeinline{property_lis
 { template <typename... propertyTN> }
 { property_list(propertyTN... props) }
 {
+  Available only when: \codeinline{is_property<property>::value}
+  evaluates to \codeinline{true} where \codeinline{property} is each
+  property in \codeinline{propertyTN}.
+  \newline
   Construct a SYCL \codeinline{property_list} with zero or more properties.
 }
 \completeTable
