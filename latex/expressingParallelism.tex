@@ -504,9 +504,7 @@ A synopsis of the SYCL \codeinline{item} class is provided below. The member fun
   \addRow
     {size_t operator[](int dimension) const}
     {
-      Return the constituent \codeinline{id} value representing the
-      work-item's position in the iteration space in the given
-      \codeinline{dimension}.
+      Return the same value as get_id(dimension).
     }
   \addRow
     {range<dimensions> get_range() const}
@@ -517,7 +515,7 @@ A synopsis of the SYCL \codeinline{item} class is provided below. The member fun
   \addRow
     {size_t get_range(int dimension) const}
     {
-      Return the same value as get_range().get(dimension)
+      Return the same value as get_range().get(dimension).
     }
   \addRow
     {id<dimensions> get_offset() const}
@@ -970,7 +968,7 @@ operation.
   \addRow
     {size_t get_id(int dimension) const}
     {
-        Return the index of the work-group in the given \codeinline{dimension}.
+        Return the index of the work-group in the given \codeinline{dimension} within the \codeinline{nd_range}.
     }
   \addRow
     {range<dimensions> get_global_range() const}
@@ -1006,8 +1004,7 @@ operation.
   \addRow
     {size_t operator[](int dimension) const}
     {
-        Return the index of the group in the given \codeinline{dimension}
-        within the \codeinline{nd_range}.
+        Return the same value as get_id(dimension).
     }
   \addRow
     {size_t get_linear_id() const}
