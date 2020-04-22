@@ -23,7 +23,7 @@ class event {
 
   /* -- common interface members -- */
 
-  cl_event get();
+  cl_event get() const;
 
   bool is_host() const;
 
