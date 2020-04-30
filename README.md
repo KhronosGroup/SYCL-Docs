@@ -2,7 +2,7 @@
 
 ![Build Status](https://api.travis-ci.com/KhronosGroup/SYCL-Docs.svg?branch=master)
 [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://khronosgroup.github.io/SYCL-Docs/sycl/sycl.pdf)
-[![SPEC 1.2.1-6](https://img.shields.io/badge/SPEC-1.2.1--6-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-1.2.1.pdf)
+[![SPEC 1.2.1-7](https://img.shields.io/badge/SPEC-1.2.1--7-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-1.2.1.pdf)
 [![Join the Slack group](https://img.shields.io/badge/chat-on%20slack-blue.svg?logo=slack)](https://khr.io/slack)
 
 # SYCL Open Source Specification
