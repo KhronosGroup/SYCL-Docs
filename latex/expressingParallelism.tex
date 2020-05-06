@@ -1411,7 +1411,10 @@ Table~\ref{table.members.handler.kernel} lists all the members of the
       Defines and invokes a \gls{sycl-kernel-function} as a lambda function
       or a named function object type,
       for the specified \gls{nd-range} and given an \gls{nd-item}
-      for indexing in the indexing space defined by the \gls{nd-range}.
+      for indexing in the indexing space defined by the \gls{nd-range}. If the
+      global size defined in the associated \gls{nd-range} is not evenly divisible
+      by the local size in each dimension then an \codeinline{nd_range_error} SYCL exception
+      must be thrown.
       If it is a named function object and the function object type is globally
       visible there is no need for the developer
       to provide a \gls{kernel-name} (\codeinline{typename KernelName}) for it,
@@ -1483,7 +1486,9 @@ Table~\ref{table.members.handler.kernel} lists all the members of the
       Kernel invocation method of a pre-compiled \gls{kernel} defined by SYCL \codeinline{kernel} instance,
       for the specified \codeinline{ndrange} and given an \codeinline{nd_item}
       for indexing in the indexing space defined by the \codeinline{nd_range},
-      described in detail in~\ref{subsec:invokingkernels}
+      described in detail in~\ref{subsec:invokingkernels}. If the global size defined in the associated
+      \gls{nd-range} is not evenly divisible by the local size in each dimension then an \codeinline{nd_range_error}
+      SYCL exception must be thrown.
     }
 \completeTable
 
