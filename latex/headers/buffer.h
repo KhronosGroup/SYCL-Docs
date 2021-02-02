@@ -80,7 +80,7 @@ class buffer {
   buffer<T, 1>(InputIterator first, InputIterator last,
                const property_list &propList = {});
 
-  buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions> &baseIndex,
+  buffer(buffer &b, const id<dimensions> &baseIndex,
          const range<dimensions> &subRange);
 
   /* Available only when: dimensions == 1. */
