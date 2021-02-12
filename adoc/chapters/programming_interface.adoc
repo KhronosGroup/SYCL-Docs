@@ -14400,7 +14400,8 @@ kernel_bundle<State> get_kernel_bundle(const context &ctxt, const std::vector<de
 _Returns:_ A kernel bundle in state [code]#State# which contains all of the
 <<kernel,kernels>> in the application which are compatible with at least one of
 the devices in [code]#devs#.  This does not include any device built-in kernels.
-The bundle's set of associated devices is [code]#devs#.
+The bundle's set of associated devices is [code]#devs# (with any duplicate
+devices removed).
 
 Since the implementation may not represent all kernels in
 [code]#bundle_state::input# or [code]#bundle_state::object#, calling this
@@ -14411,7 +14412,7 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt#.
+    the context [code]#ctxt# or if the [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#State# is [code]#bundle_state::input# and any device in [code]#devs#
     does not have [code]#aspect::online_compiler#.
@@ -14433,11 +14434,12 @@ kernel_bundle<State> get_kernel_bundle(const context &ctxt, const std::vector<de
 _Returns:_ A kernel bundle in state [code]#State# which contains all of the
 device images that are compatible with at least one of the devices in
 [code]#devs#, further filtered to contain only those device images that contain
-kernels with the given identifiers.  These identifiers may represent kernels
-that are defined in the application, device built-in kernels, or a mixture of
-the two.  Since the device images may group many kernels together, the returned
-bundle may contain additional kernels beyond those that are requested in
-[code]#kernelIds#.  The bundle's set of associated devices is [code]#devs#.
+at least one of the kernels with the given identifiers.  These identifiers may
+represent kernels that are defined in the application, device built-in kernels,
+or a mixture of the two.  Since the device images may group many kernels
+together, the returned bundle may contain additional kernels beyond those that
+are requested in [code]#kernelIds#.  The bundle's set of associated devices is
+[code]#devs# (with duplicate devices removed).
 
 Since the implementation may not represent all kernels in
 [code]#bundle_state::input# or [code]#bundle_state::object#, calling this
@@ -14448,10 +14450,11 @@ the kernels in [code]#kernelIds#.  The application can test for this via
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
-    the kernels are incompatible with all devices in [code]#devs#.
+    the kernels identified by [code]#kernelIds# are incompatible with all
+    devices in [code]#devs#.
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt#.
+    the context [code]#ctxt# or if the [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#State# is [code]#bundle_state::input# and any device in [code]#devs#
     does not have [code]#aspect::online_compiler#.
@@ -14483,13 +14486,15 @@ determines whether a device image is included in the new kernel bundle.  The
 in the application, not for device images that contain device built-in kernels.
 
 _Returns:_ A kernel bundle in state [code]#State# which contains all of the
-device images for which the [code]#selector# returns [code]#true#.
+device images for which the [code]#selector# returns [code]#true#.  The
+bundle's set of associated devices is [code]#devs# (with duplicate devices
+removed).
 
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt#.
+    the context [code]#ctxt# or if the [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#State# is [code]#bundle_state::input# and any device in [code]#devs#
     does not have [code]#aspect::online_compiler#.
@@ -14578,7 +14583,7 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt#.
+    the context [code]#ctxt# or if the [code]#devs# vector is empty.
 
 [source]
 ----
@@ -14602,7 +14607,7 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt#.
+    the context [code]#ctxt# or if the [code]#devs# vector is empty.
 
 [source]
 ----
@@ -14691,7 +14696,15 @@ kernel_bundle<State> join(const std::vector<kernel_bundle<State>> &bundles);
 ----
 
 _Returns:_ A new kernel bundle that represents the union of all the device
-images in the input [code]#bundles# with duplicates removed.
+images in the input [code]#bundles# with duplicates removed.  The new bundle
+has the same associated context and the same set of associated devices as
+those in [code]#bundles#.
+
+_Throws:_
+
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    bundles in [code]#bundles# do not all have the same associated context
+    or do not all have the same set of associated devices.
 
 
 [[sec:bundles.compile-link]]
@@ -14730,7 +14743,8 @@ kernels (those that are not compatible with any of the devices [code]#devs#)
 are not compiled and not represented in the new kernel bundle.
 
 The new bundle has the same associated context as [code]#inputBundle#, and the
-new bundle's set of associated devices is [code]#devs#.
+new bundle's set of associated devices is [code]#devs# (with duplicate devices
+removed).
 
 _Returns:_ The new kernel bundle.
 
@@ -14738,7 +14752,8 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# are not in the set of associated devices for
-    [code]#inputBundle# (as defined by [code]#kernel_bundle::get_devices()#).
+    [code]#inputBundle# (as defined by [code]#kernel_bundle::get_devices()#) or
+    if the [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::build# error code if the online
     compile operation fails.
 
@@ -14762,7 +14777,7 @@ represented in the new bundle.
 
 The new bundle has the same associated context as those in
 [code]#objectBundles#, and the new bundle's set of associated devices is
-[code]#devs#.
+[code]#devs# (with duplicate devices removed).
 
 _Returns:_ The new kernel bundle.
 
@@ -14774,7 +14789,8 @@ _Throws:_
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# are not in the set of associated devices for
     any of the bundles in [code]#objectBundles# (as defined by
-    [code]#kernel_bundle::get_devices()#).
+    [code]#kernel_bundle::get_devices()#) or if the [code]#devs# vector is
+    empty.
   * An [code]#exception# with the [code]#errc::build# error code if the online
     link operation fails.
 
@@ -14798,7 +14814,8 @@ the devices [code]#devs#) are not compiled or linked and are not represented in
 the new bundle.
 
 The new bundle has the same associated context as [code]#inputBundle#, and the
-new bundle's set of associated devices is [code]#devs#.
+new bundle's set of associated devices is [code]#devs# (with duplicate devices
+removed).
 
 _Returns:_ The new kernel bundle.
 
@@ -14806,7 +14823,8 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
     the devices in [code]#devs# are not in the set of associated devices for
-    [code]#inputBundle# (as defined by [code]#kernel_bundle::get_devices()#).
+    [code]#inputBundle# (as defined by [code]#kernel_bundle::get_devices()#) or
+    if the [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::build# error code if the online
     compile or link operations fail.
 
