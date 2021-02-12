@@ -15799,7 +15799,7 @@ const char *what() const
 a@
 [source]
 ----
-bool has_context() const
+bool has_context() const noexcept
 ----
    a@ Returns [code]#true# if this SYCL [code]#exception# has an associated SYCL [code]#context# and [code]#false# if it does not.
 
@@ -15967,6 +15967,15 @@ backend_mismatch
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ SYCL Error Code Helpers @ Description
+a@
+[source]
+----
+const std::error_category& sycl_category() noexcept;
+----
+   a@ Obtains a reference to the static error category object for SYCL errors.
+      This object overrides the virtual function [code]#error_category()# to
+      return a pointer to the string [code]#"sycl"#.
+
 a@
 [source]
 ----
