@@ -24,6 +24,8 @@ class exception : public virtual std::exception {
     const std::error_code& code() const noexcept;
     const std::error_category& category() const noexcept;
 
+    const char *what() const;
+
     bool has_context() const noexcept;
     context get_context() const;
 };
