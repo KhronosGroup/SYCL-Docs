@@ -22,7 +22,7 @@ class KernelFunctor {
 
 // Using "sycl::requires()" does not provide any guarantee that the device
 // actually supports the required features.  Therefore, the host code should
-// still check the devices aspects before submitting the kernel.
+// still check the device's aspects before submitting the kernel.
 if (myQueue.get_device().has(aspect::fp16)) {
   myQueue.submit([&](handler &h) {
     h.parallel_for(range{16}, KernelFunctor{});
