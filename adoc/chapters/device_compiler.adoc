@@ -397,6 +397,13 @@ following aspects are those that correspond to optional kernel features:
   * [code]#fp64#
   * [code]#atomic64#
 
+In addition, the following {cpp} attributes from <<sec:kernel.attributes>> also
+correspond to optional kernel features because they force the kernel to be
+compiled in a way that might not run on all devices:
+
+  * [code]#reqd_work_group_size()#
+  * [code]#reqd_sub_group_size()#
+
 In order to guarantee source code portability of SYCL applications that use
 optional kernel features, all SYCL implementations must be able to compile
 device code that uses these optional features regardless of whether the
@@ -467,6 +474,7 @@ compiled for the host, it has no effect when the function is compiled for the
 host.
 
 
+[[sec:kernel.attributes]]
 === Kernel attributes
 
 The attributes in <<table.kernel.attributes>> are applied to the function-type
@@ -496,9 +504,13 @@ reqd_work_group_size(dim0, dim1, dim2)
       dimensionality of the attribute variant used must match the dimensionality of
       the work-group used to invoke the kernel.
 
-SYCL device compilers should give a compilation error if the required
-work-group size is unsupported.  If the kernel is submitted for execution using
-an incompatible work-group size, the SYCL runtime must throw an
+Each device may have limitations on the work group sizes that it supports.  If
+a kernel is decorated with this attribute and then submitted to a device that
+does not support the work group size, the implementation must throw a
+synchronous [code]#exception# with the [code]#errc::kernel_not_supported# error
+code.  If the kernel is submitted to a device that does support the work group
+size, but the application provides an [code]#nd_range# that does not match the
+size from the attribute, then the implementation must throw a synchronous
 [code]#exception# with the [code]#errc::nd_range# error code.
 
 a@
@@ -536,11 +548,13 @@ reqd_sub_group_size(dim)
       sub-group size. The argument to the attribute must be an integral constant
       expression.
 
-SYCL device compilers should give a compilation error if the required sub-group
-size is unsupported by the device or incompatible with any language feature used
-by the kernel.  The set of valid sub-group sizes for a kernel can be queried as
-described in <<table.device.info>> and
-<<table.kernel.devicespecificinfo>>.
+Each device supports only certain sub-group sizes as defined by
+[code]#info::device::sub_group_sizes#.  In addition, some device features may
+be incompatible with certain sub-group sizes.  If a kernel is decorated with
+this attribute and then submitted to a device that does not support the
+sub-group size or if the kernel uses a feature that the device does not support
+with this sub-group size, the implementation must throw a synchronous
+[code]#exception# with the [code]#errc::kernel_not_supported# error code.
 
 a@
 [source]
