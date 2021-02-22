@@ -24,7 +24,7 @@ int main() {
       accessor writeResult { resultBuf, cgh, write_only, no_init };
 
       // Enqueue a parallel_for task with 1024 work-items
-      cgh.parallel_for(1024, [=](id<1> idx) { 
+      cgh.parallel_for(1024, [=](id<1> idx) {
         // Initialize each buffer element with its own rank number starting at 0
         writeResult[idx] = idx;
       });  // End of the kernel function

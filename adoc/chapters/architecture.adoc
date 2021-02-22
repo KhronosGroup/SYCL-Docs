@@ -78,9 +78,9 @@ The application is structured in three scopes which specify the different sectio
 The <<kernel-scope>> specifies a single kernel function that will
 be, or has been, compiled by a <<device-compiler>> and executed on a
 <<device>>. In this example <<kernel-scope>> is defined by lines
-26 to 29.  The <<command-group-scope>> specifies a unit of work which is
+25 to 26.  The <<command-group-scope>> specifies a unit of work which is
 comprised of a <<sycl-kernel-function>> and <<accessor,accessors>>.  In this
-example <<command-group-scope>> is defined by lines 21 to 30.  The
+example <<command-group-scope>> is defined by lines 20 to 28.  The
 <<application-scope>> specifies all other code outside of a
 <<command-group-scope>>.
 These three scopes are used to control the application flow and the
@@ -111,7 +111,7 @@ The different member functions to
 execute kernels can be found in <<subsec:invokingkernels>>.
 
 A <<command-group-scope>> is the syntactic scope wrapped by the construction
-of a <<command-group-function-object>> as seen on line 21. The
+of a <<command-group-function-object>> as seen on line 19. The
 <<command-group-function-object>> may invoke only a single
 <<sycl-kernel-function>>, and it takes a parameter of type command group
 [code]#handler#, which is constructed by the runtime.
@@ -119,20 +119,20 @@ of a <<command-group-function-object>> as seen on line 21. The
 All the requirements for a kernel to execute are
 defined in this <<command-group-scope>>, as described in
 <<sec:executionmodel>>. In this case the constructor used
-for [code]#myQueue# on line 15 is the default constructor, which allows
+for [code]#myQueue# on line 9 is the default constructor, which allows
 the queue to select the best underlying device to execute on, leaving the
 decision up to the runtime.
 
 In SYCL, data that is required within a <<sycl-kernel-function>> must
 be contained within a <<buffer>>, <<image>>, or <<usm>> allocation, as described in
 <<sec:memory.model>>. We
-construct a buffer on line 18. Access to the <<buffer>> is controlled via
-an <<accessor>> which is constructed on line 23.
+construct a buffer on line 16. Access to the <<buffer>> is controlled via
+an <<accessor>> which is constructed on line 21.
 The <<buffer>> is used to
 keep track of access to the data and the <<accessor>> is used to request
 access to the data on a queue, as well as to track the dependencies between
 <<sycl-kernel-function>>. In this example the <<accessor>> is used to
-write to the data buffer on line 28.
+write to the data buffer on line 26.
 
 
 [[sec:normativerefs]]
