@@ -1,0 +1,827 @@
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin compiler_abi %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[[chapter.device.compiler]]
+= SYCL Device Compiler
+
+This section specifies the requirements of the SYCL device compiler.
+Most features described in this section relate to underlying <<backend>>
+capabilities of target devices and limiting the requirements of device
+code to ensure portability.
+
+
+== Offline compilation of SYCL source files
+
+There are two alternatives for a SYCL <<device-compiler>>: a
+[keyword]#single-source device compiler# and a device compiler that supports
+the technique of <<smcp>>.
+
+A SYCL device compiler takes in a {cpp} source file, extracts only the SYCL
+kernels and outputs the device code in a form that can be enqueued from host
+code by the associated <<sycl-runtime>>. How the <<sycl-runtime>>
+invokes the kernels is implementation-defined, but a typical approach is for
+a device compiler to produce a header file with the compiled kernel
+contained within it. By providing a command-line option to the host
+compiler, it would cause the implementation's SYCL header files to
+[code]#{hash}include# the generated header file. The SYCL specification has
+been written to allow this as an implementation approach in order to allow
+<<smcp>>. However, any of the mechanisms needed from the SYCL compiler,
+the <<sycl-runtime>> and build system are implementation-defined, as they
+can vary depending on the platform and approach.
+
+A SYCL single-source device compiler takes in a {cpp} source file and compiles
+both host and device code at the same time. This specification specifies how
+a SYCL single-source device compiler sees and outputs device code for kernels,
+but does not specify the host compilation.
+
+
+[[sec:naming.kernels]]
+== Naming of kernels
+
+SYCL kernels are extracted from {cpp} source files and stored in an
+implementation-defined format. In the case of the shared-source compilation model, the kernels
+have to be uniquely identified by both host and device compiler. This is
+required in order for the host runtime to be able to load the kernel by using
+a backend-specific host runtime interface.
+
+From this requirement the following rules apply for naming the kernels:
+
+  * The kernel name is a [keyword]#{cpp} typename#.
+  * The kernel name must be forward declarable at namespace scope
+    (including global namespace scope) and may not be forward declared other
+    than at namespace scope. If it isn't forward declared
+    but is specified as a template argument in a kernel invoking interface,
+    as described in <<subsec:invokingkernels>>, then it may not conflict
+    with a name in any enclosing namespace scope.
+
+[NOTE]
+====
+The requirement that a kernel name be forward declarable makes some types
+for kernel names illegal, such as anything declared in the [code]#std#
+namespace (adding a declaration to namespace [code]#std# leads to undefined
+behavior).
+====
+
+  * If the kernel is defined as a named function object type, the name can
+    be the typename of the function object as long as it is either declared
+    at namespace scope, or does not conflict with any name in an enclosing
+    namespace scope.
+  * If the kernel is defined as a lambda, a typename can optionally be
+    provided to the kernel invoking interface as described
+    in <<subsec:invokingkernels>>, so that the developer can control the
+    kernel name for purposes such as debugging or referring to the kernel
+    when applying build options.
+  * If a kernel function relies on template parameters, then those template
+    parameters must be contained by the kernel name.  If such a kernel name
+    is specified as a template argument in a kernel invoking interface, then
+    the template parameters on which the kernel depends must be forward
+    declarable at namespace scope.
+
+In both single-source and shared-source implementations, a device compiler should
+detect the kernel invocations (e.g. [code]#parallel_for<kernelname>)#
+in the source code and compile the enclosed kernels, storing them with their
+associated type name.
+
+The format of the kernel and the compilation techniques are details of an
+implementation and not specified. The interface between the compiler and the
+runtime for extracting and executing SYCL kernels on the device is a detail of
+an implementation and not specified.
+
+
+== Compilation of functions
+
+The SYCL device compiler parses an entire {cpp} source file supplied by the
+user, including any header files referenced via [code]#{hash}include#
+directives. From this source file, the SYCL device compiler must compile
+kernels for the device, as well as any functions that the kernels call.
+
+The device compiler identifies kernels by looking for calls to
+<<kernel-invocation-command, Kernel invocation commands>> such as [code]#parallel_for#.  One of
+the parameters is a function object which is known as a
+<<sycl-kernel-function>>, and this function must always return
+[code]#void#.  Any function called by the <<sycl-kernel-function>> is
+also compiled for the device, and these functions together with the
+<<sycl-kernel-function, SYCL kernel functions>> are known as <<device-function, device functions>>.  The device
+compiler searches recursively for any functions called from a
+<<device-function>>, and these functions are also compiled for the device and
+known as <<device-function, device functions>>.
+
+To illustrate, the following source code shows three functions and a kernel
+invoke with comments explaining which functions need to be compiled for the
+device.
+
+[source,,linenums]
+----
+void f(handler& cgh) {
+  // Function "f" is not compiled for device
+
+  cgh.single_task([=] {
+    // This code is compiled for device
+    g(); // This line forces "g" to be compiled for device
+  });
+}
+
+void g() {
+  // Called from kernel, so "g" is compiled for device
+}
+
+void h() {
+  // Not called from a device function, so not compiled for device
+}
+----
+
+In order for the SYCL device compiler to correctly compile <<device function, device functions>>, all
+functions in the source file, whether <<device function, device functions>> or not, must be
+syntactically correct functions according to this specification. A syntactically
+correct function adheres to at least the minimum required {cpp} version
+defined in <<sec:progmodel.minimumcppversion>>.
+
+
+[[sec:language.restrictions.kernels]]
+== Language restrictions for device functions
+
+<<device-function, Device functions>> must abide by certain restrictions.  The full set of
+{cpp} features are not available to these functions.  Following is a list of
+these restrictions:
+
+  * Pointers and objects containing pointers may be shared.  However, when a pointer is
+    passed between SYCL devices or between the host and a SYCL device,
+    dereferencing that pointer on the device produces undefined behavior unless
+    the device supports <<usm>> and the pointer is an address within a
+    <<usm>> memory region (see <<sec:usm>>).
+  * Memory storage allocation is not allowed in kernels. All memory allocation
+    for the device is done on the host using accessor classes or using
+    <<usm>> as explained in <<sec:usm>>.
+    Consequently, the default allocation [code]#operator new# overloads
+    that allocate storage are disallowed in a SYCL kernel. The placement
+    [code]#new# operator and any user-defined overloads that do not
+    allocate storage are permitted.
+  * Kernel functions must always have a [code]#void# return type. A
+    kernel lambda trailing-return-type that is not [code]#void# is
+    therefore illegal, as is a return statement (that would return from the
+    kernel function) with an expression that does not convert to
+    [code]#void#.
+  * The odr-use of polymorphic classes and classes with virtual
+    inheritance is allowed. However, no virtual member functions are allowed
+    to be called in a <<device-function>>.
+  * No function pointers or references are allowed to be called in a
+    <<device-function,device function>>.
+  * RTTI is disabled inside <<device-function,device functions>>.
+  * No variadic functions are allowed to be called in a
+    <<device-function>>.
+  * Exception-handling cannot be used inside a
+    <<device-function>>.
+    [code]#noexcept# is allowed.
+  * Recursion is not allowed in a <<device-function>>.
+  * Variables with thread storage duration ([code]#thread_local#
+    storage class specifier) are not allowed to be odr-used in a
+    <<device-function>>.
+  * Variables with static storage duration that are odr-used inside a
+    <<device-function>>, must be [code]#const#
+    or [code]#constexpr# and zero-initialized or constant-initialized.
+
+[NOTE]
+====
+Amongst other things, this restriction makes it illegal for a
+<<device-function>> to access a global variable that isn't [code]#const#
+or [code]#constexpr#.
+====
+
+  * The rules for kernels apply to both the kernel function objects
+    themselves and all functions, operators, member functions, constructors
+    and destructors called by the kernel. This means that kernels can only
+    use library functions that have been adapted to work with SYCL.
+    Implementations are not required to support any library routines in
+    kernels beyond those explicitly mentioned as usable in kernels in this
+    spec. Developers should refer to the SYCL built-in functions
+    in <<sycl:builtins>> to find functions that are specified to be usable
+    in kernels.
+  * Interacting with a special <<sycl-runtime>> class (e.g. SYCL
+    [code]#accessor# or [code]#stream)# that is stored within a {cpp} union
+    is undefined behavior.
+
+
+[[subsec:scalartypes]]
+== Built-in scalar data types
+
+In a SYCL device compiler, the device definition of all standard {cpp}
+fundamental types from <<table.types.fundamental>> must match the
+host definition of those types, in both size and alignment. A device
+compiler may have this preconfigured so that it can match them based on the
+definitions of those types on the platform, or there may be a necessity for
+a device compiler command-line option to ensure the types are the same.
+
+The standard {cpp} fixed width types, e.g. [code]#int8_t#,
+[code]#int16_t#, [code]#int32_t#,[code]#int64_t#,
+should have the same size as defined by the {cpp} standard for host and
+device.
+
+ifdef::showtodos[]
+[NOTE]
+.Note
+====
+To ensure that pointer types and [code]#size_t# use the same amount of
+storage on host and device when inside structures, SYCL also requires that
+device compilers use the host sizes for pointers or [code]#size_t#. Devices
+may be using a smaller size internally for pointers and [code]#size_t#,
+but this should not impact the programming model for users. In the case where
+devices use larger pointer size internally than the host, then
+[code]#size_t# will match the <<host-pointer>> size. For structures shared
+between host and device it is recommended to use fixed width types for pointers.
+Scalar data types for a SYCL device compiler are described in
+<<table.types.fundamental>>.
+====
+endif::showtodos[]
+
+
+
+[[table.types.fundamental]]
+.Fundamental data types supported by SYCL
+[width="100%",options="header",separator="@",cols="65%,35%"]
+|====
+@ Fundamental data type @ Description
+a@
+[source]
+----
+bool
+----
+   a@ A conditional data type which can be either true or false. The value
+      true expands to the integer constant 1 and the value false expands to the
+      integer constant 0.
+
+a@
+[source]
+----
+char
+----
+   a@ A signed or unsigned 8-bit integer, as defined by the {cpp} core language
+
+a@
+[source]
+----
+signed char
+----
+   a@ A signed 8-bit integer, as defined by the {cpp} core language
+
+a@
+[source]
+----
+unsigned char
+----
+   a@ An unsigned 8-bit integer, as defined by the {cpp} core language
+
+a@
+[source]
+----
+short int
+----
+   a@ A signed integer of at least 16-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+unsigned short int
+----
+   a@ An unsigned integer of at least 16-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+int
+----
+   a@ A signed integer of at least 16-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+unsigned int
+----
+   a@ An unsigned integer of at least 16-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+long int
+----
+   a@ A signed integer of at least 32-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+unsigned long int
+----
+   a@ An unsigned integer of at least 32-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+long long int
+----
+   a@ An integer of at least 64-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+unsigned long long int
+----
+   a@ An unsigned integer of at least 64-bits, as defined by the {cpp} core language
+
+a@
+[source]
+----
+float
+----
+   a@ A 32-bit floating-point. The float data type must conform to the IEEE 754
+      single precision storage format.
+
+a@
+[source]
+----
+double
+----
+   a@ A 64-bit floating-point. The double data type must conform to the IEEE 754
+      double precision storage format.  This type is only supported on devices
+      that have [code]#aspect::fp64#.
+
+|====
+
+
+
+== Preprocessor directives and macros
+
+The standard {cpp} preprocessing directives and macros are supported.
+The following preprocessor macros must be defined by all conformant
+implementations:
+
+  * [code]#SYCL_LANGUAGE_VERSION# substitutes an integer reflecting
+    the version number and revision of the SYCL language being supported
+    by the implementation. The version of SYCL defined in this document
+    will have [code]#SYCL_LANGUAGE_VERSION# substitute the integer
+    [code]#{SYCL_LANGUAGE_VERSION}#, composed with the general SYCL version
+    followed by 2 digits representing the revision number;
+  * [code]#SYCL_DEVICE_COPYABLE# is defined to 1 if the implementation
+    supports explicitly specified <<device-copyable>> types as described in
+    <<sec::device.copyable>>.  Otherwise, the implementation's definition of
+    device copyable falls back to {cpp} trivially copyable and
+    [code]#sycl::is_device_copyable# is ignored;
+  * [code]#+__SYCL_DEVICE_ONLY__+# is defined to 1 if the source file is
+    being compiled with a SYCL device compiler which does not produce host
+    binary;
+  * [code]#+__SYCL_SINGLE_SOURCE__+# is defined to 1 if the source file
+    is being compiled with a SYCL single-source compiler which produces host
+    as well as device binary;
+  * [code]#SYCL_FEATURE_SET_FULL# is defined to 1 if the SYCL implementation
+    supports the full feature set and is not defined otherwise. For more details
+    see <<cha:feature-sets>>;
+  * [code]#SYCL_FEATURE_SET_REDUCED# is defined to 1 if the SYCL implementation
+    supports the reduced feature set and not the full feature set, otherwise it
+    is not defined. For more details see <<cha:feature-sets>>;
+  * [code]#SYCL_EXTERNAL# is an optional macro which enables external
+    linkage of SYCL functions and member functions to be included in a SYCL kernel.
+    The macro is only defined if the implementation supports external linkage.
+    For more details see <<subsec:syclexternal>>
+
+In addition, for each <<backend>> supported, the preprocessor macros described
+in <<sec:backends>> must be defined by all conformant implementations.
+
+
+[[sec:optional-kernel-features]]
+== Optional kernel features
+
+A number of kernel features defined by this SYCL specification are optional;
+they may be supported on some devices but not on other devices.  As described
+in <<sec:device-aspects>>, an application can test whether a device supports
+these features by testing whether the device has an associated aspect.  The
+following aspects are those that correspond to optional kernel features:
+
+  * [code]#fp16#
+  * [code]#fp64#
+  * [code]#atomic64#
+
+In order to guarantee source code portability of SYCL applications that use
+optional kernel features, all SYCL implementations must be able to compile
+device code that uses these optional features regardless of whether the
+implementation supports the features on any of its devices.
+
+Of course, applications that make use of optional kernel features should ensure
+that a kernel using such a feature is submitted only to a device that supports
+the feature.  If the application submits a <<command-group>> using a secondary
+queue, then any kernel submitted from the <<command-group>> should use only
+features that are supported by both the primary queue's device and the
+secondary queue's device.  If an application fails to do this, the
+implementation must throw a synchronous exception with the
+[code]#errc::kernel_not_supported# error code from the
+<<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
+
+It is legal for a SYCL application to define several kernels in the same
+translation unit even if they use different optional features, as shown in the
+following example:
+
+[source,,linenums]
+----
+include::{code_dir}/twoOptionalFeatures.cpp[lines=4..-1]
+----
+
+An implementation may not raise a compile time diagnostic or a run time
+exception merely due to speculative compilation of a kernel for a device when
+the application does not actually submit the kernel to that device.  To
+illustrate using the example above, assume that device [code]#dev1# does not
+have [code]#aspect::atomic64# and device [code]#dev2# doe not have
+[code]#aspect::fp16#.  An implementation cannot raise a diagnostic due to
+compilation of [code]#KernelA# for device [code]#dev2# or for compilation of
+[code]#KernelB# for device [code]#dev1# because the application does not submit
+these kernels to those devices.
+
+[NOTE]
+====
+It is expected that this requirement will have an impact on the way an
+implementation bundles kernels into device images.  For example, naively
+bundling [code]#KernelA# and [code]#KernelB# into the same device image could
+run afoul of this requirement if the implementation compiles the entire device
+image when [code]#KernelA# is submitted to device [code]#dev1#.
+====
+
+
+[[sec:device.attributes]]
+== Attributes for device code
+
+{cpp} attributes may be used to decorate kernels and device functions in order
+to influence the code generated by the device compiler.  These attributes are
+all defined in the [code]#+[[sycl::]]+# namespace, with the exception of the
+deprecated attributes described in <<subsec::attributes.deprecated>>.
+
+Each attribute-token defined in this section may be applied at most once for
+any particular kernel or device function.  Applications that decorate a kernel
+or device function with the same attribute-token more than once are ill formed
+and the compiler must issue a diagnostic.  If a kernel or device function is
+decorated with one of these attributes, the decoration must exist on the first
+declaration of the kernel or device function in the translation unit.  Programs
+which fail to do this are ill formed and the compiler must issue a diagnostic.
+If a function is declared with an attribute in one translation unit and the
+same function is declared without the same attribute in another translation
+unit, the program is ill formed and no diagnostic is required.  Applying these
+attributes to any language construct other than those specified in this section
+has implementation-defined effect.
+
+If any of these attributes is applied to a device function that is also
+compiled for the host, it has no effect when the function is compiled for the
+host.
+
+
+=== Kernel attributes
+
+The attributes in <<table.kernel.attributes>> are applied to the function-type
+of kernel function declarations.  The example below demonstrates this syntax
+using the [code]#[[sycl::reqd_work_group_size(16)]]# attribute.
+
+[source,,linenums]
+----
+include::{code_dir}/attributes.cpp[lines=4..-1]
+----
+
+[[table.kernel.attributes]]
+.Attributes for kernel functions
+[width="100%",options="header",separator="@",cols="65%,35%"]
+|====
+@ SYCL attribute @ Description
+a@
+[source]
+----
+reqd_work_group_size(dim0)
+reqd_work_group_size(dim0, dim1)
+reqd_work_group_size(dim0, dim1, dim2)
+----
+   a@ Indicates that the kernel must be launched with the specified work-group size.
+      The order of the arguments matches the constructor of the [code]#group#
+      class.  Each argument to the attribute must be an integral constant expression.  The
+      dimensionality of the attribute variant used must match the dimensionality of
+      the work-group used to invoke the kernel.
+
+SYCL device compilers should give a compilation error if the required
+work-group size is unsupported.  If the kernel is submitted for execution using
+an incompatible work-group size, the SYCL runtime must throw an
+[code]#exception# with the [code]#errc::nd_range# error code.
+
+a@
+[source]
+----
+work_group_size_hint(dim0)
+work_group_size_hint(dim0, dim1)
+work_group_size_hint(dim0, dim1, dim2)
+----
+   a@ Hint to the compiler on the work-group size most likely to be used when
+      launching the kernel at runtime. Each argument must be an integral constant
+      expression, and the number of dimensional values defined provide additional
+      information to the compiler on the dimensionality most likely to be used when
+      launching the kernel at runtime. The effect of this attribute, if any, is
+      implementation-defined.
+
+a@
+[source]
+----
+vec_type_hint(<type>)
+----
+   a@ Hint to the compiler on the vector computational width of of the kernel. The
+      argument must be one of the vector types defined in <<sec:vector.type>>.
+      The effect of this attribute, if any, is implementation-defined.
+
+This attribute is deprecated (available for use, but will likely be removed in
+a future version of the specification and is not recommended for use in new code).
+
+a@
+[source]
+----
+reqd_sub_group_size(dim)
+----
+   a@ Indicates that the kernel must be compiled and executed with the specified
+      sub-group size. The argument to the attribute must be an integral constant
+      expression.
+
+SYCL device compilers should give a compilation error if the required sub-group
+size is unsupported by the device or incompatible with any language feature used
+by the kernel.  The set of valid sub-group sizes for a kernel can be queried as
+described in <<table.device.info>> and
+<<table.kernel.devicespecificinfo>>.
+
+a@
+[source]
+----
+sycl::requires(has(aspect, ...))
+----
+   a@ This attribute may be used to decorate either the declaration of a kernel
+      function that is defined in the current translation unit or to decorate
+      the declaration of a non-kernel device function.  The following
+      description applies when the attribute decorates a kernel function.
+
+The parameter list to the [code]#sycl::requires()# attribute may either be
+empty or it may be a single [code]#has()# clause.  The parameter list to the
+[code]#has()# clause consists of zero or more [code]#constexpr# integral
+expressions, where each integer is interpreted as one of the enumerated values
+in the [code]#sycl::aspect# enumeration type.  Specifying an empty parameter
+list to [code]#sycl::requires()# is equivalent to specifying a [code]#has()#
+clause with an empty parameter list.
+
+Specifying this attribute on a kernel has two effects.  First, it causes the
+<<kernel-invocation-command>> to throw a synchronous exception with the
+[code]#errc::kernel_not_supported# error code if the kernel is submitted to a
+device that does not have one of the listed aspects.  (This includes the device
+associated with the secondary queue if the kernel is submitted from a
+<<command-group>> that has a secondary queue.)  Second, it causes the compiler
+to issue a diagnostic if the kernel (or any of the functions it calls) uses an
+optional feature that is associated with an aspect that is not listed in the
+attribute.
+
+The value of each parameter to the [code]#has()# clause must be equal to one of
+the values in the [code]#sycl::aspect# enumeration type (including any extended
+values the implementation may provide).  If it does not, the program is ill
+formed and the compiler must issue a diagnostic.
+
+See <<listing:requires>> for an example of this attribute.
+
+|====
+
+.Example of the [code]#sycl::requires()# attribute
+[[listing:requires]]
+[source,,linenums]
+----
+include::{code_dir}/requires.cpp[lines=4..-1]
+----
+
+
+=== Device function attributes
+
+The attributes in <<table.device.attributes>> are applied to the declaration
+of a non-kernel device function.
+
+[[table.device.attributes]]
+.Attributes for non-kernel device functions
+[width="100%",options="header",separator="@",cols="65%,35%"]
+|====
+@ SYCL attribute @ Description
+a@
+[source]
+----
+sycl::requires(has(aspect, ...))
+----
+   a@ This attribute may be used to decorate either the declaration of a kernel
+      function that is defined in the current translation unit or to decorate
+      the declaration of a non-kernel device function.  The following
+      description applies when the attribute decorates a non-kernel device
+      function declaration.
+
+The syntax of this attribute's parameter list is the same as the syntax for
+the form of [code]#sycl::requires()# that is specified on a kernel function
+(see <<table.kernel.attributes>>).
+
+This attribute is required when a non-kernel device function that uses optional
+device features is called in one translation unit and defined in another
+translation unit via the [code]#SYCL_EXTERNAL# macro.
+
+When this attribute appears in a translation unit that calls the decorated
+device function, it is an assertion that the device function uses optional
+features that correspond to the aspects listed in the attribute.  The program
+is ill formed if the called device function uses optional features that do not
+correspond to any of the aspects listed in the attribute, or if the function
+uses optional features and the attribute is not specified.  No diagnostic is
+required in this case.
+
+When this attribute appears in a translation unit that defines the decorated
+device function, it causes the compiler to issue a diagnostic if the device
+function (or any of the functions it calls) uses an optional feature that is
+associated with an aspect that is not listed in the attribute.
+
+|====
+
+
+[[subsec::attributes.deprecated]]
+=== Deprecated kernel attribute syntax
+
+The SYCL 1.2.1 specification (superseded by this version) defined two mechanisms
+for kernel attributes to be specified, which are deprecated in this version of
+SYCL.  The old syntaxes are supported but will be removed in a future version, and
+are therefore not recommended for use. Specifically, the following two
+attribute syntaxes defined by the SYCL 1.2.1 specification are deprecated:
+
+  . The attribute syntax defined by the OpenCL C specification within device
+    code like [code]#+__attribute__((attrib))+#.
+  . The {cpp} attribute specifier syntax in the [code]#+[[cl::]]+# namespace
+    applied to device functions (not the function-type of a kernel
+    function), including automatic propagation of the attribute to any
+    caller of such device functions.
+
+
+== Address-space deduction
+
+{cpp} has no type-level support to represent address spaces. As a consequence,
+the SYCL generic programming model does not directly affect the {cpp} type of
+unannotated pointers and references.
+
+Source level guarantees about address spaces in the SYCL generic
+programming model can only be achieved using pointer classes (instances of
+[code]#multi_ptr#), which are regular classes that represent pointers
+to data stored in the corresponding address spaces.
+
+In SYCL, the address space of pointer and references are derived from:
+
+  * Accessors that give access to shared data. They can be bound to a memory
+    object in a command group and passed into a kernel. Accessors are used
+    in scheduling of kernels to define ordering. Accessors to buffers have a
+    compile-time address space based on their access mode.
+  * Explicit pointer classes (e.g. [code]#global_ptr#) holds a pointer
+    which is known to be addressing the address space represented by the
+    [code]#access::address_space#. This allows the compiler to
+    determine whether the pointer references global, local, constant or
+    private memory and generate code accordingly.
+  * Raw {cpp} pointer and reference types (e.g. [code]#int*#) are allowed
+    within SYCL kernels. They can be constructed from the address of local
+    variables, explicit pointer classes, or accessors.
+
+
+[[subsec:addrspaceAssignment]]
+=== Address space assignment
+
+In order to understand where data lives, the device compiler is
+expected to assign address spaces while lowering types for the
+underlying target based on the context.  Depending on the <<backend, SYCL backends>>
+and mode, address space deducing rules differ slightly.
+
+If the target of the SYCL backend can represent the generic address space,
+then the "common address space deduction rules" in
+<<subsec:commonAddressSpace>> and the "generic as default address space rules"
+in <<subsec:genericAddressSpace>> apply.  If the target of the SYCL backend
+cannot represent the generic address space, then the "common address space
+deduction rules" in <<subsec:commonAddressSpace>> and the "inferred address
+space rules" in <<subsec:inferredAddressSpace>> apply.
+
+[NOTE]
+====
+SYCL address space does not affect the type, address space shall be
+understood as memory segment in which data is allocated.  For
+instance, if [code]#int i;# is allocated to the global address
+space, then [code]#decltype(&i)# shall evaluate to
+[code]#int*#.
+====
+
+
+[[subsec:commonAddressSpace]]
+=== Common address space deduction rules
+
+The variable declarations get assigned to an address space depending on their
+scope and storage class:
+
+  * Namespace scope
+  ** If the type is [code]#const#, the address space the declaration is assigned to
+     is implementation-defined. If the target of the SYCL backend can represent the
+     generic address space, then the assigned address space must be compatible with
+     the generic address space.
+
+[NOTE]
+====
+Namespace scope non-[code]#const# declarations cannot be used within a kernel,
+as restricted in <<sec:language.restrictions.kernels>>.  This means that
+non-[code]#const# global variables cannot be accessed by any device kernel or
+code called by the device kernel.
+====
+
+  * Block scope and function parameter scope
+  ** Declarations with static storage duration are treated the same way as variables
+     in namespace scope
+  ** Otherwise the declaration is assigned to the local address space if
+     declared in a hierarchical context
+  ** Otherwise the declaration is assigned to the private address space
+  * Class scope
+  ** Static data members are treated the same way as for variable in
+     namespace scope
+
+The result of a prvalue-to-xvalue conversion is assigned to the local
+address space if it happens in a hierarchical context or to the private
+address space otherwise.
+
+
+[[subsec:genericAddressSpace]]
+=== Generic as default address space
+
+For SYCL backends that can represent the generic address space
+(see <<subsec:addrspaceAssignment>>), unannotated pointers and
+references are considered to be pointing to the generic address space.
+
+
+[[subsec:inferredAddressSpace]]
+=== Inferred address space
+
+[NOTE]
+.Note for this version
+====
+The address space deduction feature described next is inherited from
+the SYCL 1.2.1 specifications. This section will be changed in a future version
+to better align with addition of generic address space and generic
+as default address space.
+====
+
+For SYCL backends that cannot represent the generic address space
+(see <<subsec:addrspaceAssignment>>), inside kernels the SYCL device
+compiler will need to auto-deduce the memory region
+of unannotated pointer and reference types during the lowering of types
+from {cpp} to the underlying representation.
+
+If a kernel function or device function contains a pointer or reference type,
+then the address space deduction must be attempted using the following rules:
+
+  * If an explicit pointer class is converted into a {cpp} pointer value, then
+    the {cpp} pointer value will point to same address space as the one
+    represented by the explicit pointer class.
+  * If a variable is declared as a pointer type, but initialized in its
+    declaration to a pointer value with an already-deduced address space,
+    then that variable will have the same address space as its initializer.
+  * If a function parameter is declared as a pointer type, and the argument
+    is a pointer value with a deduced address space, then the function will
+    be compiled as if the parameter had the same address space as its
+    argument. It is legal for a function to be called in different places
+    with different address spaces for its arguments: in this case the
+    function is said to be "`duplicated`" and compiled multiple times. Each
+    duplicated instance of the function must compile legally in order to
+    have defined behavior.
+  * If a function return type is declared as a pointer type and return
+    statements use address space deduced expressions, then the function will
+    be compiled as if the return type had the same address space. To compile
+    legally, all return expressions must deduce to the same address space.
+  * The rules for pointer types also apply to reference types. i.e. a
+    reference variable takes its address space from its initializer. A
+    function with a reference parameter takes its address space from its
+    argument.
+  * If no other rule above can be applied to a declaration of a pointer,
+    then it is assumed to be in the private address space.
+
+It is illegal to assign a pointer value addressing one address space to a pointer
+variable addressing a different address space.
+
+
+== SYCL offline linking
+
+// Jon: Section empty, but subsection has content? Odd choice.
+
+
+[[subsec:syclexternal]]
+=== SYCL functions and member functions linkage
+
+The default behavior in SYCL applications is that all the definitions and
+declarations of the functions and member functions are available to the SYCL compiler,
+in the same translation unit. When this is not the case, all the symbols that
+need to be exported to a SYCL library or from a {cpp} library to a SYCL
+application need to be defined using the macro: [code]#SYCL_EXTERNAL#.
+
+The [code]#SYCL_EXTERNAL# macro will only be defined if the implementation
+supports offline linking. The macro is implementation-defined, but the following
+restrictions apply:
+
+  * [code]#SYCL_EXTERNAL# can only be used on functions;
+  * if the SYCL backend does not support the generic address space then the
+    function cannot use raw pointers as parameter or return types. Explicit
+    pointer classes must be used instead;
+  * externally defined functions cannot call a
+    [code]#sycl::parallel_for_work_item# member function;
+  * externally defined functions cannot be called from a
+    [code]#sycl::parallel_for_work_group# scope.
+
+The SYCL linkage mechanism is optional and implementation-defined.
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%% end compiler_abi %%%%%%%%%%%%%%%%%%%%%%%%%%%%

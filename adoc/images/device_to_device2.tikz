@@ -1,0 +1,34 @@
+[tikz,"device_to_device2"]
+----
+\usetikzlibrary{arrows}
+\begin{tikzpicture}[auto] \small
+\tikzset{Base/.style={align=center}, %, minimum height=2ex},
+  Line/.style={draw, very thick, >=latex', black},
+  LineHost/.style={draw, dashed, >=latex', black},
+  MemoryObject/.style={draw, Base, black},
+  CommandGroup/.style={draw, Base, rounded corners, black},
+  Notice/.style  = {draw, above, rounded corners, rectangle callout, text width=6cm,
+    callout absolute pointer={#1} },
+  Action/.style = {very thick, solid, draw, rectangle callout, rounded corners, black, Base}
+    }
+
+\matrix (binmat) [ampersand replacement=\&, column sep=0.5em, row sep=2em]
+  {\node  (empty) {}; \&
+    \node (empty) {};  \&
+    \node [MemoryObject] (Host) {Host memory (ptr)};  \&
+    \node (empty) {};  \\
+    \node (empty) {};  \&
+    \node [CommandGroup] (CGA)  {$CG_a(b1_{RW})$}; \&
+    \node (empty) {};  \&
+    \node [CommandGroup, style=dotted] (CGB)  {$CG_b(b2_{RW})$}; \\
+    \node (empty) {};  \&
+    \& \node [CommandGroup] (CGC)  {$CG_c(b1_{RW},b2_{RW})$}; \\
+    \node (empty) {};  \&
+    \& \node (empty) {}; \\
+};
+  \path [LineHost, ->] (Host) -- node[blue, left=0.3, near start] {clEnqueueWriteBuffer(q1, ptr, b1\_c1)} (CGA);
+  \path [LineHost, ->] (Host) -- node[blue, right=0.3, near start] {clEnqueueWriteBuffer(q2, ptr, b2\_c2)} (CGB);
+  \path [Line, ->] (CGA) -- node[blue, left=0.2, near end] {} (CGC);
+  \path [Line, ->] (CGB) -- node[blue, right=0.5, near end, align=left] {clEnqueueReadBuffer(q2, b2\_c2, ptr);\\ clEnqueueReadBuffer(q1, b2\_c1, ptr)} (CGC);
+\end{tikzpicture}
+----

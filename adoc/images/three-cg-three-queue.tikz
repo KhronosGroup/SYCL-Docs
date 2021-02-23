@@ -1,0 +1,26 @@
+[tikz,"three-cg-three-queue"]
+----
+\usetikzlibrary{arrows}
+\begin{tikzpicture}[auto] \small
+\tikzset{
+  Base/.style={align=center}, %, minimum height=2ex},
+  Line/.style={draw, very thick, >=latex', black},
+  CommandGroup/.style={draw, Base, rounded corners, black},
+  Notice/.style  = { draw, above, rounded corners, rectangle callout, text width=6cm,
+    callout absolute pointer={#1} },
+    }
+
+\matrix (binmat) [ampersand replacement=\&, column sep=0.5em, row sep=2em]
+{
+  \node [CommandGroup] (CGA)  {$CG_a(r_1)$}; \&
+    \node (empty) {};  \&
+    \node [CommandGroup] (CGB)  {$CG_b(r_2)$}; \\
+
+    \& \node [CommandGroup] (CGC)  {$CG_c(r_1,r_2)$}; \\
+    \& \node (empty) {}; \\
+};
+
+\path [Line, ->] (CGA) -- (CGC);
+\path [Line, ->] (CGB) -- (CGC);
+\end{tikzpicture}
+----

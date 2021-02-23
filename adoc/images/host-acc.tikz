@@ -1,0 +1,31 @@
+[tikz,"host-acc"]
+----
+\usetikzlibrary{arrows}
+\begin{tikzpicture}[auto] \small
+\tikzset{Base/.style={align=center}, %, minimum height=2ex},
+  Line/.style={draw, very thick, >=latex', black},
+  LineHost/.style={draw, dashed, >=latex', black},
+  MemoryObject/.style={draw, Base, black},
+  HostAcc/.style={draw, Base, black, cylinder},
+  CommandGroup/.style={draw, Base, rounded corners, black},
+  Notice/.style  = {draw, above, rounded corners, rectangle callout, text width=6cm,
+    callout absolute pointer={#1} },
+    }
+
+\matrix (binmat) [ampersand replacement=\&, column sep=0.5em, row sep=2em]
+{
+    \node [CommandGroup] (CGA) {$CG_a(b1_{RW})$}; \&
+    \node (empty) {};  \&
+    \node (empty) {};  \\
+    \node [CommandGroup] (CGB)  {$CG_b(b2_{RW})$}; \&
+    \node [MemoryObject] (HA) {$H(b1_{RW})$};  \\
+    \& \node [CommandGroup] (CGC)  {$CG_c(b1_{RW}, b2_{RW})$}; \\
+    \node (empty) {};  \&
+
+    \& \node (empty) {}; \\
+};
+\path [Line, ->] (CGA) -- (HA);
+\path [Line, ->] (CGB) -- (CGC);
+\path [Line, ->] (HA) -- (CGC);
+\end{tikzpicture}
+----
