@@ -259,12 +259,13 @@ OpenCL C language, in addition to supporting SYCL kernels written in {cpp}.
 <<sycl-runtime>> classes which encapsulate an OpenCL opaque type such as
 SYCL [code]#context# or SYCL [code]#queue# must provide an
 interoperability constructor taking an instance of the OpenCL opaque type.
-These constructors must retain that instance to increase the reference count
-of the OpenCL resource.
-
-The destructor for the <<sycl-runtime>> classes which encapsulate an
-OpenCL opaque type must release that instance to decrease the reference
-count of the OpenCL resource.
+When the OpenCL object supports reference counting, these constructors must
+retain that instance to increase the reference count of the OpenCL resource.
+Likewise, the destructor for the <<sycl-runtime>> classes which encapsulate a
+reference counted OpenCL opaque type must release that instance to decrease the
+reference count of the OpenCL resource.  Since the OpenCL [code]#platform_id#
+is not reference counted, the encapsulating SYCL [code]#platform# class neither
+retains nor releases this OpenCL resource.
 
 Note that an instance of a <<sycl-runtime>> class which encapsulates an
 OpenCL opaque type can encapsulate any number of instances of the OpenCL
@@ -313,11 +314,19 @@ to their OpenCL native type in the SYCL application.
 a@
 [source]
 ----
+platform
+----
+   a@ [code]#cl_platform_id#
+   a@ [code]#cl_platform_id#
+   a@ A SYCL platform object encapsulates an OpenCL platform ID.
+a@
+[source]
+----
 device
 ----
    a@ [code]#cl_device_id#
    a@ [code]#cl_device_id#
-   a@ A SYCL device object encapsulates an OpenCL device object.
+   a@ A SYCL device object encapsulates an OpenCL device ID.
 a@
 [source]
 ----
@@ -326,6 +335,14 @@ context
    a@ [code]#cl_context#
    a@ [code]#cl_context#
    a@ A SYCL context object encapsulates an OpenCL context object.
+a@
+[source]
+----
+queue
+----
+   a@ [code]#cl_command_queue#
+   a@ [code]#cl_command_queue#
+   a@ A SYCL queue object encapsulates an OpenCL queue object.
 a@
 [source]
 ----
@@ -452,9 +469,13 @@ the interoperability aliases defined in <<table.types.aliases>>.
 == Programming interface
 
 The following section describes the OpenCL-specific API.
-All free functions are available in the [code]#sycl::opencl# namespace.
 
 === Construct SYCL objects from OpenCL ones
+
+The OpenCL backend provides the following specializations of the
+[code]#make_{sycl_class}# template functions which are defined in
+<<sec:backend-interoperability-make>>.  These functions are in the
+[code]#sycl# namespace.
 
 [width="100%",options="header",separator="@",cols="40%,60%"]
 |====
@@ -470,31 +491,31 @@ context make_context(
 a@
 [source]
 ----
-sycl::event make_event(const cl_event &clEvent,
-    const sycl::context &syclContext)
+event make_event(const cl_event &clEvent,
+    const context &syclContext)
 ----
    a@ Constructs a SYCL [code]#event# instance from an OpenCL [code]#cl_event# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-sycl::device make_device(
+device make_device(
     const cl_device_id &clDeviceId)
 ----
    a@ Constructs a SYCL [code]#device# instance from an OpenCL [code]#cl_device_id# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-sycl::platform make_platform(
+platform make_platform(
     const cl_platform_id &clPlatformId)
 ----
    a@ Constructs a SYCL [code]#platform# instance from an OpenCL [code]#cl_platform_id# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-sycl::queue make_queue(
+queue make_queue(
     const cl_command_queue &clQueue,
-    const sycl::context &syclContext,
-    const sycl::async_handler &asyncHandler = {})
+    const context &syclContext,
+    const async_handler &asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#queue# instance with an optional
       [code]#async_handler# from an OpenCL [code]#cl_command_queue#
@@ -505,10 +526,10 @@ a@
 ----
 template <typename T, int dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-sycl::buffer<T, dimensions, AllocatorT> make_buffer(
+buffer<T, dimensions, AllocatorT> make_buffer(
     const cl_mem &clMemObject,
-    const sycl::context &syclContext,
-    sycl::event availableEvent)
+    const context &syclContext,
+    event availableEvent)
 ----
    a@ Available only when: [code]#dimensions == 1#.
 
@@ -521,9 +542,9 @@ a@
 ----
 template <typename T, int dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-sycl::buffer<T, dimensions, AllocatorT> make_buffer(
+buffer<T, dimensions, AllocatorT> make_buffer(
     const cl_mem &clMemObject,
-    const sycl::context &syclContext)
+    const context &syclContext)
 ----
    a@ Available only when: [code]#dimensions == 1#.
 
@@ -533,10 +554,11 @@ a@
 [source]
 ----
 template <int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator>
-sycl::sampled_image<dimensions, AllocatorT> make_sampled_image(
+          typename AllocatorT = image_allocator>
+sampled_image<dimensions, AllocatorT> make_sampled_image(
     const cl_mem &clMemObject,
     const context &syclContext,
+    image_sampler syclImageSampler,
     event availableEvent)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
@@ -547,10 +569,11 @@ a@
 [source]
 ----
 template <int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator>
-sycl::sampled_image<dimensions, AllocatorT> make_sampled_image(
+          typename AllocatorT = image_allocator>
+sampled_image<dimensions, AllocatorT> make_sampled_image(
     const cl_mem &clMemObject,
-    const context &syclContext)
+    const context &syclContext,
+    image_sampler syclImageSampler)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The SYCL [code]#context# parameter [code]#syclContext# is the context associated with the memory object.
@@ -559,11 +582,10 @@ a@
 [source]
 ----
 template <int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator>
-sycl::unsampled_image<dimensions, AllocatorT> make_unsampled_image(
+          typename AllocatorT = image_allocator>
+unsampled_image<dimensions, AllocatorT> make_unsampled_image(
     const cl_mem &clMemObject,
-    const sycl::context &syclContext,
-    sycl::image_sampler syclImageSampler,
+    const context &syclContext,
     event availableEvent)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
@@ -574,11 +596,10 @@ a@
 [source]
 ----
 template <int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator>
-sycl::unsampled_image<dimensions, AllocatorT> make_unsampled_image(
+          typename AllocatorT = image_allocator>
+unsampled_image<dimensions, AllocatorT> make_unsampled_image(
     const cl_mem &clMemObject,
-    const sycl::context &syclContext,
-    sycl::image_sampler syclImageSampler)
+    const context &syclContext)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
@@ -664,7 +685,7 @@ bool has_extension(
 
 === Reference counting
 
-All OpenCL objects are reference counted. The SYCL general programming model
+Most OpenCL objects are reference counted. The SYCL general programming model
 doesn't require that native objects are reference counted. However, for
 convenience, the following function is provided in the
 [code]#sycl::opencl# namespace.
