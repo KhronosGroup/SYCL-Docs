@@ -13663,9 +13663,10 @@ this same <<command-group>>.
 
 _Throws:_
 
-  * An [code]#exception# with the [code]#errc::invalid# error code if
-    the <<context>> associated with the <<handler>> via its associated
-    <<queue>> is different from the <<context>> associated with the
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    <<context>> associated with the <<handler>> via its associated primary
+    <<queue>> or the <<context>> associated with the secondary <<queue>> (if
+    provided) is different from the <<context>> associated with the
     <<kernel-bundle>> specified by [code]#execBundle#.
 
   * An [code]#exception# with the [code]#errc::invalid# error code if
@@ -14392,6 +14393,10 @@ ahead-of-time compiler, or it may call the online compiler or linker to create
 the bundle's device images in the requested state.  A bundle may also contain
 device images that represent a device's built-in kernels.
 
+When [code]#get_kernel_bundle()# is used to obtain a kernel bundle in
+[code]#bundle_state::object# or [code]#bundle_state::executable#, any
+specialization constants in the bundle will have their default values.
+
 [source]
 ----
 template<bundle_state State>
@@ -14702,10 +14707,10 @@ template<bundle_state State>
 kernel_bundle<State> join(const std::vector<kernel_bundle<State>> &bundles);
 ----
 
-_Returns:_ A new kernel bundle that represents the union of all the device
-images in the input [code]#bundles# with duplicates removed.  The new bundle
-has the same associated context and the same set of associated devices as
-those in [code]#bundles#.
+_Returns:_ A new kernel bundle that contains a copy of all the device images in
+the input [code]#bundles# with duplicates removed.  The new bundle has the same
+associated context and the same set of associated devices as those in
+[code]#bundles#.
 
 _Throws:_
 
