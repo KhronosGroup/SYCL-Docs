@@ -2432,7 +2432,9 @@ info::device::profile
 
     @ [.code]#std::string#
    a@ Deprecated in SYCL 2020.  Only supported when using the OpenCL backend
-      (see <<chapter:opencl-backend>>).
+      (see <<chapter:opencl-backend>>).  Throws an [code]#exception# with the
+      [code]#errc::invalid# error code if used with a device whose backend is
+      not OpenCL.
 
 The value returned can be one of the following strings:
 --
@@ -2541,7 +2543,9 @@ info::device::preferred_interop_user_sync
 
     @ [.code]#bool#
    a@ Deprecated in SYCL 2020.  Only supported when using the OpenCL backend
-      (see <<chapter:opencl-backend>>).
+      (see <<chapter:opencl-backend>>).  Throws an [code]#exception# with the
+      [code]#errc::invalid# error code if used with a device whose backend is
+      not OpenCL.
 
 Returns true if the preference for this SYCL [code]#device# is for the user to
 be responsible for synchronization, when sharing memory objects between OpenCL
@@ -12978,9 +12982,10 @@ void single_task(const kernel &kernelObject)
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
       built-in kernel.  Attempting to use this function to invoke other kernels
-      results in undefined behavior.  The precise semantics of this function
-      are defined by each SYCL backend specification, but the intent is that
-      the kernel should execute exactly once.
+      throws a synchronous [code]#exception# with the [code]#errc::invalid#
+      error code.  The precise semantics of this function are defined by each
+      SYCL backend specification, but the intent is that the kernel should
+      execute exactly once.
 
 This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
@@ -13000,9 +13005,10 @@ template <int dimensions> void parallel_for(
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
       built-in kernel.  Attempting to use this function to invoke other kernels
-      results in undefined behavior.  The precise semantics of this function
-      are defined by each SYCL backend specification, but the intent is that
-      the kernel should be invoked for the specified range of index values.
+      throws a synchronous [code]#exception# with the [code]#errc::invalid#
+      error code.  The precise semantics of this function are defined by each
+      SYCL backend specification, but the intent is that the kernel should be
+      invoked for the specified range of index values.
 
 This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
@@ -13022,9 +13028,10 @@ template <int dimensions> void parallel_for(
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
       built-in kernel.  Attempting to use this function to invoke other kernels
-      results in undefined behavior.  The precise semantics of this function
-      are defined by each SYCL backend specification, but the intent is that
-      the kernel should be invoked for the specified [code]#ndrange#.
+      throws a synchronous [code]#exception# with the [code]#errc::invalid#
+      error code.  The precise semantics of this function are defined by each
+      SYCL backend specification, but the intent is that the kernel should be
+      invoked for the specified [code]#ndRange#.
 
 This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
@@ -15178,11 +15185,14 @@ info::kernel::num_args
 ----
 
     @ [code]#uint32_t#
-   a@ This descriptor is only meaningful when used to query a kernel that
-      resides in a kernel bundle that was constructed using a backend specific
-      interoperability function.  Attempting to use this query for other
-      kernels returns an unspecified value.  The semantics of this descriptor
-      are defined by each SYCL backend specification.
+   a@ This descriptor may only be used to query a kernel that resides in a
+      kernel bundle that was constructed using a backend specific
+      interoperability function or to query a device built-in kernel, and the
+      semantics of this descriptor are defined by each SYCL backend
+      specification.
+
+Attempting to use this descriptor for other kernels throws an [code]#exception#
+with the [code]#errc::invalid# error code.
 
 a@
 [source]
@@ -15216,10 +15226,14 @@ info::kernel_device_specific::global_work_size
 ----
 
     @ [code]#range<3>#
-   a@ Returns the maximum global work size.  This descriptor is only valid if
-      the device type is [code]#device_type::custom# or if the kernel is a
-      built-in kernel, and the exact semantics are defined by each SYCL backend
-      specification.
+   a@ This descriptor may only be used if the device type is
+      [code]#device_type::custom# or if the kernel is a built-in kernel.  The
+      exact semantics of this descriptor are defined by each SYCL backend
+      specification, but the intent is to return the kernel's maximum global
+      work size.
+
+Attempting to use this descriptor for other devices or kernels throws an
+[code]#exception# with the [code]#errc::invalid# error code.
 
 a@
 [source]
