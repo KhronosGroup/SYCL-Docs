@@ -14643,10 +14643,16 @@ formed, and the implementation must issue a diagnostic in this case.
 
 The following free functions allow an application to test whether a particular
 kernel is compatible with a device.  A kernel that is defined in the
-application is compatible with a device unless it uses optional features which
-are not supported on the device, as described in
-<<sec:optional-kernel-features>>.  A device built-in kernel is only compatible
-with the device for which it is built-in.
+application is compatible with a device unless:
+
+* It uses optional features which are not supported on the device, as described
+  in <<sec:optional-kernel-features>>; or
+* It is decorated with a [code]#[[sycl::requires()]]# {cpp} attribute that
+  lists an aspect that is not supported by the device, as described in
+  <<sec:kernel.attributes>>.
+
+A device built-in kernel is only compatible with the device for which it is
+built-in.
 
 [source]
 ----
