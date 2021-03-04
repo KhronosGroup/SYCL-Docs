@@ -1,9 +1,10 @@
 ![SYCL Logo](adoc/logos/SYCL_RGB_June16-inkscape-1500.png)
 
-[//]: # "to update to newer CI when going public ![Build Status](https://api.travis-ci.com/KhronosGroup/SYCL-Docs.svg?branch=master)""
-[//]: # "to update to newer CI when going public [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://khronosgroup.github.io/SYCL-Docs/sycl/sycl.pdf)"
+<!-- to update to newer CI when going public ![Build Status](https://api.travis-ci.com/KhronosGroup/SYCL-Docs.svg?branch=master) -->
+<!-- to update to newer CI when going public [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://khronosgroup.github.io/SYCL-Docs/sycl/sycl.pdf) -->
+[![SPEC 2020-3](https://img.shields.io/badge/SPEC-2020--3-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/pdf/sycl-2020.pdf)
+[![SPEC 2020-3](https://img.shields.io/badge/SPEC-2020--3-orange.svg?logo=HTML5)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html)
 [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://gitlab.khronos.org/sycl/Specification/-/jobs)
-[![SPEC 2020-1](https://img.shields.io/badge/SPEC-2020--1-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020-provisional.pdf)
 [![Join the Slack group](https://img.shields.io/badge/chat-on%20slack-blue.svg?logo=slack)](https://khr.io/slack)
 
 # SYCL Open Source Specification
