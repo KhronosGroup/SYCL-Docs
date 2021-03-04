@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <typename dataT, int dimensions>
+template <typename dataT, int dimensions = 1>
 class local_accessor {
  public:
   using value_type =             // const dataT for read-only accessors, dataT otherwise
