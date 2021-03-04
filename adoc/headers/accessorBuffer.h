@@ -25,7 +25,7 @@ enum class placeholder { // Deprecated
 
 
 template <typename dataT,
-          int dimensions,
+          int dimensions = 1,
           access_mode accessMode =
             (std::is_const_v<dataT> ? access_mode::read
                                     : access_mode::read_write),
