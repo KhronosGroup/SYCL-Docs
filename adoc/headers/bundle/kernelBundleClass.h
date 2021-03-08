@@ -33,16 +33,17 @@ class kernel_bundle {
 
   bool native_specialization_constant() const noexcept;
 
-  template<auto& S>
+  template<auto& SpecName>
   bool has_specialization_constant() const noexcept;
 
   /* Available only when: (State == bundle_state::input) */
-  template<auto& S>
+  template<auto& SpecName>
   void set_specialization_constant(
-    typename std::remove_reference_t<decltype(S)>::type value);
+    typename std::remove_reference_t<decltype(SpecName)>::value_type value);
 
-  template<auto& S>
-  typename std::remove_reference_t<decltype(S)>::type get_specialization_constant() const;
+  template<auto& SpecName>
+  typename std::remove_reference_t<decltype(SpecName)>::value_type
+  get_specialization_constant() const;
 
   device_image_iterator begin() const;
 
