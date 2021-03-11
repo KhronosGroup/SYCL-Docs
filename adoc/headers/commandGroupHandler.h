@@ -123,8 +123,13 @@ class handler {
 
   void use_kernel_bundle(const kernel_bundle<bundle_state::executable> &execBundle);
 
-  template<auto& S>
-  typename std::remove_reference_t<decltype(S)>::type get_specialization_constant();
+  template<auto& SpecName>
+  void set_specialization_constant(
+      typename std::remove_reference_t<decltype(SpecName)>::value_type value);
+
+  template<auto& SpecName>
+  typename std::remove_reference_t<decltype(SpecName)>::value_type
+  get_specialization_constant();
 
 };
 }  // namespace sycl

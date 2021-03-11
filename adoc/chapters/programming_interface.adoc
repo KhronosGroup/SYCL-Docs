@@ -13778,7 +13778,7 @@ another invocation of the same <<command-group-function-object>>.
 ----
 template<auto& SpecName>
 void set_specialization_constant(
-    typename std::remove_reference_t<decltype(SpecName)>::type value);
+    typename std::remove_reference_t<decltype(SpecName)>::value_type value);
 ----
 
 _Effects:_ Sets the value of the specialization constant whose address is
@@ -13799,7 +13799,7 @@ _Throws:_
 [source]
 ----
 template<auto& SpecName>
-typename std::remove_reference_t<decltype(SpecName)>::type get_specialization_constant();
+typename std::remove_reference_t<decltype(SpecName)>::value_type get_specialization_constant();
 ----
 
 _Returns:_ The value of the specialization constant whose address is
@@ -13834,7 +13834,8 @@ include::{header_dir}/expressingParallelism/classKernelHandler.h[lines=4..-1]
 [source,,linenums]
 ----
 template<auto& SpecName>
-typename std::remove_reference_t<decltype(SpecName)>::type get_specialization_constant();
+typename std::remove_reference_t<decltype(SpecName)>::value_type
+get_specialization_constant();
 ----
 
 _Returns:_ The value of the <<specialization-constant>> whose address is
@@ -15020,7 +15021,7 @@ specialization constant whose address is [code]#SpecName#.
 ----
 template<auto& SpecName>
 void set_specialization_constant(
-  typename std::remove_reference_t<decltype(S)>::type value);
+  typename std::remove_reference_t<decltype(SpecName)>::value_type value);
 ----
 
 _Preconditions:_ This member function is only available if the kernel bundle's
@@ -15037,7 +15038,8 @@ uses it; doing so has no effect on the execution of kernels from that bundle.
 [source]
 ----
 template<auto& SpecName>
-typename std::remove_reference_t<decltype(S)>::type get_specialization_constant() const;
+typename std::remove_reference_t<decltype(SpecName)>::value_type
+get_specialization_constant() const;
 ----
 
 _Returns:_ The value of the <<specialization-constant>> whose address is
