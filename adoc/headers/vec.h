@@ -143,7 +143,7 @@ class vec {
   friend vec operatorOP(vec& lhs, int) { /* ... */ }
 
   // OP is unary +, -
-  friend vec operatorOP(vec &rhs) const { /* ... */ }
+  friend vec operatorOP(const vec &rhs) const { /* ... */ }
 
   // OP is: &, |, ^
   /* Available only when: dataT != float && dataT != double
