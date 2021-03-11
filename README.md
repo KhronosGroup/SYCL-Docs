@@ -9,25 +9,18 @@
 
 # SYCL Open Source Specification
 
-This repository contains the source and tool chain used to generate
-the formal SYCL specifications found on [https://www.khronos.org/sycl/](https://www.khronos.org/sycl/).
+This repository contains the source markup used to generate the
+formal SYCL specifications found on
+[https://www.khronos.org/sycl/](https://www.khronos.org/sycl/).
 
-## Reading the latest version of the SYCL specification
-
-The CI pipeline builds the specification HTML and PDF targets on commits
-to the repository.
-
-
-
-The GitLab CI pipeline builds the specification. This is accessible
-from this page, under the green check symbol, on the top right of the
-page or more generally from the rocket symbol on the left side.
-
-Then on the pipeline page, select the *Jobs* tab and click on the
-*download* icon on the bottom right.
+If you are proposing a merge or pull request to the specification, this
+README describes how the specification HTML and PDF targets can be built.
+Proposed changes must successfully build these targets before being
+considered for inclusion by the SYCL Working Group.
 
 
 ## Building the SYCL specification
+
 
 ### Building Using Github CI
 
@@ -79,7 +72,7 @@ docker pull khronosgroup/docker-images:asciidoctor-spec
 ```
 
 The Dockerfile specifying this image can be found at
-`https://github.com/KhronosGroup/DockerContainers` if you need to build a
+https://github.com/KhronosGroup/DockerContainers if you need to build a
 modified or layered image. However, if something is missing or out of date
 in the image, please file an issue on the `DockerContainers` repository
 before trying to build your own image. We will try to keep the image updated
@@ -116,11 +109,14 @@ example, though we do not support this), then you will need to install all
 the same tools in your own environment.
 
 We cannot provide instructions to do this on every possible build
-environment. If you are using Debian/Ubuntu Linux, however, you should be
-able to figure out the required tools by looking at the Dockerfile, at
-`https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile`.
-Note that the Khronos image builds on the official Ruby 2.7 Docker image, so
-you must also install Ruby.
+environment. However, if you are using Debian/Ubuntu Linux, either native or
+via WSL2, you should be able to install the required tools by looking at the
+Dockerfile at
+
+https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile
+
+Note that the Khronos Docker image layers on the official Ruby 2.7 Docker
+image, so you must install Ruby first.
 
 
 ### Building Using GitLab CI
