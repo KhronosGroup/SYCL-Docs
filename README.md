@@ -22,7 +22,7 @@ considered for inclusion by the SYCL Working Group.
 ## Building the SYCL specification
 
 
-### Building Using Github CI
+### Building using Github CI
 
 When using our github repository, pushing to a branch will trigger the
 Github Actions CI script under `../.github/workflows/CI.yml` to build HTML
