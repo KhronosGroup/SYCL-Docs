@@ -51,8 +51,10 @@ class unsampled_image_accessor {
 };
 
 template <typename dataT,
-          int dimensions,
-          access_mode accessMode>
+          int dimensions = 1,
+          access_mode accessMode =
+            (std::is_const_v<dataT> ? access_mode::read
+                                    : access_mode::read_write)>
 class host_unsampled_image_accessor {
  public:
   using value_type =             // const dataT for read-only accessors, dataT otherwise
@@ -74,14 +76,16 @@ class host_unsampled_image_accessor {
 
   size_t size() const noexcept;
 
-  /* Available only when: accessMode == access_mode::read
+  /* Available only when: (accessMode == access_mode::read ||
+                           accessMode == access_mode::read_write)
   if dimensions == 1, coordT = int
   if dimensions == 2, coordT = int2
   if dimensions == 4, coordT = int4 */
   template <typename coordT>
   dataT read(const coordT &coords) const noexcept;
 
-  /* Available only when: accessMode == access_mode::write
+  /* Available only when: (accessMode == access_mode::write ||
+                           accessMode == access_mode::read_write)
   if dimensions == 1, coordT = int
   if dimensions == 2, coordT = int2
   if dimensions == 3, coordT = int4 */

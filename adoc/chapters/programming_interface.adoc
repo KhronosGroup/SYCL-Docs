@@ -8370,9 +8370,11 @@ within a <<host-task>>.  The latter provides access from host code that is
 outside of a <<host-task>>.
 
 The dimensionality of an unsampled image accessor must match the dimensionality
-of the underlying image to which it provides access.  Unsampled image accessors
-support only two access modes: [code]#access_mode::read# and
-[code]#access_mode::write#.
+of the underlying image to which it provides access.  Both unsampled image
+accessor classes support the [code]#access_mode::read# and
+[code]#access_mode::write# access modes.  In addition, the
+[code]#host_unsampled_image_accessor# class supports
+[code]#access_mode::read_write#.
 
 The [code]#accessTarget# template parameter dictates how the
 [code]#unsampled_image_accessor# can be used: [code]#image_target::device#
@@ -8548,7 +8550,8 @@ a@
 template <typename coordT>
 dataT read(const coordT &coords) const
 ----
-   a@ Available only when [code]#(accessMode == access_mode::read)#.
+   a@ Available only when [code]#(accessMode == access_mode::read ||
+      accessMode == access_mode::read_write)#.
 
 Reads and returns an element of the [code]#unsampled_image# at the coordinates
 specified by [code]#coords#.  Permitted types for [code]#coordT# are
@@ -8564,7 +8567,8 @@ a@
 template <typename coordT>
 void write(const coordT &coords, const dataT &color) const
 ----
-   a@ Available only when [code]#(accessMode == access_mode::write)#.
+   a@ Available only when [code]#(accessMode == access_mode::write ||
+      accessMode == access_mode::read_write)#.
 
 Writes the value specified by [code]#color# to the element of the image at the
 coordinates specified by [code]#coords#.  Permitted types for [code]#coordT#
@@ -8618,6 +8622,8 @@ that they imply.
     | [code]#access_mode::read#
 | [code]#write_only#
     | [code]#access_mode::write#
+| [code]#read_write#
+    | [code]#access_mode::read_write#
 |====
 
 
