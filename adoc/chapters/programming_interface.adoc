@@ -7056,6 +7056,14 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
+bool is_placeholder() const
+----
+   a@ Returns [code]#true# if the accessor was constructed as a placeholder and
+      returns [code]#false# otherwise.
+
+a@
+[source]
+----
 id<dimensions> get_offset() const
 ----
    a@ Available only when [code]#(dimensions > 0)#.
@@ -7192,6 +7200,13 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Member function @ Description
+a@
+[source]
+----
+bool is_placeholder() const
+----
+   a@ Always returns [code]#false#.
+
 a@
 [source]
 ----
@@ -7379,20 +7394,6 @@ const_reference
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Member function @ Description
-a@
-[source]
-----
-bool is_placeholder() const
-----
-   a@ Tells if this is a placeholder accessor.
-
-When [code]#accessTarget# is [code]#target::constant_buffer#, returns
-[code]#true# if the accessor was constructed as a placeholder and returns
-[code]#false# otherwise.
-
-When [code]#accessTarget# is [code]#target::host_buffer# or
-[code]#target::local#, always returns [code]#false#.
-
 a@
 [source]
 ----
