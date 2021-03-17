@@ -7440,7 +7440,7 @@ buffer, unless this is a <<ranged-accessor>> in which case it is the range that
 was specified when the accessor was constructed.
 
 When [code]#accessTarget# is [code]#target::local#, the returned value is the
-the range that was specified when the accessor was constructed.
+range that was specified when the accessor was constructed.
 
 a@
 [source]
@@ -7850,12 +7850,12 @@ access to this memory from within a <<sycl-kernel-function>>.  The
 simultaneously in an implementation, each work-group receives its own
 independent copy of the allocated local memory.
 
-The underlying [code]#dataT# type can be any {cpp} type.  If [code]#dataT# is
-an implicit-lifetime type (as defined in the {cpp} core language), the local
-accessor implicitly creates objects of that type with indeterminate values.
-For other types, the local accessor merely allocates uninitialized memory, and
-the application is responsible for constructing objects in that memory (e.g. by
-calling placement-new).
+The underlying [code]#dataT# type can be any {cpp} type that the device
+supports.  If [code]#dataT# is an implicit-lifetime type (as defined in the
+{cpp} core language), the local accessor implicitly creates objects of that
+type with indeterminate values.  For other types, the local accessor merely
+allocates uninitialized memory, and the application is responsible for
+constructing objects in that memory (e.g. by calling placement-new).
 
 A local accessor must not be used in a <<sycl-kernel-function>> that is invoked
 via [code]#single_task# or via the simple form of [code]#parallel_for# that
