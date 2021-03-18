@@ -9,154 +9,125 @@
 
 # SYCL Open Source Specification
 
-This repository contains the source and tool chain used to generate
-the formal SYCL specifications found on [https://www.khronos.org/sycl/](https://www.khronos.org/sycl/).
+This repository contains the source markup used to generate the
+formal SYCL specifications found on
+[https://www.khronos.org/sycl/](https://www.khronos.org/sycl/).
 
-## Reading the latest version of the SYCL specification
-
-The GitLab CI pipeline builds the specification. This is accessible
-from this page, under the green check symbol, on the top right of the
-page or more generally from the rocket symbol on the left side.
-
-Then on the pipeline page, select the *Jobs* tab and click on the
-*download* icon on the bottom right.
+If you are proposing a merge or pull request to the specification, this
+README describes how the specification HTML and PDF targets can be built.
+Proposed changes must successfully build these targets before being
+considered for inclusion by the SYCL Working Group.
 
 
 ## Building the SYCL specification
 
-### Using GitLab CI
 
-The simplest way to build the specification is not to actually build
-it, but to rely on the Khronos continuous integration process which
-builds automatically a branch when it is changed on
-https://gitlab.khronos.org/sycl/Specification
+### Building using Github CI
 
-Look at CI/CD-Jobs (the rocket-ship icon on the left menu bar or
-https://gitlab.khronos.org/sycl/Specification/-/jobs), click on the
-`Download` icon for the latest CI job in the branch of interest or
-click on `Passed` to dive into more details. Once unzipping the
-compilation artifacts, look inside `adoc/out` directory to find the
-HTML and PDF version.
+When using our github repository, pushing to a branch will trigger the
+Github Actions CI script under `../.github/workflows/CI.yml` to build HTML
+and PDF versions of the spec. To see the outputs, click on the `Actions` tab
+in the top navigation bar, or go to
+https://github.com/KhronosGroup/SYCL-Docs/actions . Your commit should show
+up on the list of commits below. Click through to the Actions summary for
+that commit.
+
+On success, a green checkmark will appear by the commit name on this page.
+Output artifacts can be downloaded as a zipfile from the `Artifacts` section
+near the bottom of the page.
+
+On failure, a red `x` will appear by the commit name. Click through to the
+`build` job and it should auto-scroll to the CI log showing where the build
+failed. Fix it and push a new commit to try again.
 
 Note that to read the HTML specification correctly with all the
 mathematical symbols, you need also to have the `katex` directory
 along the `html` one. This might not be the case if your downloading
 framework lazily unzips just what you read.
 
-You can use this CI infrastructure while developing: you can git-push
-or git-force-push your branch on the server and go to CI/CD-Jobs to
-look at the compiled version.
+If you are proposing a pull request from your own clone of our repository,
+you may need to enable Github Actions for your clone.
 
-All this works because of the existing `.gitlab-ci.yml` recipe.
 
-### Using pre-configured AsciiDoctor-capable Docker image
+### Building Using The Khronos Docker Image
 
-Compiling the specification requires some specific AsciiDoctor related
-packages.
+Building the specification on your own machine requires a large set of
+tools. Rather than installing these tools yourself, if you can run Docker on
+a Linux compatible host (probably including Windows WSL2 with a Ubuntu or
+Debian OS, and possibly including MacOS X), you can use the same
+pre-configured Docker image used by the CI builds.
 
-To simplify the setup, Khronos provides a pre-configured Docker Linux
-Ubuntu image you can use on a Docker executor to compile the
-specification on various OS able to run Docker.
+If you are on Debian/Ubuntu Linux, install Docker with:
 
-Assuming you are on Debian/Ubuntu Linux, the first time you need to
-install Docker with for example:
 ```bash
 sudo apt update
 sudo apt install docker.io
 ```
 
-The base image used to build the specifications can be downloaded or
+The Docker image used to build the specifications can then be downloaded or
 updated to the latest version via
+
 ```bash
-docker pull khronosgroup/docker-images:vulkan-docs-base
+docker pull khronosgroup/docker-images:asciidoctor-spec
 ```
-Or you can manually generate the image using the script provided in
-`https://github.com/KhronosGroup/DockerContainers`.
 
+The Dockerfile specifying this image can be found at
+https://github.com/KhronosGroup/DockerContainers if you need to build a
+modified or layered image. However, if something is missing or out of date
+in the image, please file an issue on the `DockerContainers` repository
+before trying to build your own image. We will try to keep the image updated
+as needed.
 
-To compile the specification you can rely on the `Makefile` inside the
-`adoc` directory, for example with:
+To build the specification using the image, use the `Makefile` inside the
+`adoc` directory:
+
 ```bash
 cd adoc
 make clean docker-html docker-pdf
 ```
 
-There are a few variables defined in the `Makefile` you can set to
-change the behavior, such as to display verbosely the compilation
-process:
+Outputs will be located in $(OUTDIR) (by default, `out/` in the `adoc`
+directory).
+
+There are some variables defined in the `Makefile` you can set to change the
+behavior, such as to verbosely display the build process:
+
 ```bash
 make QUIET= clean docker-html docker-pdf
 ```
 
-If you need to launch explicitly Docker without using `make` on the
-host, look at the `adoc/Makefile` and imitate on your system how
-Docker is launched.
-
-Since the Docker image is old, there is a new path using a script to
-upgrade the files inside the Docker image to be used as:
-```bash
-make DOCKER_COMMAND="make QUIET= --directory=/sycl/adoc clean html pdf" dock
-```
-
-### Using native computer
-
-If you are using a Debian/Ubuntu Linux distribution, you can look at
-how the previous process works and how the Docker image is done at
-https://github.com/KhronosGroup/DockerContainers and specifically
-https://github.com/KhronosGroup/DockerContainers/blob/master/Dockerfile.vulkan-docs-base
-which gives an idea of the packages to install and
-https://github.com/KhronosGroup/DockerContainers/blob/master/entrypoint.vulkan.sh
-
-*TODO*: find the minimal recipe.
-```bash
-sudo apt update
-sudo apt install bison \
-  build-essential \
-  cmake \
-  flex \
-  fonts-lyx \
-  g++ \
-  ghostscript \
-  git \
-  libcairo2-dev \
-  libffi-dev \
-  libgdk-pixbuf2.0-dev \
-  libpango1.0-dev \
-  libreadline-dev \
-  libxml2-dev \
-  nodejs \
-  node-escape-string-regexp \
-  node-he \
-  node-lunr \
-  poppler-utils \
-  python3 \
-  ruby-dev
-
-sudo apt clean
-
-sudo gem install asciidoctor \
-  asciidoctor-diagram \
-  asciidoctor-mathematical \
-  asciidoctor-pdf \
-  coderay \
-  json-schema \
-  i18n \
-  pygments.rb \
-  rouge \
-  text-hyphen
-```
-
-Then use for example:
-```bash
-make QUIET= clean html pdf
-```
-
-There is also some discussion back-ground in
-https://gitlab.khronos.org/sycl/Specification/-/merge_requests/484#note_270338
+If you need to invoke Docker without using `make` on the host, look at the
+actions in the `docker-%` target in `adoc/Makefile` and replicate them on
+your system.
 
 
-### Windows recipe
+### Building On Your Native Machine
 
-*TODO*: Investigate the Docker route
-https://docs.docker.com/docker-for-windows/install/ , WSL2, CygWin,
-VCPKG...
+If you don't want to, or can't use Docker (or a compatible replacement - it
+is possible that the Red Hat `podman` tool can run our Docker container, for
+example, though we do not support this), then you will need to install all
+the same tools in your own environment.
+
+We cannot provide instructions to do this on every possible build
+environment. However, if you are using Debian/Ubuntu Linux, either native or
+via WSL2, you should be able to install the required tools by looking at the
+Dockerfile at
+
+https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile
+
+Note that the Khronos Docker image layers on the official Ruby 2.7 Docker
+image, so you must install Ruby first.
+
+
+### Building Using GitLab CI
+
+Finally, if you are a Khronos member working in our internal Gitlab server,
+Gitlab CI builds the image just like Github CI. Go to the
+`...sycl/Specification` repository page on the gitlab server, click through
+to CI/CD-Jobs (the rocket-ship icon on the left menu bar or
+`...sycl/Specification/-/jobs`). If your job succeeded, click on the
+`Download` icon for the latest CI job in the appropriate branch to download
+the zip file of build artifacts, or click on `Passed` to see build details.
+
+The Gitlab CI script is functionally equivalent to the Github CI script, but
+is located under `.gitlab-ci.yml`, using a different YAML scheme.
