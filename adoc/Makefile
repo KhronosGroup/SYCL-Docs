@@ -289,7 +289,8 @@ docker-%:
 	# variables are dropped by docker.
 	sudo docker run --user `id --user`:`id --group` \
 	  --interactive --tty --rm \
-	  --volume $(SYCL_DIR):/sycl khronosgroup/docker-images:vulkan-docs-base \
+          --volume $(SYCL_DIR):/sycl \
+          khronosgroup/docker-images:asciidoctor-spec \
 	  $(MAKE) MAKEFLAGS="$(MAKEFLAGS)" --directory=/sycl/adoc $*
 
 dock:
@@ -300,7 +301,8 @@ dock:
 	sudo docker run \
 	  --interactive --tty --rm \
 	  -e USER_ID=`id --user` -e GROUP_ID=`id --group` \
-	  --volume $(SYCL_DIR):/sycl khronosgroup/docker-images:vulkan-docs-base \
+          --volume $(SYCL_DIR):/sycl \
+          khronosgroup/docker-images:asciidoctor-spec \
 	  /sycl/adoc/scripts/install-rouge.sh \
 	  $(DOCKER_COMMAND)
 
