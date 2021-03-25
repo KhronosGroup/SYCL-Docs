@@ -24,8 +24,6 @@ class accessor {
 
   /* -- common interface members -- */
 
-  bool is_placeholder() const;
-
   size_t get_size() const;
 
   size_t get_count() const;
