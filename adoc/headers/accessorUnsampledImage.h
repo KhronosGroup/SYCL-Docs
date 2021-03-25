@@ -38,7 +38,7 @@ class unsampled_image_accessor {
   /* Available only when: accessMode == access_mode::read
   if dimensions == 1, coordT = int
   if dimensions == 2, coordT = int2
-  if dimensions == 4, coordT = int4 */
+  if dimensions == 3, coordT = int4 */
   template <typename coordT>
   dataT read(const coordT &coords) const noexcept;
 
@@ -77,7 +77,7 @@ class host_unsampled_image_accessor {
   /* Available only when: accessMode == access_mode::read
   if dimensions == 1, coordT = int
   if dimensions == 2, coordT = int2
-  if dimensions == 4, coordT = int4 */
+  if dimensions == 3, coordT = int4 */
   template <typename coordT>
   dataT read(const coordT &coords) const noexcept;
 
