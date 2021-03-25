@@ -4671,12 +4671,10 @@ template <typename ReinterpretT, int ReinterpretDim = dimensions>
       Only valid when [code]#(ReinterpretDim == 1)# or when
       [code]#\((ReinterpretDim == dimensions) && (sizeof(ReinterpretT) == sizeof(T)))#.
       The buffer object being reinterpreted can be a SYCL sub-buffer
-      that was created from a SYCL [code]#buffer# and
-      must throw an [code]#exception# with the [code]#errc::invalid# error code
-      if the total size in bytes represented by the type and range
-      of the reinterpreted SYCL [code]#buffer# (or sub-buffer)
-      does not equal the total size in bytes represented by the type and range
-      of this SYCL [code]#buffer# (or sub-buffer).
+      that was created from a SYCL [code]#buffer#.  The implementation must
+      throw an [code]#exception# with the [code]#errc::invalid# error code
+      if the total size in bytes represented by this SYCL [code]#buffer# (or
+      sub-buffer) is not evenly divisible by [code]#sizeof(ReinterpretT)#.
       Reinterpreting a sub-buffer provides a reinterpreted view
       of the sub-buffer only,
       and does not change the offset or size of the sub-buffer view (in bytes)
