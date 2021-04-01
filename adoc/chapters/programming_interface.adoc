@@ -12550,9 +12550,10 @@ include::{header_dir}/reducer.h[lines=4..-1]
 a@
 [source]
 ----
-void combine(const T& partial) const
+reducer& combine(const T& partial)
 ----
-   a@ Combine the value of [code]#partial# with the reduction variable
+   a@ Available only when: [code]#Dimensions == 0#.
+      Combine the value of [code]#partial# with the reduction variable
       associated with this [code]#reducer#.
 
 a@
@@ -12560,7 +12561,7 @@ a@
 ----
 __unspecified__ &operator[](size_t index) const
 ----
-   a@ Available only when: [code]#Dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 0#.
       Returns an instance of an undefined intermediate type representing
       a [code]#reducer# of the same type as this [code]#reducer#,
       with the dimensionality [code]#Dimensions-1# and containing an
@@ -12578,7 +12579,6 @@ T identity() const
    a@ Return the identity value of the combination operation associated with
       this [code]#reducer#.  Only available if the identity value is known
       to the implementation.
-
 |====
 
 [[table.operators.reducer]]
