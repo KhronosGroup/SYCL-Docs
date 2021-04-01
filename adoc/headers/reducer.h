@@ -46,7 +46,7 @@ public:
    * BinaryOperation == bit_xor<> or BinaryOperation == bit_xor<T> */
   friend reducer& operator^=(reducer&, const T&) { /* ... */ }
 
-  /* Only available if Dimensions == 0, T is an integral type and either
+  /* Only available if Dimensions == 0, T is an integral type, T is not bool and either
    * BinaryOperation == plus<> or BinaryOperation == plus<T> */
   friend reducer& operator++(reducer&) { /* ... */ }
 

@@ -12594,7 +12594,7 @@ a@
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 &&
-      (is_same_v<BinaryOperation, plus<>> || is_same_v<BinaryOperation, plus<T>>)#.
+      (std::is_same_v<BinaryOperation, plus<>> || std::is_same_v<BinaryOperation, plus<T>>)#.
 
 a@
 [source]
@@ -12603,7 +12603,7 @@ a@
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 &&
-      (is_same_v<BinaryOperation, multiplies<>> || is_same_v<BinaryOperation, multiplies<T>>)#.
+      (std::is_same_v<BinaryOperation, multiplies<>> || std::is_same_v<BinaryOperation, multiplies<T>>)#.
 
 a@
 [source]
@@ -12612,7 +12612,7 @@ a@
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
-      (is_same_v<BinaryOperation, bit_and<>> || is_same_v<BinaryOperation, bit_and<T>>)#.
+      (std::is_same_v<BinaryOperation, bit_and<>> || std::is_same_v<BinaryOperation, bit_and<T>>)#.
 
 a@
 [source]
@@ -12621,7 +12621,7 @@ a@
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
-      (is_same_v<BinaryOperation, bit_or<>> || is_same_v<BinaryOperation, bit_or<T>>)#.
+      (std::is_same_v<BinaryOperation, bit_or<>> || std::is_same_v<BinaryOperation, bit_or<T>>)#.
       
 a@
 [source]
@@ -12630,7 +12630,7 @@ a@
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
-      (is_same_v<BinaryOperation, bit_xor<>> || is_same_v<BinaryOperation, bit_xor<T>>)#.
+      (std::is_same_v<BinaryOperation, bit_xor<>> || std::is_same_v<BinaryOperation, bit_xor<T>>)#.
 
 a@
 [source]
@@ -12638,8 +12638,8 @@ a@
     reducer& operator++(reducer<T,plus<T>,0>& accum)
 ----
    a@ Equivalent to calling [code]#accum.combine(1)#.
-      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
-      (is_same_v<BinaryOperation, plus<>> || is_same_v<BinaryOperation, plus<T>>)#.
+      Available only when: [code]#Dimensions == 0 && std::is_integral_v<T> && !std::is_same_v<T, bool> &&
+      (std::is_same_v<BinaryOperation, plus<>> || std::is_same_v<BinaryOperation, plus<T>>)#.
 
 |====
 
