@@ -12555,6 +12555,7 @@ reducer& combine(const T& partial)
    a@ Available only when: [code]#Dimensions == 0#.
       Combine the value of [code]#partial# with the reduction variable
       associated with this [code]#reducer#.
+      Returns [code]#*this#.
 
 a@
 [source]
@@ -12582,61 +12583,63 @@ T identity() const
 |====
 
 [[table.operators.reducer]]
-.Operators of the [code]#reducer# class
+.Hidden friend operators of the [code]#reducer# class
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Operator @ Description
 a@
 [source]
 ----
-template <typename T>
-    void operator+=(reducer<T,plus<T>,0>& accum, const T& partial)
+    reducer& operator+=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
+      Available only when: [code]#Dimensions == 0 &&
+      (is_same_v<BinaryOperation, plus<>> || is_same_v<BinaryOperation, plus<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator*=(reducer<T,multiplies<T>,0>& accum, const T& partial)
+    reducer& operator*=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
+      Available only when: [code]#Dimensions == 0 &&
+      (is_same_v<BinaryOperation, multiplies<>> || is_same_v<BinaryOperation, multiplies<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator|=(reducer<T,bit_or<T>,0>& accum, const T& partial)
+    reducer& operator&=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
-      Only available for integral types.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (is_same_v<BinaryOperation, bit_and<>> || is_same_v<BinaryOperation, bit_and<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator&=(reducer<T,bit_and<T>,0>& accum, const T& partial)
+    reducer& operator|=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
-      Only available for integral types.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (is_same_v<BinaryOperation, bit_or<>> || is_same_v<BinaryOperation, bit_or<T>>)#.
+      
+a@
+[source]
+----
+    reducer& operator^=(reducer& accum, const T& partial)
+----
+   a@ Equivalent to calling [code]#accum.combine(partial)#.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (is_same_v<BinaryOperation, bit_xor<>> || is_same_v<BinaryOperation, bit_xor<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator^=(reducer<T,bit_xor<T>,0>& accum, const T& partial)
-----
-   a@ Equivalent to calling [code]#accum.combine(partial)#.
-      Only available for integral types.
-
-a@
-[source]
-----
-template <typename T>
-    void operator++(reducer<T,plus<T>,0>& accum)
+    reducer& operator++(reducer<T,plus<T>,0>& accum)
 ----
    a@ Equivalent to calling [code]#accum.combine(1)#.
-      Only available for integral types.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (is_same_v<BinaryOperation, plus<>> || is_same_v<BinaryOperation, plus<T>>)#.
 
 |====
 

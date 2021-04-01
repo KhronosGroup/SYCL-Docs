@@ -29,7 +29,6 @@ public:
   /* Only available if Dimensions == 0 and either
    * BinaryOperation == plus<> or BinaryOperation == plus<T> */
   friend reducer& operator+=(reducer&, const T&) { /* ... */ }
-  friend reducer& operator++(reducer&) { /* ... */ }
 
   /* Only available if Dimensions == 0 and either
    * BinaryOperation == multiplies<> or BinaryOperation == multiplies<T> */
@@ -46,6 +45,10 @@ public:
   /* Only available if Dimensions == 0, T is an integral type and either
    * BinaryOperation == bit_xor<> or BinaryOperation == bit_xor<T> */
   friend reducer& operator^=(reducer&, const T&) { /* ... */ }
+
+  /* Only available if Dimensions == 0, T is an integral type and either
+   * BinaryOperation == plus<> or BinaryOperation == plus<T> */
+  friend reducer& operator++(reducer&) { /* ... */ }
 
 };
 
