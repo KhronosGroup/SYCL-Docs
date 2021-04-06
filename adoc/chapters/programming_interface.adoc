@@ -13721,12 +13721,31 @@ overhead associated with recompilation of the kernel's bundle.
 ==== Declaring a specialization constant
 
 Specialization constants must be declared using the [code]#specialization_id#
-class, and the declaration must be outside of <<kernel-scope>> using static
-storage duration.  The declaration must be in either namespace scope or class
-scope.
+class with the following restrictions:
 
-A synopsis of this class is shown below.  The template parameter [code]#T# must
-be a forward-declarable type.
+* The template parameter [code]#T# must be a <<device copyable>> type.
+* The [code]#specialization_id# variable must be declared as [code]#constexpr#.
+* The [code]#specialization_id# variable must be declared in one of the
+  following scopes:
+  - Namespace scope (including the anonymous namespace).
+  - Class scope where the class is declared in namespace scope.
+  - Class scope where the class is declared in some other class scope, and the
+    outermost class is declared at namespace scope.
+* If the [code]#specialization_id# variable is declared in the anonymous
+  namespace, its name must be unambiguous when referenced from the global
+  namespace scope (i.e. it must not have the same name as some other variable
+  declared in a named namespace).
+* If the [code]#specialization_id# variable is declared in class scope, it must
+  have public accessibility when referenced from namespace scope.
+
+The following example illustrates some of these restrictions:
+
+[source,,linenums]
+----
+include::{code_dir}/specialization_id.cpp[lines=4..-1]
+----
+
+A synopsis of this class is shown below.
 
 [source,,linenums]
 ----
