@@ -13395,19 +13395,19 @@ Manual copy operations can be seen as specialized kernels executing on the
 device, except that typically this operations will be implemented using a
 host API that exists as part of a backend (e.g, OpenCL enqueue copy operations).
 
-The SYCL memory objects involved in a copy operation are specified using
-buffer accessors.
-Explicit copy operations have a source and a destination.
-When an accessor is the _source_ of the operation, the destination can be
-a host pointer or another accessor.
-The _source_ accessor can have either [code]#read# or
-[code]#read_write# access mode.
+These explicit copy operations have a source and a destination.  When an
+accessor is the _source_ of the operation, the destination can be a host
+pointer or another accessor.  The _source_ accessor must have either
+[code]#access_mode::read# or [code]#access_mode::read_write# access mode.  When
+an accessor is the _destination_ of the explicit copy operation, the source can
+be a host pointer or another accessor.  The _destination_ accessor must have
+either [code]#access_mode::write#, [code]#access_mode::read_write#,
+[code]#access_mode::discard_write# or [code]#access_mode::discard_read_write#
+access mode.
 
-When an accessor is the _destination_ of the explicit copy operation,
-the source can be a host pointer or another accessor.
-The _destination_ accessor can have either
-[code]#write#, [code]#read_write#, [code]#discard_write#,
-[code]#discard_read_write# access modes.
+When an accessor is used as a parameter to one of these explicit copy
+operations, the target must be either [code]#target::device# or
+[code]#target::constant_buffer#.
 
 When accessors are both the origin and the destination,
 the operation is executed on objects controlled by the SYCL runtime.
