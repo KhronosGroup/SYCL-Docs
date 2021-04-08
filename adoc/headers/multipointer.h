@@ -24,7 +24,7 @@ template<typename T> struct remove_decoration {
 };
 
 template<typename T>
-using remove_decoration_t = remove_decoration::type;
+using remove_decoration_t = remove_decoration<T>::type;
 
 template <typename ElementType, access::address_space Space, access::decorated DecorateAddress>
 class multi_ptr {
