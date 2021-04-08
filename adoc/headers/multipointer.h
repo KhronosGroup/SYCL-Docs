@@ -58,7 +58,7 @@ class multi_ptr {
 
   // Only if Space == local_space or generic_space
   template <int dimensions>
-  multi_ptr(local_accessor<ElementType, dimensions>)
+  multi_ptr(local_accessor<ElementType, dimensions>);
 
   // Deprecated
   // Only if Space == local_space or generic_space
