@@ -33,10 +33,10 @@ class multi_ptr {
   static constexpr access::address_space address_space = Space;
 
   using value_type = ElementType;
-  using pointer = std::conditional<is_decorated, __unspecified__ *,
-                                   std::add_pointer_t<value_type>>;
-  using reference = std::conditional<is_decorated, __unspecified__ &,
-                                     std::add_lvalue_reference_t<value_type>>;
+  using pointer = std::conditional_t<is_decorated, __unspecified__ *,
+                                     std::add_pointer_t<value_type>>;
+  using reference = std::conditional_t<is_decorated, __unspecified__ &,
+                                       std::add_lvalue_reference_t<value_type>>;
   using iterator_category = std::random_access_iterator_tag;
   using difference_type = std::ptrdiff_t;
 
@@ -185,8 +185,8 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   static constexpr access::address_space address_space = Space;
 
   using value_type = VoidType;
-  using pointer = std::conditional<is_decorated, __unspecified__ *,
-                                   std::add_pointer_t<value_type>>;
+  using pointer = std::conditional_t<is_decorated, __unspecified__ *,
+                                     std::add_pointer_t<value_type>>;
   using difference_type = std::ptrdiff_t;
 
   static_assert(std::is_same_v<remove_decoration_t<pointer>, std::add_pointer_t<value_type>>);
