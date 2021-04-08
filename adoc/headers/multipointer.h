@@ -185,7 +185,7 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   static constexpr access::address_space address_space = Space;
 
   using value_type = VoidType;
-  using pointer = std::conditional<is_decorated, __unspecified__ value_type *,
+  using pointer = std::conditional<is_decorated, __unspecified__ *,
                                    std::add_pointer_t<value_type>>;
   using difference_type = std::ptrdiff_t;
 
