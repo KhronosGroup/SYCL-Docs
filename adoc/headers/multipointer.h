@@ -120,17 +120,17 @@ class multi_ptr {
 
   // Implicit conversion to a multi_ptr<void>.
   // Only available when value_type is not const-qualified.
-  template<access::decorated DecorateAddress>
-  operator multi_ptr<void, Space, DecorateAddress>() const;
+  template<access::decorated DecorateAddress2>
+  operator multi_ptr<void, Space, DecorateAddress2>() const;
 
   // Implicit conversion to a multi_ptr<const void>.
   // Only available when value_type is const-qualified.
-  template<access::decorated DecorateAddress>
-  operator multi_ptr<const void, Space, DecorateAddress>() const;
+  template<access::decorated DecorateAddress2>
+  operator multi_ptr<const void, Space, DecorateAddress2>() const;
 
   // Implicit conversion to multi_ptr<const value_type, Space>.
-  template<access::decorated DecorateAddress>
-  operator multi_ptr<const value_type, Space, DecorateAddress>() const;
+  template<access::decorated DecorateAddress2>
+  operator multi_ptr<const value_type, Space, DecorateAddress2>() const;
 
   // Implicit conversion to the non-decorated version of multi_ptr.
   // Only available when is_decorated is true.
