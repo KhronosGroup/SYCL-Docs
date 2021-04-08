@@ -12940,6 +12940,10 @@ template <typename KernelName, int dimensions, typename... Rest>
       construct an instance of [code]#kernel_handler# and pass it to
       the callable.
 
+Throws an [code]#exception# with the [code]#errc::nd_range# error code if the
+global size defined in the associated [code]#executionRange# is not evenly
+divisible by the local size in each dimension.
+
 a@
 [source]
 ----
@@ -13030,7 +13034,7 @@ a@
 [source]
 ----
 template <int dimensions> void parallel_for(
-    nd_range<dimensions> ndRange,
+    nd_range<dimensions> executionRange,
     const kernel &kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
@@ -13039,7 +13043,11 @@ template <int dimensions> void parallel_for(
       throws a synchronous [code]#exception# with the [code]#errc::invalid#
       error code.  The precise semantics of this function are defined by each
       SYCL backend specification, but the intent is that the kernel should be
-      invoked for the specified [code]#ndRange#.
+      invoked for the specified [code]#executionRange#.
+
+Throws an [code]#exception# with the [code]#errc::nd_range# error code if the
+global size defined in the associated [code]#executionRange# is not evenly
+divisible by the local size in each dimension.
 
 This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
