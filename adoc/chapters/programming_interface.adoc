@@ -12550,17 +12550,19 @@ include::{header_dir}/reducer.h[lines=4..-1]
 a@
 [source]
 ----
-void combine(const T& partial) const
+reducer& combine(const T& partial)
 ----
-   a@ Combine the value of [code]#partial# with the reduction variable
+   a@ Available only when: [code]#Dimensions == 0#.
+      Combine the value of [code]#partial# with the reduction variable
       associated with this [code]#reducer#.
+      Returns [code]#*this#.
 
 a@
 [source]
 ----
 __unspecified__ &operator[](size_t index) const
 ----
-   a@ Available only when: [code]#Dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 0#.
       Returns an instance of an undefined intermediate type representing
       a [code]#reducer# of the same type as this [code]#reducer#,
       with the dimensionality [code]#Dimensions-1# and containing an
@@ -12578,65 +12580,66 @@ T identity() const
    a@ Return the identity value of the combination operation associated with
       this [code]#reducer#.  Only available if the identity value is known
       to the implementation.
-
 |====
 
 [[table.operators.reducer]]
-.Operators of the [code]#reducer# class
+.Hidden friend operators of the [code]#reducer# class
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Operator @ Description
 a@
 [source]
 ----
-template <typename T>
-    void operator+=(reducer<T,plus<T>,0>& accum, const T& partial)
+    reducer& operator+=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
+      Available only when: [code]#Dimensions == 0 &&
+      (std::is_same_v<BinaryOperation, plus<>> || std::is_same_v<BinaryOperation, plus<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator*=(reducer<T,multiplies<T>,0>& accum, const T& partial)
+    reducer& operator*=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
+      Available only when: [code]#Dimensions == 0 &&
+      (std::is_same_v<BinaryOperation, multiplies<>> || std::is_same_v<BinaryOperation, multiplies<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator|=(reducer<T,bit_or<T>,0>& accum, const T& partial)
+    reducer& operator&=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
-      Only available for integral types.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (std::is_same_v<BinaryOperation, bit_and<>> || std::is_same_v<BinaryOperation, bit_and<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator&=(reducer<T,bit_and<T>,0>& accum, const T& partial)
+    reducer& operator|=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
-      Only available for integral types.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (std::is_same_v<BinaryOperation, bit_or<>> || std::is_same_v<BinaryOperation, bit_or<T>>)#.
+      
+a@
+[source]
+----
+    reducer& operator^=(reducer& accum, const T& partial)
+----
+   a@ Equivalent to calling [code]#accum.combine(partial)#.
+      Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
+      (std::is_same_v<BinaryOperation, bit_xor<>> || std::is_same_v<BinaryOperation, bit_xor<T>>)#.
 
 a@
 [source]
 ----
-template <typename T>
-    void operator^=(reducer<T,bit_xor<T>,0>& accum, const T& partial)
-----
-   a@ Equivalent to calling [code]#accum.combine(partial)#.
-      Only available for integral types.
-
-a@
-[source]
-----
-template <typename T>
-    void operator++(reducer<T,plus<T>,0>& accum)
+    reducer& operator++(reducer& accum)
 ----
    a@ Equivalent to calling [code]#accum.combine(1)#.
-      Only available for integral types.
+      Available only when: [code]#Dimensions == 0 && std::is_integral_v<T> && !std::is_same_v<T, bool> &&
+      (std::is_same_v<BinaryOperation, plus<>> || std::is_same_v<BinaryOperation, plus<T>>)#.
 
 |====
 
