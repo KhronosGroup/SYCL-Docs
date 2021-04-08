@@ -49,7 +49,7 @@ class multi_ptr {
   multi_ptr();
   multi_ptr(const multi_ptr&);
   multi_ptr(multi_ptr&&);
-  explicit multi_ptr(multi_ptr<ElementType, Space, yes>::pointer);
+  explicit multi_ptr(multi_ptr<ElementType, Space, access::decorated::yes>::pointer);
   multi_ptr(std::nullptr_t);
 
   // Only if Space == global_space or generic_space
@@ -197,7 +197,7 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   multi_ptr();
   multi_ptr(const multi_ptr&);
   multi_ptr(multi_ptr&&);
-  explicit multi_ptr(multi_ptr<VoidType, Space, yes>::pointer);
+  explicit multi_ptr(multi_ptr<VoidType, Space, access::decorated::yes>::pointer);
   multi_ptr(std::nullptr_t);
 
   // Only if Space == global_space
