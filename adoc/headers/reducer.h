@@ -4,12 +4,21 @@
 // Exposition only
 template <typename T, typename BinaryOperation, int Dimensions, /* unspecified */>
 class reducer {
+public:
 
-  reducer(const reducer<T,BinaryOperation,Dimensions>&) = delete;
-  reducer<T,BinaryOperation,Dimensions>& operator(const reducer<T,BinaryOperation,Dimensions>&) = delete;
+  using value_type = T;
+  using binary_operation = BinaryOperation;
+  static constexpr int dimensions = Dimensions;
+
+  reducer(const reducer&) = delete;
+  reducer(reducer&&) = delete;
+  reducer& operator=(const reducer&) = delete;
+  reducer& operator=(reducer&&) = delete;
+
+  ~reducer();
 
   /* Only available if Dimensions == 0 */
-  void combine(const T& partial);
+  reducer& combine(const T& partial);
 
   /* Only available if Dimensions > 0 */
   __unspecified__ &operator[](size_t index) const;
@@ -17,26 +26,29 @@ class reducer {
   /* Only available if identity value is known */
   T identity() const;
 
+  /* Only available if Dimensions == 0 and either
+   * BinaryOperation == plus<> or BinaryOperation == plus<T> */
+  friend reducer& operator+=(reducer&, const T&) { /* ... */ }
+
+  /* Only available if Dimensions == 0 and either
+   * BinaryOperation == multiplies<> or BinaryOperation == multiplies<T> */
+  friend reducer& operator*=(reducer&, const T&) { /* ... */ }
+
+  /* Only available if Dimensions == 0, T is an integral type and either
+   * BinaryOperation == bit_and<> or BinaryOperation == bit_and<T> */
+  friend reducer& operator&=(reducer&, const T&) { /* ... */ }
+
+  /* Only available if Dimensions == 0, T is an integral type and either
+   * BinaryOperation == bit_or<> or BinaryOperation == bit_or<T> */
+  friend reducer& operator|=(reducer&, const T&) { /* ... */ }
+
+  /* Only available if Dimensions == 0, T is an integral type and either
+   * BinaryOperation == bit_xor<> or BinaryOperation == bit_xor<T> */
+  friend reducer& operator^=(reducer&, const T&) { /* ... */ }
+
+  /* Only available if Dimensions == 0, T is an integral type, T is not bool and either
+   * BinaryOperation == plus<> or BinaryOperation == plus<T> */
+  friend reducer& operator++(reducer&) { /* ... */ }
+
 };
 
-template <typename T>
-void operator+=(reducer<T,plus<T>,0>&, const T&);
-
-template <typename T>
-void operator*=(reducer<T,multiplies<T>,0>&, const T&);
-
-/* Only available for integral types */
-template <typename T>
-void operator&=(reducer<T,bit_and<T>,0>&, const T&);
-
-/* Only available for integral types */
-template <typename T>
-void operator|=(reducer<T,bit_or<T>,0>&, const T&);
-
-/* Only available for integral types */
-template <typename T>
-void operator^=(reducer<T,bit_xor<T>,0>&, const T&);
-
-/* Only available for integral types */
-template <typename T>
-void operator++(reducer<T,plus<T>,0>&);
