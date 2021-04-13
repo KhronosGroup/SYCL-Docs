@@ -13726,13 +13726,22 @@ class with the following restrictions:
 * the template parameter [code]#T# must be a <<device copyable>> type;
 * the [code]#specialization_id# variable must be declared as [code]#constexpr#;
 * the [code]#specialization_id# variable must be declared in either namespace
-  scope (including the anonymous namespace) or in class scope;
-* if the [code]#specialization_id# variable is declared in the anonymous
-  namespace, its name must be unambiguous when referenced from the global
-  namespace scope (i.e. it must not have the same name as some other variable
-  declared in different namespace);
+  scope or in class scope;
 * if the [code]#specialization_id# variable is declared in class scope, it must
-  have public accessibility when referenced from namespace scope.
+  have public accessibility when referenced from namespace scope;
+* the [code]#specialization_id# variable may not be shadowed by another
+  variable [code]#V# which has the same name and is declared in an
+  [code]#inline# namespace, such that the [code]#specialization_id# variable is
+  no longer accessible after the declaration of [code]#V#.
+
+[NOTE]
+====
+The expectation is that some implementations may conceptually insert code at
+the end of a translation unit which references each `specialization_id`
+variable that is declared in that translation unit.  The restrictions listed
+above make this possible by ensuring that these variables are accessible at the
+end of the translation unit.
+====
 
 The following example illustrates some of these restrictions:
 
@@ -16165,7 +16174,7 @@ vec()
 a@
 [source]
 ----
-explicit vec(const dataT &arg)
+explicit constexpr vec(const dataT &arg)
 ----
    a@ Construct a vector of element type [code]#dataT# and
       [code]#numElements# dimensions by setting each value to [code]#arg# by
@@ -16175,14 +16184,14 @@ a@
 [source]
 ----
 template <typename... argTN>
-    vec(const argTN&... args)
+constexpr vec(const argTN&... args)
 ----
    a@ Construct a SYCL [code]#vec# instance from any combination of scalar and SYCL [code]#vec# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#numElements# of this [code]#vec# specialization.
 
 a@
 [source]
 ----
-vec(const vec<dataT, numElements> &rhs)
+constexpr vec(const vec<dataT, numElements> &rhs)
 ----
    a@ Construct a vector of element type [code]#dataT# and number of elements [code]#numElements# by copy from another similar vector.
 
@@ -16993,7 +17002,7 @@ marray()
 a@
 [source]
 ----
-explicit marray(const dataT &arg)
+explicit constexpr marray(const dataT &arg)
 ----
    a@ Construct an array of element type [code]#dataT# and
       [code]#numElements# dimensions by setting each value to [code]#arg# by
@@ -17003,16 +17012,24 @@ a@
 [source]
 ----
 template <typename... argTN>
-    marray(const argTN&... args)
+constexpr marray(const argTN&... args)
 ----
    a@ Construct a SYCL [code]#marray# instance from any combination of scalar and SYCL [code]#marray# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#numElements# of this [code]#marray# specialization.
 
 a@
 [source]
 ----
-marray(const marray<dataT, numElements> &rhs)
+constexpr marray(const marray<dataT, numElements> &rhs)
 ----
    a@ Construct an array of element type [code]#dataT# and number of elements [code]#numElements# by copy from another similar vector.
+
+a@
+[source]
+----
+constexpr marray(marray<dataT, numElements> &&rhs)
+----
+   a@ Construct an array of element type [code]#dataT# and number of elements
+      [code]#numElements# by moving from another similar vector.
 
 |====
 
