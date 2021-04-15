@@ -58,14 +58,14 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
 
   // Implicit conversion to a multi_ptr<void>
   // Only available when ElementType is not const-qualified
-  operator multi_ptr<void, Space>() const;
+  operator multi_ptr<void, Space, access::decorated::legacy>() const;
 
   // Implicit conversion to a multi_ptr<const void>
   // Only available when ElementType is const-qualified
-  operator multi_ptr<const void, Space>() const;
+  operator multi_ptr<const void, Space, access::decorated::legacy>() const;
 
   // Implicit conversion to multi_ptr<const ElementType, Space>
-  operator multi_ptr<const ElementType, Space>() const;
+  operator multi_ptr<const ElementType, Space, access::decorated::legacy>() const;
 
   // Arithmetic operators
   friend multi_ptr& operator++(multi_ptr& mp) { /* ... */ }
@@ -156,10 +156,10 @@ class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
   // Explicit conversion to a multi_ptr<ElementType>
   // If VoidType is const, ElementType must be as well
   template <typename ElementType>
-  explicit operator multi_ptr<ElementType, Space>() const;
+  explicit operator multi_ptr<ElementType, Space, access::decorated::legacy>() const;
 
   // Implicit conversion to multi_ptr<const void, Space>
-  operator multi_ptr<const void, Space>() const;
+  operator multi_ptr<const void, Space, access::decorated::legacy>() const;
 
   friend bool operator==(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
   friend bool operator!=(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */ }
