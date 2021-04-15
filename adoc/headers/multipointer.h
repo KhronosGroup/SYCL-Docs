@@ -24,7 +24,7 @@ template<typename T> struct remove_decoration {
 };
 
 template<typename T>
-using remove_decoration_t = remove_decoration::type;
+using remove_decoration_t = remove_decoration<T>::type;
 
 template <typename ElementType, access::address_space Space, access::decorated DecorateAddress>
 class multi_ptr {
@@ -33,10 +33,10 @@ class multi_ptr {
   static constexpr access::address_space address_space = Space;
 
   using value_type = ElementType;
-  using pointer = std::conditional<is_decorated, __unspecified__ *,
-                                   std::add_pointer_t<value_type>>;
-  using reference = std::conditional<is_decorated, __unspecified__ &,
-                                     std::add_lvalue_reference_t<value_type>>;
+  using pointer = std::conditional_t<is_decorated, __unspecified__ *,
+                                     std::add_pointer_t<value_type>>;
+  using reference = std::conditional_t<is_decorated, __unspecified__ &,
+                                       std::add_lvalue_reference_t<value_type>>;
   using iterator_category = std::random_access_iterator_tag;
   using difference_type = std::ptrdiff_t;
 
@@ -49,7 +49,7 @@ class multi_ptr {
   multi_ptr();
   multi_ptr(const multi_ptr&);
   multi_ptr(multi_ptr&&);
-  explicit multi_ptr(multi_ptr<ElementType, Space, yes>::pointer);
+  explicit multi_ptr(typename multi_ptr<ElementType, Space, access::decorated::yes>::pointer);
   multi_ptr(std::nullptr_t);
 
   // Only if Space == global_space or generic_space
@@ -58,7 +58,7 @@ class multi_ptr {
 
   // Only if Space == local_space or generic_space
   template <int dimensions>
-  multi_ptr(local_accessor<ElementType, dimensions>)
+  multi_ptr(local_accessor<ElementType, dimensions>);
 
   // Deprecated
   // Only if Space == local_space or generic_space
@@ -120,17 +120,17 @@ class multi_ptr {
 
   // Implicit conversion to a multi_ptr<void>.
   // Only available when value_type is not const-qualified.
-  template<access::decorated DecorateAddress>
-  operator multi_ptr<void, Space, DecorateAddress>() const;
+  template<access::decorated DecorateAddress2>
+  operator multi_ptr<void, Space, DecorateAddress2>() const;
 
   // Implicit conversion to a multi_ptr<const void>.
   // Only available when value_type is const-qualified.
-  template<access::decorated DecorateAddress>
-  operator multi_ptr<const void, Space, DecorateAddress>() const;
+  template<access::decorated DecorateAddress2>
+  operator multi_ptr<const void, Space, DecorateAddress2>() const;
 
   // Implicit conversion to multi_ptr<const value_type, Space>.
-  template<access::decorated DecorateAddress>
-  operator multi_ptr<const value_type, Space, DecorateAddress>() const;
+  template<access::decorated DecorateAddress2>
+  operator multi_ptr<const value_type, Space, DecorateAddress2>() const;
 
   // Implicit conversion to the non-decorated version of multi_ptr.
   // Only available when is_decorated is true.
@@ -185,8 +185,8 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   static constexpr access::address_space address_space = Space;
 
   using value_type = VoidType;
-  using pointer = std::conditional<is_decorated, __unspecified__ value_type *,
-                                   std::add_pointer_t<value_type>>;
+  using pointer = std::conditional_t<is_decorated, __unspecified__ *,
+                                     std::add_pointer_t<value_type>>;
   using difference_type = std::ptrdiff_t;
 
   static_assert(std::is_same_v<remove_decoration_t<pointer>, std::add_pointer_t<value_type>>);
@@ -197,7 +197,7 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   multi_ptr();
   multi_ptr(const multi_ptr&);
   multi_ptr(multi_ptr&&);
-  explicit multi_ptr(multi_ptr<VoidType, Space, yes>::pointer);
+  explicit multi_ptr(typename multi_ptr<VoidType, Space, access::decorated::yes>::pointer);
   multi_ptr(std::nullptr_t);
 
   // Only if Space == global_space
