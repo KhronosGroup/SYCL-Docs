@@ -461,23 +461,26 @@ device function, it must be applied to the first declaration of that kernel
 or device function in the translation unit.  Programs which fail to do this are
 ill formed and the compiler must issue a diagnostic.  Redeclarations of the
 kernel or device function in the same translation unit may optionally have the
-same attribute applied (with its same parameters), but this is not required.
-The attribute remains in effect regardless of whether it appears in the
-redeclaration.
+same attribute applied (so long as the attribute arguments are the same between
+the declarations), but this is not required.  The attribute remains in effect
+regardless of whether it appears in the redeclaration.
 
-Programs which apply the same attribute (with either the same or different
-parameters) more than once to the same kernel or device function declaration
-are ill formed.  The compiler must issue a diagnostic for programs which
-violate this requirement.
+Unless an attribute's description specifically allows it, a kernel or device
+function may not be declared with the more than one instance of the same
+attribute unless all instances have the same attribute arguments.  The compiler
+must issue a diagnostic for programs which violate this requirement.  When two
+or more instances of the same attribute appear on the declaration of a kernel
+or device function, the effect is as though a single instance appeared
+(assuming that all instances have the same attribute arguments).
 
 If a kernel or device function is declared with an attribute in one translation
 unit and the same kernel or device function is declared without the same
-attribute (and its same parameters) in another translation unit, the program is
-ill formed and no diagnostic is required.
+attribute (and its same attribute arguments) in another translation unit, the
+program is ill formed and no diagnostic is required.
 
-If any of these attributes is applied to a device function that is also
-compiled for the host, it has no effect when the function is compiled for the
-host.
+If any of these attributes are applied to a device function that is also
+compiled for the host, they have no effect when the function is compiled for
+the host.
 
 Applying these attributes to any language construct other than those specified
 in this section has implementation-defined effect.
