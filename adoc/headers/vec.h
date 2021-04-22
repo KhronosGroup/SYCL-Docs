@@ -49,12 +49,12 @@ class vec {
 
   vec();
 
-  explicit vec(const dataT &arg);
+  explicit constexpr vec(const dataT &arg);
 
   template <typename... argTN>
-  vec(const argTN&... args);
+  constexpr vec(const argTN&... args);
 
-  vec(const vec<dataT, numElements> &rhs);
+  constexpr vec(const vec<dataT, numElements> &rhs);
 
 #ifdef __SYCL_DEVICE_ONLY__
   vec(vector_t nativeVector);

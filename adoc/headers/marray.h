@@ -14,13 +14,13 @@ class marray {
 
   marray();
 
-  explicit marray(const dataT &arg);
+  explicit constexpr marray(const dataT &arg);
 
   template <typename... argTN>
-  marray(const argTN&... args);
+  constexpr marray(const argTN&... args);
 
-  marray(const marray<dataT, numElements> &rhs);
-  marray(marray<dataT, numElements> &&rhs);
+  constexpr marray(const marray<dataT, numElements> &rhs);
+  constexpr marray(marray<dataT, numElements> &&rhs);
 
   // Available only when: numElements == 1
   operator dataT() const;
