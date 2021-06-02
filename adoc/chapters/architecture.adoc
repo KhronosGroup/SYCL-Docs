@@ -905,9 +905,9 @@ Work-items executing in a kernel have access to three distinct address spaces
     Work-items can read from or write to any element of a global memory
     object. Reads and writes to global memory may be cached depending on the
     capabilities of the device. Global memory is persistent across kernel
-    invocations. There is no guarantee that two concurrently
-    executing kernels can simultaneously write to the same USM allocation and
-    expect correct results unless <<mem-fence>> and atomic operations are used.
+    invocations. Concurrent access to a location in an USM allocation by two or more executing
+    kernels where at least one kernel modifies that location is a data race; there is no guarantee
+    of correct results unless <<mem-fence>> and atomic operations are used.
   * <<local-memory,Local-memory>> is accessible to all work-items in a single
     work-group. Attempting to access local memory in one work-group from
     another work group results in undefined behavior. This memory region can be
