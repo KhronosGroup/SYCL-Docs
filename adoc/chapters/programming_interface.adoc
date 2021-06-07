@@ -19454,7 +19454,8 @@ include::{header_dir}/groups/broadcast.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true.
+    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#T# is a
+    trivially copyable type.
 +
 --
 _Returns:_ The value of [code]#x# from the work-item with the smallest linear
@@ -19462,7 +19463,8 @@ id within the group.
 --
 
   . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true.
+    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#T# is a
+    trivially copyable type.
 +
 --
 _Preconditions:_ [code]#local_linear_id# must be the same for all work-items in
@@ -19473,7 +19475,8 @@ id within the group.
 --
 
   . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true.
+    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#T# is a
+    trivially copyable type.
 +
 --
 _Preconditions:_ [code]#local_id# must be the same for all work-items in the
@@ -19569,7 +19572,8 @@ include::{header_dir}/algorithms/any_of.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true.
+    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#Ptr# is a
+    pointer.
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
@@ -19603,7 +19607,8 @@ include::{header_dir}/algorithms/all_of.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true.
+    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#Ptr# is a
+    pointer.
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
@@ -19637,7 +19642,8 @@ include::{header_dir}/algorithms/none_of.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true.
+    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#Ptr# is a
+    pointer.
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
@@ -19682,11 +19688,12 @@ include::{header_dir}/algorithms/shift.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true.
+    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true and
+    [code]#T# is a trivially copyable type.
 +
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the
-group.  [code]#T# must be a trivially copyable type.
+group.
 
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 ([code]#id#) is [code]#delta# larger than that of the calling work-item.
@@ -19695,11 +19702,12 @@ size, but the value returned in this case is unspecified.
 --
 
   . _Constraints:_ Available only if
-    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true.
+    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true and
+    [code]#T# is a trivially copyable type.
 +
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the
-group.  [code]#T# must be a trivially copyable type.
+group.
 
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 ([code]#id#) is [code]#delta# smaller than that of the calling work-item.
@@ -19722,11 +19730,12 @@ include::{header_dir}/algorithms/permute.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true.
+    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true and
+    [code]#T# is a trivially copyable type.
 +
 --
 _Preconditions:_ [code]#mask# must be the same for all work-items in the
-group.  [code]#T# must be a trivially copyable type.
+group.
 
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 is equal to the bitwise exclusive OR of the calling work-item's group local id
@@ -19748,11 +19757,10 @@ include::{header_dir}/algorithms/select.h[lines=4..-1]
 ----
 
   . _Constraints:_ Available only if
-    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true.
+    [code]#std::is_same_v<std::decay_t<Group>, sub_group># is true and
+    [code]#T# is a trivially copyable type.
 +
 --
-_Preconditions:_ [code]#T# must be a trivially copyable type.
-
 _Returns:_ the value of [code]#x# from the work-item with the group local id
 specified by [code]#remote_local_id#.  The value of [code]#remote_local_id# may
 be outside of the group, but the value returned in this case is unspecified.
