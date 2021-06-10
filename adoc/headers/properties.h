@@ -3,33 +3,33 @@
 
 namespace sycl {
 
-template <typename propertyT>
+template <typename Property>
 struct is_property;
 
-template <typename propertyT>
-inline constexpr bool is_property_v = is_property<propertyT>::value;
+template <typename Property>
+inline constexpr bool is_property_v = is_property<Property>::value;
 
-template <typename propertyT, typename syclObjectT>
+template <typename Property, typename SyclObject>
 struct is_property_of;
 
-template <typename propertyT, typename syclObjectT>
-inline constexpr bool is_property_of_v = is_property_of<propertyT, syclObjectT>::value;
+template <typename Property, typename SyclObject>
+inline constexpr bool is_property_of_v = is_property_of<Property, SyclObject>::value;
 
 class T {
   ...
 
-  template <typename propertyT>
+  template <typename Property>
   bool has_property() const noexcept;
 
-  template <typename propertyT>
-  propertyT get_property() const;
+  template <typename Property>
+  Property get_property() const;
 
   ...
 };
 
 class property_list {
  public:
-   template <typename... propertyTN>
-   property_list(propertyTN... props);
+   template <typename... Properties>
+   property_list(Properties... props);
 };
 }  // namespace sycl
