@@ -690,12 +690,12 @@ include::{header_dir}/properties.h[lines=4..-1]
 a@
 [source]
 ----
-template <typename propertyT>
+template <typename Property>
 struct is_property
 ----
    a@ An explicit specialization of [code]#is_property# that inherits
       from [code]#std::true_type# must be provided for each property,
-      where [code]#propertyT# is the class defining the property.
+      where [code]#Property# is the class defining the property.
       This includes both standard properties described in this
       specification and any additional non-standard properties defined by
       an implementation. All other specializations of
@@ -704,22 +704,22 @@ struct is_property
 a@
 [source,c++]
 ----
-template <typename propertyT>
+template <typename Property>
 inline constexpr bool is_property_v;
 ----
-   a@ Variable containing value of [code]#is_property<propertyT>#.
+   a@ Variable containing value of [code]#is_property<Property>#.
 
 a@
 [source]
 ----
-template <typename propertyT, syclObjectT>
+template <typename Property, SyclObject>
 struct is_property_of
 ----
    a@ An explicit specialization of [code]#is_property_of# that
       inherits from [code]#std::true_type# must be provided for each
       property that can be used in constructing a given SYCL class, where
-      [code]#propertyT# is the class defining the property and
-      [code]#syclObjectT# is the SYCL class. This includes both
+      [code]#Property# is the class defining the property and
+      [code]#SyclObject# is the SYCL class. This includes both
       standard properties described in this specification and any
       additional non-standard properties defined by an implementation. All
       other specializations of [code]#is_property_of# must inherit
@@ -727,10 +727,10 @@ struct is_property_of
 a@
 [source,c++]
 ----
-template <typename propertyT, syclObjectT>
+template <typename Property, SyclObject>
 inline constexpr bool is_property_of_v;
 ----
-   a@ Variable containing value of [code]#is_property_of<propertyT, syclObjectT>#.
+   a@ Variable containing value of [code]#is_property_of<Property, SyclObject>#.
 
 |====
 
@@ -744,24 +744,24 @@ inline constexpr bool is_property_of_v;
 a@
 [source]
 ----
-template <typename propertyT>
+template <typename Property>
 bool has_property() const noexcept
 ----
    a@ Returns true if [code]#T# was constructed with the property
-      specified by [code]#propertyT#. Returns false if it was
+      specified by [code]#Property#. Returns false if it was
       not.
 
 a@
 [source]
 ----
-template <typename propertyT>
-propertyT get_property() const
+template <typename Property>
+Property get_property() const
 ----
-   a@ Returns a copy of the property of type [code]#propertyT#
+   a@ Returns a copy of the property of type [code]#Property#
       that [code]#T# was constructed with. Must throw an
       [code]#exception# with the [code]#errc::invalid#
       error code if [code]#T# was not constructed with the
-      [code]#propertyT# property.
+      [code]#Property# property.
 
 |====
 
@@ -775,12 +775,12 @@ propertyT get_property() const
 a@
 [source]
 ----
-template <typename... propertyTN>
-property_list(propertyTN... props)
+template <typename... PropertyN>
+property_list(PropertyN... props)
 ----
    a@ Available only when: [code]#is_property<property>::value#
       evaluates to [code]#true# where [code]#property# is each
-      property in [code]#propertyTN#.
+      property in [code]#PropertyN#.
 
 Construct a SYCL [code]#property_list# with zero or more properties.
 
@@ -896,10 +896,10 @@ __unspecified_callable__ aspect_selector(
    const std::vector<aspect> &aspectList,
    const std::vector<aspect> &denyList = {});
 
-template <typename... aspectListTN>
-__unspecified_callable__ aspect_selector(aspectListTN... aspectList);
+template <typename... AspectList>
+__unspecified_callable__ aspect_selector(AspectList... aspectList);
 
-template <aspect... aspectList>
+template <aspect... AspectList>
 __unspecified_callable__ aspect_selector();
 ----
 a@ The free function [code]#aspect_selector# has several overloads,
@@ -1104,26 +1104,26 @@ backend get_backend() const noexcept
 a@
 [source]
 ----
-template <typename param> typename param::return_type get_info() const
+template <typename Param> typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#platform# for information requested by
-      the template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      the template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the info parameters in <<table.device.info>> to
-      facilitate returning the type associated with the [code]#param#
+      facilitate returning the type associated with the [code]#Param#
       parameter.
 
 a@
 [source]
 ----
-template <typename param> typename param::return_type get_backend_info() const
+template <typename Param> typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#platform# for <<backend>>-specific
-      information requested by the template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      information requested by the template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the <<backend>> specification.
       Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#param# is different
+      error code if the <<backend>> that corresponds with [code]#Param# is different
       from the <<backend>> that is associated with this [code]#platform#.
 
 a@
@@ -1335,27 +1335,27 @@ backend get_backend() const noexcept
 a@
 [source]
 ----
-template <typename param> typename param::return_type get_info() const
+template <typename Param> typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#context# for information requested by the
-      template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the info parameters in <<table.context.info>> to
-      facilitate returning the type associated with the [code]#param#
+      facilitate returning the type associated with the [code]#Param#
       parameter.
 
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_backend_info() const
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#context# for <<backend>>-specific information
-      requested by the template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      requested by the template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the <<backend>> specification.
       Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#param# is different
+      error code if the <<backend>> that corresponds with [code]#Param# is different
       from the <<backend>> that is associated with this [code]#context#.
 
 a@
@@ -1585,28 +1585,28 @@ bool is_accelerator() const
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_info() const
+template <typename Param>
+typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#device# for information requested by the
-      template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the info parameters in <<table.device.info>> to
-      facilitate returning the type associated with the [code]#param#
+      facilitate returning the type associated with the [code]#Param#
       parameter.
 
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_backend_info() const
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#device# for <<backend>>-specific information
-      requested by the template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      requested by the template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the <<backend>> specification.
       Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#param# is different
+      error code if the <<backend>> that corresponds with [code]#Param# is different
       from the <<backend>> that is associated with this [code]#device#.
 
 a@
@@ -1631,11 +1631,11 @@ Returns true if this SYCL [code]#device# supports the extension queried by the [
 a@
 [source]
 ----
-template <info::partition_property prop>
+template <info::partition_property Prop>
 std::vector<device> create_sub_devices(
     size_t count) const
 ----
-   a@ Available only when [code]#prop# is
+   a@ Available only when [code]#Prop# is
       [code]#info::partition_property::partition_equally#.  Returns a
       [code]#std::vector# of sub devices partitioned from this SYCL
       [code]#device# based on the [code]#count# parameter.  The returned vector
@@ -1654,11 +1654,11 @@ the [code]#errc::feature_not_supported# error code must be thrown.  If
 a@
 [source]
 ----
-template <info::partition_property prop>
+template <info::partition_property Prop>
 std::vector<device> create_sub_devices(
     const std::vector<size_t> &counts) const
 ----
-   a@ Available only when [code]#prop# is
+   a@ Available only when [code]#Prop# is
       [code]#info::partition_property::partition_by_counts#.  Returns a
       [code]#std::vector# of sub devices partitioned from this SYCL
       [code]#device# based on the [code]#counts# parameter.  For each non-zero
@@ -1678,7 +1678,7 @@ in the device (as returned by [code]#info::device::max_compute_units#), an
 a@
 [source]
 ----
-template <info::partition_property prop>
+template <info::partition_property Prop>
 std::vector<device> create_sub_devices(
     info::partition_affinity_domain domain) const
 ----
@@ -1688,7 +1688,7 @@ std::vector<device> create_sub_devices(
 // to see if any of the text is cut off at the bottom of the page.  If so, try
 // making this column wider so that this row still fits on a page.
 
-   a@ Available only when [code]#prop# is
+   a@ Available only when [code]#Prop# is
       [code]#info::partition_property::partition_by_affinity_domain#.  Returns
       a [code]#std::vector# of sub devices partitioned from this SYCL
       [code]#device# by affinity domain based on the [code]#domain# parameter,
@@ -3192,14 +3192,14 @@ described in <<subsubsec:exception.nohandler>>.
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_info() const
+template <typename Param>
+typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#queue# for information requested by the
-      template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the info parameters in <<table.queue.info>> to
-      facilitate returning the type associated with the [code]#param#
+      facilitate returning the type associated with the [code]#Param#
       parameter.
 
 a@
@@ -3226,15 +3226,15 @@ is being enqueued on.
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_backend_info() const
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
 a@ Queries this SYCL [code]#queue# for <<backend>>-specific information
-requested by the template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+requested by the template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the <<backend>> specification.
       Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#param# is different
+      error code if the <<backend>> that corresponds with [code]#Param# is different
       from the <<backend>> that is associated with this [code]#queue#.
 
 |====
@@ -3309,9 +3309,9 @@ a@
 [source]
 ----
 template <typename KernelName,
-          int dimensions,
+          int Dimensions,
           typename... Rest>
-event parallel_for(range<dimensions> numWorkItems,
+event parallel_for(range<Dimensions> numWorkItems,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
@@ -3319,9 +3319,9 @@ a@
 [source]
 ----
 template <typename KernelName,
-          int dimensions,
+          int Dimensions,
           typename... Rest>
-event parallel_for(range<dimensions> numWorkItems,
+event parallel_for(range<Dimensions> numWorkItems,
                    event depEvent,
                    Rest&&... rest)
 ----
@@ -3330,9 +3330,9 @@ a@
 [source]
 ----
 template <typename KernelName,
-          int dimensions,
+          int Dimensions,
           typename... Rest>
-event parallel_for(range<dimensions> numWorkItems,
+event parallel_for(range<Dimensions> numWorkItems,
                    const std::vector<event> &depEvents,
                    Rest&&... rest)
 ----
@@ -3341,9 +3341,9 @@ a@
 [source]
 ----
 template <typename KernelName,
-          int dimensions,
+          int Dimensions,
           typename... Rest>
-event parallel_for(nd_range<dimensions> executionRange,
+event parallel_for(nd_range<Dimensions> executionRange,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
@@ -3351,9 +3351,9 @@ a@
 [source]
 ----
 template <typename KernelName,
-          int dimensions,
+          int Dimensions,
           typename... Rest>
-event parallel_for(nd_range<dimensions> executionRange,
+event parallel_for(nd_range<Dimensions> executionRange,
                    event depEvent,
                    Rest&&... rest)
 ----
@@ -3362,9 +3362,9 @@ a@
 [source]
 ----
 template <typename KernelName,
-          int dimensions,
+          int Dimensions,
           typename... Rest>
-event parallel_for(nd_range<dimensions> executionRange,
+event parallel_for(nd_range<Dimensions> executionRange,
                    const std::vector<event> &depEvents,
                    Rest&&... rest)
 ----
@@ -3498,71 +3498,71 @@ a@ <<sec:usm, USM>>
 a@
 [source]
 ----
-template <typename T_src, int dim_src, access_mode mode_src,
-         target tgt_src, access::placeholder isPlaceholder,
-         typename T_dest>
-event copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src,
-           std::shared_ptr<T_dest> dest);
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+         target SrcTgt, access::placeholder IsPlaceholder,
+         typename DestT>
+event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
+           std::shared_ptr<DestT> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@
 [source]
 ----
-template <typename T_src, typename T_dest, int dim_dest,
-          access_mode mode_dest, target tgt_dest,
-          access::placeholder isPlaceholder>
+template <typename SrcT, typename DestT, int DestDims,
+          access_mode DestMode, target DestTgt,
+          access::placeholder IsPlaceholder>
 event
-copy(std::shared_ptr<T_src> src,
-     accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest);
+copy(std::shared_ptr<SrcT> src,
+     accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@
 [source]
 ----
-template <typename T_src, int dim_src, access_mode mode_src,
-          target tgt_src, access::placeholder isPlaceholder,
-          typename T_dest>
-event copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src,
-           T_dest *dest);
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+          target SrcTgt, access::placeholder IsPlaceholder,
+          typename DestT>
+event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
+           DestT *dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@
 [source]
 ----
-template <typename T_src, typename T_dest, int dim_dest,
-          access_mode mode_dest, target tgt_dest,
-          access::placeholder isPlaceholder>
+template <typename SrcT, typename DestT, int DestDims,
+          access_mode DestMode, target DestTgt,
+          access::placeholder IsPlaceholder>
 event
-copy(const T_src *src,
-     accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest);
+copy(const SrcT *src,
+     accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@
 [source]
 ----
-template <typename T_src, int dim_src, access_mode mode_src,
-          target tgt_src, access::placeholder isPlaceholder_src,
-          typename T_dest, int dim_dest, access_mode mode_dest,
-          target tgt_dest, access::placeholder isPlaceholder_dest>
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+          target SrcTgt, access::placeholder IsSrcPlaceholder,
+          typename DestT, int DestDims, access_mode DestMode,
+          target DestTgt, access::placeholder IsDestPlaceholder>
 event copy(
-   accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder_src> src,
-   accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder_dest> dest);
+   accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
+   accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@
 [source]
 ----
-  template <typename T, int dim, access_mode mode, target tgt,
-            access::placeholder isPlaceholder>
-  event update_host(accessor<T, dim, mode, tgt, isPlaceholder> acc);
+  template <typename T, int Dims, access_mode Mode, target Tgt,
+            access::placeholder IsPlaceholder>
+  event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@
 [source]
 ----
-  template <typename T, int dim, access_mode mode, target tgt,
-            access::placeholder isPlaceholder>
-  event fill(accessor<T, dim, mode, tgt, isPlaceholder> dest, const T &src);
+  template <typename T, int Dims, access_mode Mode, target Tgt,
+            access::placeholder IsPlaceholder>
+  event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T &src);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 
@@ -3831,37 +3831,37 @@ described in <<subsubsec:exception.nohandler>>.
 a@
 [source]
 ----
-template <typename param> typename param::return_type get_info() const
+template <typename Param> typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#event# for information requested by the
-      template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the info parameters in <<table.event.info>> to
-      facilitate returning the type associated with the [code]#param#
+      facilitate returning the type associated with the [code]#Param#
       parameter.
 
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_backend_info() const
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#event# for <<backend>>-specific information
-      requested by the template parameter [code]#param#.
-      The type alias [code]#param::return_type# must be defined in
+      requested by the template parameter [code]#Param#.
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the <<backend>> specification.
       Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#param# is different
+      error code if the <<backend>> that corresponds with [code]#Param# is different
       from the <<backend>> that is associated with this [code]#event#.
 
 a@
 [source]
 ----
-template <typename param>
-typename param::return_type get_profiling_info () const
+template <typename Param>
+typename Param::return_type get_profiling_info () const
 ----
    a@ Queries this SYCL [code]#event# for profiling information requested
-      by the parameter [code]#param#. If the requested profiling information
+      by the parameter [code]#Param#. If the requested profiling information
       is unavailable when [code]#get_profiling_info# is called due to
       incompletion of <<command-group,command groups>> associated with the [code]#event#,
       then the call to [code]#get_profiling_info# will block until
@@ -3873,10 +3873,10 @@ typename param::return_type get_profiling_info () const
       [code]#queue# which submitted the <<command-group>> this
       SYCL [code]#event# is associated with was not constructed with
       the [code]#property::queue::enable_profiling# property.
-      The type alias [code]#param::return_type# must be defined in
+      The type alias [code]#Param::return_type# must be defined in
       accordance with the info parameters in
       <<table.event.profilinginfo>> to facilitate returning the type
-      associated with the [code]#param# parameter.
+      associated with the [code]#Param# parameter.
 
 |====
 
@@ -4143,7 +4143,7 @@ include::{header_dir}/buffer.h[lines=4..-1]
 a@
 [source]
 ----
-buffer(const range<dimensions> & bufferRange,
+buffer(const range<Dimensions> & bufferRange,
 const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
@@ -4155,7 +4155,7 @@ const property_list &propList = {})
 a@
 [source]
 ----
-buffer(const range<dimensions> & bufferRange,
+buffer(const range<Dimensions> & bufferRange,
 AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -4169,7 +4169,7 @@ a@
 [source]
 ----
 buffer(T* hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
@@ -4183,7 +4183,7 @@ a@
 [source]
 ----
 buffer(T* hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -4198,7 +4198,7 @@ a@
 [source]
 ----
 buffer(const T* hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the
@@ -4231,7 +4231,7 @@ a@
 [source]
 ----
 buffer(const T* hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -4327,7 +4327,7 @@ a@
 [source]
 ----
 buffer(const std::shared_ptr<T> &hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
@@ -4339,7 +4339,7 @@ a@
 [source]
 ----
 buffer(const std::shared_ptr<T> &hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -4352,7 +4352,7 @@ a@
 [source,c++]
 ----
 buffer(const std::shared_ptr<T[]> &hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
@@ -4364,7 +4364,7 @@ a@
 [source,c++]
 ----
 buffer(const std::shared_ptr<T[]> &hostData,
-const range<dimensions> & bufferRange,
+const range<Dimensions> & bufferRange,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -4405,8 +4405,8 @@ buffer(InputIterator first, InputIterator last,
 a@
 [source]
 ----
-buffer(buffer &b, const id<dimensions> &baseIndex,
-      const range<dimensions> &subRange)
+buffer(buffer &b, const id<Dimensions> &baseIndex,
+      const range<Dimensions> &subRange)
 ----
    a@ Create a new sub-buffer without allocation to have separate
       accessors later. [code]#b# is the buffer with the real data, which must not be a sub-buffer.
@@ -4453,7 +4453,7 @@ Must throw an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-range<dimensions> get_range() const
+range<Dimensions> get_range() const
 ----
    a@ Return a range object representing the
       size of the buffer in terms of number
@@ -4496,9 +4496,9 @@ AllocatorT get_allocator() const
 a@
 [source]
 ----
-template<access_mode mode = access_mode::read_write,
-         target targ = target::device>
-accessor<T, dimensions, mode, targ>
+template<access_mode Mode = access_mode::read_write,
+         target Targ = target::device>
+accessor<T, Dimensions, Mode, Targ>
     get_access(handler &commandGroupHandler)
 ----
    a@ Returns a valid [code]#accessor# to the buffer with the specified
@@ -4509,8 +4509,8 @@ accessor<T, dimensions, mode, targ>
 a@
 [source]
 ----
-template<access_mode mode>
-accessor<T, dimensions, mode, target::host_buffer>
+template<access_mode Mode>
+accessor<T, Dimensions, Mode, target::host_buffer>
     get_access()
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
@@ -4521,12 +4521,12 @@ access mode and target.
 a@
 [source]
 ----
-template<access_mode mode = access_mode::read_write,
-         target targ=target::device>
-accessor<T, dimensions, mode, targ>
+template<access_mode Mode = access_mode::read_write,
+         target Targ=target::device>
+accessor<T, Dimensions, Mode, Targ>
     get_access(handler &commandGroupHandler,
-               range<dimensions> accessRange,
-               id<dimensions> accessOffset = {})
+               range<Dimensions> accessRange,
+               id<Dimensions> accessOffset = {})
 ----
    a@ Returns a valid [code]#accessor# to the buffer with the specified access
       mode and target in the command group buffer.  The accessor is a
@@ -4541,9 +4541,9 @@ the buffer in any dimension.
 a@
 [source]
 ----
-template<access_mode mode>
-accessor<T, dimensions, mode, target::host_buffer>
-    get_access(range<dimensions> accessRange, id<dimensions> accessOffset = {})
+template<access_mode Mode>
+accessor<T, Dimensions, Mode, target::host_buffer>
+    get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {})
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
 
@@ -4659,7 +4659,7 @@ template <typename ReinterpretT, int ReinterpretDim>
 a@
 [source]
 ----
-template <typename ReinterpretT, int ReinterpretDim = dimensions>
+template <typename ReinterpretT, int ReinterpretDim = Dimensions>
     buffer<ReinterpretT, ReinterpretDim,
            typename std::allocator_traits<AllocatorT>::template rebind_alloc<
              ReinterpretT>>
@@ -4669,7 +4669,7 @@ template <typename ReinterpretT, int ReinterpretDim = dimensions>
       with the type specified by [code]#ReinterpretT# and
       dimensions specified by [code]#ReinterpretDim#.
       Only valid when [code]#(ReinterpretDim == 1)# or when
-      [code]#\((ReinterpretDim == dimensions) && (sizeof(ReinterpretT) == sizeof(T)))#.
+      [code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) == sizeof(T)))#.
       The buffer object being reinterpreted can be a SYCL sub-buffer
       that was created from a SYCL [code]#buffer#.  The implementation must
       throw an [code]#exception# with the [code]#errc::invalid# error code
@@ -5000,7 +5000,7 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<dimensions> &rangeRef,
+const range<Dimensions> &rangeRef,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
@@ -5025,7 +5025,7 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<dimensions> &rangeRef,
+const range<Dimensions> &rangeRef,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -5051,11 +5051,11 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<dimensions> &rangeRef,
-    const range<dimensions-1> &pitch,
+const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> &pitch,
     const property_list &propList = {})
 ----
-   a@ Available only when: [code]#dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 1#.
 
 Construct a SYCL [code]#unsampled_image# instance with
 uninitialized memory.
@@ -5079,12 +5079,12 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<dimensions> &rangeRef,
-    const range<dimensions-1> &pitch,
+const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> &pitch,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
-   a@ Available only when: [code]#dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 1#.
 
 Construct a SYCL [code]#unsampled_image# instance with
 uninitialized memory.
@@ -5109,7 +5109,7 @@ a@
 ----
 unsampled_image(void *hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
+    const range<Dimensions> &rangeRef,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
@@ -5137,7 +5137,7 @@ a@
 ----
 unsampled_image(void *hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
+    const range<Dimensions> &rangeRef,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -5165,11 +5165,11 @@ a@
 ----
 unsampled_image(void *hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
-    const range<dimensions-1> &pitch,
+    const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> &pitch,
     const property_list &propList = {})
 ----
-   a@ Available only when: [code]#dimensions > 1#
+   a@ Available only when: [code]#Dimensions > 1#
 
 Construct a SYCL [code]#unsampled_image# instance with the
 [code]#hostPointer# parameter provided. The ownership of this
@@ -5196,12 +5196,12 @@ a@
 ----
 unsampled_image(void *hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
-    const range<dimensions-1> &pitch,
+    const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> &pitch,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
-   a@ Available only when: [code]#dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 1#.
 
 Construct a SYCL [code]#unsampled_image# instance with the
 [code]#hostPointer# parameter provided. The ownership of this
@@ -5227,7 +5227,7 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
+    const range<Dimensions> &rangeRef,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
@@ -5254,7 +5254,7 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
+    const range<Dimensions> &rangeRef,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -5282,8 +5282,8 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
-    const range<dimensions-1> & pitch,
+    const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> & pitch,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
@@ -5310,8 +5310,8 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<dimensions> &rangeRef,
-    const range<dimensions-1> & pitch,
+    const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> & pitch,
     AllocatorT allocator,
     const property_list &propList = {})
 ----
@@ -5346,7 +5346,7 @@ image_format format,
 a@
 [source]
 ----
-range<dimensions> get_range() const
+range<Dimensions> get_range() const
 ----
    a@ Return a range object representing the
       size of the image in terms of the number
@@ -5356,9 +5356,9 @@ range<dimensions> get_range() const
 a@
 [source]
 ----
-range<dimensions-1> get_pitch() const
+range<Dimensions-1> get_pitch() const
 ----
-   a@ Available only when: [code]#dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 1#.
 
 Return a range object representing the
 pitch of the image in bytes.
@@ -5369,7 +5369,7 @@ a@
 size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the image.
-      Equal to [code]#+get_range()[0] * ... * get_range()[dimensions-1]+#.
+      Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
 
 a@
 [source]
@@ -5489,7 +5489,7 @@ a@
 sampled_image(const void *hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<dimensions> &rangeRef,
+    const range<Dimensions> &rangeRef,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
@@ -5518,11 +5518,11 @@ a@
 sampled_image(const void *hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<dimensions> &rangeRef,
-    const range<dimensions-1> &pitch,
+    const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> &pitch,
     const property_list &propList = {})
 ----
-   a@ Available only when: [code]#dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 1#.
 
 Construct a SYCL [code]#sampled_image# instance with the
 [code]#hostPointer# parameter provided. The ownership of this
@@ -5550,7 +5550,7 @@ a@
 sampled_image(std::shared_ptr<const void>& hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<dimensions> &rangeRef,
+    const range<Dimensions> &rangeRef,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
@@ -5579,8 +5579,8 @@ a@
 sampled_image(std::shared_ptr<const void>& hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<dimensions> &rangeRef,
-    const range<dimensions-1> & pitch,
+    const range<Dimensions> &rangeRef,
+    const range<Dimensions-1> & pitch,
     const property_list &propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
@@ -5615,7 +5615,7 @@ image_format format,
 a@
 [source]
 ----
-range<dimensions> get_range() const
+range<Dimensions> get_range() const
 ----
    a@ Return a range object representing the
       size of the image in terms of the number
@@ -5625,9 +5625,9 @@ range<dimensions> get_range() const
 a@
 [source]
 ----
-range<dimensions-1> get_pitch() const
+range<Dimensions-1> get_pitch() const
 ----
-   a@ Available only when: [code]#dimensions > 1#.
+   a@ Available only when: [code]#Dimensions > 1#.
 
 Return a range object representing the
 pitch of the image in bytes.
@@ -5638,7 +5638,7 @@ a@
 size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the image.
-      Equal to [code]#+get_range()[0] * ... * get_range()[dimensions-1]+#.
+      Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
 
 a@
 [source]
@@ -6232,7 +6232,7 @@ class in the sections that follow.
 ==== Accessing elements of an accessor
 
 Accessors of type [code]#accessor#, [code]#host_accessor#, and
-[code]#local_accessor# can have zero, one, two, or three dimensions.  A zero
+[code]#local_accessor# can have zero, one, two, or three Dimensions.  A zero
 dimension accessor provides access to a single scalar element via an implicit
 conversion operator to the underlying type of that element.
 
@@ -6432,7 +6432,7 @@ template <typename AllocatorT>
 accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs a placeholder [code]#accessor# for accessing the first element of a
 [code]#buffer#.  The optional [code]#property_list# provides properties for the
@@ -6446,7 +6446,7 @@ accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs an [code]#accessor# for accessing the first element of a
 [code]#buffer# within a <<sycl-kernel-function>> on the [code]#queue#
@@ -6457,10 +6457,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# for accessing a [code]#buffer#.  The
 optional [code]#property_list# provides properties for the constructed
@@ -6470,10 +6470,10 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# for accessing a [code]#buffer#.  The
 [code]#tag# is used to deduce template arguments of the accessor as described
@@ -6484,11 +6484,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# for accessing a [code]#buffer# within a
 <<sycl-kernel-function>> on the [code]#queue# associated with
@@ -6499,11 +6499,11 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# for accessing a [code]#buffer# within a
 <<sycl-kernel-function>> on the [code]#queue# associated with
@@ -6516,11 +6516,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# that is a <<ranged-accessor>>, where
 the range starts at the beginning of the [code]#buffer#.  The optional
@@ -6533,11 +6533,11 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# that is a <<ranged-accessor>>, where
 the range starts at the beginning of the [code]#buffer#.  The [code]#tag# is
@@ -6552,12 +6552,12 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# that is a <<ranged-accessor>>, where
 the range starts at an offset from the beginning of the [code]#buffer#.  The
@@ -6572,12 +6572,12 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# that is a <<ranged-accessor>>, where
 the range starts at an offset from the beginning of the [code]#buffer#.  The
@@ -6593,12 +6593,12 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
-    range<dimensions> accessRange,
+    range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>>, where the range
 starts at the beginning of the [code]#buffer#.  The accessor can only be used
@@ -6613,12 +6613,12 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
-    range<dimensions> accessRange,
+    range<Dimensions> accessRange,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>>, where the range
 starts at the beginning of the [code]#buffer#.  The accessor can only be used
@@ -6635,13 +6635,13 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>>, where the range
 starts at an offset from the beginning of the [code]#buffer#.  The accessor can
@@ -6657,13 +6657,13 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>>, where the range
 starts at an offset from the beginning of the [code]#buffer#.  The accessor can
@@ -6704,13 +6704,13 @@ bool is_placeholder() const
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 If this is a <<ranged-accessor>>, returns the offset that was specified when the
 accessor was constructed.  For other accessors, returns the default constructed
-[code]#id<dimensions>{}#.
+[code]#id<Dimensions>{}#.
 
 a@
 [source]
@@ -6823,7 +6823,7 @@ constructed with the property [code]#property::no_init#.
 
 ====== Placeholder template parameter
 
-The [code]#accessor# template parameter [code]#isPlaceholder# is allowed to be
+The [code]#accessor# template parameter [code]#IsPlaceholder# is allowed to be
 specified, but it has no bearing on whether the [code]#accessor# instance is a
 placeholder.  This is determined solely by the constructor used to create the
 instance.
@@ -6916,7 +6916,7 @@ template <typename AllocatorT>
 accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs a placeholder [code]#accessor# for accessing the first element of a
 [code]#buffer#.  The optional [code]#property_list# provides properties for the
@@ -6930,7 +6930,7 @@ accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs an [code]#accessor# for accessing the first element of a
 [code]#buffer# within a <<sycl-kernel-function>> on the [code]#queue#
@@ -6941,10 +6941,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# for accessing a [code]#buffer#.  The
 optional [code]#property_list# provides properties for the constructed
@@ -6954,11 +6954,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# for accessing a [code]#buffer# within a
 <<sycl-kernel-function>> on the [code]#queue# associated with
@@ -6969,11 +6969,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# that is a <<ranged-accessor>>, where
 the range starts at the beginning of the [code]#buffer#.  The optional
@@ -6985,12 +6985,12 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a placeholder [code]#accessor# that is a <<ranged-accessor>>, where
 the range starts at an offset from the beginning of the [code]#buffer#.  The
@@ -7005,12 +7005,12 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
-    range<dimensions> accessRange,
+    range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>>, where the range
 starts at the beginning of the [code]#buffer#.  The accessor can only be used
@@ -7025,13 +7025,13 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>>, where the range
 starts at an offset from the beginning of the [code]#buffer#.  The accessor can
@@ -7062,13 +7062,13 @@ bool is_placeholder() const
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 If this is a <<ranged-accessor>>, returns the offset that was specified when
 the accessor was constructed, otherwise returns the default constructed
-[code]#id<dimensions>{}#.
+[code]#id<Dimensions>{}#.
 
 a@
 [source]
@@ -7133,7 +7133,7 @@ template <typename AllocatorT>
 accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs an [code]#accessor# for accessing the first element of a
 [code]#buffer# immediately on the host.  The optional [code]#property_list#
@@ -7143,10 +7143,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# for accessing a [code]#buffer# immediately on
 the host.  The optional [code]#property_list# provides properties for the
@@ -7156,11 +7156,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>> which accesses a
 buffer immediately on the host, where the range starts at the beginning of the
@@ -7174,12 +7174,12 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# that is a <<ranged-accessor>> which accesses a
 buffer immediately on the host, where the range starts at an offset from the
@@ -7208,13 +7208,13 @@ bool is_placeholder() const
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 If this is a <<ranged-accessor>>, returns the offset that was specified when
 the accessor was constructed, otherwise returns the default constructed
-[code]#id<dimensions>{}#.
+[code]#id<Dimensions>{}#.
 
 a@
 [source]
@@ -7269,7 +7269,7 @@ a@
 accessor(handler &commandGroupHandlerRef,
          const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs an [code]#accessor# instance for accessing <<local-memory>> of a
 single [code]#dataT# element within a <<sycl-kernel-function>> on the queue
@@ -7279,11 +7279,11 @@ associated with [code]#commandGroupHandlerRef#.  The optional
 a@
 [source]
 ----
-accessor(range<dimensions> allocationSize,
+accessor(range<Dimensions> allocationSize,
          handler &commandGroupHandlerRef,
          const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# instance for accessing <<local-memory>> of an
 array of [code]#dataT# elements within a <<sycl-kernel-function>> on the queue
@@ -7305,7 +7305,7 @@ a@
 operator atomic<dataT, access::address_space::local_space>() const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && dimensions == 0)#.
+      [code]#(accessMode == access_mode::atomic && Dimensions == 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
 access to the element stored within the work-group's local memory allocation
@@ -7314,10 +7314,10 @@ that this accessor is accessing.
 a@
 [source]
 ----
-atomic<dataT, access::address_space::local_space> operator[](id<dimensions> index) const
+atomic<dataT, access::address_space::local_space> operator[](id<Dimensions> index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && dimensions > 0)#.
+      [code]#(accessMode == access_mode::atomic && Dimensions > 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
 access to the element stored within the work-group's local memory allocation
@@ -7329,7 +7329,7 @@ a@
 atomic<dataT, access::address_space::local_space> operator[](size_t index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && dimensions == 1)#.
+      [code]#(accessMode == access_mode::atomic && Dimensions == 1)#.
 
 Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
 access to the element stored within the work-group's local memory allocation
@@ -7426,9 +7426,9 @@ number of elements in the accessor's local memory allocation, per work-group.
 a@
 [source]
 ----
-range<dimensions> get_range() const
+range<Dimensions> get_range() const
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Returns a [code]#range# object which represents the number of elements of
 [code]#dataT# per dimension that this accessor may access.
@@ -7448,24 +7448,24 @@ operator reference() const
 ----
    a@ When [code]#accessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
-      [code]#(dimensions == 0)#.
+      [code]#(Dimensions == 0)#.
 
 When [code]#accessTarget# is [code]#target::local#, available only when
-[code]#(accessMode == access_mode::read_write && dimensions == 0)#.
+[code]#(accessMode == access_mode::read_write && Dimensions == 0)#.
 
 Returns a reference to the single element that is accessed by this accessor.
 
 a@
 [source]
 ----
-reference operator[](id<dimensions> index) const
+reference operator[](id<Dimensions> index) const
 ----
    a@ When [code]#accessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
-      [code]#(dimensions > 0)#.
+      [code]#(Dimensions > 0)#.
 
 When [code]#accessTarget# is [code]#target::local#, available only when
-[code]#(accessMode == access_mode::read_write && dimensions > 0)#.
+[code]#(accessMode == access_mode::read_write && Dimensions > 0)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
@@ -7476,11 +7476,11 @@ a@
 ----
 __unspecified__ &operator[](size_t index) const
 ----
-   a@ Available only when [code]#(dimensions > 1)#.
+   a@ Available only when [code]#(Dimensions > 1)#.
 
 Returns an instance of an undefined intermediate type representing this
-accessor, with the dimensionality [code]#dimensions-1# and containing an
-implicit [code]#id# with index [code]#dimensions# set to [code]#index#.  The
+accessor, with the dimensionality [code]#Dimensions-1# and containing an
+implicit [code]#id# with index [code]#Dimensions# set to [code]#index#.  The
 intermediate type returned must provide all available subscript operators which
 take a [code]#size_t# parameter defined by this accessor class that are
 appropriate for the type it represents (including this subscript operator).
@@ -7495,10 +7495,10 @@ reference operator[](size_t index) const
 ----
    a@ When [code]#accessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
-      [code]#(dimensions == 1)#.
+      [code]#(Dimensions == 1)#.
 
 When [code]#accessTarget# is [code]#target::local#, available only when
-[code]#(accessMode == access_mode::read_write && dimensions == 1)#.
+[code]#(accessMode == access_mode::read_write && Dimensions == 1)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
@@ -7527,7 +7527,7 @@ a@
 operator atomic<dataT, access::address_space::global_space>() const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && dimensions == 0)#.
+      [code]#(accessMode == access_mode::atomic && Dimensions == 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
 access to the single element that is accessed by this accessor.
@@ -7536,10 +7536,10 @@ a@
 [source]
 ----
 atomic<dataT, access::address_space::global_space> operator[](
-  id<dimensions> index) const
+  id<Dimensions> index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && dimensions > 0)#.
+      [code]#(accessMode == access_mode::atomic && Dimensions > 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
 access to the element stored within the accessor's buffer at the index
@@ -7556,7 +7556,7 @@ atomic<dataT, access::address_space::global_space> operator[](
   size_t index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && dimensions == 1)#.
+      [code]#(accessMode == access_mode::atomic && Dimensions == 1)#.
 
 Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
 access to the element stored within the accessor's buffer at the index
@@ -7638,7 +7638,7 @@ template <typename AllocatorT>
 host_accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs a [code]#host_accessor# for accessing the first element of a
 [code]#buffer# immediately on the host.  The optional [code]#property_list#
@@ -7649,10 +7649,10 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<dataT, dimensions, AllocatorT> &bufferRef,
+    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#host_accessor# for accessing a [code]#buffer# immediately
 on the host.  The optional [code]#property_list# provides properties for the
@@ -7663,10 +7663,10 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<dataT, dimensions, AllocatorT> &bufferRef,
+    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#host_accessor# for accessing a [code]#buffer# immediately
 on the host.  The [code]#tag# is used to deduce template arguments of the
@@ -7678,11 +7678,11 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
+    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#host_accessor# that is a <<ranged-accessor>> which accesses
 a buffer immediately on the host, where the range starts at the beginning of
@@ -7697,11 +7697,11 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
+    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#host_accessor# that is a <<ranged-accessor>> which accesses
 a buffer immediately on the host, where the range starts at the beginning of
@@ -7717,12 +7717,12 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#host_accessor# that is a <<ranged-accessor>> which accesses
 a buffer immediately on the host, where the range starts at an offset from the
@@ -7738,12 +7738,12 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<dataT, dimensions, AllocatorT> &bufferRef,
-    range<dimensions> accessRange,
-    id<dimensions> accessOffset,
+    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    range<Dimensions> accessRange,
+    id<Dimensions> accessOffset,
     TagT tag, const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#host_accessor# that is a <<ranged-accessor>> which accesses
 a buffer immediately on the host, where the range starts at an offset from the
@@ -7775,13 +7775,13 @@ void swap(host_accessor &other);
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 If this is a <<ranged-accessor>>, returns the offset that was specified when the
 accessor was constructed.  For other accessors, returns the default constructed
-[code]#id<dimensions>{}#.
+[code]#id<Dimensions>{}#.
 
 |====
 
@@ -7929,7 +7929,7 @@ a@
 local_accessor(handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions == 0)#.
+   a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs a [code]#local_accessor# for accessing <<local-memory>> of a single
 [code]#dataT# element within a <<sycl-kernel-function>> on the queue associated
@@ -7939,11 +7939,11 @@ provides properties for the constructed accessor.
 a@
 [source]
 ----
-local_accessor(range<dimensions> allocationSize,
+local_accessor(range<Dimensions> allocationSize,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#local_accessor# for accessing <<local-memory>> of an array
 of [code]#dataT# elements within a <<sycl-kernel-function>> on the queue
@@ -8136,9 +8136,9 @@ bool empty() const noexcept
 a@
 [source]
 ----
-range<dimensions> get_range() const
+range<Dimensions> get_range() const
 ----
-   a@ Available only when [code]#(dimensions > 0)#.
+   a@ Available only when [code]#(Dimensions > 0)#.
 
 Returns a [code]#range# object which represents the number of elements of
 [code]#dataT# per dimension that this accessor may access.
@@ -8153,10 +8153,10 @@ a@
 operator reference() const
 ----
    a@ For [code]#accessor# available only when
-      [code]#(accessMode != access_mode::atomic && dimensions == 0)#.
+      [code]#(accessMode != access_mode::atomic && Dimensions == 0)#.
 
 For [code]#host_accessor# and [code]#local_accessor# available only when
-[code]#(dimensions == 0)#.
+[code]#(Dimensions == 0)#.
 
 Returns a reference to the single element that is accessed by this accessor.
 
@@ -8166,13 +8166,13 @@ called from within a <<command>>.
 a@
 [source]
 ----
-reference operator[](id<dimensions> index) const
+reference operator[](id<Dimensions> index) const
 ----
    a@ For [code]#accessor# available only when
-      [code]#(accessMode != access_mode::atomic && dimensions > 0)#.
+      [code]#(accessMode != access_mode::atomic && Dimensions > 0)#.
 
 For [code]#host_accessor# and [code]#local_accessor# available only when
-[code]#(dimensions > 0)#.
+[code]#(Dimensions > 0)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
@@ -8186,11 +8186,11 @@ a@
 ----
 __unspecified__ &operator[](size_t index) const
 ----
-   a@ Available only when [code]#(dimensions > 1)#.
+   a@ Available only when [code]#(Dimensions > 1)#.
 
 Returns an instance of an undefined intermediate type representing this
-accessor, with the dimensionality [code]#dimensions-1# and containing an
-implicit [code]#id# with index [code]#dimensions# set to [code]#index#.  The
+accessor, with the dimensionality [code]#Dimensions-1# and containing an
+implicit [code]#id# with index [code]#Dimensions# set to [code]#index#.  The
 intermediate type returned must provide all available subscript operators which
 take a [code]#size_t# parameter defined by this accessor class that are
 appropriate for the type it represents (including this subscript operator).
@@ -8207,10 +8207,10 @@ a@
 reference operator[](size_t index) const
 ----
    a@ For [code]#accessor# available only when
-      [code]#(accessMode != access_mode::atomic && dimensions == 1)#.
+      [code]#(accessMode != access_mode::atomic && Dimensions == 1)#.
 
 For [code]#host_accessor# and [code]#local_accessor# available only when
-[code]#(dimensions == 1)#.
+[code]#(Dimensions == 1)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
@@ -8458,7 +8458,7 @@ a@
 ----
 template <typename AllocatorT>
 unsampled_image_accessor(
-    unsampled_image<dimensions, AllocatorT> &imageRef,
+    unsampled_image<Dimensions, AllocatorT> &imageRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
@@ -8477,7 +8477,7 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 unsampled_image_accessor(
-    unsampled_image<dimensions, AllocatorT> &imageRef,
+    unsampled_image<Dimensions, AllocatorT> &imageRef,
     handler &commandGroupHandlerRef, TagT tag,
     const property_list &propList = {})
 ----
@@ -8506,7 +8506,7 @@ a@
 ----
 template <typename AllocatorT>
 host_unsampled_image_accessor(
-    unsampled_image<dimensions, AllocatorT> &imageRef,
+    unsampled_image<Dimensions, AllocatorT> &imageRef,
     const property_list &propList = {})
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
@@ -8518,7 +8518,7 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_unsampled_image_accessor(
-    unsampled_image<dimensions, AllocatorT> &imageRef,
+    unsampled_image<Dimensions, AllocatorT> &imageRef,
     TagT tag, const property_list &propList = {})
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
@@ -8554,8 +8554,8 @@ dataT read(const coordT &coords) const
 
 Reads and returns an element of the [code]#unsampled_image# at the coordinates
 specified by [code]#coords#.  Permitted types for [code]#coordT# are
-[code]#int# when [code]#dimensions == 1#, [code]#int2# when
-[code]#dimensions == 2# and [code]#int4# when [code]#dimensions == 3#.
+[code]#int# when [code]#Dimensions == 1#, [code]#int2# when
+[code]#Dimensions == 2# and [code]#int4# when [code]#Dimensions == 3#.
 
 For [code]#unsampled_image_accessor#, this function may only be called from
 within a <<command>>.
@@ -8571,8 +8571,8 @@ void write(const coordT &coords, const dataT &color) const
 
 Writes the value specified by [code]#color# to the element of the image at the
 coordinates specified by [code]#coords#.  Permitted types for [code]#coordT#
-are [code]#int# when [code]#dimensions == 1#, [code]#int2# when
-[code]#dimensions == 2# and [code]#int4# when [code]#dimensions == 3#.
+are [code]#int# when [code]#Dimensions == 1#, [code]#int2# when
+[code]#Dimensions == 2# and [code]#int4# when [code]#Dimensions == 3#.
 
 For [code]#unsampled_image_accessor#, this function may only be called from
 within a <<command>>.
@@ -8727,7 +8727,7 @@ a@
 ----
 template <typename AllocatorT>
 sampled_image_accessor(
-    sampled_image<dimensions, AllocatorT> &imageRef,
+    sampled_image<Dimensions, AllocatorT> &imageRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
@@ -8746,7 +8746,7 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 sampled_image_accessor(
-    sampled_image<dimensions, AllocatorT> &imageRef,
+    sampled_image<Dimensions, AllocatorT> &imageRef,
     handler &commandGroupHandlerRef, TagT tag,
     const property_list &propList = {})
 ----
@@ -8775,7 +8775,7 @@ a@
 ----
 template <typename AllocatorT>
 host_sampled_image_accessor(
-    sampled_image<dimensions, AllocatorT> &imageRef,
+    sampled_image<Dimensions, AllocatorT> &imageRef,
     const property_list &propList = {})
 ----
    a@ Constructs a [code]#host_sampled_image_accessor# for accessing a
@@ -8806,9 +8806,9 @@ dataT read(const coordT &coords) const
 ----
    a@ Reads and returns a sampled element of the [code]#sampled_image# at the
       coordinates specified by [code]#coords#.  Permitted types for
-      [code]#coordT# are [code]#float# when [code]#dimensions == 1#,
-      [code]#float2# when [code]#dimensions == 2# and [code]#float4# when
-      [code]#dimensions == 3#.
+      [code]#coordT# are [code]#float# when [code]#Dimensions == 1#,
+      [code]#float2# when [code]#Dimensions == 2# and [code]#float4# when
+      [code]#Dimensions == 3#.
 
 For [code]#sampled_image_accessor#, this function may only be called from
 within a <<command>>.
@@ -8967,8 +8967,8 @@ multi_ptr(std::nullptr_t)
 a@
 [source]
 ----
-template <int dimensions, access_mode Mode, access::placeholder isPlaceholder>
-multi_ptr(accessor<ElementType, dimensions, Mode, target::device, isPlaceholder>);
+template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+multi_ptr(accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 ----
    a@ Available only when:
       [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
@@ -8981,8 +8981,8 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int dimensions>
-multi_ptr(local_accessor<ElementType, dimensions>)
+template <int Dimensions>
+multi_ptr(local_accessor<ElementType, Dimensions>)
 ----
    a@ Available only when:
       [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
@@ -8994,8 +8994,8 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int dimensions, access_mode Mode, access::placeholder isPlaceholder>
-multi_ptr(accessor<ElementType, dimensions, Mode, target::local, isPlaceholder>);
+template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+multi_ptr(accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
 ----
    a@ Deprecated in SYCL 2020.  Use the overload with
       [code]#local_accessor# instead.
@@ -10739,10 +10739,10 @@ group
 [[range-class]]
 ==== [code]#range# class
 
-[code]#range<int _dimensions_>#
+[code]#range<int _Dimensions_>#
 is a 1D, 2D or 3D vector that defines
 the iteration domain of either a single work-group in a parallel
-dispatch, or the overall dimensions of the dispatch. It can be
+dispatch, or the overall Dimensions of the dispatch. It can be
 constructed from integers.
 
 The SYCL [code]#range# class template provides the common by-value
@@ -10775,7 +10775,7 @@ a@
 range(size_t dim0)
 ----
    a@ Construct a 1D range with value dim0.
-      Only valid when the template parameter [code]#dimensions# is equal
+      Only valid when the template parameter [code]#Dimensions# is equal
       to 1.
 
 a@
@@ -10784,7 +10784,7 @@ a@
 range(size_t dim0, size_t dim1)
 ----
    a@ Construct a 2D range with values dim0 and dim1.
-      Only valid when the template parameter [code]#dimensions# is equal
+      Only valid when the template parameter [code]#Dimensions# is equal
       to 2.
 
 a@
@@ -10793,7 +10793,7 @@ a@
 range(size_t dim0, size_t dim1, size_t dim2)
 ----
    a@ Construct a 3D range with values dim0, dim1 and dim2.
-      Only valid when the template parameter [code]#dimensions# is equal
+      Only valid when the template parameter [code]#Dimensions# is equal
       to 3.
 
 |====
@@ -10982,7 +10982,7 @@ Then return the initial copy of the [code]#range#.
 include::{header_dir}/ndRange.h[lines=4..-1]
 ----
 
-[code]#nd_range<int _dimensions_>#
+[code]#nd_range<int _Dimensions_>#
 defines the iteration domain of both
 the work-groups and the overall dispatch. To define this the
 [code]#nd_range# comprises two ranges: the whole range over which
@@ -11009,10 +11009,10 @@ and <<table.hiddenfriends.common.byval>> respectively.
 a@
 [source]
 ----
-nd_range<dimensions>(
-    range<dimensions> globalSize,
-    range<dimensions> localSize)
-    id<dimensions> offset = id<dimensions>())
+nd_range<Dimensions>(
+    range<Dimensions> globalSize,
+    range<Dimensions> localSize)
+    id<Dimensions> offset = id<Dimensions>())
 ----
    a@ Construct an [code]#nd_range# from the local and global
       constituent ranges. Supplying the option offset is
@@ -11031,21 +11031,21 @@ nd_range<dimensions>(
 a@
 [source]
 ----
-range<dimensions> get_global_range() const
+range<Dimensions> get_global_range() const
 ----
    a@ Return the constituent global range.
 
 a@
 [source]
 ----
-range<dimensions> get_local_range() const
+range<Dimensions> get_local_range() const
 ----
    a@ Return the constituent local range.
 
 a@
 [source]
 ----
-range<dimensions> get_group_range() const
+range<Dimensions> get_group_range() const
 ----
    a@ Return a range representing the number of groups in each
       dimension.  This range would result from
@@ -11054,7 +11054,7 @@ range<dimensions> get_group_range() const
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -11067,7 +11067,7 @@ id<dimensions> get_offset() const
 [[id-class]]
 ==== [code]#id# class
 
-[code]#id<int _dimensions_># is a vector of dimensions that is used to
+[code]#id<int Dimensions># is a vector of Dimensions that is used to
 represent an <<id>> into a global or local
 [code]#range#. It can be used as an index in an accessor of the
 same rank. The subscript operator ([code]#operator[](n)#) returns the component
@@ -11109,7 +11109,7 @@ a@
 id(size_t dim0)
 ----
    a@ Construct a 1D [code]#id# with value dim0.
-      Only valid when the template parameter [code]#dimensions# is equal
+      Only valid when the template parameter [code]#Dimensions# is equal
       to 1.
 
 a@
@@ -11133,14 +11133,14 @@ id(size_t dim0, size_t dim1, size_t dim2)
 a@
 [source]
 ----
-id(const range<dimensions> &range)
+id(const range<Dimensions> &range)
 ----
    a@ Construct an [code]#id# from the dimensions of [code]#range#.
 
 a@
 [source]
 ----
-id(const item<dimensions> &item)
+id(const item<Dimensions> &item)
 ----
    a@ Construct an [code]#id# from [code]#item.get_id()#.
 
@@ -11182,7 +11182,7 @@ a@
 ----
 operator size_t() const
 ----
-   a@ Available only when: [code]#dimensions == 1#
+   a@ Available only when: [code]#Dimensions == 1#
 
 Returns the same value as [code]#get(0)#.
 
@@ -11349,7 +11349,7 @@ include::{header_dir}/item.h[lines=4..-1]
 a@
 [source]
 ----
-id<dimensions> get_id() const
+id<Dimensions> get_id() const
 ----
    a@ Return the constituent [code]#id#
       representing the work-item's position in the iteration space.
@@ -11371,7 +11371,7 @@ size_t operator[](int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_range() const
+range<Dimensions> get_range() const
 ----
    a@ Returns a [code]#range# representing the dimensions of the
       range of possible values of the [code]#item#.
@@ -11386,7 +11386,7 @@ size_t get_range(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -11401,7 +11401,7 @@ This member function is only available if [code]#with_offset# is [code]#true#.
 a@
 [source]
 ----
-operator item<dimensions, true>() const
+operator item<Dimensions, true>() const
 ----
    a@ Available only when: [code]#with_offset == false#
 
@@ -11414,7 +11414,7 @@ a@
 ----
 operator size_t() const
 ----
-   a@ Available only when: [code]#dimensions == 1#
+   a@ Available only when: [code]#Dimensions == 1#
 
 Returns the same value as [code]#get(0)#.
 
@@ -11434,12 +11434,12 @@ size_t get_linear_id() const
 [[nditem-class]]
 ==== [code]#nd_item# class
 
-[code]#nd_item<int dimensions># identifies an instance of the function object
-executing at each point in an [code]#nd_range<int dimensions># passed to a
+[code]#nd_item<int Dimensions># identifies an instance of the function object
+executing at each point in an [code]#nd_range<int Dimensions># passed to a
 [code]#parallel_for# call. It encapsulates enough
 information to identify the <<work-item>>'s local and global <<id,ids>>, the
 <<work-group-id>> and also provides access to the [code]#group# and
-[code]#sub_group# classes.  Instances of the [code]#nd_item<int dimensions># class are not user-constructible and are passed by the runtime to
+[code]#sub_group# classes.  Instances of the [code]#nd_item<int Dimensions># class are not user-constructible and are passed by the runtime to
 each instance of the function object.
 
 The SYCL [code]#nd_item# class template provides the common by-value
@@ -11467,7 +11467,7 @@ include::{header_dir}/nditem.h[lines=4..-1]
 a@
 [source]
 ----
-id<dimensions> get_global_id() const
+id<Dimensions> get_global_id() const
 ----
    a@ Return the constituent <<global-id>> representing the
       work-item's position in the global iteration space.
@@ -11494,7 +11494,7 @@ size_t get_global_linear_id() const
 a@
 [source]
 ----
-id<dimensions> get_local_id() const
+id<Dimensions> get_local_id() const
 ----
    a@ Return the constituent <<local-id>> representing the
       work-item's position within the current <<work-group>>.
@@ -11520,7 +11520,7 @@ size_t get_local_linear_id() const
 a@
 [source]
 ----
-group<dimensions> get_group() const
+group<Dimensions> get_group() const
 ----
    a@ Return the constituent <<work-group>>, [code]#group#
       representing the <<work-group>>'s position within the overall
@@ -11553,7 +11553,7 @@ size_t get_group_linear_id() const
 a@
 [source]
 ----
-range<dimensions> get_group_range() const
+range<Dimensions> get_group_range() const
 ----
    a@ Returns the number of <<work-group,work groups>> in the iteration space.
 
@@ -11568,7 +11568,7 @@ size_t get_group_range(int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_global_range() const
+range<Dimensions> get_global_range() const
 ----
    a@ Returns a [code]#range# representing the dimensions of the
       global iteration space.
@@ -11583,7 +11583,7 @@ size_t get_global_range(int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_local_range() const
+range<Dimensions> get_local_range() const
 ----
    a@ Returns a [code]#range# representing the dimensions of the current
       work-group.
@@ -11598,7 +11598,7 @@ size_t get_local_range(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_offset() const
+id<Dimensions> get_offset() const
 // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -11609,7 +11609,7 @@ id<dimensions> get_offset() const
 a@
 [source]
 ----
-nd_range<dimensions> get_nd_range() const
+nd_range<Dimensions> get_nd_range() const
 ----
    a@ Returns the [code]#nd_range# of the current execution.
 
@@ -11683,9 +11683,9 @@ template <typename... eventTN>
 [[hitem-class]]
 ==== [code]#h_item# class
 
-[code]#h_item<int dimensions># identifies an instance of a
+[code]#h_item<int Dimensions># identifies an instance of a
 [code]#group::parallel_for_work_item# function object executing at each
-point in a local [code]#range<int dimensions># passed to a
+point in a local [code]#range<int Dimensions># passed to a
 [code]#parallel_for_work_item# call or to the corresponding
 [code]#parallel_for_work_group# call if no [code]#range# is passed
 to the [code]#parallel_for_work_item# call. It encapsulates enough
@@ -11693,7 +11693,7 @@ information to identify the <<work-item>>'s local and global <<item,items>>
 according to the information given to [code]#parallel_for_work_group#
 (physical ids) as well as the <<work-item>>'s logical local <<item,items>>
 in the logical local range. All returned <<item,items>> objects are
-offset-less. Instances of the [code]#h_item<int dimensions># class are
+offset-less. Instances of the [code]#h_item<int Dimensions># class are
 not user-constructible and are passed by the runtime to each instance of the
 function object.
 
@@ -11721,7 +11721,7 @@ include::{header_dir}/hitem.h[lines=4..-1]
 a@
 [source]
 ----
-item<dimensions, false> get_global() const
+item<Dimensions, false> get_global() const
 ----
    a@ Return the constituent global <<item>> representing the
       work-item's position in the global iteration space as provided upon kernel invocation.
@@ -11729,14 +11729,14 @@ item<dimensions, false> get_global() const
 a@
 [source]
 ----
-item<dimensions, false> get_local() const
+item<Dimensions, false> get_local() const
 ----
    a@ Return the same value as [code]#get_logical_local()#.
 
 a@
 [source]
 ----
-item<dimensions, false> get_logical_local() const
+item<Dimensions, false> get_logical_local() const
 ----
    a@ Return the constituent element of the logical local <<item>>
       work-item's position in the local iteration space as provided upon the invocation of the
@@ -11752,7 +11752,7 @@ of the logical id and the physical range:
 a@
 [source]
 ----
-item<dimensions, false> get_physical_local() const
+item<Dimensions, false> get_physical_local() const
 ----
    a@ Return the constituent element of the physical local <<item>>
       work-item's position in the local iteration space as provided (by the user or the runtime)
@@ -11761,7 +11761,7 @@ item<dimensions, false> get_physical_local() const
 a@
 [source]
 ----
-range<dimensions> get_global_range() const
+range<Dimensions> get_global_range() const
 ----
    a@ Return the same value as [code]#get_global().get_range()#
 
@@ -11775,7 +11775,7 @@ size_t get_global_range(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_global_id() const
+id<Dimensions> get_global_id() const
 ----
    a@ Return the same value as [code]#get_global().get_id()#
 
@@ -11789,7 +11789,7 @@ size_t get_global_id(int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_local_range() const
+range<Dimensions> get_local_range() const
 ----
    a@ Return the same value as [code]#get_local().get_range()#
 
@@ -11803,7 +11803,7 @@ size_t get_local_range(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_local_id() const
+id<Dimensions> get_local_id() const
 ----
    a@ Return the same value as [code]#get_local().get_id()#
 
@@ -11817,7 +11817,7 @@ size_t get_local_id(int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_logical_local_range() const
+range<Dimensions> get_logical_local_range() const
 ----
    a@ Return the same value as [code]#get_logical_local().get_range()#
 
@@ -11831,7 +11831,7 @@ size_t get_logical_local_range(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_logical_local_id() const
+id<Dimensions> get_logical_local_id() const
 ----
    a@ Return the same value as [code]#get_logical_local().get_id()#
 
@@ -11845,7 +11845,7 @@ size_t get_logical_local_id(int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_physical_local_range() const
+range<Dimensions> get_physical_local_range() const
 ----
    a@ Return the same value as [code]#get_physical_local().get_range()#
 
@@ -11859,7 +11859,7 @@ size_t get_physical_local_range(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_physical_local_id() const
+id<Dimensions> get_physical_local_id() const
 ----
    a@ Return the same value as [code]#get_physical_local().get_id()#
 
@@ -11877,7 +11877,7 @@ size_t get_physical_local_id(int dimension) const
 [[group-class]]
 ==== [code]#group# class
 
-The [code]#group<int dimensions># encapsulates all functionality
+The [code]#group<int Dimensions># encapsulates all functionality
 required to represent a particular <<work-group>> within a
 parallel execution. It is not user-constructible.
 
@@ -11913,7 +11913,7 @@ include::{header_dir}/group.h[lines=4..-1]
 a@
 [source]
 ----
-id<dimensions> get_group_id() const
+id<Dimensions> get_group_id() const
 ----
    a@ Return an <<id>> representing the index of the work-group
       within the <<nd-range>> for every dimension.
@@ -11928,7 +11928,7 @@ size_t get_group_id(int dimension) const
 a@
 [source]
 ----
-id<dimensions> get_local_id() const
+id<Dimensions> get_local_id() const
 ----
    a@ Return a SYCL [code]#id# representing the calling work-item's position
       within the <<work-group>>.
@@ -11949,7 +11949,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-range<dimensions> get_local_range() const
+range<Dimensions> get_local_range() const
 ----
    a@ Return a SYCL [code]#range# representing all dimensions of the local range.
       This local range may have been provided by the programmer, or chosen by the <<sycl-runtime>>.
@@ -11964,7 +11964,7 @@ size_t get_local_range(int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_group_range() const
+range<Dimensions> get_group_range() const
 ----
    a@ Return a [code]#range# representing the number of <<work-group,work groups>> in the [code]#nd_range#.
 
@@ -11985,7 +11985,7 @@ size_t operator[](int dimension) const
 a@
 [source]
 ----
-range<dimensions> get_max_local_range() const
+range<Dimensions> get_max_local_range() const
 ----
    a@ Return a [code]#range# representing the maximum number of work-items in any <<work-group>>
       in the [code]#nd_range#.
@@ -12048,7 +12048,7 @@ template <typename workItemFunctionT>
    a@ Launch the work-items for this work-group.
 
 [code]#func# is a function object type with a public member function
-[code]#void F::operator()(h_item<dimensions>)#
+[code]#void F::operator()(h_item<Dimensions>)#
 representing the work-item computation.
 
 This member function can only be invoked within a
@@ -12065,7 +12065,7 @@ a@
 [source]
 ----
 template <typename workItemFunctionT>
-    void parallel_for_work_item(range<dimensions>
+    void parallel_for_work_item(range<Dimensions>
     logicalRange, const workItemFunctionT &func) const
 ----
    a@ Launch the work-items for this work-group using a logical local range.
@@ -12076,7 +12076,7 @@ template <typename workItemFunctionT>
 [code]#logicalRange# is the new local range to be used.
 This range can be smaller or larger than the one used to invoke the kernel.
 [code]#func# is a function object type with a public member function
-[code]#void F::operator()(h_item<dimensions>)#
+[code]#void F::operator()(h_item<Dimensions>)#
 representing the work-item computation.
 
 Note that the logical range does not need to be uniform
@@ -12763,9 +12763,9 @@ are added when code calls the [code]#handler::depends_on()# member function.
 a@
 [source]
 ----
-template <typename dataT, int dimensions,
-access_mode accessMode, target accessTarget, access::placeholder isPlaceholder>
-    void require(accessor<dataT, dimensions, accessMode, accessTarget, isPlaceholder>
+template <typename dataT, int Dimensions,
+access_mode accessMode, target accessTarget, access::placeholder IsPlaceholder>
+    void require(accessor<dataT, Dimensions, accessMode, accessTarget, IsPlaceholder>
     acc)
 ----
    a@ Requires access to the memory object associated with the accessor.
@@ -12863,9 +12863,9 @@ template <typename KernelName, typename KernelType>
 a@
 [source]
 ----
-template <typename KernelName, int dimensions, typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>
     void parallel_for(
-    range<dimensions> numWorkItems,
+    range<Dimensions> numWorkItems,
     Rest&&... rest)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
@@ -12889,10 +12889,10 @@ template <typename KernelName, int dimensions, typename... Rest>
 a@
 [source]
 ----
-template <typename KernelName, int dimensions, typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>
     void parallel_for(
-    range<dimensions> numWorkItems,
-    id<dimensions> workItemOffset,
+    range<Dimensions> numWorkItems,
+    id<Dimensions> workItemOffset,
     const KernelType &kernelFunc)
 // Deprecated in SYCL 2020.
 ----
@@ -12917,9 +12917,9 @@ template <typename KernelName, int dimensions, typename... Rest>
 a@
 [source]
 ----
-template <typename KernelName, int dimensions, typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>
     void parallel_for(
-    nd_range<dimensions> executionRange,
+    nd_range<Dimensions> executionRange,
     Rest&&... rest)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
@@ -12947,9 +12947,9 @@ divisible by the local size in each dimension.
 a@
 [source]
 ----
-template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
+template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
     void parallel_for_work_group(
-    range<dimensions> numWorkGroups,
+    range<Dimensions> numWorkGroups,
     const WorkgroupFunctionType &kernelFunc)
 ----
    a@ Defines and invokes a hierarchical kernel as a lambda function
@@ -12967,10 +12967,10 @@ template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
 a@
 [source]
 ----
-template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
+template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
     void parallel_for_work_group(
-    range<dimensions> numWorkGroups,
-    range<dimensions> workGroupSize,
+    range<Dimensions> numWorkGroups,
+    range<Dimensions> workGroupSize,
     const WorkgroupFunctionType &kernelFunc)
 ----
    a@ Defines and invokes a hierarchical kernel as a lambda function
@@ -13010,8 +13010,8 @@ associated with the secondary queue (if specified).
 a@
 [source]
 ----
-template <int dimensions> void parallel_for(
-    range<dimensions> numWorkItems,
+template <int Dimensions> void parallel_for(
+    range<Dimensions> numWorkItems,
     const kernel &kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
@@ -13033,8 +13033,8 @@ associated with the secondary queue (if specified).
 a@
 [source]
 ----
-template <int dimensions> void parallel_for(
-    nd_range<dimensions> executionRange,
+template <int Dimensions> void parallel_for(
+    nd_range<Dimensions> executionRange,
     const kernel &kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
@@ -13237,7 +13237,7 @@ and the kernel defined as a function object will be created and enqueued
 as part of the command group scope.
 
 Some forms of [code]#parallel_for# accept an offset parameter of type
-[code]#id<dimensions>#, where the number of dimensions of the [code]#id# is the same
+[code]#id<Dimensions>#, where the number of dimensions of the [code]#id# is the same
 as the number of dimensions of the [code]#range# that determines the iteration space.
 These forms of [code]#parallel_for# execute the same number of iterations as the form
 with no offset.  The difference is that the [code]#id# or [code]#item# parameter passed
@@ -13456,13 +13456,13 @@ explicit copy operations.
 a@
 [source]
 ----
-template <typename T_src, int dim_src, access_mode mode_src,
-          target tgt_src, typename T_dest,
-          access::placeholder isPlaceholder>
-void copy(accessor<T_src, dim_src,
-                   mode_src, tgt_src,
-                   isPlaceholder> src,
-          std::shared_ptr<T_dest> dest)
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+          target SrcTgt, typename DestT,
+          access::placeholder IsPlaceholder>
+void copy(accessor<SrcT, SrcDims,
+                   SrcMode, SrcTgt,
+                   IsPlaceholder> src,
+          std::shared_ptr<DestT> dest)
 ----
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
@@ -13472,13 +13472,13 @@ range accessed by [code]#src#.
 a@
 [source]
 ----
-template <typename T_src, typename T_dest, int dim_dest,
-          access_mode mode_dest, target tgt_dest,
-          access::placeholder isPlaceholder>
-void copy(std::shared_ptr<T_src> src,
-          accessor<T_dest, dim_dest,
-                   mode_dest, tgt_dest,
-                   isPlaceholder> dest)
+template <typename SrcT, typename DestT, int DestDims,
+          access_mode DestMode, target DestTgt,
+          access::placeholder IsPlaceholder>
+void copy(std::shared_ptr<SrcT> src,
+          accessor<DestT, DestDims,
+                   DestMode, DestTgt,
+                   IsPlaceholder> dest)
 ----
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
@@ -13488,13 +13488,13 @@ range accessed by [code]#dest#.
 a@
 [source]
 ----
-template <typename T_src, int dim_src, access_mode mode_src,
-          target tgt_src, typename T_dest,
-          access::placeholder isPlaceholder>
-void copy(accessor<T_src, dim_src,
-                   mode_src, tgt_src,
-                   isPlaceholder> src,
-          T_dest * dest)
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+          target SrcTgt, typename DestT,
+          access::placeholder IsPlaceholder>
+void copy(accessor<SrcT, SrcDims,
+                   SrcMode, SrcTgt,
+                   IsPlaceholder> src,
+          DestT * dest)
 ----
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
@@ -13504,13 +13504,13 @@ range accessed by [code]#src#.
 a@
 [source]
 ----
-template <typename T_src, typename T_dest, int dim_dest,
-          access_mode mode_dest, target tgt_dest,
-          access::placeholder isPlaceholder>
-void copy(const T_src * src,
-          accessor<T_dest, dim_dest,
-                   mode_dest, tgt_dest,
-                   isPlaceholder> dest)
+template <typename SrcT, typename DestT, int DestDims,
+          access_mode DestMode, target DestTgt,
+          access::placeholder IsPlaceholder>
+void copy(const SrcT * src,
+          accessor<DestT, DestDims,
+                   DestMode, DestTgt,
+                   IsPlaceholder> dest)
 ----
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
@@ -13520,18 +13520,18 @@ range accessed by [code]#dest#.
 a@
 [source]
 ----
-template <typename T_src, int dim_src,
-          access_mode mode_src, target tgt_src,
-          access::placeholder isPlaceholder_src,
-          typename T_dest, int dim_dest,
-          access_mode mode_dest, target tgt_dest,
-          access::placeholder isPlaceholder_dest>
-void copy(accessor<T_src, dim_src,
-                   mode_src, tgt_src,
-                   isPlaceholder_src> src,
-          accessor<T_dest, dim_dest,
-                   mode_dest, tgt_dest,
-                   isPlaceholder_dest> dest)
+template <typename SrcT, int SrcDims,
+          access_mode SrcMode, target SrcTgt,
+          access::placeholder IsSrcPlaceholder,
+          typename DestT, int DestDims,
+          access_mode DestMode, target DestTgt,
+          access::placeholder IsDestPlaceholder>
+void copy(accessor<SrcT, SrcDims,
+                   SrcMode, SrcTgt,
+                   IsSrcPlaceholder> src,
+          accessor<DestT, DestDims,
+                   DestMode, DestTgt,
+                   IsDestPlaceholder> dest)
 ----
 a@ Copies the contents of the memory object accessed by [code]#src#
 into the memory object accessed by [code]#dest#.  The size of the [code]#src#
@@ -13543,12 +13543,12 @@ implementation throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-template <typename T, int dim,
-          access_mode mode, target tgt,
-          access::placeholder isPlaceholder>
-void update_host(accessor<T, dim,
-                          mode, tgt,
-                          isPlaceholder> acc)
+template <typename T, int Dims,
+          access_mode Mode, target Tgt,
+          access::placeholder IsPlaceholder>
+void update_host(accessor<T, Dims,
+                          Mode, Tgt,
+                          IsPlaceholder> acc)
 ----
 a@ The contents of the memory object accessed via [code]#acc#
 on the host are guaranteed to be up-to-date after this
@@ -13557,10 +13557,10 @@ on the host are guaranteed to be up-to-date after this
 a@
 [source]
 ----
-template <typename T, int dim,
-          access_mode mode, target tgt,
-          access::placeholder isPlaceholder>
-void fill(accessor<T, dim, mode, tgt, isPlaceholder> dest,
+template <typename T, int Dims,
+          access_mode Mode, target Tgt,
+          access::placeholder IsPlaceholder>
+void fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest,
           const T& src)
 ----
 a@ Replicates the value of [code]#src# into the

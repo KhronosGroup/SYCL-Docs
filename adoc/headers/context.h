@@ -31,9 +31,9 @@ class context {
 
   std::vector<device> get_devices() const;
 
-  template <typename param> typename param::return_type get_info() const;
+  template <typename Param> typename Param::return_type get_info() const;
 
-  template <typename param>
-  typename param::return_type get_backend_info() const;
+  template <typename Param>
+  typename Param::return_type get_backend_info() const;
 };
 }  // namespace sycl
