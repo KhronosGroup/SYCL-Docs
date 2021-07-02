@@ -46,6 +46,7 @@ class exception_list {
 };
 
 enum class errc {
+  success = 0,
   runtime = /* implementation-defined */,
   kernel = /* implementation-defined */,
   accessor = /* implementation-defined */,
