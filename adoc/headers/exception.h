@@ -65,7 +65,6 @@ enum class errc {
 template<backend b>
 using errc_for = typename backend_traits<b>::errc;
 
-std::error_condition make_error_condition(errc e) noexcept;
 std::error_code make_error_code(errc e) noexcept;
 
 const std::error_category& sycl_category() noexcept;
@@ -76,9 +75,6 @@ const std::error_category& error_category_for() noexcept;
 }  // namespace sycl
 
 namespace std {
-
-  template <>
-  struct is_error_condition_enum<sycl::errc> : true_type {};
 
   template <>
   struct is_error_code_enum<see-below> : true_type {};
