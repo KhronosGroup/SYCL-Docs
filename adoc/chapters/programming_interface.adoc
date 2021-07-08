@@ -9013,12 +9013,31 @@ a@
 template <typename ElementType, access::address_space Space, access::decorated DecorateAddress>
     multi_ptr<ElementType, Space, DecorateAddress> make_ptr(ElementType* pointer)
 ----
-   a@ Global function to create a [code]#multi_ptr# instance depending
-      on the address space of the [code]#pointer# argument.
-      An implementation must return [code]#nullptr# if the run-time value of
-      [code]#pointer# is not compatible with [code]#Space#, and must issue a
-      compile-time diagnostic if the deduced address space is not compatible
-      with [code]#Space#.
+   a@ Deprecated in SYCL 2020.  Use [code]#address_space_cast# instead.
+
+Global function to create a [code]#multi_ptr# instance depending
+on the address space of the [code]#pointer# argument.
+An implementation must return [code]#nullptr# if the run-time value of
+[code]#pointer# is not compatible with [code]#Space#, and must issue a
+compile-time diagnostic if the deduced address space is not compatible
+with [code]#Space#.
+
+a@
+[source]
+----
+template <access::address_space Space,
+          access::decorated DecorateAddress,
+          typename ElementType>
+    multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType* pointer)
+----
+   a@ Global function to create a [code]#multi_ptr# instance from
+      [code]#pointer#, using the address space and decoration specified
+      via the [code]#Space# and [code]#DecorateAddress# template arguments.
+
+An implementation must return [code]#nullptr# if the run-time value of
+[code]#pointer# is not compatible with [code]#Space#, and must issue a
+compile-time diagnostic if the deduced address space for [code]#pointer#
+is not compatible with [code]#Space#.
 
 |====
 
