@@ -15763,9 +15763,6 @@ corresponding information.
 <<backend, SYCL backends>> can provide additional exception class objects as long as they derive
 from [code]#sycl::exception# object, or any of its derived classes.
 
-A specialization of [code]#std::is_error_condition_enum# must be defined
-for [code]#sycl::errc# inheriting from [code]#std::true_type#.
-
 A specialization of [code]#std::is_error_code_enum# must be defined
 for [code]#sycl::errc# and [code]#backend_traits<Backend>::errc#
 inheriting from [code]#std::true_type# for each [code]#Backend#, where
@@ -16061,13 +16058,6 @@ const std::error_category& sycl_category() noexcept;
    a@ Obtains a reference to the static error category object for SYCL errors.
       This object overrides the virtual function [code]#error_category()# to
       return a pointer to the string [code]#"sycl"#.
-
-a@
-[source]
-----
-std::error_condition make_error_condition(errc e) noexcept;
-----
-   a@ Constructs an error condition using [code]#e# and [code]#sycl_category()#.
 
 a@
 [source]
