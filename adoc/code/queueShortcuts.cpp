@@ -3,7 +3,8 @@
 
 class MyKernel;
 
-auto usmPtr = malloc_device<int>(1024); // USM pointer
+queue myQueue;
+auto usmPtr = malloc_device<int>(1024, myQueue); // USM pointer
 
 int* data = /* pointer to some data */;
 buffer buf{data, 1024};
