@@ -17,19 +17,22 @@ myQueue.submit([&](handler & cgh) {
   cgh.parallel_for(nd_range<1>(range<1>(16), range<1>(16)),
     [=] (nd_item<1> it) {
 
-      // Apply a group algorithm to any number of values, described by an iterator range
-      // The work-group reduces all inputValues and each work-item works on part of the range
+      // Apply a group algorithm to any number of values, described by an iterator range.
+      // The work-group reduces all inputValues and each work-item works on part of the
+      // range.
       int* first = inputValues.get_pointer();
       int* last = first + 1024;
       int sum = joint_reduce(it.get_group(), first, last, plus<>());
       outputValues[0] = sum;
 
-      // Apply a group algorithm to a set of values held directly by work-items
-      // The work-group reduces a number of values equal to the size of the group and each work-item provides one value
-      int partial_sum = reduce_over_group(it.get_group(), inputValues[it.get_linear_id()], plus<>());
+      // Apply a group algorithm to a set of values held directly by work-items.
+      // The work-group reduces a number of values equal to the size of the group and each
+      // work-item provides one value.
+      int partial_sum =
+        reduce_over_group(it.get_group(), inputValues[it.get_global_linear_id()], plus<>());
       outputValues[1] = partial_sum;
 
     });
 });
 
-assert(outputBuf.get_host_access()[0] == 523776 && outputBuf.get_host_access()[1] == 136);
+assert(outputBuf.get_host_access()[0] == 523776 && outputBuf.get_host_access()[1] == 120);
