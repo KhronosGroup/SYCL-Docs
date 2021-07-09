@@ -20,4 +20,4 @@ __unspecified__ reduction(T* var, const T& identity, BinaryOperation combiner, c
 
 /* Available only if has_known_identity<BinaryOperation, T>::value is false */
 template <typename T, typename Extent, typename BinaryOperation>
-__unspecified__ reduction(span<T, Extent> vars, const T& identity, BinaryOperation combiner);
+__unspecified__ reduction(span<T, Extent> vars, const T& identity, BinaryOperation combiner, const property_list &propList = {});
