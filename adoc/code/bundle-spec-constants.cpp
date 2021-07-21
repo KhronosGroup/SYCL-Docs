@@ -12,8 +12,8 @@ extern int get_width();
 extern int get_height();
 
 // Declare specialization constants used in our kernels.
-specialization_id<int> width;
-specialization_id<int> height;
+constexpr specialization_id<int> width;
+constexpr specialization_id<int> height;
 
 int main() {
   queue myQueue;
