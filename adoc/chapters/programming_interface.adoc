@@ -16072,8 +16072,12 @@ a@
 const std::error_category& sycl_category() noexcept;
 ----
    a@ Obtains a reference to the static error category object for SYCL errors.
-      This object overrides the virtual function [code]#error_category()# to
-      return a pointer to the string [code]#"sycl"#.
+      This object overrides the virtual function [code]#error_category::name()#
+      to return a pointer to the string [code]#"sycl"#.  When the
+      implementation throws an [code]#sycl::exception# object [code]#ex# with
+      this category, the error code value contained by the exception
+      ([code]#ex.code().value()#) is one of the enumerated values in
+      [code]#sycl::errc#.
 
 a@
 [source]
