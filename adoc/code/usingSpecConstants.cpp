@@ -10,7 +10,7 @@ using coeff_t = std::array<std::array<float, 3>, 3>;
 coeff_t get_coefficients();
 
 // Identify the specialization constant.
-specialization_id<coeff_t> coeff_id;
+constexpr specialization_id<coeff_t> coeff_id;
 
 void do_conv(buffer<float, 2> in, buffer<float, 2> out) {
   queue myQueue;
