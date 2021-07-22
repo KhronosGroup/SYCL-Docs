@@ -10,14 +10,11 @@ __unspecified__ reduction(T* var, BinaryOperation combiner, const property_list 
 template <typename T, typename Extent, typename BinaryOperation>
 __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner, const property_list &propList = {});
 
-/* Available only if has_known_identity<BinaryOperation, BufferT::value_type>::value is false */
 template <typename BufferT, typename BinaryOperation>
 __unspecified__ reduction(BufferT vars, handler& cgh, const BufferT::value_type& identity, BinaryOperation combiner, const property_list &propList = {});
 
-/* Available only if has_known_identity<BinaryOperation, T>::value is false */
 template <typename T, typename BinaryOperation>
 __unspecified__ reduction(T* var, const T& identity, BinaryOperation combiner, const property_list &propList = {});
 
-/* Available only if has_known_identity<BinaryOperation, T>::value is false */
 template <typename T, typename Extent, typename BinaryOperation>
 __unspecified__ reduction(span<T, Extent> vars, const T& identity, BinaryOperation combiner);
