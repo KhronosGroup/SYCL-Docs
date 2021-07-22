@@ -124,12 +124,12 @@ class queue {
                const std::vector<event> &depEvents);
 
   template <typename T>
-  event copy(T* dest, const T *src, size_t count);
+  event copy(const T* src, T *dest, size_t count);
   template <typename T>
-  event copy(T* dest, const T *src, size_t count,
+  event copy(const T* src, T *dest, size_t count,
              event depEvent);
   template <typename T>
-  event copy(T* dest, const T *src, size_t count,
+  event copy(const T* src, T *dest, size_t count,
              const std::vector<event> &depEvents);
 
   event memset(void* ptr, int value, size_t numBytes);
