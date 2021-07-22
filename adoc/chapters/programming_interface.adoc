@@ -156,19 +156,6 @@ Each of the following <<sycl-runtime>> classes:
 [code]#vec#
 must be available within a <<sycl-kernel-function>>.
 
-Each of the following <<sycl-runtime>> classes:
-[code]#accessor#,
-[code]#id#,
-[code]#local_accessor#,
-[code]#marray#,
-[code]#range#,
-[code]#reducer#,
-[code]#sampled_image_accessor#,
-[code]#stream#,
-[code]#unsampled_image_accessor# and
-[code]#vec#
-are permitted as arguments to a <<sycl-kernel-function>>.
-
 == Common interface
 
 When a dimension template parameter is used in SYCL classes, it is
@@ -15580,45 +15567,65 @@ as a device copyable type in that case and the specialization is ignored.
 [[sec:kernel.parameter.passing]]
 === Rules for parameter passing to kernels
 
-In a case where a kernel is a named function object or a lambda function, any
-member variables encapsulated within the function object or variables captured by
-the lambda function must be treated according to the following rules:
+A SYCL application passes parameters to a kernel in different ways depending on
+whether the kernel is a named function object or a lambda function.  If the
+kernel is a named function object, the [code]#operator()# member function (or
+other member functions that it calls) may reference member variables inside the
+same named function object.  Any such member variables become parameters to the
+kernel.  If the kernel is a lambda function, any variables captured by the
+lambda become parameters to the kernel.
 
-  * Any accessor must be passed as an argument to the device kernel in a
-    form that allows the device kernel to access the data in the specified
-    way.
-  * The <<sycl-runtime>> and compiler(s) must produce the necessary
-    conversions to enable accessor arguments from the host to be converted
-    to the correct type of parameter on the device.
-  * The device compiler(s) must validate that the layout of any data
-    shared between the host and the device(s) (e.g. value kernel arguments
-    or data accessed through an accessor or USM) is compatible with the
-    layout of that data on the host. If there is a layout mismatch that the
-    implementation cannot or will not correct for (to make the layouts
-    compatible), then the device compiler must issue an error and
-    compilation must fail.
-  * A local accessor provides access to work-group-local memory. The
-    accessor is not constructed with any buffer, but instead constructed
-    with a size and base data type. The runtime must ensure that the
-    work-group-local memory is allocated per work-group and available to be
-    used by the kernel via the local accessor.
-  * <<device-copyable,Device copyable>> types must be passed by value to the
-    kernel.
-  * Types that are not <<device-copyable>> must not be passed as arguments to a
-    kernel that is compiled for a device.
-  * It is illegal to pass a buffer or image (instead of an accessor
-    class) as an argument to a kernel. Generation of a compiler error in
-    this illegal case is optional.
-  * It is illegal to pass a reference argument to a kernel.
-    Generation of a compiler error in this illegal case is optional.
-  * If a pointer passed to a kernel is [code]#nullptr# or points to a <<usm>>
-    allocation, it must be passed through to the device unmodified. It is legal
-    to pass other pointers to a kernel, but dereferencing such pointers or
-    performing pointer arithmetic results in undefined behavior.
-  * Any aggregate types such as structs or classes should follow the rules
-    above recursively. It is not necessary to separate struct or class
-    members into separate kernel parameters if all members of the aggregate
-    type are unaffected by the rules above.
+Regardless of how the parameter is passed, the following rules define the
+allowable types for a kernel parameter:
+
+* Any <<device-copyable>> type is a legal parameter type.
+
+* The following SYCL types are legal parameter types:
+  - [code]#accessor# when templated with [code]#target::device#;
+  - [code]#accessor# when templated with any of the deprecated parameters:
+    [code]#target::global_buffer#, [code]#target::constant_buffer#, or
+    [code]#target::local#;
+  - [code]#local_accessor#;
+  - [code]#unsampled_image_accessor# when templated with
+    [code]#image_target::device#;
+  - [code]#sampled_image_accessor# when templated with
+    [code]#image_target::device#;
+  - [code]#stream#;
+  - [code]#id#;
+  - [code]#range#;
+  - [code]#marray<T, numElements># when [code]#T# is <<device-copyable>>;
+  - [code]#vec<T, numElements>#.
+
+* An array of element types [code]#T# is a legal parameter type if [code]#T# is
+  a legal parameter type.
+
+* A class type [code]#S# with a non-static member variable of type [code]#T# is
+  a legal parameter type if [code]#T# is a legal parameter type and if
+  [code]#S# would otherwise be a legal parameter type aside from this member
+  variable.
+
+* A class type [code]#S# with a non-virtual base class of type [code]#T# is a
+  legal parameter type if [code]#T# is a legal parameter type and if [code]#S#
+  would otherwise be a legal parameter type aside from this base class.
+
+[NOTE]
+====
+Pointer types are trivially copyable, so they may be passed as kernel
+parameters.  However, only the pointer value itself is passed to the kernel.
+Dereferencing the pointer on the kernel results in undefined behavior unless
+the pointer points to an address within a <<usm>> memory region that is
+accessible on the device.
+
+Reference types are not trivially copyable, so they may not be passed as
+kernel parameters.
+====
+
+[NOTE]
+====
+The [code]#reducer# class is a special type of kernel parameter which is passed
+to a kernel in a different way.  <<sec:reduction>> describes how this parameter
+type is used.
+====
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end expressingParallelism %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
