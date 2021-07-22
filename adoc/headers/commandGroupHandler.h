@@ -76,7 +76,7 @@ class handler {
   void memcpy(void *dest, const void *src, size_t numBytes);
 
   template <typename T>
-  void copy(T *dest, const T *src, size_t count);
+  void copy(const T *src, T *dest, size_t count);
 
   void memset(void *ptr, int value, size_t numBytes);
 
