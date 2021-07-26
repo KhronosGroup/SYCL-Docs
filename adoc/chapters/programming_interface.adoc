@@ -12480,11 +12480,12 @@ property::reduction::initialize_to_identity
 ----
    a@ The [code]#initialize_to_identity# property adds the requirement that the
       <<sycl-runtime>> must initialize the [code]#reduction# variable to the
-      identity value of its associated reduction operator.  If the identity
-      value of the reduction operator cannot be determined, the compiler must
-      raise a diagnostic. When this property is set, the original value of the
-      reduction variable is not included
-      in the reduction.
+      identity value passed to the reduction interface, or to the identity
+      value determined by the [code]#known_identity# trait if no identity value
+      was specified. If no identity value was specified and an identity value
+      cannot be determined by the [code]#known_identity# trait, the compiler
+      must raise a diagnostic. When this property is set, the original value of
+      the reduction variable is not included in the reduction.
 
 |====
 
