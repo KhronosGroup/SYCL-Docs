@@ -12302,14 +12302,12 @@ variable is accessed directly during the lifetime of a reduction (e.g. via an
 [code]#accessor# or USM pointer), the behavior is undefined.
 
 Certain implementations of reductions can be made more efficient if the
-identity value associated with the reduction operator is known.  For standard
-binary operators (e.g. [code]#plus# on arithmetic types), an implementation
-must determine the correct identity value automatically in order to avoid
-performance penalties.  For user-defined reduction operators, an implementation
-should issue a compile-time warning if the user does not provide an identity
-value and this is known to negatively impact performance.
+reduction operator has an identity value and this value is known to the
+implementation. For standard binary operators (e.g. [code]#plus# on arithmetic
+types), an implementation can determine the correct identity value
+automatically in order to avoid performance penalties.
 
-If an implementation can identify the identity value for a given combination of
+If an implementation can identify an identity value for a given combination of
 accumulator type and function object type, the value is defined as a member of
 the [code]#known_identity# trait class.  Whether this member value exists can
 be tested using the [code]#has_known_identity# trait class.
