@@ -6003,7 +6003,7 @@ functions fall into this category.
 
 ==== Data type
 
-All accessors have a [code]#dataT# template parameter which specifies the type
+All accessors have a [code]#DataT# template parameter which specifies the type
 of each element that the accessor accesses.  For [code]#accessor# and
 [code]#host_accessor#, this type must either match the type of each element in
 the underlying [code]#buffer#, or it must be a [code]#const# qualified version
@@ -6011,7 +6011,7 @@ of that type.
 
 For the image accessors ([code]#unsampled_image_accessor#,
 [code]#sampled_image_accessor#, [code]#host_unsampled_image_accessor#, and
-[code]#host_sampled_image_accessor#), [code]#dataT# must be one of:
+[code]#host_sampled_image_accessor#), [code]#DataT# must be one of:
 
 * [code]#int4# ([code]#vec<int32_t,4>#),
 * [code]#uint4# ([code]#vec<uint32_t,4>#),
@@ -6019,7 +6019,7 @@ For the image accessors ([code]#unsampled_image_accessor#,
 * [code]#half4# ([code]#vec<half,4>#)
 
 For [code]#local_accessor# see <<sec:accessor.local>> for the allowable
-[code]#dataT# types.
+[code]#DataT# types.
 
 
 ==== Access modes
@@ -6122,7 +6122,7 @@ This property is allowed only for accessors with [code]#access_mode::write# or
 [code]#exception# with the [code]#errc::invalid# error code to be thrown.
 
 The usage of this property is different depending on whether the accessor's
-underlying data type [code]#dataT# is an implicit-lifetime type (as defined in
+underlying data type [code]#DataT# is an implicit-lifetime type (as defined in
 the {cpp} core language).  If it is an implicit-lifetime type, the accessor
 implicitly creates objects of that type with indeterminate values.  The
 application is not required to write values to each element of the accessor,
@@ -6132,7 +6132,7 @@ If this is a <<ranged-accessor>>, this applies only to the elements within the
 accessor's range.  The values of unwritten elements outside of this range are
 preserved.
 
-If [code]#dataT# is not an implicit-lifetime type, the accessor merely
+If [code]#DataT# is not an implicit-lifetime type, the accessor merely
 allocates uninitialized memory, and the application is responsible for
 constructing objects in that memory (e.g. by calling placement-new).  The
 application must create an object in each element of the accessor unless the
@@ -6152,7 +6152,7 @@ for this requirement is to avoid the possibility of overwriting a valid object
 with indeterminate bytes, for example, when a <<command>> using the accessor
 completes.  This means that the implementation can unconditionally copy memory
 from the device back to the host when the <<command>> completes, regardless of
-whether the [code]#dataT# type is an implicit-lifetime type.
+whether the [code]#DataT# type is an implicit-lifetime type.
 ====
 
 The constructors of the accessor property classes are listed in
@@ -6181,26 +6181,26 @@ parameter.  A read-only accessor provides read-only access to the underlying
 data and provides a "read" requirement for the memory object when it is
 constructed.
 
-The [code]#dataT# template parameter for a read-only accessor can optionally
+The [code]#DataT# template parameter for a read-only accessor can optionally
 be [code]#const# qualified, and the semantics of the accessor are unchanged.
-For example, an accessor declared with [code]#const dataT# and
+For example, an accessor declared with [code]#const DataT# and
 [code]#access_mode::read# has the same semantics as an accessor declared with
-[code]#dataT# and [code]#access_mode::read#.
+[code]#DataT# and [code]#access_mode::read#.
 
 As detailed in the sections below, some accessor types have a default value
-for [code]#accessMode#, which depends on whether the [code]#dataT# parameter
+for [code]#accessMode#, which depends on whether the [code]#DataT# parameter
 is [code]#const# qualified.  This provides a convenient way to declare a
 read-only accessor without explicitly specifying the access mode.
 
-A [code]#const# qualified [code]#dataT# is only allowed for a read-only
-accessor.  Programs which specify a [code]#const# qualified [code]#dataT# and
+A [code]#const# qualified [code]#DataT# is only allowed for a read-only
+accessor.  Programs which specify a [code]#const# qualified [code]#DataT# and
 any access mode other than [code]#access_mode::read# are ill formed, and the
 implementation must issue a diagnostic in this case.
 
 Each accessor class also provides implicit conversions between the two forms
 of read-only accessors.  This makes it possible, for example, to assign an
-accessor whose type has [code]#const dataT# and [code]#access_mode::read# to an
-accessor whose type has [code]#dataT# and [code]#access_mode::read#, so long as
+accessor whose type has [code]#const DataT# and [code]#access_mode::read# to an
+accessor whose type has [code]#DataT# and [code]#access_mode::read#, so long as
 the other template parameters are the same.  There is also an implicit
 conversion from a read-write accessor to either of the forms of a read-only
 accessor.  These implicit conversions are described in detail for each accessor
@@ -6222,7 +6222,7 @@ same dimensionality as the accessor.  The second way is by passing a single
 in <<sec:multi-dim-subscript>>.
 
 In all these cases, the reference to the contained element is of type
-[code]#const dataT &# for read-only accessors and of type [code]#dataT &# for
+[code]#const DataT &# for read-only accessors and of type [code]#DataT &# for
 other accessors.
 
 Accessors of all types have a range that defines the set of indices that may be
@@ -6407,7 +6407,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
@@ -6420,7 +6420,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
@@ -6435,7 +6435,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -6448,7 +6448,7 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     TagT tag, const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -6462,7 +6462,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
@@ -6477,7 +6477,7 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     TagT tag, const property_list &propList = {})
 ----
@@ -6494,7 +6494,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
@@ -6511,7 +6511,7 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     TagT tag, const property_list &propList = {})
 ----
@@ -6530,7 +6530,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
     const property_list &propList = {})
@@ -6550,7 +6550,7 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
     TagT tag, const property_list &propList = {})
@@ -6571,7 +6571,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     range<Dimensions> accessRange,
     const property_list &propList = {})
@@ -6591,7 +6591,7 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     range<Dimensions> accessRange,
     TagT tag, const property_list &propList = {})
@@ -6613,7 +6613,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
@@ -6635,7 +6635,7 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
@@ -6891,7 +6891,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
@@ -6904,7 +6904,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
@@ -6919,7 +6919,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -6932,7 +6932,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     const property_list &propList = {})
 ----
@@ -6947,7 +6947,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
@@ -6963,7 +6963,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
     const property_list &propList = {})
@@ -6983,7 +6983,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     range<Dimensions> accessRange,
     const property_list &propList = {})
@@ -7003,7 +7003,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     handler &commandGroupHandlerRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
@@ -7051,7 +7051,7 @@ the accessor was constructed, otherwise returns the default constructed
 a@
 [source]
 ----
-constant_ptr<dataT> get_pointer() const noexcept
+constant_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
       buffer, even if this is a <<ranged-accessor>> whose range does not start
@@ -7108,7 +7108,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
@@ -7121,7 +7121,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7134,7 +7134,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
@@ -7152,7 +7152,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
     const property_list &propList = {})
@@ -7250,7 +7250,7 @@ accessor(handler &commandGroupHandlerRef,
    a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs an [code]#accessor# instance for accessing <<local-memory>> of a
-single [code]#dataT# element within a <<sycl-kernel-function>> on the queue
+single [code]#DataT# element within a <<sycl-kernel-function>> on the queue
 associated with [code]#commandGroupHandlerRef#.  The optional
 [code]#property_list# provides properties for the constructed accessor.
 
@@ -7264,7 +7264,7 @@ accessor(range<Dimensions> allocationSize,
    a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs an [code]#accessor# instance for accessing <<local-memory>> of an
-array of [code]#dataT# elements within a <<sycl-kernel-function>> on the queue
+array of [code]#DataT# elements within a <<sycl-kernel-function>> on the queue
 associated with [code]#commandGroupHandlerRef#.  The number of elements in the
 array is defined by [code]#allocationSize#.  The optional [code]#property_list#
 provides properties for the constructed accessor.
@@ -7280,43 +7280,43 @@ provides properties for the constructed accessor.
 a@
 [source]
 ----
-operator atomic<dataT, access::address_space::local_space>() const
+operator atomic<DataT, access::address_space::local_space>() const
 ----
    a@ Available only when
       [code]#(accessMode == access_mode::atomic && Dimensions == 0)#.
 
-Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
+Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing.
 
 a@
 [source]
 ----
-atomic<dataT, access::address_space::local_space> operator[](id<Dimensions> index) const
+atomic<DataT, access::address_space::local_space> operator[](id<Dimensions> index) const
 ----
    a@ Available only when
       [code]#(accessMode == access_mode::atomic && Dimensions > 0)#.
 
-Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
+Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing, at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-atomic<dataT, access::address_space::local_space> operator[](size_t index) const
+atomic<DataT, access::address_space::local_space> operator[](size_t index) const
 ----
    a@ Available only when
       [code]#(accessMode == access_mode::atomic && Dimensions == 1)#.
 
-Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
+Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing, at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-local_ptr<dataT> get_pointer() const noexcept
+local_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the work-group's local memory allocation
       that this accessor is accessing.
@@ -7346,7 +7346,7 @@ a@
 value_type
 ----
    a@ If [code]#(accessMode == access_mode::read)#, equal to
-      [code]#const dataT#, otherwise equal to [code]#dataT#.
+      [code]#const DataT#, otherwise equal to [code]#DataT#.
 
 a@
 [source]
@@ -7360,7 +7360,7 @@ a@
 ----
 const_reference
 ----
-   a@ Equal to [code]#const dataT&#.
+   a@ Equal to [code]#const DataT&#.
 
 |====
 
@@ -7390,7 +7390,7 @@ a@
 ----
 size_t get_count() const noexcept
 ----
-   a@ Returns the number of [code]#dataT# elements of the memory region this
+   a@ Returns the number of [code]#DataT# elements of the memory region this
       accessor may access.
 
 When [code]#accessTarget# is [code]#target::constant_buffer# or
@@ -7409,7 +7409,7 @@ range<Dimensions> get_range() const
    a@ Available only when [code]#(Dimensions > 0)#.
 
 Returns a [code]#range# object which represents the number of elements of
-[code]#dataT# per dimension that this accessor may access.
+[code]#DataT# per dimension that this accessor may access.
 
 When [code]#accessTarget# is [code]#target::constant_buffer# or
 [code]#target::host_buffer#, the returned value is the range of the underlying
@@ -7502,24 +7502,24 @@ in <<table.accessors.deprecated.atomic.members>>.
 a@
 [source]
 ----
-operator atomic<dataT, access::address_space::global_space>() const
+operator atomic<DataT, access::address_space::global_space>() const
 ----
    a@ Available only when
       [code]#(accessMode == access_mode::atomic && Dimensions == 0)#.
 
-Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
+Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the single element that is accessed by this accessor.
 
 a@
 [source]
 ----
-atomic<dataT, access::address_space::global_space> operator[](
+atomic<DataT, access::address_space::global_space> operator[](
   id<Dimensions> index) const
 ----
    a@ Available only when
       [code]#(accessMode == access_mode::atomic && Dimensions > 0)#.
 
-Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
+Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the accessor's buffer at the index
 specified by [code]#index#.
 
@@ -7530,13 +7530,13 @@ the accessor's offset to [code]#index#.
 a@
 [source]
 ----
-atomic<dataT, access::address_space::global_space> operator[](
+atomic<DataT, access::address_space::global_space> operator[](
   size_t index) const
 ----
    a@ Available only when
       [code]#(accessMode == access_mode::atomic && Dimensions == 1)#.
 
-Returns an instance of [code]#atomic# of type [code]#dataT# providing atomic
+Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the accessor's buffer at the index
 specified by [code]#index#.
 
@@ -7613,7 +7613,7 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+host_accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
@@ -7627,7 +7627,7 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7641,7 +7641,7 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     TagT tag, const property_list &propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7656,7 +7656,7 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     const property_list &propList = {})
 ----
@@ -7675,7 +7675,7 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     TagT tag, const property_list &propList = {})
 ----
@@ -7695,7 +7695,7 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
     const property_list &propList = {})
@@ -7716,7 +7716,7 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<dataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
     TagT tag, const property_list &propList = {})
@@ -7827,8 +7827,8 @@ access to this memory from within a <<sycl-kernel-function>>.  The
 simultaneously in an implementation, each work-group receives its own
 independent copy of the allocated local memory.
 
-The underlying [code]#dataT# type can be any {cpp} type that the device
-supports.  If [code]#dataT# is an implicit-lifetime type (as defined in the
+The underlying [code]#DataT# type can be any {cpp} type that the device
+supports.  If [code]#DataT# is an implicit-lifetime type (as defined in the
 {cpp} core language), the local accessor implicitly creates objects of that
 type with indeterminate values.  For other types, the local accessor merely
 allocates uninitialized memory, and the application is responsible for
@@ -7910,7 +7910,7 @@ local_accessor(handler &commandGroupHandlerRef,
    a@ Available only when [code]#(Dimensions == 0)#.
 
 Constructs a [code]#local_accessor# for accessing <<local-memory>> of a single
-[code]#dataT# element within a <<sycl-kernel-function>> on the queue associated
+[code]#DataT# element within a <<sycl-kernel-function>> on the queue associated
 with [code]#commandGroupHandlerRef#.  The optional [code]#property_list#
 provides properties for the constructed accessor.
 
@@ -7924,7 +7924,7 @@ local_accessor(range<Dimensions> allocationSize,
    a@ Available only when [code]#(Dimensions > 0)#.
 
 Constructs a [code]#local_accessor# for accessing <<local-memory>> of an array
-of [code]#dataT# elements within a <<sycl-kernel-function>> on the queue
+of [code]#DataT# elements within a <<sycl-kernel-function>> on the queue
 associated with [code]#commandGroupHandlerRef#.  The number of elements in the
 array is defined by [code]#allocationSize#.  The optional [code]#property_list#
 provides properties for the constructed accessor.
@@ -7964,8 +7964,8 @@ This function may only be called from within a <<sycl-kernel-function>>.
 
 Since [code]#local_accessor# has no template parameter for the access mode, the
 only specialization for a read-only local accessor is by providing a
-[code]#const# qualified [code]#dataT# parameter.  Specializations with a
-non-[code]#const# qualified [code]#dataT# parameter are read-write.  There is
+[code]#const# qualified [code]#DataT# parameter.  Specializations with a
+non-[code]#const# qualified [code]#DataT# parameter are read-write.  There is
 an implicit conversion from the read-write specialization to the read-only
 specialization, provided that all other template parameters are the same.
 
@@ -7989,8 +7989,8 @@ a@
 ----
 value_type
 ----
-   a@ If the accessor is read-only, equal to [code]#const dataT#, otherwise
-      equal to [code]#dataT#.
+   a@ If the accessor is read-only, equal to [code]#const DataT#, otherwise
+      equal to [code]#DataT#.
 
 See <<sec:accessor.command.buffer.conversions>>,
 <<sec:accessor.host.buffer.conversions>> and <<sec:accessor.local.conversions>>
@@ -8008,7 +8008,7 @@ a@
 ----
 const_reference
 ----
-   a@ Equal to [code]#const dataT&#.
+   a@ Equal to [code]#const DataT&#.
 
 a@
 [source]
@@ -8086,7 +8086,7 @@ a@
 ----
 size_type size() const noexcept
 ----
-   a@ Returns the number of [code]#dataT# elements of the memory region this
+   a@ Returns the number of [code]#DataT# elements of the memory region this
       accessor may access.
 
 For a buffer accessor this is the number of elements in the underlying buffer,
@@ -8119,7 +8119,7 @@ range<Dimensions> get_range() const
    a@ Available only when [code]#(Dimensions > 0)#.
 
 Returns a [code]#range# object which represents the number of elements of
-[code]#dataT# per dimension that this accessor may access.
+[code]#DataT# per dimension that this accessor may access.
 
 For a buffer accessor this is the range of the underlying buffer, unless it is
 a <<ranged-accessor>> in which case it is the range that was specified when the
@@ -8403,8 +8403,8 @@ a@
 ----
 value_type
 ----
-   a@ If the accessor is read-only, equal to [code]#const dataT#, otherwise
-      equal to [code]#dataT#.
+   a@ If the accessor is read-only, equal to [code]#const DataT#, otherwise
+      equal to [code]#DataT#.
 
 See <<sec:accessor.unsampled.image.conversions>> for which accessors are
 considered read-only.
@@ -8421,7 +8421,7 @@ a@
 ----
 const_reference
 ----
-   a@ Equal to [code]#const dataT&#.
+   a@ Equal to [code]#const DataT&#.
 
 |====
 
@@ -8525,7 +8525,7 @@ a@
 [source]
 ----
 template <typename coordT>
-dataT read(const coordT &coords) const
+DataT read(const coordT &coords) const
 ----
    a@ Available only when [code]#(accessMode == access_mode::read ||
       accessMode == access_mode::read_write)#.
@@ -8542,7 +8542,7 @@ a@
 [source]
 ----
 template <typename coordT>
-void write(const coordT &coords, const dataT &color) const
+void write(const coordT &coords, const DataT &color) const
 ----
    a@ Available only when [code]#(accessMode == access_mode::write ||
       accessMode == access_mode::read_write)#.
@@ -8608,7 +8608,7 @@ that they imply.
 ===== Read only unsampled image accessors and implicit conversions
 
 All specializations of unsampled image accessors with [code]#access_mode::read#
-are read-only regardless of whether [code]#dataT# is [code]#const# qualified.
+are read-only regardless of whether [code]#DataT# is [code]#const# qualified.
 There is an implicit conversion between the [code]#const# qualified and
 non-[code]#const# qualified specializations, provided that all other template
 parameters are the same.
@@ -8676,21 +8676,21 @@ a@
 ----
 value_type
 ----
-   a@ Equal to [code]#const dataT#.
+   a@ Equal to [code]#const DataT#.
 
 a@
 [source]
 ----
 reference
 ----
-   a@ Equal to [code]#const dataT&#.
+   a@ Equal to [code]#const DataT&#.
 
 a@
 [source]
 ----
 const_reference
 ----
-   a@ Equal to [code]#const dataT&#.
+   a@ Equal to [code]#const DataT&#.
 
 |====
 
@@ -8780,7 +8780,7 @@ a@
 [source]
 ----
 template <typename coordT>
-dataT read(const coordT &coords) const
+DataT read(const coordT &coords) const
 ----
    a@ Reads and returns a sampled element of the [code]#sampled_image# at the
       coordinates specified by [code]#coords#.  Permitted types for
@@ -8818,7 +8818,7 @@ accessor target that they imply.
 ===== Read only sampled image accessors and implicit conversions
 
 All specializations of sampled image accessors are read-only regardless of
-whether [code]#dataT# is [code]#const# qualified.  There is an implicit
+whether [code]#DataT# is [code]#const# qualified.  There is an implicit
 conversion between the [code]#const# qualified and non-[code]#const# qualified
 specializations, provided that all other template parameters are the same.
 
@@ -11614,12 +11614,12 @@ nd_range<Dimensions> get_nd_range() const
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_local_ptr<dataT> dest, decorated_global_ptr<dataT> src,
+    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
     size_t numElements) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# and returns a SYCL [code]#device_event#
       which can be used to wait on the completion of the copy.
@@ -11627,12 +11627,12 @@ template <typename dataT>
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_global_ptr<dataT> dest, decorated_local_ptr<dataT> src,
+    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
     size_t numElements) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# and returns a SYCL [code]#device_event#
       which can be used to wait on the completion of the copy.
@@ -11640,12 +11640,12 @@ template <typename dataT>
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_local_ptr<dataT> dest, decorated_global_ptr<dataT> src,
+    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
     size_t numElements, size_t srcStride) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# with a source stride specified by
       [code]#srcStride# and returns a SYCL [code]#device_event#
@@ -11654,12 +11654,12 @@ template <typename dataT>
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_global_ptr<dataT> dest, decorated_local_ptr<dataT> src,
+    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
     size_t numElements, size_t destStride) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# with a destination stride specified by
       [code]#destStride# and returns a SYCL [code]#device_event#
@@ -12089,12 +12089,12 @@ This member function can only be invoked within a
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_local_ptr<dataT> dest, decorated_global_ptr<dataT> src,
+    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
     size_t numElements) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# and returns a SYCL [code]#device_event#
       which can be used to wait on the completion of the copy.
@@ -12102,12 +12102,12 @@ template <typename dataT>
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_global_ptr<dataT> dest, decorated_local_ptr<dataT> src,
+    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
     size_t numElements) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# and returns a SYCL [code]#device_event#
       which can be used to wait on the completion of the copy.
@@ -12115,12 +12115,12 @@ template <typename dataT>
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_local_ptr<dataT> dest, decorated_global_ptr<dataT> src,
+    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
     size_t numElements, size_t srcStride) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# with a source stride specified by
       [code]#srcStride# and returns a SYCL [code]#device_event#
@@ -12129,12 +12129,12 @@ template <typename dataT>
 a@
 [source]
 ----
-template <typename dataT>
+template <typename DataT>
     device_event async_work_group_copy(
-    decorated_global_ptr<dataT> dest, decorated_local_ptr<dataT> src,
+    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
     size_t numElements, size_t destStride) const
 ----
-   a@ Permitted types for [code]#dataT# are all scalar and vector types.
+   a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
       pointer [code]#dest# with a destination stride specified by
       [code]#destStride# and returns a SYCL [code]#device_event#
@@ -12761,9 +12761,9 @@ are added when code calls the [code]#handler::depends_on()# member function.
 a@
 [source]
 ----
-template <typename dataT, int Dimensions,
+template <typename DataT, int Dimensions,
 access_mode accessMode, target accessTarget, access::placeholder IsPlaceholder>
-    void require(accessor<dataT, Dimensions, accessMode, accessTarget, IsPlaceholder>
+    void require(accessor<DataT, Dimensions, accessMode, accessTarget, IsPlaceholder>
     acc)
 ----
    a@ Requires access to the memory object associated with the accessor.
@@ -16169,14 +16169,14 @@ allows sharing of vectors between the host and its SYCL devices. The
 vector supports member functions that allow construction of a new vector from a
 swizzled set of component elements.
 
-[code]#vec<typename _dataT_, int _numElements_>#
+[code]#vec<typename _DataT_, int _numElements_>#
 is a vector type
 that compiles down to a <<backend>> built-in vector types on SYCL devices,
 where possible, and provides compatible support on the host or when it is
 not possible. The [code]#vec# class is templated on its number of
 elements and its element type. The number of elements parameter,
 _numElements_, can be one of: 1, 2, 3, 4, 8 or 16. Any other value shall
-produce a compilation failure. The element type parameter, _dataT_, must
+produce a compilation failure. The element type parameter, _DataT_, must
 be one of the basic scalar types supported in device code.
 
 The SYCL [code]#vec# class template provides interoperability with the
@@ -16215,16 +16215,16 @@ a@
 ----
 vec()
 ----
-   a@ Default construct a vector with element type [code]#dataT# and
+   a@ Default construct a vector with element type [code]#DataT# and
       with [code]#numElements# dimensions by default construction of
       each of its elements.
 
 a@
 [source]
 ----
-explicit constexpr vec(const dataT &arg)
+explicit constexpr vec(const DataT &arg)
 ----
-   a@ Construct a vector of element type [code]#dataT# and
+   a@ Construct a vector of element type [code]#DataT# and
       [code]#numElements# dimensions by setting each value to [code]#arg# by
       assignment.
 
@@ -16239,9 +16239,9 @@ constexpr vec(const argTN&... args)
 a@
 [source]
 ----
-constexpr vec(const vec<dataT, numElements> &rhs)
+constexpr vec(const vec<DataT, numElements> &rhs)
 ----
-   a@ Construct a vector of element type [code]#dataT# and number of elements [code]#numElements# by copy from another similar vector.
+   a@ Construct a vector of element type [code]#DataT# and number of elements [code]#numElements# by copy from another similar vector.
 
 a@
 [source]
@@ -16274,15 +16274,15 @@ defined by [code]#vector_t#.
 a@
 [source]
 ----
-operator dataT() const
+operator DataT() const
 ----
    a@ Available only when: [code]#numElements == 1#.
 
-Converts this SYCL [code]#vec# instance to an instance of [code]#dataT# with
+Converts this SYCL [code]#vec# instance to an instance of [code]#DataT# with
 the value of the single element in this SYCL [code]#vec# instance.
 
 The SYCL [code]#vec# instance shall be implicitly convertible to the same data types,
-to which [code]#dataT# is implicitly convertible.
+to which [code]#DataT# is implicitly convertible.
 Note that conversion operator shall not be templated
 to allow standard conversion sequence for implicit conversion.
 
@@ -16458,29 +16458,29 @@ a@
 [source]
 ----
 template <access::address_space addressSpace, access::decorated IsDecorated>
-    void load(size_t offset, multi_ptr<const dataT, addressSpace, IsDecorated> ptr)
+    void load(size_t offset, multi_ptr<const DataT, addressSpace, IsDecorated> ptr)
 ----
-   a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#dataT# by [code]#numElements * offset#, into the components of this SYCL [code]#vec#.
+   a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#numElements * offset#, into the components of this SYCL [code]#vec#.
 
 a@
 [source]
 ----
 template <access::address_space addressSpace, access::decorated IsDecorated>
-    void store(size_t offset, multi_ptr<dataT, addressSpace, IsDecorated> ptr) const
+    void store(size_t offset, multi_ptr<DataT, addressSpace, IsDecorated> ptr) const
 ----
-   a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#dataT# by [code]#numElements * offset#.
+   a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#numElements * offset#.
 
 a@
 [source]
 ----
-dataT &operator[](int index)
+DataT &operator[](int index)
 ----
    a@ Returns a reference to the element stored within this SYCL [code]#vec# at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-const dataT &operator[](int index) const
+const DataT &operator[](int index) const
 ----
    a@ Returns a const reference to the element stored within this SYCL [code]#vec# at the index specified by [code]#index#.
 
@@ -16494,7 +16494,7 @@ vec &operator=(const vec &rhs)
 a@
 [source]
 ----
-vec &operator=(const dataT &rhs)
+vec &operator=(const DataT &rhs)
 ----
    a@ Assign each element of the [code]#rhs# scalar to each element of this SYCL [code]#vec# and return a reference to this SYCL [code]#vec#.
 
@@ -16512,7 +16512,7 @@ a@
 ----
 vec operatorOP(const vec &lhs, const vec &rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
@@ -16521,9 +16521,9 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const dataT &rhs)
+vec operatorOP(const vec &lhs, const DataT &rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -16534,7 +16534,7 @@ a@
 ----
 vec &operatorOP(vec &lhs, const vec &rhs)
 ----
-   a@ If [code]#OP# is [code]#%=#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec# and return [code]#lhs# [code]#vec#.
 
@@ -16543,9 +16543,9 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#, [cod
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const dataT &rhs)
+vec &operatorOP(vec &lhs, const DataT &rhs)
 ----
-   a@ If [code]#OP# is [code]#%=#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and [code]#rhs# scalar and return [code]#lhs# [code]#vec#.
 
@@ -16583,7 +16583,7 @@ a@
 ----
 vec operatorOP(const vec &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
@@ -16592,9 +16592,9 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const dataT &rhs)
+vec operatorOP(const vec &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -16605,7 +16605,7 @@ a@
 ----
 vec &operatorOP(vec &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# SYCL [code]#vec# and return [code]#lhs# [code]#vec#.
 
@@ -16614,9 +16614,9 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const dataT &rhs)
+vec &operatorOP(vec &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar and return a [code]#lhs# [code]#vec#.
 
@@ -16629,18 +16629,18 @@ vec<RET, numElements> operatorOP(const vec &lhs, const vec &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const vec &lhs, const dataT &rhs)
+vec<RET, numElements> operatorOP(const vec &lhs, const DataT &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -16649,20 +16649,20 @@ a@
 ----
 vec operatorOP(const vec &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. If [code]#OP# is [code]#>>#, [code]#dataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#<<#, [code]#>>#.
 
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const dataT &rhs)
+vec operatorOP(const vec &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. If [code]#OP# is [code]#>>#, [code]#dataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#<<#, [code]#>>#.
 
@@ -16671,20 +16671,20 @@ a@
 ----
 vec &operatorOP(vec &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# SYCL [code]#vec# and returns [code]#lhs# [code]#vec#. If [code]#OP# is [code]#>>=#, [code]#dataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# SYCL [code]#vec# and returns [code]#lhs# [code]#vec#. If [code]#OP# is [code]#>>=#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const dataT &rhs)
+vec &operatorOP(vec &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar and returns a reference to this SYCL [code]#vec#. If [code]#OP# is [code]#>>=#, [code]#dataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar and returns a reference to this SYCL [code]#vec#. If [code]#OP# is [code]#>>=#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 
@@ -16695,27 +16695,27 @@ vec<RET, numElements> operatorOP(const vec& lhs, const vec &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or either this SYCL [code]#vec# or the [code]#rhs# SYCL [code]#vec# is a NaN.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const vec &lhs, const dataT &rhs)
+vec<RET, numElements> operatorOP(const vec &lhs, const DataT &rhs)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#dataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or either [code]#lhs# [code]#vec# or the [code]#rhs# SYCL [code]#vec# is a NaN.
+   a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or either [code]#lhs# [code]#vec# or the [code]#rhs# SYCL [code]#vec# is a NaN.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
 a@
 [source]
 ----
-vec operatorOP(const dataT &lhs, const vec &rhs)
+vec operatorOP(const DataT &lhs, const vec &rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -16730,9 +16730,9 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
 a@
 [source]
 ----
-vec operatorOP(const dataT &lhs, const vec &rhs)
+vec operatorOP(const DataT &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -16744,29 +16744,29 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const dataT &lhs, const vec &rhs)
+vec<RET, numElements> operatorOP(const DataT &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
 with each element of the new SYCL [code]#vec# instance the result of
 an element-wise [code]#OP# logical operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
 a@
 [source]
 ----
-vec operatorOP(const dataT &lhs, const vec &rhs)
+vec operatorOP(const DataT &lhs, const vec &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with
       the same template parameters as the [code]#rhs# SYCL [code]#vec#
       with each element of the new SYCL [code]#vec# instance the result of
       an element-wise [code]#OP# bitshift operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
-      If [code]#OP# is [code]#>>#, [code]#dataT# is a signed type
+      If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type
       and this SYCL [code]#vec# has a negative value any vacated bits viewed
       as an unsigned integer must be assigned the value [code]#1#, otherwise
       any vacated bits viewed as an unsigned integer must be assigned the value
@@ -16777,9 +16777,9 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const dataT &lhs, const vec &rhs)
+vec<RET, numElements> operatorOP(const DataT &lhs, const vec &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the element type [code]#RET# with each element of the new SYCL
@@ -16791,15 +16791,15 @@ results in [code]#true# and [code]#0# if the operation results
 in [code]#false# or either this SYCL [code]#vec# or the
 [code]#rhs# SYCL [code]#vec# is a NaN.
 
-The [code]#dataT# template parameter of the constructed SYCL
-[code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL
-[code]#vec# with [code]#dataT# of type [code]#int8_t# or
+The [code]#DataT# template parameter of the constructed SYCL
+[code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL
+[code]#vec# with [code]#DataT# of type [code]#int8_t# or
 [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a
-SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET#
+SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET#
 must be [code]#int16_t#. For a SYCL [code]#vec# with
-[code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or
+[code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or
 [code]#float# [code]#RET# must be [code]#int32_t#. For a
-SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET#
+SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET#
 must be [code]#int64_t#.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -16809,7 +16809,7 @@ a@
 ----
 vec &operator~(const vec &v)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitwise operation on each element of [code]#v# [code]#vec#.
 
@@ -16820,7 +16820,7 @@ vec<RET, numElements> operator!(const vec &v)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 |====
 
@@ -16896,10 +16896,10 @@ alterations described below:
 +
 For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
   * The [code]#+__swizzled_vec__+# class template must be convertible to
-    an instance of SYCL [code]#vec# with the type [code]#dataT#
+    an instance of SYCL [code]#vec# with the type [code]#DataT#
     and number of elements specified by the swizzle member function, if
     [code]#numElements > 1#, and must be convertible to an instance of
-    type [code]#dataT#, if [code]#numElements == 1#.
+    type [code]#DataT#, if [code]#numElements == 1#.
   * The [code]#+__swizzled_vec__+# class template must be non-copyable,
     non-moveable, non-user constructible and may not be bound to a l-value
     or escape the expression it was constructed in. For example
@@ -16907,7 +16907,7 @@ For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
   * The [code]#+__swizzled_vec__+# class template should return
     [code]#+__swizzled_vec__ &+# for each operator inherited from the
     [code]#vec# class template interface which would return
-    [code]#vec<dataT, numElements> &#.
+    [code]#vec<DataT, numElements> &#.
 
 
 ==== Rounding modes
@@ -16970,7 +16970,7 @@ of the element type in bytes multiplied by the number of elements:
 [[vec-memory-alignment]]
 [latexmath]
 ++++
-\texttt{sizeof}(\texttt{dataT}) \cdot \texttt{numElements}
+\texttt{sizeof}(\texttt{DataT}) \cdot \texttt{numElements}
 ++++
 
 The exception to this is when the number of element is three in which case
@@ -16980,7 +16980,7 @@ bytes multiplied by four:
 [[vec3-memory-alignment]]
 [latexmath]
 ++++
-\texttt{sizeof}(\texttt{dataT}) \cdot 4
+\texttt{sizeof}(\texttt{DataT}) \cdot 4
 ++++
 
 This is true for both host and device code in order to allow for instances
@@ -17001,13 +17001,13 @@ The usage of the subscript [code]#operator[]# may not be efficient on some devic
 [[sec:marray.type]]
 === Math array types
 
-SYCL provides an [code]#marray<typename dataT, std::size_t numElements># class
+SYCL provides an [code]#marray<typename DataT, std::size_t numElements># class
 template to represent a contiguous fixed-size container.  This type allows
 sharing of containers between the host and its SYCL devices.
 
 The [code]#marray# class is templated on its element type and number of
 elements. The number of elements parameter, [code]#numElements#, is a positive
-value of the [code]#std::size_t# type. The element type parameter, [code]#dataT#,
+value of the [code]#std::size_t# type. The element type parameter, [code]#DataT#,
 must be a _numeric type_ as it is defined by {cpp} standard.
 
 An instance of the [code]#marray# class template can also be
@@ -17043,16 +17043,16 @@ a@
 ----
 marray()
 ----
-   a@ Default construct an array with element type [code]#dataT# and
+   a@ Default construct an array with element type [code]#DataT# and
       with [code]#numElements# dimensions by default construction of
       each of its elements.
 
 a@
 [source]
 ----
-explicit constexpr marray(const dataT &arg)
+explicit constexpr marray(const DataT &arg)
 ----
-   a@ Construct an array of element type [code]#dataT# and
+   a@ Construct an array of element type [code]#DataT# and
       [code]#numElements# dimensions by setting each value to [code]#arg# by
       assignment.
 
@@ -17067,16 +17067,16 @@ constexpr marray(const argTN&... args)
 a@
 [source]
 ----
-constexpr marray(const marray<dataT, numElements> &rhs)
+constexpr marray(const marray<DataT, numElements> &rhs)
 ----
-   a@ Construct an array of element type [code]#dataT# and number of elements [code]#numElements# by copy from another similar vector.
+   a@ Construct an array of element type [code]#DataT# and number of elements [code]#numElements# by copy from another similar vector.
 
 a@
 [source]
 ----
-constexpr marray(marray<dataT, numElements> &&rhs)
+constexpr marray(marray<DataT, numElements> &&rhs)
 ----
-   a@ Construct an array of element type [code]#dataT# and number of elements
+   a@ Construct an array of element type [code]#DataT# and number of elements
       [code]#numElements# by moving from another similar vector.
 
 |====
@@ -17091,15 +17091,15 @@ constexpr marray(marray<dataT, numElements> &&rhs)
 a@
 [source]
 ----
-operator dataT() const
+operator DataT() const
 ----
    a@ Available only when: [code]#numElements == 1#.
 
-Converts this SYCL [code]#marray# instance to an instance of [code]#dataT# with
+Converts this SYCL [code]#marray# instance to an instance of [code]#DataT# with
 the value of the single element in this SYCL [code]#marray# instance.
 
 The SYCL [code]#marray# instance shall be implicitly convertible to the same data types,
-to which [code]#dataT# is implicitly convertible.
+to which [code]#DataT# is implicitly convertible.
 Note that conversion operator shall not be templated
 to allow standard conversion sequence for implicit conversion.
 
@@ -17113,14 +17113,14 @@ static constexpr std::size_t size() noexcept
 a@
 [source]
 ----
-dataT &operator[](std::size_t index)
+DataT &operator[](std::size_t index)
 ----
    a@ Returns a reference to the element stored within this SYCL [code]#marray# at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-const dataT &operator[](std::size_t index) const
+const DataT &operator[](std::size_t index) const
 ----
    a@ Returns a const reference to the element stored within this SYCL [code]#marray# at the index specified by [code]#index#.
 
@@ -17134,7 +17134,7 @@ marray &operator=(const marray &rhs)
 a@
 [source]
 ----
-marray &operator=(const dataT &rhs)
+marray &operator=(const DataT &rhs)
 ----
    a@ Assign each element of the [code]#rhs# scalar to each element of this SYCL [code]#marray# and return a reference to this SYCL [code]#marray#.
 
@@ -17181,7 +17181,7 @@ a@
 ----
 marray operatorOP(const marray &lhs, const marray &rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# SYCL [code]#marray#.
 
@@ -17190,9 +17190,9 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const dataT &rhs)
+marray operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
 
@@ -17203,7 +17203,7 @@ a@
 ----
 marray &operatorOP(marray &lhs, const marray &rhs)
 ----
-   a@ If [code]#OP# is [code]#%=#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# SYCL [code]#marray# and return [code]#lhs# [code]#marray#.
 
@@ -17212,9 +17212,9 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#, [cod
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const dataT &rhs)
+marray &operatorOP(marray &lhs, const DataT &rhs)
 ----
-   a@ If [code]#OP# is [code]#%=#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#marray# and [code]#rhs# scalar and return [code]#lhs# [code]#marray#.
 
@@ -17252,7 +17252,7 @@ a@
 ----
 marray operatorOP(const marray &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# SYCL [code]#marray#.
 
@@ -17261,9 +17261,9 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const dataT &rhs)
+marray operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
 
@@ -17274,7 +17274,7 @@ a@
 ----
 marray &operatorOP(marray &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# SYCL [code]#marray# and return [code]#lhs# [code]#marray#.
 
@@ -17283,9 +17283,9 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const dataT &rhs)
+marray &operatorOP(marray &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Perform an in-place element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar and return a [code]#lhs# [code]#marray#.
 
@@ -17296,16 +17296,16 @@ a@
 ----
 marray<bool, numElements> operatorOP(const marray &lhs, const marray &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# [code]#marray#.
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# [code]#marray#.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const marray &lhs, const dataT &rhs)
+marray<bool, numElements> operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -17314,20 +17314,20 @@ a@
 ----
 marray operatorOP(const marray &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# SYCL [code]#marray#. If [code]#OP# is [code]#>>#, [code]#dataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# SYCL [code]#marray#. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#<<#, [code]#>>#.
 
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const dataT &rhs)
+marray operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar. If [code]#OP# is [code]#>>#, [code]#dataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#lhs# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#<<#, [code]#>>#.
 
@@ -17336,20 +17336,20 @@ a@
 ----
 marray &operatorOP(marray &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# SYCL [code]#marray# and returns [code]#lhs# [code]#marray#. If [code]#OP# is [code]#>>=#, [code]#dataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# SYCL [code]#marray# and returns [code]#lhs# [code]#marray#. If [code]#OP# is [code]#>>=#, [code]#DataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const dataT &rhs)
+marray &operatorOP(marray &lhs, const DataT &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar and returns a reference to this SYCL [code]#marray#. If [code]#OP# is [code]#>>=#, [code]#dataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar and returns a reference to this SYCL [code]#marray#. If [code]#OP# is [code]#>>=#, [code]#DataT# is a signed type and [code]#lhs# [code]#marray# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
 Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 
@@ -17358,7 +17358,7 @@ a@
 ----
 marray<bool, numElements> operatorOP(const marray& lhs, const marray &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and same numElements as [code]#lhs# [code]#marray#
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#marray#
       and each element of the [code]#rhs# [code]#marray#.
       Corresponding element of the [code]#marray# that is returned must be [code]#false# if the operation results is a NaN.
@@ -17368,9 +17368,9 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const marray &lhs, const dataT &rhs)
+marray<bool, numElements> operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and same numElements as [code]#lhs# [code]#marray#
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#marray#
       and the [code]#rhs# scalar.
       Corresponding element of the [code]#marray# that is returned must be [code]#false# if the operation results is a NaN.
@@ -17380,9 +17380,9 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-marray operatorOP(const dataT &lhs, const marray &rhs)
+marray operatorOP(const DataT &lhs, const marray &rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#marray#
@@ -17397,9 +17397,9 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
 a@
 [source]
 ----
-marray operatorOP(const dataT &lhs, const marray &rhs)
+marray operatorOP(const DataT &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#marray#
@@ -17411,11 +17411,11 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray<RET, numElements> operatorOP(const dataT &lhs, const marray &rhs)
+marray<RET, numElements> operatorOP(const DataT &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and
+Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and
 same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance
 the result of an element-wise [code]#OP# logical operation between the [code]#lhs#
 scalar and each element of the [code]#rhs# [code]#marray#.
@@ -17425,13 +17425,13 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-marray operatorOP(const dataT &lhs, const marray &rhs)
+marray operatorOP(const DataT &lhs, const marray &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#marray# class template with
       the same template parameters as the [code]#rhs# SYCL [code]#marray#
       with each element of the new SYCL [code]#marray# instance the result of
       an element-wise [code]#OP# bitshift operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#marray#.
-      If [code]#OP# is [code]#>>#, [code]#dataT# is a signed type
+      If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type
       and this SYCL [code]#marray# has a negative value any vacated bits viewed
       as an unsigned integer must be assigned the value [code]#1#, otherwise
       any vacated bits viewed as an unsigned integer must be assigned the value
@@ -17442,11 +17442,11 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const dataT &lhs, const marray &rhs)
+marray<bool, numElements> operatorOP(const DataT &lhs, const marray &rhs)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and same numElements as [code]#lhs# [code]#marray#
+Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray#
 with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP#
 relational operation between the [code]#lhs# scalar and each element of the [code]#rhs# [code]#marray#.
 Corresponding element of the [code]#marray# that is returned must be [code]#false# if the operation results is a NaN.
@@ -17458,7 +17458,7 @@ a@
 ----
 marray &operator~(const marray &v)
 ----
-   a@ Available only when: [code]#dataT != float && dataT != double && dataT != half#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as [code]#v# [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# bitwise operation on each element of [code]#v# [code]#marray#.
 
@@ -17467,10 +17467,10 @@ a@
 ----
 marray<bool, numElements> operator!(const marray &v)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#dataT = bool# and same numElements as [code]#v# [code]#marray#
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#v# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise logical [code]#!# operation on each element of [code]#v# [code]#marray#.
 
-The [code]#dataT# template parameter of the constructed SYCL [code]#marray#, [code]#RET#, varies depending on the [code]#dataT# template parameter of this SYCL [code]#marray#. For a SYCL [code]#marray# with [code]#dataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#marray# with [code]#dataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#marray# with [code]#dataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#marray# with [code]#dataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#marray#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#marray#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 |====
 
@@ -17501,7 +17501,7 @@ and [code]#mfloat16# is the alias to [code]#marray<float, 16>#.
 ==== Memory layout and alignment
 
 The elements of an instance of the [code]#marray# class template as if
-stored in [code]#std::array<dataT, numElements>#.
+stored in [code]#std::array<DataT, numElements>#.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end marray_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -19249,7 +19249,7 @@ a@
 ----
 genfloatptr
 ----
-   a@ All permutations of [code]#multi_ptr<dataT, addressSpace, IsDecorated># where [code]#dataT# is all types within [code]#genfloat#,
+   a@ All permutations of [code]#multi_ptr<DataT, addressSpace, IsDecorated># where [code]#DataT# is all types within [code]#genfloat#,
       [code]#addressSpace# is [code]#access::address_space::global_space#,
       [code]#access::address_space::local_space# and
       [code]#access::address_space::private_space# and [code]#IsDecorated# is
@@ -19260,7 +19260,8 @@ a@
 ----
 genintptr
 ----
-   a@ All permutations of [code]#multi_ptr<dataT, addressSpace, IsDecorated># where [code]#dataT# is all types within [code]#genint#,
+   a@ All permutations of [code]#multi_ptr<DataT, addressSpace,
+      IsDecorated># where [code]#DataT# is all types within [code]#genint#,
       [code]#addressSpace# is [code]#access::address_space::global_space#,
       [code]#access::address_space::local_space# and
       [code]#access::address_space::private_space# and [code]#IsDecorated# is

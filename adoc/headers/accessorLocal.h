@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <typename dataT, int dimensions = 1>
+template <typename DataT, int Dimensions = 1>
 class local_accessor {
  public:
-  using value_type =             // const dataT for read-only accessors, dataT otherwise
+  using value_type =             // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type &;
-  using const_reference = const dataT &;
+  using const_reference = const DataT &;
   template <access::decorated IsDecorated>
       using accessor_ptr =
           multi_ptr<value_type, access::address_space::local_space, IsDecorated>;
@@ -21,12 +21,12 @@ class local_accessor {
 
   local_accessor();
 
-  /* Available only when: (dimensions == 0) */
+  /* Available only when: (Dimensions == 0) */
   local_accessor(handler &commandGroupHandlerRef,
                  const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
-  local_accessor(range<dimensions> allocationSize, handler &commandGroupHandlerRef,
+  /* Available only when: (Dimensions > 0) */
+  local_accessor(range<Dimensions> allocationSize, handler &commandGroupHandlerRef,
                  const property_list &propList = {});
 
   /* -- common interface members -- */
@@ -41,18 +41,18 @@ class local_accessor {
 
   bool empty() const noexcept;
 
-  range<dimensions> get_range() const;
+  range<Dimensions> get_range() const;
 
-  /* Available only when: (dimensions == 0) */
+  /* Available only when: (Dimensions == 0) */
   operator reference() const;
 
-  /* Available only when: (dimensions > 0) */
-  reference operator[](id<dimensions> index) const;
+  /* Available only when: (Dimensions > 0) */
+  reference operator[](id<Dimensions> index) const;
 
-  /* Available only when: (dimensions > 1) */
+  /* Available only when: (Dimensions > 1) */
   __unspecified__ &operator[](size_t index) const;
 
-  /* Available only when: (dimensions == 1) */
+  /* Available only when: (Dimensions == 1) */
   reference operator[](size_t index) const;
 
   std::add_pointer_t<value_type> get_pointer() const noexcept;

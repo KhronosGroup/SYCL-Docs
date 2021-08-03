@@ -3,59 +3,59 @@
 
 namespace sycl {
 
-template <typename dataT,
-          int dimensions,
-          access_mode accessMode,
-          target accessTarget,
-          access::placeholder isPlaceholder>
+template <typename DataT,
+          int Dimensions,
+          access_mode AccessMode,
+          target AccessTarget,
+          access::placeholder IsPlaceholder>
 class accessor {
  public:
-  using value_type = const dataT;
-  using reference = const dataT &;
-  using const_reference = const dataT &;
+  using value_type = const DataT;
+  using reference = const DataT &;
+  using const_reference = const DataT &;
 
-  /* Available only when: (dimensions == 0) */
+  /* Available only when: (Dimensions == 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+  accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
            const property_list &propList = {});
 
-  /* Available only when: (dimensions == 0) */
+  /* Available only when: (Dimensions == 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, 1, AllocatorT> &bufferRef,
+  accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef, const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
+  /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
            const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
+  /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef, const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
+  /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           range<dimensions> accessRange, const property_list &propList = {});
+  accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+           range<Dimensions> accessRange, const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
+  /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           range<dimensions> accessRange, id<dimensions> accessOffset,
+  accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+           range<Dimensions> accessRange, id<Dimensions> accessOffset,
            const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
+  /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           handler &commandGroupHandlerRef, range<dimensions> accessRange,
+  accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+           handler &commandGroupHandlerRef, range<Dimensions> accessRange,
            const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
+  /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           handler &commandGroupHandlerRef, range<dimensions> accessRange,
-           id<dimensions> accessOffset, const property_list &propList = {});
+  accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+           handler &commandGroupHandlerRef, range<Dimensions> accessRange,
+           id<Dimensions> accessOffset, const property_list &propList = {});
 
   /* -- common interface members -- */
 
@@ -65,25 +65,25 @@ class accessor {
 
   size_t get_count() const noexcept;
 
-  /* Available only when: (dimensions > 0) */
-  range<dimensions> get_range() const;
+  /* Available only when: (Dimensions > 0) */
+  range<Dimensions> get_range() const;
 
-  /* Available only when: (dimensions > 0) */
-  id<dimensions> get_offset() const;
+  /* Available only when: (Dimensions > 0) */
+  id<Dimensions> get_offset() const;
 
-  /* Available only when: (dimensions == 0) */
+  /* Available only when: (Dimensions == 0) */
   operator reference() const;
 
-  /* Available only when: (dimensions > 0) */
-  reference operator[](id<dimensions> index) const;
+  /* Available only when: (Dimensions > 0) */
+  reference operator[](id<Dimensions> index) const;
 
-  /* Available only when: (dimensions > 1) */
+  /* Available only when: (Dimensions > 1) */
   __unspecified__ &operator[](size_t index) const;
 
-  /* Available only when: (dimensions == 1) */
+  /* Available only when: (Dimensions == 1) */
   reference operator[](size_t index) const;
 
-  constant_ptr<dataT> get_pointer() const noexcept;
+  constant_ptr<DataT> get_pointer() const noexcept;
 };
 
 }  // namespace sycl
