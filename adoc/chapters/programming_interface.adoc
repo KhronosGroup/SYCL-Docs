@@ -6024,7 +6024,7 @@ For [code]#local_accessor# see <<sec:accessor.local>> for the allowable
 
 ==== Access modes
 
-Most accessors have an [code]#accessMode# template parameter which specifies
+Most accessors have an [code]#AccessMode# template parameter which specifies
 whether the accessor can read or write the underlying data.  This information
 is used by the runtime when defining the requirements for the associated
 <<command>>, and it tells the runtime whether data needs to be transferred to
@@ -6175,7 +6175,7 @@ property::no_init::no_init()
 
 ==== Read only accessors
 
-Accessors which have an [code]#accessMode# template parameter can be declared
+Accessors which have an [code]#AccessMode# template parameter can be declared
 as read-only by specifying [code]#access_mode::read# for the template
 parameter.  A read-only accessor provides read-only access to the underlying
 data and provides a "read" requirement for the memory object when it is
@@ -6188,7 +6188,7 @@ For example, an accessor declared with [code]#const DataT# and
 [code]#DataT# and [code]#access_mode::read#.
 
 As detailed in the sections below, some accessor types have a default value
-for [code]#accessMode#, which depends on whether the [code]#DataT# parameter
+for [code]#AccessMode#, which depends on whether the [code]#DataT# parameter
 is [code]#const# qualified.  This provides a convenient way to declare a
 read-only accessor without explicitly specifying the access mode.
 
@@ -6296,7 +6296,7 @@ a <<sycl-kernel-function>>, it accesses the contents of the buffer via the
 device's <<global-memory>>.  These two forms of the accessor are distinguished
 by the [code]#accessTarget# template parameter as shown in
 <<table.accessors.command.buffer.capabilities>>.  Both forms support the
-following values for the [code]#accessMode# template parameter:
+following values for the [code]#AccessMode# template parameter:
 [code]#access_mode::read#, [code]#access_mode::write# and
 [code]#access_mode::read_write#.
 
@@ -7283,7 +7283,7 @@ a@
 operator atomic<DataT, access::address_space::local_space>() const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && Dimensions == 0)#.
+      [code]#(AccessMode == access_mode::atomic && Dimensions == 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
@@ -7295,7 +7295,7 @@ a@
 atomic<DataT, access::address_space::local_space> operator[](id<Dimensions> index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && Dimensions > 0)#.
+      [code]#(AccessMode == access_mode::atomic && Dimensions > 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
@@ -7307,7 +7307,7 @@ a@
 atomic<DataT, access::address_space::local_space> operator[](size_t index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && Dimensions == 1)#.
+      [code]#(AccessMode == access_mode::atomic && Dimensions == 1)#.
 
 Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
@@ -7345,7 +7345,7 @@ a@
 ----
 value_type
 ----
-   a@ If [code]#(accessMode == access_mode::read)#, equal to
+   a@ If [code]#(AccessMode == access_mode::read)#, equal to
       [code]#const DataT#, otherwise equal to [code]#DataT#.
 
 a@
@@ -7429,7 +7429,7 @@ operator reference() const
       [code]#(Dimensions == 0)#.
 
 When [code]#accessTarget# is [code]#target::local#, available only when
-[code]#(accessMode == access_mode::read_write && Dimensions == 0)#.
+[code]#(AccessMode == access_mode::read_write && Dimensions == 0)#.
 
 Returns a reference to the single element that is accessed by this accessor.
 
@@ -7443,7 +7443,7 @@ reference operator[](id<Dimensions> index) const
       [code]#(Dimensions > 0)#.
 
 When [code]#accessTarget# is [code]#target::local#, available only when
-[code]#(accessMode == access_mode::read_write && Dimensions > 0)#.
+[code]#(AccessMode == access_mode::read_write && Dimensions > 0)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
@@ -7476,7 +7476,7 @@ reference operator[](size_t index) const
       [code]#(Dimensions == 1)#.
 
 When [code]#accessTarget# is [code]#target::local#, available only when
-[code]#(accessMode == access_mode::read_write && Dimensions == 1)#.
+[code]#(AccessMode == access_mode::read_write && Dimensions == 1)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
@@ -7505,7 +7505,7 @@ a@
 operator atomic<DataT, access::address_space::global_space>() const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && Dimensions == 0)#.
+      [code]#(AccessMode == access_mode::atomic && Dimensions == 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the single element that is accessed by this accessor.
@@ -7517,7 +7517,7 @@ atomic<DataT, access::address_space::global_space> operator[](
   id<Dimensions> index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && Dimensions > 0)#.
+      [code]#(AccessMode == access_mode::atomic && Dimensions > 0)#.
 
 Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the accessor's buffer at the index
@@ -7534,7 +7534,7 @@ atomic<DataT, access::address_space::global_space> operator[](
   size_t index) const
 ----
    a@ Available only when
-      [code]#(accessMode == access_mode::atomic && Dimensions == 1)#.
+      [code]#(AccessMode == access_mode::atomic && Dimensions == 1)#.
 
 Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the accessor's buffer at the index
@@ -8131,7 +8131,7 @@ a@
 operator reference() const
 ----
    a@ For [code]#accessor# available only when
-      [code]#(accessMode != access_mode::atomic && Dimensions == 0)#.
+      [code]#(AccessMode != access_mode::atomic && Dimensions == 0)#.
 
 For [code]#host_accessor# and [code]#local_accessor# available only when
 [code]#(Dimensions == 0)#.
@@ -8147,7 +8147,7 @@ a@
 reference operator[](id<Dimensions> index) const
 ----
    a@ For [code]#accessor# available only when
-      [code]#(accessMode != access_mode::atomic && Dimensions > 0)#.
+      [code]#(AccessMode != access_mode::atomic && Dimensions > 0)#.
 
 For [code]#host_accessor# and [code]#local_accessor# available only when
 [code]#(Dimensions > 0)#.
@@ -8185,7 +8185,7 @@ a@
 reference operator[](size_t index) const
 ----
    a@ For [code]#accessor# available only when
-      [code]#(accessMode != access_mode::atomic && Dimensions == 1)#.
+      [code]#(AccessMode != access_mode::atomic && Dimensions == 1)#.
 
 For [code]#host_accessor# and [code]#local_accessor# available only when
 [code]#(Dimensions == 1)#.
@@ -8527,8 +8527,8 @@ a@
 template <typename coordT>
 DataT read(const coordT &coords) const
 ----
-   a@ Available only when [code]#(accessMode == access_mode::read ||
-      accessMode == access_mode::read_write)#.
+   a@ Available only when [code]#(AccessMode == access_mode::read ||
+      AccessMode == access_mode::read_write)#.
 
 Reads and returns an element of the [code]#unsampled_image# at the coordinates
 specified by [code]#coords#.  Permitted types for [code]#coordT# are
@@ -8544,8 +8544,8 @@ a@
 template <typename coordT>
 void write(const coordT &coords, const DataT &color) const
 ----
-   a@ Available only when [code]#(accessMode == access_mode::write ||
-      accessMode == access_mode::read_write)#.
+   a@ Available only when [code]#(AccessMode == access_mode::write ||
+      AccessMode == access_mode::read_write)#.
 
 Writes the value specified by [code]#color# to the element of the image at the
 coordinates specified by [code]#coords#.  Permitted types for [code]#coordT#
@@ -12762,8 +12762,8 @@ a@
 [source]
 ----
 template <typename DataT, int Dimensions,
-access_mode accessMode, target accessTarget, access::placeholder IsPlaceholder>
-    void require(accessor<DataT, Dimensions, accessMode, accessTarget, IsPlaceholder>
+access_mode AccessMode, target accessTarget, access::placeholder IsPlaceholder>
+    void require(accessor<DataT, Dimensions, AccessMode, accessTarget, IsPlaceholder>
     acc)
 ----
    a@ Requires access to the memory object associated with the accessor.

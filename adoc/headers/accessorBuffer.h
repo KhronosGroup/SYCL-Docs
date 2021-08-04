@@ -26,7 +26,7 @@ enum class placeholder { // Deprecated
 
 template <typename DataT,
           int Dimensions = 1,
-          access_mode accessMode =
+          access_mode AccessMode =
             (std::is_const_v<DataT> ? access_mode::read
                                     : access_mode::read_write),
           target accessTarget = target::device,
@@ -163,15 +163,15 @@ class accessor {
   /* Available only when: (Dimensions > 1) */
   __unspecified__ &operator[](size_t index) const;
 
-  /* Available only when: (accessMode != access_mode::atomic && Dimensions == 1) */
+  /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 1) */
   reference operator[](size_t index) const;
 
   /* Deprecated
-  Available only when: (accessMode == access_mode::atomic && Dimensions ==  0) */
+  Available only when: (AccessMode == access_mode::atomic && Dimensions ==  0) */
   operator cl::sycl::atomic<DataT, access::address_space::global_space> () const;
 
   /* Deprecated
-  Available only when: (accessMode == access_mode::atomic && Dimensions == 1) */
+  Available only when: (AccessMode == access_mode::atomic && Dimensions == 1) */
   cl::sycl::atomic<DataT, access::address_space::global_space> operator[](
     id<Dimensions> index) const;
 
