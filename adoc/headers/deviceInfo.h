@@ -9,7 +9,7 @@ struct device_type;
 struct vendor_id;
 struct max_compute_units;
 struct max_work_item_dimensions;
-template<int dimensions = 3> struct max_work_item_sizes;
+template<int Dimensions = 3> struct max_work_item_sizes;
 struct max_work_group_size;
 struct preferred_vector_width_char;
 struct preferred_vector_width_short;
