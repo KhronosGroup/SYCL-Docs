@@ -6294,7 +6294,7 @@ The [code]#accessor# class provides access to data in a [code]#buffer# from
 within a <<sycl-kernel-function>> or from within a <<host-task>>.  When used in
 a <<sycl-kernel-function>>, it accesses the contents of the buffer via the
 device's <<global-memory>>.  These two forms of the accessor are distinguished
-by the [code]#accessTarget# template parameter as shown in
+by the [code]#AccessTarget# template parameter as shown in
 <<table.accessors.command.buffer.capabilities>>.  Both forms support the
 following values for the [code]#AccessMode# template parameter:
 [code]#access_mode::read#, [code]#access_mode::write# and
@@ -6372,11 +6372,11 @@ a@
 template <access::decorated IsDecorated>
 accessor_ptr
 ----
-   a@ If [code]#(accessTarget == target::device)#:
+   a@ If [code]#(AccessTarget == target::device)#:
       [code]#multi_ptr<value_type, access::address_space::global_space, IsDecorated>#.
 
 The definition of this type is not specified when
-[code]#(accessTarget == target::host_task)#.
+[code]#(AccessTarget == target::host_task)#.
 
 |====
 
@@ -7377,12 +7377,12 @@ size_t get_size() const noexcept
 ----
    a@ Returns the size in bytes of the memory region this accessor may access.
 
-When [code]#accessTarget# is [code]#target::constant_buffer# or
+When [code]#AccessTarget# is [code]#target::constant_buffer# or
 [code]#target::host_buffer#, the returned value is the size of the elements in
 the underlying buffer, unless this is a <<ranged-accessor>> in which case it is
 the size of the elements within the accessor's range.
 
-When [code]#accessTarget# is [code]#target::local#, the returned value is the
+When [code]#AccessTarget# is [code]#target::local#, the returned value is the
 size in bytes of the accessor's local memory allocation, per work-group.
 
 a@
@@ -7393,12 +7393,12 @@ size_t get_count() const noexcept
    a@ Returns the number of [code]#DataT# elements of the memory region this
       accessor may access.
 
-When [code]#accessTarget# is [code]#target::constant_buffer# or
+When [code]#AccessTarget# is [code]#target::constant_buffer# or
 [code]#target::host_buffer#, the returned value is the number of elements in
 the underlying buffer, unless this is a <<ranged-accessor>> in which case it is
 the number of elements within the accessor's range.
 
-When [code]#accessTarget# is [code]#target::local#, the returned value is the
+When [code]#AccessTarget# is [code]#target::local#, the returned value is the
 number of elements in the accessor's local memory allocation, per work-group.
 
 a@
@@ -7411,12 +7411,12 @@ range<Dimensions> get_range() const
 Returns a [code]#range# object which represents the number of elements of
 [code]#DataT# per dimension that this accessor may access.
 
-When [code]#accessTarget# is [code]#target::constant_buffer# or
+When [code]#AccessTarget# is [code]#target::constant_buffer# or
 [code]#target::host_buffer#, the returned value is the range of the underlying
 buffer, unless this is a <<ranged-accessor>> in which case it is the range that
 was specified when the accessor was constructed.
 
-When [code]#accessTarget# is [code]#target::local#, the returned value is the
+When [code]#AccessTarget# is [code]#target::local#, the returned value is the
 range that was specified when the accessor was constructed.
 
 a@
@@ -7424,11 +7424,11 @@ a@
 ----
 operator reference() const
 ----
-   a@ When [code]#accessTarget# is [code]#target::constant_buffer# or
+   a@ When [code]#AccessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
       [code]#(Dimensions == 0)#.
 
-When [code]#accessTarget# is [code]#target::local#, available only when
+When [code]#AccessTarget# is [code]#target::local#, available only when
 [code]#(AccessMode == access_mode::read_write && Dimensions == 0)#.
 
 Returns a reference to the single element that is accessed by this accessor.
@@ -7438,11 +7438,11 @@ a@
 ----
 reference operator[](id<Dimensions> index) const
 ----
-   a@ When [code]#accessTarget# is [code]#target::constant_buffer# or
+   a@ When [code]#AccessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
       [code]#(Dimensions > 0)#.
 
-When [code]#accessTarget# is [code]#target::local#, available only when
+When [code]#AccessTarget# is [code]#target::local#, available only when
 [code]#(AccessMode == access_mode::read_write && Dimensions > 0)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
@@ -7471,11 +7471,11 @@ a@
 ----
 reference operator[](size_t index) const
 ----
-   a@ When [code]#accessTarget# is [code]#target::constant_buffer# or
+   a@ When [code]#AccessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
       [code]#(Dimensions == 1)#.
 
-When [code]#accessTarget# is [code]#target::local#, available only when
+When [code]#AccessTarget# is [code]#target::local#, available only when
 [code]#(AccessMode == access_mode::read_write && Dimensions == 1)#.
 
 Returns a reference to the element at the location specified by [code]#index#.
@@ -8353,7 +8353,7 @@ accessor classes support the [code]#access_mode::read# and
 [code]#host_unsampled_image_accessor# class supports
 [code]#access_mode::read_write#.
 
-The [code]#accessTarget# template parameter dictates how the
+The [code]#AccessTarget# template parameter dictates how the
 [code]#unsampled_image_accessor# can be used: [code]#image_target::device#
 means the accessor can be used in a <<sycl-kernel-function>> while
 [code]#image_target::host_task# means the accessor can be used in a
@@ -8445,7 +8445,7 @@ unsampled_image_accessor(
       associated with [code]#commandGroupHandlerRef#.  The optional
       [code]#property_list# provides properties for the constructed object.
 
-If [code]#accessTarget# is [code]#image_target::device#, throws an
+If [code]#AccessTarget# is [code]#image_target::device#, throws an
 [code]#exception# with the [code]#errc::feature_not_supported# error code if
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
@@ -8466,7 +8466,7 @@ unsampled_image_accessor(
       described in <<sec:accessor.unsampled.image.tags>>.  The optional
       [code]#property_list# provides properties for the constructed object.
 
-If [code]#accessTarget# is [code]#image_target::device#, throws an
+If [code]#AccessTarget# is [code]#image_target::device#, throws an
 [code]#exception# with the [code]#errc::feature_not_supported# error code if
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
@@ -8626,7 +8626,7 @@ The dimensionality of a sampled image accessor must match the dimensionality
 of the underlying image to which it provides access.  Sampled image accessors
 are always read-only.
 
-The [code]#accessTarget# template parameter dictates how the
+The [code]#AccessTarget# template parameter dictates how the
 [code]#sampled_image_accessor# can be used: [code]#image_target::device# means
 the accessor can be used in a <<sycl-kernel-function>> while
 [code]#image_target::host_task# means the accessor can be used in a
@@ -8714,7 +8714,7 @@ sampled_image_accessor(
       associated with [code]#commandGroupHandlerRef#.  The optional
       [code]#property_list# provides properties for the constructed object.
 
-If [code]#accessTarget# is [code]#image_target::device#, throws an
+If [code]#AccessTarget# is [code]#image_target::device#, throws an
 [code]#exception# with the [code]#errc::feature_not_supported# error code if
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
@@ -8735,7 +8735,7 @@ sampled_image_accessor(
       described in <<sec:accessor.sampled.image.tags>>.  The optional
       [code]#property_list# provides properties for the constructed object.
 
-If [code]#accessTarget# is [code]#image_target::device#, throws an
+If [code]#AccessTarget# is [code]#image_target::device#, throws an
 [code]#exception# with the [code]#errc::feature_not_supported# error code if
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
@@ -12762,8 +12762,8 @@ a@
 [source]
 ----
 template <typename DataT, int Dimensions,
-access_mode AccessMode, target accessTarget, access::placeholder IsPlaceholder>
-    void require(accessor<DataT, Dimensions, AccessMode, accessTarget, IsPlaceholder>
+access_mode AccessMode, target AccessTarget, access::placeholder IsPlaceholder>
+    void require(accessor<DataT, Dimensions, AccessMode, AccessTarget, IsPlaceholder>
     acc)
 ----
    a@ Requires access to the memory object associated with the accessor.

@@ -29,7 +29,7 @@ template <typename DataT,
           access_mode AccessMode =
             (std::is_const_v<DataT> ? access_mode::read
                                     : access_mode::read_write),
-          target accessTarget = target::device,
+          target AccessTarget = target::device,
           access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {
  public:
