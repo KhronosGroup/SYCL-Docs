@@ -4266,7 +4266,7 @@ Zero or more properties can be provided to the constructed SYCL
 [code]#property_list#.
 
 This constructor is only defined for a [code]#buffer# parameterized
-with [code]#dimensions == 1#, and when [code]#std::data(container)#
+with [code]#Dimensions == 1#, and when [code]#std::data(container)#
 is convertible to [code]#T*#.
 
 
@@ -4297,7 +4297,7 @@ Zero or more properties can be provided to the constructed SYCL
 [code]#property_list#.
 
 This constructor is only defined for a [code]#buffer# parameterized
-with [code]#dimensions == 1#, and when [code]#std::data(container)#
+with [code]#Dimensions == 1#, and when [code]#std::data(container)#
 is convertible to [code]#T*#.
 
 
@@ -4444,7 +4444,7 @@ a@
 size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the buffer.
-      Equal to [code]#+get_range()[0] * ... * get_range()[dimensions-1]+#.
+      Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
 a@
 [source]
 ----
@@ -11116,7 +11116,7 @@ a@
 id(size_t dim0, size_t dim1)
 ----
    a@ Construct a 2D [code]#id# with values dim0, dim1.
-      Only valid when the template parameter [code]#dimensions# is equal
+      Only valid when the template parameter [code]#Dimensions# is equal
       to 2.
 
 a@
@@ -11125,7 +11125,7 @@ a@
 id(size_t dim0, size_t dim1, size_t dim2)
 ----
    a@ Construct a 3D [code]#id# with values dim0, dim1, dim2.
-      Only valid when the template parameter [code]#dimensions# is equal
+      Only valid when the template parameter [code]#Dimensions# is equal
       to 3.
 
 a@
@@ -11157,7 +11157,7 @@ a@
 size_t get(int dimension) const
 ----
    a@ Return the value of the [code]#id# for dimension
-      [code]#dimension#.
+      [code]#Dimension#.
 
 a@
 [source]
@@ -11477,7 +11477,7 @@ size_t get_global_id(int dimension) const
 ----
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
-      in the given [code]#dimension#.
+      in the given [code]#Dimension#.
 
 a@
 [source]
@@ -11504,7 +11504,7 @@ size_t get_local_id(int dimension) const
 ----
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
-      [code]#dimension#.
+      [code]#Dimension#.
 
 a@
 [source]
@@ -11538,7 +11538,7 @@ size_t get_group(int dimension) const
 ----
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
-      given [code]#dimension#.
+      given [code]#Dimension#.
 
 a@
 [source]
@@ -11560,7 +11560,7 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return the number of <<work-group,work groups>> for [code]#dimension# in the
+   a@ Return the number of <<work-group,work groups>> for [code]#Dimension# in the
       iteration space.
 
 a@
@@ -11957,7 +11957,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the dimension of the local range specified by the [code]#dimension# parameter.
+   a@ Return the dimension of the local range specified by the [code]#Dimension# parameter.
 
 a@
 [source]
@@ -11971,7 +11971,7 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return element [code]#dimension# from the constituent group range.
+   a@ Return element [code]#Dimension# from the constituent group range.
 
 a@
 [source]
@@ -12620,7 +12620,7 @@ a@
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
       (std::is_same_v<BinaryOperation, bit_or<>> || std::is_same_v<BinaryOperation, bit_or<T>>)#.
-      
+
 a@
 [source]
 ----

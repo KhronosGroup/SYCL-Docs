@@ -48,7 +48,7 @@ public:
   void parallel_for_work_item(const WorkItemFunctionT &func) const;
 
   template<typename WorkItemFunctionT>
-  void parallel_for_work_item(range<dimensions> logicalRange,
+  void parallel_for_work_item(range<Dimensions> logicalRange,
     const WorkItemFunctionT &func) const;
 
   template <typename DataT>
