@@ -33,7 +33,7 @@ class sampled_image_accessor {
 
   size_t size() const noexcept;
 
-  /* if Dimensions == 1, coordT = float
+  /* if Dimensions == 1, CoordT = float
      if Dimensions == 2, CoordT = float2
      if Dimensions == 3, CoordT = float4 */
   template <typename CoordT>
