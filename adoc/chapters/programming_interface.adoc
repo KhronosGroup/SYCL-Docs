@@ -12311,14 +12311,12 @@ variable is accessed directly during the lifetime of a reduction (e.g. via an
 [code]#accessor# or USM pointer), the behavior is undefined.
 
 Certain implementations of reductions can be made more efficient if the
-identity value associated with the reduction operator is known.  For standard
-binary operators (e.g. [code]#plus# on arithmetic types), an implementation
-must determine the correct identity value automatically in order to avoid
-performance penalties.  For user-defined reduction operators, an implementation
-should issue a compile-time warning if the user does not provide an identity
-value and this is known to negatively impact performance.
+reduction operator has an identity value and this value is known to the
+implementation. For standard binary operators (e.g. [code]#plus# on arithmetic
+types), an implementation can determine the correct identity value
+automatically in order to avoid performance penalties.
 
-If an implementation can identify the identity value for a given combination of
+If an implementation can identify an identity value for a given combination of
 accumulator type and function object type, the value is defined as a member of
 the [code]#known_identity# trait class.  Whether this member value exists can
 be tested using the [code]#has_known_identity# trait class.
@@ -12357,6 +12355,18 @@ The return value of the [code]#reduction# interface is an
 implementation-defined object of unspecified type, which is interpreted by
 [code]#parallel_for# to construct an appropriate [code]#reducer#
 type as detailed in <<reducer-class>>.
+
+An implementation may use an unspecified number of temporary variables inside
+of any [code]#reducer# objects it creates. If an identity value is supplied to
+a reduction, an implementation will use that value to initialize any such
+temporary variables.
+
+[NOTE]
+====
+Since the number of temporary variables is unspecified, supplying an identity
+value different to the identity value associated with the reduction operator
+may lead to unexpected results.
+====
 
 The initial value of the reduction variable is included
 in the reduction operation, unless the [code]#property::reduction::initialize_to_identity#
@@ -12420,15 +12430,11 @@ reduction<BufferT, BinaryOperation>(BufferT vars, handler& cgh,
 const BufferT::value_type& identity, BinaryOperation combiner,
 const property_list &propList = {})
 ----
-   a@ Available only when [code]#has_known_identity<BinaryOperation,
-      BufferT::value_type>::value# is [code]#false#.
-      Construct an unspecified object representing a reduction
+   a@ Construct an unspecified object representing a reduction
       of the variable(s) described by [code]#vars# using the combination
       operation specified by [code]#combiner#. The value of
       [code]#identity# may be used by the implementation to initialize
-      temporary accumulation variables; using an [code]#identity# value
-      that is not the identity value of the combination operation specified
-      by [code]#combiner# results in undefined behavior. Zero or more
+      an unspecified number of temporary accumulation variables.  Zero or more
       properties can be provided via an instance of [code]#property_list#.
       Throws an [code]#exception# with the [code]#errc::invalid#
       error code if the range of the [code]#vars# buffer is not 1.
@@ -12439,15 +12445,11 @@ a@
 reduction<T, BinaryOperation>(T* var, const T& identity,
 BinaryOperation combiner, const property_list &propList = {})
 ----
-   a@ Available only when [code]#has_known_identity<BinaryOperation, T>::value#
-      is [code]#false#.
-      Construct an unspecified object representing a reduction
+   a@ Construct an unspecified object representing a reduction
       of the variable described by [code]#var# using the combination
       operation specified by [code]#combiner#. The value of
       [code]#identity# may be used by the implementation to initialize
-      temporary accumulation variables; using an [code]#identity# value
-      that is not the identity value of the combination operation specified
-      by [code]#combiner# results in undefined behavior.  Zero or more
+      an unspecified number of temporary accumulation variables.  Zero or more
       properties can be provided via an instance of [code]#property_list#.
 
 a@
@@ -12456,15 +12458,12 @@ a@
 reduction<T, BinaryOperation>(span<T, Extent> vars, const T& identity,
 BinaryOperation combiner, const property_list &propList = {})
 ----
-   a@ Available only when [code]#has_known_identity<BinaryOperation, T>::value#
-      is [code]#false# and [code]#Extent != sycl::dynamic_extent#.
+   a@ Available only when [code]#Extent != sycl::dynamic_extent#.
       Construct an unspecified object representing a reduction
       of the variable(s) described by [code]#vars# using the combination
       operation specified by [code]#combiner#. The value of
       [code]#identity# may be used by the implementation to initialize
-      temporary accumulation variables; using an [code]#identity# value
-      that is not the identity value of the combination operation specified
-      by [code]#combiner# results in undefined behavior.  Zero or more
+      an unspecified number of temporary accumulation variables.  Zero or more
       properties can be provided via an instance of [code]#property_list#.
 
 |====
@@ -12488,11 +12487,12 @@ property::reduction::initialize_to_identity
 ----
    a@ The [code]#initialize_to_identity# property adds the requirement that the
       <<sycl-runtime>> must initialize the [code]#reduction# variable to the
-      identity value of its associated reduction operator.  If the identity
-      value of the reduction operator cannot be determined, the compiler must
-      raise a diagnostic. When this property is set, the original value of the
-      reduction variable is not included
-      in the reduction.
+      identity value passed to the reduction interface, or to the identity
+      value determined by the [code]#known_identity# trait if no identity value
+      was specified. If no identity value was specified and an identity value
+      cannot be determined by the [code]#known_identity# trait, the compiler
+      must raise a diagnostic. When this property is set, the original value of
+      the reduction variable is not included in the reduction.
 
 |====
 
