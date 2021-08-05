@@ -79,6 +79,8 @@ class multi_ptr {
   template<access::address_space ASP, access::decorated IsDecorated>
   multi_ptr &operator=(multi_ptr<value_type, ASP, IsDecorated>&&);
 
+  reference operator[](std::ptrdiff_t) const;
+
   reference operator*() const;
   pointer operator->() const;
 
