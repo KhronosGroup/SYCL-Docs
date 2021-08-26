@@ -5,7 +5,7 @@ template <typename Group, typename InPtr, typename OutPtr, typename BinaryOperat
 OutPtr joint_inclusive_scan(Group g, InPtr first, InPtr last, OutPtr result, BinaryOperation binary_op); // (1)
 
 template <typename Group, typename InPtr, typename OutPtr, typename T, typename BinaryOperation>
-T joint_inclusive_scan(Group g, InPtr first, InPtr last, OutPtr result, BinaryOperation binary_op, T init); // (2)
+OutPtr joint_inclusive_scan(Group g, InPtr first, InPtr last, OutPtr result, BinaryOperation binary_op, T init); // (2)
 
 template <typename Group, typename T, typename BinaryOperation>
 T inclusive_scan_over_group(Group g, T x, BinaryOperation binary_op); // (3)
