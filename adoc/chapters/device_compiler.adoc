@@ -586,20 +586,17 @@ with this sub-group size, the implementation must throw a synchronous
 a@
 [source]
 ----
-requires(has(aspect, ...))
+device_has(aspect, ...)
 ----
    a@ This attribute may be used to decorate either the declaration of a kernel
       function that is defined in the current translation unit or to decorate
       the declaration of a non-kernel device function.  The following
       description applies when the attribute decorates a kernel function.
 
-The parameter list to the [code]#sycl::requires()# attribute may either be
-empty or it may be a single [code]#has()# clause.  The parameter list to the
-[code]#has()# clause consists of zero or more [code]#constexpr# integral
-expressions, where each integer is interpreted as one of the enumerated values
-in the [code]#sycl::aspect# enumeration type.  Specifying an empty parameter
-list to [code]#sycl::requires()# is equivalent to specifying a [code]#has()#
-clause with an empty parameter list.
+The parameter list to the [code]#sycl::device_has()# attribute consists of zero
+or more [code]#constexpr# integral expressions, where each integer is
+interpreted as one of the enumerated values in the [code]#sycl::aspect#
+enumeration type.
 
 Specifying this attribute on a kernel has two effects.  First, it causes the
 <<kernel-invocation-command>> to throw a synchronous exception with the
@@ -611,20 +608,20 @@ to issue a diagnostic if the kernel (or any of the functions it calls) uses an
 optional feature that is associated with an aspect that is not listed in the
 attribute.
 
-The value of each parameter to the [code]#has()# clause must be equal to one of
-the values in the [code]#sycl::aspect# enumeration type (including any extended
+The value of each parameter to this attribute must be equal to one of the
+values in the [code]#sycl::aspect# enumeration type (including any extended
 values the implementation may provide).  If it does not, the program is ill
 formed and the compiler must issue a diagnostic.
 
-See <<listing:requires>> for an example of this attribute.
+See <<listing:device-has>> for an example of this attribute.
 
 |====
 
-.Example of the [code]#sycl::requires()# attribute
-[[listing:requires]]
+.Example of the [code]#sycl::device_has()# attribute
+[[listing:device-has]]
 [source,,linenums]
 ----
-include::{code_dir}/requires.cpp[lines=4..-1]
+include::{code_dir}/deviceHas.cpp[lines=4..-1]
 ----
 
 
@@ -643,7 +640,7 @@ as for the kernel function attributes defined above in
 a@
 [source]
 ----
-requires(has(aspect, ...))
+device_has(aspect, ...)
 ----
    a@ This attribute may be used to decorate either the declaration of a kernel
       function that is defined in the current translation unit or to decorate
@@ -652,7 +649,7 @@ requires(has(aspect, ...))
       function declaration.
 
 The syntax of this attribute's parameter list is the same as the syntax for
-the form of [code]#sycl::requires()# that is specified on a kernel function
+the form of [code]#sycl::device_has()# that is specified on a kernel function
 (see <<table.kernel.attributes>>).
 
 This attribute is required when a non-kernel device function that uses optional
