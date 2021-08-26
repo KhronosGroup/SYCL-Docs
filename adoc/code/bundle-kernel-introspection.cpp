@@ -14,7 +14,7 @@ int main() {
 
   // Get an executable kernel bundle containing our kernel.
   kernel_id kernelId = get_kernel_id<MyKernel>();
-  auto myBundle = get_kernel_bundle<bundle_state::executable>(myContext, kernelId);
+  auto myBundle = get_kernel_bundle<bundle_state::executable>(myContext, {kernelId});
 
   // Get the kernel's maximum work group size when running on our device.
   kernel myKernel = myBundle.get_kernel(kernelId);
