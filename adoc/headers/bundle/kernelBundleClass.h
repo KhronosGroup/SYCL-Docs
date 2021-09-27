@@ -24,10 +24,20 @@ class kernel_bundle {
 
   bool has_kernel(const kernel_id &kernelId, const device &dev) const noexcept;
 
+  template<typename KernelName>
+  bool has_kernel() const noexcept;
+
+  template<typename KernelName>
+  bool has_kernel(const device &dev) const noexcept;
+
   std::vector<kernel_id> get_kernel_ids() const;
 
   /* Available only when: (State == bundle_state::executable) */
   kernel get_kernel(const kernel_id &kernelId) const;
+
+  /* Available only when: (State == bundle_state::executable) */
+  template<typename KernelName>
+  kernel get_kernel() const;
 
   bool contains_specialization_constants() const noexcept;
 

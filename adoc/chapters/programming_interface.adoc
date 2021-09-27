@@ -15001,6 +15001,29 @@ bool has_kernel(const kernel_id &kernelId, const device &dev) const noexcept;  /
 
 [source]
 ----
+template<typename KernelName>
+bool has_kernel() const noexcept;                   // (1)
+
+template<typename KernelName>
+bool has_kernel(const device &dev) const noexcept;  // (2)
+----
+
+_Preconditions:_ The template parameter [code]#KernelName# must be the
+<<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
+Since lambda functions have no standard type name, kernels defined as lambda
+functions must specify a [code]#KernelName# in their
+<<kernel-invocation-command>> in order to use these functions.  Applications
+which call these functions for a [code]#KernelName# that is not defined are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+  . _Returns:_ [code]#true# only if the kernel bundle contains the kernel
+    identified by [code]#KernelName#.
+  . _Returns:_ [code]#true# only if the kernel bundle contains the kernel
+    identified by [code]#KernelName# and if that kernel is compatible with the
+    device [code]#dev#.
+
+[source]
+----
 std::vector<kernel_id> get_kernel_ids() const;
 ----
 
@@ -15022,6 +15045,30 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if the
     kernel bundle does not contain the kernel identified by [code]#kernelId#.
+
+[source]
+----
+template<typename KernelName>
+kernel get_kernel() const;
+----
+
+_Preconditions:_ This member function is only available if the kernel bundle's
+state is [code]#bundle_state::executable#.  The template parameter
+[code]#KernelName# must be the <<type-kernel-name>> of a kernel that is defined
+in the <<sycl-application>>.  Since lambda functions have no standard type
+name, kernels defined as lambda functions must specify a [code]#KernelName# in
+their <<kernel-invocation-command>> in order to use this function.
+Applications which call this function for a [code]#KernelName# that is not
+defined are ill formed, and the implementation must issue a diagnostic in this
+case.
+
+_Returns:_ A [code]#kernel# object representing the kernel identified by
+[code]#KernelName#, which resides in the bundle.
+
+_Throws:_
+
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    kernel bundle does not contain the kernel identified by [code]#KernelName#.
 
 ==== Specialization constant support
 
