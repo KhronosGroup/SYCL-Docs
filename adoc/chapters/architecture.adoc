@@ -1571,7 +1571,8 @@ predefined image formats which are provided by an underlying <<backend>>
 implementation. Images are encapsulated in the
 [code]#sycl::unsampled_image# or [code]#sycl::sampled_image#
 types, which are templated by the number of dimensions in the image. The
-minimum number of elements in a memory object is one.
+minimum number of elements in an image object is one. The minimum number
+of elements in a buffer object is zero.
 
 The fundamental differences between a buffer and an image object are:
 
@@ -1622,6 +1623,9 @@ multi-dimensional.  The size of each dimension is defined by a [code]#range#
 object of one, two or three dimensions, and an element in the multi-dimensional
 space can be identified using an [code]#id# object with the same number of
 dimensions as the corresponding [code]#range#.
+
+If the size of any dimension is zero, there are zero elements in the
+multi-dimensional range.
 
 [[sec:multi-dim-linearization]]
 === Linearization
