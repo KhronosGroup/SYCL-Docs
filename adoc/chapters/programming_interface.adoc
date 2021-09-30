@@ -3957,6 +3957,9 @@ data, while allowing exception handling for blocking
 and non-blocking data transfers. Accessors manage data transfers between the host
 and all of the devices in the system, as well as tracking of data dependencies.
 
+Zero-sized buffers are permitted. In this case, the buffer still handles ownership as
+normal, but does not need to store the zero-sized data itself.
+
 When using <<usm>> allocations, data storage is managed by USM allocation functions, and
 data access is via pointers.  See <<sec:usm>> for greater detail.
 
@@ -3992,8 +3995,9 @@ allocator).
 [[subsec:default.allocators]]
 ==== Default allocators
 
-A default allocator is always defined by the implementation, and it is
-guaranteed to return non-[code]#nullptr# and new memory positions every call.
+A default allocator is always defined by the implementation. For allocations
+greater than size zero, it is guaranteed to return non-[code]#nullptr# and
+new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the
 type (therefore, the default allocator for a buffer of type [code]#const int#
 will be an [code]#Allocator<int>)#.
@@ -6255,7 +6259,7 @@ according to <<sec:multi-dim-linearization>>.
 Accessors of type [code]#accessor# and [code]#host_accessor# can be constructed
 from a sub-range of a [code]#buffer# by providing a range and offset to the
 constructor.  This limits the elements that can be accessed to the specified
-sub-range, which allows the implement to perform certain optimizations such
+sub-range, which allows the implementation to perform certain optimizations such
 as reducing the amount of memory that needs to be copied to or from a device.
 
 If the ranged accessor is multi-dimensional, the sub-range is allowed to
@@ -6287,6 +6291,12 @@ must take care to manually add the offset before dereferencing the pointer
 because accessing an element that is outside of the accessor's range results
 in undefined behavior.
 
+[NOTE]
+====
+There is no change in behavior for ranged accessors with a range of zero.
+It still creates a requisite for the entire underlying buffer, and 
+and attempt to access an element produces undefined behaviour.
+====
 
 ==== Buffer accessor for commands
 
@@ -6507,6 +6517,15 @@ the range starts at the beginning of the [code]#buffer#.  The optional
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
 
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
 a@
 [source]
 ----
@@ -6525,6 +6544,15 @@ provides properties for the constructed accessor.
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -6545,6 +6573,15 @@ accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -6567,6 +6604,15 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
 
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
 a@
 [source]
 ----
@@ -6586,6 +6632,15 @@ properties for the constructed accessor.
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -6609,6 +6664,15 @@ accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
 
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
 a@
 [source]
 ----
@@ -6630,6 +6694,15 @@ properties for the constructed accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -6654,6 +6727,15 @@ accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 |====
 
@@ -6959,6 +7041,16 @@ the range starts at the beginning of the [code]#buffer#.  The optional
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
 a@
 [source]
 ----
@@ -6979,6 +7071,15 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
 
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
 a@
 [source]
 ----
@@ -6998,6 +7099,15 @@ properties for the constructed accessor.
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -7020,6 +7130,15 @@ properties for the constructed accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 |====
 
@@ -7148,6 +7267,15 @@ constructed accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
 
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
 a@
 [source]
 ----
@@ -7167,6 +7295,15 @@ properties for the constructed accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 |====
 
@@ -7268,6 +7405,15 @@ array of [code]#dataT# elements within a <<sycl-kernel-function>> on the queue
 associated with [code]#commandGroupHandlerRef#.  The number of elements in the
 array is defined by [code]#allocationSize#.  The optional [code]#property_list#
 provides properties for the constructed accessor.
+
+If the range is zero sized, this constructs an empty accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 |====
 
@@ -7670,6 +7816,16 @@ the constructed accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
 
+If the range is zero sized, this constructs an empty host accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
+
+
 a@
 [source]
 ----
@@ -7689,6 +7845,15 @@ the accessor as described in <<sec:accessor.host.buffer.tags>>.  The optional
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty host accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -7710,6 +7875,15 @@ properties for the constructed accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty host accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 a@
 [source]
@@ -7733,6 +7907,15 @@ accessor.
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 [code]#bufferRef# in any dimension.
+
+If the range is zero sized, this constructs an empty host accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 |====
 
@@ -7928,6 +8111,15 @@ of [code]#dataT# elements within a <<sycl-kernel-function>> on the queue
 associated with [code]#commandGroupHandlerRef#.  The number of elements in the
 array is defined by [code]#allocationSize#.  The optional [code]#property_list#
 provides properties for the constructed accessor.
+
+If the range is zero sized, this constructs an empty local accessor which fulfills the
+following post-conditions:
+--
+  * [code]#(empty() == true)#
+  * All size queries return [code]#0#.
+  * The only iterator that can be obtained is [code]#nullptr#.
+  * Trying to access the underlying memory is undefined behavior.
+--
 
 |====
 
