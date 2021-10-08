@@ -4,7 +4,7 @@
 <!-- to update to newer CI when going public [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://khronosgroup.github.io/SYCL-Docs/sycl/sycl.pdf) -->
 [![SPEC 2020-3](https://img.shields.io/badge/SPEC-2020--3-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/pdf/sycl-2020.pdf)
 [![SPEC 2020-3](https://img.shields.io/badge/SPEC-2020--3-orange.svg?logo=HTML5)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html)
-[![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://gitlab.khronos.org/sycl/Specification/-/jobs)
+[![SPEC latest](https://img.shields.io/badge/SPEC-latest-red.svg?logo=adobe-acrobat-reader)](https://github.com/KhronosGroup/SYCL-Docs/actions?query=branch%3ASYCL-2020%2Fmaster+is%3Asuccess)
 [![Join the Slack group](https://img.shields.io/badge/chat-on%20slack-blue.svg?logo=slack)](https://khr.io/slack)
 
 # SYCL Open Source Specification
