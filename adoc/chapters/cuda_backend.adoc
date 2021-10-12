@@ -1,0 +1,209 @@
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin cuda_backend %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[appendix]
+[[chapter:cuda-backend]]
+= CUDA backend specification
+
+[[sec:cuda:introduction]]
+== Introduction
+
+[[sec:cuda:mapping_of_sycl_programming_model]]
+== Mapping of SYCL programming model
+
+[[sub:cuda:platform_model]]
+=== Platform Model
+
+[[sub:cuda:memory_model]]
+=== Memory model
+
+[[sub:cuda:execution_model]]
+=== Execution Model
+
+[[sec::programming_interface]]
+== Programming Interface
+
+[[sub:cuda:application_interoperability]]
+=== Application Interoperability
+
+[[table.cuda.appinterop.nativeobjects]]
+.Types of native backend objects application interoperability
+[width="100%",options="header",cols="20%,20%,20%,40%"]
+|====
+| [code]#SyclType#                                                   | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
+| [code]#buffer# |   |   |
+| [code]#context#                                                   |   |   |
+| [code]#device#                                                    |   |   |
+| [code]#device_image<State>#                                       |   |   |
+| [code]#event#                                                     |   |   |
+| [code]#kernel#                                                    |   |   |
+| [code]#kernel_bundle<State>#                                      |   |   |
+| [code]#platform#                                                  |   |   |
+| [code]#queue#                                                     |   |   |
+| [code]#sampled_image<Dims, AllocatorT>#                           |   |   |
+| [code]#unsampled_image<Dims, AllocatorT>#                         |   |   |
+|====
+
+[[table.cuda.appinterop.ownership]]
+.Ownership behavior of native backend objects.
+[width="100%",options="header",cols="40%,60%"]
+|====
+| SYCL Object                                                       | Destructor behaviour
+| [code]#buffer# |   
+| [code]#context#                                                   |   
+| [code]#device#                                                    |  
+| [code]#device_image<State>#                                       |   
+| [code]#event#                                                     |  
+| [code]#kernel#                                                    |   
+| [code]#kernel_bundle<State>#                                      |   
+| [code]#platform#                                                  |  
+| [code]#queue#                                                     |   
+| [code]#sampled_image<Dims, AllocatorT>#                           |   
+| [code]#unsampled_image<Dims, AllocatorT>#                         | 
+|====
+
+[[table.cuda.appinterop.make_interop_APIs]]
+.[code]#make_*# Interoperability APIs for native backend objects.
+[width="100%",options="header",cols="40%,60%"]
+|====
+| CUDA interoperability function                                    |  Description
+| [code]#template<backend Backend> +
+platform + 
+make_platform(const backend_input_t<Backend, platform> &backendObject);# 
+        |
+
+| [code]#template<backend Backend> +
+device +
+make_device(const backend_input_t<Backend, device> &backendObject);# 
+        |
+
+| [code]#template<backend Backend> +
+context +
+make_context(const backend_input_t<Backend, context> &backendObject,
+                     const async_handler asyncHandler = {});# 
+        |
+
+| [code]#template<backend Backend> +
+queue +
+make_queue(const backend_input_t<Backend, queue> &backendObject,
+                 const context &targetContext,
+                 const async_handler asyncHandler = {});# 
+        |
+
+| [code]#template<backend Backend> +
+event +
+make_event(const backend_input_t<Backend, event> &backendObject,
+                 const context &targetContext);# 
+        |
+
+| [code]#template <backend Backend, typename T, int dimensions = 1,
+          typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
+buffer<T, dimensions, AllocatorT> +
+make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
+                &backendObject,
+            const context &targetContext, event availableEvent);# 
+        |
+
+| [code]#template <backend Backend, typename T, int dimensions = 1,
+          typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
+buffer<T, dimensions, AllocatorT> +
+make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
+                &backendObject,
+            const context &targetContext);# 
+        |
+
+| [code]#template <backend Backend, int dimensions = 1,
+          typename AllocatorT = sycl::image_allocator> +
+sampled_image<dimensions, AllocatorT> + 
+make_sampled_image(
+    const backend_input_t<Backend, sampled_image<dimensions, AllocatorT>>
+        &backendObject,
+    const context &targetContext, image_sampler imageSampler,
+    event availableEvent);# 
+        |
+
+| [code]#template <backend Backend, int dimensions = 1,
+          typename AllocatorT = sycl::image_allocator> +
+sampled_image<dimensions, AllocatorT> +
+make_sampled_image(
+    const backend_input_t<Backend, sampled_image<dimensions, AllocatorT>>
+        &backendObject,
+    const context &targetContext, image_sampler imageSampler);# 
+        |
+
+| [code]#template <backend Backend, int dimensions = 1,
+          typename AllocatorT = sycl::image_allocator> +
+unsampled_image<dimensions, AllocatorT> +
+make_unsampled_image(
+    const backend_input_t<Backend, unsampled_image<dimensions, AllocatorT>>
+        &backendObject,
+    const context &targetContext, event availableEvent);# 
+        |
+
+| [code]#template <backend Backend, int dimensions = 1,
+          typename AllocatorT = sycl::image_allocator> +
+unsampled_image<dimensions, AllocatorT> + 
+make_unsampled_image(
+    const backend_input_t<Backend, unsampled_image<dimensions, AllocatorT>>
+        &backendObject,
+    const context &targetContext);# 
+        |
+
+| [code]#template<backend Backend, bundle_state State> +
+kernel_bundle<State> +
+make_kernel_bundle(
+    const backend_input_t<Backend, kernel_bundle<State>> &backendObject,
+    const context &targetContext);# 
+        |
+
+| [code]#template<backend Backend> +
+kernel +
+make_kernel(const backend_input_t<Backend, kernel> &backendObject,
+                   const context &targetContext);# 
+        |
+|====
+
+[[table.cuda.appinterop.make_interop_APIs]]
+.[code]#get_native# Interoperability APIs for native backend objects.
+[width="100%",options="header",cols="40%,60%"]
+|====
+| CUDA interoperability function                                    |  Description
+| [code]#template<backend Backend, class T> +
+backend_return_t<Backend, T> +
+get_native(const T &syclObject);# 
+        |
+|====
+
+
+[[sub:cuda:kernel_function_interoperability]]
+=== Kernel Function Interoperability
+
+[[table.cuda.appinterop.nativeobjects]]
+.Types of native backend objects kernel function interoperability
+[width="100%",options="header",cols="20%,20%,20%,40%"]
+|====
+| [code]#SyclType#                                                   | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
+| [code]#accessor<T, Dims, Mode, target::device>#                    |   |   |
+| [code]#accessor<T, Dims, Mode, target::constant_buffer>#           |   |   |
+| [code]#accessor<T, Dims, Mode, target::local>#                     |   |   |
+| [code]#local_accessor<T, Dims>#                                    |   |   |
+| [code]#sampled_image_accessor<T, 1, Mode, image_target::device>#   |   |   |
+| [code]#sampled_image_accessor<T, 2, Mode, image_target::device>#   |   |   |
+| [code]#sampled_image_accessor<T, 3, Mode, image_target::device>#   |   |   |
+| [code]#unsampled_image_accessor<T, 1, Mode, image_target::device># |   |   |
+| [code]#unsampled_image_accessor<T, 2, Mode, image_target::device># |   |   |
+| [code]#unsampled_image_accessor<T, 3, Mode, image_target::device># |   |   |
+| [code]#stream#                                                     |   |   |
+| [code]#device_event#                                               |   |   |
+|====
+
+
+[[sec:non_core_features_and_extensions]]
+== Non-core features and extensions
+
+[[sub:cuda:extensions]]
+=== Extensions
+
+[[sub:cuda:error_handling]]
+=== Error Handling
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%% end cuda_backend %%%%%%%%%%%%%%%%%%%%%%%%%%%%
