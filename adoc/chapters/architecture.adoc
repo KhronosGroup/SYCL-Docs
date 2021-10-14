@@ -581,6 +581,11 @@ work-item executes the same code but the specific execution pathway through the
 code and the data operated upon can vary by using the work-item global id to
 specialize the computation.
 
+An index space of size zero is allowed.  All aspects of kernel execution proceed
+as normal with the exception that the kernel function itself is not executed.
+Note this means the command queue will still schedule this kernel after satisfying
+the requirements and this satisfies requirements of any dependent enqueued kernels.
+
 ==== Basic kernels
 
 SYCL allows a simple execution model in which a kernel is invoked over an
@@ -1204,8 +1209,10 @@ work-group in <<local memory,local>> or <<global memory>> and to synchronize bet
 work-items in the same work-group by calling the
 [code]#group_barrier# function. All work-groups in a given
 [code]#parallel_for# will be the same size, and the global size
-defined in the nd-range must be a multiple of the work-group size in
-each dimension.
+defined in the nd-range must either be a multiple of the work-group size in
+each dimension, or the global size must be zero. When the global size
+is zero, the kernel function is not executed, the local size is ignored, and
+any dependencies are satisfied.
 
 Work-groups may be further subdivided into <<sub-group>>s.
 The size and number of sub-groups is implementation-defined and may differ for
@@ -1564,7 +1571,8 @@ predefined image formats which are provided by an underlying <<backend>>
 implementation. Images are encapsulated in the
 [code]#sycl::unsampled_image# or [code]#sycl::sampled_image#
 types, which are templated by the number of dimensions in the image. The
-minimum number of elements in a memory object is one.
+minimum number of elements in an image object is one. The minimum number
+of elements in a buffer object is zero.
 
 The fundamental differences between a buffer and an image object are:
 
@@ -1615,6 +1623,9 @@ multi-dimensional.  The size of each dimension is defined by a [code]#range#
 object of one, two or three dimensions, and an element in the multi-dimensional
 space can be identified using an [code]#id# object with the same number of
 dimensions as the corresponding [code]#range#.
+
+If the size of any dimension is zero, there are zero elements in the
+multi-dimensional range.
 
 [[sec:multi-dim-linearization]]
 === Linearization
