@@ -3957,6 +3957,9 @@ data, while allowing exception handling for blocking
 and non-blocking data transfers. Accessors manage data transfers between the host
 and all of the devices in the system, as well as tracking of data dependencies.
 
+Zero-sized buffers are permitted. In this case, the buffer still handles ownership as
+normal, but does not need to store the zero-sized data itself.
+
 When using <<usm>> allocations, data storage is managed by USM allocation functions, and
 data access is via pointers.  See <<sec:usm>> for greater detail.
 
@@ -3992,8 +3995,9 @@ allocator).
 [[subsec:default.allocators]]
 ==== Default allocators
 
-A default allocator is always defined by the implementation, and it is
-guaranteed to return non-[code]#nullptr# and new memory positions every call.
+A default allocator is always defined by the implementation. For allocations
+greater than size zero, it is guaranteed to return non-[code]#nullptr# and
+new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the
 type (therefore, the default allocator for a buffer of type [code]#const int#
 will be an [code]#Allocator<int>)#.
@@ -6255,7 +6259,7 @@ according to <<sec:multi-dim-linearization>>.
 Accessors of type [code]#accessor# and [code]#host_accessor# can be constructed
 from a sub-range of a [code]#buffer# by providing a range and offset to the
 constructor.  This limits the elements that can be accessed to the specified
-sub-range, which allows the implement to perform certain optimizations such
+sub-range, which allows the implementation to perform certain optimizations such
 as reducing the amount of memory that needs to be copied to or from a device.
 
 If the ranged accessor is multi-dimensional, the sub-range is allowed to
@@ -6287,6 +6291,12 @@ must take care to manually add the offset before dereferencing the pointer
 because accessing an element that is outside of the accessor's range results
 in undefined behavior.
 
+[NOTE]
+====
+There is no change in behavior for ranged accessors with a range of zero.
+It still creates a requisite for the entire underlying buffer, and 
+an attempt to access an element produces undefined behaviour.
+====
 
 ==== Buffer accessor for commands
 
@@ -6959,6 +6969,7 @@ the range starts at the beginning of the [code]#buffer#.  The optional
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
 a@
 [source]
 ----
@@ -7669,6 +7680,7 @@ the constructed accessor.
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 [code]#accessRange# exceeds the range of [code]#bufferRef# in any dimension.
+
 
 a@
 [source]
@@ -12939,8 +12951,8 @@ template <typename KernelName, int dimensions, typename... Rest>
       the callable.
 
 Throws an [code]#exception# with the [code]#errc::nd_range# error code if the
-global size defined in the associated [code]#executionRange# is not evenly
-divisible by the local size in each dimension.
+global size defined in the associated [code]#executionRange# defines a non-zero
+index space which is not evenly divisible by the local size in each dimension.
 
 a@
 [source]
@@ -13046,8 +13058,8 @@ template <int dimensions> void parallel_for(
       invoked for the specified [code]#executionRange#.
 
 Throws an [code]#exception# with the [code]#errc::nd_range# error code if the
-global size defined in the associated [code]#executionRange# is not evenly
-divisible by the local size in each dimension.
+global size defined in the associated [code]#executionRange# defines a non-zero
+index space which is not evenly divisible by the local size in each dimension.
 
 This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
