@@ -4,14 +4,46 @@
 [[chapter:cuda-backend]]
 = CUDA backend specification
 
-[[sec:cuda:introduction]]
-== Introduction
+This chapter describes how the SYCL general programming model is mapped on top
+of CUDA, and how the SYCL generic interoperability interface must be
+implemented by vendors providing SYCL for CUDA implementations to ensure SYCL
+applications written for the CUDA backend are interoperable.
+
+The CUDA backend is enabled using the `sycl::backend::cuda` value of `enum
+class backend`. That means that when the CUDA backend is active, the value of
+`sycl::is_backend_active<sycl::backend::cuda>::value` will be `true`, and the
+preprocessor macro `SYCL_BACKEND_CUDA` will be defined.
+
+The CUDA backend requires an installation of CUDA SDK as well as one or more
+CUDA devices available in the system.
 
 [[sec:cuda:mapping_of_sycl_programming_model]]
 == Mapping of SYCL programming model
 
+This section gives a general overview of how the SYCL programming model maps to
+CUDA. These two programming models are pretty similar in essence however they do
+have a few differences in terminology and architecture.
+
 [[sub:cuda:platform_model]]
 === Platform Model
+
+TODO: Platform
+
+TODO: Device
+
+A SYCL <<context>> simply maps to one, or multiple CUDA contexts. Indeed while
+a CUDA context is tied to a single device, this is not the case for a SYCL
+<<context>> and the CUDA backend implementation may use multiple CUDA contexts
+to emulate a SYCL <<context>> containing multiple devices. Additionally, while
+SYCL contexts are simple objects passed around either implicitly or explicitly,
+CUDA contexts require to be activated on the current thread to be used by other
+CUDA entry points. Therefore any use of the SYCL APIs with a CUDA backend may
+modify the current active context on the thread, and no guarantee is provided
+that any existing active CUDA context would be restored by SYCL.
+
+A SYCL <<queue>> simply maps to one or multiple CUDA streams. Indeed while a
+CUDA stream is in-order, a SYCL <<queue>> isn't, so a CUDA backend implementation
+may use multiple CUDA streams to implement an out of order SYCL <<queue>>.
 
 [[sub:cuda:memory_model]]
 === Memory model
