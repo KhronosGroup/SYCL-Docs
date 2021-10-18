@@ -48,6 +48,128 @@ may use multiple CUDA streams to implement an out of order SYCL <<queue>>.
 [[sub:cuda:memory_model]]
 === Memory model
 
+==== Memory Allocations
+
+When non-host accessors to buffers are created without [code]#target::host_buffer# they need to allocate memory for their contents on the device. For example using [code]#cudaMalloc3D()#, [code]#cudaMallocPitch()# or [code]#cudaMalloc()#.
+
+When accessors to images are created without [code]#target::host_buffer# they allocate memory, for example using [code]#cudaMalloc3DArray()# or [code]#cudaMallocArray()#. 
+
+When non-host accessors are created with [code]#target::host_buffer# they can, for example use [code]#cudaHostAlloc()# to allocate pinned memory on host.
+
+Table <<table.cuda.memmodel.USM>> specifies which underlying CUDA functions can be used for USM allocations. For shared USM allocations this would mean memory is managed (moved between host and different devices) by CUDA runtime. Alternatively shared USM allocations can be managed by SYCL runtime, using non-managed CUDA allocation on device when needed, such as [code]#cudaMalloc()#.
+
+[[table.cuda.memmodel.USM]]
+.Cuda functions that could be used to allocate SYCL USM allocations
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL USM type | CUDA function
+| device | [code]#cudaMalloc()#
+| host | [code]#cudaHostAlloc()#
+| shared | [code]#cudaMallocManaged()#
+|====
+
+==== Samplers
+
+In both SYCL and CUDA samplers consist of addressing mode, filtering mode and coordinate normalization mode. Mapping between SYCL and CUDA values is defined in tables <<table.cuda.memmodel.sampler_addressing>>, <<table.cuda.memmodel.sampler_filtering>> and <<table.cuda.memmodel.sampler_normalization>>. In CUDA addressing modes for all dimesnions will be the same, as CUDA allows different addressing modes for different dimesnions, while SYCL does not. 
+
+[[table.cuda.memmodel.sampler_addressing]]
+.Mapping of SYCL sampler addressing modes to CUDA
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL sampler addressing mode | CUDA sampler addressing mode
+| [code]#sycl::addressing_mode::mirrored_repeat# | [code]#cudaAddressModeMirror#
+| [code]#sycl::addressing_mode::repeat# | [code]#cudaAddressModeWrap#
+| [code]#sycl::addressing_mode::clamp_to_edge# | [code]#cudaAddressModeClamp#
+| [code]#sycl::addressing_mode::clamp# | [code]#cudaAddressModeClamp#
+| [code]#sycl::addressing_mode::none# | [code]#cudaAddressModeBorder#
+|====
+
+SYCL allows [code]#sycl::addressing_mode::mirrored_repeat# and [code]#sycl::addressing_mode::repeat# to be used together with unnormalized coordinates. In this case the resulting coordinates are undefined. CUDA does not allow this, so if [code]#sycl::addressing_mode::mirrored_repeat# or [code]#sycl::addressing_mode::repeat# is specified together with unnormalized coordinates, [code]#cudaAddressModeBorder# is used instead.
+
+[[table.cuda.memmodel.sampler_filtering]]
+.Mapping of SYCL sampler filtering modes to CUDA
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL sampler filtering mode | CUDA sampler filtering mode
+| [code]#sycl::filtering_mode::nearest# | [code]#cudaFilterModePoint#
+| [code]#sycl::filtering_mode::linear# | [code]#cudaFilterModeLinear#
+|====
+
+[[table.cuda.memmodel.sampler_normalization]]
+.Mapping of SYCL sampler coordinate normalization modes to CUDA
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL sampler coordinate normalization mode | CUDA sampler coordinate normalization mode
+| [code]#sycl::coordinate_normalization_mode::normalized# | [code]#normalizedCoords = true#
+| [code]#sycl::coordinate_normalization_mode::unnormalized# | [code]#normalizedCoords = false#
+|====
+
+==== Address Spaces
+
+Table <<table.cuda.memmodel.address_spaces>> maps SYCL address spaces to CUDA address spaces.
+
+[[table.cuda.memmodel.address_spaces]]
+.Mapping from SYCL address spaces to CUDA address spaces
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL Address Space | CUDA Address Space
+| Global memory | global
+| Local memory | shared
+| Private memory | registers or local
+| Generic memory | generic
+| Constant memory | const
+|====
+
+==== Atomics
+
+Not all CUDA devices support all memory orders. If a particular memory order is unsupported by a CUDA device, it can be unsupported in the SYCL CUDA backend for that device. Sequentially consistent atomics are currently not supported on any device, so the SYCL CUDA backend is not required to implement them. The mappings of other memory orders (when supported by the device) is defined in table <<table.cuda.memmodel.memory_orders>>.
+
+[[table.cuda.memmodel.memory_orders]]
+.Mapping from [code]#sycl::memory_order# to PTX ISA memory orders
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#sycl::memory_order# | PTX ISA Memory Order
+| [code]#memory_order::relaxed# | relaxed
+| [code]#memory_order::acquire# | acquire
+| [code]#memory_order::release# | release
+| [code]#memory_order::acq_rel# | acq_rel
+| [code]#memory_order::seq_cst# | undefined
+|====
+
+Mapping of memory scopes (when supported by the device) is defined in table [table.cuda.memmodel.memory_scopes]. [code]#memory_scope::work_item# does not require any consistency between different work items, so it can be mapped to non-atomic operation.
+
+[[table.cuda.memmodel.memory_scopes]]
+.Mapping from [code]#sycl::memory_scope# to PTX ISA memory scopes
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#sycl::memory_scope# | PTX ISA Memory Scope
+| [code]#memory_scope::work_item# | 
+| [code]#memory_scope::sub_group# | cta
+| [code]#memory_scope::work_group# | cta
+| [code]#memory_scope::device# | gpu
+| [code]#memory_scope::system# | system
+|====
+
+==== Fences
+
+If a device supports the [code]#fence# PTX instruction the mapping of memory orders is defined in <<table.cuda.memmodel.fence_memory_orders>>. Otherwise all memory orders (except relaxed) are mapped to the [code]#membar# instruction.
+
+[[table.cuda.memmodel.fence_memory_orders]]
+.Mapping from [code]#sycl::memory_order# to PTX ISA memory orders when used in fences
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#sycl::memory_order# | PTX ISA Memory Order
+| [code]#memory_order::relaxed# | none
+| [code]#memory_order::acquire# | acq_rel
+| [code]#memory_order::release# | acq_rel
+| [code]#memory_order::acq_rel# | acq_rel
+| [code]#memory_order::seq_cst# | sc
+|====
+
+If future versions of PTX ISA define fence instructions with only acquire or only release memory order, these can be used as well for [code]#memory_order::acquire# and [code]#memory_order::release# on devices that support them.
+
+Mapping of SYCL memory scopes to PTX ISA is the same as for atomics. It is defined in <<table.cuda.memmodel.memory_scopes>>.
+
 [[sub:cuda:execution_model]]
 === Execution Model
 
