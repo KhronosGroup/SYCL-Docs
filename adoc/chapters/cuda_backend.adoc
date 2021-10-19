@@ -16,6 +16,9 @@ preprocessor macro `SYCL_BACKEND_CUDA` will be defined.
 
 The CUDA backend requires an installation of CUDA SDK as well as one or more
 CUDA devices available in the system.
+[[sec:cuda:introduction]]
+== Introduction
+>>>>>>> cuda execution model
 
 [[sec:cuda:mapping_of_sycl_programming_model]]
 == Mapping of SYCL programming model
@@ -172,6 +175,94 @@ Mapping of SYCL memory scopes to PTX ISA is the same as for atomics. It is defin
 
 [[sub:cuda:execution_model]]
 === Execution Model
+
+CUDA's execution model is similar to SYCL's. CUDA uses kernels to
+offload computation, splitting the host and GPU into asynchronous 
+computing devices. In general, except for CUDA's dynamic 
+parallelism extensions, kernels are called by the host. One 
+difference between CUDA and SYCL execution models is that CUDA 
+uses Single Instruction Multiple Thread (SIMT) while SYCL uses 
+Single Instruction Multiple Data (SIMD) kernels. SIMT kernels use 
+multiple scalar instructions acting on non-contiguous data.  SIMD 
+kernels use vector instructions acting on contiguous data. SIMT 
+can be used in place of SIMD but not the other way around, as SIMD 
+requires memory blocks to have no interruptions within the data, 
+while SIMT does not have this as a requirement. 
+
+CUDA GPUs are constructed out of streaming multiprocessors (SM) 
+which perform the actual computation. Each SM consists of 8 scalar 
+cores, shared memory, registers, a load/store unit, and a scheduler 
+unit. CUDA uses a hierarchy of threads to organize the execution of
+kernels. Kernels are split up into thread blocks. The threadblocks 
+form a grid each thread can identify its location within the grid 
+using a block ID. The grid is a concept used to index threadblocks 
+the grid can be one, two, or three dimensions. Each thread block is 
+tied to a single SM. Similar to a thread block's location within the 
+grid, each thread's position within the block can be identified with 
+a one, two, or three dimensional thread ID. 
+
+Pre-Volta GPU architectures breaks thread blocks into warps which 
+consist of 32 threads. The warp is processed by the SM concurrently. 
+For one warp instruction to be executed requires 4 SM clock cycles. 
+SM's execute multiple warp instructions. The warps instructions are 
+prioritized and scheduled to minimize overhead. 
+
+Volta and more recent GPU architectures use independent thread 
+scheduling. In addition, each thread can access memory within a 
+unified virtual address space. Threads must synchronize with other 
+threads using execution barriers, synchronization primitives and 
+Cooperative Groups to utilize unified memory.
+
+SYCL has a similar execution hierarchy consisting of kernels. 
+The kernel is broken down into work-items. Each work-item concurrently
+executes an instance of the kernel on a piece of memory. Work-items 
+can be combined into work-groups that have designated shared memory.
+Work-groups can synchronize their work-items with work-group barriers.
+
+There are some equivalences between CUDA and SYCL execution models. 
+For example, CUDA's stream multiprocessor is equal to a SYCL compute 
+unit. CUDA's grid is similar to SYCL's nd_range as it is the highest 
+level grouping of threads, not including the whole kernel. Both 
+nd_range and grid can segment the groups of threads into one, two, or 
+three dimensions. SYCL sub-groups roughly map to
+cooperative groups `thread_block_tile` as it allows for the
+work-group/thread block to be further subdivided into concurrent threads.
+Likewise, thread blocks map directly to work-groups, and a
+single thread is a SYCL work-item.
+
+CUDA primarily synchronizes the threads through two functions,
+`cudaStreamSynchronize()` and `__syncthreads()`. 
+`cudaStreamSynchronize()` blocks work from being performed until all 
+threads on the device has been completed. `__syncthreads()` waits for 
+all threads within a thread block to reach the same point. So 
+`cudaStreamSynchronize()` is similar to queue.wait(), buffer 
+destruction, and other host-device synchronization events within SYCL. 
+`__syncthreads()` synchronizes the threads within a thread block which
+is analogous to the work-group barrier.
+
+CUDA's warp concept has no SYCL equivalent. If a user were to write 
+warp aware code it would be non-generic SYCL code and specific to the 
+CUDA backend.
+
+CUDA allows for more detailed thread and memory management through 
+Cooperative Groups. Cooperative Groups allow for synchronizing at the 
+grid level and organizing subgroups in sizes smaller than a warp. 
+Cooperative Groups do not have an equivalent within SYCL 2020 and are 
+not yet supported.
+
+[[table.cuda.CUDA_features_to_SYCL]]
+.CUDA execution features with their corresponding SYCL features
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#SYCL#                                                       | [code]#CUDA#
+| [code]#Compute unit#                                               | [code]#Streaming multiprocessor#
+| [code]#nd_range#                                                   | [code]#grid#
+| [code]#work-group#                                                 | [code]#Thread block#
+| [code]#sub-group#                                                  | [code]#thread_block_tile#
+| [code]#work-item#                                                  | [code]#Thread#
+| [code]#SYCL nd_item synchronization#                               | [code]#cudaStreamSynchronize#
+| [code]#work-group barrier#                                         | [code]#__syncthread#
+|====
 
 [[sec::programming_interface]]
 == Programming Interface
