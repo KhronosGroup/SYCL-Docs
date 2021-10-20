@@ -18,7 +18,6 @@ The CUDA backend requires an installation of CUDA SDK as well as one or more
 CUDA devices available in the system.
 [[sec:cuda:introduction]]
 == Introduction
->>>>>>> cuda execution model
 
 [[sec:cuda:mapping_of_sycl_programming_model]]
 == Mapping of SYCL programming model
@@ -444,6 +443,52 @@ get_native(const T &syclObject);#
 
 [[sec:non_core_features_and_extensions]]
 == Non-core features and extensions
+
+Additional CUDA features are available depending upon the devices compute capability.
+SYCL can support these optional CUDA features with extensions.
+Unlike OpenCL, CUDA needs to know if the extension is available at compile time. 
+As a result there are no valid CUDA extensions which can be passed to `has_extension`.
+
+As the extension must be known at runtime CUDA extensions are best implemented 
+using feature test macros. The test macro format is 
+SYCL_EXT_<vendorstring>_<featurename>. For CUDA extensions this format translates 
+to SYCL_EXT_NVIDIA_<featurename>. Similarly, the format for the naming of extension 
+classes and enumerations should be ext_<vendorstring>_<featurename>. Which in this context
+becomes ext_NVIDIA_<featurename>. Given the necessity to know the extension at 
+compile-time, the usage of extension macros should be the primary method of determining 
+if the extension is available in the SYCL implementation not. 
+A list of non-core CUDA features which have SYCL support is below.
+Non-core CUDA features for require a compute capability of greater than 5.
+
+TODO: The table below shows a proposal for SYCL supported CUDA extensions.
+The table should be developed with other members of the SYCL community.
+
+[[table.extensionsupport]]
+.SYCL support for CUDA 11.3 extensions
+[width="100%",options="header",cols="35%,35%,15%, 15"]
+|====
+| SYCL Aspect              | CUDA Extension                                        | Core SYCL API | Required Compute Capability 
+| [code]#aspect::fp16#     | [code]#16-bit floating point#                         | Yes           | 5.3 or greater
+| -                        | [code]#Tensor Cores#                                  | No            | 7 or greater
+| -                        | [code]#Atomic floating-point operations#              | No            | 6 or greater
+|====
+
+=== Aspects
+Aspects are used to query what features and attributes a device has. Some aspects such as `fp16`
+are non-core CUDA features. Therefore, the runtime must be able to determine what aspects CUDA 
+devices have. This can be performed by querying `cudaDeviceProp::major` and `cudaDeviceProp::minor`
+to find out the compute capability. The compute capability indicates what extensions are
+available to the device, and therefore what aspects are available.
+
+[[sec:cuda:extension-fp16]]
+=== Half precision floating-point
+
+The half scalar data type: [code]#half# and the half vector data types:
+[code]#half1#, [code]#half2#, [code]#half3#,
+[code]#half4#, [code]#half8# and [code]#half16# must be
+available at compile-time. However a kernel using these types is only
+supported on devices that have [code]#aspect::fp16#, i.e. compute capability
+5.3 or greater.
 
 [[sub:cuda:extensions]]
 === Extensions
