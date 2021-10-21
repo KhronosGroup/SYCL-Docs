@@ -496,4 +496,44 @@ supported on devices that have [code]#aspect::fp16#, i.e. compute capability
 [[sub:cuda:error_handling]]
 === Error Handling
 
+If there is a CUDA driver API error associated with an exception triggered, then the
+CUDA error code can be obtained by the free function `CUresult sycl::cuda::get_error_code(sycl::exception&)`. In the case where there is
+no CUDA error associated with the exception triggered, the CUDA error
+code will be `CUDA_SUCCESS`.
+
+Most of the SYCL error codes that form sycl::errc are specifically defined as errors thrown during calls to the SYCL API or SYCL runtime. There are also some cases of sycl::errc which cover errors thrown during the compilation or execution of device code.
+It is suitable to map CUDA errors to such cases, such that an exception, "cuda_exception", that was created due to a CUDA error, may, upon execution of `cuda_exception.code()`, return a `std::error_code` relating to the `sycl::errc` case that the CUDA error maps to; whilst `sycl::cuda::get_error_code(cuda_exception)` will return the original CUDA error code.
+
+The relevant `sycl::errc` cases and the CUDA errors that they may be mapped from are listed below.
+
+==== build
+
+`sycl::errc::build` is defined as:
+
+_Error from an online compile or
+link operation when compiling,
+linking, or building a kernel bundle for a device._
+
+which may be mapped from `CUDA_ERROR_NO_BINARY_FOR_GPU`, `CUDA_ERROR_JIT_COMPILER_NOT_FOUND`, `CUDA_ERROR_INVALID_PTX`, `CUDA_ERROR_UNSUPPORTED_PTX_VERSION`, `CUDA_ERROR_SHARED_OBJECT_INIT_FAILED`, `CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND`.
+
+
+==== memory_allocation
+
+`sycl::errc::memory_allocation` is defined as:
+
+_Error on memory allocation on the
+SYCL device for a SYCL kernel._
+
+which may be mapped from `CUDA_ERROR_OUT_OF_MEMORY`.
+
+==== kernel_argument
+
+`sycl::errc::kernel_argument` is defined as:
+
+_The application has passed an invalid argument to a SYCL kernel
+function. This includes captured
+variables if the SYCL kernel function is a lambda function._
+
+which may be mapped from `CUDA_ERROR_NOT_FOUND`.
+
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end cuda_backend %%%%%%%%%%%%%%%%%%%%%%%%%%%%
