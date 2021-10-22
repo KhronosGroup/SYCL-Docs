@@ -268,40 +268,24 @@ not yet supported.
 [[sub:cuda:application_interoperability]]
 === Application Interoperability
 
+This section describes the API level interoperability between SYCL and CUDA.
+
+The CUDA backend supports API interoperability for `platform`, `device`,
+`context`, `queue`, `event` and `buffer`. Interoperability for `kernel`,
+`kernel_bundle`, `device_image`, `sampled_image` and `unsampled_image` is not
+supported.
+
 [[table.cuda.appinterop.nativeobjects]]
 .Types of native backend objects application interoperability
 [width="100%",options="header",cols="20%,20%,20%,40%"]
 |====
-| [code]#SyclType#                                                   | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
-| [code]#buffer# |   |   |
-| [code]#context#                                                   |   |   |
-| [code]#device#                                                    |   |   |
-| [code]#device_image<State>#                                       |   |   |
-| [code]#event#                                                     |   |   |
-| [code]#kernel#                                                    |   |   |
-| [code]#kernel_bundle<State>#                                      |   |   |
-| [code]#platform#                                                  |   |   |
-| [code]#queue#                                                     |   |   |
-| [code]#sampled_image<Dims, AllocatorT>#                           |   |   |
-| [code]#unsampled_image<Dims, AllocatorT>#                         |   |   |
-|====
-
-[[table.cuda.appinterop.ownership]]
-.Ownership behavior of native backend objects.
-[width="100%",options="header",cols="40%,60%"]
-|====
-| SYCL Object                                                       | Destructor behaviour
-| [code]#buffer# |   
-| [code]#context#                                                   |   
-| [code]#device#                                                    |  
-| [code]#device_image<State>#                                       |   
-| [code]#event#                                                     |  
-| [code]#kernel#                                                    |   
-| [code]#kernel_bundle<State>#                                      |   
-| [code]#platform#                                                  |  
-| [code]#queue#                                                     |   
-| [code]#sampled_image<Dims, AllocatorT>#                           |   
-| [code]#unsampled_image<Dims, AllocatorT>#                         | 
+| [code]#SyclType# | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
+| [code]#platform# | `std::vector<CUdevice>`   | `std::vector<CUdevice>`  | A SYCL platform encapsulates a list of CUDA devices.
+| [code]#device#   | `CUdevice`                | `CUdevice`               | A SYCL device encapsulates a CUDA device.
+| [code]#context#  | `CUcontext`               | `std::vector<CUcontext>` | A SYCL context can encapsulate multiple CUDA contexts , however it is not possible to create a SYCL context from multiple CUDA contexts.
+| [code]#queue#    | `CUstream`   | `CUstream` | A SYCL queue encapsulates a CUDA stream.
+| [code]#event#    | `CUevent`    | `CUevent`  | A SYCL event encapsulates a CUDA event.
+| [code]#buffer# | `struct { CUdeviceptr ptr; size_t size; }` | `CUdeviceptr` | A SYCL buffer encapsulates a CUDA device pointer.
 |====
 
 [[table.cuda.appinterop.make_interop_APIs]]
@@ -312,110 +296,59 @@ not yet supported.
 | [code]#template<backend Backend> +
 platform + 
 make_platform(const backend_input_t<Backend, platform> &backendObject);# 
-        |
+        | Create a SYCL `platform` from a list of CUDA device, the list must contain at least one CUDA device.
 
 | [code]#template<backend Backend> +
 device +
 make_device(const backend_input_t<Backend, device> &backendObject);# 
-        |
+        | Create a SYCL `device` from a CUDA device.
 
 | [code]#template<backend Backend> +
 context +
 make_context(const backend_input_t<Backend, context> &backendObject,
                      const async_handler asyncHandler = {});# 
-        |
+        | Create a SYCL `context` from a CUDA context.
 
 | [code]#template<backend Backend> +
 queue +
 make_queue(const backend_input_t<Backend, queue> &backendObject,
                  const context &targetContext,
                  const async_handler asyncHandler = {});# 
-        |
+        | Create a SYCL `queue` from a CUDA stream. The provided `targetContext` must encapsulate the same CUDA context as the provided CUDA stream.
 
 | [code]#template<backend Backend> +
 event +
 make_event(const backend_input_t<Backend, event> &backendObject,
                  const context &targetContext);# 
-        |
+        | Create a SYCL `event` from a CUDA event.
 
 | [code]#template <backend Backend, typename T, int dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
 buffer<T, dimensions, AllocatorT> +
 make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
-                &backendObject,
-            const context &targetContext, event availableEvent);# 
-        |
-
+               &backendObject,
+           const context &targetContext, event availableEvent);#
+        | Create a SYCL `buffer` from a CUDA device pointer.` The CUDA pointer must be within the provided `targetContext`. The `availableEvent` parameter can be used for synchronization and indicates when the CUDA pointer is ready to be used. Only `dimensions == 1` is supported.
+ 
 | [code]#template <backend Backend, typename T, int dimensions = 1,
-          typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
+           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
 buffer<T, dimensions, AllocatorT> +
 make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
                 &backendObject,
-            const context &targetContext);# 
-        |
+            const context &targetContext);#
+        | Create a SYCL `buffer` from a CUDA device pointer.` The CUDA pointer must be within the provided `targetContext`. Only `dimensions == 1` is supported.
 
-| [code]#template <backend Backend, int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator> +
-sampled_image<dimensions, AllocatorT> + 
-make_sampled_image(
-    const backend_input_t<Backend, sampled_image<dimensions, AllocatorT>>
-        &backendObject,
-    const context &targetContext, image_sampler imageSampler,
-    event availableEvent);# 
-        |
-
-| [code]#template <backend Backend, int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator> +
-sampled_image<dimensions, AllocatorT> +
-make_sampled_image(
-    const backend_input_t<Backend, sampled_image<dimensions, AllocatorT>>
-        &backendObject,
-    const context &targetContext, image_sampler imageSampler);# 
-        |
-
-| [code]#template <backend Backend, int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator> +
-unsampled_image<dimensions, AllocatorT> +
-make_unsampled_image(
-    const backend_input_t<Backend, unsampled_image<dimensions, AllocatorT>>
-        &backendObject,
-    const context &targetContext, event availableEvent);# 
-        |
-
-| [code]#template <backend Backend, int dimensions = 1,
-          typename AllocatorT = sycl::image_allocator> +
-unsampled_image<dimensions, AllocatorT> + 
-make_unsampled_image(
-    const backend_input_t<Backend, unsampled_image<dimensions, AllocatorT>>
-        &backendObject,
-    const context &targetContext);# 
-        |
-
-| [code]#template<backend Backend, bundle_state State> +
-kernel_bundle<State> +
-make_kernel_bundle(
-    const backend_input_t<Backend, kernel_bundle<State>> &backendObject,
-    const context &targetContext);# 
-        |
-
-| [code]#template<backend Backend> +
-kernel +
-make_kernel(const backend_input_t<Backend, kernel> &backendObject,
-                   const context &targetContext);# 
-        |
 |====
 
-[[table.cuda.appinterop.make_interop_APIs]]
-.[code]#get_native# Interoperability APIs for native backend objects.
-[width="100%",options="header",cols="40%,60%"]
-|====
-| CUDA interoperability function                                    |  Description
-| [code]#template<backend Backend, class T> +
-backend_return_t<Backend, T> +
-get_native(const T &syclObject);# 
-        |
-|====
+==== Ownership of native backend objects
 
+The CUDA backend retains ownership of all native CUDA objects obtained through
+the interoperability API, therefore associated SYCL objects must be kept alive
+for the duration of the CUDA work using these native CUDA objects.
+
+When creating a SYCL object from a native CUDA object SYCL does not take
+ownership of the object and it is up to the application to dispose of them when
+appropriate.
 
 [[sub:cuda:kernel_function_interoperability]]
 === Kernel Function Interoperability
