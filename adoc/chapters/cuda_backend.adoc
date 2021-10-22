@@ -345,6 +345,7 @@ make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
 The CUDA backend retains ownership of all native CUDA objects obtained through
 the interoperability API, therefore associated SYCL objects must be kept alive
 for the duration of the CUDA work using these native CUDA objects.
+dd CUDA backend specification kernel function interop definitions
 
 When creating a SYCL object from a native CUDA object SYCL does not take
 ownership of the object and it is up to the application to dispose of them when
@@ -353,23 +354,47 @@ appropriate.
 [[sub:cuda:kernel_function_interoperability]]
 === Kernel Function Interoperability
 
-[[table.cuda.appinterop.nativeobjects]]
+This section describes the kernel function interoperability for the CUDA
+backend.
+
+The CUDA backend supports kernel function interoperability for the `accessor`,
+`local_accessor`, `sampled_image_accessor`, `unsampled_image_accessor` and
+`stream` classes.
+
+The CUDA backend does not support interoperability for the `device_event` class
+as there's no equivalent in CUDA.
+
+Address spaces in CUDA are associated with variable decorations rather than the
+type, so when pointers are passed as parameters to a function the parameter
+types does not need to be decorated with an address space, instead it's simply a
+raw un-decorated pointer. For this reason the `accessor`,  `local_accessor` and
+`stream` classes map to a raw undecorated pointer which can be implemented using
+the generic address space.
+
+Other kernel function types in CUDA are represented by aliases provided in the
+`sycl::cuda` namespace. These are provided for the `sampled_image_accessor`,
+and `unsampled_image_accessor` classes; `sycl::cuda::texture` and
+`sycl::cuda::surface` respectively.
+
+Below is a table of the `backend_input_t` and `backend_return_t` specializations
+for the SYCL classes which support kernel function interoperability.
+
+[[table.cuda.kernelinterop.nativeobjects]]
 .Types of native backend objects kernel function interoperability
 [width="100%",options="header",cols="20%,20%,20%,40%"]
 |====
 | [code]#SyclType#                                                   | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
-| [code]#accessor<T, Dims, Mode, target::device>#                    |   |   |
-| [code]#accessor<T, Dims, Mode, target::constant_buffer>#           |   |   |
-| [code]#accessor<T, Dims, Mode, target::local>#                     |   |   |
-| [code]#local_accessor<T, Dims>#                                    |   |   |
-| [code]#sampled_image_accessor<T, 1, Mode, image_target::device>#   |   |   |
-| [code]#sampled_image_accessor<T, 2, Mode, image_target::device>#   |   |   |
-| [code]#sampled_image_accessor<T, 3, Mode, image_target::device>#   |   |   |
-| [code]#unsampled_image_accessor<T, 1, Mode, image_target::device># |   |   |
-| [code]#unsampled_image_accessor<T, 2, Mode, image_target::device># |   |   |
-| [code]#unsampled_image_accessor<T, 3, Mode, image_target::device># |   |   |
-| [code]#stream#                                                     |   |   |
-| [code]#device_event#                                               |   |   |
+| [code]#accessor<T, Dims, Mode, target::device>#                    | T * | T * | Convert a SYCL `accessor` to an undecorated raw pointer.
+| [code]#accessor<T, Dims, Mode, target::constant_buffer>#           | T * | T * | Convert a SYCL `accessor` to an undecorated raw pointer.
+| [code]#accessor<T, Dims, Mode, target::local>#                     | T * | T * | Convert a SYCL `accessor` to an undecorated raw pointer.
+| [code]#local_accessor<T, Dims>#                                    | T * | T * | Convert a SYCL `accessor` to an undecorated raw pointer.
+| [code]#sampled_image_accessor<T, 1, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | sycl::cuda::texture<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
+| [code]#sampled_image_accessor<T, 2, Mode, image_target::device>#   | sycl::cuda::texture<T, 2> | sycl::cuda::texture<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
+| [code]#sampled_image_accessor<T, 3, Mode, image_target::device>#   | sycl::cuda::texture<T, 3> | sycl::cuda::texture<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 1, Mode, image_target::device># | sycl::cuda::surface<T, 1> | sycl::cuda::surface<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 2, Mode, image_target::device># | sycl::cuda::surface<T, 2> | sycl::cuda::surface<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 3, Mode, image_target::device># | sycl::cuda::surface<T, 3> | sycl::cuda::surface<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
+| [code]#stream#                                                     | signed char * | signed char * | Convert a SYCL `accessor` to an undecorated raw signed char pointer.
 |====
 
 
