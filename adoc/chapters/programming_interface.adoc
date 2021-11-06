@@ -11668,10 +11668,10 @@ template <typename DataT>
 a@
 [source]
 ----
-template <typename... eventTN>
-    void wait_for(eventTN... events) const
+template <typename... EventTN>
+    void wait_for(EventTN... events) const
 ----
-   a@ Permitted type for [code]#eventTN# is [code]#device_event#.
+   a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
 
 |====
@@ -11957,7 +11957,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the dimension of the local range specified by the [code]#Dimension# parameter.
+   a@ Return the dimension of the local range specified by the [code]#dimension# parameter.
 
 a@
 [source]
@@ -11971,7 +11971,7 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return element [code]#Dimension# from the constituent group range.
+   a@ Return element [code]#dimension# from the constituent group range.
 
 a@
 [source]
@@ -12040,8 +12040,8 @@ local id of 0.
 a@
 [source]
 ----
-template <typename workItemFunctionT>
-    void parallel_for_work_item(const workItemFunctionT &func) const
+template <typename WorkItemFunctionT>
+    void parallel_for_work_item(const WorkItemFunctionT &func) const
 ----
    a@ Launch the work-items for this work-group.
 
@@ -12062,9 +12062,9 @@ that specifies the size of a work-group.
 a@
 [source]
 ----
-template <typename workItemFunctionT>
+template <typename WorkItemFunctionT>
     void parallel_for_work_item(range<Dimensions>
-    logicalRange, const workItemFunctionT &func) const
+    logicalRange, const WorkItemFunctionT &func) const
 ----
    a@ Launch the work-items for this work-group using a logical local range.
       The function object [code]#func# is executed as if the kernel were
@@ -12143,10 +12143,10 @@ template <typename DataT>
 a@
 [source]
 ----
-template <typename... eventTN>
-    void wait_for(eventTN... events) const
+template <typename... EventTN>
+    void wait_for(EventTN... events) const
 ----
-   a@ Permitted type for [code]#eventTN# is [code]#device_event#.
+   a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
 
 |====
@@ -15176,27 +15176,27 @@ _Returns:_ The kernel bundle that contains this kernel.
 
 [source]
 ----
-template <typename param>
-typename param::return_type get_info() const;
+template <typename Param>
+typename Param::return_type get_info() const;
 ----
 
-_Preconditions:_ The [code]#param# must be one of the [code]#info::kernel#
+_Preconditions:_ The [code]#Param# must be one of the [code]#info::kernel#
 descriptors defined in <<table.kernel.info>>, and the type alias
-[code]#param::return_type# must be defined in accordance with that table.
+[code]#Param::return_type# must be defined in accordance with that table.
 
 _Returns:_ Information about the kernel that is not specific to the device on
 which it is invoked.
 
 [source]
 ----
-template <typename param>
-typename param::return_type get_info(const device &dev) const;
+template <typename Param>
+typename Param::return_type get_info(const device &dev) const;
 ----
 
-_Preconditions:_ The [code]#param# must be one of the
+_Preconditions:_ The [code]#Param# must be one of the
 [code]#info::kernel_device_specific# descriptors defined in
 <<table.kernel.devicespecificinfo>>, and the type alias
-[code]#param::return_type# must be defined in accordance with that table.
+[code]#Param::return_type# must be defined in accordance with that table.
 
 _Returns:_ Information about the kernel that applies when the kernel is invoked
 on the device [code]#dev#.
@@ -15209,11 +15209,11 @@ _Throws:_
 
 [source]
 ----
-template <typename param>
-typename param::return_type get_backend_info() const;
+template <typename Param>
+typename Param::return_type get_backend_info() const;
 ----
 
-_Preconditions:_ The [code]#param# must be one of a descriptor defined by a
+_Preconditions:_ The [code]#Param# must be one of a descriptor defined by a
 <<backend>> specification.
 
 _Returns:_ Backend specific information about the kernel that is not specific
@@ -15222,7 +15222,7 @@ to the device on which it is invoked.
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::backend_mismatch# error code if
-    the <<backend>> that corresponds with [code]#param# is different from the
+    the <<backend>> that corresponds with [code]#Param# is different from the
     <<backend>> that is associated with this kernel bundle.
 
 ==== Kernel information descriptors
@@ -15606,8 +15606,8 @@ allowable types for a kernel parameter:
   - [code]#stream#;
   - [code]#id#;
   - [code]#range#;
-  - [code]#marray<T, numElements># when [code]#T# is <<device-copyable>>;
-  - [code]#vec<T, numElements>#.
+  - [code]#marray<T, NumElements># when [code]#T# is <<device-copyable>>;
+  - [code]#vec<T, NumElements>#.
 
 * An array of element types [code]#T# is a legal parameter type if [code]#T# is
   a legal parameter type.
@@ -16169,13 +16169,13 @@ allows sharing of vectors between the host and its SYCL devices. The
 vector supports member functions that allow construction of a new vector from a
 swizzled set of component elements.
 
-[code]#vec<typename _DataT_, int _numElements_>#
+[code]#vec<typename _DataT_, int _NumElements_>#
 is a vector type
 that compiles down to a <<backend>> built-in vector types on SYCL devices,
 where possible, and provides compatible support on the host or when it is
 not possible. The [code]#vec# class is templated on its number of
 elements and its element type. The number of elements parameter,
-_numElements_, can be one of: 1, 2, 3, 4, 8 or 16. Any other value shall
+_NumElements_, can be one of: 1, 2, 3, 4, 8 or 16. Any other value shall
 produce a compilation failure. The element type parameter, _DataT_, must
 be one of the basic scalar types supported in device code.
 
@@ -16216,7 +16216,7 @@ a@
 vec()
 ----
    a@ Default construct a vector with element type [code]#DataT# and
-      with [code]#numElements# dimensions by default construction of
+      with [code]#NumElements# dimensions by default construction of
       each of its elements.
 
 a@
@@ -16225,23 +16225,23 @@ a@
 explicit constexpr vec(const DataT &arg)
 ----
    a@ Construct a vector of element type [code]#DataT# and
-      [code]#numElements# dimensions by setting each value to [code]#arg# by
+      [code]#NumElements# dimensions by setting each value to [code]#arg# by
       assignment.
 
 a@
 [source]
 ----
-template <typename... argTN>
-constexpr vec(const argTN&... args)
+template <typename... ArgTN>
+constexpr vec(const ArgTN&... args)
 ----
-   a@ Construct a SYCL [code]#vec# instance from any combination of scalar and SYCL [code]#vec# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#numElements# of this [code]#vec# specialization.
+   a@ Construct a SYCL [code]#vec# instance from any combination of scalar and SYCL [code]#vec# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#NumElements# of this [code]#vec# specialization.
 
 a@
 [source]
 ----
-constexpr vec(const vec<DataT, numElements> &rhs)
+constexpr vec(const vec<DataT, NumElements> &rhs)
 ----
-   a@ Construct a vector of element type [code]#DataT# and number of elements [code]#numElements# by copy from another similar vector.
+   a@ Construct a vector of element type [code]#DataT# and number of elements [code]#NumElements# by copy from another similar vector.
 
 a@
 [source]
@@ -16276,7 +16276,7 @@ a@
 ----
 operator DataT() const
 ----
-   a@ Available only when: [code]#numElements == 1#.
+   a@ Available only when: [code]#NumElements == 1#.
 
 Converts this SYCL [code]#vec# instance to an instance of [code]#DataT# with
 the value of the single element in this SYCL [code]#vec# instance.
@@ -16317,10 +16317,10 @@ size_t get_size() const
 a@
 [source]
 ----
-template<typename convertT, rounding_mode roundingMode = rounding_mode::automatic>
-    vec<convertT, numElements> convert() const
+template<typename ConvertT, rounding_mode RoundingMode = rounding_mode::automatic>
+    vec<ConvertT, NumElements> convert() const
 ----
-   a@ Converts this SYCL [code]#vec# to a SYCL [code]#vec# of a different element type specified by [code]#convertT# using the rounding mode specified by [code]#roundingMode#. The new SYCL [code]#vec# type must have the same number of elements as this SYCL [code]#vec#. The different rounding modes are described in <<table.vec.roundingmodes>>.
+   a@ Converts this SYCL [code]#vec# to a SYCL [code]#vec# of a different element type specified by [code]#ConvertT# using the rounding mode specified by [code]#RoundingMode#. The new SYCL [code]#vec# type must have the same number of elements as this SYCL [code]#vec#. The different rounding modes are described in <<table.vec.roundingmodes>>.
 
 a@
 [source]
@@ -16343,24 +16343,24 @@ a@
 ----
 __swizzled_vec__ XYZW_ACCESS() const
 ----
-   a@ Available only when: [code]#+numElements <= 4+#.
+   a@ Available only when: [code]#+NumElements <= 4+#.
 
 Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
 
-Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#numElements == 1#,
+Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 [code]#x, y# for
-[code]#numElements == 2#,
+[code]#NumElements == 2#,
 [code]#x, y, z# for
-[code]#numElements == 3# and
+[code]#NumElements == 3# and
 [code]#x, y, z, w# for
-[code]#numElements == 4#.
+[code]#NumElements == 4#.
 
 a@
 [source]
 ----
 __swizzled_vec__ RGBA_ACCESS() const
 ----
-   a@ Available only when: [code]#numElements == 4#.
+   a@ Available only when: [code]#NumElements == 4#.
 
 Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
 
@@ -16373,40 +16373,40 @@ __swizzled_vec__ INDEX_ACCESS() const
 ----
    a@ Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
 
-Where [code]#INDEX_ACCESS# is: [code]#s0# for [code]#numElements == 1#,
+Where [code]#INDEX_ACCESS# is: [code]#s0# for [code]#NumElements == 1#,
 [code]#s0, s1# for
-[code]#numElements == 2#,
+[code]#NumElements == 2#,
 [code]#s0, s1, s2# for
-[code]#numElements == 3#,
+[code]#NumElements == 3#,
 [code]#s0, s1, s2, s3# for
-[code]#numElements == 4#,
+[code]#NumElements == 4#,
 [code]#s0, s1, s2, s3, s4, s5, s6, s7, s8# for
-[code]#numElements == 8# and
+[code]#NumElements == 8# and
 [code]#s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD, sE, sF# for
-[code]#numElements == 16#.
+[code]#NumElements == 16#.
 
 a@
 [source]
 ----
 __swizzled_vec__ XYZW_SWIZZLE() const
 ----
-   a@ Available only when: [code]#+numElements <= 4+#, and when the macro [code]#SYCL_SIMPLE_SWIZZLES# is defined before including [code]#<sycl/sycl.hpp>#.
+   a@ Available only when: [code]#+NumElements <= 4+#, and when the macro [code]#SYCL_SIMPLE_SWIZZLES# is defined before including [code]#<sycl/sycl.hpp>#.
 
 Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
 
 Where XYZW_SWIZZLE is all permutations with repetition, of any subset with length greater than [code]#1#, of [code]#x, y# for
-[code]#numElements == 2#,
+[code]#NumElements == 2#,
 [code]#x, y, z# for
-[code]#numElements == 3# and
+[code]#NumElements == 3# and
 [code]#x, y, z, w# for
-[code]#numElements == 4#. For example a four element [code]#vec# provides permutations including [code]#xzyw#, [code]#xyyy# and [code]#xz#.
+[code]#NumElements == 4#. For example a four element [code]#vec# provides permutations including [code]#xzyw#, [code]#xyyy# and [code]#xz#.
 
 a@
 [source]
 ----
 __swizzled_vec__ RGBA_SWIZZLE() const
 ----
-   a@ Available only when: [code]#numElements == 4#, and when the macro [code]#SYCL_SIMPLE_SWIZZLES# is defined before including [code]#<sycl/sycl.hpp>#.
+   a@ Available only when: [code]#NumElements == 4#, and when the macro [code]#SYCL_SIMPLE_SWIZZLES# is defined before including [code]#<sycl/sycl.hpp>#.
 
 Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
 
@@ -16418,30 +16418,30 @@ a@
 ----
 __swizzled_vec__ lo() const
 ----
-   a@ Available only when: [code]#numElements > 1#.
+   a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the lower half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#numElements == 3#, this SYCL [code]#vec# is treated as though
-[code]#numElements == 4# with the fourth element undefined.
+Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the lower half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+[code]#NumElements == 4# with the fourth element undefined.
 
 a@
 [source]
 ----
 __swizzled_vec__ hi() const
 ----
-   a@ Available only when: [code]#numElements > 1#.
+   a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the upper half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#numElements == 3#, this SYCL [code]#vec# is treated as though
-[code]#numElements == 4# with the fourth element undefined.
+Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the upper half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+[code]#NumElements == 4# with the fourth element undefined.
 
 a@
 [source]
 ----
 __swizzled_vec__ odd() const
 ----
-   a@ Available only when: [code]#numElements > 1#.
+   a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the odd indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#numElements == 3#, this SYCL [code]#vec# is treated as though
-[code]#numElements == 4# with the fourth element undefined.
+Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the odd indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+[code]#NumElements == 4# with the fourth element undefined.
 
 
 a@
@@ -16449,26 +16449,26 @@ a@
 ----
 __swizzled_vec__ even() const
 ----
-   a@ Available only when: [code]#numElements > 1#.
+   a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the even indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#numElements == 3#, this SYCL [code]#vec# is treated as though
-[code]#numElements == 4# with the fourth element undefined.
-
-a@
-[source]
-----
-template <access::address_space addressSpace, access::decorated IsDecorated>
-    void load(size_t offset, multi_ptr<const DataT, addressSpace, IsDecorated> ptr)
-----
-   a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#numElements * offset#, into the components of this SYCL [code]#vec#.
+Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the even indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+[code]#NumElements == 4# with the fourth element undefined.
 
 a@
 [source]
 ----
-template <access::address_space addressSpace, access::decorated IsDecorated>
-    void store(size_t offset, multi_ptr<DataT, addressSpace, IsDecorated> ptr) const
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+    void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
 ----
-   a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#numElements * offset#.
+   a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#, into the components of this SYCL [code]#vec#.
+
+a@
+[source]
+----
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+    void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+----
+   a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#.
 
 a@
 [source]
@@ -16625,7 +16625,7 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const vec &lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const vec &lhs, const vec &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
@@ -16636,7 +16636,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const vec &lhs, const DataT &rhs)
+vec<RET, NumElements> operatorOP(const vec &lhs, const DataT &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -16691,7 +16691,7 @@ Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const vec& lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const vec& lhs, const vec &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or either this SYCL [code]#vec# or the [code]#rhs# SYCL [code]#vec# is a NaN.
 
@@ -16702,7 +16702,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const vec &lhs, const DataT &rhs)
+vec<RET, NumElements> operatorOP(const vec &lhs, const DataT &rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or either [code]#lhs# [code]#vec# or the [code]#rhs# SYCL [code]#vec# is a NaN.
 
@@ -16744,7 +16744,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const DataT &lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const DataT &lhs, const vec &rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16777,7 +16777,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-vec<RET, numElements> operatorOP(const DataT &lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const DataT &lhs, const vec &rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16816,7 +16816,7 @@ Construct a new instance of the SYCL [code]#vec# class template with the same te
 a@
 [source]
 ----
-vec<RET, numElements> operator!(const vec &v)
+vec<RET, NumElements> operator!(const vec &v)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
 
@@ -16850,7 +16850,7 @@ and [code]#float16# is the alias to [code]#vec<float, 16>#.
 Swizzle operations can be performed in two ways. Firstly by calling the
 [code]#swizzle# member function template, which takes a variadic number
 of integer template arguments between [code]#0# and
-[code]#numElements-1#, specifying swizzle indexes. Secondly by calling
+[code]#NumElements-1#, specifying swizzle indexes. Secondly by calling
 one of the simple swizzle member functions defined in
 <<table.members.vec>> as [code]#XYZW_SWIZZLE# and
 [code]#RGBA_SWIZZLE#. Note that the simple swizzle functions are only
@@ -16898,8 +16898,8 @@ For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
   * The [code]#+__swizzled_vec__+# class template must be convertible to
     an instance of SYCL [code]#vec# with the type [code]#DataT#
     and number of elements specified by the swizzle member function, if
-    [code]#numElements > 1#, and must be convertible to an instance of
-    type [code]#DataT#, if [code]#numElements == 1#.
+    [code]#NumElements > 1#, and must be convertible to an instance of
+    type [code]#DataT#, if [code]#NumElements == 1#.
   * The [code]#+__swizzled_vec__+# class template must be non-copyable,
     non-moveable, non-user constructible and may not be bound to a l-value
     or escape the expression it was constructed in. For example
@@ -16907,7 +16907,7 @@ For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
   * The [code]#+__swizzled_vec__+# class template should return
     [code]#+__swizzled_vec__ &+# for each operator inherited from the
     [code]#vec# class template interface which would return
-    [code]#vec<DataT, numElements> &#.
+    [code]#vec<DataT, NumElements> &#.
 
 
 ==== Rounding modes
@@ -16970,7 +16970,7 @@ of the element type in bytes multiplied by the number of elements:
 [[vec-memory-alignment]]
 [latexmath]
 ++++
-\texttt{sizeof}(\texttt{DataT}) \cdot \texttt{numElements}
+\texttt{sizeof}(\texttt{DataT}) \cdot \texttt{NumElements}
 ++++
 
 The exception to this is when the number of element is three in which case
@@ -17001,12 +17001,12 @@ The usage of the subscript [code]#operator[]# may not be efficient on some devic
 [[sec:marray.type]]
 === Math array types
 
-SYCL provides an [code]#marray<typename DataT, std::size_t numElements># class
+SYCL provides an [code]#marray<typename DataT, std::size_t NumElements># class
 template to represent a contiguous fixed-size container.  This type allows
 sharing of containers between the host and its SYCL devices.
 
 The [code]#marray# class is templated on its element type and number of
-elements. The number of elements parameter, [code]#numElements#, is a positive
+elements. The number of elements parameter, [code]#NumElements#, is a positive
 value of the [code]#std::size_t# type. The element type parameter, [code]#DataT#,
 must be a _numeric type_ as it is defined by {cpp} standard.
 
@@ -17016,7 +17016,7 @@ elements is [code]#1# in order to allow single element arrays and
 scalars to be convertible with each other.
 
 Logical and comparison operators for [code]#marray# class template
-return [code]#marray<bool, numElements>#.
+return [code]#marray<bool, NumElements>#.
 
 
 ==== Math array interface
@@ -17044,7 +17044,7 @@ a@
 marray()
 ----
    a@ Default construct an array with element type [code]#DataT# and
-      with [code]#numElements# dimensions by default construction of
+      with [code]#NumElements# dimensions by default construction of
       each of its elements.
 
 a@
@@ -17053,31 +17053,31 @@ a@
 explicit constexpr marray(const DataT &arg)
 ----
    a@ Construct an array of element type [code]#DataT# and
-      [code]#numElements# dimensions by setting each value to [code]#arg# by
+      [code]#NumElements# dimensions by setting each value to [code]#arg# by
       assignment.
 
 a@
 [source]
 ----
-template <typename... argTN>
-constexpr marray(const argTN&... args)
+template <typename... ArgTN>
+constexpr marray(const ArgTN&... args)
 ----
-   a@ Construct a SYCL [code]#marray# instance from any combination of scalar and SYCL [code]#marray# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#numElements# of this [code]#marray# specialization.
+   a@ Construct a SYCL [code]#marray# instance from any combination of scalar and SYCL [code]#marray# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#NumElements# of this [code]#marray# specialization.
 
 a@
 [source]
 ----
-constexpr marray(const marray<DataT, numElements> &rhs)
+constexpr marray(const marray<DataT, NumElements> &rhs)
 ----
-   a@ Construct an array of element type [code]#DataT# and number of elements [code]#numElements# by copy from another similar vector.
+   a@ Construct an array of element type [code]#DataT# and number of elements [code]#NumElements# by copy from another similar vector.
 
 a@
 [source]
 ----
-constexpr marray(marray<DataT, numElements> &&rhs)
+constexpr marray(marray<DataT, NumElements> &&rhs)
 ----
    a@ Construct an array of element type [code]#DataT# and number of elements
-      [code]#numElements# by moving from another similar vector.
+      [code]#NumElements# by moving from another similar vector.
 
 |====
 
@@ -17093,7 +17093,7 @@ a@
 ----
 operator DataT() const
 ----
-   a@ Available only when: [code]#numElements == 1#.
+   a@ Available only when: [code]#NumElements == 1#.
 
 Converts this SYCL [code]#marray# instance to an instance of [code]#DataT# with
 the value of the single element in this SYCL [code]#marray# instance.
@@ -17294,18 +17294,18 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const marray &lhs, const marray &rhs)
+marray<bool, NumElements> operatorOP(const marray &lhs, const marray &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# [code]#marray#.
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# [code]#marray#.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const marray &lhs, const DataT &rhs)
+marray<bool, NumElements> operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -17356,9 +17356,9 @@ Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const marray& lhs, const marray &rhs)
+marray<bool, NumElements> operatorOP(const marray& lhs, const marray &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray#
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#marray#
       and each element of the [code]#rhs# [code]#marray#.
       Corresponding element of the [code]#marray# that is returned must be [code]#false# if the operation results is a NaN.
@@ -17368,9 +17368,9 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const marray &lhs, const DataT &rhs)
+marray<bool, NumElements> operatorOP(const marray &lhs, const DataT &rhs)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray#
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#marray#
       and the [code]#rhs# scalar.
       Corresponding element of the [code]#marray# that is returned must be [code]#false# if the operation results is a NaN.
@@ -17411,12 +17411,12 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray<RET, numElements> operatorOP(const DataT &lhs, const marray &rhs)
+marray<RET, NumElements> operatorOP(const DataT &lhs, const marray &rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and
-same numElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance
+same NumElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance
 the result of an element-wise [code]#OP# logical operation between the [code]#lhs#
 scalar and each element of the [code]#rhs# [code]#marray#.
 
@@ -17442,11 +17442,11 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-marray<bool, numElements> operatorOP(const DataT &lhs, const marray &rhs)
+marray<bool, NumElements> operatorOP(const DataT &lhs, const marray &rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
-Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#lhs# [code]#marray#
+Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
 with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP#
 relational operation between the [code]#lhs# scalar and each element of the [code]#rhs# [code]#marray#.
 Corresponding element of the [code]#marray# that is returned must be [code]#false# if the operation results is a NaN.
@@ -17465,9 +17465,9 @@ Construct a new instance of the SYCL [code]#marray# class template with the same
 a@
 [source]
 ----
-marray<bool, numElements> operator!(const marray &v)
+marray<bool, NumElements> operator!(const marray &v)
 ----
-   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same numElements as [code]#v# [code]#marray#
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#v# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise logical [code]#!# operation on each element of [code]#v# [code]#marray#.
 
 The [code]#DataT# template parameter of the constructed SYCL [code]#marray#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#marray#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#marray# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
@@ -17501,7 +17501,7 @@ and [code]#mfloat16# is the alias to [code]#marray<float, 16>#.
 ==== Memory layout and alignment
 
 The elements of an instance of the [code]#marray# class template as if
-stored in [code]#std::array<DataT, numElements>#.
+stored in [code]#std::array<DataT, NumElements>#.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end marray_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -18202,7 +18202,7 @@ a@
 [source]
 ----
 template <typename pointerT>
-atomic(multi_ptr<pointerT, addressSpace> ptr)
+atomic(multi_ptr<pointerT, AddressSpace> ptr)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18428,8 +18428,8 @@ This function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_load(atomic<T, addressSpace> object,
+template <typename T, access::address_space AddressSpace>
+T atomic_load(atomic<T, AddressSpace> object,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18439,8 +18439,8 @@ Equivalent to calling [code]#object.load(memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-void atomic_store(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+void atomic_store(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18450,8 +18450,8 @@ Equivalent to calling [code]#object.store(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_exchange(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_exchange(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18461,9 +18461,9 @@ Equivalent to calling [code]#object.exchange(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
+template <typename T, access::address_space AddressSpace>
 bool atomic_compare_exchange_strong(
-    atomic<T, addressSpace> object, T &expected, T desired,
+    atomic<T, AddressSpace> object, T &expected, T desired,
     memory_order successMemoryOrder =
     memory_order::relaxed
     memory_order failMemoryOrder =
@@ -18476,8 +18476,8 @@ Equivalent to calling [code]#object.compare_exchange_strong(expected, desired, s
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_fetch_add(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_fetch_add(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18487,8 +18487,8 @@ Equivalent to calling [code]#object.fetch_add(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_fetch_sub(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_fetch_sub(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18498,7 +18498,7 @@ Equivalent to calling [code]#object.fetch_sub(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
+template <typename T, access::address_space AddressSpace>
 T atomic_fetch_and(atomic<T> operand, T object,
     memory_order memoryOrder = memory_order::relaxed)
 ----
@@ -18509,8 +18509,8 @@ Equivalent to calling [code]#object.fetch_add(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_fetch_or(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_fetch_or(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18520,8 +18520,8 @@ Equivalent to calling [code]#object.fetch_or(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_fetch_xor(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_fetch_xor(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18531,8 +18531,8 @@ Equivalent to calling [code]#object.fetch_xor(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_fetch_min(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_fetch_min(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -18542,8 +18542,8 @@ Equivalent to calling [code]#object.fetch_min(operand, memoryOrder)#.
 a@
 [source]
 ----
-template <typename T, access::address_space addressSpace>
-T atomic_fetch_max(atomic<T, addressSpace> object, T operand,
+template <typename T, access::address_space AddressSpace>
+T atomic_fetch_max(atomic<T, AddressSpace> object, T operand,
     memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
@@ -19249,8 +19249,8 @@ a@
 ----
 genfloatptr
 ----
-   a@ All permutations of [code]#multi_ptr<DataT, addressSpace, IsDecorated># where [code]#DataT# is all types within [code]#genfloat#,
-      [code]#addressSpace# is [code]#access::address_space::global_space#,
+   a@ All permutations of [code]#multi_ptr<DataT, AddressSpace, IsDecorated># where [code]#DataT# is all types within [code]#genfloat#,
+      [code]#AddressSpace# is [code]#access::address_space::global_space#,
       [code]#access::address_space::local_space# and
       [code]#access::address_space::private_space# and [code]#IsDecorated# is
       [code]#access::decorated::yes# and [code]#access::decorated::no#.
@@ -19260,9 +19260,9 @@ a@
 ----
 genintptr
 ----
-   a@ All permutations of [code]#multi_ptr<DataT, addressSpace,
+   a@ All permutations of [code]#multi_ptr<DataT, AddressSpace,
       IsDecorated># where [code]#DataT# is all types within [code]#genint#,
-      [code]#addressSpace# is [code]#access::address_space::global_space#,
+      [code]#AddressSpace# is [code]#access::address_space::global_space#,
       [code]#access::address_space::local_space# and
       [code]#access::address_space::private_space# and [code]#IsDecorated# is
       [code]#access::decorated::yes# and [code]#access::decorated::no#.

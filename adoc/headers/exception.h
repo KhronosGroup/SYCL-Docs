@@ -78,6 +78,6 @@ const std::error_category& error_category_for() noexcept;
 namespace std {
 
   template <>
-  struct is_error_code_enum<see-below> : true_type {};
+  struct is_error_code_enum</* see below */> : true_type {};
 
 }  // namespace std
