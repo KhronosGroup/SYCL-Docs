@@ -35,14 +35,33 @@ module Rouge
         aligned_alloc_host
         aligned_alloc_shared
         all_of
+        all_of_group
         any_of
+        any_of_group
         aspect_selector
+        atomic_fence
         barrier
+        build
         byte_size
+        compare_exchange_strong
+        compare_exchange_weak
+        compile
+        contains_specialization_constants
         copy
+        create_bundle
         create_sub_devices
         depends_on
+        error_category_for
+        exchange
         exclusive_scan
+        exclusive_scan_over_group
+        fetch_add
+        fetch_and
+        fetch_max
+        fetch_min
+        fetch_or
+        fetch_sub
+        fetch_xor
         fill
         free
         get
@@ -52,10 +71,16 @@ module Rouge
         get_backend_info
         get_context
         get_count
+        get_decorated
         get_device
         get_devices
         get_host_access
         get_info
+        get_kernel
+        get_kernel_bundle
+        get_kernel_id
+        get_kernel_ids
+        get_name
         get_native
         get_native_context
         get_native_device
@@ -67,7 +92,10 @@ module Rouge
         get_pointer_type
         get_profiling_info
         get_property
+        get_range
+        get_reference_count
         get_size
+        get_specialization_constant
         get_wait_list
         group_all_of
         group_any_of
@@ -78,18 +106,35 @@ module Rouge
         group_none_of
         group_reduce
         has
+        has_context
         has_extension
+        has_kernel
+        has_kernel_bundle
         has_property
+        has_specialization_constant
         host_task
         inclusive_scan
+        inclusive_scan_over_group
+        is_accelerator
+        is_compatible
         is_cpu
         is_gpu
-        is_accelerator
         is_in_order
+        is_lock_free
         is_sub_buffer
+        join
+        joint_all_of
+        joint_any_of
+        joint_exclusive_scan
+        joint_inclusive_scan
+        joint_none_of
+        joint_reduce
+        link
+        load
         make_buffer
         make_context
         make_device
+        make_error_code
         make_event
         make_image_sampler
         make_kernel
@@ -107,20 +152,31 @@ module Rouge
         mem_advise
         memcpy
         memset
+        native_specialization_constant
         none_of
+        none_of_group
         parallel_for
         parallel_for_work_group
         parallel_for_work_item
         param_traits
+        permute_group_by_xor
         prefetch
         reduce
+        reduce_over_group
         reinterpret
+        select_from_group
         set_final_data
+        set_specialization_constant
         set_write_back
+        shift_group_left
+        shift_group_right
         single_task
+        store
         submit
+        sycl_category
         throw_asynchronous
         update_host
+        use_kernel_bundle
         wait
         wait_and_throw
       )
@@ -189,7 +245,13 @@ module Rouge
       )
 
       sycl_macros = %w(
+        __SYCL_DEVICE_ONLY__
+        __SYCL_SINGLE_SOURCE__
+        SYCL_DEVICE_COPYABLE
         SYCL_EXTERNAL
+        SYCL_FEATURE_SET_FULL
+        SYCL_FEATURE_SET_REDUCED
+        SYCL_LANGUAGE_VERSION
       )
 
       sycl_namespaces = %w(
@@ -307,6 +369,7 @@ module Rouge
         bit_xor
         buffer
         buffer_allocator
+        bundle_state
         constant_ptr
         context
         context_bound
@@ -318,7 +381,11 @@ module Rouge
         default_selector
         device
         device_event
+        device_image
+        device_image_iterator
         device_type
+        elem
+        errc_for
         event
         event_command_status
         exception
@@ -337,11 +404,16 @@ module Rouge
         image_sampler
         input
         interop_handle
+        is_device_copyable
+        is_error_code_enum
+        is_group
         is_property
         is_property_of
         item
         kernel
         kernel_bundle
+        kernel_handler
+        kernel_id
         local_mem_type
         local_ptr
         logical_and
@@ -349,6 +421,7 @@ module Rouge
         marray
         maximum
         memory_order
+        memory_order_traits
         memory_scope
         minimum
         mode
@@ -373,9 +446,11 @@ module Rouge
         raw_private_ptr
         reducer
         reduction
+        rounding_mode
         sampled_image
         specialization_id
         stream
+        stream_manipulator
         sub_group
         target
         unsampled_image
@@ -394,6 +469,8 @@ module Rouge
         default_selector_v
         gpu_selector_v
         host_selector_v
+        is_device_copyable_v
+        is_group_v
         is_property_of_v
         is_property_v
         memory_order_acq_rel
