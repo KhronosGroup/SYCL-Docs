@@ -255,8 +255,9 @@ module Rouge
       )
 
       sycl_namespaces = %w(
-        info
         event_profiling
+        image
+        info
         kernel_device_specific
         property
         sycl
@@ -401,6 +402,7 @@ module Rouge
         host_selector
         id
         image_allocator
+        image_format
         image_sampler
         input
         interop_handle
