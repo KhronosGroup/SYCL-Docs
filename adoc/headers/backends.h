@@ -3,6 +3,6 @@
 
 namespace sycl {
 enum class backend {
-  <see-below>
+  /* see below */
 };
 }  // namespace sycl

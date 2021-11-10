@@ -11,10 +11,10 @@ class handler {
 
  public:
 
-  template <typename dataT, int dimensions, access_mode accessMode,
-    target accessTarget, access::placeholder isPlaceholder>
-  void require(accessor<dataT, dimensions, accessMode, accessTarget,
-               isPlaceholder> acc);
+  template <typename DataT, int Dimensions, access_mode AccessMode,
+    target AccessTarget, access::placeholder IsPlaceholder>
+  void require(accessor<DataT, Dimensions, AccessMode, AccessTarget,
+               IsPlaceholder> acc);
 
   void depends_on(event depEvent);
 
@@ -37,39 +37,39 @@ class handler {
   void single_task(const KernelType &kernelFunc);
 
   // Parameter pack acts as-if: Reductions&&... reductions, const KernelType &kernelFunc
-  template <typename KernelName, int dimensions, typename... Rest>
-  void parallel_for(range<dimensions> numWorkItems,
+  template <typename KernelName, int Dimensions, typename... Rest>
+  void parallel_for(range<Dimensions> numWorkItems,
                     Rest&&... rest);
 
   // Deprecated in SYCL 2020.
-  template <typename KernelName, typename KernelType, int dimensions>
-  void parallel_for(range<dimensions> numWorkItems,
-                    id<dimensions> workItemOffset,
+  template <typename KernelName, typename KernelType, int Dimensions>
+  void parallel_for(range<Dimensions> numWorkItems,
+                    id<Dimensions> workItemOffset,
                     const KernelType& kernelFunc);
 
   // Parameter pack acts as-if: Reductions&&... reductions, const KernelType &kernelFunc
-  template <typename KernelName, int dimensions, typename... Rest>
-  void parallel_for(nd_range<dimensions> executionRange,
+  template <typename KernelName, int Dimensions, typename... Rest>
+  void parallel_for(nd_range<Dimensions> executionRange,
                     Rest&&... rest);
 
-  template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
-  void parallel_for_work_group(range<dimensions> numWorkGroups,
+  template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
+  void parallel_for_work_group(range<Dimensions> numWorkGroups,
                                const WorkgroupFunctionType &kernelFunc);
 
-  template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
-  void parallel_for_work_group(range<dimensions> numWorkGroups,
-                               range<dimensions> workGroupSize,
+  template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
+  void parallel_for_work_group(range<Dimensions> numWorkGroups,
+                               range<Dimensions> workGroupSize,
                                const WorkgroupFunctionType &kernelFunc);
 
   void single_task(const kernel &kernelObject);
 
-  template <int dimensions>
-  void parallel_for(range<dimensions> numWorkItems, const kernel &kernelObject);
+  template <int Dimensions>
+  void parallel_for(range<Dimensions> numWorkItems, const kernel &kernelObject);
 
-  template <int dimensions>
-  void parallel_for(nd_range<dimensions> ndRange, const kernel &kernelObject);
+  template <int Dimensions>
+  void parallel_for(nd_range<Dimensions> ndRange, const kernel &kernelObject);
 
-  
+
   //------ USM functions
   //
 
@@ -90,36 +90,36 @@ class handler {
 
   //------ Explicit memory operation APIs
   //
-  template <typename T_src, int dim_src, access_mode mode_src, target tgt_src, access::placeholder isPlaceholder,
-            typename T_dest>
-  void copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src,
-            std::shared_ptr<T_dest> dest);
+  template <typename SrcT, int SrcDim, access_mode SrcMode, target SrcTgt, access::placeholder IsPlaceholder,
+            typename DestT>
+  void copy(accessor<SrcT, SrcDim, SrcMode, SrcTgt, IsPlaceholder> src,
+            std::shared_ptr<DestT> dest);
 
-  template <typename T_src,
-            typename T_dest, int dim_dest, access_mode mode_dest, target tgt_dest, access::placeholder isPlaceholder>
-  void copy(std::shared_ptr<T_src> src,
-            accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest);
+  template <typename SrcT,
+            typename DestT, int DestDim, access_mode DestMode, target DestTgt, access::placeholder IsPlaceholder>
+  void copy(std::shared_ptr<SrcT> src,
+            accessor<DestT, DestDim, DestMode, DestTgt, IsPlaceholder> dest);
 
-  template <typename T_src, int dim_src, access_mode mode_src, target tgt_src, access::placeholder isPlaceholder,
-            typename T_dest>
-  void copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src,
-            T_dest *dest);
+  template <typename SrcT, int SrcDim, access_mode SrcMode, target SrcTgt, access::placeholder IsPlaceholder,
+            typename DestT>
+  void copy(accessor<SrcT, SrcDim, SrcMode, SrcTgt, IsPlaceholder> src,
+            DestT *dest);
 
-  template <typename T_src,
-            typename T_dest, int dim_dest, access_mode mode_dest, target tgt_dest, access::placeholder isPlaceholder>
-  void copy(const T_src *src,
-            accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest);
+  template <typename SrcT,
+            typename DestT, int DestDim, access_mode DestMode, target DestTgt, access::placeholder IsPlaceholder>
+  void copy(const SrcT *src,
+            accessor<DestT, DestDim, DestMode, DestTgt, IsPlaceholder> dest);
 
-  template <typename T_src, int dim_src, access_mode mode_src, target tgt_src, access::placeholder isPlaceholder_src,
-            typename T_dest, int dim_dest, access_mode mode_dest, target tgt_dest, access::placeholder isPlaceholder_dest>
-  void copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder_src> src,
-            accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder_dest> dest);
+  template <typename SrcT, int SrcDim, access_mode SrcMode, target SrcTgt, access::placeholder SrcIsPlaceholder,
+            typename DestT, int DestDim, access_mode DestMode, target DestTgt, access::placeholder DestIsPlaceholder>
+  void copy(accessor<SrcT, SrcDim, SrcMode, SrcTgt, SrcIsPlaceholder> src,
+            accessor<DestT, DestDim , DestMode, DestTgt, DestIsPlaceholder> dest);
 
-  template <typename T, int dim, access_mode mode, target tgt, access::placeholder isPlaceholder>
-  void update_host(accessor<T, dim, mode, tgt, isPlaceholder> acc);
+  template <typename T, int Dim, access_mode Mode, target Tgt, access::placeholder IsPlaceholder>
+  void update_host(accessor<T, Dim, Mode, Tgt, IsPlaceholder> acc);
 
-  template <typename T, int dim, access_mode mode, target tgt, access::placeholder isPlaceholder>
-  void fill(accessor<T, dim, mode, tgt, isPlaceholder> dest, const T& src);
+  template <typename T, int Dim, access_mode Mode, target Tgt, access::placeholder IsPlaceholder>
+  void fill(accessor<T, Dim, Mode, Tgt, IsPlaceholder> dest, const T& src);
 
   void use_kernel_bundle(const kernel_bundle<bundle_state::executable> &execBundle);
 

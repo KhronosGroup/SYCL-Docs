@@ -21,13 +21,13 @@ class event {
 
   static void wait_and_throw(const std::vector<event> &eventList);
 
-  template <typename param> typename param::return_type get_info() const;
+  template <typename Param> typename Param::return_type get_info() const;
 
-  template <typename param>
-  typename param::return_type get_backend_info() const;
+  template <typename Param>
+  typename Param::return_type get_backend_info() const;
 
-  template <typename param>
-  typename param::return_type get_profiling_info() const;
+  template <typename Param>
+  typename Param::return_type get_profiling_info() const;
 };
 
 }  // namespace sycl

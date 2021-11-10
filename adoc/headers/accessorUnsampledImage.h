@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Khronos Group, Inc.
+g// Copyright (c) 2011-2021 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -8,24 +8,24 @@ enum class image_target {
   host_task
 };
 
-template <typename dataT,
-          int dimensions,
-          access_mode accessMode,
-          image_target accessTarget = image_target::device>
+template <typename DataT,
+          int Dimensions,
+          access_mode AccessMode,
+          image_target AccessTarget = image_target::device>
 class unsampled_image_accessor {
  public:
-  using value_type =             // const dataT for read-only accessors, dataT otherwise
+  using value_type =             // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type &;
-  using const_reference = const dataT &;
+  using const_reference = const DataT &;
 
   template <typename AllocatorT>
-  unsampled_image_accessor(unsampled_image<dimensions, AllocatorT> &imageRef,
+  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
                            handler &commandGroupHandlerRef,
                            const property_list &propList = {});
 
   template <typename AllocatorT, typename TagT>
-  unsampled_image_accessor(unsampled_image<dimensions, AllocatorT> &imageRef,
+  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
                            handler &commandGroupHandlerRef, TagT tag,
                            const property_list &propList = {});
 
@@ -35,39 +35,39 @@ class unsampled_image_accessor {
 
   size_t size() const noexcept;
 
-  /* Available only when: accessMode == access_mode::read
-  if dimensions == 1, coordT = int
-  if dimensions == 2, coordT = int2
-  if dimensions == 3, coordT = int4 */
-  template <typename coordT>
-  dataT read(const coordT &coords) const noexcept;
+  /* Available only when: AccessMode == access_mode::read
+  if Dimensions == 1, CoordT = int
+  if Dimensions == 2, CoordT = int2
+  if Dimensions == 3, CoordT = int4 */
+  template <typename CoordT>
+  DataT read(const CoordT &coords) const noexcept;
 
-  /* Available only when: accessMode == access_mode::write
-  if dimensions == 1, coordT = int
-  if dimensions == 2, coordT = int2
-  if dimensions == 3, coordT = int4 */
-  template <typename coordT>
-  void write(const coordT &coords, const dataT &color) const;
+  /* Available only when: AccessMode == access_mode::write
+  if Dimensions == 1, CoordT = int
+  if Dimensions == 2, CoordT = int2
+  if Dimensions == 3, CoordT = int4 */
+  template <typename CoordT>
+  void write(const CoordT &coords, const DataT &color) const;
 };
 
-template <typename dataT,
-          int dimensions = 1,
-          access_mode accessMode =
-            (std::is_const_v<dataT> ? access_mode::read
+template <typename DataT,
+          int Dimensions = 1,
+          access_mode AccessMode =
+            (std::is_const_v<DataT> ? access_mode::read
                                     : access_mode::read_write)>
 class host_unsampled_image_accessor {
  public:
-  using value_type =             // const dataT for read-only accessors, dataT otherwise
+  using value_type =             // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type &;
-  using const_reference = const dataT &;
+  using const_reference = const DataT &;
 
   template <typename AllocatorT>
-  host_unsampled_image_accessor(unsampled_image<dimensions, AllocatorT> &imageRef,
+  host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
                                 const property_list &propList = {});
 
   template <typename AllocatorT, typename TagT>
-  host_unsampled_image_accessor(unsampled_image<dimensions, AllocatorT> &imageRef,
+  host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
                                 TagT tag, const property_list &propList = {});
 
   /* -- common interface members -- */
@@ -76,21 +76,21 @@ class host_unsampled_image_accessor {
 
   size_t size() const noexcept;
 
-  /* Available only when: (accessMode == access_mode::read ||
-                           accessMode == access_mode::read_write)
-  if dimensions == 1, coordT = int
-  if dimensions == 2, coordT = int2
-  if dimensions == 3, coordT = int4 */
-  template <typename coordT>
-  dataT read(const coordT &coords) const noexcept;
+  /* Available only when: (AccessMode == access_mode::read ||
+                           AccessMode == access_mode::read_write)
+  if Dimensions == 1, CoordT = int
+  if Dimensions == 2, CoordT = int2
+  if Dimensions == 3, CoordT = int4 */
+  template <typename CoordT>
+  DataT read(const CoordT &coords) const noexcept;
 
-  /* Available only when: (accessMode == access_mode::write ||
-                           accessMode == access_mode::read_write)
-  if dimensions == 1, coordT = int
-  if dimensions == 2, coordT = int2
-  if dimensions == 3, coordT = int4 */
-  template <typename coordT>
-  void write(const coordT &coords, const dataT &color) const;
+  /* Available only when: (AccessMode == access_mode::write ||
+                           AccessMode == access_mode::read_write)
+  if Dimensions == 1, CoordT = int
+  if Dimensions == 2, CoordT = int2
+  if Dimensions == 3, CoordT = int4 */
+  template <typename CoordT>
+  void write(const CoordT &coords, const DataT &color) const;
 };
 
 }  // namespace sycl

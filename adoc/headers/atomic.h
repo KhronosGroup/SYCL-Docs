@@ -9,12 +9,12 @@ enum class memory_order : int {
 };
 
 /* Deprecated in SYCL 2020 */
-template <typename T, access::address_space addressSpace =
+template <typename T, access::address_space AddressSpace =
   access::address_space::global_space>
 class atomic {
  public:
-  template <typename pointerT, access::decorated IsDecorated>
-  atomic(multi_ptr<pointerT, addressSpace, IsDecorated> ptr);
+  template <typename PointerT, access::decorated IsDecorated>
+  atomic(multi_ptr<PointerT, AddressSpace, IsDecorated> ptr);
 
   void store(T operand, memory_order memoryOrder =
     memory_order::relaxed);

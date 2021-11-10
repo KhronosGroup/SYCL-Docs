@@ -6,11 +6,11 @@ using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
 
 constexpr int N = 512;
 
-template<bool hasFp16>
+template<bool HasFp16>
 class MyKernel {
  public:
   void operator()(id<1> i) {
-    if constexpr (hasFp16) {
+    if constexpr (HasFp16) {
       // Algorithm using sycl::half type
     } else {
       // Fall back code for devices that don't support sycl::half

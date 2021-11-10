@@ -2,31 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int dimensions = 1>
+template <int Dimensions = 1>
 class id {
 public:
   id();
 
   /* The following constructor is only available in the id class
-   * specialization where: dimensions==1 */
+   * specialization where: Dimensions==1 */
   id(size_t dim0);
   /* The following constructor is only available in the id class
-   * specialization where: dimensions==2 */
+   * specialization where: Dimensions==2 */
   id(size_t dim0, size_t dim1);
   /* The following constructor is only available in the id class
-   * specialization where: dimensions==3 */
+   * specialization where: Dimensions==3 */
   id(size_t dim0, size_t dim1, size_t dim2);
 
    /* -- common interface members -- */
 
-  id(const range<dimensions> &range);
-  id(const item<dimensions> &item);
+  id(const range<Dimensions> &range);
+  id(const item<Dimensions> &item);
 
   size_t get(int dimension) const;
   size_t &operator[](int dimension);
   size_t operator[](int dimension) const;
 
-  // only available if dimensions == 1
+  // only available if Dimensions == 1
   operator size_t() const;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=

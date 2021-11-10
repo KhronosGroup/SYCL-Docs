@@ -22,46 +22,46 @@ template<backend Backend>
 event make_event(const backend_input_t<Backend, event> &backendObject,
                  const context &targetContext);
 
-template <backend Backend, typename T, int dimensions = 1,
+template <backend Backend, typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-buffer<T, dimensions, AllocatorT>
-make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
+buffer<T, Dimensions, AllocatorT>
+make_buffer(const backend_input_t<Backend, buffer<T, Dimensions, AllocatorT>>
                 &backendObject,
             const context &targetContext, event availableEvent);
 
-template <backend Backend, typename T, int dimensions = 1,
+template <backend Backend, typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-buffer<T, dimensions, AllocatorT>
-make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
+buffer<T, Dimensions, AllocatorT>
+make_buffer(const backend_input_t<Backend, buffer<T, Dimensions, AllocatorT>>
                 &backendObject,
             const context &targetContext);
 
-template <backend Backend, int dimensions = 1,
+template <backend Backend, int Dimensions = 1,
           typename AllocatorT = sycl::image_allocator>
-sampled_image<dimensions, AllocatorT> make_sampled_image(
-    const backend_input_t<Backend, sampled_image<dimensions, AllocatorT>>
+sampled_image<Dimensions, AllocatorT> make_sampled_image(
+    const backend_input_t<Backend, sampled_image<Dimensions, AllocatorT>>
         &backendObject,
     const context &targetContext, image_sampler imageSampler,
     event availableEvent);
 
-template <backend Backend, int dimensions = 1,
+template <backend Backend, int Dimensions = 1,
           typename AllocatorT = sycl::image_allocator>
-sampled_image<dimensions, AllocatorT> make_sampled_image(
-    const backend_input_t<Backend, sampled_image<dimensions, AllocatorT>>
+sampled_image<Dimensions, AllocatorT> make_sampled_image(
+    const backend_input_t<Backend, sampled_image<Dimensions, AllocatorT>>
         &backendObject,
     const context &targetContext, image_sampler imageSampler);
 
-template <backend Backend, int dimensions = 1,
+template <backend Backend, int Dimensions = 1,
           typename AllocatorT = sycl::image_allocator>
-unsampled_image<dimensions, AllocatorT> make_unsampled_image(
-    const backend_input_t<Backend, unsampled_image<dimensions, AllocatorT>>
+unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
+    const backend_input_t<Backend, unsampled_image<Dimensions, AllocatorT>>
         &backendObject,
     const context &targetContext, event availableEvent);
 
-template <backend Backend, int dimensions = 1,
+template <backend Backend, int Dimensions = 1,
           typename AllocatorT = sycl::image_allocator>
-unsampled_image<dimensions, AllocatorT> make_unsampled_image(
-    const backend_input_t<Backend, unsampled_image<dimensions, AllocatorT>>
+unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
+    const backend_input_t<Backend, unsampled_image<Dimensions, AllocatorT>>
         &backendObject,
     const context &targetContext);
 

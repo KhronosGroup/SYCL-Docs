@@ -852,7 +852,7 @@ multiple read-only copies of the data on multiple devices.
 
 A special case of requirement is the one defined by a *host accessor*.
 Host accessors are represented with
-_H(MemoryObject~accessMode~)_, e.g,
+_H(MemoryObject~AccessMode~)_, e.g,
 _H(b1~RW~)_ represents a host accessor to _b1_ in read-write mode.
 Host accessors are a special type of accessor constructed from a memory
 object outside a command group, and require that the data associated with
@@ -1785,13 +1785,13 @@ core language are implicitly device copyable:
   * [code]#std::variant<>#;
   * [code]#+std::variant<Types...>+# if all the types in the parameter pack
     [code]#Types# are device copyable;
-  * [code]#std::basic_string_view<charT, traits>#;
+  * [code]#std::basic_string_view<CharT, Traits>#;
   * [code]#std::span<ElementType, Extent># (the [code]#std::span# type has
     been introduced in {cpp}20).
 
 [NOTE]
 ====
-The types [code]#std::basic_string_view<charT, traits># and
+The types [code]#std::basic_string_view<CharT, Traits># and
 [code]#std::span<ElementType, Extent># are both view types, which reference
 underlying data that is not contained within their type.  Although these view
 types are device copyable, the implementation copies just the view and not
