@@ -524,14 +524,14 @@ queue make_queue(
 a@
 [source]
 ----
-template <typename T, int dimensions = 1,
+template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-buffer<T, dimensions, AllocatorT> make_buffer(
+buffer<T, Dimensions, AllocatorT> make_buffer(
     const cl_mem &clMemObject,
     const context &syclContext,
     event availableEvent)
 ----
-   a@ Available only when: [code]#dimensions == 1#.
+   a@ Available only when: [code]#Dimensions == 1#.
 
 Constructs a SYCL [code]#buffer# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
 The instance of the SYCL [code]#buffer# class template being constructed must wait for the SYCL [code]#event# parameter, [code]#availableEvent# to signal that the [code]#cl_mem# instance is ready to be used.
@@ -540,22 +540,22 @@ The SYCL [code]#context# parameter [code]#syclContext# is the context associated
 a@
 [source]
 ----
-template <typename T, int dimensions = 1,
+template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-buffer<T, dimensions, AllocatorT> make_buffer(
+buffer<T, Dimensions, AllocatorT> make_buffer(
     const cl_mem &clMemObject,
     const context &syclContext)
 ----
-   a@ Available only when: [code]#dimensions == 1#.
+   a@ Available only when: [code]#Dimensions == 1#.
 
 Constructs a SYCL [code]#buffer# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
 
 a@
 [source]
 ----
-template <int dimensions = 1,
+template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
-sampled_image<dimensions, AllocatorT> make_sampled_image(
+sampled_image<Dimensions, AllocatorT> make_sampled_image(
     const cl_mem &clMemObject,
     const context &syclContext,
     image_sampler syclImageSampler,
@@ -568,9 +568,9 @@ sampled_image<dimensions, AllocatorT> make_sampled_image(
 a@
 [source]
 ----
-template <int dimensions = 1,
+template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
-sampled_image<dimensions, AllocatorT> make_sampled_image(
+sampled_image<Dimensions, AllocatorT> make_sampled_image(
     const cl_mem &clMemObject,
     const context &syclContext,
     image_sampler syclImageSampler)
@@ -581,9 +581,9 @@ sampled_image<dimensions, AllocatorT> make_sampled_image(
 a@
 [source]
 ----
-template <int dimensions = 1,
+template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
-unsampled_image<dimensions, AllocatorT> make_unsampled_image(
+unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
     const cl_mem &clMemObject,
     const context &syclContext,
     event availableEvent)
@@ -595,9 +595,9 @@ unsampled_image<dimensions, AllocatorT> make_unsampled_image(
 a@
 [source]
 ----
-template <int dimensions = 1,
+template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
-unsampled_image<dimensions, AllocatorT> make_unsampled_image(
+unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
     const cl_mem &clMemObject,
     const context &syclContext)
 ----

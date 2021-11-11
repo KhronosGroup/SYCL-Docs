@@ -7,12 +7,12 @@ template <backend Backend>
 class backend_traits {
  public:
   template <class T>
-  using input_type = see-below;
+  using input_type = /* see below */;
 
   template <class T>
-  using return_type = see-below;
+  using return_type = /* see below */;
 
-  using errc = see-below;
+  using errc = /* see below */;
 };
 
 template <backend Backend, typename SyclType>

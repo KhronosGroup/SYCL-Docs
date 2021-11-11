@@ -1,29 +1,29 @@
-// Copyright (c) 2011-2021 The Khronos Group, Inc.
+g// Copyright (c) 2011-2021 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 
-template <typename dataT, std::size_t numElements>
+template <typename DataT, std::size_t NumElements>
 class marray {
  public:
-  using value_type = dataT;
-  using reference = dataT&;
-  using const_reference = const dataT&;
-  using iterator = dataT*;
-  using const_iterator = const dataT*;
+  using value_type = DataT;
+  using reference = DataT&;
+  using const_reference = const DataT&;
+  using iterator = DataT*;
+  using const_iterator = const DataT*;
 
   marray();
 
-  explicit constexpr marray(const dataT &arg);
+  explicit constexpr marray(const DataT &arg);
 
-  template <typename... argTN>
-  constexpr marray(const argTN&... args);
+  template <typename... ArgTN>
+  constexpr marray(const ArgTN&... args);
 
-  constexpr marray(const marray<dataT, numElements> &rhs);
-  constexpr marray(marray<dataT, numElements> &&rhs);
+  constexpr marray(const marray<DataT, NumElements> &rhs);
+  constexpr marray(marray<DataT, NumElements> &&rhs);
 
-  // Available only when: numElements == 1
-  operator dataT() const;
+  // Available only when: NumElements == 1
+  operator DataT() const;
 
   static constexpr std::size_t size() noexcept;
 
@@ -31,8 +31,8 @@ class marray {
   reference operator[](std::size_t index);
   const_reference operator[](std::size_t index) const;
 
-  marray &operator=(const marray<dataT, numElements> &rhs);
-  marray &operator=(const dataT &rhs);
+  marray &operator=(const marray<DataT, NumElements> &rhs);
+  marray &operator=(const DataT &rhs);
 
   // iterator functions
   iterator begin();
@@ -43,14 +43,14 @@ class marray {
 
 
   // OP is: +, -, *, /, %
-  /* If OP is %, available only when: dataT != float && dataT != double && dataT != half. */
+  /* If OP is %, available only when: DataT != float && DataT != double && DataT != half. */
   friend marray operatorOP(const marray &lhs, const marray &rhs) { /* ... */ }
-  friend marray operatorOP(const marray &lhs, const dataT &rhs) { /* ... */ }
+  friend marray operatorOP(const marray &lhs, const DataT &rhs) { /* ... */ }
 
   // OP is: +=, -=, *=, /=, %=
-  /* If OP is %=, available only when: dataT != float && dataT != double && dataT != half. */
+  /* If OP is %=, available only when: DataT != float && DataT != double && DataT != half. */
   friend marray &operatorOP(marray &lhs, const marray &rhs) { /* ... */ }
-  friend marray &operatorOP(marray &lhs, const dataT &rhs) { /* ... */ }
+  friend marray &operatorOP(marray &lhs, const DataT &rhs) { /* ... */ }
 
   // OP is prefix ++, --
   friend marray &operatorOP(marray &rhs) { /* ... */ }
@@ -62,62 +62,62 @@ class marray {
   friend marray operatorOP(marray &rhs) { /* ... */ }
 
   // OP is: &, |, ^
-  /* Available only when: dataT != float && dataT != double && dataT != half. */
+  /* Available only when: DataT != float && DataT != double && DataT != half. */
   friend marray operatorOP(const marray &lhs, const marray &rhs) { /* ... */ }
-  friend marray operatorOP(const marray &lhs, const dataT &rhs) { /* ... */ }
+  friend marray operatorOP(const marray &lhs, const DataT &rhs) { /* ... */ }
 
   // OP is: &=, |=, ^=
-  /* Available only when: dataT != float && dataT != double && dataT != half. */
+  /* Available only when: DataT != float && DataT != double && DataT != half. */
   friend marray &operatorOP(marray &lhs, const marray &rhs) { /* ... */ }
-  friend marray &operatorOP(marray &lhs, const dataT &rhs) { /* ... */ }
+  friend marray &operatorOP(marray &lhs, const DataT &rhs) { /* ... */ }
 
   // OP is: &&, ||
-  friend marray<bool, numElements> operatorOP(const marray &lhs, const marray &rhs) {
+  friend marray<bool, NumElements> operatorOP(const marray &lhs, const marray &rhs) {
     /* ... */ }
-  friend marray<bool, numElements> operatorOP(const marray& lhs, const dataT &rhs) {
+  friend marray<bool, NumElements> operatorOP(const marray& lhs, const DataT &rhs) {
     /* ... */ }
 
   // OP is: <<, >>
-  /* Available only when: dataT != float && dataT != double && dataT != half. */
+  /* Available only when: DataT != float && DataT != double && DataT != half. */
   friend marray operatorOP(const marray &lhs, const marray &rhs) { /* ... */ }
-  friend marray operatorOP(const marray &lhs, const dataT &rhs) { /* ... */ }
+  friend marray operatorOP(const marray &lhs, const DataT &rhs) { /* ... */ }
 
   // OP is: <<=, >>=
-  /* Available only when: dataT != float && dataT != double && dataT != half. */
+  /* Available only when: DataT != float && DataT != double && DataT != half. */
   friend marray &operatorOP(marray &lhs, const marray &rhs) { /* ... */ }
-  friend marray &operatorOP(marray &lhs, const dataT &rhs) { /* ... */ }
+  friend marray &operatorOP(marray &lhs, const DataT &rhs) { /* ... */ }
 
   // OP is: ==, !=, <, >, <=, >=
-  friend marray<bool, numElements> operatorOP(const marray &lhs, const marray &rhs) {
+  friend marray<bool, NumElements> operatorOP(const marray &lhs, const marray &rhs) {
     /* ... */ }
-  friend marray<bool, numElements> operatorOP(const marray &lhs, const dataT &rhs) {
+  friend marray<bool, NumElements> operatorOP(const marray &lhs, const DataT &rhs) {
     /* ... */ }
 
-  /* Available only when: dataT != float && dataT != double && dataT != half. */
+  /* Available only when: DataT != float && DataT != double && DataT != half. */
   friend marray operator~(const marray &v) { /* ... */ }
 
   // OP is: +, -, *, /, %
-  /* operator% is only available when: dataT != float && dataT != double && dataT != half. */
-  friend marray operatorOP(const dataT &lhs, const marray &rhs) { /* ... */ }
+  /* operator% is only available when: DataT != float && DataT != double && DataT != half. */
+  friend marray operatorOP(const DataT &lhs, const marray &rhs) { /* ... */ }
 
   // OP is: &, |, ^
-  /* Available only when: dataT != float && dataT != double
-  && dataT != half. */
-  friend marray operatorOP(const dataT &lhs, const marray &rhs) { /* ... */ }
+  /* Available only when: DataT != float && DataT != double
+  && DataT != half. */
+  friend marray operatorOP(const DataT &lhs, const marray &rhs) { /* ... */ }
 
   // OP is: &&, ||
-  friend marray<bool, numElements> operatorOP(const dataT &lhs, const marray &rhs) {
+  friend marray<bool, NumElements> operatorOP(const DataT &lhs, const marray &rhs) {
     /* ... */ }
 
   // OP is: <<, >>
-  /* Available only when: dataT != float && dataT != double && dataT != half. */
-  friend marray operatorOP(const dataT &lhs, const marray &rhs) { /* ... */ }
+  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  friend marray operatorOP(const DataT &lhs, const marray &rhs) { /* ... */ }
 
   // OP is: ==, !=, <, >, <=, >=
-  friend marray<bool, numElements> operatorOP(const dataT &lhs, const marray &rhs) {
+  friend marray<bool, NumElements> operatorOP(const DataT &lhs, const marray &rhs) {
     /* ... */ }
 
-  friend marray<bool, numElements> operator!(const marray &v) { /* ... */ }
+  friend marray<bool, NumElements> operator!(const marray &v) { /* ... */ }
 
 };
 

@@ -39,16 +39,16 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
   ElementType* operator->() const;
 
   // Only if Space == global_space
-  template <int dimensions, access_mode Mode, access::placeholder isPlaceholder>
-  multi_ptr(accessor<ElementType, dimensions, Mode, target::device, isPlaceholder>);
+  template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+  multi_ptr(accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 
   // Only if Space == local_space
-  template <int dimensions, access_mode Mode, access::placeholder isPlaceholder>
-  multi_ptr(accessor<ElementType, dimensions, Mode, target::local, isPlaceholder>);
+  template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+  multi_ptr(accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
 
   // Only if Space == constant_space
-  template <int dimensions, access_mode Mode, access::placeholder isPlaceholder>
-  multi_ptr(accessor<ElementType, dimensions, Mode, target::constant_buffer, isPlaceholder>);
+  template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+  multi_ptr(accessor<ElementType, Dimensions, Mode, target::constant_buffer, IsPlaceholder>);
 
   // Returns the underlying OpenCL C pointer
   pointer_t get() const;
@@ -136,16 +136,16 @@ class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
   multi_ptr &operator=(std::nullptr_t);
 
   // Only if Space == global_space
-  template <typename ElementType, int dimensions, access_mode Mode>
-  multi_ptr(accessor<ElementType, dimensions, Mode, target::device>);
+  template <typename ElementType, int Dimensions, access_mode Mode>
+  multi_ptr(accessor<ElementType, Dimensions, Mode, target::device>);
 
   // Only if Space == local_space
-  template <typename ElementType, int dimensions, access_mode Mode>
-  multi_ptr(accessor<ElementType, dimensions, Mode, target::local>);
+  template <typename ElementType, int Dimensions, access_mode Mode>
+  multi_ptr(accessor<ElementType, Dimensions, Mode, target::local>);
 
   // Only if Space == constant_space
-  template <typename ElementType, int dimensions, access_mode Mode>
-  multi_ptr(accessor<ElementType, dimensions, Mode, target::constant_buffer>);
+  template <typename ElementType, int Dimensions, access_mode Mode>
+  multi_ptr(accessor<ElementType, Dimensions, Mode, target::constant_buffer>);
 
   // Returns the underlying OpenCL C pointer
   pointer_t get() const;

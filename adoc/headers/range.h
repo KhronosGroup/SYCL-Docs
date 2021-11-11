@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int dimensions = 1>
+template <int Dimensions = 1>
 class range {
 public:
-  /* The following constructor is only available in the range class specialization where: dimensions==1 */
+  /* The following constructor is only available in the range class specialization where: Dimensions==1 */
   range(size_t dim0);
-  /* The following constructor is only available in the range class specialization where: dimensions==2 */
+  /* The following constructor is only available in the range class specialization where: Dimensions==2 */
   range(size_t dim0, size_t dim1);
-  /* The following constructor is only available in the range class specialization where: dimensions==3 */
+  /* The following constructor is only available in the range class specialization where: Dimensions==3 */
   range(size_t dim0, size_t dim1, size_t dim2);
 
    /* -- common interface members -- */

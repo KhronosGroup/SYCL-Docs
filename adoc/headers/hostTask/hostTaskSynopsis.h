@@ -14,22 +14,22 @@ class interop_handle {
 
   backend get_backend() const noexcept;
 
-  template <backend Backend, typename dataT, int dims, access_mode accessMode,
-            target accessTarget, access::placeholder isPlaceholder>
-  backend_return_t<Backend, buffer<dataT, dims>>
-  get_native_mem(const accessor<dataT, dims, accessMode, accessTarget,
+  template <backend Backend, typename DataT, int Dims, access_mode AccessMode,
+            target AccessTarget, access::placeholder isPlaceholder>
+  backend_return_t<Backend, buffer<DataT, Dims>>
+  get_native_mem(const accessor<DataT, Dims, AccessMode, AccessTarget,
                                 isPlaceholder> &bufferAccessor) const;
 
-  template <backend Backend, typename dataT, int dims, access_mode accMode>
-  backend_return_t<Backend, unsampled_image<dims>>
+  template <backend Backend, typename DataT, int Dims, access_mode AccMode>
+  backend_return_t<Backend, unsampled_image<Dims>>
   get_native_mem(
-      const unsampled_image_accessor<dataT, dims, accMode, image_target::device>
+      const unsampled_image_accessor<DataT, Dims, AccMode, image_target::device>
           &imageAcc) const;
 
-  template <backend Backend, typename dataT, int dims>
-  backend_return_t<Backend, sampled_image<dims>>
+  template <backend Backend, typename DataT, int Dims>
+  backend_return_t<Backend, sampled_image<Dims>>
   get_native_mem(
-      const sampled_image_accessor<dataT, dims, image_target::device> &imageAcc)
+      const sampled_image_accessor<DataT, Dims, image_target::device> &imageAcc)
       const;
 
   template <backend Backend>

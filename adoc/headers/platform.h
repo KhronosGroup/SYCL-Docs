@@ -16,10 +16,10 @@ class platform {
   std::vector<device> get_devices(
     info::device_type = info::device_type::all) const;
 
-  template <typename param> typename param::return_type get_info() const;
+  template <typename Param> typename Param::return_type get_info() const;
 
-  template <typename param>
-  typename param::return_type get_backend_info() const;
+  template <typename Param>
+  typename Param::return_type get_backend_info() const;
 
   bool has(aspect asp) const;
 

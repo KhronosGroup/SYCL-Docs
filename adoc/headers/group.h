@@ -44,30 +44,30 @@ public:
 
   bool leader() const;
 
-  template<typename workItemFunctionT>
-  void parallel_for_work_item(const workItemFunctionT &func) const;
+  template<typename WorkItemFunctionT>
+  void parallel_for_work_item(const WorkItemFunctionT &func) const;
 
-  template<typename workItemFunctionT>
-  void parallel_for_work_item(range<dimensions> logicalRange,
-    const workItemFunctionT &func) const;
+  template<typename WorkItemFunctionT>
+  void parallel_for_work_item(range<Dimensions> logicalRange,
+    const WorkItemFunctionT &func) const;
 
-  template <typename dataT>
-  device_event async_work_group_copy(decorated_local_ptr<dataT> dest,
-    decorated_global_ptr<dataT> src, size_t numElements) const;
+  template <typename DataT>
+  device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
+    decorated_global_ptr<DataT> src, size_t numElements) const;
 
-  template <typename dataT>
-  device_event async_work_group_copy(decorated_global_ptr<dataT> dest,
-    decorated_local_ptr<dataT> src, size_t numElements) const;
+  template <typename DataT>
+  device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
+    decorated_local_ptr<DataT> src, size_t numElements) const;
 
-  template <typename dataT>
-  device_event async_work_group_copy(decorated_local_ptr<dataT> dest,
-    decorated_global_ptr<dataT> src, size_t numElements, size_t srcStride) const;
+  template <typename DataT>
+  device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
+    decorated_global_ptr<DataT> src, size_t numElements, size_t srcStride) const;
 
-  template <typename dataT>
-  device_event async_work_group_copy(decorated_global_ptr<dataT> dest,
-    decorated_local_ptr<dataT> src, size_t numElements, size_t destStride) const;
+  template <typename DataT>
+  device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
+    decorated_local_ptr<DataT> src, size_t numElements, size_t destStride) const;
 
-  template <typename... eventTN>
-  void wait_for(eventTN... events) const;
+  template <typename... EventTN>
+  void wait_for(EventTN... events) const;
 };
 }  // sycl

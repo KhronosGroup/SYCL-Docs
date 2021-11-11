@@ -3,23 +3,23 @@
 
 namespace sycl {
 
-template <typename dataT,
-          int dimensions,
-          access_mode accessMode,
-          target accessTarget,
-          access::placeholder isPlaceholder>
+template <typename DataT,
+          int Dimensions,
+          access_mode AccessMode,
+          target AccessTarget,
+          access::placeholder IsPlaceholder>
 class accessor {
  public:
-  using value_type = dataT;
-  using reference = dataT &;
-  using const_reference = const dataT &;
+  using value_type = DataT;
+  using reference = DataT &;
+  using const_reference = const DataT &;
 
-  /* Available only when: (dimensions == 0) */
+  /* Available only when: (Dimensions == 0) */
   accessor(handler &commandGroupHandlerRef,
            const property_list &propList = {});
 
-  /* Available only when: (dimensions > 0) */
-  accessor(range<dimensions> allocationSize, handler &commandGroupHandlerRef,
+  /* Available only when: (Dimensions > 0) */
+  accessor(range<Dimensions> allocationSize, handler &commandGroupHandlerRef,
            const property_list &propList = {});
 
   /* -- common interface members -- */
@@ -28,31 +28,31 @@ class accessor {
 
   size_t get_count() const;
 
-  /* Available only when: (dimensions > 0) */
-  range<dimensions> get_range() const;
+  /* Available only when: (Dimensions > 0) */
+  range<Dimensions> get_range() const;
 
-  /* Available only when: (accessMode == access_mode::read_write && dimensions == 0) */
+  /* Available only when: (AccessMode == access_mode::read_write && Dimensions == 0) */
   operator reference() const;
 
-  /* Available only when: (accessMode == access_mode::read_write && dimensions > 0) */
-  reference operator[](id<dimensions> index) const;
+  /* Available only when: (AccessMode == access_mode::read_write && Dimensions > 0) */
+  reference operator[](id<Dimensions> index) const;
 
-  /* Available only when: (dimensions > 1) */
+  /* Available only when: (Dimensions > 1) */
   __unspecified__ &operator[](size_t index) const;
 
-  /* Available only when: (accessMode == access_mode::read_write && dimensions == 1) */
+  /* Available only when: (AccessMode == access_mode::read_write && Dimensions == 1) */
   reference operator[](size_t index) const;
 
-  /* Available only when: (accessMode == access_mode::atomic && dimensions == 0) */
-  operator atomic<dataT, access::address_space::local_space> () const;
+  /* Available only when: (AccessMode == access_mode::atomic && Dimensions == 0) */
+  operator atomic<DataT, access::address_space::local_space> () const;
 
-  /* Available only when: (accessMode == access_mode::atomic && dimensions > 0) */
-  atomic<dataT, access::address_space::local_space> operator[](id<dimensions> index) const;
+  /* Available only when: (AccessMode == access_mode::atomic && Dimensions > 0) */
+  atomic<DataT, access::address_space::local_space> operator[](id<Dimensions> index) const;
 
-  /* Available only when: (accessMode == access_mode::atomic && dimensions == 1) */
-  atomic<dataT, access::address_space::local_space> operator[](size_t index) const;
+  /* Available only when: (AccessMode == access_mode::atomic && Dimensions == 1) */
+  atomic<DataT, access::address_space::local_space> operator[](size_t index) const;
 
-  local_ptr<dataT> get_pointer() const noexcept;
+  local_ptr<DataT> get_pointer() const noexcept;
 };
 
 }  // namespace sycl

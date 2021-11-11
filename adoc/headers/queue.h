@@ -53,10 +53,10 @@ class queue {
 
   bool is_in_order() const;
 
-  template <typename param> typename param::return_type get_info() const;
+  template <typename Param> typename Param::return_type get_info() const;
 
-  template <typename param>
-  typename param::return_type get_backend_info() const;
+  template <typename Param>
+  typename Param::return_type get_backend_info() const;
 
   template <typename T>
   event submit(T cgf);
@@ -163,44 +163,44 @@ class queue {
 
   // Explicit copy functions
 
-  template <typename T_src, int dim_src, access_mode mode_src, target tgt_src,
-            access::placeholder isPlaceholder, typename T_dest>
-  event copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src,
-             std::shared_ptr<T_dest> dest);
+  template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+            access::placeholder IsPlaceholder, typename DestT>
+  event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
+             std::shared_ptr<DestT> dest);
 
-  template <typename T_src, typename T_dest, int dim_dest,
-            access_mode mode_dest, target tgt_dest,
-            access::placeholder isPlaceholder>
+  template <typename SrcT, typename DestT, int DestDims,
+            access_mode DestMode, target DestTgt,
+            access::placeholder IsPlaceholder>
   event
-  copy(std::shared_ptr<T_src> src,
-       accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest);
+  copy(std::shared_ptr<SrcT> src,
+       accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 
-  template <typename T_src, int dim_src, access_mode mode_src, target tgt_src,
-            access::placeholder isPlaceholder, typename T_dest>
-  event copy(accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder> src,
-             T_dest *dest);
+  template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+            access::placeholder IsPlaceholder, typename DestT>
+  event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
+             DestT *dest);
 
-  template <typename T_src, typename T_dest, int dim_dest,
-            access_mode mode_dest, target tgt_dest,
-            access::placeholder isPlaceholder>
+  template <typename SrcT, typename DestT, int DestDims,
+            access_mode DestMode, target DestTgt,
+            access::placeholder IsPlaceholder>
   event
-  copy(const T_src *src,
-       accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder> dest);
+  copy(const SrcT *src,
+       accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 
-  template <typename T_src, int dim_src, access_mode mode_src, target tgt_src,
-            access::placeholder isPlaceholder_src, typename T_dest,
-            int dim_dest, access_mode mode_dest, target tgt_dest,
-            access::placeholder isPlaceholder_dest>
+  template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+            access::placeholder IsSrcPlaceholder, typename DestT,
+            int DestDims, access_mode DestMode, target DestTgt,
+            access::placeholder IsDestPlaceholder>
   event copy(
-      accessor<T_src, dim_src, mode_src, tgt_src, isPlaceholder_src> src,
-      accessor<T_dest, dim_dest, mode_dest, tgt_dest, isPlaceholder_dest> dest);
+      accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
+      accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
 
-  template <typename T, int dim, access_mode mode, target tgt,
-            access::placeholder isPlaceholder>
-  event update_host(accessor<T, dim, mode, tgt, isPlaceholder> acc);
+  template <typename T, int Dims, access_mode Mode, target Tgt,
+            access::placeholder IsPlaceholder>
+  event update_host(accessor<T, Dim, Mode, Tgt, IsPlaceholder> acc);
 
-  template <typename T, int dim, access_mode mode, target tgt,
-            access::placeholder isPlaceholder>
-  event fill(accessor<T, dim, mode, tgt, isPlaceholder> dest, const T &src);
+  template <typename T, int Dims, access_mode Mode, target Tgt,
+            access::placeholder IsPlaceholder>
+  event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T &src);
 };
 }  // namespace sycl

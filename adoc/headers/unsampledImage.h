@@ -16,73 +16,73 @@ enum class image_format : unsigned int {
   b8g8r8a8_unorm,
 };
 
-template <int dimensions = 1, typename AllocatorT = sycl::image_allocator>
+template <int Dimensions = 1, typename AllocatorT = sycl::image_allocator>
 class unsampled_image {
  public:
-  unsampled_image(image_format format, const range<dimensions> &rangeRef,
+  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
                   const property_list &propList = {});
 
-  unsampled_image(image_format format, const range<dimensions> &rangeRef,
+  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
                   AllocatorT allocator, const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
-  unsampled_image(image_format format, const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch,
+  /* Available only when: Dimensions > 1 */
+  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
-  unsampled_image(image_format format, const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch, AllocatorT allocator,
-                  const property_list &propList = {});
-
-  unsampled_image(void *hostPointer, image_format format,
-                  const range<dimensions> &rangeRef,
+  /* Available only when: Dimensions > 1 */
+  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch, AllocatorT allocator,
                   const property_list &propList = {});
 
   unsampled_image(void *hostPointer, image_format format,
-                  const range<dimensions> &rangeRef, AllocatorT allocator,
+                  const range<Dimensions> &rangeRef,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
   unsampled_image(void *hostPointer, image_format format,
-                  const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch,
+                  const range<Dimensions> &rangeRef, AllocatorT allocator,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
+  /* Available only when: Dimensions > 1 */
   unsampled_image(void *hostPointer, image_format format,
-                  const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch, AllocatorT allocator,
+                  const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch,
+                  const property_list &propList = {});
+
+  /* Available only when: Dimensions > 1 */
+  unsampled_image(void *hostPointer, image_format format,
+                  const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch, AllocatorT allocator,
                   const property_list &propList = {});
 
   unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<dimensions> &rangeRef,
+                  const range<Dimensions> &rangeRef,
                   const property_list &propList = {});
 
   unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<dimensions> &rangeRef, AllocatorT allocator,
+                  const range<Dimensions> &rangeRef, AllocatorT allocator,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
+  /* Available only when: Dimensions > 1 */
   unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch,
+                  const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
+  /* Available only when: Dimensions > 1 */
   unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch, AllocatorT allocator,
+                  const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch, AllocatorT allocator,
                   const property_list &propList = {});
 
   /* -- common interface members -- */
 
   /* -- property interface members -- */
 
-  range<dimensions> get_range() const;
+  range<Dimensions> get_range() const;
 
-  /* Available only when: dimensions > 1 */
-  range<dimensions - 1> get_pitch() const;
+  /* Available only when: Dimensions > 1 */
+  range<Dimensions - 1> get_pitch() const;
 
   size_t byte_size() const noexcept;
 
