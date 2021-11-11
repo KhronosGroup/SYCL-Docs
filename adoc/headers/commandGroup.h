@@ -4,12 +4,12 @@
 namespace sycl {
 class command_group {
  public:
-  template <typename functorT>
-  command_group(queue &primaryQueue, const functorT &lambda);
+  template <typename FunctorT>
+  command_group(queue &primaryQueue, const FunctorT &lambda);
 
-  template <typename functorT>
+  template <typename FunctorT>
   command_group(queue &primaryQueue, queue &secondaryQueue,
-                const functorT &lambda);
+                const FunctorT &lambda);
 
   ~command_group();
 

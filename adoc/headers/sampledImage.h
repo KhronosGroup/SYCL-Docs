@@ -16,37 +16,37 @@ enum class image_format : unsigned int {
   b8g8r8a8_unorm,
 };
 
-template <int dimensions = 1, typename AllocatorT = sycl::image_allocator>
+template <int Dimensions = 1, typename AllocatorT = sycl::image_allocator>
 class sampled_image {
  public:
   sampled_image(const void *hostPointer, image_format format,
-                  image_sampler sampler, const range<dimensions> &rangeRef,
+                  image_sampler sampler, const range<Dimensions> &rangeRef,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
+  /* Available only when: Dimensions > 1 */
   sampled_image(const void *hostPointer, image_format format,
-                  image_sampler sampler, const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch,
+                  image_sampler sampler, const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch,
                   const property_list &propList = {});
 
   sampled_image(std::shared_ptr<const void> &hostPointer, image_format format,
-                  image_sampler sampler, const range<dimensions> &rangeRef,
+                  image_sampler sampler, const range<Dimensions> &rangeRef,
                   const property_list &propList = {});
 
-  /* Available only when: dimensions > 1 */
+  /* Available only when: Dimensions > 1 */
   sampled_image(std::shared_ptr<const void> &hostPointer, image_format format,
-                  image_sampler sampler, const range<dimensions> &rangeRef,
-                  const range<dimensions -1> &pitch,
+                  image_sampler sampler, const range<Dimensions> &rangeRef,
+                  const range<Dimensions - 1> &pitch,
                   const property_list &propList = {});
 
   /* -- common interface members -- */
 
   /* -- property interface members -- */
 
-  range<dimensions> get_range() const;
+  range<Dimensions> get_range() const;
 
-  /* Available only when: dimensions > 1 */
-  range<dimensions - 1> get_pitch() const;
+  /* Available only when: Dimensions > 1 */
+  range<Dimensions - 1> get_pitch() const;
 
   size_t byte_size() const;
 

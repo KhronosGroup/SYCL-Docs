@@ -2,21 +2,21 @@ headers/hostTask/classInteropHandle/getnativeX.h
 // Copyright (c) 2011-2021 The Khronos Group, Inc.
 // SPDX-License-Identifier: MIT
 
-template <backend Backend, typename dataT, int dims, access_mode accMode,
-          target accTarget, access::placeholder isPlaceholder>
-backend_return_t<Backend, buffer<dataT, dims>>
-get_native_mem(const accessor<dataT, dims, accMode, accTarget,                // (1)
-                              isPlaceholder> &bufferAcc) const;
+template <backend Backend, typename DataT, int Dims, access_mode AccMode,
+          target AccTarget, access::placeholder IsPlaceholder>
+backend_return_t<Backend, buffer<DataT, Dims>>
+get_native_mem(const accessor<DataT, Dims, AccMode, AccTarget,                // (1)
+                              IsPlaceholder> &bufferAcc) const;
 
-template <backend Backend, typename dataT, int dims, access_mode accMode>
-backend_return_t<Backend, unsampled_image<dims>>
+template <backend Backend, typename DataT, int Dims, access_mode AccMode>
+backend_return_t<Backend, unsampled_image<Dims>>
 get_native_mem(                                                               // (2)
-  const unsampled_image_accessor<dataT, dims, accMode, image_target::device> &imageAcc) const;
+  const unsampled_image_accessor<DataT, Dims, AccMode, image_target::device> &imageAcc) const;
 
-template <backend Backend, typename dataT, int dims>
-backend_return_t<Backend, sampled_image<dims>>
+template <backend Backend, typename DataT, int Dims>
+backend_return_t<Backend, sampled_image<Dims>>
 get_native_mem(                                                               // (3)
-  const sampled_image_accessor<dataT, dims, image_target::device> &imageAcc) const;
+  const sampled_image_accessor<DataT, Dims, image_target::device> &imageAcc) const;
 
 template <backend Backend>
 backend_return_t<Backend, queue> get_native_queue() const;         // (4)

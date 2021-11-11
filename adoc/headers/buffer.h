@@ -25,7 +25,7 @@ class context_bound {
 }  // namespace buffer
 }  // namespace property
 
-template <typename T, int dimensions = 1,
+template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
 class buffer {
  public:
@@ -34,28 +34,28 @@ class buffer {
   using const_reference = const value_type &;
   using allocator_type = AllocatorT;
 
-  buffer(const range<dimensions> &bufferRange,
+  buffer(const range<Dimensions> &bufferRange,
          const property_list &propList = {});
 
-  buffer(const range<dimensions> &bufferRange, AllocatorT allocator,
+  buffer(const range<Dimensions> &bufferRange, AllocatorT allocator,
          const property_list &propList = {});
 
-  buffer(T *hostData, const range<dimensions> &bufferRange,
+  buffer(T *hostData, const range<Dimensions> &bufferRange,
          const property_list &propList = {});
 
-  buffer(T *hostData, const range<dimensions> &bufferRange,
+  buffer(T *hostData, const range<Dimensions> &bufferRange,
          AllocatorT allocator, const property_list &propList = {});
 
-  buffer(const T *hostData, const range<dimensions> &bufferRange,
+  buffer(const T *hostData, const range<Dimensions> &bufferRange,
          const property_list &propList = {});
 
-  buffer(const T *hostData, const range<dimensions> &bufferRange,
+  buffer(const T *hostData, const range<Dimensions> &bufferRange,
          AllocatorT allocator, const property_list &propList = {});
 
   /* Available only if Container is a contiguous container:
        - std::data(container) and std::size(container) are well formed
        - return type of std::data(container) is convertible to T*
-     and dimensions == 1 */
+     and Dimensions == 1 */
   template <typename Container>
   buffer(Container &container, AllocatorT allocator,
          const property_list &propList = {});
@@ -63,24 +63,24 @@ class buffer {
   /* Available only if Container is a contiguous container:
        - std::data(container) and std::size(container) are well formed
        - return type of std::data(container) is convertible to T*
-     and dimensions == 1 */
+     and Dimensions == 1 */
   template <typename Container>
   buffer(Container &container, const property_list &propList = {});
 
   buffer(const std::shared_ptr<T> &hostData,
-         const range<dimensions> &bufferRange, AllocatorT allocator,
+         const range<Dimensions> &bufferRange, AllocatorT allocator,
          const property_list &propList = {});
 
   buffer(const std::shared_ptr<T> &hostData,
-         const range<dimensions> &bufferRange,
+         const range<Dimensions> &bufferRange,
          const property_list &propList = {});
 
   buffer(const std::shared_ptr<T[]> &hostData,
-         const range<dimensions> &bufferRange, AllocatorT allocator,
+         const range<Dimensions> &bufferRange, AllocatorT allocator,
          const property_list &propList = {});
 
   buffer(const std::shared_ptr<T[]> &hostData,
-         const range<dimensions> &bufferRange,
+         const range<Dimensions> &bufferRange,
          const property_list &propList = {});
 
   template <class InputIterator>
@@ -91,14 +91,14 @@ class buffer {
   buffer<T, 1>(InputIterator first, InputIterator last,
                const property_list &propList = {});
 
-  buffer(buffer &b, const id<dimensions> &baseIndex,
-         const range<dimensions> &subRange);
+  buffer(buffer &b, const id<Dimensions> &baseIndex,
+         const range<Dimensions> &subRange);
 
   /* -- common interface members -- */
 
   /* -- property interface members -- */
 
-  range<dimensions> get_range() const;
+  range<Dimensions> get_range() const;
 
   size_t byte_size() const noexcept;
 
@@ -112,23 +112,23 @@ class buffer {
 
   AllocatorT get_allocator() const;
 
-  template <access_mode mode = access_mode::read_write, target targ = target::device>
-  accessor<T, dimensions, mode, targ> get_access(
+  template <access_mode Mode = access_mode::read_write, target Targ = target::device>
+  accessor<T, Dimensions, Mode, Targ> get_access(
       handler &commandGroupHandler);
 
   // Deprecated
-  template <access_mode mode>
-  accessor<T, dimensions, mode, target::host_buffer> get_access();
+  template <access_mode Mode>
+  accessor<T, Dimensions, Mode, target::host_buffer> get_access();
 
-  template <access_mode mode = access_mode::read_write, target targ = target::device>
-  accessor<T, dimensions, mode, targ> get_access(
-      handler &commandGroupHandler, range<dimensions> accessRange,
-      id<dimensions> accessOffset = {});
+  template <access_mode Mode = access_mode::read_write, target Targ = target::device>
+  accessor<T, Dimensions, Mode, Targ> get_access(
+      handler &commandGroupHandler, range<Dimensions> accessRange,
+      id<Dimensions> accessOffset = {});
 
   // Deprecated
-  template <access_mode mode>
-  accessor<T, dimensions, mode, target::host_buffer> get_access(
-    range<dimensions> accessRange, id<dimensions> accessOffset = {});
+  template <access_mode Mode>
+  accessor<T, Dimensions, Mode, target::host_buffer> get_access(
+    range<Dimensions> accessRange, id<Dimensions> accessOffset = {});
 
   template<typename... Ts>
   auto get_access(Ts...);
@@ -150,9 +150,9 @@ class buffer {
   reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
   // Only available when ReinterpretDim == 1
-  // or when (ReinterpretDim == dimensions) &&
+  // or when (ReinterpretDim == Dimensions) &&
   //         (sizeof(ReinterpretT) == sizeof(T))
-  template <typename ReinterpretT, int ReinterpretDim = dimensions>
+  template <typename ReinterpretT, int ReinterpretDim = Dimensions>
   buffer<ReinterpretT, ReinterpretDim,
          typename std::allocator_traits<AllocatorT>::template rebind_alloc<
              ReinterpretT>>
@@ -169,14 +169,14 @@ template <class InputIterator>
 buffer(InputIterator, InputIterator, const property_list & = {})
     -> buffer<typename std::iterator_traits<InputIterator>::value_type, 1>;
 
-template <class T, int dimensions, class AllocatorT>
-buffer(const T *, const range<dimensions> &, AllocatorT,
+template <class T, int Dimensions, class AllocatorT>
+buffer(const T *, const range<Dimensions> &, AllocatorT,
        const property_list & = {})
-    -> buffer<T, dimensions, AllocatorT>;
+    -> buffer<T, Dimensions, AllocatorT>;
 
-template <class T, int dimensions>
-buffer(const T *, const range<dimensions> &, const property_list & = {})
-    -> buffer<T, dimensions>;
+template <class T, int Dimensions>
+buffer(const T *, const range<Dimensions> &, const property_list & = {})
+    -> buffer<T, Dimensions>;
 
 template <class Container, class AllocatorT>
 buffer(Container &, AllocatorT, const property_list & = {})

@@ -19,9 +19,9 @@ using accelerator_selector = __unspecified__;
 __unspecified_callable__ aspect_selector(
   const std::vector<aspect> &aspectList,
   const std::vector<aspect> &denyList = {});
-template <class... aspectListTN>
-__unspecified_callable__ aspect_selector(aspectListTN... aspectList);
-template <aspect... aspectList>
+template <class... AspectList>
+__unspecified_callable__ aspect_selector(AspectList... aspectList);
+template <aspect... AspectList>
 __unspecified_callable__ aspect_selector();
 
 } // namespace sycl
