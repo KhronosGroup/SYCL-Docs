@@ -13229,10 +13229,16 @@ exposed in SYCL through [code]#+parallel_for (nd_range,...)+# and the
 grained control of the enqueuing of the kernel. This variation of
 parallel_for expects an [code]#nd_range#, specifying both local and
 global ranges, defining the global number of work-items and the number in
-each cooperating work-group. The resulting function object is passed an
-[code]#nd_item# instance making all the information available, as well
-as <<work-group-barrier>> to synchronize between the <<work-item>>s in
-the <<work-group>>.
+each cooperating work-group. The function object that represents the SYCL
+kernel function must take one of:
+1) a single SYCL [code]#nd_item# parameter, 2) a single generic parameter
+([code]#template# parameter or [code]#auto#), 3) any other type converted
+from SYCL [code]#nd_item#, representing the currently executing work-item
+within the range specified by the [code]#nd_range# parameter. The
+[code]#nd_item# parameter makes all information about the work-item and
+its position in the range available, and provides access to functions
+enabling the use of a <<work-group-barrier>> to synchronize between the
+<<work-item>>s in the <<work-group>>.
 
 The following example shows how sixty-four work-items may be launched
 in a three-dimensional grid with four in each dimension, and divided
