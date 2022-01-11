@@ -301,7 +301,7 @@ make_platform(const backend_input_t<Backend, platform> &backendObject);#
 | [code]#template<backend Backend> +
 device +
 make_device(const backend_input_t<Backend, device> &backendObject);# 
-        | Create a SYCL `device` from a CUDA device.
+        | Construct a SYCL `device` from a CUDA device. As the SYCL execution environment for the CUDA backend contains a fixed number of devices that are enumerated via `sycl::device::get_devices()`. Calling this function does not create a new device. Rather it merely creates a `sycl::device` object that is a copy of one of the devices from that enumeration.
 
 | [code]#template<backend Backend> +
 context +
@@ -345,7 +345,6 @@ make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
 The CUDA backend retains ownership of all native CUDA objects obtained through
 the interoperability API, therefore associated SYCL objects must be kept alive
 for the duration of the CUDA work using these native CUDA objects.
-dd CUDA backend specification kernel function interop definitions
 
 When creating a SYCL object from a native CUDA object SYCL does not take
 ownership of the object and it is up to the application to dispose of them when
