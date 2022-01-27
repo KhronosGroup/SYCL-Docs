@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 template <typename Group, typename T>
-bool group_broadcast(Group g, T x); // (1)
+T group_broadcast(Group g, T x); // (1)
 
 template <typename Group, typename T>
 T group_broadcast(Group g, T x, Group::linear_id_type local_linear_id); // (2)
