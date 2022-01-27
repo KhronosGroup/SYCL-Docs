@@ -13125,11 +13125,18 @@ For the simplest case, users need only provide the global range (the total
 number of work-items in the index space) via a SYCL [code]#range#
 parameter. In this case the function object that represents the SYCL kernel
 function must take one of:
-1) a single SYCL [code]#item# parameter, 2) single generic parameter
-([code]#template# parameter or [code]#auto)#, 3) any other type
+1) a single SYCL [code]#item# parameter, 2) a single generic parameter
+([code]#template# parameter or [code]#auto#) that will be treated as
+an [code]#item# parameter, 3) any other type
 implicitly converted from SYCL [code]#item#, representing the currently
 executing work-item within the range specified by the [code]#range#
 parameter.
+
+[NOTE]
+====
+Case 3) above includes user-defined types that can be constructed from
+[code]#item#, enabling users to layer their own abstractions on top of SYCL.
+====
 
 The execution of the kernel function is the same whether the parameter to
 the SYCL kernel function is a SYCL [code]#id# or a SYCL
@@ -13229,10 +13236,23 @@ exposed in SYCL through [code]#+parallel_for (nd_range,...)+# and the
 grained control of the enqueuing of the kernel. This variation of
 parallel_for expects an [code]#nd_range#, specifying both local and
 global ranges, defining the global number of work-items and the number in
-each cooperating work-group. The resulting function object is passed an
-[code]#nd_item# instance making all the information available, as well
-as <<work-group-barrier>> to synchronize between the <<work-item>>s in
-the <<work-group>>.
+each cooperating work-group. The function object that represents the SYCL
+kernel function must take one of:
+1) a single SYCL [code]#nd_item# parameter, 2) a single generic parameter
+([code]#template# parameter or [code]#auto#) that will be treated as
+an [code]#nd_item# parameter, 3) any other type converted
+from SYCL [code]#nd_item#, representing the currently executing work-item
+within the range specified by the [code]#nd_range# parameter. The
+[code]#nd_item# parameter makes all information about the work-item and
+its position in the range available, and provides access to functions
+enabling the use of a <<work-group-barrier>> to synchronize between the
+<<work-item>>s in the <<work-group>>.
+
+[NOTE]
+====
+Case 3) above includes user-defined types that can be constructed from
+[code]#nd_item#, enabling users to layer their own abstractions on top of SYCL.
+====
 
 The following example shows how sixty-four work-items may be launched
 in a three-dimensional grid with four in each dimension, and divided
