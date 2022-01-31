@@ -49,25 +49,51 @@ may use multiple CUDA streams to implement an out of order SYCL <<queue>>.
 [[sub:cuda:memory_model]]
 === Memory model
 
-==== Memory Allocations
+==== Accessing memory on a different GPU
 
-When non-host accessors to buffers are created without [code]#target::host_buffer# they need to allocate memory for their contents on the device. For example using [code]#cudaMalloc3D()#, [code]#cudaMallocPitch()# or [code]#cudaMalloc()#.
+Devices belonging to the same context must be able to access (directly or indirectly) each other's global memory. This is done in one of the following ways:
 
-When accessors to images are created without [code]#target::host_buffer# they allocate memory, for example using [code]#cudaMalloc3DArray()# or [code]#cudaMallocArray()#. 
+- Device directly accesses memory on another device (peer-to-peer memory access).
+- CUDA-runtime-managed memory is used. CUDA runtime copies the data from one device to another.
+- Peer copy (one of [code]#CuMemcpyPeerAsync# or [code]#CuMemcpy3DPeerAsync#) is used to directly copy the data from one device to another.
+- The data is copied from one device to the host, and then from host to another device.
 
-When non-host accessors are created with [code]#target::host_buffer# they can, for example use [code]#cudaHostAlloc()# to allocate pinned memory on host.
+==== Shared USM memory advices
 
-Table <<table.cuda.memmodel.USM>> specifies which underlying CUDA functions can be used for USM allocations. For shared USM allocations this would mean memory is managed (moved between host and different devices) by CUDA runtime. Alternatively shared USM allocations can be managed by SYCL runtime, using non-managed CUDA allocation on device when needed, such as [code]#cudaMalloc()#.
+Values for the `advice` parameter of `sycl::queue::mem_advise` and `sycl::handler::mem_advice` and their mapping to CUDA equivalent are defined in table <<table.cuda.memmodel.advices>>.
 
-[[table.cuda.memmodel.USM]]
-.Cuda functions that could be used to allocate SYCL USM allocations
-[width="100%",options="header",cols="50%,50%"]
+[[table.cuda.memmodel.advices]]
+.Valid shared USM advices and their equivalents in CUDA
+[width="100%",options="header",cols="40%,30%,30%"]
 |====
-| SYCL USM type | CUDA function
-| device | [code]#cudaMalloc()#
-| host | [code]#cudaHostAlloc()#
-| shared | [code]#cudaMallocManaged()#
+| SYCL shared USM advice | CUDA managed memory advice | processor, the advice is set for
+| CUDA_MEM_ADVISE_SET_READ_MOSTLY | cudaMemAdviseSetReadMostly | device associated with the queue/handler
+| CUDA_MEM_ADVISE_UNSET_READ_MOSTLY | cudaMemAdviceUnsetReadMostly | device associated with the queue/handler
+| CUDA_MEM_ADVISE_SET_PREFERRED_LOCATION | cudaMemAdviseSetPreferredLocation | device associated with the queue/handler
+| CUDA_MEM_ADVISE_UNSET_PREFERRED_LOCATION | cudaMemAdviseUnsetPreferredLocation | device associated with the queue/handler
+| CUDA_MEM_ADVISE_SET_ACCESSED_BY | cudaMemAdviseSetAccessedBy | device associated with the queue/handler
+| CUDA_MEM_ADVISE_UNSET_ACCESSED_BY | cudaMemAdviseUnsetAccessedBy | device associated with the queue/handler
+| CUDA_MEM_ADVISE_SET_PREFERRED_LOCATION_HOST | cudaMemAdviseSetPreferredLocation | host
+| CUDA_MEM_ADVISE_UNSET_PREFERRED_LOCATION_HOST | cudaMemAdviseUnsetPreferredLocation | host
+| CUDA_MEM_ADVISE_SET_ACCESSED_BY_HOST | cudaMemAdviseSetAccessedBy | host
+| CUDA_MEM_ADVISE_UNSET_ACCESSED_BY_HOST | cudaMemAdviseUnsetAccessedBy | host
 |====
+
+==== Supported image formats
+
+Supported image formats are:
+
+* r8g8b8a8_unorm
+* r16g16b16a16_unorm
+* r8g8b8a8_sint
+* r16g16b16a16_sint
+* r32b32g32a32_sint
+* r8g8b8a8_uint
+* r16g16b16a16_uint
+* r32b32g32a32_uint
+* r16b16g16a16_sfloat
+* r32g32b32a32_sfloat
+* b8g8r8a8_unorm
 
 ==== Samplers
 
