@@ -203,15 +203,7 @@ Mapping of SYCL memory scopes to PTX ISA is the same as for atomics. It is defin
 CUDA's execution model is similar to SYCL's. CUDA uses kernels to
 offload computation, splitting the host and GPU into asynchronous 
 computing devices. In general, except for CUDA's dynamic 
-parallelism extensions, kernels are called by the host. One 
-difference between CUDA and SYCL execution models is that CUDA 
-uses Single Instruction Multiple Thread (SIMT) while SYCL uses 
-Single Instruction Multiple Data (SIMD) kernels. SIMT kernels use 
-multiple scalar instructions acting on non-contiguous data.  SIMD 
-kernels use vector instructions acting on contiguous data. SIMT 
-can be used in place of SIMD but not the other way around, as SIMD 
-requires memory blocks to have no interruptions within the data, 
-while SIMT does not have this as a requirement. 
+parallelism extensions, kernels are called by the host. 
 
 CUDA GPUs are constructed out of streaming multiprocessors (SM) 
 which perform the actual computation. Each SM consists of 8 scalar 
@@ -236,6 +228,15 @@ scheduling. In addition, each thread can access memory within a
 unified virtual address space. Threads must synchronize with other 
 threads using execution barriers, synchronization primitives and 
 Cooperative Groups to utilize unified memory.
+
+In SYCL, group functions and synchronizations are convergent, meaning 
+all work-items must reach them by the same control flow. Work-items 
+encountering a group function or synchronization point under diverse 
+conditions results in undefined behaviour. Therefore, any device specific 
+capability of independent forward progress among work-items is not exposed 
+in SYCL, and will not be observable to users. Independent forward progress
+of work-items may be achieved through the CUDA interop API, which gives
+the same guarantees as native CUDA.
 
 SYCL has a similar execution hierarchy consisting of kernels. 
 The kernel is broken down into work-items. Each work-item concurrently
@@ -273,6 +274,44 @@ Cooperative Groups. Cooperative Groups allow for synchronizing at the
 grid level and organizing subgroups in sizes smaller than a warp. 
 Cooperative Groups do not have an equivalent within SYCL 2020 and are 
 not yet supported.
+
+==== Work Item Mapping
+
+A SYCL `nd_range` will tranpose indices as it maps to hardware memory.
+This gives better memory access patterns, in general.
+
+SYCL uses row major memory ordering, meaning in some memory object the 
+rows will be contiguous in memory. SYCL follows C++ convention in 
+this regard. Following the row-major paradigm, it is intuitive to imagine 
+each work-item in a `parallel_for` indexing through a contiguous block of 
+memory as it does its work. However, this gives poorly coalesced memory 
+accesses, as a given contiguous chunk of data being loaded may only pass 
+memory to a single work-item. More efficient memory access patterns are 
+achieved when each load of contiguous data can give data to as many 
+work-items as possible. Meaning the data used by a given work-item
+is non-contiguous.
+
+SYCL makes this intuitive row-major C++ approach give good memory access 
+patterns by flipping the indices of the `nd_range`, as it maps to hardware.
+
+The linear id (whose use is not recommended) of a two dimensional `nd_range` 
+can be calculated using:
+
+[source,c++]
+----
+cgh.parallel_for(range<2>(64, 128), [=](item<2> it) {
+  size_t linearIdx = it.get_id(1) + (it.get_id(0) * it.get_range(0));
+  ...
+});
+----
+
+Notice that rows appear to be accessed in a column-major, rather than 
+row-major, format. This is only the case because the indices are flipped 
+by the SYCL implementation. All memory in SYCL is stored in row-major format.
+
+It is best to avoid calculating the linear index manually; it is better
+to use a multi-dimensional `sycl::id` to index into memory, as it doesn't
+expose index-flipping to the user.
 
 [[table.cuda.CUDA_features_to_SYCL]]
 .CUDA execution features with their corresponding SYCL features
@@ -475,8 +514,20 @@ supported on devices that have [code]#aspect::fp16#, i.e. compute capability
 [[sub:cuda:extensions]]
 === Extensions
 
+[[sub:cuda:builtin-kernel-functions]]
+=== Built-in Kernel Functions
+The CUDA backend specification currently does not define any built-in kernel 
+functions.
+
+
 [[sub:cuda:error_handling]]
 === Error Handling
+
+SYCL uses `sycl::errc` as an enum class to hold error codes. These error
+codes may originate in the SYCL runtime or be passed from other runtimes to
+the SYCL runtime. When a `sycl::exception` is thrown, the `sycl::errc` can
+be queried using the exception's `.code()` method. Possible values for 
+`sycl::errc` include: `success`, `runtime`, `memory_allocation`, and more.
 
 If there is a CUDA driver API error associated with an exception triggered, then the
 CUDA error code can be obtained by the free function `CUresult sycl::cuda::get_error_code(sycl::exception&)`. In the case where there is
@@ -517,5 +568,23 @@ function. This includes captured
 variables if the SYCL kernel function is a lambda function._
 
 which may be mapped from `CUDA_ERROR_NOT_FOUND`.
+
+[[sub:cuda:non_core_properties]]
+=== Non-Core Properties
+
+The constructors for most SYCL library objects, such as for `sycl::queue` or 
+`sycl::context`, accept the parameter `sycl::property_list`, which can affect 
+the semantics of the compilation or linking operation.
+
+There are currently no CUDA backend specific properties, meaning any properties
+relating to the CUDA backend will be defined by a given implementation.
+
+[[sub:cuda:graphics_apis_interop]]
+=== Interoperability with Graphics APIs
+
+Interoperability between SYCL and OpenGL or DirectX is not directly provided 
+by the SYCL interface. However, since the CUDA API provides interoperability 
+with these APIs, interoperability between SYCL and OpenGL or DirectX is best 
+done indirectly through interoperability with the CUDA API.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end cuda_backend %%%%%%%%%%%%%%%%%%%%%%%%%%%%
