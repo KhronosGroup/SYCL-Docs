@@ -3257,9 +3257,9 @@ include::{code_dir}/queueShortcuts.cpp[lines=4..-1]
 
 [[table.queue.shortcuts]]
 .Queue shortcut functions
-[width="100%",options="header",separator="@",cols="80%,20%"]
+[width="100%",options="header",separator="@",cols="60%,10%,20%"]
 |====
-@ Function definition @ Function type
+@ Function Definition @ Function Type @ Description
 a@
 [source]
 ----
@@ -3267,6 +3267,8 @@ template <typename KernelName, typename KernelType>
 event single_task(const KernelType &kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::single_task(kernelFunc)#.
 a@
 [source]
 ----
@@ -3275,6 +3277,9 @@ event single_task(event depEvent,
                   const KernelType &kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::single_task(kernelFunc)#.
 a@
 [source]
 ----
@@ -3283,6 +3288,9 @@ event single_task(const std::vector<event> &depEvents,
                   const KernelType &kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::single_task(kernelFunc)#.
 a@
 [source]
 ----
@@ -3293,6 +3301,8 @@ event parallel_for(range<Dimensions> numWorkItems,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::parallel_for(numWorkItems, rest)#.
 a@
 [source]
 ----
@@ -3304,6 +3314,9 @@ event parallel_for(range<Dimensions> numWorkItems,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::parallel_for(numWorkItems, rest)#.
 a@
 [source]
 ----
@@ -3315,6 +3328,9 @@ event parallel_for(range<Dimensions> numWorkItems,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::parallel_for(numWorkItems, rest)#.
 a@
 [source]
 ----
@@ -3325,6 +3341,8 @@ event parallel_for(nd_range<Dimensions> executionRange,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::parallel_for(executionRange, rest)#.
 a@
 [source]
 ----
@@ -3336,6 +3354,9 @@ event parallel_for(nd_range<Dimensions> executionRange,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::parallel_for(executionRange, rest)#.
 a@
 [source]
 ----
@@ -3347,12 +3368,17 @@ event parallel_for(nd_range<Dimensions> executionRange,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::parallel_for(executionRange, rest)#.
 a@
 [source]
 ----
 event memcpy(void* dest, const void* src, size_t numBytes)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::memcpy(dest, src, numBytes)#.
 a@
 [source]
 ----
@@ -3360,6 +3386,9 @@ event memcpy(void* dest, const void* src, size_t numBytes,
              event depEvent)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::memcpy(dest, src, numBytes)#.
 a@
 [source]
 ----
@@ -3367,6 +3396,9 @@ event memcpy(void* dest, const void* src, size_t numBytes,
              const std::vector<event> &depEvents)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::memcpy(dest, src, numBytes)#.
 a@
 [source]
 ----
@@ -3374,6 +3406,8 @@ template <typename T>
 event copy(const T* src, T* dest, size_t count)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::copy(src, dest, count)#.
 a@
 [source]
 ----
@@ -3382,6 +3416,9 @@ event copy(const T* src, T* dest, size_t count,
            event depEvent)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::copy(src, dest, count)#.
 a@
 [source]
 ----
@@ -3390,12 +3427,17 @@ event copy(const T* srct, T* dest, size_t count,
            const std::vector<event> &depEvents)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::copy(src, dest, count)#.
 a@
 [source]
 ----
 event memset(void* ptr, int value, size_t numBytes)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::memset(ptr, value, numBytes)#.
 a@
 [source]
 ----
@@ -3403,6 +3445,9 @@ event memset(void* ptr, int value, size_t numBytes,
              event depEvent)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::memset(ptr, value, numBytes)#.
 a@
 [source]
 ----
@@ -3410,6 +3455,9 @@ event memset(void* ptr, int value, size_t numBytes,
              const std::vector<event> &depEvents)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::memset(ptr, value, numBytes)#.
 a@
 [source]
 ----
@@ -3417,6 +3465,8 @@ template <typename T>
 event fill(void* ptr, const T& pattern, size_t count)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::fill(ptr, pattern, count)#.
 a@
 [source]
 ----
@@ -3425,6 +3475,9 @@ event fill(void* ptr, const T& pattern, size_t count,
            event depEvent)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::fill(ptr, pattern, count)#.
 a@
 [source]
 ----
@@ -3433,12 +3486,17 @@ event fill(void* ptr, const T& pattern, size_t count,
            const std::vector<event> &depEvents)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::fill(ptr, pattern, count)#.
 a@
 [source]
 ----
 event prefetch(void* ptr, size_t numBytes)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::prefetch(ptr, numBytes)#.
 a@
 [source]
 ----
@@ -3446,6 +3504,9 @@ event prefetch(void* ptr, size_t numBytes,
                event depEvent)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::prefetch(ptr, numBytes)#.
 a@
 [source]
 ----
@@ -3453,12 +3514,17 @@ event prefetch(void* ptr, size_t numBytes,
                const std::vector<event> &depEvents)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::prefetch(ptr, numBytes)#.
 a@
 [source]
 ----
 event mem_advise(void* ptr, size_t numBytes, int advice)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
 a@
 [source]
 ----
@@ -3466,6 +3532,9 @@ event mem_advise(void* ptr, size_t numBytes, int advice,
                  event depEvent)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
 a@
 [source]
 ----
@@ -3473,6 +3542,9 @@ event mem_advise(void* ptr, size_t numBytes, int advice,
                  const std::vector<event> &depEvents)
 ----
 a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
 a@
 [source]
 ----
@@ -3483,6 +3555,9 @@ event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
            std::shared_ptr<DestT> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(src)# and
+[code]#handler::copy(src, dest)#.
 a@
 [source]
 ----
@@ -3494,6 +3569,9 @@ copy(std::shared_ptr<SrcT> src,
      accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(dest)# and
+[code]#handler::copy(src, dest)#.
 a@
 [source]
 ----
@@ -3504,6 +3582,9 @@ event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
            DestT *dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(src)# and
+[code]#handler::copy(src, dest)#.
 a@
 [source]
 ----
@@ -3515,6 +3596,9 @@ copy(const SrcT *src,
      accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(dest)# and
+[code]#handler::copy(src, dest)#.
 a@
 [source]
 ----
@@ -3527,6 +3611,9 @@ event copy(
    accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(src)#, [code]#handler::require(dest)# and
+[code]#handler::copy(src, dest)#.
 a@
 [source]
 ----
@@ -3535,6 +3622,9 @@ a@
   event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(acc)# and
+[code]#handler::update_host(acc)#.
 a@
 [source]
 ----
@@ -3543,6 +3633,9 @@ a@
   event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T &src);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::require(dest)# and
+[code]#handler::fill(dest, src)#.
 
 |====
 
