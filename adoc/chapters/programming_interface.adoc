@@ -15907,8 +15907,10 @@ a secondary queue specified, then the command group may be enqueued
 to the secondary queue instead of the primary queue. The error handling in this
 case is also configured using the <<async-handler>> provided for both
 queues. If there is no <<async-handler>> given on any of the queues,
-then no asynchronous error reporting is done and no exceptions are thrown. If
-the primary queue fails and there is an <<async-handler>> given at
+then the asynchronous error handling proceeds through the contexts
+associated with the queues, and if they were also constructed without
+<<async-handler>>s, then the default handler will be used.
+If the primary queue fails and there is an <<async-handler>> given at
 this queue's construction, which populates the [code]#exception_list#
 parameter, then any errors will be added and can be thrown whenever the user
 chooses to handle those exceptions. Since there were errors on the primary
@@ -15917,7 +15919,10 @@ re-scheduled to the secondary queue and any error reporting for the kernel
 execution on that queue is done through that queue, in the same way as
 described above. The secondary queue may fail as well, and the errors will be
 thrown if there is an <<async-handler>> and either
-[code]#wait_and_throw()# or [code]#throw()# are called on that queue.
+[code]#wait_and_throw()# or [code]#throw()# are called on that queue. If no
+<<async-handler>> was specified, then the one associated with the queue's context
+will be used and if the context was also constructed without an <<async-handler>>,
+then the default handler will be used.
 The <<command-group-function-object>> event returned by that function will be
 relevant to the queue where the kernel has been enqueued.
 
