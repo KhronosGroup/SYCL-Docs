@@ -338,7 +338,7 @@ expose index-flipping to the user.
 This section describes the API level interoperability between SYCL and CUDA.
 
 The CUDA backend supports API interoperability for `platform`, `device`,
-`context`, `queue`, `event` and `buffer`. Interoperability for `kernel`,
+`context`, `queue`, and `event`. Interoperability for `buffer`, `kernel`,
 `kernel_bundle`, `device_image`, `sampled_image` and `unsampled_image` is not
 supported.
 
@@ -352,7 +352,6 @@ supported.
 | [code]#context#  | `CUcontext`               | `std::vector<CUcontext>` | A SYCL context can encapsulate multiple CUDA contexts , however it is not possible to create a SYCL context from multiple CUDA contexts.
 | [code]#queue#    | `CUstream`   | `CUstream` | A SYCL queue encapsulates a CUDA stream.
 | [code]#event#    | `CUevent`    | `CUevent`  | A SYCL event encapsulates a CUDA event.
-| [code]#buffer# | `struct { CUdeviceptr ptr; size_t size; }` | `CUdeviceptr` | A SYCL buffer encapsulates a CUDA device pointer. If the SYCL buffer is a sub-buffer, the returned `CUdeviceptr` is offset to the beginning of the sub-buffer.
 |====
 
 [[table.cuda.appinterop.make_interop_APIs]]
@@ -388,22 +387,6 @@ event +
 make_event(const backend_input_t<Backend, event> &backendObject,
                  const context &targetContext);# 
         | Create a SYCL `event` from a CUDA event.
-
-| [code]#template <backend Backend, typename T, int dimensions = 1,
-          typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
-buffer<T, dimensions, AllocatorT> +
-make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
-               &backendObject,
-           const context &targetContext, event availableEvent);#
-        | Create a SYCL `buffer` from a CUDA device pointer.` The CUDA pointer must be within the provided `targetContext`. The `availableEvent` parameter can be used for synchronization and indicates when the CUDA pointer is ready to be used. Only `dimensions == 1` is supported.
- 
-| [code]#template <backend Backend, typename T, int dimensions = 1,
-           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>> +
-buffer<T, dimensions, AllocatorT> +
-make_buffer(const backend_input_t<Backend, buffer<T, dimensions, AllocatorT>>
-                &backendObject,
-            const context &targetContext);#
-        | Create a SYCL `buffer` from a CUDA device pointer.` The CUDA pointer must be within the provided `targetContext`. Only `dimensions == 1` is supported.
 
 |====
 
