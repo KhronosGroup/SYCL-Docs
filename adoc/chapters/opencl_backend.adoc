@@ -149,15 +149,17 @@ combination of the two.
 
 The SYCL system presents the user with a set of devices, grouped into some
 number of platforms.
-The device version is an indication of the device's
-capabilities, as represented by the device information returned by the
-[code]#sycl::device::get_info()# member function.  Examples of attributes
-associated with the device version are resource limits and information
-about functionality beyond the requirements in the <<core-spec>>.
-The version returned corresponds to the highest version of the OpenCL
-specification for which the device is conformant, but is not higher than
-the version of the device's platform which bounds the overall capabilities
-of the runtime operating the device.
+
+The version returned by [code]#sycl::platform::get_info()# and
+[code]#sycl::device::get_info()# for the attributes
+[code]#info::platform::driver_version# and [code]#info::device::driver_version#
+respectively, represents the OpenCL software driver version in the form:
+[code]#major_number.minor_number#.
+
+The version returned for the device corresponds to the highest version of the
+OpenCL specification for which the device is conformant, but is not higher than
+the version of the device's platform which bounds the overall capabilities of
+the runtime operating the device.
 
 
 === OpenCL memory model
