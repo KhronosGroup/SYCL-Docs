@@ -6501,7 +6501,8 @@ accessor()
 --
   * [code]#(empty() == true)#
   * All size queries return [code]#0#.
-  * The only iterator that can be obtained is [code]#nullptr#.
+  * The return values of [code]#get_pointer()# and [code]#get_multi_ptr()# are
+    unspecified.
   * Trying to access the underlying memory is undefined behavior.
 
 A default constructed accessor can be passed to a <<sycl-kernel-function>>
@@ -6803,7 +6804,8 @@ accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
       buffer, even if this is a <<ranged-accessor>> whose range does not start
-      at the beginning of the buffer.
+      at the beginning of the buffer.  The return value is unspecified if the
+      accessor is empty.
 
 This function may only be called from within a <<command>>.
 
@@ -7161,7 +7163,8 @@ constant_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
       buffer, even if this is a <<ranged-accessor>> whose range does not start
-      at the beginning of the buffer.
+      at the beginning of the buffer.  The return value is unspecified if the
+      accessor is empty.
 
 |====
 
@@ -7307,7 +7310,8 @@ std::add_pointer_t<value_type> get_pointer() const noexcept
 ----
    a@ Returns a pointer to the start of this accessor's underlying buffer, even
       if this is a <<ranged-accessor>> whose range does not start at the
-      beginning of the buffer.
+      beginning of the buffer.  The return value is unspecified if the accessor
+      is empty.
 
 |====
 
@@ -7425,7 +7429,8 @@ a@
 local_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the work-group's local memory allocation
-      that this accessor is accessing.
+      that this accessor is accessing.  The return value is unspecified if the
+      accessor is empty.
 
 |====
 
@@ -7711,7 +7716,7 @@ host_accessor()
 --
   * [code]#(empty() == true)#
   * All size queries return [code]#0#.
-  * The only iterator that can be obtained is [code]#nullptr#.
+  * The return value of [code]#get_pointer()# is unspecified.
   * Trying to access the underlying memory is undefined behavior.
 --
 
@@ -8004,7 +8009,8 @@ local_accessor()
 --
   * [code]#(empty() == true)#
   * All size queries return [code]#0#.
-  * The only iterator that can be obtained is [code]#nullptr#.
+  * The return values of [code]#get_pointer()# and [code]#get_multi_ptr()# are
+    unspecified.
   * Trying to access the underlying memory is undefined behavior.
 --
 
@@ -8059,7 +8065,8 @@ template <access::decorated IsDecorated>
 accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of the accessor's local memory
-      region which corresponds to the calling work-group.
+      region which corresponds to the calling work-group.  The return value is
+      unspecified if the accessor is empty.
 
 This function may only be called from within a <<sycl-kernel-function>>.
 
@@ -8314,6 +8321,8 @@ std::add_pointer_t<value_type> get_pointer() const noexcept
 For a buffer accessor this is a pointer to the start of the underlying buffer,
 even if this is a <<ranged-accessor>> whose range does not start at the
 beginning of the buffer.
+
+The return value is unspecified if the accessor is empty.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
