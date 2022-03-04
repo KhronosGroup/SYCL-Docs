@@ -20123,9 +20123,10 @@ Note that [code]#first# may be equal to [code]#result#.
 
 _Effects:_ The value written to [code]#result# + _i_ is the exclusive scan of
 the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and the identity value of [code]#binary_op#, using
-the operator [code]#binary_op#.  The scan is computed using a generalized
-noncommutative sum as defined in standard {cpp}.
+[code]#[first, last)# and the identity value of [code]#binary_op# (as
+identified by [code]#sycl::known_identity#), using the operator
+[code]#binary_op#.  The scan is computed using a generalized noncommutative sum
+as defined in standard {cpp}.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20170,10 +20171,11 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of
-the first _i_ values in the group and the identity value of [code]#binary_op#,
-using the operator [code]#binary_op#.  The scan is computed using a generalized
-noncommutative sum as defined in standard {cpp}.  For multi-dimensional groups,
-the order of work-items in the group is determined by their linear id.
+the first _i_ values in the group and the identity value of [code]#binary_op#
+(as identified by [code]#sycl::known_identity#), using the operator
+[code]#binary_op#.  The scan is computed using a generalized noncommutative sum
+as defined in standard {cpp}.  For multi-dimensional groups, the order of
+work-items in the group is determined by their linear id.
 --
 
   . _Constraints:_ Available only if
@@ -20220,9 +20222,8 @@ Note that [code]#first# may be equal to [code]#result#.
 
 _Effects:_ The value written to [code]#result# + _i_ is the inclusive scan of
 the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and the identity value of [code]#binary_op#,
-using the operator [code]#binary_op#.  The scan is computed using a generalized
-noncommutative sum as defined in standard {cpp}.
+[code]#[first, last)#, using the operator [code]#binary_op#.  The scan is
+computed using a generalized noncommutative sum as defined in standard {cpp}.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20266,10 +20267,10 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of
-the first _i_ values in the group and the identity value of [code]#binary_op#,
-using the operator [code]#binary_op#.  The scan is computed using a generalized
-noncommutative sum as defined in standard {cpp}.  For multi-dimensional groups,
-the order of work-items in the group is determined by their linear id.
+the first _i_ values in the group, using the operator [code]#binary_op#.  The
+scan is computed using a generalized noncommutative sum as defined in standard
+{cpp}.  For multi-dimensional groups, the order of work-items in the group is
+determined by their linear id.
 --
 
   . _Constraints:_ Available only if
