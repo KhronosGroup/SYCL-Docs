@@ -3,7 +3,8 @@
 
 class KernelFunctor {
  public:
-  void operator()(item<1> it) const [[sycl::device_has(aspect::fp16)]] {
+  [[sycl::device_has(aspect::fp16)]]
+  void operator()(item<1> it) const {
     foo();
     bar();
   };
