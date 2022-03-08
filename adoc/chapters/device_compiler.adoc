@@ -525,11 +525,11 @@ reqd_work_group_size(dim0)
 reqd_work_group_size(dim0, dim1)
 reqd_work_group_size(dim0, dim1, dim2)
 ----
-   a@ Indicates that the kernel must be launched with the specified work-group size.
-      The order of the arguments matches the constructor of the [code]#group#
-      class.  Each argument to the attribute must be an integral constant expression.  The
-      dimensionality of the attribute variant used must match the dimensionality of
-      the work-group used to invoke the kernel.
+   a@ Indicates that the kernel must be launched with the specified work-group
+      size.  The number of arguments must match the dimensionality of the
+      work-group used to invoke the kernel, and the order of the arguments
+      matches the order of the dimension extents to the [code]#range#
+      constructor.  Each argument must be an integral constant expression.
 
 Each device may have limitations on the work group sizes that it supports.  If
 a kernel is decorated with this attribute and then submitted to a device that
@@ -547,11 +547,12 @@ work_group_size_hint(dim0)
 work_group_size_hint(dim0, dim1)
 work_group_size_hint(dim0, dim1, dim2)
 ----
-   a@ Hint to the compiler on the work-group size most likely to be used when
-      launching the kernel at runtime. Each argument must be an integral constant
-      expression, and the number of dimensional values defined provide additional
-      information to the compiler on the dimensionality most likely to be used when
-      launching the kernel at runtime. The effect of this attribute, if any, is
+   a@ Provides a hint to the compiler about the work-group size most likely to
+      be used when launching the kernel at runtime.  The number of arguments
+      must match the dimensionality of the work-group used to invoke the
+      kernel, and the order of the arguments matches the order of the dimension
+      extents to the [code]#range# constructor.  Each argument must be an
+      integral constant expression.  The effect of this attribute, if any, is
       implementation-defined.
 
 a@
@@ -594,9 +595,8 @@ device_has(aspect, ...)
       description applies when the attribute decorates a kernel function.
 
 The parameter list to the [code]#sycl::device_has()# attribute consists of zero
-or more [code]#constexpr# integral expressions, where each integer is
-interpreted as one of the enumerated values in the [code]#sycl::aspect#
-enumeration type.
+or more integral constant expressions, where each integer is interpreted as one
+of the enumerated values in the [code]#sycl::aspect# enumeration type.
 
 Specifying this attribute on a kernel has two effects.  First, it causes the
 <<kernel-invocation-command>> to throw a synchronous exception with the
