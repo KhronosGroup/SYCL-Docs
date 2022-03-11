@@ -19183,6 +19183,21 @@ sgenfloat
 a@
 [source]
 ----
+vgenfloat
+----
+   a@ [code]#float{n}#, [code]#double{n}#, [code]#half{n}#
+
+a@
+[source]
+----
+mgenfloat
+----
+   a@ [code]#marray<float,{N}>#, [code]#marray<double,{N}>#,
+      [code]#marray<half,{N}>#
+
+a@
+[source]
+----
 gengeofloat
 ----
    a@ [code]#float#, [code]#float2#, [code]#float3#, [code]#float4#, [code]#mfloat2#,
@@ -19399,6 +19414,39 @@ igenintegerNbit
 a@
 [source]
 ----
+sigeninteger
+----
+   a@ [code]#signed char#,
+      [code]#short#,
+      [code]#int#,
+      [code]#long int#,
+      [code]#long long int#
+
+a@
+[source]
+----
+vigeninteger
+----
+   a@ [code]#schar{n}#,
+      [code]#short{n}#,
+      [code]#int{n}#,
+      [code]#long{n}#,
+      [code]#longlong{n}#
+
+a@
+[source]
+----
+migeninteger
+----
+   a@ [code]#marray<signed char,{N}>#,
+      [code]#marray<short,{N}>#,
+      [code]#marray<int,{N}>#,
+      [code]#marray<long,{N}>#,
+      [code]#marray<long long,{N}>#
+
+a@
+[source]
+----
 ugeninteger
 ----
    a@ [code]#ugenchar#, [code]#ugenshort#, [code]#ugenint#, [code]#ugenlonginteger#
@@ -19414,11 +19462,56 @@ ugenintegerNbit
 a@
 [source]
 ----
+sugeninteger
+----
+   a@ [code]#unsigned char#,
+      [code]#unsigned short#,
+      [code]#unsigned int#,
+      [code]#unsigned long int#,
+      [code]#unsigned long long int#
+
+a@
+[source]
+----
+vugeninteger
+----
+   a@ [code]#uchar{n}#,
+      [code]#ushort{n}#,
+      [code]#uint{n}#,
+      [code]#ulong{n}#,
+      [code]#ulonglong{n}#
+
+a@
+[source]
+----
+mugeninteger
+----
+   a@ [code]#marray<unsigned char,{N}>#,
+      [code]#marray<unsigned short,{N}>#,
+      [code]#marray<unsigned int,{N}>#,
+      [code]#marray<unsigned long int,{N}>#,
+      [code]#marray<unsigned long long int,{N}>#
+
+a@
+[source]
+----
 sgeninteger
 ----
-   a@ [code]#char#, [code]#signed# char, [code]#unsigned# char, [code]#short#, [code]#unsigned#
-      short, [code]#int#, [code]#unsigned# int, [code]#long# int, [code]#unsigned# long int,
-      [code]#long# long int, [code]#unsigned# long long int
+   a@ [code]#char#, [code]#sigeninteger#, [code]#sugeninteger#
+
+a@
+[source]
+----
+vgeninteger
+----
+   a@ [code]#char{n}#, [code]#vigeninteger#, [code]#vugeninteger#
+
+a@
+[source]
+----
+mgeninteger
+----
+   a@ [code]#marray<char,{N}>#, [code]#migeninteger#, [code]#mugeninteger#
 
 a@
 [source]
@@ -19426,6 +19519,27 @@ a@
 gentype
 ----
    a@ [code]#genfloat#, [code]#geninteger#
+
+a@
+[source]
+----
+sgentype
+----
+   a@ [code]#sgenfloat#, [code]#sgeninteger#
+
+a@
+[source]
+----
+vgentype
+----
+   a@ [code]#vgenfloat#, [code]#vgeninteger#
+
+a@
+[source]
+----
+mgentype
+----
+   a@ [code]#mgenfloat#, [code]#mgeninteger#
 
 a@
 [source]
@@ -21579,352 +21693,361 @@ with the following exceptions:
 
 === Relational functions
 
-In SYCL the OpenCL [keyword]#relational functions# are available in the
-namespace [code]#sycl# on host and device as defined in the
-OpenCL 1.2 specification document <<opencl12, par. 6.12.6>>. The
-built-in functions can take as input [code]#char#,
-[code]#unsigned char#, [code]#short#,
-[code]#unsigned short#, [code]#int#,
-[code]#unsigned int#,
-[code]#long#, [code]#unsigned long#, [code]#float# or
-optionally [code]#double# and their [code]#vec# and
-[code]#marray# counterparts.  The relational functions are
-provided in addition to the operators.
+The follow free functions are defined in the [code]#sycl# namespace and are
+available on both host and device.  These functions perform various relational
+comparisons on [code]#vec#, [code]#marray#, and scalar types.
 
-The available built-in functions for [code]#vec# template class are described in
-<<table.relational.functions.vec>>
+The functions [code]#isequal#, [code]#isgreater#, [code]#isgreaterequal#,
+[code]#isless#, [code]#islessequal#, and [code]#islessgreater# compare true
+when one or both operands are NaN.  The function [code]#isnotequal# compares
+false when one or both operands are NaN.
 
+The [code]#vec# versions of these functions follow the definitions in the
+OpenCL 1.2 specification document <<opencl12, par. 6.12.6>>.  Unless otherwise
+specified, these functions return a vector component of -1 (i.e. all bits set)
+when the comparison is true and 0 when the comparison is false.
+
+<<table.relational.functions.vec>> shows the functions that are available for
+the [code]#vec# type.
 
 [[table.relational.functions.vec]]
-.Relational functions for [code]#vec# template class which work on SYCL host and device, are available in the [code]#sycl# namespace. They correspond to <<opencl12, Table 6.14 of the OpenCL 1.2 specification>>.
+.Relational functions for the [code]#vec# template class.
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Relational Function @ Description
 a@
 [source]
 ----
-igeninteger32bit isequal (genfloatf x, genfloatf y)
-igeninteger64bit isequal (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isequal (half{n} x, half{n} y)
+vec<int32_t,{n}> isequal (float{n} x, float{n} y)
+vec<int64_t,{n}> isequal (double{n} x, double{n} y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x == y].
+   a@ Returns the component-wise compare of [code]#x == y#.
 
 a@
 [source]
 ----
-igeninteger32bit isnotequal (genfloatf x, genfloatf y)
-igeninteger64bit isnotequal (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isnotequal (half{n} x, half{n} y)
+vec<int32_t,{n}> isnotequal (float{n} x, float{n} y)
+vec<int64_t,{n}> isnotequal (double{n} x, double{n} y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x != y].
+   a@ Returns the component-wise compare of [code]#x != y#.
 
 a@
 [source]
 ----
-igeninteger32bit isgreater (genfloatf x, genfloatf y)
-igeninteger64bit isgreater (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isgreater (half{n} x, half{n} y)
+vec<int32_t,{n}> isgreater (float{n} x, float{n} y)
+vec<int64_t,{n}> isgreater (double{n} x, double{n} y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x > y].
+   a@ Returns the component-wise compare of [code]#x > y#.
 
 a@
 [source]
 ----
-igeninteger32bit isgreaterequal (genfloatf x, genfloatf y)
-igeninteger64bit isgreaterequal (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isgreaterequal (half{n} x, half{n} y)
+vec<int32_t,{n}> isgreaterequal (float{n} x, float{n} y)
+vec<int64_t,{n}> isgreaterequal (double{n} x, double{n} y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x >= y].
+   a@ Returns the component-wise compare of [code]#x >= y#.
 
 a@
 [source]
 ----
-igeninteger32bit isless (genfloatf x, genfloatf y)
-igeninteger64bit isless (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isless (half{n} x, half{n} y)
+vec<int32_t,{n}> isless (float{n} x, float{n} y)
+vec<int64_t,{n}> isless (double{n} x, double{n} y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x < y].
+   a@ Returns the component-wise compare of [code]#x < y#.
 
 a@
 [source]
 ----
-igeninteger32bit islessequal (genfloatf x, genfloatf y)
-igeninteger64bit islessequal (genfloatd x, genfloatd y)
+vec<int16_t,{n}> islessequal (half{n} x, half{n} y)
+vec<int32_t,{n}> islessequal (float{n} x, float{n} y)
+vec<int64_t,{n}> islessequal (double{n} x, double{n} y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x <= y].
+   a@ Returns the component-wise compare of [code]#+x <= y+#.
 
 a@
 [source]
 ----
-igeninteger32bit islessgreater (genfloatf x, genfloatf y)
-igeninteger64bit islessgreater (genfloatd x, genfloatd y)
+vec<int16_t,{n}> islessgreater (half{n} x, half{n} y)
+vec<int32_t,{n}> islessgreater (float{n} x, float{n} y)
+vec<int64_t,{n}> islessgreater (double{n} x, double{n} y)
 ----
    a@ Returns the component-wise compare of
-      latexmath:[(x < y) || (x > y)].
+      [code]#(x < y) || (x > y)#.
 
 a@
 [source]
 ----
-igeninteger32bit isfinite (genfloatf x)
-igeninteger64bit isfinite (genfloatd x)
+vec<int16_t,{n}> isfinite (half{n} x)
+vec<int32_t,{n}> isfinite (float{n} x)
+vec<int64_t,{n}> isfinite (double{n} x)
 ----
    a@ Test for finite value.
 
 a@
 [source]
 ----
-igeninteger32bit isinf (genfloatf x)
-igeninteger64bit isinf (genfloatd x)
+vec<int16_t,{n}> isinf (half{n} x)
+vec<int32_t,{n}> isinf (float{n} x)
+vec<int64_t,{n}> isinf (double{n} x)
 ----
    a@ Test for infinity value (positive or negative) .
 
 a@
 [source]
 ----
-igeninteger32bit isnan (genfloatf x)
-igeninteger64bit isnan (genfloatd x)
+vec<int16_t,{n}> isnan (half{n} x)
+vec<int32_t,{n}> isnan (float{n} x)
+vec<int64_t,{n}> isnan (double{n} x)
 ----
    a@ Test for a NaN.
 
 a@
 [source]
 ----
-igeninteger32bit isnormal (genfloatf x)
-igeninteger64bit isnormal (genfloatd x)
+vec<int16_t,{n}> isnormal (half{n} x)
+vec<int32_t,{n}> isnormal (float{n} x)
+vec<int64_t,{n}> isnormal (double{n} x)
 ----
    a@ Test for a normal value.
 
 a@
 [source]
 ----
-igeninteger32bit isordered (genfloatf x, genfloatf y)
-igeninteger64bit isordered (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isordered (half{n} x, half{n} y)
+vec<int32_t,{n}> isordered (float{n} x, float{n} y)
+vec<int64_t,{n}> isordered (double{n} x, double{n} y)
 ----
-   a@ Test if arguments are ordered. isordered() takes arguments x and y, and
-      returns the result [code]#isequal(x, x) && isequal(y, y)#.
+   a@ Test if arguments are ordered. [code]#isordered()# takes arguments
+      [code]#x# and [code]#y#, and returns the result
+      [code]#isequal(x, x) && isequal(y, y)#.
 
 a@
 [source]
 ----
-igeninteger32bit isunordered (genfloatf x, genfloatf y)
-igeninteger64bit isunordered (genfloatd x, genfloatd y)
+vec<int16_t,{n}> isunordered (half{n} x, half{n} y)
+vec<int32_t,{n}> isunordered (float{n} x, float{n} y)
+vec<int64_t,{n}> isunordered (double{n} x, double{n} y)
 ----
-   a@ Test if arguments are unordered. isunordered()
-      takes arguments x and y, returning non-zero if x or
-      y is NaN, and zero otherwise.
+   a@ Test if arguments are unordered. [code]#isunordered()# takes arguments
+      [code]#x# and [code]#y#, returning non-zero if [code]#x# or [code]#y# is
+      NaN, and zero otherwise.
 
 a@
 [source]
 ----
-igeninteger32bit signbit (genfloatf x)
-igeninteger64bit signbit (genfloatd x)
+vec<int16_t,{n}> signbit (half{n} x)
+vec<int32_t,{n}> signbit (float{n} x)
+vec<int64_t,{n}> signbit (double{n} x)
 ----
-   a@ Test for sign bit. The scalar version of the
-      function returns a 1 if the sign bit in the float is set
-      else returns 0.
-
-The vector version of the function
-returns the following for each component in [keyword]#floatn#:
-
--1 (i.e all bits set) if the sign bit in the float is set
-else returns 0.
+   a@ Test for sign bit.  Returns the following for each component in
+      [code]#x#: -1 (i.e all bits set) if the sign bit in the component value
+      is set else returns 0.
 
 a@
 [source]
 ----
-int any (igeninteger x)
+int any (vigeninteger x)
 ----
    a@ Returns 1 if the most significant bit in any
-      component of x is set; otherwise returns 0.
+      component of [code]#x# is set; otherwise returns 0.
 
 a@
 [source]
 ----
-int all (igeninteger x)
+int all (vigeninteger x)
 ----
    a@ Returns 1 if the most significant bit in all
-      components of x is set; otherwise returns 0.
+      components of [code]#x# is set; otherwise returns 0.
 
 a@
 [source]
 ----
-gentype bitselect (gentype a, gentype b, gentype c)
+vgentype bitselect (vgentype a, vgentype b, vgentype c)
 ----
-   a@ Each bit of the result is the corresponding bit of a
-      if the corresponding bit of c is 0. Otherwise it is
-      the corresponding bit of b.
+   a@ Each bit of the result is the corresponding bit of [code]#a#
+      if the corresponding bit of [code]#c# is 0. Otherwise it is
+      the corresponding bit of [code]#b#.
 
 a@
 [source]
 ----
-geninteger select (geninteger a, geninteger b, igeninteger c)
-geninteger select (geninteger a, geninteger b, ugeninteger c)
-genfloatf select (genfloatf a, genfloatf b, genint c)
-genfloatf select (genfloatf a, genfloatf b, ugenint c)
-genfloatd select (genfloatd a, genfloatd b, igeninteger64 c)
-genfloatd select (genfloatd a, genfloatd b, ugeninteger64 c)
+vgentype select (vgentype a, vgentype b, vigeninteger c)
+vgentype select (vgentype a, vgentype b, vugeninteger c)
 ----
    a@ For each component of a vector type:
 
 [code]#result[i] = (MSB of c[i] is set) ? b[i] : a[i]#.
 
-For a scalar type:
-[code]#result = c ? b : a#.
-
-[code]#geninteger# must have the same number of elements and bits as
-[code]#gentype#.
+[code]#vigeninteger# and [code]#vugeninteger# must have the same number of
+elements and bits as [code]#vgentype#.
 
 |====
 
 
-The available built-in functions for [code]#marray# template class are described in
-<<table.relational.functions.marray>>
-
+<<table.relational.functions.marray>> shows the functions that are available
+for the [code]#marray# type and for scalar data types.
 
 [[table.relational.functions.marray]]
-.Relational functions for scalar data types and [code]#marray# template class template class which work on SYCL host and device, are available in the [code]#sycl# namespace.
-[width="100%",options="header",separator="@",cols="65%,35%"]
+.Relational functions for the [code]#maray# template class and for scalar data types.
+[width="100%",options="header",separator="@",cols="66%,34%"]
 |====
 @ Relational Function @ Description
 a@
 [source]
 ----
-genbool isequal (genfloatf x, genfloatf y)
-genbool isequal (genfloatd x, genfloatd y)
+bool isequal (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isequal (mgenfloat x, mgenfloat y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x == y].
+   a@ Returns the component-wise compare of [code]#x == y#.
 
 a@
 [source]
 ----
-genbool isnotequal (genfloatf x, genfloatf y)
-genbool isnotequal (genfloatd x, genfloatd y)
+bool isnotequal (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isnotequal (mgenfloat x, mgenfloat y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x != y].
+   a@ Returns the component-wise compare of [code]#x != y#.
 
 a@
 [source]
 ----
-genbool isgreater (genfloatf x, genfloatf y)
-genbool isgreater (genfloatd x, genfloatd y)
+bool isgreater (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isgreater (mgenfloat x, mgenfloat y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x > y].
+   a@ Returns the component-wise compare of [code]#x > y#.
 
 a@
 [source]
 ----
-genbool isgreaterequal (genfloatf x, genfloatf y)
-genbool isgreaterequal (genfloatd x, genfloatd y)
+bool isgreaterequal (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isgreaterequal (mgenfloat x, mgenfloat y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x >= y].
+   a@ Returns the component-wise compare of [code]#x >= y#.
 
 a@
 [source]
 ----
-genbool isless (genfloatf x, genfloatf y)
-genbool isless (genfloatd x, genfloatd y)
+bool isless (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isless (mgenfloat x, mgenfloat y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x < y].
+   a@ Returns the component-wise compare of [code]#x < y#.
 
 a@
 [source]
 ----
-genbool islessequal (genfloatf x, genfloatf y)
-genbool islessequal (genfloatd x, genfloatd y)
+bool islessequal (sgenfloat x, sgenfloat y)
+marray<bool,{N}> islessequal (mgenfloat x, mgenfloat y)
 ----
-   a@ Returns the component-wise compare of latexmath:[x <= y].
+   a@ Returns the component-wise compare of [code]#+x <= y+#.
 
 a@
 [source]
 ----
-genbool islessgreater (genfloatf x, genfloatf y)
-genbool islessgreater (genfloatd x, genfloatd y)
+bool islessgreater (sgenfloat x, sgenfloat y)
+marray<bool,{N}> islessgreater (mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of
-      latexmath:[(x < y) || (x > y)].
+      [code]#(x < y) || (x > y)#.
 
 a@
 [source]
 ----
-genbool isfinite (genfloatf x)
-genbool isfinite (genfloatd x)
+bool isfinite (sgenfloat x)
+marray<bool,{N}> isfinite (mgenfloat x)
 ----
    a@ Test for finite value.
 
 a@
 [source]
 ----
-genbool isinf (genfloatf x)
-genbool isinf (genfloatd x)
+bool isinf (sgenfloat x)
+marray<bool,{N}> isinf (mgenfloat x)
 ----
    a@ Test for infinity value (positive or negative) .
 
 a@
 [source]
 ----
-genbool isnan (genfloatf x)
-genbool isnan (genfloatd x)
+bool isnan (sgenfloat x)
+marray<bool,{N}> isnan (mgenfloat x)
 ----
    a@ Test for a NaN.
 
 a@
 [source]
 ----
-genbool isnormal (genfloatf x)
-genbool isnormal (genfloatd x)
+bool isnormal (sgenfloat x)
+marray<bool,{N}> isnormal (mgenfloat x)
 ----
    a@ Test for a normal value.
 
 a@
 [source]
 ----
-genbool isordered (genfloatf x, genfloatf y)
-genbool isordered (genfloatd x, genfloatd y)
+bool isordered (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isordered (mgenfloat x, mgenfloat y)
 ----
-   a@ Test if arguments are ordered. isordered() takes arguments x and y, and
-      returns the result [code]#isequal(x, x) && isequal(y, y)#.
+   a@ Test if arguments are ordered. [code]#isordered()# takes arguments
+      [code]#x# and [code]#y#, and returns the result
+      [code]#isequal(x, x) && isequal(y, y)#.
 
 a@
 [source]
 ----
-genbool isunordered (genfloatf x, genfloatf y)
-genbool isunordered (genfloatd x, genfloatd y)
+bool isunordered (sgenfloat x, sgenfloat y)
+marray<bool,{N}> isunordered (mgenfloat x, mgenfloat y)
 ----
-   a@ Test if arguments are unordered. isunordered()
-      takes arguments x and y, returning [code]#true# if x or
-      y is NaN, and [code]#false# otherwise.
+   a@ Test if arguments are unordered. [code]#isunordered()#
+      takes arguments [code]#x# and [code]#y#, returning [code]#true# if
+      [code]#x# or [code]#y# is NaN, and [code]#false# otherwise.
 
 a@
 [source]
 ----
-genbool signbit (genfloatf x)
-genbool signbit (genfloatd x)
+bool signbit (sgenfloat x)
+marray<bool,{N}> signbit (mgenfloat x)
 ----
    a@ Test for sign bit, returning [code]#true# if the sign bit
-      in the float is set, and [code]#false# otherwise.
+      in [code]#x# is set, and [code]#false# otherwise.
 
 a@
 [source]
 ----
-bool any (genbool x)
+bool any (sigeninteger x)
+bool any (migeninteger x)
 ----
-   a@ Returns [code]#true# if the most significant bit in any component of x is set; otherwise returns [code]#false#.
+   a@ Returns [code]#true# if the most significant bit in any component of
+      [code]#x# is set; otherwise returns [code]#false#.
 
 a@
 [source]
 ----
-int all (igeninteger x)
+bool all (sigeninteger x)
+bool all (migeninteger x)
 ----
-   a@ Returns [code]#true# if the most significant bit in all components of x is set; otherwise returns [code]#false#.
+   a@ Returns [code]#true# if the most significant bit in all components of
+      [code]#x# is set; otherwise returns [code]#false#.
 
 a@
 [source]
 ----
-gentype bitselect (gentype a, gentype b, gentype c)
+sgentype bitselect (sgentype a, sgentype b, sgentype c)
+mgentype bitselect (mgentype a, mgentype b, mgentype c)
 ----
-   a@ Each bit of the result is the corresponding bit of a
-      if the corresponding bit of c is 0. Otherwise it is
-      the corresponding bit of b.
+   a@ Each bit of the result is the corresponding bit of [code]#a#
+      if the corresponding bit of [code]#c# is 0. Otherwise it is
+      the corresponding bit of [code]#b#.
 
 a@
 [source]
 ----
-gentype select (gentype a, gentype b, genbool c)
+sgentype select (sgentype a, sgentype b, bool c)
+mgentype select (mgentype a, mgentype b, marray<bool,{N}> c)
 ----
    a@ Returns the component-wise [code]#result = c ? b : a#.
 
