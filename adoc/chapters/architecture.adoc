@@ -948,7 +948,6 @@ scope will be allocated in local memory.
 
 Users can create accessors that reference sub-buffers as well as entire buffers.
 
-
 Within kernels, the underlying {cpp} pointer types can be obtained from an
 accessor. The pointer types will contain a compile-time deduced address space.
 So, for example, if a {cpp} pointer is obtained from an accessor to global memory,
@@ -961,18 +960,16 @@ When developers need to explicitly state the address space of a pointer value,
 one of the explicit pointer classes can be used. There is a different explicit
 pointer class for each address space: [code]#sycl::raw_local_ptr#,
 [code]#sycl::raw_global_ptr#, [code]#sycl::raw_private_ptr#,
- [code]#sycl::raw_generic_ptr#,
+[code]#sycl::raw_generic_ptr#,
 [code]#sycl::decorated_local_ptr#,
 [code]#sycl::decorated_global_ptr#, [code]#sycl::decorated_private_ptr#,
- or [code]#sycl::decorated_generic_ptr#.
+or [code]#sycl::decorated_generic_ptr#.
 
 The classes with the [code]#decorated# prefix expose pointers that use an
 implementation-defined address space decoration, while the classes with the
 [code]#raw# prefix do not. Buffer accessors with an access target
 [code]#target::device# or [code]#target::constant_buffer# and local accessors
-can be converted into explicit pointer classes ([code]#multi_ptr)#. Explicit
-pointer class values cannot be passed as arguments to kernels or stored in
-global memory.
+can be converted into explicit pointer classes ([code]#multi_ptr#).
 
 For templates that need to adapt to different address spaces, a
 [code]#sycl::multi_ptr# class is defined which is templated
