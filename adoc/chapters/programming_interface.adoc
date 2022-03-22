@@ -12840,16 +12840,6 @@ where buffers (<<subsec:buffers>>) and accessor (<<subsec:accessors>>) classes
 are described.  The overall memory model of the SYCL application is described in
 <<sub.section.memmodel.app>>.
 
-It is possible to obtain events for the start of the <<command-group-function-object>>,
-the kernel starting, and the command group completing.
-These events are useful for
-profiling and synchronization of kernels.
-When using buffers, safe synchronization in SYCL requires synchronization on
-buffer availability, not on kernel completion. This is because
-the memory that data is stored in upon kernel
-completion is not rigidly specified. The events are provided at the submission of the
-<<command-group-function-object>> to the queue to be executed on.
-
 It is possible for a <<command-group-function-object>> to fail to enqueue to a queue,
 or for it to fail to execute correctly. A user can therefore supply a secondary
 queue when submitting a command group to the primary queue. If the <<sycl-runtime>>
