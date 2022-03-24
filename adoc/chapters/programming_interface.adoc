@@ -177,13 +177,16 @@ interface for interoperating between the <<sycl-runtime>> object and the
 <<native-backend-object>> in order to support interoperability within an
 application between SYCL and the associated <<backend-api>>.
 
-There are two forms of interoperability with <<sycl-runtime>> classes:
-interoperability on the <<sycl-application>> with the <<backend-api>>
-and interoperability within a <<sycl-kernel-function>> with the equivalent
-kernel language types of the <<backend>>. <<sycl-application,SYCL application>>
-interoperability and <<sycl-kernel-function>> interoperability are
-provided via different interfaces and may have different
-<<native-backend-object>> types.
+There are three forms of interoperability with <<sycl-runtime>> classes:
+interoperability on the <<sycl-application>> with the <<backend-api>>,
+interoperability within a <<sycl-kernel-function>> with the equivalent kernel
+language types of the <<backend>>, and interoperability within a <<host-task>>
+with the [code]#interop_handle#.
+
+<<sycl-application,SYCL application>> interoperability,
+<<sycl-kernel-function>> interoperability and <<host-task>> interoperability
+are provided via different interfaces and may have different behavior for the
+same SYCL object.
 
 <<sycl-application,SYCL application>> interoperability may be provided for
 [code]#buffer#,
@@ -206,6 +209,15 @@ provided via different interfaces and may have different
 [code]#stream# and
 [code]#unsampled_image_accessor#
 inside <<kernel-scope>> only and is not available outside of that scope.
+
+<<host-task>> interoperability may be provided for
+[code]#accessor#,
+[code]#sampled_image_accessor#,
+[code]#unsampled_image_accessor#,
+[code]#queue#,
+[code]#device#,
+[code]#context
+inside the scope of a <<host-task>> only, see <<subsec:interfaces.hosttasks>>.
 
 Support for <<backend>> interoperability is optional and therefore not required
 to be provided by a SYCL implementation. A SYCL application using <<backend>>
@@ -6475,10 +6487,12 @@ following values for the [code]#AccessMode# template parameter:
     | Access a buffer from a <<host-task>>.
 |====
 
-Programs which specify the access target as [code]#target::device# and then use
-the [code]#accessor# from a <<host-task>> are ill formed.  Likewise, programs
-which specify the access target as [code]#target::host_task# and then use the
-[code]#accessor# from a <<sycl-kernel-function>> are ill formed.
+Programs which specify the access target as [code]#target::device# and then
+capture the [code]#accessor# in a <<host-task>> can only use the accessor for
+interoperability through the [code]#interop_handle#.
+
+Programs which specify the access target as [code]#target::host_task# and then
+use the [code]#accessor# from a <<sycl-kernel-function>> are ill formed.
 
 The dimensionality of the accessor must match the underlying buffer, however,
 there is a special case if the buffer is one-dimensional.  In this case, the
@@ -14233,8 +14247,11 @@ defined in <<sub.section.memmodel.app>>.
 Since a <<host-task>> is invoked directly by the <<sycl-runtime>> rather
 than being compiled as a <<sycl-kernel-function>>, it does not have the same
 restrictions as a <<sycl-kernel-function>>, and can therefore contain any
-arbitrary {cpp} code. However, capturing or using any SYCL class that has reference
-semantics (see <<sec:reference-semantics>>) is undefined behavior.
+arbitrary {cpp} code.
+
+Capturing <<accessor,accessors>> in a <<host-task>> is allowed, however,
+capturing or using any other SYCL class that has reference semantics (see
+<<sec:reference-semantics>>) is undefined behavior.
 
 A <<host-task>> can be enqueued on any <<queue>> and the callable will be
 invoked directly by the SYCL runtime, regardless of which <<device>> the
@@ -14344,14 +14361,12 @@ include::{header_dir}/hostTask/classInteropHandle/getnativeX.h[lines=4..-1]
     [code]#target::device#.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<accessor>>
-[code]#bufferAcc#. The <<native-backend-object>> returned must
-be in a state where it represents the memory in its current state within the
-<<sycl-runtime>> dependency model and is capable of being used in a way
-appropriate for the associated <<backend>>. It is undefined behavior to
-use the <<native-backend-object>> outside of the scope of the
-<<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the underlying
+<<buffer>> of <<accessor>> [code]#bufferAcc#.  The <<native-backend-object>>
+returned must be in a state where it represents the memory in its current state
+within the <<sycl-runtime>> dependency model and is capable of being used in a
+way appropriate for the associated <<backend>>. It is undefined behavior to use
+the <<native-backend-object>> outside of the scope of the <<host-task>>.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 <<accessor>> [code]#bufferAcc# was not registered with the
@@ -14363,14 +14378,13 @@ _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
     is available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<accessor>>
-[code]#imageAcc#. The <<native-backend-object>> returned must be
-in a state where it represents the memory in its current state within the
-<<sycl-runtime>> dependency model and is capable of being used in a way
-appropriate for the associated <<backend>>. It is undefined behavior to
-use the <<native-backend-object>> outside of the scope of the
-<<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with with the underlying
+[code]#unsampled_image# of <<accessor>> [code]#imageAcc#. The
+<<native-backend-object>> returned must be in a state where it represents the
+memory in its current state within the <<sycl-runtime>> dependency model and is
+capable of being used in a way appropriate for the associated <<backend>>. It
+is undefined behavior to use the <<native-backend-object>> outside of the scope
+of the <<host-task>>.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 <<accessor>> [code]#imageAcc# was not registered with the
@@ -14381,14 +14395,13 @@ _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
     is available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<accessor>>
-[code]#imageAcc#. The <<native-backend-object>> returned must be
-in a state where it represents the memory in its current state within the
-<<sycl-runtime>> dependency model and is capable of being used in a way
-appropriate for the associated <<backend>>. It is undefined behavior to
-use the <<native-backend-object>> outside of the scope of the
-<<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with with the underlying
+[code]#sampled_image# of <<accessor>> [code]#imageAcc#. The
+<<native-backend-object>> returned must be in a state where it represents the
+memory in its current state within the <<sycl-runtime>> dependency model and is
+capable of being used in a way appropriate for the associated <<backend>>. It
+is undefined behavior to use the <<native-backend-object>> outside of the scope
+of the <<host-task>>.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 <<accessor>> [code]#imageAcc# was not registered with the
@@ -14400,15 +14413,14 @@ _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
     available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<queue>> that the
-<<host-task>> was submitted to. If the <<command-group>> was submitted
-with a secondary <<queue>> and the fall-back was triggered, the
-<<queue>> that is associated with the [code]#interop_handle# must be
-the fall-back <<queue>>. The <<native-backend-object>> returned must be
-in a state where it is capable of being used in a way appropriate for the
-associated <<backend>>. It is undefined behavior to use the
-<<native-backend-object>> outside of the scope of the <<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the <<queue>> that the
+<<host-task>> was submitted to. If the <<command-group>> was submitted with a
+secondary <<queue>> and the fall-back was triggered, the <<queue>> that is
+associated with the [code]#interop_handle# must be the fall-back <<queue>>. The
+<<native-backend-object>> returned must be in a state where it is capable of
+being used in a way appropriate for the associated <<backend>>. It is undefined
+behavior to use the <<native-backend-object>> outside of the scope of the
+<<host-task>>.
 
 _Throws:_ Must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if [code]#Backend != get_backend()#.
@@ -14418,13 +14430,12 @@ _Throws:_ Must throw an [code]#exception# with the
     available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<device>> that is
-associated with the <<queue>> that the <<host-task>> was submitted to.
-The <<native-backend-object>> returned must be in a state where it is
-capable of being used in a way appropriate for the associated <<backend>>.
-It is undefined behavior to use the <<native-backend-object>> outside of
-the scope of the <<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the <<device>> that is
+associated with the <<queue>> that the <<host-task>> was submitted to.  The
+<<native-backend-object>> returned must be in a state where it is capable of
+being used in a way appropriate for the associated <<backend>>.  It is
+undefined behavior to use the <<native-backend-object>> outside of the scope of
+the <<host-task>>.
 
 _Throws:_ Must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if [code]#Backend != get_backend()#.
@@ -14434,13 +14445,12 @@ _Throws:_ Must throw an [code]#exception# with the
     available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<context>> that is
-associated with the <<queue>> that the <<host-task>> was submitted to.
-The <<native-backend-object>> returned must be in a state where it is
-capable of being used in a way appropriate for the associated <<backend>>.
-It is undefined behavior to use the <<native-backend-object>> outside of
-the scope of the <<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the <<context>> that
+is associated with the <<queue>> that the <<host-task>> was submitted to.  The
+<<native-backend-object>> returned must be in a state where it is capable of
+being used in a way appropriate for the associated <<backend>>.  It is
+undefined behavior to use the <<native-backend-object>> outside of the scope of
+the <<host-task>>.
 
 _Throws:_ Must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if [code]#Backend != get_backend()#.
