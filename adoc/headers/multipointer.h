@@ -3,18 +3,19 @@
 
 namespace sycl {
 namespace access {
-enum class address_space : int {
+
+enum class address_space : /* unspecified */ {
   global_space,
   local_space,
   constant_space, // Deprecated in SYCL 2020
   private_space,
-  generic_space,
+  generic_space
 };
 
-enum class decorated : int {
+enum class decorated : /* unspecified */ {
   no,
   yes,
-  legacy,
+  legacy
 };
 
 }  // namespace access

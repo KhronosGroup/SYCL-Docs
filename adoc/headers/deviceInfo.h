@@ -86,7 +86,7 @@ struct partition_type_affinity_domain;
 
 }  // namespace device
 
-enum class device_type : unsigned int {
+enum class device_type : /* unspecified */ {
   cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
   gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
   accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
@@ -96,14 +96,14 @@ enum class device_type : unsigned int {
   all          // Maps to OpenCL CL_DEVICE_TYPE_ALL
 };
 
-enum class partition_property : int {
+enum class partition_property : /* unspecified */ {
   no_partition,
   partition_equally,
   partition_by_counts,
   partition_by_affinity_domain
 };
 
-enum class partition_affinity_domain : int {
+enum class partition_affinity_domain : /* unspecified */ {
   not_applicable,
   numa,
   L4_cache,
@@ -113,9 +113,13 @@ enum class partition_affinity_domain : int {
   next_partitionable
 };
 
-enum class local_mem_type : int { none, local, global };
+enum class local_mem_type : /* unspecified */ {
+  none,
+  local,
+  global
+};
 
-enum class fp_config : int {
+enum class fp_config : /* unspecified */ {
   denorm,
   inf_nan,
   round_to_nearest,
@@ -126,9 +130,13 @@ enum class fp_config : int {
   soft_float
 };
 
-enum class global_mem_cache_type : int { none, read_only, read_write };
+enum class global_mem_cache_type : /* unspecified */ {
+  none,
+  read_only,
+  read_write
+};
 
-enum class execution_capability : unsigned int {
+enum class execution_capability : /* unspecified */ {
   exec_kernel,
   exec_native_kernel
 };

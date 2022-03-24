@@ -3,20 +3,20 @@
 
 namespace sycl {
 
-enum class target {
+enum class target : /* unspecified */ {
   device,
   host_task,
-  global_buffer = device,             // Deprecated
   constant_buffer,                    // Deprecated
   local,                              // Deprecated
-  host_buffer                         // Deprecated
+  host_buffer,                        // Deprecated
+  global_buffer = device              // Deprecated
 };
 
 namespace access {
   // The legacy type "access::target" is deprecated.
   using sycl::target;
 
-enum class placeholder { // Deprecated
+enum class placeholder : /* unspecified */ { // Deprecated
   false_t,
   true_t
 };

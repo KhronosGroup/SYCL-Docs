@@ -3,7 +3,7 @@
 
 namespace sycl {
 
-enum class aspect {
+enum class aspect : /* unspecified */ {
   cpu,
   gpu,
   accelerator,

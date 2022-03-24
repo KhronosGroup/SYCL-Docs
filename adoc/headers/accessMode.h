@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-enum class access_mode {
+
+enum class access_mode : /* unspecified */ {
   read,
   write,
   read_write,
@@ -15,4 +16,5 @@ namespace access {
   // The legacy type "access::mode" is deprecated.
   using mode = sycl::access_mode;
 }  // namespace access
+
 }  // namespace sycl
