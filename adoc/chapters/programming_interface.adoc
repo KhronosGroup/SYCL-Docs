@@ -6060,9 +6060,23 @@ to local memory on a <<device>>, and they define the *requirements* to memory
 objects which determine the scheduling of <<kernel,kernels>> (see
 <<sub.section.memmodel.app>>).
 
-A memory object requirement is created when an accessor is constructed, unless
-the accessor is a placeholder in which case the requirement is created when
-the accessor is bound to a <<command>> by calling [code]#handler::require()#.
+A memory object requirement is created by a <<command-group-function-object>>
+whenever a non-placeholder accessor is constructed during execution of that
+function and whenever a placeholder accessor is bound to a <<command>> during
+execution of that function by calling [code]#handler::require()#.  These
+requirements are created sometime after the <<command-group-function-object>>
+returns to the [code]#submit()# function and before the [code]#submit()#
+function itself returns.
+
+[NOTE]
+====
+Since the memory object requirements aren't created until after the command
+group function object returns, it is generally unwise to construct a buffer or
+image inside of command group scope.  The destructor for the buffer or image
+only blocks when there is a memory requirement, but variables defined in the
+command group function object go out of scope before those requirements are
+added.
+====
 
 There are several different {cpp} classes that implement accessors:
 
@@ -6437,6 +6451,15 @@ placeholder accessor is passed as an argument to a <<command>> without first
 being bound to a <<command-group>> with [code]#handler::require()#, the
 implementation throws a synchronous [code]#exception# with the
 [code]#errc::kernel_argument# error code when the <<command>> is submitted.
+
+An [code]#accessor# to a buffer is only a view over that buffer.  Therefore,
+it is the application's responsibility to ensure that the lifetime of the
+buffer is at least as long as the lifetime of the accessor.  Calling any
+member function on an accessor after its associated buffer has been destroyed
+results in undefined behavior.  In some cases the buffer destructor is defined
+to block until commands with requisites on that buffer have completed.  This
+results in well defined behavior so long as all invocations to member functions
+of accessors for that buffer occur before those commands complete.
 
 
 ===== Interface for buffer command accessors
@@ -7671,6 +7694,12 @@ The [code]#host_accessor# class supports the following access modes:
 [code]#access_mode::read#, [code]#access_mode::write# and
 [code]#access_mode::read_write#.
 
+A [code]#host_accessor# to a buffer is only a view over that buffer.
+Therefore, it is the application's responsibility to ensure that the lifetime
+of the buffer is at least as long as the lifetime of the host accessor.
+Calling any member function on a host accessor after its associated buffer has
+been destroyed results in undefined behavior.
+
 
 ===== Interface for buffer host accessors
 
@@ -8472,6 +8501,16 @@ template parameter as [code]#image_target::host_task# and then use the
 [code]#unsampled_image_accessor# from a <<sycl-kernel-function>> are ill
 formed.
 
+An unsampled image accessor is only a view over its associated image.
+Therefore, it is the application's responsibility to ensure that the lifetime
+of the image is at least as long as the lifetime of the accessor.  Calling any
+member function on an unsampled image accessor after its associated image has
+been destroyed results in undefined behavior.  In some cases the image
+destructor is defined to block until commands with requisites on that image
+have completed.  This results in well defined behavior so long as all
+invocations to member functions of accessors for that image occur before those
+commands complete.
+
 
 ===== Interface for unsampled image accessors
 
@@ -8743,6 +8782,15 @@ the accessor can be used in a <<sycl-kernel-function>> while
 from a <<host-task>> are ill formed.  Likewise, programs which specify this
 template parameter as [code]#image_target::host_task# and then use the
 [code]#sampled_image_accessor# from a <<sycl-kernel-function>> are ill formed.
+
+A sampled image accessor is only a view over its associated image.  Therefore,
+it is the application's responsibility to ensure that the lifetime of the image
+is at least as long as the lifetime of the accessor.  Calling any member
+function on a sampled image accessor after its associated image has been
+destroyed results in undefined behavior.  In some cases the image destructor is
+defined to block until commands with requisites on that image have completed.
+This results in well defined behavior so long as all invocations to member
+functions of accessors for that image occur before those commands complete.
 
 
 
