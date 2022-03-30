@@ -463,25 +463,39 @@ for the SYCL classes which support kernel function interoperability.
 | [code]#stream#                                                     | signed char * | signed char * | Convert a SYCL `accessor` to an undecorated raw signed char pointer.
 |====
 
+[[sec:cuda_support_of_core_features]]
+== CUDA Support of Core SYCL Features
+
+Some core SYCL features require a minimum compute capability for the CUDA
+backend.
+
+[[table.extensionsupport]]
+.CUDA support for Core SYCL API features
+[width="100%",options="header",cols="33%,33%,33%"]
+|====
+| Feature                                   | SYCL Aspect               | Required Compute Capability 
+| [code]#16-bit floating point#             | [code]#aspect::fp16#      | 5.3 or greater
+|====
 
 [[sec:non_core_features_and_extensions]]
 == Non-core features and extensions
 
-Additional CUDA features are available depending upon the devices compute capability.
-SYCL can support these optional CUDA features with extensions.
-Unlike OpenCL, CUDA needs to know if the extension is available at compile time. 
-As a result there are no valid CUDA extensions which can be passed to `has_extension`.
+Additional CUDA features are available depending upon the device's compute 
+capability. SYCL can support these optional CUDA features with extensions.
 
-As the extension must be known at runtime CUDA extensions are best implemented 
-using feature test macros. The test macro format is 
-SYCL_EXT_<vendorstring>_<featurename>. For CUDA extensions this format translates 
-to SYCL_EXT_NVIDIA_<featurename>. Similarly, the format for the naming of extension 
-classes and enumerations should be ext_<vendorstring>_<featurename>. Which in this context
-becomes ext_NVIDIA_<featurename>. Given the necessity to know the extension at 
-compile-time, the usage of extension macros should be the primary method of determining 
-if the extension is available in the SYCL implementation not. 
-A list of non-core CUDA features which have SYCL support is below.
-Non-core CUDA features for require a compute capability of greater than 5.
+Use of CUDA extensions requires that the API for a given extension is available
+to the SYCL implementation. This needs to be determined at compile time. 
+Checking for the existence of feature test macros is the preferred method
+for checking whether an API exists. The feature test macro format 
+is `SYCL_EXT_<vendor>_<feature>`. The `<vendor>` string may also contain the
+word `CUDA` for features specific to CUDA. For example, the feature test macro
+for CUDA extensions in oneAPI may be either `SYCL_EXT_ONEAPI_CUDA_<feature>`,
+or just `SYCL_EXT_ONEAPI_<feature>`.
+
+Use of a given CUDA extension also requires that a chosen device has the
+required compute capability to use the CUDA extension. This can be determined
+using `sycl::aspect`s. Non-core SYCL aspects may be defined by an
+implementation which would allow this check to happen at runtime.
 
 TODO: The table below shows a proposal for SYCL supported CUDA extensions.
 The table should be developed with other members of the SYCL community.
@@ -490,18 +504,8 @@ The table should be developed with other members of the SYCL community.
 .SYCL support for CUDA 11.3 extensions
 [width="100%",options="header",cols="35%,35%,15%, 15"]
 |====
-| SYCL Aspect              | CUDA Extension                                        | Core SYCL API | Required Compute Capability 
-| [code]#aspect::fp16#     | [code]#16-bit floating point#                         | Yes           | 5.3 or greater
-| -                        | [code]#Tensor Cores#                                  | No            | 7 or greater
-| -                        | [code]#Atomic floating-point operations#              | No            | 6 or greater
+| CUDA Extension                            | SYCL Aspect   | Feature Test Macro               | Required Compute Capability 
 |====
-
-=== Aspects
-Aspects are used to query what features and attributes a device has. Some aspects such as `fp16`
-are non-core CUDA features. Therefore, the runtime must be able to determine what aspects CUDA 
-devices have. This can be performed by querying `cudaDeviceProp::major` and `cudaDeviceProp::minor`
-to find out the compute capability. The compute capability indicates what extensions are
-available to the device, and therefore what aspects are available.
 
 [[sec:cuda:extension-fp16]]
 === Half precision floating-point
