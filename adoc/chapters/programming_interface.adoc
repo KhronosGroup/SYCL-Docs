@@ -13233,8 +13233,13 @@ parameter.
 
 [NOTE]
 ====
-Case 3) above includes user-defined types that can be constructed from
-[code]#item#, enabling users to layer their own abstractions on top of SYCL.
+Case 3) above allows the kernel function to take an argument of type [code]#id#
+because [code]#item# is implicitly convertible to [code]#id#.  It also allows
+a 1-D kernel function to take an integral argument (e.g. [code]#int# or
+[code]#size_t#) because a 1-D [code]#item# is implicitly convertible to these
+types.  Finally, it allows the kernel function to take a user-defined argument
+type that can be constructed from [code]#item#, enabling users to layer their
+own abstractions on top of SYCL.
 ====
 
 The execution of the kernel function is the same whether the parameter to
@@ -13279,10 +13284,9 @@ include::{code_dir}/basicParallelForGeneric.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with
-[code]#parallel_for# using a lambda function and passing integral type
-(e.g. [code]#int#, [code]#size_t#) parameter. This example is only
-valid when calling [code]#parallel_for# with [code]#range<1>#. In
-this case only the global id is available. This variant of
+[code]#parallel_for# using a lambda function and passing an integral type
+parameter. This example is only valid when calling [code]#parallel_for# with
+[code]#range<1>#. In this case only the global id is available. This variant of
 [code]#parallel_for# is designed for when it is not necessary to query
 the global range of the index space being executed across.
 
