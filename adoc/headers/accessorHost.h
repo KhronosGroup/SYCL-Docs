@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Khronos Group, Inc.
+// Copyright (c) 2011-2022 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -6,7 +6,7 @@ template <typename DataT,
           int Dimensions = 1,
           access_mode AccessMode =
             (std::is_const_v<DataT> ? access_mode::read
-                                    : access_mode::read_write),
+                                    : access_mode::read_write)>
 class host_accessor {
  public:
   using value_type =             // const DataT for read-only accessors, DataT otherwise
