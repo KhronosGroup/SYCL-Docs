@@ -12761,7 +12761,9 @@ may execute a single <<command>> such as invoking a kernel, copying memory,
 or executing a host task.  It is legal for a <<command-group-scope>> to
 statically contain more than one call to a <<command>> function, but any
 single execution of the <<command-group-function-object>> may execute no more
-than one <<command>>.  The statements that call <<command, commands>> together with
+than one <<command>>. If an application fails to do this, the implementation
+must throw a synchronous [code]#exception# with the [code]#errc::invalid# error
+code. The statements that call <<command, commands>> together with
 the statements that define the requirements for a kernel form the
 <<command-group-function-object>>.  The command group
 function object takes as a parameter an instance of the <<handler>> class which
