@@ -332,6 +332,29 @@ expose index-flipping to the user.
 [[sec::programming_interface]]
 == Programming Interface
 
+[[sub:cuda:queries]]
+=== Queries
+
+For all event information profiling descriptors, the calls to 
+[code]#sycl::event::get_profiling_info# return the time (in nanoseconds) since 
+the creation of the context that the event is associated with. The "Resolution"
+(timing error) of the returned value is the same as that provided by the CUDA
+driver API call `cuEventElapsedTime`: +/- 0.5 microseconds. All event
+information profiling descriptors, defined by the SYCL specification, are
+supported by the CUDA backend.
+
+Currently no restrictions are defined for parameters of [code]#get_info# member
+function in classes [code]#platform#, [code]#context#, [code]#device#, 
+[code]#queue#, [code]#event# and [code]#kernel#. All parameter values defined 
+in the SYCL specification are supported.
+
+Querying for [code]#info::device::backend_version# by calling 
+[code]#device::get_info# returns the CUDA compute capability of the device.
+
+Currently no parameters are defined for [code]#get_backend_info# member 
+functions of classes [code]#platform#, [code]#context#, [code]#device#, 
+[code]#queue#, [code]#event# and [code]#kernel#.
+
 [[sub:cuda:application_interoperability]]
 === Application Interoperability
 
