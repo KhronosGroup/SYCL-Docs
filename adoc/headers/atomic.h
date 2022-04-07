@@ -3,8 +3,9 @@
 
 namespace cl {
 namespace sycl {
+
 /* Deprecated in SYCL 2020 */
-enum class memory_order : int {
+enum class memory_order : /* unspecified */ {
   relaxed
 };
 
@@ -57,5 +58,6 @@ class atomic {
   T fetch_max(T operand, memory_order memoryOrder =
     memory_order::relaxed);
 };
+
 }  // namespace sycl
 }  // namespace cl

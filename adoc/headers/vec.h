@@ -3,7 +3,7 @@
 
 namespace sycl {
 
-enum class rounding_mode {
+enum class rounding_mode : /* unspecified */ {
   automatic,
   rte,
   rtz,

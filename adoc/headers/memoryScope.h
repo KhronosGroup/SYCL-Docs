@@ -4,8 +4,13 @@
 namespace sycl {
 
 enum class memory_scope : /* unspecified */ {
-  work_item, sub_group, work_group, device, system
+  work_item,
+  sub_group,
+  work_group,
+  device,
+  system
 };
+
 inline constexpr auto memory_scope_work_item = memory_scope::work_item;
 inline constexpr auto memory_scope_sub_group = memory_scope::sub_group;
 inline constexpr auto memory_scope_work_group = memory_scope::work_group;

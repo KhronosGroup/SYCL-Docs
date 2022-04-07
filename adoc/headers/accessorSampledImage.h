@@ -3,7 +3,7 @@
 
 namespace sycl {
 
-enum class image_target {
+enum class image_target : /* unspecified */ {
   device,
   host_task
 };

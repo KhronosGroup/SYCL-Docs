@@ -3,7 +3,7 @@ g// Copyright (c) 2011-2021 The Khronos Group, Inc.
 
 namespace sycl {
 
-enum class image_target {
+enum class image_target : /* unspecified */ {
   device,
   host_task
 };
