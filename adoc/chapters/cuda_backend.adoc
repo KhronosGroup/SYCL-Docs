@@ -362,7 +362,7 @@ This section describes the API level interoperability between SYCL and CUDA.
 
 The CUDA backend supports API interoperability for `platform`, `device`,
 `context`, `queue`, and `event`. Interoperability for `buffer`, `kernel`,
-`kernel_bundle`, `device_image`, `sampled_image` and `unsampled_image` is not
+`kernel_bundle`, `device_image`, `sampled_image` and `unsampled_image` are not
 supported.
 
 [[table.cuda.appinterop.nativeobjects]]
@@ -372,11 +372,10 @@ supported.
 | [code]#SyclType# | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
 | [code]#platform# | `std::vector<CUdevice>`   | `std::vector<CUdevice>`  | A SYCL platform encapsulates a list of CUDA devices.
 | [code]#device#   | `CUdevice`                | `CUdevice`               | A SYCL device encapsulates a CUDA device.
-| [code]#context#  | `CUcontext`               | `std::vector<CUcontext>` | A SYCL context can encapsulate multiple CUDA contexts , however it is not possible to create a SYCL context from multiple CUDA contexts.
-| [code]#queue#    | `CUstream`   | `CUstream` | A SYCL queue encapsulates a CUDA stream.
-| [code]#event#    | `CUevent`    | `CUevent`  | A SYCL event encapsulates a CUDA event.
-| [code]#buffer# | `struct { void * ptr; size_t size; }` | `void *` | A SYCL buffer encapsulates a CUDA device pointer. If
-the SYCL buffer is a sub-buffer, the returned `void *` is offset to the beginning of the sub-buffer.
+| [code]#context#  | `CUcontext`               | `std::vector<CUcontext>` | A SYCL context can encapsulate multiple CUDA contexts, however, it is not possible to create a SYCL context from multiple CUDA contexts.
+| [code]#queue#    | `CUstream`   | `CUstream` | A SYCL queue can encapsulates multiple CUDA stream, however, a SYCL queue can only be created from or produce one, and any synchronization required should be performed.
+| [code]#event#    | `CUevent`    | `CUevent`  | A SYCL event can encapsulates multiple CUDA events, however, a SYCL event can only be created from or produce one, and a CUevent produced from a SYCL event may or may not be valid, use `sycl::cuda::has_native_event` to query this.
+| [code]#buffer# | NA | `void *` | A SYCL buffer encapsulates a CUDA device pointer. If the SYCL buffer is a sub-buffer, the returned `void *` is offset to the beginning of the sub-buffer.
 |====
 
 [[table.cuda.appinterop.make_interop_APIs]]
@@ -432,9 +431,8 @@ This section describes the kernel function interoperability for the CUDA
 backend.
 
 The CUDA backend supports kernel function interoperability for the `accessor`,
-`local_accessor`, `sampled_image_accessor`, `unsampled_image_accessor`, `queue`,
-`device` and `context` classes. These are exposed with `get_native` free template
-function.
+`local_accessor`, `sampled_image_accessor` and `unsampled_image_accessor`
+classes. These are exposed with `get_native` free template function.
 
 The CUDA backend does not support interoperability for the `device_event` class
 as there's no equivalent in CUDA.
@@ -459,19 +457,16 @@ for the SYCL classes which support kernel function interoperability.
 [width="100%",options="header",cols="20%,20%,20%,40%"]
 |====
 | [code]#SyclType#                                                   | [code]#backend_return_t<backend::cuda, SyclType># | Description
-| [code]#queue#                                                      | `CUstream` | Convert a SYCL `queue` to native cuda type `CUstream`.
-| [code]#device#                                                     | `CUdevice` | Convert a SYCL `device` to native cuda type `CUdevice`.
-| [code]#context#                                                    | `CUcontext` | Convert a SYCL `context` to a vector of `CUcontext`.
 | [code]#accessor<T, Dims, Mode, target::device>#                    | void * | Convert a SYCL `accessor` to an undecorated raw pointer.
 | [code]#accessor<T, Dims, Mode, target::constant_buffer>#           | void * | Convert a SYCL `accessor` to an undecorated raw pointer.
 | [code]#accessor<T, Dims, Mode, target::local>#                     | void * | Convert a SYCL `accessor` to an undecorated raw pointer.
-| [code]#local_accessor<T, Dims>#                                    | void * | Convert a SYCL `accessor` to an undecorated raw pointer.
-| [code]#sampled_image_accessor<T, 1, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
-| [code]#sampled_image_accessor<T, 2, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
-| [code]#sampled_image_accessor<T, 3, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
-| [code]#unsampled_image_accessor<T, 1, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
-| [code]#unsampled_image_accessor<T, 2, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
-| [code]#unsampled_image_accessor<T, 3, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL `accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
+| [code]#local_accessor<T, Dims>#                                    | void * | Convert a SYCL `local_accessor` to an undecorated raw pointer.
+| [code]#sampled_image_accessor<T, 1, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL `sampled_image_accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
+| [code]#sampled_image_accessor<T, 2, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL `sampled_image_accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
+| [code]#sampled_image_accessor<T, 3, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL `sampled_image_accessor` to the `sycl::cuda::texture` interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 1, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL `unsampled_image_accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 2, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL `unsampled_image_accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 3, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL `unsampled_image_accessor` to the `sycl::cuda::surface` interoperability type with the same type and dimensions.
 |====
 
 [[sec:cuda_support_of_core_features]]
@@ -491,6 +486,17 @@ backend.
 [[sec:non_core_features_and_extensions]]
 == Non-core features and extensions
 
+Some additional functions are provided for the CUDA backend in the
+`sycl::cuda` namespace.
+
+[[table.noncorefeatures]]
+.CUDA support for non-Core SYCL APIs
+[width="100%",options="header",cols="33%,33%,33%"]
+|====
+| API                                                    | Description
+| [code]#bool sycl::cuda::has_native_event(sycl::event)# | Returns `true` if the SYCL event has a valid `CUevent` that can be queries via application interop.
+|====
+
 Additional CUDA features are available depending upon the device's compute 
 capability. SYCL can support these optional CUDA features with extensions.
 
@@ -508,8 +514,8 @@ required compute capability to use the CUDA extension. This can be determined
 using `sycl::aspect`s. Non-core SYCL aspects may be defined by an
 implementation which would allow this check to happen at runtime.
 
-TODO: The table below shows a proposal for SYCL supported CUDA extensions.
-The table should be developed with other members of the SYCL community.
+The table below shows a proposal for SYCL supported CUDA extensions. This should
+be populated by other members of the SYCL community.
 
 [[table.extensionsupport]]
 .SYCL support for CUDA 11.3 extensions
@@ -518,24 +524,10 @@ The table should be developed with other members of the SYCL community.
 | CUDA Extension                            | SYCL Aspect   | Feature Test Macro               | Required Compute Capability 
 |====
 
-[[sec:cuda:extension-fp16]]
-=== Half precision floating-point
-
-The half scalar data type: [code]#half# and the half vector data types:
-[code]#half1#, [code]#half2#, [code]#half3#,
-[code]#half4#, [code]#half8# and [code]#half16# must be
-available at compile-time. However a kernel using these types is only
-supported on devices that have [code]#aspect::fp16#, i.e. compute capability
-5.3 or greater.
-
-[[sub:cuda:extensions]]
-=== Extensions
-
 [[sub:cuda:builtin-kernel-functions]]
 === Built-in Kernel Functions
 The CUDA backend specification currently does not define any built-in kernel 
 functions.
-
 
 [[sub:cuda:error_handling]]
 === Error Handling
@@ -565,7 +557,6 @@ link operation when compiling,
 linking, or building a kernel bundle for a device._
 
 which may be mapped from `CUDA_ERROR_NO_BINARY_FOR_GPU`, `CUDA_ERROR_JIT_COMPILER_NOT_FOUND`, `CUDA_ERROR_INVALID_PTX`, `CUDA_ERROR_UNSUPPORTED_PTX_VERSION`, `CUDA_ERROR_SHARED_OBJECT_INIT_FAILED`, `CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND`.
-
 
 ==== memory_allocation
 
