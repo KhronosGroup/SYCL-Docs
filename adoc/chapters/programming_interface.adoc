@@ -3965,7 +3965,6 @@ associated with the <<event>>. All info parameters in [code]#info::event# are
 specified in <<table.event.info>> and the synopsis for [code]#info::event# is
 described in <<appendix.event.descriptors>>.
 
-
 [[table.event.info]]
 .Event class information descriptors
 [width="100%",options="header",separator="@",cols="37%,19%,44%"]
@@ -3983,6 +3982,40 @@ info::event::command_execution_status
 
 |====
 
+The [code]#info::event::command_execution_status# query returns one of the
+values defined in <<table.event.command-status>>.
+
+[[table.event.command-status]]
+.Event command status
+[width="100%",options="header",separator="@",cols="45%,55%"]
+|====
+@ Status @ Description
+a@
+[source]
+----
+info::event_command_status::submitted
+----
+   a@ Indicates that the command has been submitted to the SYCL queue but has
+      not yet started running on the device.
+
+a@
+[source]
+----
+info::event_command_status::running
+----
+   a@ Indicates that the command has started running on the device but has not
+      yet completed.
+
+a@
+[source]
+----
+info::event_command_status::complete
+----
+   a@ Indicates that the command has finished running on the device.
+      Attempting to wait on such an event will not block.
+
+|====
+
 
 An <<event>> can be queried for profiling information using the
 [code]#get_profiling_info# member function of the [code]#event# class,
@@ -3994,10 +4027,15 @@ associated with the <<event>>. All info parameters in
 and the synopsis for [code]#info::event_profiling# is described in
 <<appendix.event.descriptors>>.
 
+Each profiling descriptor returns a 64-bit timestamp that represents the number
+of nanoseconds that have elapsed since some implementation-defined timebase.
+All events that share the same backend are guaranteed to share the same
+timebase, therefore the difference between two timestamps from the same backend
+yields the number of nanoseconds that have elapsed between those events.
 
 [[table.event.profilinginfo]]
 .Profiling information descriptors for the SYCL [code]#event# class
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
+[width="100%",options="header",separator="@",cols="43%,13%,44%"]
 |====
 @ Event information profiling descriptor @ Return type @ Description
 a@
@@ -4007,9 +4045,10 @@ info::event_profiling::command_submit
 ----
 
     @ [.code]#uint64_t#
-   a@ Returns an implementation-defined 64-bit value describing the time in
-      nanoseconds when the associated <<command-group>> was submitted to
-      the [code]#queue#.
+   a@ Returns a timestamp telling when the associated <<command-group>> was
+      submitted to the [code]#queue#.  This is always some time after the
+      <<command-group-function-object>> returns and before the associated call
+      to [code]#queue::submit# returns.
 
 a@
 [source]
@@ -4018,9 +4057,16 @@ info::event_profiling::command_start
 ----
 
     @ [.code]#uint64_t#
-   a@ Returns an implementation-defined 64-bit value describing the time in
-      nanoseconds when the action associated with the <<command-group>>
-      (e.g. kernel invocation) started executing on the device.
+   a@ Querying this profiling descriptor blocks until the event's state becomes
+      either [code]#info::event_command_status::running# or
+      [code]#info::event_command_status::complete#.  The returned timestamp
+      tells when the action associated with the <<command-group>> (e.g. kernel
+      invocation) started executing on the device.  For any given event, this
+      timestamp is always greater than or equal to the
+      [code]#info::event_profiling::command_submit# timestamp.  Implementations
+      are encouraged to return a timestamp that is as close as possible to the
+      point when the action starts running on the device, but there is no
+      specific accuracy that is guaranteed.
 
 a@
 [source]
@@ -4029,9 +4075,12 @@ info::event_profiling::command_end
 ----
 
     @ [.code]#uint64_t#
-   a@ Returns an implementation-defined 64-bit value describing the time in
-      nanoseconds when the action associated with the <<command-group>>
-      (e.g. kernel invocation) finished executing on the device.
+   a@ Querying this profiling descriptor blocks until the event's state becomes
+      [code]#info::event_command_status::complete#.  The returned timestamp
+      tells when the action associated with the <<command-group>> (e.g. kernel
+      invocation) finished executing on the device.  For any given event, this
+      timestamp is always greater than or equal to the
+      [code]#info::event_profiling::command_start# timestamp.
 
 
 |====
