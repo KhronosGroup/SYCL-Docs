@@ -9,7 +9,7 @@ struct command_execution_status;
 
 }  // namespace event
 
-enum class event_command_status : int {
+enum class event_command_status : /* unspecified */ {
   submitted,
   running,
   complete

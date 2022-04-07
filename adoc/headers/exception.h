@@ -45,22 +45,22 @@ class exception_list {
   iterator end() const;    // refer to past-the-end last asynchronous exception
 };
 
-enum class errc {
+enum class errc : /* unspecified */ {
   success = 0,
-  runtime = /* implementation-defined */,
-  kernel = /* implementation-defined */,
-  accessor = /* implementation-defined */,
-  nd_range = /* implementation-defined */,
-  event = /* implementation-defined */,
-  kernel_argument = /* implementation-defined */,
-  build = /* implementation-defined */,
-  invalid = /* implementation-defined */,
-  memory_allocation = /* implementation-defined */,
-  platform = /* implementation-defined */,
-  profiling = /* implementation-defined */,
-  feature_not_supported = /* implementation-defined */,
-  kernel_not_supported = /* implementation-defined */,
-  backend_mismatch = /* implementation-defined */
+  runtime,
+  kernel,
+  accessor,
+  nd_range,
+  event,
+  kernel_argument,
+  build,
+  invalid,
+  memory_allocation,
+  platform,
+  profiling,
+  feature_not_supported,
+  kernel_not_supported,
+  backend_mismatch
 };
 
 template<backend b>

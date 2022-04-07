@@ -3,7 +3,7 @@
 
 namespace sycl {
 
-enum class stream_manipulator {
+enum class stream_manipulator : /* unspecified */ {
   flush,
   dec,
   hex,

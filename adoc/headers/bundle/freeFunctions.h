@@ -3,7 +3,7 @@
 
 namespace sycl {
 
-enum class bundle_state {
+enum class bundle_state : /* unspecified */ {
   input,
   object,
   executable

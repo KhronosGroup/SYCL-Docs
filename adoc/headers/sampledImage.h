@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-enum class image_format : unsigned int {
+
+enum class image_format : /* unspecified */ {
   r8g8b8a8_unorm,
   r16g16b16a16_unorm,
   r8g8b8a8_sint,
@@ -13,7 +14,7 @@ enum class image_format : unsigned int {
   r32b32g32a32_uint,
   r16b16g16a16_sfloat,
   r32g32b32a32_sfloat,
-  b8g8r8a8_unorm,
+  b8g8r8a8_unorm
 };
 
 template <int Dimensions = 1, typename AllocatorT = sycl::image_allocator>
@@ -58,4 +59,5 @@ class sampled_image {
   template<typename... Ts>
   auto get_host_access(Ts... args);
 };
+
 }  // namespace sycl

@@ -4,8 +4,13 @@
 namespace sycl {
 
 enum class memory_order : /* unspecified */ {
-  relaxed, acquire, release, acq_rel, seq_cst
+  relaxed,
+  acquire,
+  release,
+  acq_rel,
+  seq_cst
 };
+
 inline constexpr auto memory_order_relaxed = memory_order::relaxed;
 inline constexpr auto memory_order_acquire = memory_order::acquire;
 inline constexpr auto memory_order_release = memory_order::release;
