@@ -221,10 +221,18 @@ module Rouge
         intn
         longlongn
         longn
+        mgenfloat
+        mgeninteger
+        mgentype
+        migeninteger
+        mugeninteger
         scharn
         sgenfloat
         sgeninteger
+        sgentype
         shortn
+        sigeninteger
+        sugeninteger
         ucharn
         ugenchar
         ugenint
@@ -242,6 +250,11 @@ module Rouge
         ulonglongn
         ulongn
         ushortn
+        vgenfloat
+        vgeninteger
+        vgentype
+        vigeninteger
+        vugeninteger
       )
 
       sycl_macros = %w(
