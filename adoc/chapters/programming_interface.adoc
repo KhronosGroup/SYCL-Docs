@@ -3068,14 +3068,12 @@ explicit queue(const context &syclContext,
                const device &syclDevice,
                const property_list &propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice# provided, and associated with the
-[code]#syclContext# provided. Must throw an
-[code]#exception# with the
-[code]#errc::invalid# error code if
-[code]#syclContext# does not encapsulate the SYCL
-[code]#device# [code]#syclDevice#. Zero or more
-properties can be provided to the constructed SYCL [code]#queue#
-via an instance of [code]#property_list#.
+a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice#
+provided.  This device must either be contained by [code]#syclContext# or it
+must be a <<descendent-device>> of some device that is contained by that
+context, otherwise this function throws a synchronous exception with the
+[code]#errc::invalid# error code.  Zero or more properties can be provided to
+the constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 
 a@
 [source]
@@ -3085,14 +3083,13 @@ explicit queue(const context &syclContext,
                const async_handler &asyncHandler,
                const property_list &propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using the [code]#syclDevice# provided, and
-associated with the [code]#syclContext# provided. Must throw an
-[code]#exception# with the
-[code]#errc::invalid# error code if
-[code]#syclContext# does not encapsulate the SYCL
-[code]#device# [code]#syclDevice#.  Zero or more
-properties can be provided to the constructed SYCL [code]#queue# via
-an instance of [code]#property_list#.
+a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using
+the [code]#syclDevice# provided.  This device must either be contained by
+[code]#syclContext# or it must be a <<descendent-device>> of some device that
+is contained by that context, otherwise this function throws a synchronous
+exception with the [code]#errc::invalid# error code.  Zero or more properties
+can be provided to the constructed SYCL [code]#queue# via an instance of
+[code]#property_list#.
 
 |====
 
@@ -10091,6 +10088,9 @@ allocated by this allocator is suitably aligned for objects of its underlying
 [code]#value_type# or at the alignment specified by [code]#Alignment#,
 whichever is greater.
 
+A synopsis of the [code]#usm_allocator# class is provided below.  The
+constructors are listed in <<table.constructors.usm-allocator>>.
+
 [source,,linenums]
 ----
 template <typename T, usm::alloc AllocKind, size_t Alignment = 0>
@@ -10106,12 +10106,12 @@ public:
     typedef usm_allocator<U, AllocKind, Alignment> other;
   };
 
-  usm_allocator() noexcept = delete;
+  usm_allocator() = delete;
   usm_allocator(const context &ctxt,
                 const device &dev,
-                const property_list &propList = {}) noexcept;
+                const property_list &propList = {});
   usm_allocator(const queue &q,
-                const property_list &propList = {}) noexcept;
+                const property_list &propList = {});
   usm_allocator(const usm_allocator &other) noexcept = default;
   usm_allocator(usm_allocator &&) noexcept = default;
   usm_allocator &operator=(const usm_allocator &) = delete;
@@ -10143,6 +10143,37 @@ public:
                          const usm_allocator<U, AllocKindU, AlignmentU> &);
 };
 ----
+
+[[table.constructors.usm-allocator]]
+.Constructors of the [code]#usm_allocator# class
+[width="100%",options="header",separator="@",cols="65%,35%"]
+|====
+@ Constructor @ Description
+a@
+[source]
+----
+usm_allocator(const context &ctxt,
+              const device &dev,
+              const property_list &propList = {})
+----
+a@ Constructs a [code]#usm_allocator# instance that allocates USM memory for
+the provided context and device.  If [code]#AllocKind# is
+[code]#usm::alloc::host#, the [code]#dev# parameter is ignored.  For other
+values of [code]#AllocKind#, [code]#dev# must either be contained by
+[code]#ctxt# or it must be a <<descendent-device>> of some device that is
+contained by [code]#ctxt#, otherwise this constructor throws a synchronous
+[code]#exception# with the [code]#errc::invalid# error code.
+
+a@
+[source]
+----
+usm_allocator(const queue &q,
+              const property_list &propList = {})
+----
+a@ Constructs a [code]#usm_allocator# instance that allocates USM memory for
+the context and device from the provided [code]#queue#.
+
+|====
 
 While the modern {cpp} [code]#usm_allocator# interface is sufficient for
 specifying USM allocations and deallocations, many programmers may prefer
@@ -10179,7 +10210,10 @@ returns [code]#nullptr#.  Zero or more properties can be provided to the
 allocation function via an instance of [code]#property_list#.  Throws a
 synchronous [code]#exception# with the [code]#errc::feature_not_supported#
 error code if the [code]#syclDevice# does not have
-[code]#aspect::usm_device_allocations#.
+[code]#aspect::usm_device_allocations#.  The [code]#syclDevice# must either be
+contained by [code]#syclContext# or it must be a <<descendent-device>> of some
+device that is contained by that context, otherwise this function throws a
+synchronous [code]#exception# with the [code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10199,7 +10233,11 @@ Zero or more properties can be provided to the allocation function
 via an instance of [code]#property_list#.
 Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
-does not have [code]#aspect::usm_device_allocations#.
+does not have [code]#aspect::usm_device_allocations#.  The [code]#syclDevice#
+must either be contained by [code]#syclContext# or it must be a
+<<descendent-device>> of some device that is contained by that context,
+otherwise this function throws a synchronous [code]#exception# with the
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10251,7 +10289,11 @@ deallocated with [code]#sycl::free# to avoid memory leaks.  On failure, returns
 properties can be provided to the allocation function via an instance of
 [code]#property_list#.  Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
-does not have [code]#aspect::usm_device_allocations#.
+does not have [code]#aspect::usm_device_allocations#.  The [code]#syclDevice#
+must either be contained by [code]#syclContext# or it must be a
+<<descendent-device>> of some device that is contained by that context,
+otherwise this function throws a synchronous [code]#exception# with the
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10274,7 +10316,10 @@ permit certain alignments.  Zero or more properties can be provided to the
 allocation function via an instance of [code]#property_list#.  Throws a
 synchronous [code]#exception# with the [code]#errc::feature_not_supported#
 error code if the [code]#syclDevice# does not have
-[code]#aspect::usm_device_allocations#.
+[code]#aspect::usm_device_allocations#.  The [code]#syclDevice# must either be
+contained by [code]#syclContext# or it must be a <<descendent-device>> of some
+device that is contained by that context, otherwise this function throws a
+synchronous [code]#exception# with the [code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10485,7 +10530,7 @@ void* sycl::malloc_shared(size_t numBytes,
                           const property_list &propList = {})
 ----
 a@ Returns a shared allocation that is accessible on the host and
-on [code]#syclDevice#.  [code]#syclContext# must contain [code]#syclDevice#.
+on [code]#syclDevice#.
 This allocation is specified in bytes.  This memory
 must be deallocated with [code]#sycl::free# to avoid memory leaks.  On failure,
 returns [code]#nullptr#.
@@ -10493,7 +10538,11 @@ Zero or more properties can be provided to the allocation function
 via an instance of [code]#property_list#.
 Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
-does not have [code]#aspect::usm_shared_allocations#.
+does not have [code]#aspect::usm_shared_allocations#.  The [code]#syclDevice#
+must either be contained by [code]#syclContext# or it must be a
+<<descendent-device>> of some device that is contained by that context,
+otherwise this function throws a synchronous [code]#exception# with the
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10505,7 +10554,7 @@ T* sycl::malloc_shared(size_t count,
                        const property_list &propList = {})
 ----
 a@ Returns a shared allocation that is accessible on the host and
-on [code]#syclDevice#.  [code]#syclContext# must contain [code]#syclDevice#.
+on [code]#syclDevice#.
 This allocation is specified in number of elements of
 type [code]#T#. This memory must be deallocated with [code]#sycl::free# to avoid
 memory leaks.  On failure, returns [code]#nullptr#.
@@ -10513,7 +10562,11 @@ Zero or more properties can be provided to the allocation function
 via an instance of [code]#property_list#.
 Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
-does not have [code]#aspect::usm_shared_allocations#.
+does not have [code]#aspect::usm_shared_allocations#.  The [code]#syclDevice#
+must either be contained by [code]#syclContext# or it must be a
+<<descendent-device>> of some device that is contained by that context,
+otherwise this function throws a synchronous [code]#exception# with the
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10557,7 +10610,7 @@ sycl::aligned_alloc_shared(size_t alignment,
                            const property_list &propList = {})
 ----
 a@ Returns a shared allocation that is accessible on the host and
-on [code]#syclDevice#.  [code]#syclContext# must contain [code]#syclDevice#.
+on [code]#syclDevice#.
 This allocation is specified in bytes and aligned to the
 specified alignment.  This memory
 must be deallocated with [code]#sycl::free# to avoid memory leaks.  On failure,
@@ -10566,7 +10619,11 @@ Zero or more properties can be provided to the allocation function
 via an instance of [code]#property_list#.
 Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
-does not have [code]#aspect::usm_shared_allocations#.
+does not have [code]#aspect::usm_shared_allocations#.  The [code]#syclDevice#
+must either be contained by [code]#syclContext# or it must be a
+<<descendent-device>> of some device that is contained by that context,
+otherwise this function throws a synchronous [code]#exception# with the
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10580,7 +10637,7 @@ sycl::aligned_alloc_shared(size_t alignment,
                            const property_list &propList = {})
 ----
 a@ Returns a shared allocation that is accessible on the host and
-on [code]#syclDevice#.  [code]#syclContext# must contain [code]#syclDevice#.
+on [code]#syclDevice#.
 This allocation is specified in number of elements of type [code]#T# and aligned to the
 specified alignment.  This memory
 must be deallocated with [code]#sycl::free# to avoid memory leaks.  On failure,
@@ -10589,7 +10646,11 @@ Zero or more properties can be provided to the allocation function
 via an instance of [code]#property_list#.
 Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
-does not have [code]#aspect::usm_shared_allocations#.
+does not have [code]#aspect::usm_shared_allocations#.  The [code]#syclDevice#
+must either be contained by [code]#syclContext# or it must be a
+<<descendent-device>> of some device that is contained by that context,
+otherwise this function throws a synchronous [code]#exception# with the
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10658,14 +10719,17 @@ void *sycl::malloc(size_t numBytes,
                    usm::alloc kind,
                    const property_list &propList = {})
 ----
-a@ Returns a [code]#kind# allocation.  If [code]#kind# is [code]#usm::alloc::host#,
-[code]#syclDevice# is ignored. If not, [code]#syclContext# must contain
-[code]#syclDevice#.
+a@ Returns a [code]#kind# allocation.
 This allocation is specified in bytes. This memory
 must be deallocated with [code]#sycl::free# to avoid memory leaks.  On failure,
 returns [code]#nullptr#.
 Zero or more properties can be provided to the allocation function
-via an instance of [code]#property_list#.
+via an instance of [code]#property_list#.  The [code]#syclDevice# parameter is
+ignored if [code]#kind# is [code]#usm::alloc::host#.  If [code]#kind# is not
+[code]#usm::alloc::host#, [code]#syclDevice# must either be contained by
+[code]#syclContext# or it must be a <<descendent-device>> of some device that
+is contained by that context, otherwise this function throws a synchronous
+[code]#exception# with the [code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10677,14 +10741,17 @@ T *sycl::malloc(size_t count,
                 usm::alloc kind,
                 const property_list &propList = {})
 ----
-a@ Returns a [code]#kind# allocation.  If [code]#kind# is [code]#usm::alloc::host#,
-[code]#syclDevice# is ignored. If not, [code]#syclContext# must contain
-[code]#syclDevice#.
+a@ Returns a [code]#kind# allocation.
 This allocation is specified in number of elements of type [code]#T#.
 This memory must be deallocated with [code]#sycl::free# to avoid memory leaks.
 On failure, returns [code]#nullptr#.
 Zero or more properties can be provided to the allocation function
-via an instance of [code]#property_list#.
+via an instance of [code]#property_list#.  The [code]#syclDevice# parameter is
+ignored if [code]#kind# is [code]#usm::alloc::host#.  If [code]#kind# is not
+[code]#usm::alloc::host#, [code]#syclDevice# must either be contained by
+[code]#syclContext# or it must be a <<descendent-device>> of some device that
+is contained by that context, otherwise this function throws a synchronous
+[code]#exception# with the [code]#errc::invalid# error code.
 
 
 a@
@@ -10724,15 +10791,18 @@ void *sycl::aligned_alloc(size_t alignment,
                           usm::alloc kind,
                           const property_list &propList = {})
 ----
-a@ Returns a [code]#kind# allocation.  If [code]#kind# is [code]#usm::alloc::host#,
-[code]#syclDevice# is ignored. If not, [code]#syclContext# must contain
-[code]#syclDevice#.
+a@ Returns a [code]#kind# allocation.
 This allocation is specified in bytes and aligned to the
 specified alignment.  This memory
 must be deallocated with [code]#sycl::free# to avoid memory leaks.  On failure,
 returns [code]#nullptr#.
 Zero or more properties can be provided to the allocation function
-via an instance of [code]#property_list#.
+via an instance of [code]#property_list#.  The [code]#syclDevice# parameter is
+ignored if [code]#kind# is [code]#usm::alloc::host#.  If [code]#kind# is not
+[code]#usm::alloc::host#, [code]#syclDevice# must either be contained by
+[code]#syclContext# or it must be a <<descendent-device>> of some device that
+is contained by that context, otherwise this function throws a synchronous
+[code]#exception# with the [code]#errc::invalid# error code.
 
 a@
 [source]
@@ -10745,15 +10815,18 @@ T* sycl::aligned_alloc(size_t alignment,
                        usm::alloc kind,
                        const property_list &propList = {})
 ----
-a@ Returns a [code]#kind# allocation.  If [code]#kind# is [code]#usm::alloc::host#,
-[code]#syclDevice# is ignored. If not, [code]#syclContext# must contain
-[code]#syclDevice#.
+a@ Returns a [code]#kind# allocation.
 This allocation is specified in number of elements of type [code]#T# and aligned
 to the specified alignment.  This memory
 must be deallocated with [code]#sycl::free# to avoid memory leaks.  On failure,
 returns [code]#nullptr#.
 Zero or more properties can be provided to the allocation function
-via an instance of [code]#property_list#.
+via an instance of [code]#property_list#.  The [code]#syclDevice# parameter is
+ignored if [code]#kind# is [code]#usm::alloc::host#.  If [code]#kind# is not
+[code]#usm::alloc::host#, [code]#syclDevice# must either be contained by
+[code]#syclContext# or it must be a <<descendent-device>> of some device that
+is contained by that context, otherwise this function throws a synchronous
+[code]#exception# with the [code]#errc::invalid# error code.
 
 a@
 [source]
@@ -14710,8 +14783,11 @@ the application's kernels.
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
-    the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt# or if the [code]#devs# vector is empty.
+    the devices in [code]#devs# is not one of devices contained by the context
+    [code]#ctxt# or is not a <<descendent-device>> of some device in
+    [code]#ctxt#.
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#State# is [code]#bundle_state::input# and any device in [code]#devs#
     does not have [code]#aspect::online_compiler#.
@@ -14752,8 +14828,11 @@ _Throws:_
     the kernels identified by [code]#kernelIds# are incompatible with all
     devices in [code]#devs#.
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
-    the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt# or if the [code]#devs# vector is empty.
+    the devices in [code]#devs# is not one of devices contained by the context
+    [code]#ctxt# or is not a <<descendent-device>> of some device in
+    [code]#ctxt#.
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#State# is [code]#bundle_state::input# and any device in [code]#devs#
     does not have [code]#aspect::online_compiler#.
@@ -14792,8 +14871,11 @@ removed).
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
-    the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt# or if the [code]#devs# vector is empty.
+    the devices in [code]#devs# is not one of devices contained by the context
+    [code]#ctxt# or is not a <<descendent-device>> of some device in
+    [code]#ctxt#.
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    [code]#devs# vector is empty.
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#State# is [code]#bundle_state::input# and any device in [code]#devs#
     does not have [code]#aspect::online_compiler#.
@@ -14881,8 +14963,11 @@ _Returns:_ [code]#true# only if all of the following are true:
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
-    the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt# or if the [code]#devs# vector is empty.
+    the devices in [code]#devs# is not one of devices contained by the context
+    [code]#ctxt# or is not a <<descendent-device>> of some device in
+    [code]#ctxt#.
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    [code]#devs# vector is empty.
 
 [source]
 ----
@@ -14905,8 +14990,11 @@ _Returns:_ [code]#true# only if all of the following are true:
 _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if any of
-    the devices in [code]#devs# is not in the list of devices associated with
-    the context [code]#ctxt# or if the [code]#devs# vector is empty.
+    the devices in [code]#devs# is not one of devices contained by the context
+    [code]#ctxt# or is not a <<descendent-device>> of some device in
+    [code]#ctxt#.
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    [code]#devs# vector is empty.
 
 [source]
 ----
