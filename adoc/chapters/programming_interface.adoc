@@ -2922,6 +2922,14 @@ Each constructor takes as the last
 parameter an optional SYCL [code]#property_list# to provide properties to
 the SYCL [code]#queue#.
 
+A SYCL [code]#queue# may be destroyed even when there are uncompleted
+<<command, commands>> that have been submitted to the queue.  Doing so does not
+block.  Instead, any commands that have been submitted to the queue begin
+execution when their requisites are satisfied, just as they would had the queue
+not been destroyed.  Any event objects for those commands are signaled in the
+normal manner when the command completes.  Resources associated with the queue
+will be freed by the time the last command completes.
+
 The SYCL [code]#queue# class provides the common reference semantics
 (see <<sec:reference-semantics>>).
 
