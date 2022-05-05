@@ -10043,6 +10043,38 @@ if system allocations are supported for use on the device, through
 
 USM provides several allocation functions.  These functions accept a [code]#property_list# parameter, which is provided for future extensibility.  This specification does not yet define any USM allocation properties.
 
+Some of the allocation functions take an explicit alignment parameter.  Like
+[code]#std::aligned_alloc#, these functions return [code]#nullptr# if the
+alignment is not supported by the implementation.  Some of the allocation
+functions are templated on the allocated type [code]#T# and some are not.  The
+following table specifies the alignment guarantees for each category.
+
+[[table.usm.alignment]]
+.Alignment guarantees of USM allocation functions
+[width="100%",options="header",separator="@",cols="45%,55%"]
+|====
+@ Category @ Alignment guarantee
+a@ No alignment parameter +
+   Not templated on allocation type
+a@ Pointer is suitably aligned for any object with fundamental alignment whose
+   size is less than or equal to the requested allocation size.
+
+a@ No alignment parameter +
+   Templated on allocation type [code]#T#
+a@ Pointer is suitably aligned for an object of type [code]#T#.
+
+a@ Alignment parameter [code]#alignment# specified +
+   Not templated on allocation type
+a@ Pointer is suitably aligned for any object with fundamental alignment whose
+   size is less than or equal to the requested allocation size or it is aligned
+   to the specified [code]#alignment#, whichever is greater.
+
+a@ Alignment parameter [code]#alignment# specified +
+   Templated on allocation type [code]#T#
+a@ Pointer is suitably aligned for an object of type [code]#T# or it is aligned
+   to the specified [code]#alignment#, whichever is greater.
+|====
+
 ==== {cpp} allocator interface
 
 USM provides an allocator class that aligns with the {cpp} allocator interface.  This is useful when
@@ -10050,6 +10082,13 @@ using USM with things like {cpp} containers or routines like [code]#std::allocat
 to how {cpp} library routines that use allocators tend to assume that any memory allocated by an allocator
 may be accessed on the host, the [code]#usm_allocator# class is not required to support
 allocating [code]#usm::alloc::device# allocations.
+
+The [code]#usm_allocator# class has a template argument [code]#Alignment#,
+which specifies the minimum alignment for memory that it allocates.  This
+alignment is used even if the allocator is rebound to a different type.  Memory
+allocated by this allocator is suitably aligned for objects of its underlying
+[code]#value_type# or at the alignment specified by [code]#Alignment#,
+whichever is greater.
 
 [source,,linenums]
 ----
