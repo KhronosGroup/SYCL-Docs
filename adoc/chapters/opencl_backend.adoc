@@ -144,21 +144,20 @@ units (where each PE maintains its own program counter) or as some
 combination of the two.
 
 
-// From Architecture, Section 3.3.1 (Platform mixed version support)
-=== Platform mixed version support
+=== Backend specific information descriptors
 
-The SYCL system presents the user with a set of devices, grouped into some
-number of platforms.
-The device version is an indication of the device's
-capabilities, as represented by the device information returned by the
-[code]#sycl::device::get_info()# member function.  Examples of attributes
-associated with the device version are resource limits and information
-about functionality beyond the requirements in the <<core-spec>>.
-The version returned corresponds to the highest version of the OpenCL
-specification for which the device is conformant, but is not higher than
-the version of the device's platform which bounds the overall capabilities
-of the runtime operating the device.
+Some of the SYCL information descriptors are backend-defined. For the OpenCL
+backend these information descriptors map directly to OpenCL properties as
+described in the table below:
 
+[[table.opencl.info]]
+.Mapping of SYCL information descriptors to OpenCL properties
+[width="40%",options="header",cols="50%,50%"]
+|====
+| SYCL                                 | OpenCL
+| [code]#info::platform::version#      | [code]#CL_PLATFORM_VERSION#
+| [code]#info::device::version#        | [code]#CL_DEVICE_VERSION#
+|====
 
 === OpenCL memory model
 
