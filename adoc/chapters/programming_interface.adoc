@@ -10112,10 +10112,10 @@ public:
                 const property_list &propList = {}) noexcept;
   usm_allocator(const queue &q,
                 const property_list &propList = {}) noexcept;
-  usm_allocator(const usm_allocator &other) noexcept = default;
-  usm_allocator(usm_allocator &&) noexcept = default;
-  usm_allocator &operator=(const usm_allocator &) = delete;
-  usm_allocator &operator=(usm_allocator &&) = default;
+  usm_allocator(const usm_allocator &other) noexcept;
+  usm_allocator(usm_allocator &&) noexcept;
+  usm_allocator &operator=(const usm_allocator &);
+  usm_allocator &operator=(usm_allocator &&);
 
 
   template <class U>
@@ -10797,7 +10797,7 @@ via an instance of [code]#property_list#.
 a@
 [source]
 ----
-void sycl::free(void* ptr, sycl::context& syclContext)
+void sycl::free(void* ptr, const context& syclContext)
 ----
 a@ Frees an allocation.  The memory pointed to by [code]#ptr# must have been
 allocated using one of the USM allocation routines.  [code]#syclContext# must
@@ -10809,7 +10809,7 @@ are enqueued the behavior is undefined.
 a@
 [source]
 ----
-void sycl::free(void* ptr, sycl::queue& syclQueue)
+void sycl::free(void* ptr, const queue& syclQueue)
 ----
 a@ Alternate form where [code]#syclQueue# provides the [code]#context#.
 
