@@ -23,6 +23,8 @@ public:
 
   group<Dimensions> get_group() const;
 
+  sub_group get_sub_group() const;
+
   size_t get_group(int dimension) const;
 
   size_t get_group_linear_id() const;
