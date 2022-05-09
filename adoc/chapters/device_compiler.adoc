@@ -196,8 +196,12 @@ or [code]#constexpr#.
     in <<sycl:builtins>> to find functions that are specified to be usable
     in kernels.
   * Interacting with a special <<sycl-runtime>> class (e.g. SYCL
-    [code]#accessor# or [code]#stream)# that is stored within a {cpp} union
+    [code]#accessor# or [code]#stream#) that is stored within a {cpp} union
     is undefined behavior.
+  * Any variable or function that is odr-used from a <<device-function>> must
+    be defined in the same translation unit as that use.  However, a function
+    may be defined in another translation unit if the implementation defines
+    the [code]#SYCL_EXTERNAL# macro as described in <<subsec:syclexternal>>.
 
 
 [[subsec:scalartypes]]
@@ -378,7 +382,7 @@ implementations:
   * [code]#SYCL_EXTERNAL# is an optional macro which enables external
     linkage of SYCL functions and member functions to be included in a SYCL kernel.
     The macro is only defined if the implementation supports external linkage.
-    For more details see <<subsec:syclexternal>>
+    For more details see <<subsec:syclexternal>>.
 
 In addition, for each <<backend>> supported, the preprocessor macros described
 in <<sec:backends>> must be defined by all conformant implementations.
@@ -531,6 +535,9 @@ reqd_work_group_size(dim0, dim1, dim2)
       matches the order of the dimension extents to the [code]#range#
       constructor.  Each argument must be an integral constant expression.
 
+Kernels that are decorated with this attribute may not call functions that are
+defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
+
 Each device may have limitations on the work group sizes that it supports.  If
 a kernel is decorated with this attribute and then submitted to a device that
 does not support the work group size, the implementation must throw a
@@ -575,6 +582,9 @@ reqd_sub_group_size(dim)
    a@ Indicates that the kernel must be compiled and executed with the specified
       sub-group size. The argument to the attribute must be an integral constant
       expression.
+
+Kernels that are decorated with this attribute may not call functions that are
+defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
 
 Each device supports only certain sub-group sizes as defined by
 [code]#info::device::sub_group_sizes#.  In addition, some device features may
@@ -826,25 +836,48 @@ variable addressing a different address space.
 [[subsec:syclexternal]]
 === SYCL functions and member functions linkage
 
-The default behavior in SYCL applications is that all the definitions and
-declarations of the functions and member functions are available to the SYCL compiler,
-in the same translation unit. When this is not the case, all the symbols that
-need to be exported to a SYCL library or from a {cpp} library to a SYCL
-application need to be defined using the macro: [code]#SYCL_EXTERNAL#.
+By default, any function that is odr-used from a <<device-function>> must be
+defined in the same translation unit as that use.  However, this restriction is
+relaxed if both of the following conditions are met:
 
-The [code]#SYCL_EXTERNAL# macro will only be defined if the implementation
-supports offline linking. The macro is implementation-defined, but the following
-restrictions apply:
+* The implementation defines the [code]#SYCL_EXTERNAL# macro;
+* The translation unit that calls the function declares the function with
+  [code]#SYCL_EXTERNAL# as described below.
 
-  * [code]#SYCL_EXTERNAL# can only be used on functions;
-  * if the SYCL backend does not support the generic address space then the
-    function cannot use raw pointers as parameter or return types. Explicit
-    pointer classes must be used instead;
-  * externally defined functions cannot call a
-    [code]#sycl::parallel_for_work_item# member function;
-  * externally defined functions cannot be called from a
-    [code]#sycl::parallel_for_work_group# scope.
+When a function is declared with [code]#SYCL_EXTERNAL#, that macro must be used
+on the first declaration of that function in the translation unit.
+Redeclarations of the function in the same translation unit may optionally use
+[code]#SYCL_EXTERNAL#, but this is not required.
 
-The SYCL linkage mechanism is optional and implementation-defined.
+When a function is declared with [code]#SYCL_EXTERNAL#, that function must also
+be defined in some translation unit, where the function is declared with
+[code]#SYCL_EXTERNAL#.
+
+A function declared with [code]#SYCL_EXTERNAL# may be called from both host and
+device code.  The macro has no effect when the function is called from host
+code.
+
+In order to declare a function with [code]#SYCL_EXTERNAL#, the macro name
+[code]#SYCL_EXTERNAL# must appear before the function declaration.  If the
+function is also decorated with {cpp} attributes that appear before the
+declaration, the [code]#SYCL_EXTERNAL# may appear before, after, or between
+these attributes.  The following example demonstrates the use of
+[code]#SYCL_EXTERNAL#.
+
+[source,,linenums]
+----
+include::{code_dir}/sycl-external.cpp[lines=4..-1]
+----
+
+Functions that are declared using [code]#SYCL_EXTERNAL# have the following
+additional restrictions beyond those imposed on other device functions:
+
+* If the SYCL backend does not support the generic address space then the
+  function cannot use raw pointers as parameter or return types.  Explicit
+  pointer classes must be used instead;
+
+* The function cannot call [code]#group::parallel_for_work_item#;
+
+* The function cannot be called from a [code]#parallel_for_work_group# scope.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end compiler_abi %%%%%%%%%%%%%%%%%%%%%%%%%%%%

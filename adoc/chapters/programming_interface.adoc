@@ -1193,7 +1193,7 @@ info::platform::version
 ----
 
     @ [.code]#std::string#
-   a@ Returns the software driver version of the <<device>>.
+   a@ Returns a backend-defined <<platform>> version.
 
 a@
 [source]
@@ -1427,7 +1427,7 @@ info::context::atomic_fence_order_capabilities
     @ [.code]#std::vector<memory_order>#
    a@ Returns the set of memory orderings supported by [code]#atomic_fence#
       on all devices in the context, which is guaranteed to include
-      [code]#relaxed#.
+      [code]#relaxed#, [code]#acquire#, [code]#release# and [code]#acq_rel#.
 
 The memory ordering of the context determines the behavior of fence operations applied
 to any memory that can be concurrently accessed by multiple devices in the context.
@@ -2253,7 +2253,8 @@ info::device::atomic_fence_order_capabilities
 
     @ [.code]#std::vector<memory_order>#
    a@ Returns the set of memory orderings supported by [code]#atomic_fence# on the device,
-      which is guaranteed to include [code]#relaxed#.
+      which is guaranteed to include [code]#relaxed#, [code]#acquire#,
+      [code]#release# and [code]#acq_rel#.
 
 a@
 [source]
@@ -2406,9 +2407,8 @@ info::device::driver_version
 ----
 
     @ [.code]#std::string#
-   a@ Returns a backend-defined driver version as a [code]#std::string#.
-      If using the OpenCL backend, the returned value represents the
-      OpenCL software driver version in the form: major_number.minor_number.
+   a@ Returns a vendor-defined string describing the version of the underlying
+      backend software driver.
 
 a@
 [source]
@@ -2437,8 +2437,7 @@ info::device::version
 ----
 
     @ [.code]#std::string#
-   a@ Returns the SYCL version as a [code]#std::string# in the form:
-      [code]#<major_version>.<minor_version>#.
+   a@ Returns a backend-defined <<device>> version.
 
 a@
 [source]
@@ -2921,6 +2920,14 @@ facilitate the construction of the queue.
 Each constructor takes as the last
 parameter an optional SYCL [code]#property_list# to provide properties to
 the SYCL [code]#queue#.
+
+A SYCL [code]#queue# may be destroyed even when there are uncompleted
+<<command, commands>> that have been submitted to the queue.  Doing so does not
+block.  Instead, any commands that have been submitted to the queue begin
+execution when their requisites are satisfied, just as they would had the queue
+not been destroyed.  Any event objects for those commands are signaled in the
+normal manner when the command completes.  Resources associated with the queue
+will be freed by the time the last command completes.
 
 The SYCL [code]#queue# class provides the common reference semantics
 (see <<sec:reference-semantics>>).
@@ -6556,7 +6563,8 @@ accessor()
 --
   * [code]#(empty() == true)#
   * All size queries return [code]#0#.
-  * The only iterator that can be obtained is [code]#nullptr#.
+  * The return values of [code]#get_pointer()# and [code]#get_multi_ptr()# are
+    unspecified.
   * Trying to access the underlying memory is undefined behavior.
 
 A default constructed accessor can be passed to a <<sycl-kernel-function>>
@@ -6858,7 +6866,8 @@ accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
       buffer, even if this is a <<ranged-accessor>> whose range does not start
-      at the beginning of the buffer.
+      at the beginning of the buffer.  The return value is unspecified if the
+      accessor is empty.
 
 This function may only be called from within a <<command>>.
 
@@ -7216,7 +7225,8 @@ constant_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
       buffer, even if this is a <<ranged-accessor>> whose range does not start
-      at the beginning of the buffer.
+      at the beginning of the buffer.  The return value is unspecified if the
+      accessor is empty.
 
 |====
 
@@ -7362,7 +7372,8 @@ std::add_pointer_t<value_type> get_pointer() const noexcept
 ----
    a@ Returns a pointer to the start of this accessor's underlying buffer, even
       if this is a <<ranged-accessor>> whose range does not start at the
-      beginning of the buffer.
+      beginning of the buffer.  The return value is unspecified if the accessor
+      is empty.
 
 |====
 
@@ -7480,7 +7491,8 @@ a@
 local_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the work-group's local memory allocation
-      that this accessor is accessing.
+      that this accessor is accessing.  The return value is unspecified if the
+      accessor is empty.
 
 |====
 
@@ -7766,7 +7778,7 @@ host_accessor()
 --
   * [code]#(empty() == true)#
   * All size queries return [code]#0#.
-  * The only iterator that can be obtained is [code]#nullptr#.
+  * The return value of [code]#get_pointer()# is unspecified.
   * Trying to access the underlying memory is undefined behavior.
 --
 
@@ -8059,7 +8071,8 @@ local_accessor()
 --
   * [code]#(empty() == true)#
   * All size queries return [code]#0#.
-  * The only iterator that can be obtained is [code]#nullptr#.
+  * The return values of [code]#get_pointer()# and [code]#get_multi_ptr()# are
+    unspecified.
   * Trying to access the underlying memory is undefined behavior.
 --
 
@@ -8114,7 +8127,8 @@ template <access::decorated IsDecorated>
 accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of the accessor's local memory
-      region which corresponds to the calling work-group.
+      region which corresponds to the calling work-group.  The return value is
+      unspecified if the accessor is empty.
 
 This function may only be called from within a <<sycl-kernel-function>>.
 
@@ -8369,6 +8383,8 @@ std::add_pointer_t<value_type> get_pointer() const noexcept
 For a buffer accessor this is a pointer to the start of the underlying buffer,
 even if this is a <<ranged-accessor>> whose range does not start at the
 beginning of the buffer.
+
+The return value is unspecified if the accessor is empty.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
@@ -10036,6 +10052,38 @@ if system allocations are supported for use on the device, through
 
 USM provides several allocation functions.  These functions accept a [code]#property_list# parameter, which is provided for future extensibility.  This specification does not yet define any USM allocation properties.
 
+Some of the allocation functions take an explicit alignment parameter.  Like
+[code]#std::aligned_alloc#, these functions return [code]#nullptr# if the
+alignment is not supported by the implementation.  Some of the allocation
+functions are templated on the allocated type [code]#T# and some are not.  The
+following table specifies the alignment guarantees for each category.
+
+[[table.usm.alignment]]
+.Alignment guarantees of USM allocation functions
+[width="100%",options="header",separator="@",cols="45%,55%"]
+|====
+@ Category @ Alignment guarantee
+a@ No alignment parameter +
+   Not templated on allocation type
+a@ Pointer is suitably aligned for any object with fundamental alignment whose
+   size is less than or equal to the requested allocation size.
+
+a@ No alignment parameter +
+   Templated on allocation type [code]#T#
+a@ Pointer is suitably aligned for an object of type [code]#T#.
+
+a@ Alignment parameter [code]#alignment# specified +
+   Not templated on allocation type
+a@ Pointer is suitably aligned for any object with fundamental alignment whose
+   size is less than or equal to the requested allocation size or it is aligned
+   to the specified [code]#alignment#, whichever is greater.
+
+a@ Alignment parameter [code]#alignment# specified +
+   Templated on allocation type [code]#T#
+a@ Pointer is suitably aligned for an object of type [code]#T# or it is aligned
+   to the specified [code]#alignment#, whichever is greater.
+|====
+
 ==== {cpp} allocator interface
 
 USM provides an allocator class that aligns with the {cpp} allocator interface.  This is useful when
@@ -10043,6 +10091,13 @@ using USM with things like {cpp} containers or routines like [code]#std::allocat
 to how {cpp} library routines that use allocators tend to assume that any memory allocated by an allocator
 may be accessed on the host, the [code]#usm_allocator# class is not required to support
 allocating [code]#usm::alloc::device# allocations.
+
+The [code]#usm_allocator# class has a template argument [code]#Alignment#,
+which specifies the minimum alignment for memory that it allocates.  This
+alignment is used even if the allocator is rebound to a different type.  Memory
+allocated by this allocator is suitably aligned for objects of its underlying
+[code]#value_type# or at the alignment specified by [code]#Alignment#,
+whichever is greater.
 
 [source,,linenums]
 ----
@@ -10065,10 +10120,10 @@ public:
                 const property_list &propList = {}) noexcept;
   usm_allocator(const queue &q,
                 const property_list &propList = {}) noexcept;
-  usm_allocator(const usm_allocator &other) noexcept = default;
-  usm_allocator(usm_allocator &&) noexcept = default;
-  usm_allocator &operator=(const usm_allocator &) = delete;
-  usm_allocator &operator=(usm_allocator &&) = default;
+  usm_allocator(const usm_allocator &other) noexcept;
+  usm_allocator(usm_allocator &&) noexcept;
+  usm_allocator &operator=(const usm_allocator &);
+  usm_allocator &operator=(usm_allocator &&);
 
 
   template <class U>
@@ -10750,7 +10805,7 @@ via an instance of [code]#property_list#.
 a@
 [source]
 ----
-void sycl::free(void* ptr, sycl::context& syclContext)
+void sycl::free(void* ptr, const context& syclContext)
 ----
 a@ Frees an allocation.  The memory pointed to by [code]#ptr# must have been
 allocated using one of the USM allocation routines.  [code]#syclContext# must
@@ -10762,7 +10817,7 @@ are enqueued the behavior is undefined.
 a@
 [source]
 ----
-void sycl::free(void* ptr, sycl::queue& syclQueue)
+void sycl::free(void* ptr, const queue& syclQueue)
 ----
 a@ Alternate form where [code]#syclQueue# provides the [code]#context#.
 
@@ -12723,7 +12778,7 @@ reducer& combine(const T& partial)
 a@
 [source]
 ----
-__unspecified__ operator[](size_t index) const
+__unspecified__ operator[](size_t index)
 ----
    a@ Available only when: [code]#Dimensions > 0#.
       Returns an instance of an undefined intermediate type representing
@@ -12815,7 +12870,10 @@ may execute a single <<command>> such as invoking a kernel, copying memory,
 or executing a host task.  It is legal for a <<command-group-scope>> to
 statically contain more than one call to a <<command>> function, but any
 single execution of the <<command-group-function-object>> may execute no more
-than one <<command>>.  The statements that call <<command, commands>> together with
+than one <<command>>. If an application fails to do this, the function that
+submits the <<command-group-function-object>> (i.e., [code]#queue::submit#)
+must throw a synchronous [code]#exception# with the [code]#errc::invalid# error
+code. The statements that call <<command, commands>> together with
 the statements that define the requirements for a kernel form the
 <<command-group-function-object>>.  The command group
 function object takes as a parameter an instance of the <<handler>> class which
@@ -12839,16 +12897,6 @@ host data accesses are better described in <<sec:data.access.and.storage>>,
 where buffers (<<subsec:buffers>>) and accessor (<<subsec:accessors>>) classes
 are described.  The overall memory model of the SYCL application is described in
 <<sub.section.memmodel.app>>.
-
-It is possible to obtain events for the start of the <<command-group-function-object>>,
-the kernel starting, and the command group completing.
-These events are useful for
-profiling and synchronization of kernels.
-When using buffers, safe synchronization in SYCL requires synchronization on
-buffer availability, not on kernel completion. This is because
-the memory that data is stored in upon kernel
-completion is not rigidly specified. The events are provided at the submission of the
-<<command-group-function-object>> to the queue to be executed on.
 
 It is possible for a <<command-group-function-object>> to fail to enqueue to a queue,
 or for it to fail to execute correctly. A user can therefore supply a secondary
@@ -13727,7 +13775,7 @@ into the memory object accessed by [code]#dest#.  The size of the [code]#src#
 accessor determines the number of bytes that are copied, and [code]#dest# must
 have at least this many bytes.  If the size of [code]#dest# is too small, the
 implementation throws a synchronous [code]#exception# with the
-[code]#errc::invalid_object# error code.
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -14126,6 +14174,9 @@ The <<event>> returned by the submission of the associated <<command group>>
 enters the completed state (corresponding to a status of
 [code]#info::event_command_status::complete#) once the invocation of the
 provided {cpp} callable has returned.
+Any uncaught exception thrown during the execution of a <<host-task>> will be
+turned into an <<async-error>> that can be handled as described in
+<<subsubsec:exception.async>>.
 
 A <<host-task>> can optionally be used to interoperate with the
 <<native-backend-object,native backend objects>> associated with the <<queue>> executing the
