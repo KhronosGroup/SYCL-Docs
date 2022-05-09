@@ -6489,10 +6489,12 @@ following values for the [code]#AccessMode# template parameter:
 
 Programs which specify the access target as [code]#target::device# and then
 capture the [code]#accessor# in a <<host-task>> can only use the accessor for
-interoperability through the [code]#interop_handle#.
+interoperability through the [code]#interop_handle#, any other uses result in
+undefined behavior.
 
 Programs which specify the access target as [code]#target::host_task# and then
-use the [code]#accessor# from a <<sycl-kernel-function>> are ill formed.
+use the [code]#accessor# from a <<sycl-kernel-function>> result in undefined
+behavior.
 
 The dimensionality of the accessor must match the underlying buffer, however,
 there is a special case if the buffer is one-dimensional.  In this case, the
