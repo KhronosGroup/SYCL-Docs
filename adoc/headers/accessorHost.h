@@ -85,7 +85,7 @@ class host_accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ &operator[](size_t index) const;
+  __unspecified__ operator[](size_t index) const;
 
   /* Available only when: (Dimensions == 1) */
   reference operator[](size_t index) const;
