@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Khronos Group, Inc.
+// Copyright (c) 2011-2022 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -22,6 +22,8 @@ public:
   size_t get_local_linear_id() const;
 
   group<Dimensions> get_group() const;
+
+  sub_group get_sub_group() const;
 
   size_t get_group(int dimension) const;
 

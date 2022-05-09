@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Khronos Group, Inc.
+// Copyright (c) 2011-2022 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -50,7 +50,7 @@ class local_accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ &operator[](size_t index) const;
+  __unspecified__ operator[](size_t index) const;
 
   /* Available only when: (Dimensions == 1) */
   reference operator[](size_t index) const;

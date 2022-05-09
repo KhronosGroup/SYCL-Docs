@@ -2921,6 +2921,14 @@ Each constructor takes as the last
 parameter an optional SYCL [code]#property_list# to provide properties to
 the SYCL [code]#queue#.
 
+A SYCL [code]#queue# may be destroyed even when there are uncompleted
+<<command, commands>> that have been submitted to the queue.  Doing so does not
+block.  Instead, any commands that have been submitted to the queue begin
+execution when their requisites are satisfied, just as they would had the queue
+not been destroyed.  Any event objects for those commands are signaled in the
+normal manner when the command completes.  Resources associated with the queue
+will be freed by the time the last command completes.
+
 The SYCL [code]#queue# class provides the common reference semantics
 (see <<sec:reference-semantics>>).
 
@@ -7614,7 +7622,7 @@ If this is a <<ranged-accessor>>, the element is determined by adding
 a@
 [source]
 ----
-__unspecified__ &operator[](size_t index) const
+__unspecified__ operator[](size_t index) const
 ----
    a@ Available only when [code]#(Dimensions > 1)#.
 
@@ -8327,7 +8335,7 @@ called from within a <<command>>.
 a@
 [source]
 ----
-__unspecified__ &operator[](size_t index) const
+__unspecified__ operator[](size_t index) const
 ----
    a@ Available only when [code]#(Dimensions > 1)#.
 
@@ -10112,11 +10120,10 @@ public:
                 const property_list &propList = {});
   usm_allocator(const queue &q,
                 const property_list &propList = {});
-  usm_allocator(const usm_allocator &other) noexcept = default;
-  usm_allocator(usm_allocator &&) noexcept = default;
-  usm_allocator &operator=(const usm_allocator &) = delete;
-  usm_allocator &operator=(usm_allocator &&) = default;
-
+  usm_allocator(const usm_allocator &other);
+  usm_allocator(usm_allocator &&) noexcept;
+  usm_allocator &operator=(const usm_allocator &);
+  usm_allocator &operator=(usm_allocator &&);
 
   template <class U>
   usm_allocator(usm_allocator<U, AllocKind, Alignment> const &) noexcept;
@@ -10870,7 +10877,7 @@ via an instance of [code]#property_list#.
 a@
 [source]
 ----
-void sycl::free(void* ptr, sycl::context& syclContext)
+void sycl::free(void* ptr, const context& syclContext)
 ----
 a@ Frees an allocation.  The memory pointed to by [code]#ptr# must have been
 allocated using one of the USM allocation routines.  [code]#syclContext# must
@@ -10882,7 +10889,7 @@ are enqueued the behavior is undefined.
 a@
 [source]
 ----
-void sycl::free(void* ptr, sycl::queue& syclQueue)
+void sycl::free(void* ptr, const queue& syclQueue)
 ----
 a@ Alternate form where [code]#syclQueue# provides the [code]#context#.
 
@@ -12843,7 +12850,7 @@ reducer& combine(const T& partial)
 a@
 [source]
 ----
-__unspecified__ &operator[](size_t index)
+__unspecified__ operator[](size_t index)
 ----
    a@ Available only when: [code]#Dimensions > 0#.
       Returns an instance of an undefined intermediate type representing
@@ -12962,16 +12969,6 @@ host data accesses are better described in <<sec:data.access.and.storage>>,
 where buffers (<<subsec:buffers>>) and accessor (<<subsec:accessors>>) classes
 are described.  The overall memory model of the SYCL application is described in
 <<sub.section.memmodel.app>>.
-
-It is possible to obtain events for the start of the <<command-group-function-object>>,
-the kernel starting, and the command group completing.
-These events are useful for
-profiling and synchronization of kernels.
-When using buffers, safe synchronization in SYCL requires synchronization on
-buffer availability, not on kernel completion. This is because
-the memory that data is stored in upon kernel
-completion is not rigidly specified. The events are provided at the submission of the
-<<command-group-function-object>> to the queue to be executed on.
 
 It is possible for a <<command-group-function-object>> to fail to enqueue to a queue,
 or for it to fail to execute correctly. A user can therefore supply a secondary
@@ -13850,7 +13847,7 @@ into the memory object accessed by [code]#dest#.  The size of the [code]#src#
 accessor determines the number of bytes that are copied, and [code]#dest# must
 have at least this many bytes.  If the size of [code]#dest# is too small, the
 implementation throws a synchronous [code]#exception# with the
-[code]#errc::invalid_object# error code.
+[code]#errc::invalid# error code.
 
 a@
 [source]
@@ -14249,6 +14246,9 @@ The <<event>> returned by the submission of the associated <<command group>>
 enters the completed state (corresponding to a status of
 [code]#info::event_command_status::complete#) once the invocation of the
 provided {cpp} callable has returned.
+Any uncaught exception thrown during the execution of a <<host-task>> will be
+turned into an <<async-error>> that can be handled as described in
+<<subsubsec:exception.async>>.
 
 A <<host-task>> can optionally be used to interoperate with the
 <<native-backend-object,native backend objects>> associated with the <<queue>> executing the
