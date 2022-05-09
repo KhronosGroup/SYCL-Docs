@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Khronos Group, Inc.
+// Copyright (c) 2011-2022 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 buffer<int,2> parent_buffer { range<2>{ 8,8 } };  // Create 2-d buffer with 8x8 ints
