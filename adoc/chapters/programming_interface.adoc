@@ -1025,10 +1025,12 @@ errors are handled by throwing synchronous SYCL exceptions.
 
 The execution environment for a SYCL application has a fixed number of
 platforms which does not vary as the application executes.  The application
-can get a list of all these platforms via [code]#platform::get_platforms()#.
-The [code]#platform# class also provides constructors, but constructing a new
-[code]#platform# instance merely creates a new object that is a copy of one
-of the objects returned by [code]#platform::get_platforms()#.
+can get a list of all these platforms via [code]#platform::get_platforms()#,
+and the order of the platform objects is the same each time the application
+calls that function.  The [code]#platform# class also provides constructors,
+but constructing a new [code]#platform# instance merely creates a new object
+that is a copy of one of the objects returned by
+[code]#platform::get_platforms()#.
 
 The SYCL [code]#platform# class provides the common reference semantics
 (see <<sec:reference-semantics>>).
@@ -1143,9 +1145,9 @@ std::vector<device> get_devices(
     info::device_type deviceType =
     info::device_type::all) const
 ----
-   a@ Returns a [code]#std::vector# containing all SYCL
-      [code]#devices# associated with this SYCL [code]#platform#
-      which have the device type encapsulated by [code]#deviceType#.
+   a@ Returns a [code]#std::vector# containing all the root devices associated
+      with this SYCL [code]#platform# which have the device type encapsulated
+      by [code]#deviceType#.
 
 |====
 
@@ -1471,12 +1473,14 @@ which <<kernel,kernels>> can be executed.
 All member functions of the [code]#device# class are synchronous and
 errors are handled by throwing synchronous SYCL exceptions.
 
-The execution environment for a SYCL application has a fixed number of
-devices which does not vary as the application executes.  The application
-can get a list of all these devices via [code]#device::get_devices()#.  The
-[code]#device# class also provides constructors, but constructing a new
-[code]#device# instance merely creates a new object that is a copy of one
-of the objects returned by [code]#device::get_devices()#.
+The execution environment for a SYCL application has a fixed number of root
+devices which does not vary as the application executes.  The application can
+get a list of all these devices via [code]#device::get_devices()#, and the
+order of the device objects is the same each time the application calls that
+function (assuming the parameter to that function is the same for each call).
+The [code]#device# class also provides constructors, but constructing a new
+[code]#device# instance merely creates a new object that is a copy of one of
+the objects returned by [code]#device::get_devices()#.
 
 A SYCL [code]#device# can be partitioned into multiple SYCL devices, by
 calling the [code]#create_sub_devices()# member function template. The
@@ -1732,8 +1736,8 @@ a@
 static std::vector<device> get_devices(
     info::device_type deviceType = info::device_type::all)
 ----
-   a@ Returns a [code]#std::vector# containing all SYCL
-      [code]#devices# from all <<backend, SYCL backends>> available in the
+   a@ Returns a [code]#std::vector# containing all the root devices
+      from all <<backend, SYCL backends>> available in the
       system which have the device type encapsulated by [code]#deviceType#.
 
 |====
