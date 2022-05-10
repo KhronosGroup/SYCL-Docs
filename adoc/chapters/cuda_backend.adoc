@@ -263,13 +263,14 @@ Likewise, thread blocks map directly to work-groups, and a
 single thread is a SYCL work-item.
 
 CUDA primarily synchronizes the threads through two functions,
-[code]#cudaStreamSynchronize()# and [code]#&lowbar&lowbarsyncthreads()#.
+[code]#cudaStreamSynchronize()# and [code]#\__syncthreads()#.
 [code]#cudaStreamSynchronize()# blocks work from being performed until all
-threads on the device has been completed. [code]#&lowbar&lowbarsyncthreads()# waits for
+threads on the device has been completed.
+[code]#__syncthreads()# waits for
 all threads within a thread block to reach the same point. So 
 [code]#cudaStreamSynchronize()# is similar to queue.wait(), buffer
-destruction, and other host-device synchronization events within SYCL. 
-[code]#&lowbar&lowbarsyncthreads()# synchronizes the threads within a thread block which
+destruction, and other host-device synchronization events within SYCL.
+[code]#__syncthreads()# synchronizes the threads within a thread block which
 is analogous to the work-group barrier.
 
 CUDA's warp concept has no SYCL equivalent. If a user were to write 
