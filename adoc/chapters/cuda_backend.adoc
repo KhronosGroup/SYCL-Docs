@@ -31,8 +31,7 @@ have a few differences in terminology and architecture.
 
 A SYCL device maps to a single CUDA device.  As CUDA does not split into
 separate platforms there is no 'platform' concept in CUDA corresponding to the
-SYCL platform. Instead, a SYCL platform maps to a collection of CUDA devices
-represented by `std::vector<CUdevice>`.
+SYCL platform. Instead, a SYCL platform maps to a collection of CUDA devices.
 
 A SYCL <<context>> simply maps to one, or multiple CUDA contexts. Indeed while
 a CUDA context is tied to a single device, this is not the case for a SYCL
@@ -360,8 +359,8 @@ functions of classes [code]#platform#, [code]#context#, [code]#device#,
 
 This section describes the API level interoperability between SYCL and CUDA.
 
-The CUDA backend supports API interoperability for `platform`, `device`,
-`context`, `queue`, and `event`. Interoperability for `buffer`, `kernel`,
+The CUDA backend supports API interoperability for `device`, `context`,
+`queue`, and `event`. Interoperability for `platform`, `buffer`, `kernel`,
 `kernel_bundle`, `device_image`, `sampled_image` and `unsampled_image` are not
 supported.
 
@@ -370,7 +369,6 @@ supported.
 [width="100%",options="header",cols="20%,20%,20%,40%"]
 |====
 | [code]#SyclType# | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
-| [code]#platform# | `std::vector<CUdevice>`   | `std::vector<CUdevice>`  | A SYCL platform encapsulates a list of CUDA devices.
 | [code]#device#   | `CUdevice`                | `CUdevice`               | A SYCL device encapsulates a CUDA device.
 | [code]#context#  | `CUcontext`               | `std::vector<CUcontext>` | A SYCL context can encapsulate multiple CUDA contexts, however, it is not possible to create a SYCL context from multiple CUDA contexts.
 | [code]#queue#    | `CUstream`   | `CUstream` | A SYCL queue can encapsulates multiple CUDA stream, however, a SYCL queue can only be created from or produce one, and any synchronization required should be performed.
@@ -383,11 +381,6 @@ supported.
 [width="100%",options="header",cols="40%,60%"]
 |====
 | CUDA interoperability function                                    |  Description
-| [code]#template<backend Backend> +
-platform + 
-make_platform(const backend_input_t<Backend, platform> &backendObject);# 
-        | Create a SYCL `platform` from a list of CUDA device, the list must contain at least one CUDA device. As the SYCL execution environment for the CUDA backend contains a fixed number of platforms that are enumerated via `sycl::platform::get_platforms()`. Calling this function does not create a new platform. Rather it merely creates a `sycl::platform` object that is a copy of one of the platforms from that enumeration.
-
 | [code]#template<backend Backend> +
 device +
 make_device(const backend_input_t<Backend, device> &backendObject);# 
