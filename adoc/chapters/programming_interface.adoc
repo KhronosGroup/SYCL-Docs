@@ -10914,20 +10914,25 @@ a@
 usm::alloc get_pointer_type(const void *ptr,
                             const context &ctxt)
 ----
-a@ Returns the USM allocation type for [code]#ptr# if [code]#ptr#
-falls inside a valid USM allocation.  Returns [code]#usm::alloc::unknown# if
-[code]#ptr# is not a valid USM allocation.
+a@ Returns the USM allocation type for [code]#ptr# if [code]#ptr# falls inside
+a valid USM allocation for the context [code]#syclContext#.  Returns
+[code]#usm::alloc::unknown# if [code]#ptr# does not point within a valid USM
+allocation from [code]#syclContext#.
 
 a@
 [source]
 ----
-sycl::device get_pointer_device(const void *ptr,
-                                const context &ctxt)
+device get_pointer_device(const void *ptr,
+                          const context &ctxt)
 ----
-a@  Returns the [code]#device# associated with the USM allocation.  If
-[code]#ptr# is an allocation of type [code]#usm::alloc::host#, returns the
-first device in [code]#ctxt#. Throws an error if [code]#ptr# is not a valid
-USM allocation.
+a@ Returns the [code]#device# associated with the USM allocation.  If
+[code]#ptr# points within a USM device or shared allocation for the context
+[code]#syclContext#, returns the same device that was passed when allocating
+the memory.  If [code]#ptr# points within a USM host allocation for the context
+[code]#syclContext#, returns the first device in [code]#syclContext#.  Throws a
+synchronous [code]#exception# with the [code]#errc::invalid# error code if
+[code]#ptr# does not point within a valid USM allocation from
+[code]#syclContext#.
 
 |====
 
