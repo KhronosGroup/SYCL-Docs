@@ -344,12 +344,12 @@ expose index-flipping to the user.
 === Queries
 
 For all event information profiling descriptors, the calls to 
-[code]#sycl::event::get_profiling_info# return the time (in nanoseconds) since 
-the creation of the context that the event is associated with. The "Resolution"
-(timing error) of the returned value is the same as that provided by the CUDA
-driver API call [code]#cuEventElapsedTime#: +/- 0.5 microseconds. All event
-information profiling descriptors, defined by the SYCL specification, are
-supported by the CUDA backend.
+[code]#sycl::event::get_profiling_info# return the time difference (in nanoseconds)
+between the creation of the platform (which happens when the application is started)
+and the descriptor time for the associated event. The "Resolution" (timing error)
+of the returned value is the same as that provided by the CUDA driver API call,
+[code]#cuEventElapsedTime#: +/- 0.5 microseconds. All event information profiling
+descriptors, defined by the SYCL specification, are supported by the CUDA backend.
 
 Currently no restrictions are defined for parameters of [code]#get_info# member
 function in classes [code]#platform#, [code]#context#, [code]#device#, 
