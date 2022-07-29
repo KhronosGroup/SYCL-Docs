@@ -483,16 +483,16 @@ a@
 [source]
 ----
 context make_context(
-    const cl_context &clContext,
-    const async_handler &asyncHandler = {})
+    const cl_context& clContext,
+    const async_handler& asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#context# instance from an OpenCL [code]#cl_context# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
 event make_event(
-    const std::vector<cl_event> &clEvents,
-    const context &syclContext)
+    const std::vector<cl_event>& clEvents,
+    const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#event# instance from a vector of OpenCL
       [code]#cl_event# objects in accordance with the requirements described in
@@ -501,23 +501,23 @@ a@
 [source]
 ----
 device make_device(
-    const cl_device_id &clDeviceId)
+    const cl_device_id& clDeviceId)
 ----
    a@ Constructs a SYCL [code]#device# instance from an OpenCL [code]#cl_device_id# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
 platform make_platform(
-    const cl_platform_id &clPlatformId)
+    const cl_platform_id& clPlatformId)
 ----
    a@ Constructs a SYCL [code]#platform# instance from an OpenCL [code]#cl_platform_id# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
 queue make_queue(
-    const cl_command_queue &clQueue,
-    const context &syclContext,
-    const async_handler &asyncHandler = {})
+    const cl_command_queue& clQueue,
+    const context& syclContext,
+    const async_handler& asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#queue# instance with an optional
       [code]#async_handler# from an OpenCL [code]#cl_command_queue#
@@ -529,8 +529,8 @@ a@
 template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
 buffer<T, Dimensions, AllocatorT> make_buffer(
-    const cl_mem &clMemObject,
-    const context &syclContext,
+    const cl_mem& clMemObject,
+    const context& syclContext,
     event availableEvent)
 ----
    a@ Available only when: [code]#Dimensions == 1#.
@@ -545,8 +545,8 @@ a@
 template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
 buffer<T, Dimensions, AllocatorT> make_buffer(
-    const cl_mem &clMemObject,
-    const context &syclContext)
+    const cl_mem& clMemObject,
+    const context& syclContext)
 ----
    a@ Available only when: [code]#Dimensions == 1#.
 
@@ -558,8 +558,8 @@ a@
 template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
 sampled_image<Dimensions, AllocatorT> make_sampled_image(
-    const cl_mem &clMemObject,
-    const context &syclContext,
+    const cl_mem& clMemObject,
+    const context& syclContext,
     image_sampler syclImageSampler,
     event availableEvent)
 ----
@@ -573,8 +573,8 @@ a@
 template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
 sampled_image<Dimensions, AllocatorT> make_sampled_image(
-    const cl_mem &clMemObject,
-    const context &syclContext,
+    const cl_mem& clMemObject,
+    const context& syclContext,
     image_sampler syclImageSampler)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
@@ -586,8 +586,8 @@ a@
 template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
 unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
-    const cl_mem &clMemObject,
-    const context &syclContext,
+    const cl_mem& clMemObject,
+    const context& syclContext,
     event availableEvent)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
@@ -600,15 +600,15 @@ a@
 template <int Dimensions = 1,
           typename AllocatorT = image_allocator>
 unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
-    const cl_mem &clMemObject,
-    const context &syclContext)
+    const cl_mem& clMemObject,
+    const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-kernel make_kernel(const cl_kernel &clKernel,
-                   const context &syclContext);
+kernel make_kernel(const cl_kernel& clKernel,
+                   const context& syclContext);
 ----
    a@ Constructs a SYCL [code]#kernel# instance from an OpenCL kernel object.
 a@
@@ -616,7 +616,7 @@ a@
 ----
 template <bundle_state State>
 kernel_bundle<State> make_kernel_bundle(
-    const cl_program &clProgram,
+    const cl_program& clProgram,
     const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#kernel_bundle# instance from an OpenCL
@@ -663,8 +663,8 @@ a@
 [source]
 ----
 bool has_extension(
-    const sycl::platform &syclPlatform,
-    const std::string &extension)
+    const sycl::platform& syclPlatform,
+    const std::string& extension)
 ----
    a@ Returns true if the OpenCL platform associated with [code]#syclPlatform#
    supports the extension identified by [code]#extension#, otherwise it returns
@@ -675,8 +675,8 @@ a@
 [source]
 ----
 bool has_extension(
-    const sycl::device &syclDevice,
-    const std::string &extension)
+    const sycl::device& syclDevice,
+    const std::string& extension)
 ----
    a@ Returns true if the OpenCL device associated with [code]#syclDevice#
    supports the extension identified by [code]#extension#, otherwise it returns
@@ -755,9 +755,9 @@ include::{header_dir}/openclBackend/createBundle.h[lines=4..-1]
 [source,,linenums]
 ----
 template <bundle_state State>
-kernel_bundle<State> create_bundle(const context &ctxt,
-                                   const std::vector<device> &devs,
-                                   const std::vector<cl_program> &clPrograms)
+kernel_bundle<State> create_bundle(const context& ctxt,
+                                   const std::vector<device>& devs,
+                                   const std::vector<cl_program>& clPrograms)
 ----
   . _Preconditions:_ The <<context>> specified by [code]#ctxt#
     must be associated with the OpenCL <<backend>>.
@@ -782,8 +782,8 @@ by invoking the OpenCL APIs.
 [source,,linenums]
 ----
 kernel_bundle<bundle_state::executable>
-create_bundle(const context &ctxt, const std::vector<device> &devs,
-              const std::vector<cl_kernel> &clKernels)
+create_bundle(const context& ctxt, const std::vector<device>& devs,
+              const std::vector<cl_kernel>& clKernels)
 ----
   . _Preconditions:_ The <<context>> specified by [code]#ctxt#
     must be associated with the OpenCL <<backend>>.
