@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2022 The Khronos Group, Inc.
+# Copyright 2011-2022 The Khronos Group, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -40,7 +40,6 @@ RMRF      = rm -rf
 MKDIR     = mkdir -p
 CP        = cp
 ECHO      = echo
-GS_EXISTS = $(shell command -v gs 2> /dev/null)
 
 # Path to Python scripts used in generation
 SCRIPTS  = scripts
@@ -244,18 +243,13 @@ $(HTMLDIR)/diff.html: $(SPECSRC) $(COMMONDOCS) katexinst
 
 pdf: $(PDFDIR)/$(SPEC_BASE_NAME).pdf $(SPECSRC) $(COMMONDOCS)
 
+OPTIMIZEPDF = hexapdf optimize $(OPTIMIZEPDFOPTS)
 %.pdf: $(SPECSRC) $(COMMONDOCS)
 	$(QUIET)$(MKDIR) $(PDFDIR)
 	$(QUIET)$(MKDIR) $(PDFMATHDIR)
 	$(QUIET)$(ASCIIDOCPDF) --trace $(ADOCOPTS) $(ADOCPDFOPTS) \
 	  --out-file $@ $(SPECSRC)
-ifndef GS_EXISTS
-	$(QUIET) echo "Warning: Ghostscript not installed, skipping pdf optimization"
-else
-	$(QUIET)$(CURDIR)/config/optimize-pdf $@
-	$(QUIET)rm $@
-	$(QUIET)mv $*-optimized.pdf $@
-endif
+	$(QUIET)$(OPTIMIZEPDF) $@ $@.out && mv $@.out $@
 	$(QUIET)rm -rf $(PDFMATHDIR)
 
 # Reflow text in spec sources
