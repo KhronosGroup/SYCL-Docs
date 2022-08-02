@@ -18,9 +18,9 @@ int main() {
     // pre-compiled kernel from "myBundle".
     cgh.use_kernel_bundle(myBundle);
 
-    cgh.parallel_for(range{1024}, ([=](item index) {
-      // kernel code
-    }));
+    cgh.parallel_for(range { 1024 }, ([=](item index) {
+                       // kernel code
+                     }));
   });
 
   myQueue.wait();

@@ -15,7 +15,7 @@ int main() {
   // Get an executable kernel_bundle containing all the built-in kernels
   // supported by the device.
   kernel_bundle<bundle_state::executable> myBundle =
-      get_kernel_bundle(myContext, {myDevice}, builtinKernelIds);
+      get_kernel_bundle(myContext, { myDevice }, builtinKernelIds);
 
   // Retrieve a kernel object that can be used to query for more information
   // about the built-in kernel or to submit it to a command group.  We assume
@@ -23,10 +23,10 @@ int main() {
   kernel builtinKernel = myBundle.get_kernel(builtinKernelIds[0]);
 
   // Submit the built-in kernel.
-  myQueue.submit([&](handler &cgh) {
+  myQueue.submit([&](handler& cgh) {
     // Setting the arguments depends on the backend and the exact kernel used.
     cgh.set_args(...);
-    cgh.parallel_for(range{1024}, builtinKernel);
+    cgh.parallel_for(range { 1024 }, builtinKernel);
   });
 
   myQueue.wait();
