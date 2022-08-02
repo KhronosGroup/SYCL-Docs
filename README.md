@@ -115,8 +115,17 @@ Dockerfile at
 
 https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile
 
-Note that the Khronos Docker image layers on the official Ruby 2.7 Docker
+Note that the Khronos Docker image layers on the official Ruby 3.1 Docker
 image, so you must install Ruby first.
+
+If you have installed an older version of the tools and the Khronos image is
+updated, there may be corresponding changes in the specification build and
+markup required by the new versions. For example, updating from
+asciidoctor-pdf 1.6.1 to 2.2.0 required changing the `pdf-stylesdir`
+attribute in the asciidoctor build to `pdf-themesdir`. Eventually, these
+changes may make using the older tools impractical. If this happens, update
+your tools to match the latest Docker image, and rebase your working branch
+on current `main` branch.
 
 
 ### Building Using GitLab CI

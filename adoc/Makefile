@@ -159,7 +159,7 @@ ADOCPDFEXTS  = --require asciidoctor-pdf --require asciidoctor-mathematical \
   --require $(CURDIR)/config/asciidoctor-mathematical-ext.rb
 ADOCPDFOPTS  = $(ADOCPDFEXTS) --attribute mathematical-format=svg \
   --attribute imagesoutdir=$(PDFMATHDIR) \
-  --attribute pdf-stylesdir=$(CURDIR)/config/themes \
+  --attribute pdf-themesdir=$(CURDIR)/config/themes \
   --attribute pdf-theme=pdf \
   --attribute hyphens=en_us
 
