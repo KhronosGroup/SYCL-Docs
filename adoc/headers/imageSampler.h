@@ -11,10 +11,7 @@ enum class addressing_mode : /* unspecified */ {
   none
 };
 
-enum class filtering_mode : /* unspecified */ {
-  nearest,
-  linear
-};
+enum class filtering_mode : /* unspecified */ { nearest, linear };
 
 enum class coordinate_normalization_mode : /* unspecified */ {
   normalized,
@@ -27,4 +24,4 @@ struct image_sampler {
   filtering_mode filtering;
 };
 
-}  // namespace sycl
+} // namespace sycl

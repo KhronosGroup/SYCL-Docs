@@ -7,7 +7,7 @@ class kernel_id {
  public:
   kernel_id() = delete;
 
-  const char *get_name() const noexcept;
+  const char* get_name() const noexcept;
 };
 
-}  // namespace sycl
+} // namespace sycl

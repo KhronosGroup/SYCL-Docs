@@ -8,7 +8,7 @@ namespace kernel {
 struct num_args;
 struct attributes;
 
-}  // namespace kernel
+} // namespace kernel
 
 namespace kernel_device_specific {
 
@@ -22,7 +22,7 @@ struct compile_num_sub_groups;
 struct max_sub_group_size;
 struct compile_sub_group_size;
 
-}  // namespace kernel_device_specific
+} // namespace kernel_device_specific
 
-}  // namespace info
-}  // namespace sycl
+} // namespace info
+} // namespace sycl

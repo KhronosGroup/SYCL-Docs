@@ -3,29 +3,25 @@
 
 namespace sycl {
 
-enum class image_target : /* unspecified */ {
-  device,
-  host_task
-};
+enum class image_target : /* unspecified */ { device, host_task };
 
-template <typename DataT,
-          int Dimensions,
+template <typename DataT, int Dimensions,
           image_target AccessTarget = image_target::device>
 class sampled_image_accessor {
  public:
   using value_type = const DataT;
-  using reference = const DataT &;
-  using const_reference = const DataT &;
+  using reference = const DataT&;
+  using const_reference = const DataT&;
 
   template <typename AllocatorT>
-  sampled_image_accessor(sampled_image<Dimensions, AllocatorT> &imageRef,
-                         handler &commandGroupHandlerRef,
-                         const property_list &propList = {});
+  sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
+                         handler& commandGroupHandlerRef,
+                         const property_list& propList = {});
 
   template <typename AllocatorT, typename TagT>
-  sampled_image_accessor(sampled_image<Dimensions, AllocatorT> &imageRef,
-                         handler &commandGroupHandlerRef, TagT tag,
-                         const property_list &propList = {});
+  sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
+                         handler& commandGroupHandlerRef, TagT tag,
+                         const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -36,20 +32,18 @@ class sampled_image_accessor {
   /* if Dimensions == 1, CoordT = float
      if Dimensions == 2, CoordT = float2
      if Dimensions == 3, CoordT = float4 */
-  template <typename CoordT>
-  DataT read(const CoordT &coords) const noexcept;
+  template <typename CoordT> DataT read(const CoordT& coords) const noexcept;
 };
 
-template <typename DataT, int Dimensions>
-class host_sampled_image_accessor {
+template <typename DataT, int Dimensions> class host_sampled_image_accessor {
  public:
   using value_type = const DataT;
-  using reference = const DataT &;
-  using const_reference = const DataT &;
+  using reference = const DataT&;
+  using const_reference = const DataT&;
 
   template <typename AllocatorT>
-  host_sampled_image_accessor(sampled_image<Dimensions, AllocatorT> &imageRef,
-                              const property_list &propList = {});
+  host_sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
+                              const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -60,8 +54,7 @@ class host_sampled_image_accessor {
   /* if Dimensions == 1, CoordT = float
      if Dimensions == 2, CoordT = float2
      if Dimensions == 3, CoordT = float4 */
-  template <typename CoordT>
-  DataT read(const CoordT &coords) const noexcept;
+  template <typename CoordT> DataT read(const CoordT& coords) const noexcept;
 };
 
-}  // namespace sycl
+} // namespace sycl
