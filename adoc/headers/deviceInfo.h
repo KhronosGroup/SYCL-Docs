@@ -9,7 +9,7 @@ struct device_type;
 struct vendor_id;
 struct max_compute_units;
 struct max_work_item_dimensions;
-template<int Dimensions = 3> struct max_work_item_sizes;
+template <int Dimensions = 3> struct max_work_item_sizes;
 struct max_work_group_size;
 struct preferred_vector_width_char;
 struct preferred_vector_width_short;
@@ -48,7 +48,7 @@ struct global_mem_cache_line_size;
 struct global_mem_cache_size;
 struct global_mem_size;
 struct max_constant_buffer_size; // Deprecated
-struct max_constant_args; // Deprecated
+struct max_constant_args;        // Deprecated
 struct local_mem_type;
 struct local_mem_size;
 struct error_correction_support;
@@ -61,9 +61,9 @@ struct profiling_timer_resolution;
 struct is_endian_little;
 struct is_available;
 struct is_compiler_available; // Deprecated
-struct is_linker_available; // Deprecated
+struct is_linker_available;   // Deprecated
 struct execution_capabilities;
-struct queue_profiling; // Deprecated
+struct queue_profiling;  // Deprecated
 struct built_in_kernels; // Deprecated
 struct built_in_kernel_ids;
 struct platform;
@@ -84,7 +84,7 @@ struct partition_affinity_domains;
 struct partition_type_property;
 struct partition_type_affinity_domain;
 
-}  // namespace device
+} // namespace device
 
 enum class device_type : /* unspecified */ {
   cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
@@ -93,7 +93,7 @@ enum class device_type : /* unspecified */ {
   custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
   automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
   host,
-  all          // Maps to OpenCL CL_DEVICE_TYPE_ALL
+  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
 };
 
 enum class partition_property : /* unspecified */ {
@@ -113,11 +113,7 @@ enum class partition_affinity_domain : /* unspecified */ {
   next_partitionable
 };
 
-enum class local_mem_type : /* unspecified */ {
-  none,
-  local,
-  global
-};
+enum class local_mem_type : /* unspecified */ { none, local, global };
 
 enum class fp_config : /* unspecified */ {
   denorm,
@@ -141,5 +137,5 @@ enum class execution_capability : /* unspecified */ {
   exec_native_kernel
 };
 
-}  // namespace info
-}  // namespace sycl
+} // namespace info
+} // namespace sycl

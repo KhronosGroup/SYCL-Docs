@@ -5,11 +5,9 @@ namespace sycl {
 
 class interop_handle {
  private:
-
   interop_handle(__unspecified__);
 
  public:
-
   interop_handle() = delete;
 
   backend get_backend() const noexcept;
@@ -18,18 +16,16 @@ class interop_handle {
             target AccessTarget, access::placeholder isPlaceholder>
   backend_return_t<Backend, buffer<DataT, Dims>>
   get_native_mem(const accessor<DataT, Dims, AccessMode, AccessTarget,
-                                isPlaceholder> &bufferAccessor) const;
+                                isPlaceholder>& bufferAccessor) const;
 
   template <backend Backend, typename DataT, int Dims, access_mode AccMode>
-  backend_return_t<Backend, unsampled_image<Dims>>
-  get_native_mem(
-      const unsampled_image_accessor<DataT, Dims, AccMode, image_target::device>
-          &imageAcc) const;
+  backend_return_t<Backend, unsampled_image<Dims>> get_native_mem(
+      const unsampled_image_accessor<DataT, Dims, AccMode,
+                                     image_target::device>& imageAcc) const;
 
   template <backend Backend, typename DataT, int Dims>
-  backend_return_t<Backend, sampled_image<Dims>>
-  get_native_mem(
-      const sampled_image_accessor<DataT, Dims, image_target::device> &imageAcc)
+  backend_return_t<Backend, sampled_image<Dims>> get_native_mem(
+      const sampled_image_accessor<DataT, Dims, image_target::device>& imageAcc)
       const;
 
   template <backend Backend>
@@ -40,18 +36,19 @@ class interop_handle {
 
   template <backend Backend>
   backend_return_t<Backend, context> get_native_context() const;
-
 };
 
 class handler {
   ...
 
- public:
+      public
+      :
 
-  template <typename T>
-  void host_task(T &&hostTaskCallable);
+      template <typename T>
+      void
+      host_task(T&& hostTaskCallable);
 
   ...
 };
 
-}  // namespace sycl
+} // namespace sycl

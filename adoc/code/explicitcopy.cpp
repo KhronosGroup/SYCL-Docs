@@ -13,7 +13,7 @@ sycl::buffer<int, 1> b { range<1>(nElems) };
 // Create a queue
 queue myQueue;
 
-myQueue.submit([&](handler &cgh) {
+myQueue.submit([&](handler& cgh) {
   // Retrieve a ranged write accessor to a global buffer with access to the
   // first half of the buffer
   accessor acc { b, cgh, range<1>(nElems / 2), id<1>(0), write_only };

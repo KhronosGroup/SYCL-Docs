@@ -3,7 +3,7 @@
 
 namespace sycl {
 
-template<backend Backend, class T>
-backend_return_t<Backend, T> get_native(const T &syclObject);
+template <backend Backend, class T>
+backend_return_t<Backend, T> get_native(const T& syclObject);
 
-}  // namespace sycl
+} // namespace sycl

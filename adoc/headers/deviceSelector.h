@@ -16,12 +16,11 @@ using gpu_selector = __unspecified__;
 using accelerator_selector = __unspecified__;
 
 // Returns a selector that selects a device based on desired aspects
-__unspecified_callable__ aspect_selector(
-  const std::vector<aspect> &aspectList,
-  const std::vector<aspect> &denyList = {});
+__unspecified_callable__
+aspect_selector(const std::vector<aspect>& aspectList,
+                const std::vector<aspect>& denyList = {});
 template <class... AspectList>
 __unspecified_callable__ aspect_selector(AspectList... aspectList);
-template <aspect... AspectList>
-__unspecified_callable__ aspect_selector();
+template <aspect... AspectList> __unspecified_callable__ aspect_selector();
 
 } // namespace sycl

@@ -14,9 +14,9 @@ int main() {
   queue myQueue;
 
   // Create some 2D buffers of float for our matrices
-  buffer<float, 2> a { range<2>{N, M} };
-  buffer<float, 2> b { range<2>{N, M} };
-  buffer<float, 2> c { range<2>{N, M} };
+  buffer<float, 2> a { range<2> { N, M } };
+  buffer<float, 2> b { range<2> { N, M } };
+  buffer<float, 2> c { range<2> { N, M } };
 
   // Launch an asynchronous kernel to initialize a
   myQueue.submit([&](handler& cgh) {
@@ -24,9 +24,8 @@ int main() {
     accessor A { a, cgh, write_only };
 
     // Enqueue a parallel kernel iterating on a N*M 2D iteration space
-    cgh.parallel_for(range<2> {N, M}, [=](id<2> index) {
-      A[index] = index[0] * 2 + index[1];
-    });
+    cgh.parallel_for(range<2> { N, M },
+                     [=](id<2> index) { A[index] = index[0] * 2 + index[1]; });
   });
 
   // Launch an asynchronous kernel to initialize b
@@ -39,7 +38,7 @@ int main() {
     // scheduled independently
 
     // Enqueue a parallel kernel iterating on a N*M 2D iteration space
-    cgh.parallel_for(range<2> {N, M}, [=](id<2> index) {
+    cgh.parallel_for(range<2> { N, M }, [=](id<2> index) {
       B[index] = index[0] * 2014 + index[1] * 42;
     });
   });
@@ -55,10 +54,9 @@ int main() {
     // this kernel is run, the kernels computing a and b have completed
 
     // Enqueue a parallel kernel iterating on a N*M 2D iteration space
-    cgh.parallel_for(range<2> {N, M}, [=](id<2> index) {
-        C[index] = A[index] + B[index];
-     });
-    });
+    cgh.parallel_for(range<2> { N, M },
+                     [=](id<2> index) { C[index] = A[index] + B[index]; });
+  });
 
   // Ask for an accessor to read c from application scope.  The SYCL runtime
   // waits for c to be ready before returning from the constructor

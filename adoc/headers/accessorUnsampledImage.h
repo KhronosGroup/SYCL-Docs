@@ -3,31 +3,26 @@
 
 namespace sycl {
 
-enum class image_target : /* unspecified */ {
-  device,
-  host_task
-};
+enum class image_target : /* unspecified */ { device, host_task };
 
-template <typename DataT,
-          int Dimensions,
-          access_mode AccessMode,
+template <typename DataT, int Dimensions, access_mode AccessMode,
           image_target AccessTarget = image_target::device>
 class unsampled_image_accessor {
  public:
-  using value_type =             // const DataT for read-only accessors, DataT otherwise
+  using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
-  using reference = value_type &;
-  using const_reference = const DataT &;
+  using reference = value_type&;
+  using const_reference = const DataT&;
 
   template <typename AllocatorT>
-  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
-                           handler &commandGroupHandlerRef,
-                           const property_list &propList = {});
+  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
+                           handler& commandGroupHandlerRef,
+                           const property_list& propList = {});
 
   template <typename AllocatorT, typename TagT>
-  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
-                           handler &commandGroupHandlerRef, TagT tag,
-                           const property_list &propList = {});
+  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
+                           handler& commandGroupHandlerRef, TagT tag,
+                           const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -39,36 +34,36 @@ class unsampled_image_accessor {
   if Dimensions == 1, CoordT = int
   if Dimensions == 2, CoordT = int2
   if Dimensions == 3, CoordT = int4 */
-  template <typename CoordT>
-  DataT read(const CoordT &coords) const noexcept;
+  template <typename CoordT> DataT read(const CoordT& coords) const noexcept;
 
   /* Available only when: AccessMode == access_mode::write
   if Dimensions == 1, CoordT = int
   if Dimensions == 2, CoordT = int2
   if Dimensions == 3, CoordT = int4 */
   template <typename CoordT>
-  void write(const CoordT &coords, const DataT &color) const;
+  void write(const CoordT& coords, const DataT& color) const;
 };
 
-template <typename DataT,
-          int Dimensions = 1,
+template <typename DataT, int Dimensions = 1,
           access_mode AccessMode =
-            (std::is_const_v<DataT> ? access_mode::read
-                                    : access_mode::read_write)>
+              (std::is_const_v<DataT> ? access_mode::read
+                                      : access_mode::read_write)>
 class host_unsampled_image_accessor {
  public:
-  using value_type =             // const DataT for read-only accessors, DataT otherwise
+  using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
-  using reference = value_type &;
-  using const_reference = const DataT &;
+  using reference = value_type&;
+  using const_reference = const DataT&;
 
   template <typename AllocatorT>
-  host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
-                                const property_list &propList = {});
+  host_unsampled_image_accessor(
+      unsampled_image<Dimensions, AllocatorT>& imageRef,
+      const property_list& propList = {});
 
   template <typename AllocatorT, typename TagT>
-  host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT> &imageRef,
-                                TagT tag, const property_list &propList = {});
+  host_unsampled_image_accessor(
+      unsampled_image<Dimensions, AllocatorT>& imageRef, TagT tag,
+      const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -81,8 +76,7 @@ class host_unsampled_image_accessor {
   if Dimensions == 1, CoordT = int
   if Dimensions == 2, CoordT = int2
   if Dimensions == 3, CoordT = int4 */
-  template <typename CoordT>
-  DataT read(const CoordT &coords) const noexcept;
+  template <typename CoordT> DataT read(const CoordT& coords) const noexcept;
 
   /* Available only when: (AccessMode == access_mode::write ||
                            AccessMode == access_mode::read_write)
@@ -90,7 +84,7 @@ class host_unsampled_image_accessor {
   if Dimensions == 2, CoordT = int2
   if Dimensions == 3, CoordT = int4 */
   template <typename CoordT>
-  void write(const CoordT &coords, const DataT &color) const;
+  void write(const CoordT& coords, const DataT& color) const;
 };
 
-}  // namespace sycl
+} // namespace sycl

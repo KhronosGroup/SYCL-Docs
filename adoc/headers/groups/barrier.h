@@ -2,4 +2,5 @@
 // SPDX-License-Identifier: MIT
 
 template <typename Group>
-void group_barrier(Group g, memory_scope fence_scope = Group::fence_scope); // (1)
+void group_barrier(Group g,
+                   memory_scope fence_scope = Group::fence_scope); // (1)

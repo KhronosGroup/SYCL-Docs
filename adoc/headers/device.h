@@ -8,7 +8,7 @@ class device {
   device();
 
   template <typename DeviceSelector>
-  explicit device(const DeviceSelector &deviceSelector);
+  explicit device(const DeviceSelector& deviceSelector);
 
   /* -- common interface members -- */
 
@@ -29,7 +29,7 @@ class device {
 
   bool has(aspect asp) const;
 
-  bool has_extension(const std::string &extension) const; // Deprecated
+  bool has_extension(const std::string& extension) const; // Deprecated
 
   // Available only when Prop == info::partition_property::partition_equally
   template <info::partition_property Prop>
@@ -37,13 +37,16 @@ class device {
 
   // Available only when Prop == info::partition_property::partition_by_counts
   template <info::partition_property Prop>
-  std::vector<device> create_sub_devices(const std::vector<size_t> &counts) const;
+  std::vector<device>
+  create_sub_devices(const std::vector<size_t>& counts) const;
 
-  // Available only when Prop == info::partition_property::partition_by_affinity_domain
+  // Available only when Prop ==
+  // info::partition_property::partition_by_affinity_domain
   template <info::partition_property Prop>
-  std::vector<device> create_sub_devices(info::partition_affinity_domain affinityDomain) const;
+  std::vector<device>
+  create_sub_devices(info::partition_affinity_domain affinityDomain) const;
 
-  static std::vector<device> get_devices(
-      info::device_type deviceType = info::device_type::all);
+  static std::vector<device>
+  get_devices(info::device_type deviceType = info::device_type::all);
 };
 } // namespace sycl

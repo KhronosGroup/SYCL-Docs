@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int Dimensions = 1>
-class nd_range {
-public:
-
-   /* -- common interface members -- */
+template <int Dimensions = 1> class nd_range {
+ public:
+  /* -- common interface members -- */
 
   // The offset is deprecated in SYCL 2020.
   nd_range(range<Dimensions> globalSize, range<Dimensions> localSize,
@@ -17,4 +15,4 @@ public:
   range<Dimensions> get_group_range() const;
   id<Dimensions> get_offset() const; // Deprecated in SYCL 2020.
 };
-}  // namespace sycl
+} // namespace sycl

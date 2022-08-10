@@ -12,6 +12,6 @@ struct atomic_fence_order_capabilities;
 struct atomic_memory_scope_capabilities;
 struct atomic_fence_scope_capabilities;
 
-}  // namespace context
-}  // info
-}  // sycl
+} // namespace context
+} // namespace info
+} // namespace sycl

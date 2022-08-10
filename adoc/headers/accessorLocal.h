@@ -2,36 +2,37 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <typename DataT, int Dimensions = 1>
-class local_accessor {
+template <typename DataT, int Dimensions = 1> class local_accessor {
  public:
-  using value_type =             // const DataT for read-only accessors, DataT otherwise
+  using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
-  using reference = value_type &;
-  using const_reference = const DataT &;
+  using reference = value_type&;
+  using const_reference = const DataT&;
   template <access::decorated IsDecorated>
-      using accessor_ptr =
-          multi_ptr<value_type, access::address_space::local_space, IsDecorated>;
+  using accessor_ptr =
+      multi_ptr<value_type, access::address_space::local_space, IsDecorated>;
   using iterator = __unspecified_iterator__<value_type>;
   using const_iterator = __unspecified_iterator__<const value_type>;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-  using difference_type = typename std::iterator_traits<iterator>::difference_type;
+  using difference_type =
+      typename std::iterator_traits<iterator>::difference_type;
   using size_type = size_t;
 
   local_accessor();
 
   /* Available only when: (Dimensions == 0) */
-  local_accessor(handler &commandGroupHandlerRef,
-                 const property_list &propList = {});
+  local_accessor(handler& commandGroupHandlerRef,
+                 const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  local_accessor(range<Dimensions> allocationSize, handler &commandGroupHandlerRef,
-                 const property_list &propList = {});
+  local_accessor(range<Dimensions> allocationSize,
+                 handler& commandGroupHandlerRef,
+                 const property_list& propList = {});
 
   /* -- common interface members -- */
 
-  void swap(accessor &other);
+  void swap(accessor& other);
 
   size_type byte_size() const noexcept;
 
@@ -76,4 +77,4 @@ class local_accessor {
 
   const_reverse_iterator crend() const noexcept;
 };
-}  // namespace sycl
+} // namespace sycl

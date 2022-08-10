@@ -10,4 +10,4 @@ inline constexpr __unspecified__ read_only_host_task;
 inline constexpr __unspecified__ read_write_host_task;
 inline constexpr __unspecified__ write_only_host_task;
 
-}  // namespace sycl
+} // namespace sycl

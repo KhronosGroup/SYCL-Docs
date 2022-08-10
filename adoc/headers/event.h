@@ -15,11 +15,11 @@ class event {
 
   void wait();
 
-  static void wait(const std::vector<event> &eventList);
+  static void wait(const std::vector<event>& eventList);
 
   void wait_and_throw();
 
-  static void wait_and_throw(const std::vector<event> &eventList);
+  static void wait_and_throw(const std::vector<event>& eventList);
 
   template <typename Param> typename Param::return_type get_info() const;
 
@@ -30,4 +30,4 @@ class event {
   typename Param::return_type get_profiling_info() const;
 };
 
-}  // namespace sycl
+} // namespace sycl

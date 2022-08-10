@@ -11,6 +11,6 @@ struct name;
 struct vendor;
 struct extensions; // Deprecated
 
-}  // namespace platform
-}  // namespace info
-}  // namespace sycl
+} // namespace platform
+} // namespace info
+} // namespace sycl

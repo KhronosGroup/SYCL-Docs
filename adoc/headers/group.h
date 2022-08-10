@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int Dimensions = 1>
-class group {
-public:
-
+template <int Dimensions = 1> class group {
+ public:
   using id_type = id<Dimensions>;
   using range_type = range<Dimensions>;
   using linear_id_type = size_t;
   static constexpr int dimensions = Dimensions;
   static constexpr memory_scope fence_scope = memory_scope::work_group;
 
-   /* -- common interface members -- */
+  /* -- common interface members -- */
 
   id<Dimensions> get_group_id() const;
 
@@ -44,30 +42,35 @@ public:
 
   bool leader() const;
 
-  template<typename WorkItemFunctionT>
-  void parallel_for_work_item(const WorkItemFunctionT &func) const;
+  template <typename WorkItemFunctionT>
+  void parallel_for_work_item(const WorkItemFunctionT& func) const;
 
-  template<typename WorkItemFunctionT>
+  template <typename WorkItemFunctionT>
   void parallel_for_work_item(range<Dimensions> logicalRange,
-    const WorkItemFunctionT &func) const;
+                              const WorkItemFunctionT& func) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-    decorated_global_ptr<DataT> src, size_t numElements) const;
+                                     decorated_global_ptr<DataT> src,
+                                     size_t numElements) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-    decorated_local_ptr<DataT> src, size_t numElements) const;
+                                     decorated_local_ptr<DataT> src,
+                                     size_t numElements) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-    decorated_global_ptr<DataT> src, size_t numElements, size_t srcStride) const;
+                                     decorated_global_ptr<DataT> src,
+                                     size_t numElements,
+                                     size_t srcStride) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-    decorated_local_ptr<DataT> src, size_t numElements, size_t destStride) const;
+                                     decorated_local_ptr<DataT> src,
+                                     size_t numElements,
+                                     size_t destStride) const;
 
-  template <typename... EventTN>
-  void wait_for(EventTN... events) const;
+  template <typename... EventTN> void wait_for(EventTN... events) const;
 };
-}  // sycl
+} // namespace sycl

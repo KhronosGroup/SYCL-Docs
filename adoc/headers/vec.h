@@ -3,13 +3,7 @@
 
 namespace sycl {
 
-enum class rounding_mode : /* unspecified */ {
-  automatic,
-  rte,
-  rtz,
-  rtp,
-  rtn
-};
+enum class rounding_mode : /* unspecified */ { automatic, rte, rtz, rtp, rtn };
 
 struct elem {
   static constexpr int x = 0;
@@ -38,8 +32,7 @@ struct elem {
   static constexpr int sF = 15;
 };
 
-template <typename DataT, int NumElements>
-class vec {
+template <typename DataT, int NumElements> class vec {
  public:
   using element_type = DataT;
 
@@ -49,12 +42,11 @@ class vec {
 
   vec();
 
-  explicit constexpr vec(const DataT &arg);
+  explicit constexpr vec(const DataT& arg);
 
-  template <typename... ArgTN>
-  constexpr vec(const ArgTN&... args);
+  template <typename... ArgTN> constexpr vec(const ArgTN&... args);
 
-  constexpr vec(const vec<DataT, NumElements> &rhs);
+  constexpr vec(const vec<DataT, NumElements>& rhs);
 
 #ifdef __SYCL_DEVICE_ONLY__
   vec(vector_t nativeVector);
@@ -75,14 +67,13 @@ class vec {
   // Deprecated
   size_t get_count() const;
 
-  template <typename ConvertT, rounding_mode RoundingMode = rounding_mode::automatic>
+  template <typename ConvertT,
+            rounding_mode RoundingMode = rounding_mode::automatic>
   vec<ConvertT, NumElements> convert() const;
 
-  template <typename AsT>
-  AsT as() const;
+  template <typename AsT> AsT as() const;
 
-  template<int... swizzleIndexes>
-  __swizzled_vec__ swizzle() const;
+  template <int... swizzleIndexes> __swizzled_vec__ swizzle() const;
 
   // Available only when NumElements <= 4.
   // XYZW_ACCESS is: x, y, z, w, subject to NumElements.
@@ -106,7 +97,7 @@ class vec {
   // RGBA_SWIZZLE is all permutations with repetition of: r, g, b, a.
   __swizzled_vec__ RGBA_SWIZZLE() const;
 
-#endif  // #ifdef SYCL_SIMPLE_SWIZZLES
+#endif // #ifdef SYCL_SIMPLE_SWIZZLES
 
   // Available only when: NumElements > 1.
   __swizzled_vec__ lo() const;
@@ -116,107 +107,127 @@ class vec {
 
   // load and store member functions
   template <access::address_space AddressSpace, access::decorated IsDecorated>
-  void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr);
+  void load(size_t offset,
+            multi_ptr<const DataT, AddressSpace, IsDecorated> ptr);
   template <access::address_space AddressSpace, access::decorated IsDecorated>
-  void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const;
+  void store(size_t offset,
+             multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const;
 
   // subscript operator
-  DataT &operator[](int index);
-  const DataT &operator[](int index) const;
+  DataT& operator[](int index);
+  const DataT& operator[](int index) const;
 
   // OP is: +, -, *, /, %
   /* If OP is %, available only when: DataT != float && DataT != double
   && DataT != half. */
-  friend vec operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
-  friend vec operatorOP(const vec &lhs, const DataT &rhs) { /* ... */ }
+  friend vec operatorOP(const vec& lhs, const vec& rhs) { /* ... */
+  }
+  friend vec operatorOP(const vec& lhs, const DataT& rhs) { /* ... */
+  }
 
   // OP is: +=, -=, *=, /=, %=
   /* If OP is %=, available only when: DataT != float && DataT != double
   && DataT != half. */
-  friend vec &operatorOP(vec &lhs, const vec &rhs) { /* ... */ }
-  friend vec &operatorOP(vec &lhs, const DataT &rhs) { /* ... */ }
+  friend vec& operatorOP(vec& lhs, const vec& rhs) { /* ... */
+  }
+  friend vec& operatorOP(vec& lhs, const DataT& rhs) { /* ... */
+  }
 
   // OP is prefix ++, --
-  friend vec &operatorOP(vec &rhs) { /* ... */ }
+  friend vec& operatorOP(vec& rhs) { /* ... */
+  }
 
   // OP is postfix ++, --
-  friend vec operatorOP(vec& lhs, int) { /* ... */ }
+  friend vec operatorOP(vec& lhs, int) { /* ... */
+  }
 
   // OP is unary +, -
-  friend vec operatorOP(const vec &rhs) { /* ... */ }
+  friend vec operatorOP(const vec& rhs) { /* ... */
+  }
 
   // OP is: &, |, ^
   /* Available only when: DataT != float && DataT != double
   && DataT != half. */
-  friend vec operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
-  friend vec operatorOP(const vec &lhs, const DataT &rhs) { /* ... */ }
+  friend vec operatorOP(const vec& lhs, const vec& rhs) { /* ... */
+  }
+  friend vec operatorOP(const vec& lhs, const DataT& rhs) { /* ... */
+  }
 
   // OP is: &=, |=, ^=
   /* Available only when: DataT != float && DataT != double
   && DataT != half. */
-  friend vec &operatorOP(vec &lhs, const vec &rhs) { /* ... */ }
-  friend vec &operatorOP(vec &lhs, const DataT &rhs) { /* ... */ }
+  friend vec& operatorOP(vec& lhs, const vec& rhs) { /* ... */
+  }
+  friend vec& operatorOP(vec& lhs, const DataT& rhs) { /* ... */
+  }
 
   // OP is: &&, ||
-  friend vec<RET, NumElements> operatorOP(const vec &lhs, const vec &rhs) {
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs) {
     /* ... */ }
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT &rhs) {
-    /* ... */ }
-
-  // OP is: <<, >>
-  /* Available only when: DataT != float && DataT != double
-  && DataT != half. */
-  friend vec operatorOP(const vec &lhs, const vec &rhs) { /* ... */ }
-  friend vec operatorOP(const vec &lhs, const DataT &rhs) { /* ... */ }
-
-  // OP is: <<=, >>=
-  /* Available only when: DataT != float && DataT != double
-  && DataT != half. */
-  friend vec &operatorOP(vec &lhs, const vec &rhs) { /* ... */ }
-  friend vec &operatorOP(vec &lhs, const DataT &rhs) { /* ... */ }
-
-  // OP is: ==, !=, <, >, <=, >=
-  friend vec<RET, NumElements> operatorOP(const vec &lhs, const vec &rhs) {
-    /* ... */ }
-  friend vec<RET, NumElements> operatorOP(const vec &lhs, const DataT &rhs) {
+    friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs) {
     /* ... */ }
 
-  vec &operator=(const vec<DataT, NumElements> &rhs);
-  vec &operator=(const DataT &rhs);
+    // OP is: <<, >>
+    /* Available only when: DataT != float && DataT != double
+    && DataT != half. */
+    friend vec operatorOP(const vec& lhs, const vec& rhs) { /* ... */
+    }
+    friend vec operatorOP(const vec& lhs, const DataT& rhs) { /* ... */
+    }
 
-  /* Available only when: DataT != float && DataT != double
-  && DataT != half. */
-  friend vec operator~(const vec &v) { /* ... */ }
-  friend vec<RET, NumElements> operator!(const vec &v) { /* ... */ }
+    // OP is: <<=, >>=
+    /* Available only when: DataT != float && DataT != double
+    && DataT != half. */
+    friend vec& operatorOP(vec& lhs, const vec& rhs) { /* ... */
+    }
+    friend vec& operatorOP(vec& lhs, const DataT& rhs) { /* ... */
+    }
 
-  // OP is: +, -, *, /, %
-  /* operator% is only available when: DataT != float && DataT != double &&
-  DataT != half. */
-  friend vec operatorOP(const DataT &lhs, const vec &rhs) { /* ... */ }
-
-  // OP is: &, |, ^
-  /* Available only when: DataT != float && DataT != double
-  && DataT != half. */
-  friend vec operatorOP(const DataT &lhs, const vec &rhs) { /* ... */ }
-
-  // OP is: &&, ||
-  friend vec<RET, NumElements> operatorOP(const DataT &lhs, const vec &rhs) {
+    // OP is: ==, !=, <, >, <=, >=
+    friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs) {
+    /* ... */ }
+    friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs) {
     /* ... */ }
 
-  // OP is: <<, >>
-  /* Available only when: DataT != float && DataT != double
-  && DataT != half. */
-  friend vec operatorOP(const DataT &lhs, const vec &rhs) { /* ... */ }
+    vec& operator=(const vec<DataT, NumElements>& rhs);
+    vec& operator=(const DataT& rhs);
 
-  // OP is: ==, !=, <, >, <=, >=
-  friend vec<RET, NumElements> operatorOP(const DataT &lhs, const vec &rhs) {
+    /* Available only when: DataT != float && DataT != double
+    && DataT != half. */
+    friend vec operator~(const vec& v) { /* ... */
+    }
+    friend vec<RET, NumElements> operator!(const vec& v) { /* ... */
+    }
+
+    // OP is: +, -, *, /, %
+    /* operator% is only available when: DataT != float && DataT != double &&
+    DataT != half. */
+    friend vec operatorOP(const DataT& lhs, const vec& rhs) { /* ... */
+    }
+
+    // OP is: &, |, ^
+    /* Available only when: DataT != float && DataT != double
+    && DataT != half. */
+    friend vec operatorOP(const DataT& lhs, const vec& rhs) { /* ... */
+    }
+
+    // OP is: &&, ||
+    friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs) {
     /* ... */ }
 
+    // OP is: <<, >>
+    /* Available only when: DataT != float && DataT != double
+    && DataT != half. */
+    friend vec operatorOP(const DataT& lhs, const vec& rhs) { /* ... */
+    }
+
+    // OP is: ==, !=, <, >, <=, >=
+    friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs) {
+    /* ... */ }
 };
 
 // Deduction guides
 // Available only when: (std::is_same_v<T, U> && ...)
-template <class T, class... U>
-vec(T, U...) -> vec<T, sizeof...(U) + 1>;
+template <class T, class... U> vec(T, U...) -> vec<T, sizeof...(U) + 1>;
 
-}  // namespace sycl
+} // namespace sycl

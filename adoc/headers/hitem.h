@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int Dimensions>
-class h_item {
-public:
+template <int Dimensions> class h_item {
+ public:
   h_item() = delete;
 
   /* -- common interface members -- */
@@ -48,6 +47,5 @@ public:
   id<Dimensions> get_physical_local_id() const;
 
   size_t get_physical_local_id(int dimension) const;
-
 };
-}  // namespace sycl
+} // namespace sycl

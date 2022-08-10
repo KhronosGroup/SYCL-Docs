@@ -18,10 +18,10 @@ class RandomFiller {
 };
 
 void workFunction(buffer<int, 1>& b, queue& q, const range<1> r) {
-    myQueue.submit([&](handler& cgh) {
-      accessor ptr { buf, cgh };
-      RandomFiller filler { ptr };
+  myQueue.submit([&](handler& cgh) {
+    accessor ptr { buf, cgh };
+    RandomFiller filler { ptr };
 
-      cgh.parallel_for(r, filler);
-    });
+    cgh.parallel_for(r, filler);
+  });
 }

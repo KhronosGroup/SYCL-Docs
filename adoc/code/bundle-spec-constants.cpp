@@ -21,8 +21,9 @@ int main() {
 
   // Get the identifiers for our kernels, then get an input kernel bundle that
   // contains our two kernels.
-  auto kernelIds = {get_kernel_id<MyKernel1>(), get_kernel_id<MyKernel2>()};
-  auto inputBundle = get_kernel_bundle<bundle_state::input>(myContext, kernelIds);
+  auto kernelIds = { get_kernel_id<MyKernel1>(), get_kernel_id<MyKernel2>() };
+  auto inputBundle =
+      get_kernel_bundle<bundle_state::input>(myContext, kernelIds);
 
   // Set the values of the specialization constants.
   inputBundle.set_specialization_constant<width>(get_width());
@@ -35,20 +36,22 @@ int main() {
   myQueue.submit([&](handler& cgh) {
     // Use the kernel bundle we built in this command group.
     cgh.use_kernel_bundle(exeBundle);
-    cgh.parallel_for<MyKernel1>(range{1024}, ([=](item index, kernel_handler kh) {
-      // Read the value of the specialization constant.
-      int w = kh.get_specialization_constant<width>();
-      // ...
-    }));
+    cgh.parallel_for<MyKernel1>(
+        range { 1024 }, ([=](item index, kernel_handler kh) {
+          // Read the value of the specialization constant.
+          int w = kh.get_specialization_constant<width>();
+          // ...
+        }));
   });
 
   myQueue.submit([&](handler& cgh) {
     // This command group uses the same kernel bundle.
     cgh.use_kernel_bundle(exeBundle);
-    cgh.parallel_for<MyKernel2>(range{1024}, ([=](item index, kernel_handler kh) {
-      int h = kh.get_specialization_constant<height>();
-      // ...
-    }));
+    cgh.parallel_for<MyKernel2>(
+        range { 1024 }, ([=](item index, kernel_handler kh) {
+          int h = kh.get_specialization_constant<height>();
+          // ...
+        }));
   });
 
   myQueue.wait();

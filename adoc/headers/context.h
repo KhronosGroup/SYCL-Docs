@@ -4,22 +4,22 @@
 namespace sycl {
 class context {
  public:
-  explicit context(const property_list &propList = {});
+  explicit context(const property_list& propList = {});
 
   explicit context(async_handler asyncHandler,
-                   const property_list &propList = {});
+                   const property_list& propList = {});
 
-  explicit context(const device &dev, const property_list &propList = {});
+  explicit context(const device& dev, const property_list& propList = {});
 
-  explicit context(const device &dev, async_handler asyncHandler,
-                   const property_list &propList = {});
+  explicit context(const device& dev, async_handler asyncHandler,
+                   const property_list& propList = {});
 
-  explicit context(const std::vector<device> &deviceList,
-                   const property_list &propList = {});
+  explicit context(const std::vector<device>& deviceList,
+                   const property_list& propList = {});
 
-  explicit context(const std::vector<device> &deviceList,
+  explicit context(const std::vector<device>& deviceList,
                    async_handler asyncHandler,
-                   const property_list &propList = {});
+                   const property_list& propList = {});
 
   /* -- property interface members -- */
 
@@ -36,4 +36,4 @@ class context {
   template <typename Param>
   typename Param::return_type get_backend_info() const;
 };
-}  // namespace sycl
+} // namespace sycl

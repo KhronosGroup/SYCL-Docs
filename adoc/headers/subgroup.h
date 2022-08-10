@@ -3,15 +3,14 @@
 
 namespace sycl {
 class sub_group {
-public:
-
+ public:
   using id_type = id<1>;
   using range_type = range<1>;
   using linear_id_type = uint32_t;
   static constexpr int dimensions = 1;
   static constexpr memory_scope fence_scope = memory_scope::sub_group;
 
-   /* -- common interface members -- */
+  /* -- common interface members -- */
 
   id<1> get_group_id() const;
 
@@ -32,7 +31,5 @@ public:
   uint32_t get_local_linear_range() const;
 
   bool leader() const;
-
 };
-}  // sycl
-
+} // namespace sycl

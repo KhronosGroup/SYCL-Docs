@@ -5,23 +5,23 @@ namespace sycl {
 namespace property {
 namespace image {
 class use_host_ptr {
-  public:
-    use_host_ptr() = default;
+ public:
+  use_host_ptr() = default;
 };
 
 class use_mutex {
-  public:
-    use_mutex(std::mutex &mutexRef);
+ public:
+  use_mutex(std::mutex& mutexRef);
 
-    std::mutex *get_mutex_ptr() const;
+  std::mutex* get_mutex_ptr() const;
 };
 
 class context_bound {
-  public:
-    context_bound(context boundContext);
+ public:
+  context_bound(context boundContext);
 
-    context get_context() const;
+  context get_context() const;
 };
-}  // namespace image
-}  // namespace property
-}  // namespace sycl
+} // namespace image
+} // namespace property
+} // namespace sycl

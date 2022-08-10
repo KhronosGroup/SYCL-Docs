@@ -9,4 +9,4 @@ class device_event {
  public:
   void wait() noexcept;
 };
-}  // namespace sycl
+} // namespace sycl

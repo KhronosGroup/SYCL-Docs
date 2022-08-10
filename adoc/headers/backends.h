@@ -5,4 +5,4 @@ namespace sycl {
 enum class backend : /* unspecified */ {
   /* see below */
 };
-}  // namespace sycl
+} // namespace sycl
