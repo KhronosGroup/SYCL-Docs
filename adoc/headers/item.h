@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int Dimensions = 1, bool WithOffset = true>
-class item {
-public:
+template <int Dimensions = 1, bool WithOffset = true> class item {
+ public:
   item() = delete;
 
-   /* -- common interface members -- */
+  /* -- common interface members -- */
 
   id<Dimensions> get_id() const;
 
@@ -31,4 +30,4 @@ public:
 
   size_t get_linear_id() const;
 };
-}  // namespace sycl
+} // namespace sycl

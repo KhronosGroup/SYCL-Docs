@@ -5,4 +5,4 @@ namespace sycl {
 
 void atomic_fence(memory_order order, memory_scope scope);
 
-}  // namespace sycl
+} // namespace sycl

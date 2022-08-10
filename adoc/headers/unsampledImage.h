@@ -20,61 +20,61 @@ enum class image_format : /* unspecified */ {
 template <int Dimensions = 1, typename AllocatorT = sycl::image_allocator>
 class unsampled_image {
  public:
-  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
-                  const property_list &propList = {});
+  unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                  const property_list& propList = {});
 
-  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
-                  AllocatorT allocator, const property_list &propList = {});
-
-  /* Available only when: Dimensions > 1 */
-  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch,
-                  const property_list &propList = {});
+  unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                  AllocatorT allocator, const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  unsampled_image(image_format format, const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch, AllocatorT allocator,
-                  const property_list &propList = {});
-
-  unsampled_image(void *hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef,
-                  const property_list &propList = {});
-
-  unsampled_image(void *hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef, AllocatorT allocator,
-                  const property_list &propList = {});
+  unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                  const range<Dimensions - 1>& pitch,
+                  const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  unsampled_image(void *hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch,
-                  const property_list &propList = {});
+  unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                  const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                  const property_list& propList = {});
+
+  unsampled_image(void* hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef,
+                  const property_list& propList = {});
+
+  unsampled_image(void* hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef, AllocatorT allocator,
+                  const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  unsampled_image(void *hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch, AllocatorT allocator,
-                  const property_list &propList = {});
-
-  unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef,
-                  const property_list &propList = {});
-
-  unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef, AllocatorT allocator,
-                  const property_list &propList = {});
+  unsampled_image(void* hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef,
+                  const range<Dimensions - 1>& pitch,
+                  const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch,
-                  const property_list &propList = {});
+  unsampled_image(void* hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef,
+                  const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                  const property_list& propList = {});
+
+  unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef,
+                  const property_list& propList = {});
+
+  unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef, AllocatorT allocator,
+                  const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  unsampled_image(std::shared_ptr<void> &hostPointer, image_format format,
-                  const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch, AllocatorT allocator,
-                  const property_list &propList = {});
+  unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef,
+                  const range<Dimensions - 1>& pitch,
+                  const property_list& propList = {});
+
+  /* Available only when: Dimensions > 1 */
+  unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                  const range<Dimensions>& rangeRef,
+                  const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                  const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -91,11 +91,9 @@ class unsampled_image {
 
   AllocatorT get_allocator() const;
 
-  template<typename... Ts>
-  auto get_access(Ts... args);
+  template <typename... Ts> auto get_access(Ts... args);
 
-  template<typename... Ts>
-  auto get_host_access(Ts... args);
+  template <typename... Ts> auto get_host_access(Ts... args);
 
   template <typename Destination = std::nullptr_t>
   void set_final_data(Destination finalData = std::nullptr);
@@ -103,4 +101,4 @@ class unsampled_image {
   void set_write_back(bool flag = true);
 };
 
-}  // namespace sycl
+} // namespace sycl

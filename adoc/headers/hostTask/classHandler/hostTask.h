@@ -4,9 +4,10 @@
 class handler {
   ...
 
- public:
-  template <typename T>
-  void host_task(T &&hostTaskCallable); // (1)
+      public
+      : template <typename T>
+        void
+        host_task(T&& hostTaskCallable); // (1)
 
   ...
 };

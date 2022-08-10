@@ -6,7 +6,7 @@
 using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
 
 int main() {
-  int data[1024];  // Allocate data to be worked on
+  int data[1024]; // Allocate data to be worked on
 
   // Create a default queue to enqueue work to the default device
   queue myQueue;
@@ -27,9 +27,9 @@ int main() {
       cgh.parallel_for(1024, [=](id<1> idx) {
         // Initialize each buffer element with its own rank number starting at 0
         writeResult[idx] = idx;
-      });  // End of the kernel function
-    });    // End of our commands for this queue
-  }        // End of scope, so we wait for work producing resultBuf to complete
+      }); // End of the kernel function
+    });   // End of our commands for this queue
+  }       // End of scope, so we wait for work producing resultBuf to complete
 
   // Print result
   for (int i = 0; i < 1024; i++)

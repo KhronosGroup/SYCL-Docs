@@ -4,12 +4,10 @@
 void catch_invalid_errors(sycl::context const& ctx) {
   try {
     do_something_to_invoke_error(ctx);
-  }
-  catch(sycl::exception const& e) {
-    if(e.code() == sycl::errc::invalid) {
+  } catch (sycl::exception const& e) {
+    if (e.code() == sycl::errc::invalid) {
       std::cerr << "Invalid error: " << e.what();
-    }
-    else {
+    } else {
       throw;
     }
   }

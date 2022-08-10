@@ -5,16 +5,15 @@
 class MyKernel;
 
 myQueue.submit([&](handler& h) {
-
   // Explicitly name kernel with previously forward declared type
-  h.single_task<MyKernel>([=]{
+  h.single_task<MyKernel>([=] {
     // [kernel code]
   });
 
   // Explicitly name kernel without forward declaring type at
   // namespace scope.  Must still be forward declarable at
   // namespace scope, even if not declared at that scope
-  h.single_task<class MyOtherKernel>([=]{
+  h.single_task<class MyOtherKernel>([=] {
     // [kernel code]
   });
 });

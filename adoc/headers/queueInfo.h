@@ -8,6 +8,6 @@ namespace queue {
 struct context;
 struct device;
 
-}  // namespace queue
-}  // namespace info
-}  // namespace sycl
+} // namespace queue
+} // namespace info
+} // namespace sycl

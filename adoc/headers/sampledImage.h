@@ -20,25 +20,25 @@ enum class image_format : /* unspecified */ {
 template <int Dimensions = 1, typename AllocatorT = sycl::image_allocator>
 class sampled_image {
  public:
-  sampled_image(const void *hostPointer, image_format format,
-                  image_sampler sampler, const range<Dimensions> &rangeRef,
-                  const property_list &propList = {});
+  sampled_image(const void* hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  sampled_image(const void *hostPointer, image_format format,
-                  image_sampler sampler, const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch,
-                  const property_list &propList = {});
+  sampled_image(const void* hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                const property_list& propList = {});
 
-  sampled_image(std::shared_ptr<const void> &hostPointer, image_format format,
-                  image_sampler sampler, const range<Dimensions> &rangeRef,
-                  const property_list &propList = {});
+  sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
-  sampled_image(std::shared_ptr<const void> &hostPointer, image_format format,
-                  image_sampler sampler, const range<Dimensions> &rangeRef,
-                  const range<Dimensions - 1> &pitch,
-                  const property_list &propList = {});
+  sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -53,11 +53,9 @@ class sampled_image {
 
   size_t size() const;
 
-  template<typename... Ts>
-  auto get_access(Ts... args);
+  template <typename... Ts> auto get_access(Ts... args);
 
-  template<typename... Ts>
-  auto get_host_access(Ts... args);
+  template <typename... Ts> auto get_host_access(Ts... args);
 };
 
-}  // namespace sycl
+} // namespace sycl

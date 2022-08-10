@@ -4,8 +4,7 @@
 void catch_any_errors(sycl::context const& ctx) {
   try {
     do_something_to_invoke_error(ctx);
-  }
-  catch(sycl::exception const& e) {
+  } catch (sycl::exception const& e) {
     std::cerr << e.what();
   }
 }
