@@ -13,8 +13,8 @@ enum class access_mode : /* unspecified */ {
 };
 
 namespace access {
-  // The legacy type "access::mode" is deprecated.
-  using mode = sycl::access_mode;
-}  // namespace access
+// The legacy type "access::mode" is deprecated.
+using mode = sycl::access_mode;
+} // namespace access
 
-}  // namespace sycl
+} // namespace sycl

@@ -5,11 +5,11 @@ namespace sycl {
 class command_group {
  public:
   template <typename FunctorT>
-  command_group(queue &primaryQueue, const FunctorT &lambda);
+  command_group(queue& primaryQueue, const FunctorT& lambda);
 
   template <typename FunctorT>
-  command_group(queue &primaryQueue, queue &secondaryQueue,
-                const FunctorT &lambda);
+  command_group(queue& primaryQueue, queue& secondaryQueue,
+                const FunctorT& lambda);
 
   ~command_group();
 
@@ -19,4 +19,4 @@ class command_group {
 
   event complete_event();
 };
-}  // namespace sycl
+} // namespace sycl

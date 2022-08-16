@@ -177,13 +177,16 @@ interface for interoperating between the <<sycl-runtime>> object and the
 <<native-backend-object>> in order to support interoperability within an
 application between SYCL and the associated <<backend-api>>.
 
-There are two forms of interoperability with <<sycl-runtime>> classes:
-interoperability on the <<sycl-application>> with the <<backend-api>>
-and interoperability within a <<sycl-kernel-function>> with the equivalent
-kernel language types of the <<backend>>. <<sycl-application,SYCL application>>
-interoperability and <<sycl-kernel-function>> interoperability are
-provided via different interfaces and may have different
-<<native-backend-object>> types.
+There are three forms of interoperability with <<sycl-runtime>> classes:
+interoperability on the <<sycl-application>> with the <<backend-api>>,
+interoperability within a <<sycl-kernel-function>> with the equivalent kernel
+language types of the <<backend>>, and interoperability within a <<host-task>>
+with the [code]#interop_handle#.
+
+<<sycl-application,SYCL application>> interoperability,
+<<sycl-kernel-function>> interoperability and <<host-task>> interoperability
+are provided via different interfaces and may have different behavior for the
+same SYCL object.
 
 <<sycl-application,SYCL application>> interoperability may be provided for
 [code]#buffer#,
@@ -206,6 +209,15 @@ provided via different interfaces and may have different
 [code]#stream# and
 [code]#unsampled_image_accessor#
 inside <<kernel-scope>> only and is not available outside of that scope.
+
+<<host-task>> interoperability may be provided for
+[code]#accessor#,
+[code]#sampled_image_accessor#,
+[code]#unsampled_image_accessor#,
+[code]#queue#,
+[code]#device#,
+[code]#context
+inside the scope of a <<host-task>> only, see <<subsec:interfaces.hosttasks>>.
 
 Support for <<backend>> interoperability is optional and therefore not required
 to be provided by a SYCL implementation. A SYCL application using <<backend>>
@@ -416,7 +428,7 @@ include::{header_dir}/common-reference.h[lines=4..-1]
 a@
 [source]
 ----
-T(const T &rhs)
+T(const T& rhs)
 ----
    a@ Constructs a [code]#T# instance as a copy of the RHS SYCL
       [code]#T# in accordance with the requirements set out above.
@@ -424,7 +436,7 @@ T(const T &rhs)
 a@
 [source]
 ----
-T(T &&rhs)
+T(T&& rhs)
 ----
    a@ Constructs a SYCL [code]#T# instance as a move of the RHS SYCL
       [code]#T# in accordance with the requirements set out above.
@@ -432,7 +444,7 @@ T(T &&rhs)
 a@
 [source]
 ----
-T &operator=(const T &rhs)
+T& operator=(const T& rhs)
 ----
    a@ Assigns this SYCL [code]#T# instance with a copy of the RHS SYCL
       [code]#T# in accordance with the requirements set out above.
@@ -440,7 +452,7 @@ T &operator=(const T &rhs)
 a@
 [source]
 ----
-T &operator=(T &&rhs)
+T& operator=(T&& rhs)
 ----
    a@ Assigns this SYCL [code]#T# instance with a move of the RHS SYCL
       [code]#T# in accordance with the requirements set out above.
@@ -470,7 +482,7 @@ a@
 a@
 [source]
 ----
-bool operator==(const T &lhs, const T &rhs)
+bool operator==(const T& lhs, const T& rhs)
 ----
    a@ Returns true if this LHS SYCL [code]#T# is equal to the RHS SYCL
       [code]#T# in accordance with the requirements set out above,
@@ -479,7 +491,7 @@ bool operator==(const T &lhs, const T &rhs)
 a@
 [source]
 ----
-bool operator!=(const T &lhs, const T &rhs)
+bool operator!=(const T& lhs, const T& rhs)
 ----
    a@ Returns true if this LHS SYCL [code]#T# is not equal to the RHS
       SYCL [code]#T# in accordance with the requirements set out above,
@@ -546,28 +558,28 @@ include::{header_dir}/common-byval.h[lines=4..-1]
 a@
 [source]
 ----
-T(const T &rhs);
+T(const T& rhs);
 ----
    a@ Copy constructor.
 
 a@
 [source]
 ----
-T(T &&rhs);
+T(T&& rhs);
 ----
    a@ Move constructor.
 
 a@
 [source]
 ----
-T &operator=(const T &rhs);
+T& operator=(const T& rhs);
 ----
    a@ Copy assignment operator.
 
 a@
 [source]
 ----
-T &operator=(T &&rhs);
+T& operator=(T&& rhs);
 ----
    a@ Move assignment operator.
 
@@ -588,14 +600,14 @@ a@
 a@
 [source]
 ----
-bool operator==(const T &lhs, const T &rhs)
+bool operator==(const T& lhs, const T& rhs)
 ----
    a@ Returns true if this LHS SYCL [code]#T# is equal to the RHS SYCL [code]#T# in accordance with the requirements set out above, otherwise returns false.
 
 a@
 [source]
 ----
-bool operator!=(const T &lhs, const T &rhs)
+bool operator!=(const T& lhs, const T& rhs)
 ----
    a@ Returns true if this LHS SYCL [code]#T# is not equal to the RHS SYCL [code]#T# in accordance with the requirements set out above, otherwise returns false.
 
@@ -886,8 +898,8 @@ a@
 [source]
 ----
 __unspecified_callable__ aspect_selector(
-   const std::vector<aspect> &aspectList,
-   const std::vector<aspect> &denyList = {});
+   const std::vector<aspect>& aspectList,
+   const std::vector<aspect>& denyList = {});
 
 template <typename... AspectList>
 __unspecified_callable__ aspect_selector(AspectList... aspectList);
@@ -939,7 +951,7 @@ sycl::device my_gpu { sycl::gpu_selector_v };
 
 sycl::queue my_accelerator { sycl::accelerator_selector_v };
 
-int prefer_my_vendor(const sycl::device & d) {
+int prefer_my_vendor(const sycl::device& d) {
   // Return 1 if the vendor name is "MyVendor" or 0 else.
   // 0 does not prevent another device to be picked as a second choice
   return d.get_info<info::device::vendor>() == "MyVendor";
@@ -952,7 +964,7 @@ sycl::device preferred_device { prefer_my_vendor };
 sycl::queue half_precision_controller {
   // Can use a lambda as a device ranking function.
   // Returns a negative number to fail in the case there is no such device
-  [] (auto &d) { return d.has(sycl::aspect::fp16) ? 1 : -1; }
+  [] (auto& d) { return d.has(sycl::aspect::fp16) ? 1 : -1; }
 };
 
 // To ease porting SYCL 1.2.1 code, there are types whose
@@ -1073,7 +1085,7 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-    explicit platform(const DeviceSelector &)
+    explicit platform(const DeviceSelector&)
 ----
    a@ Constructs a SYCL [code]#platform# instance that is a copy of the
       [code]#platform# which contains the device returned by the
@@ -1132,7 +1144,7 @@ bool has(aspect asp) const
 a@
 [source]
 ----
-bool has_extension(const std::string & extension) const
+bool has_extension(const std::string& extension) const
 ----
    a@ Deprecated, use [code]#has()# instead.
 
@@ -1297,7 +1309,7 @@ explicit context(async_handler asyncHandler = {})
 a@
 [source]
 ----
-explicit context(const device &dev,
+explicit context(const device& dev,
     async_handler asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#context# instance using the [code]#dev# parameter as the associated SYCL [code]#device# and the SYCL [code]#platform# associated with the [code]#dev# parameter as the associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
@@ -1305,7 +1317,7 @@ explicit context(const device &dev,
 a@
 [source]
 ----
-explicit context(const std::vector<device> & deviceList,
+explicit context(const std::vector<device>& deviceList,
     async_handler asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#context# instance using the SYCL [code]#device(s)# in the [code]#deviceList# parameter as the associated SYCL [code]#device(s)# and the SYCL [code]#platform# associated with each SYCL [code]#device# in the [code]#deviceList# parameter as the associated SYCL [code]#platform#. This requires that all SYCL [code]#devices# in the [code]#deviceList# parameter have the same associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
@@ -1529,7 +1541,7 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-    explicit device(const DeviceSelector &)
+    explicit device(const DeviceSelector&)
 ----
    a@ Constructs a SYCL [code]#device# instance that is a copy of the device
       returned by the <<device-selector>> parameter.
@@ -1620,7 +1632,7 @@ a@
 [source]
 ----
 bool has_extension(
-    const std::string &extension) const
+    const std::string& extension) const
 ----
    a@ Deprecated, use [code]#has()# instead.
 
@@ -1654,7 +1666,7 @@ a@
 ----
 template <info::partition_property Prop>
 std::vector<device> create_sub_devices(
-    const std::vector<size_t> &counts) const
+    const std::vector<size_t>& counts) const
 ----
    a@ Available only when [code]#Prop# is
       [code]#info::partition_property::partition_by_counts#.  Returns a
@@ -2967,7 +2979,7 @@ include::{header_dir}/queue.h[lines=4..-1]
 a@
 [source]
 ----
-explicit queue(const property_list &propList = {})
+explicit queue(const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance using the device
 constructed from the [code]#default_selector_v#.
@@ -2978,8 +2990,8 @@ be provided to the constructed SYCL [code]#queue# via an instance of
 a@
 [source]
 ----
-explicit queue(const async_handler &asyncHandler,
-               const property_list &propList = {})
+explicit queue(const async_handler& asyncHandler,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance with an
 [code]#async_handler# using the device constructed from the
@@ -2992,8 +3004,8 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-explicit queue(const DeviceSelector &deviceSelector,
-               const property_list &propList = {})
+explicit queue(const DeviceSelector& deviceSelector,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance using the device
 returned by the <<device-selector>> provided. Zero or
@@ -3005,9 +3017,9 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-explicit queue(const DeviceSelector &deviceSelector,
-               const async_handler &asyncHandler,
-               const property_list &propList = {})
+explicit queue(const DeviceSelector& deviceSelector,
+               const async_handler& asyncHandler,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance with an
 [code]#async_handler# using the device returned by the
@@ -3018,8 +3030,8 @@ an instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const device &syclDevice,
-               const property_list &propList = {})
+explicit queue(const device& syclDevice,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice# provided. Zero or more properties can be provided to the
 constructed SYCL [code]#queue# via an instance of [code]#property_list#.
@@ -3027,9 +3039,9 @@ constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const device &syclDevice,
-               const async_handler &asyncHandler,
-               const property_list &propList = {})
+explicit queue(const device& syclDevice,
+               const async_handler& asyncHandler,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using the [code]#syclDevice# provided. Zero or more
 properties can be provided to the constructed SYCL [code]#queue#
@@ -3039,9 +3051,9 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-explicit queue(const context &syclContext,
-               const DeviceSelector &deviceSelector,
-               const property_list &propList = {})
+explicit queue(const context& syclContext,
+               const DeviceSelector& deviceSelector,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance that is associated
 with the [code]#syclContext# provided, using the device
@@ -3058,10 +3070,10 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-explicit queue(const context &syclContext,
-               const DeviceSelector &deviceSelector,
-               const async_handler &asyncHandler,
-               const property_list &propList = {})
+explicit queue(const context& syclContext,
+               const DeviceSelector& deviceSelector,
+               const async_handler& asyncHandler,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance with an
 [code]#async_handler# that is associated with the
@@ -3078,9 +3090,9 @@ instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const context &syclContext,
-               const device &syclDevice,
-               const property_list &propList = {})
+explicit queue(const context& syclContext,
+               const device& syclDevice,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice#
 provided.  This device must either be contained by [code]#syclContext# or it
@@ -3092,10 +3104,10 @@ the constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const context &syclContext,
-               const device &syclDevice,
-               const async_handler &asyncHandler,
-               const property_list &propList = {})
+explicit queue(const context& syclContext,
+               const device& syclDevice,
+               const async_handler& asyncHandler,
+               const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using
 the [code]#syclDevice# provided.  This device must either be contained by
@@ -3211,7 +3223,7 @@ a@
 [source]
 ----
 template <typename T>
-event submit(T cgf, queue & secondaryQueue)
+event submit(T cgf, queue& secondaryQueue)
 ----
 a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
 for execution on the device. On a kernel error, this <<command-group-function-object>>
@@ -3282,7 +3294,7 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-event single_task(const KernelType &kernelFunc)
+event single_task(const KernelType& kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3292,7 +3304,7 @@ a@
 ----
 template <typename KernelName, typename KernelType>
 event single_task(event depEvent,
-                  const KernelType &kernelFunc)
+                  const KernelType& kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3302,8 +3314,8 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-event single_task(const std::vector<event> &depEvents,
-                  const KernelType &kernelFunc)
+event single_task(const std::vector<event>& depEvents,
+                  const KernelType& kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3342,7 +3354,7 @@ template <typename KernelName,
           int Dimensions,
           typename... Rest>
 event parallel_for(range<Dimensions> numWorkItems,
-                   const std::vector<event> &depEvents,
+                   const std::vector<event>& depEvents,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
@@ -3382,7 +3394,7 @@ template <typename KernelName,
           int Dimensions,
           typename... Rest>
 event parallel_for(nd_range<Dimensions> executionRange,
-                   const std::vector<event> &depEvents,
+                   const std::vector<event>& depEvents,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
@@ -3411,7 +3423,7 @@ a@
 [source]
 ----
 event memcpy(void* dest, const void* src, size_t numBytes,
-             const std::vector<event> &depEvents)
+             const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3442,7 +3454,7 @@ a@
 ----
 template <typename T>
 event copy(const T* srct, T* dest, size_t count,
-           const std::vector<event> &depEvents)
+           const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3470,7 +3482,7 @@ a@
 [source]
 ----
 event memset(void* ptr, int value, size_t numBytes,
-             const std::vector<event> &depEvents)
+             const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3501,7 +3513,7 @@ a@
 ----
 template <typename T>
 event fill(void* ptr, const T& pattern, size_t count,
-           const std::vector<event> &depEvents)
+           const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3529,7 +3541,7 @@ a@
 [source]
 ----
 event prefetch(void* ptr, size_t numBytes,
-               const std::vector<event> &depEvents)
+               const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3557,7 +3569,7 @@ a@
 [source]
 ----
 event mem_advise(void* ptr, size_t numBytes, int advice,
-                 const std::vector<event> &depEvents)
+                 const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3597,7 +3609,7 @@ template <typename SrcT, int SrcDims, access_mode SrcMode,
           target SrcTgt, access::placeholder IsPlaceholder,
           typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
-           DestT *dest);
+           DestT* dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -3610,7 +3622,7 @@ template <typename SrcT, typename DestT, int DestDims,
           access_mode DestMode, target DestTgt,
           access::placeholder IsPlaceholder>
 event
-copy(const SrcT *src,
+copy(const SrcT* src,
      accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
@@ -3648,7 +3660,7 @@ a@
 ----
   template <typename T, int Dims, access_mode Mode, target Tgt,
             access::placeholder IsPlaceholder>
-  event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T &src);
+  event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -3897,7 +3909,7 @@ a@
 [source]
 ----
 static void wait(
-    const std::vector<event> &eventList)
+    const std::vector<event>& eventList)
 ----
    a@ Synchronously wait on a list of events.
 
@@ -3905,7 +3917,7 @@ a@
 [source]
 ----
 static void wait_and_throw(
-    const std::vector<event> &eventList)
+    const std::vector<event>& eventList)
 ----
    a@ Synchronously wait on a list of events.
 
@@ -4285,8 +4297,8 @@ include::{header_dir}/buffer.h[lines=4..-1]
 a@
 [source]
 ----
-buffer(const range<Dimensions> & bufferRange,
-const property_list &propList = {})
+buffer(const range<Dimensions>& bufferRange,
+const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -4297,9 +4309,9 @@ const property_list &propList = {})
 a@
 [source]
 ----
-buffer(const range<Dimensions> & bufferRange,
+buffer(const range<Dimensions>& bufferRange,
 AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
       The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
@@ -4311,8 +4323,8 @@ a@
 [source]
 ----
 buffer(T* hostData,
-const range<Dimensions> & bufferRange,
-    const property_list &propList = {})
+const range<Dimensions>& bufferRange,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
       The buffer is initialized with the memory specified by [code]#hostData#.
@@ -4325,9 +4337,9 @@ a@
 [source]
 ----
 buffer(T* hostData,
-const range<Dimensions> & bufferRange,
+const range<Dimensions>& bufferRange,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
       The buffer is initialized with the memory specified by [code]#hostData#.
@@ -4340,8 +4352,8 @@ a@
 [source]
 ----
 buffer(const T* hostData,
-const range<Dimensions> & bufferRange,
-    const property_list &propList = {})
+const range<Dimensions>& bufferRange,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the
       [code]#hostData# parameter provided. The ownership of this
@@ -4373,9 +4385,9 @@ a@
 [source]
 ----
 buffer(const T* hostData,
-const range<Dimensions> & bufferRange,
+const range<Dimensions>& bufferRange,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the
       [code]#hostData# parameter provided. The ownership of this
@@ -4408,8 +4420,8 @@ a@
 [source]
 ----
 template <typename Container>
-buffer(Container &container,
-    const property_list &propList = {})
+buffer(Container& container,
+    const property_list& propList = {})
 ----
    a@ Construct a one dimensional SYCL [code]#buffer# instance
       from the elements starting at [code]#std::data(container)#
@@ -4438,9 +4450,9 @@ a@
 [source]
 ----
 template <typename Container>
-buffer(Container &container,
+buffer(Container& container,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a one dimensional SYCL [code]#buffer# instance
       from the elements starting at [code]#std::data(container)#
@@ -4468,9 +4480,9 @@ is convertible to [code]#T*#.
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T> &hostData,
-const range<Dimensions> & bufferRange,
-    const property_list &propList = {})
+buffer(const std::shared_ptr<T>& hostData,
+const range<Dimensions>&  bufferRange,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -4480,10 +4492,10 @@ const range<Dimensions> & bufferRange,
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T> &hostData,
-const range<Dimensions> & bufferRange,
+buffer(const std::shared_ptr<T>& hostData,
+const range<Dimensions>&  bufferRange,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
       The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
@@ -4493,9 +4505,9 @@ const range<Dimensions> & bufferRange,
 a@
 [source,c++]
 ----
-buffer(const std::shared_ptr<T[]> &hostData,
-const range<Dimensions> & bufferRange,
-    const property_list &propList = {})
+buffer(const std::shared_ptr<T[]>& hostData,
+const range<Dimensions>&  bufferRange,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -4505,10 +4517,10 @@ const range<Dimensions> & bufferRange,
 a@
 [source,c++]
 ----
-buffer(const std::shared_ptr<T[]> &hostData,
-const range<Dimensions> & bufferRange,
+buffer(const std::shared_ptr<T[]>& hostData,
+const range<Dimensions>& bufferRange,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
       The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
@@ -4520,7 +4532,7 @@ a@
 ----
 template <typename InputIterator>
 buffer(InputIterator first, InputIterator last,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Create a new allocated 1D buffer initialized from the given elements
       ranging from [code]#first# up to one before [code]#last#.
@@ -4535,7 +4547,7 @@ a@
 template <typename InputIterator>
 buffer(InputIterator first, InputIterator last,
     AllocatorT allocator = {},
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Create a new allocated 1D buffer initialized from the given elements
       ranging from [code]#first# up to one before [code]#last#.
@@ -4547,8 +4559,8 @@ buffer(InputIterator first, InputIterator last,
 a@
 [source]
 ----
-buffer(buffer &b, const id<Dimensions> &baseIndex,
-      const range<Dimensions> &subRange)
+buffer(buffer& b, const id<Dimensions>& baseIndex,
+      const range<Dimensions>& subRange)
 ----
    a@ Create a new sub-buffer without allocation to have separate
       accessors later. [code]#b# is the buffer with the real data, which must not be a sub-buffer.
@@ -4641,7 +4653,7 @@ a@
 template<access_mode Mode = access_mode::read_write,
          target Targ = target::device>
 accessor<T, Dimensions, Mode, Targ>
-    get_access(handler &commandGroupHandler)
+    get_access(handler& commandGroupHandler)
 ----
    a@ Returns a valid [code]#accessor# to the buffer with the specified
       access mode and target in the command group buffer.
@@ -4666,7 +4678,7 @@ a@
 template<access_mode Mode = access_mode::read_write,
          target Targ=target::device>
 accessor<T, Dimensions, Mode, Targ>
-    get_access(handler &commandGroupHandler,
+    get_access(handler& commandGroupHandler,
                range<Dimensions> accessRange,
                id<Dimensions> accessOffset = {})
 ----
@@ -4898,7 +4910,7 @@ property::buffer::use_host_ptr::use_host_ptr()
 a@
 [source]
 ----
-property::buffer::use_mutex::use_mutex(std::mutex &mutexRef)
+property::buffer::use_mutex::use_mutex(std::mutex& mutexRef)
 ----
    a@ Constructs a SYCL [code]#use_mutex# property instance with a reference to [code]#mutexRef# parameter provided.
 
@@ -4921,7 +4933,7 @@ property::buffer::context_bound::context_bound(context boundContext)
 a@
 [source]
 ----
-std::mutex *property::buffer::use_mutex::get_mutex_ptr() const
+std::mutex* property::buffer::use_mutex::get_mutex_ptr() const
 ----
    a@ Returns the [code]#std::mutex# which was specified when
       constructing this SYCL [code]#use_mutex# property.
@@ -5142,8 +5154,8 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<Dimensions> &rangeRef,
-    const property_list &propList = {})
+const range<Dimensions>& rangeRef,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
       uninitialized memory.
@@ -5167,9 +5179,9 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<Dimensions> &rangeRef,
+const range<Dimensions>& rangeRef,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
       uninitialized memory.
@@ -5193,9 +5205,9 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> &pitch,
-    const property_list &propList = {})
+const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
+    const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5221,10 +5233,10 @@ a@
 [source]
 ----
 unsampled_image(image_format format,
-const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> &pitch,
+const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5249,10 +5261,10 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(void *hostPointer,
+unsampled_image(void* hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5277,11 +5289,11 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(void *hostPointer,
+unsampled_image(void* hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
+    const range<Dimensions>& rangeRef,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5305,11 +5317,11 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(void *hostPointer,
+unsampled_image(void* hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> &pitch,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
+    const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#
 
@@ -5336,12 +5348,12 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(void *hostPointer,
+unsampled_image(void* hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> &pitch,
+    const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5369,8 +5381,8 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5396,9 +5408,9 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
+    const range<Dimensions>& rangeRef,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5424,9 +5436,9 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> & pitch,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5452,10 +5464,10 @@ a@
 ----
 unsampled_image(std::shared_ptr<void>& hostPointer,
 image_format format,
-    const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> & pitch,
+    const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
     AllocatorT allocator,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5628,11 +5640,11 @@ include::{header_dir}/sampledImage.h[lines=4..-1]
 a@
 [source]
 ----
-sampled_image(const void *hostPointer,
+sampled_image(const void* hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<Dimensions> &rangeRef,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5657,12 +5669,12 @@ image_format format,
 a@
 [source]
 ----
-sampled_image(const void *hostPointer,
+sampled_image(const void* hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> &pitch,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
+    const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5692,8 +5704,8 @@ a@
 sampled_image(std::shared_ptr<const void>& hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<Dimensions> &rangeRef,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5721,9 +5733,9 @@ a@
 sampled_image(std::shared_ptr<const void>& hostPointer,
 image_format format,
     image_sampler sampler,
-    const range<Dimensions> &rangeRef,
-    const range<Dimensions-1> & pitch,
-    const property_list &propList = {})
+    const range<Dimensions>& rangeRef,
+    const range<Dimensions-1>& pitch,
+    const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5893,7 +5905,7 @@ property::image::use_host_ptr::use_host_ptr()
 a@
 [source]
 ----
-property::image::use_mutex::use_mutex(std::mutex &mutexRef)
+property::image::use_mutex::use_mutex(std::mutex& mutexRef)
 ----
    a@ Constructs a SYCL [code]#use_mutex# property instance with a reference to [code]#mutexRef# parameter provided.
 
@@ -5916,7 +5928,7 @@ property::image::context_bound::context_bound(context boundContext)
 a@
 [source]
 ----
-std::mutex *property::image::use_mutex::get_mutex_ptr() const
+std::mutex* property::image::use_mutex::get_mutex_ptr() const
 ----
    a@ Returns the [code]#std::mutex# which was specified when
       constructing this SYCL [code]#use_mutex# property.
@@ -6386,7 +6398,7 @@ same dimensionality as the accessor.  The second way is by passing a single
 in <<sec:multi-dim-subscript>>.
 
 In all these cases, the reference to the contained element is of type
-[code]#const DataT &# for read-only accessors and of type [code]#DataT &# for
+[code]#const DataT&# for read-only accessors and of type [code]#DataT&# for
 other accessors.
 
 Accessors of all types have a range that defines the set of indices that may be
@@ -6481,10 +6493,14 @@ following values for the [code]#AccessMode# template parameter:
     | Access a buffer from a <<host-task>>.
 |====
 
-Programs which specify the access target as [code]#target::device# and then use
-the [code]#accessor# from a <<host-task>> are ill formed.  Likewise, programs
-which specify the access target as [code]#target::host_task# and then use the
-[code]#accessor# from a <<sycl-kernel-function>> are ill formed.
+Programs which specify the access target as [code]#target::device# and then
+capture the [code]#accessor# in a <<host-task>> can only use the accessor for
+interoperability through the [code]#interop_handle#, any other uses result in
+undefined behavior.
+
+Programs which specify the access target as [code]#target::host_task# and then
+use the [code]#accessor# from a <<sycl-kernel-function>> result in undefined
+behavior.
 
 The dimensionality of the accessor must match the underlying buffer, however,
 there is a special case if the buffer is one-dimensional.  In this case, the
@@ -6578,8 +6594,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -6591,9 +6607,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -6606,8 +6622,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6619,8 +6635,8 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    TagT tag, const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6633,9 +6649,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6648,9 +6664,9 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
-    TagT tag, const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6665,9 +6681,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6682,9 +6698,9 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
-    TagT tag, const property_list &propList = {})
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6701,10 +6717,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6721,10 +6737,10 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    TagT tag, const property_list &propList = {})
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6742,10 +6758,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
     range<Dimensions> accessRange,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6762,10 +6778,10 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
     range<Dimensions> accessRange,
-    TagT tag, const property_list &propList = {})
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6784,11 +6800,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6806,11 +6822,11 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    TagT tag, const property_list &propList = {})
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6837,7 +6853,7 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-void swap(accessor &other);
+void swap(accessor& other);
 ----
    a@ Swaps the contents of the current accessor with the contents of
       [code]#other#.
@@ -7063,8 +7079,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7076,9 +7092,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7091,8 +7107,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7104,9 +7120,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7119,9 +7135,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7136,10 +7152,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7156,10 +7172,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
     range<Dimensions> accessRange,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7176,11 +7192,11 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    handler &commandGroupHandlerRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    handler& commandGroupHandlerRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7282,8 +7298,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7295,8 +7311,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7308,9 +7324,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7326,10 +7342,10 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-accessor(buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7419,8 +7435,8 @@ include::{header_dir}/accessorDeprecatedLocal.h[lines=4..-1]
 a@
 [source]
 ----
-accessor(handler &commandGroupHandlerRef,
-         const property_list &propList = {})
+accessor(handler& commandGroupHandlerRef,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7433,8 +7449,8 @@ a@
 [source]
 ----
 accessor(range<Dimensions> allocationSize,
-         handler &commandGroupHandlerRef,
-         const property_list &propList = {})
+         handler& commandGroupHandlerRef,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7789,8 +7805,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_accessor(buffer<DataT, 1, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+host_accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7803,8 +7819,8 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    const property_list &propList = {})
+    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7817,8 +7833,8 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
-    TagT tag, const property_list &propList = {})
+    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7832,9 +7848,9 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7852,9 +7868,9 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
-    TagT tag, const property_list &propList = {})
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7872,10 +7888,10 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(
-    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    const property_list &propList = {})
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7893,10 +7909,10 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_accessor(
-    buffer<DataT, Dimensions, AllocatorT> &bufferRef,
+    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
     range<Dimensions> accessRange,
     id<Dimensions> accessOffset,
-    TagT tag, const property_list &propList = {})
+    TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7922,7 +7938,7 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-void swap(host_accessor &other);
+void swap(host_accessor& other);
 ----
    a@ Swaps the contents of the current accessor with the contents of
       [code]#other#.
@@ -8082,8 +8098,8 @@ local_accessor()
 a@
 [source]
 ----
-local_accessor(handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+local_accessor(handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -8096,8 +8112,8 @@ a@
 [source]
 ----
 local_accessor(range<Dimensions> allocationSize,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -8118,7 +8134,7 @@ provides properties for the constructed accessor.
 a@
 [source]
 ----
-void swap(local_accessor &other);
+void swap(local_accessor& other);
 ----
    a@ Swaps the contents of the current accessor with the contents of
       [code]#other#.
@@ -8617,9 +8633,9 @@ a@
 ----
 template <typename AllocatorT>
 unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT> &imageRef,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+    unsampled_image<Dimensions, AllocatorT>& imageRef,
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Constructs an [code]#unsampled_image_accessor# for accessing an
       [code]#unsampled_image# within a <<command>> on the [code]#queue#
@@ -8636,9 +8652,9 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT> &imageRef,
-    handler &commandGroupHandlerRef, TagT tag,
-    const property_list &propList = {})
+    unsampled_image<Dimensions, AllocatorT>& imageRef,
+    handler& commandGroupHandlerRef, TagT tag,
+    const property_list& propList = {})
 ----
    a@ Constructs an [code]#unsampled_image_accessor# for accessing an
       [code]#unsampled_image# within a <<command>> on the [code]#queue#
@@ -8665,8 +8681,8 @@ a@
 ----
 template <typename AllocatorT>
 host_unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT> &imageRef,
-    const property_list &propList = {})
+    unsampled_image<Dimensions, AllocatorT>& imageRef,
+    const property_list& propList = {})
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
       [code]#unsampled_image# immediately on the host.  The optional
@@ -8677,8 +8693,8 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 host_unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT> &imageRef,
-    TagT tag, const property_list &propList = {})
+    unsampled_image<Dimensions, AllocatorT>& imageRef,
+    TagT tag, const property_list& propList = {})
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
       [code]#unsampled_image# immediately on the host.  The [code]#tag# is used
@@ -8706,7 +8722,7 @@ a@
 [source]
 ----
 template <typename CoordT>
-DataT read(const CoordT &coords) const
+DataT read(const CoordT& coords) const
 ----
    a@ Available only when [code]#(AccessMode == access_mode::read ||
       AccessMode == access_mode::read_write)#.
@@ -8723,7 +8739,7 @@ a@
 [source]
 ----
 template <typename CoordT>
-void write(const CoordT &coords, const DataT &color) const
+void write(const CoordT& coords, const DataT& color) const
 ----
    a@ Available only when [code]#(AccessMode == access_mode::write ||
       AccessMode == access_mode::read_write)#.
@@ -8886,9 +8902,9 @@ a@
 ----
 template <typename AllocatorT>
 sampled_image_accessor(
-    sampled_image<Dimensions, AllocatorT> &imageRef,
-    handler &commandGroupHandlerRef,
-    const property_list &propList = {})
+    sampled_image<Dimensions, AllocatorT>& imageRef,
+    handler& commandGroupHandlerRef,
+    const property_list& propList = {})
 ----
    a@ Constructs a [code]#sampled_image_accessor# for accessing a
       [code]#sampled_image# within a <<command>> on the [code]#queue#
@@ -8905,9 +8921,9 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 sampled_image_accessor(
-    sampled_image<Dimensions, AllocatorT> &imageRef,
-    handler &commandGroupHandlerRef, TagT tag,
-    const property_list &propList = {})
+    sampled_image<Dimensions, AllocatorT>& imageRef,
+    handler& commandGroupHandlerRef, TagT tag,
+    const property_list& propList = {})
 ----
    a@ Constructs a [code]#sampled_image_accessor# for accessing a
       [code]#sampled_image# within a <<command>> on the [code]#queue#
@@ -8934,8 +8950,8 @@ a@
 ----
 template <typename AllocatorT>
 host_sampled_image_accessor(
-    sampled_image<Dimensions, AllocatorT> &imageRef,
-    const property_list &propList = {})
+    sampled_image<Dimensions, AllocatorT>& imageRef,
+    const property_list& propList = {})
 ----
    a@ Constructs a [code]#host_sampled_image_accessor# for accessing a
       [code]#sampled_image# immediately on the host.  The optional
@@ -8961,7 +8977,7 @@ a@
 [source]
 ----
 template <typename CoordT>
-DataT read(const CoordT &coords) const
+DataT read(const CoordT& coords) const
 ----
    a@ Reads and returns a sampled element of the [code]#sampled_image# at the
       coordinates specified by [code]#coords#.  Permitted types for
@@ -9098,7 +9114,7 @@ multi_ptr()
 a@
 [source]
 ----
-multi_ptr(const multi_ptr &)
+multi_ptr(const multi_ptr&)
 ----
    a@ Copy constructor.
 
@@ -9210,21 +9226,21 @@ is not compatible with [code]#Space#.
 a@
 [source]
 ----
-multi_ptr &operator=(const multi_ptr&)
+multi_ptr& operator=(const multi_ptr&)
 ----
    a@ Copy assignment operator.
 
 a@
 [source]
 ----
-multi_ptr &operator=(multi_ptr&&)
+multi_ptr& operator=(multi_ptr&&)
 ----
    a@ Move assignment operator.
 
 a@
 [source]
 ----
-multi_ptr &operator=(std::nullptr_t)
+multi_ptr& operator=(std::nullptr_t)
 ----
    a@ Assigns [code]#nullptr# to the [code]#multi_ptr#.
 
@@ -9232,7 +9248,7 @@ a@
 [source]
 ----
 template<access::address_space AS, access::decorated IsDecorated>
-multi_ptr &operator=(const multi_ptr<value_type, AS, IsDecorated>&)
+multi_ptr& operator=(const multi_ptr<value_type, AS, IsDecorated>&)
 ----
    a@ Available only when: [code]#Space == access::address_space::generic_space && AS != access::address_space::constant_space#.
 
@@ -9242,7 +9258,7 @@ a@
 [source]
 ----
 template<access::address_space AS, access::decorated IsDecorated>
-multi_ptr &operator=(multi_ptr<value_type, AS, IsDecorated>&&
+multi_ptr& operator=(multi_ptr<value_type, AS, IsDecorated>&&
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space && AS != access::address_space::constant_space#.
@@ -9435,7 +9451,7 @@ pointer get() const
 a@
 [source]
 ----
-__unspecified__ * get_decorated() const
+__unspecified__* get_decorated() const
 ----
    a@ Returns the underlying pointer decorated by the address space that it addresses.
       Note that the support involves implementation-defined device compiler extensions.
@@ -10147,39 +10163,39 @@ public:
   };
 
   usm_allocator() = delete;
-  usm_allocator(const context &syclContext,
-                const device &syclDevice,
-                const property_list &propList = {});
-  usm_allocator(const queue &syclQueue,
-                const property_list &propList = {});
-  usm_allocator(const usm_allocator &other);
-  usm_allocator(usm_allocator &&) noexcept;
-  usm_allocator &operator=(const usm_allocator &);
-  usm_allocator &operator=(usm_allocator &&);
+  usm_allocator(const context& syclContext,
+                const device& syclDevice,
+                const property_list& propList = {});
+  usm_allocator(const queue& syclQueue,
+                const property_list& propList = {});
+  usm_allocator(const usm_allocator& other);
+  usm_allocator(usm_allocator&&) noexcept;
+  usm_allocator &operator=(const usm_allocator&);
+  usm_allocator &operator=(usm_allocator&&);
 
   template <class U>
-  usm_allocator(usm_allocator<U, AllocKind, Alignment> const &) noexcept;
+  usm_allocator(usm_allocator<U, AllocKind, Alignment> const&) noexcept;
 
   /// Allocate memory
-  T *allocate(size_t count);
+  T* allocate(size_t count);
 
   /// Deallocate memory
-  void deallocate(T *Ptr, size_t count);
+  void deallocate(T* Ptr, size_t count);
 
   /// Equality Comparison
   ///
   /// Allocators only compare equal if they are of the same USM kind, alignment,
   /// context, and device
   template <class U, usm::alloc AllocKindU, size_t AlignmentU>
-  friend bool operator==(const usm_allocator<T, AllocKind, Alignment> &,
-                         const usm_allocator<U, AllocKindU, AlignmentU> &);
+  friend bool operator==(const usm_allocator<T, AllocKind, Alignment>&,
+                         const usm_allocator<U, AllocKindU, AlignmentU>&);
 
   /// Inequality Comparison
   /// Allocators only compare unequal if they are not of the same USM kind, alignment,
   /// context, or device
   template <class U, usm::alloc AllocKindU, size_t AlignmentU>
-  friend bool operator!=(const usm_allocator<T, AllocKind, Alignment> &,
-                         const usm_allocator<U, AllocKindU, AlignmentU> &);
+  friend bool operator!=(const usm_allocator<T, AllocKind, Alignment>&,
+                         const usm_allocator<U, AllocKindU, AlignmentU>&);
 };
 ----
 
@@ -10191,9 +10207,9 @@ public:
 a@
 [source]
 ----
-usm_allocator(const context &syclContext,
-              const device &syclDevice,
-              const property_list &propList = {})
+usm_allocator(const context& syclContext,
+              const device& syclDevice,
+              const property_list& propList = {})
 ----
 a@ Constructs a [code]#usm_allocator# instance that allocates USM for the
 provided context and device.
@@ -10215,8 +10231,8 @@ synchronous [code]#exception# with the [code]#errc::invalid# error code.
 a@
 [source]
 ----
-usm_allocator(const queue &syclQueue,
-              const property_list &propList = {})
+usm_allocator(const queue& syclQueue,
+              const property_list& propList = {})
 ----
 a@ Simplified constructor form where [code]#syclQueue# provides the
 [code]#device# and [code]#context#.
@@ -10242,7 +10258,7 @@ a@
 void* sycl::malloc_device(size_t numBytes,
                           const device& syclDevice,
                           const context& syclContext,
-                          const property_list &propList = {})
+                          const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is allocated on
 [code]#syclDevice#.  The allocation size is specified in bytes.  Throws a
@@ -10260,7 +10276,7 @@ template <typename T>
 T* sycl::malloc_device(size_t count,
                        const device& syclDevice,
                        const context& syclContext,
-                       const property_list &propList = {})
+                       const property_list& propList = {})
 ----
 a@  Returns a pointer to the newly allocated memory, which is allocated on
 [code]#syclDevice#.  The allocation size is specified in number of elements of
@@ -10277,7 +10293,7 @@ a@
 ----
 void* sycl::malloc_device(size_t numBytes,
                           const queue& syclQueue,
-                          const property_list &propList = {})
+                          const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10288,7 +10304,7 @@ a@
 template <typename T>
 T* sycl::malloc_device(size_t count,
                        const queue& syclQueue,
-                       const property_list &propList = {})
+                       const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10301,7 +10317,7 @@ sycl::aligned_alloc_device(size_t alignment,
                            size_t numBytes,
                            const device& syclDevice,
                            const context& syclContext,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is allocated on
 [code]#syclDevice#.  The allocation is specified in bytes and aligned according
@@ -10322,7 +10338,7 @@ sycl::aligned_alloc_device(size_t alignment,
                            size_t count,
                            const device& syclDevice,
                            const context& syclContext,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is allocated on
 [code]#syclDevice#.  The allocation is specified in number of elements of type
@@ -10341,7 +10357,7 @@ void*
 sycl::aligned_alloc_device(size_t alignment,
                            size_t numBytes,
                            const queue& syclQueue,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10354,7 +10370,7 @@ T*
 sycl::aligned_alloc_device(size_t alignment,
                            size_t count,
                            const queue& syclQueue,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10379,7 +10395,7 @@ a@
 ----
 void* sycl::malloc_host(size_t numBytes,
                         const context& syclContext,
-                        const property_list &propList = {})
+                        const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
 specified in bytes.  Throws a synchronous [code]#exception# with the
@@ -10392,7 +10408,7 @@ a@
 template <typename T>
 T* sycl::malloc_host(size_t count,
                      const context& syclContext,
-                     const property_list &propList = {})
+                     const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
 specified in number of elements of type [code]#T#.  Throws a synchronous
@@ -10404,7 +10420,7 @@ a@
 ----
 void* sycl::malloc_host(size_t numBytes,
                         const queue& syclQueue,
-                        const property_list &propList = {})
+                        const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -10414,7 +10430,7 @@ a@
 template <typename T>
 T* sycl::malloc_host(size_t count,
                      const queue& syclQueue,
-                     const property_list &propList = {})
+                     const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -10425,7 +10441,7 @@ void*
 sycl::aligned_alloc_host(size_t alignment,
                          size_t numBytes,
                          const context& syclContext,
-                         const property_list &propList = {})
+                         const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
 specified in bytes and aligned according to [code]#alignment#.  Throws a
@@ -10441,7 +10457,7 @@ T*
 sycl::aligned_alloc_host(size_t alignment,
                          size_t count,
                          const context& syclContext,
-                         const property_list &propList = {})
+                         const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
 specified in elements of type [code]#T# and aligned according to
@@ -10456,7 +10472,7 @@ void*
 sycl::aligned_alloc_host(size_t alignment,
                          size_t numBytes,
                          const queue& syclQueue,
-                         const property_list &propList = {})
+                         const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -10468,7 +10484,7 @@ void*
 sycl::aligned_alloc_host(size_t alignment,
                          size_t count,
                          const queue& syclQueue,
-                         const property_list &propList = {})
+                         const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -10493,7 +10509,7 @@ a@
 void* sycl::malloc_shared(size_t numBytes,
                           const device& syclDevice,
                           const context& syclContext,
-                          const property_list &propList = {})
+                          const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is associated with
 [code]#syclDevice#.  This allocation is specified in bytes.  Throws a
@@ -10511,7 +10527,7 @@ template <typename T>
 T* sycl::malloc_shared(size_t count,
                        const device& syclDevice,
                        const context& syclContext,
-                       const property_list &propList = {})
+                       const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is associated with
 [code]#syclDevice#.  This allocation is specified in number of elements of
@@ -10528,7 +10544,7 @@ a@
 ----
 void* sycl::malloc_shared(size_t numBytes,
                           const queue& syclQueue,
-                          const property_list &propList = {})
+                          const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10539,7 +10555,7 @@ a@
 template <typename T>
 T* sycl::malloc_shared(size_t count,
                        const queue& syclQueue,
-                       const property_list &propList = {})
+                       const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10552,7 +10568,7 @@ sycl::aligned_alloc_shared(size_t alignment,
                            size_t numBytes,
                            const device& syclDevice,
                            const context& syclContext,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is associated with
 [code]#syclDevice#.  This allocation is specified in bytes and aligned
@@ -10573,7 +10589,7 @@ sycl::aligned_alloc_shared(size_t alignment,
                            size_t count,
                            const device& syclDevice,
                            const context& syclContext,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is associated with
 [code]#syclDevice#.  This allocation is specified in number of elements of
@@ -10592,7 +10608,7 @@ void*
 sycl::aligned_alloc_shared(size_t alignment,
                            size_t numBytes,
                            const queue& syclQueue,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10605,7 +10621,7 @@ T*
 sycl::aligned_alloc_shared(size_t alignment,
                            size_t count,
                            const queue& syclQueue,
-                           const property_list &propList = {})
+                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10638,11 +10654,11 @@ memory, these functions return [code]#nullptr#.
 a@
 [source]
 ----
-void *sycl::malloc(size_t numBytes,
+void* sycl::malloc(size_t numBytes,
                    const device& syclDevice,
                    const context& syclContext,
                    usm::alloc kind,
-                   const property_list &propList = {})
+                   const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
 allocation size is specified in bytes.  The [code]#syclDevice# parameter is
@@ -10656,11 +10672,11 @@ a@
 [source]
 ----
 template <typename T>
-T *sycl::malloc(size_t count,
+T* sycl::malloc(size_t count,
                 const device& syclDevice,
                 const context& syclContext,
                 usm::alloc kind,
-                const property_list &propList = {})
+                const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
 allocation size is specified in number of elements of type [code]#T#.  The
@@ -10674,10 +10690,10 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void *sycl::malloc(size_t numBytes,
+void* sycl::malloc(size_t numBytes,
                    const queue& syclQueue,
                    usm::alloc kind,
-                   const property_list &propList = {})
+                   const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
 necessary [code]#device#.
@@ -10686,10 +10702,10 @@ a@
 [source]
 ----
 template <typename T>
-T *sycl::malloc(size_t count,
+T* sycl::malloc(size_t count,
                 const queue& syclQueue,
                 usm::alloc kind,
-                const property_list &propList = {})
+                const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
 necessary [code]#device#.
@@ -10697,12 +10713,12 @@ necessary [code]#device#.
 a@
 [source]
 ----
-void *sycl::aligned_alloc(size_t alignment,
+void* sycl::aligned_alloc(size_t alignment,
                           size_t numBytes,
                           const device& syclDevice,
                           const context& syclContext,
                           usm::alloc kind,
-                          const property_list &propList = {})
+                          const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
 allocation is specified in bytes and is aligned according to [code]#alignment#.
@@ -10722,7 +10738,7 @@ T* sycl::aligned_alloc(size_t alignment,
                        const device& syclDevice,
                        const context& syclContext,
                        usm::alloc kind,
-                       const property_list &propList = {})
+                       const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
 allocation is specified in number of elements of type [code]#T# and is aligned
@@ -10736,11 +10752,11 @@ is contained by that context, otherwise this function throws a synchronous
 a@
 [source]
 ----
-void *sycl::aligned_alloc(size_t alignment,
+void* sycl::aligned_alloc(size_t alignment,
                           size_t numBytes,
                           const queue& syclQueue,
                           usm::alloc kind,
-                          const property_list &propList = {})
+                          const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
 necessary [code]#device#.
@@ -10753,7 +10769,7 @@ T* sycl::aligned_alloc(size_t alignment,
                        size_t count,
                        const queue& syclQueue,
                        usm::alloc kind,
-                       const property_list &propList = {})
+                       const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
 necessary [code]#device#.
@@ -10805,8 +10821,8 @@ are only supported on the host.
 a@
 [source]
 ----
-usm::alloc get_pointer_type(const void *ptr,
-                            const context &syclContext)
+usm::alloc get_pointer_type(const void* ptr,
+                            const context& syclContext)
 ----
 a@ Returns the USM allocation type for [code]#ptr# if [code]#ptr# falls inside
 a valid USM allocation for the context [code]#syclContext#.  Returns
@@ -10816,8 +10832,8 @@ allocation from [code]#syclContext#.
 a@
 [source]
 ----
-device get_pointer_device(const void *ptr,
-                          const context &syclContext)
+device get_pointer_device(const void* ptr,
+                          const context& syclContext)
 ----
 a@ Returns the [code]#device# associated with the USM allocation.  If
 [code]#ptr# points within a device USM allocation or a shared USM allocation
@@ -11005,7 +11021,7 @@ size_t get(int dimension) const
 a@
 [source]
 ----
-size_t &operator[](int dimension)
+size_t& operator[](int dimension)
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
@@ -11037,7 +11053,7 @@ size_t size() const
 a@
 [source]
 ----
-range operatorOP(const range &lhs, const range &rhs)
+range operatorOP(const range& lhs, const range& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -11057,7 +11073,7 @@ is the cast to [code]#size_t#.
 a@
 [source]
 ----
-range operatorOP(const range &lhs, const size_t &rhs)
+range operatorOP(const range& lhs, const size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -11077,7 +11093,7 @@ the operator returns a [code]#bool#, the result is the cast to
 a@
 [source]
 ----
-range &operatorOP(range &lhs, const range &rhs)
+range& operatorOP(range& lhs, const range& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
@@ -11090,7 +11106,7 @@ to [code]#size_t#.
 a@
 [source]
 ----
-range &operatorOP(range &lhs, const size_t &rhs)
+range& operatorOP(range& lhs, const size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
@@ -11103,7 +11119,7 @@ operator returns a [code]#bool#, the result is the cast to
 a@
 [source]
 ----
-range operatorOP(const size_t &lhs, const range &rhs)
+range operatorOP(const size_t& lhs, const range& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -11123,7 +11139,7 @@ the [code]#lhs# [code]#size_t# and each element of the
 a@
 [source]
 ----
-range operatorOP(const range &rhs)
+range operatorOP(const range& rhs)
 ----
    a@ Where [code]#OP# is: unary [code]#pass:[+]#, unary [code]#-#.
 
@@ -11136,7 +11152,7 @@ the [code]#rhs# SYCL [code]#range#.
 a@
 [source]
 ----
-range & operatorOP(range &rhs)
+range&  operatorOP(range& rhs)
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -11147,7 +11163,7 @@ of an element-wise [code]#OP# operator on each element of the [code]#rhs#
 a@
 [source]
 ----
-range operatorOP(range &lhs, int)
+range operatorOP(range& lhs, int)
 ----
    a@ Where [code]#OP# is: postfix [code]#pass:[++]#, postfix [code]#--#.
 
@@ -11322,14 +11338,14 @@ id(size_t dim0, size_t dim1, size_t dim2)
 a@
 [source]
 ----
-id(const range<Dimensions> &range)
+id(const range<Dimensions>& range)
 ----
    a@ Construct an [code]#id# from the dimensions of [code]#range#.
 
 a@
 [source]
 ----
-id(const item<Dimensions> &item)
+id(const item<Dimensions>& item)
 ----
    a@ Construct an [code]#id# from [code]#item.get_id()#.
 
@@ -11353,7 +11369,7 @@ size_t get(int dimension) const
 a@
 [source]
 ----
-size_t &operator[](int dimension)
+size_t& operator[](int dimension)
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
@@ -11385,7 +11401,7 @@ Returns the same value as [code]#get(0)#.
 a@
 [source]
 ----
-id operatorOP(const id &lhs, const id &rhs)
+id operatorOP(const id& lhs, const id& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -11401,7 +11417,7 @@ If the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id operatorOP(const id &lhs, const size_t &rhs)
+id operatorOP(const id& lhs, const size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -11417,7 +11433,7 @@ operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id &operatorOP(id &lhs, const id &rhs)
+id& operatorOP(id& lhs, const id& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -11432,7 +11448,7 @@ the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id &operatorOP(id &lhs, const size_t &rhs)
+id& operatorOP(id& lhs, const size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -11446,7 +11462,7 @@ returns a [code]#bool# the result is the cast to [code]#size_t#.
 a@
 [source]
 ----
-id operatorOP(const size_t &lhs, const id &rhs)
+id operatorOP(const size_t& lhs, const id& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -11462,7 +11478,7 @@ the [code]#lhs# [code]#size_t# and each element of the
 a@
 [source]
 ----
-id operatorOP(const id &rhs)
+id operatorOP(const id& rhs)
 ----
    a@ Where [code]#OP# is: unary [code]#pass:[+]#, unary [code]#-#.
 
@@ -11475,7 +11491,7 @@ the [code]#rhs# SYCL [code]#id#.
 a@
 [source]
 ----
-id & operatorOP(id &rhs)
+id& operatorOP(id& rhs)
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -11486,7 +11502,7 @@ of an element-wise [code]#OP# operator on each element of the [code]#rhs#
 a@
 [source]
 ----
-id operatorOP(id &lhs, int)
+id operatorOP(id& lhs, int)
 ----
    a@ Where [code]#OP# is: postfix [code]#pass:[++]#, postfix [code]#--#.
 
@@ -12232,7 +12248,7 @@ a@
 [source]
 ----
 template <typename WorkItemFunctionT>
-    void parallel_for_work_item(const WorkItemFunctionT &func) const
+    void parallel_for_work_item(const WorkItemFunctionT& func) const
 ----
    a@ Launch the work-items for this work-group.
 
@@ -12255,7 +12271,7 @@ a@
 ----
 template <typename WorkItemFunctionT>
     void parallel_for_work_item(range<Dimensions>
-    logicalRange, const WorkItemFunctionT &func) const
+    logicalRange, const WorkItemFunctionT& func) const
 ----
    a@ Launch the work-items for this work-group using a logical local range.
       The function object [code]#func# is executed as if the kernel were
@@ -12569,7 +12585,7 @@ a@
 [source]
 ----
 reduction<BufferT, BinaryOperation>(BufferT vars, handler& cgh,
-BinaryOperation combiner, const property_list &propList = {})
+BinaryOperation combiner, const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable(s) described by [code]#vars# using the combination
@@ -12582,7 +12598,7 @@ a@
 [source]
 ----
 reduction<T, BinaryOperation>(T* var,
-BinaryOperation combiner, const property_list &propList = {})
+BinaryOperation combiner, const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable described by [code]#var# using the combination
@@ -12593,7 +12609,7 @@ a@
 [source]
 ----
 reduction<T, BinaryOperation>(span<T, Extent> vars,
-BinaryOperation combiner, const property_list &propList = {})
+BinaryOperation combiner, const property_list& propList = {})
 ----
    a@ Available only when [code]#Extent != sycl::dynamic_extent#.
       Construct an unspecified object representing a reduction
@@ -12606,7 +12622,7 @@ a@
 ----
 reduction<BufferT, BinaryOperation>(BufferT vars, handler& cgh,
 const BufferT::value_type& identity, BinaryOperation combiner,
-const property_list &propList = {})
+const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable(s) described by [code]#vars# using the combination
@@ -12621,7 +12637,7 @@ a@
 [source]
 ----
 reduction<T, BinaryOperation>(T* var, const T& identity,
-BinaryOperation combiner, const property_list &propList = {})
+BinaryOperation combiner, const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable described by [code]#var# using the combination
@@ -12634,7 +12650,7 @@ a@
 [source]
 ----
 reduction<T, BinaryOperation>(span<T, Extent> vars, const T& identity,
-BinaryOperation combiner, const property_list &propList = {})
+BinaryOperation combiner, const property_list& propList = {})
 ----
    a@ Available only when [code]#Extent != sycl::dynamic_extent#.
       Construct an unspecified object representing a reduction
@@ -12972,7 +12988,7 @@ by [code]#depEvent# must complete before executing this
 a@
 [source]
 ----
-void depends_on(const std::vector<event> &depEvents)
+void depends_on(const std::vector<event>& depEvents)
 ----
 a@ The <<command-group>> now has a *requirement* that the actions represented
 by each event in [code]#depEvents# must complete before executing this
@@ -13008,7 +13024,7 @@ a@
 [source]
 ----
 template <typename T>
-    void set_arg(int argIndex, T &&arg)
+    void set_arg(int argIndex, T&& arg)
 ----
    a@ This function must only be used to set arguments for a kernel that
       was constructed using a backend specific interoperability function
@@ -13021,7 +13037,7 @@ a@
 [source]
 ----
 template <typename... Ts>
-    void set_args(Ts &&... args)
+    void set_args(Ts&&... args)
 ----
    a@ Set all arguments for a given kernel, as if each argument in
       [code]#args# was passed to [code]#set_arg# in the same order and
@@ -13031,7 +13047,7 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-    void single_task(const KernelType &kernelFunc)
+    void single_task(const KernelType& kernelFunc)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
       or a named function object type.
@@ -13075,7 +13091,7 @@ template <typename KernelName, int Dimensions, typename... Rest>
     void parallel_for(
     range<Dimensions> numWorkItems,
     id<Dimensions> workItemOffset,
-    const KernelType &kernelFunc)
+    const KernelType& kernelFunc)
 // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -13132,7 +13148,7 @@ a@
 template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
     void parallel_for_work_group(
     range<Dimensions> numWorkGroups,
-    const WorkgroupFunctionType &kernelFunc)
+    const WorkgroupFunctionType& kernelFunc)
 ----
    a@ Defines and invokes a hierarchical kernel as a lambda function
       or a named function object type,
@@ -13154,7 +13170,7 @@ template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
     void parallel_for_work_group(
     range<Dimensions> numWorkGroups,
     range<Dimensions> workGroupSize,
-    const WorkgroupFunctionType &kernelFunc)
+    const WorkgroupFunctionType& kernelFunc)
 ----
    a@ Defines and invokes a hierarchical kernel as a lambda function
       or a named function object type,
@@ -13173,7 +13189,7 @@ template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
 a@
 [source]
 ----
-void single_task(const kernel &kernelObject)
+void single_task(const kernel& kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
@@ -13196,7 +13212,7 @@ a@
 ----
 template <int Dimensions> void parallel_for(
     range<Dimensions> numWorkItems,
-    const kernel &kernelObject)
+    const kernel& kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
@@ -13219,7 +13235,7 @@ a@
 ----
 template <int Dimensions> void parallel_for(
     nd_range<Dimensions> executionRange,
-    const kernel &kernelObject)
+    const kernel& kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
@@ -13522,7 +13538,7 @@ include::{header_dir}/priv.h[lines=4..-1]
 a@
 [source]
 ----
-private_memory(const group<Dimensions> &)
+private_memory(const group<Dimensions>&)
 ----
    a@ Place an object of type [code]#T# in the underlying private memory of each <<work-item,work items>>.
       The type [code]#T# must be default constructible.
@@ -13538,7 +13554,7 @@ private_memory(const group<Dimensions> &)
 a@
 [source]
 ----
-T &operator()(const h_item<Dimensions> &id)
+T& operator()(const h_item<Dimensions>& id)
 ----
    a@ Retrieve a reference to the object for the <<work-item,work items>>.
 
@@ -13702,7 +13718,7 @@ template <typename SrcT, int SrcDims, access_mode SrcMode,
 void copy(accessor<SrcT, SrcDims,
                    SrcMode, SrcTgt,
                    IsPlaceholder> src,
-          DestT * dest)
+          DestT* dest)
 ----
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
@@ -13715,7 +13731,7 @@ a@
 template <typename SrcT, typename DestT, int DestDims,
           access_mode DestMode, target DestTgt,
           access::placeholder IsPlaceholder>
-void copy(const SrcT * src,
+void copy(const SrcT* src,
           accessor<DestT, DestDims,
                    DestMode, DestTgt,
                    IsPlaceholder> dest)
@@ -14007,8 +14023,8 @@ specialization constant's default value.
 ----
 specialization_id(const specialization_id& rhs) = delete;            // (1)
 specialization_id(specialization_id&& rhs) = delete;                 // (2)
-specialization_id &operator=(const specialization_id& rhs) = delete; // (3)
-specialization_id &operator=(specialization_id&& rhs) = delete;      // (4)
+specialization_id& operator=(const specialization_id& rhs) = delete; // (3)
+specialization_id& operator=(specialization_id&& rhs) = delete;      // (4)
 ----
 
   . Deleted copy constructor.
@@ -14138,8 +14154,11 @@ defined in <<sub.section.memmodel.app>>.
 Since a <<host-task>> is invoked directly by the <<sycl-runtime>> rather
 than being compiled as a <<sycl-kernel-function>>, it does not have the same
 restrictions as a <<sycl-kernel-function>>, and can therefore contain any
-arbitrary {cpp} code. However, capturing or using any SYCL class that has reference
-semantics (see <<sec:reference-semantics>>) is undefined behavior.
+arbitrary {cpp} code.
+
+Capturing <<accessor,accessors>> in a <<host-task>> is allowed, however,
+capturing or using any other SYCL class that has reference semantics (see
+<<sec:reference-semantics>>) is undefined behavior.
 
 A <<host-task>> can be enqueued on any <<queue>> and the callable will be
 invoked directly by the SYCL runtime, regardless of which <<device>> the
@@ -14249,14 +14268,12 @@ include::{header_dir}/hostTask/classInteropHandle/getnativeX.h[lines=4..-1]
     [code]#target::device#.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<accessor>>
-[code]#bufferAcc#. The <<native-backend-object>> returned must
-be in a state where it represents the memory in its current state within the
-<<sycl-runtime>> dependency model and is capable of being used in a way
-appropriate for the associated <<backend>>. It is undefined behavior to
-use the <<native-backend-object>> outside of the scope of the
-<<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the underlying
+<<buffer>> of <<accessor>> [code]#bufferAcc#.  The <<native-backend-object>>
+returned must be in a state where it represents the memory in its current state
+within the <<sycl-runtime>> dependency model and is capable of being used in a
+way appropriate for the associated <<backend>>. It is undefined behavior to use
+the <<native-backend-object>> outside of the scope of the <<host-task>>.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 <<accessor>> [code]#bufferAcc# was not registered with the
@@ -14268,14 +14285,13 @@ _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
     is available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<accessor>>
-[code]#imageAcc#. The <<native-backend-object>> returned must be
-in a state where it represents the memory in its current state within the
-<<sycl-runtime>> dependency model and is capable of being used in a way
-appropriate for the associated <<backend>>. It is undefined behavior to
-use the <<native-backend-object>> outside of the scope of the
-<<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with with the underlying
+[code]#unsampled_image# of <<accessor>> [code]#imageAcc#. The
+<<native-backend-object>> returned must be in a state where it represents the
+memory in its current state within the <<sycl-runtime>> dependency model and is
+capable of being used in a way appropriate for the associated <<backend>>. It
+is undefined behavior to use the <<native-backend-object>> outside of the scope
+of the <<host-task>>.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 <<accessor>> [code]#imageAcc# was not registered with the
@@ -14286,14 +14302,13 @@ _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
     is available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<accessor>>
-[code]#imageAcc#. The <<native-backend-object>> returned must be
-in a state where it represents the memory in its current state within the
-<<sycl-runtime>> dependency model and is capable of being used in a way
-appropriate for the associated <<backend>>. It is undefined behavior to
-use the <<native-backend-object>> outside of the scope of the
-<<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with with the underlying
+[code]#sampled_image# of <<accessor>> [code]#imageAcc#. The
+<<native-backend-object>> returned must be in a state where it represents the
+memory in its current state within the <<sycl-runtime>> dependency model and is
+capable of being used in a way appropriate for the associated <<backend>>. It
+is undefined behavior to use the <<native-backend-object>> outside of the scope
+of the <<host-task>>.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 <<accessor>> [code]#imageAcc# was not registered with the
@@ -14305,15 +14320,14 @@ _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
     available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<queue>> that the
-<<host-task>> was submitted to. If the <<command-group>> was submitted
-with a secondary <<queue>> and the fall-back was triggered, the
-<<queue>> that is associated with the [code]#interop_handle# must be
-the fall-back <<queue>>. The <<native-backend-object>> returned must be
-in a state where it is capable of being used in a way appropriate for the
-associated <<backend>>. It is undefined behavior to use the
-<<native-backend-object>> outside of the scope of the <<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the <<queue>> that the
+<<host-task>> was submitted to. If the <<command-group>> was submitted with a
+secondary <<queue>> and the fall-back was triggered, the <<queue>> that is
+associated with the [code]#interop_handle# must be the fall-back <<queue>>. The
+<<native-backend-object>> returned must be in a state where it is capable of
+being used in a way appropriate for the associated <<backend>>. It is undefined
+behavior to use the <<native-backend-object>> outside of the scope of the
+<<host-task>>.
 
 _Throws:_ Must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if [code]#Backend != get_backend()#.
@@ -14323,13 +14337,12 @@ _Throws:_ Must throw an [code]#exception# with the
     available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<device>> that is
-associated with the <<queue>> that the <<host-task>> was submitted to.
-The <<native-backend-object>> returned must be in a state where it is
-capable of being used in a way appropriate for the associated <<backend>>.
-It is undefined behavior to use the <<native-backend-object>> outside of
-the scope of the <<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the <<device>> that is
+associated with the <<queue>> that the <<host-task>> was submitted to.  The
+<<native-backend-object>> returned must be in a state where it is capable of
+being used in a way appropriate for the associated <<backend>>.  It is
+undefined behavior to use the <<native-backend-object>> outside of the scope of
+the <<host-task>>.
 
 _Throws:_ Must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if [code]#Backend != get_backend()#.
@@ -14339,13 +14352,12 @@ _Throws:_ Must throw an [code]#exception# with the
     available.
 +
 --
-_Returns:_ The <<sycl-application>> interoperability
-<<native-backend-object>> associated with the <<context>> that is
-associated with the <<queue>> that the <<host-task>> was submitted to.
-The <<native-backend-object>> returned must be in a state where it is
-capable of being used in a way appropriate for the associated <<backend>>.
-It is undefined behavior to use the <<native-backend-object>> outside of
-the scope of the <<host-task>>.
+_Returns:_ The <<native-backend-object>> associated with the <<context>> that
+is associated with the <<queue>> that the <<host-task>> was submitted to.  The
+<<native-backend-object>> returned must be in a state where it is capable of
+being used in a way appropriate for the associated <<backend>>.  It is
+undefined behavior to use the <<native-backend-object>> outside of the scope of
+the <<host-task>>.
 
 _Throws:_ Must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if [code]#Backend != get_backend()#.
@@ -14603,7 +14615,7 @@ include::{header_dir}/bundle/kernelIdClass.h[lines=4..-1]
 
 [source]
 ----
-const char *get_name() const noexcept;
+const char* get_name() const noexcept;
 ----
 
 _Returns:_ An implementation-defined null-terminated string containing the
@@ -14671,7 +14683,7 @@ specialization constants in the bundle will have their default values.
 [source]
 ----
 template<bundle_state State>
-kernel_bundle<State> get_kernel_bundle(const context &ctxt, const std::vector<device> &devs);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 ----
 
 _Returns:_ A kernel bundle in state [code]#State# which contains all of the
@@ -14707,8 +14719,8 @@ _Throws:_
 [source]
 ----
 template<bundle_state State>
-kernel_bundle<State> get_kernel_bundle(const context &ctxt, const std::vector<device> &devs,
-                                       const std::vector<kernel_id> &kernelIds);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt, const std::vector<device>& devs,
+                                       const std::vector<kernel_id>& kernelIds);
 ----
 
 _Returns:_ A kernel bundle in state [code]#State# which contains all of the
@@ -14752,14 +14764,14 @@ _Throws:_
 [source]
 ----
 template<bundle_state State, typename Selector>
-kernel_bundle<State> get_kernel_bundle(const context &ctxt,
-                                       const std::vector<device> &devs,
+kernel_bundle<State> get_kernel_bundle(const context& ctxt,
+                                       const std::vector<device>& devs,
                                        Selector selector);
 ----
 
 _Preconditions:_ The [code]#selector# must be a unary predicate whose return
 value is convertible to [code]#bool# and whose parameter is
-[code]#const device_image<State> &#.
+[code]#const device_image<State>&#.
 
 _Effects:_ The predicate function [code]#selector# is called once for every
 device image in the application of state [code]#State# which is compatible
@@ -14804,14 +14816,14 @@ several bundles together with [code]#join()#.
 [source]
 ----
 template<bundle_state State>                       // (1)
-kernel_bundle<State> get_kernel_bundle(const context &ctxt);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt);
 
 template<bundle_state State>                       // (2)
-kernel_bundle<State> get_kernel_bundle(const context &ctxt,
-                                       const std::vector<kernel_id> &kernelIds);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt,
+                                       const std::vector<kernel_id>& kernelIds);
 
 template<bundle_state State, typename Selector>    // (3)
-kernel_bundle<State> get_kernel_bundle(const context &ctxt, Selector selector);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt, Selector selector);
 ----
 
   . Equivalent to [code]#get_kernel_bundle<State>(ctxt, ctxt.get_devices())#.
@@ -14823,10 +14835,10 @@ kernel_bundle<State> get_kernel_bundle(const context &ctxt, Selector selector);
 [source]
 ----
 template<typename KernelName, bundle_state State>  // (1)
-kernel_bundle<State> get_kernel_bundle(const context &ctxt);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt);
 
 template<typename KernelName, bundle_state State>  // (2)
-kernel_bundle<State> get_kernel_bundle(const context &ctxt, const std::vector<device> &devs);
+kernel_bundle<State> get_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -14852,7 +14864,7 @@ bundle with the requested characteristics exists.
 [source]
 ----
 template<bundle_state State>
-bool has_kernel_bundle(const context &ctxt, const std::vector<device> &devs);
+bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 ----
 
 _Returns:_ [code]#true# only if all of the following are true:
@@ -14877,8 +14889,8 @@ _Throws:_
 [source]
 ----
 template<bundle_state State>
-bool has_kernel_bundle(const context &ctxt, const std::vector<device> &devs,
-                       const std::vector<kernel_id> &kernelIds);
+bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs,
+                       const std::vector<kernel_id>& kernelIds);
 ----
 
 _Returns:_ [code]#true# only if all of the following are true:
@@ -14904,10 +14916,10 @@ _Throws:_
 [source]
 ----
 template<bundle_state State>                       // (1)
-bool has_kernel_bundle(const context &ctxt);
+bool has_kernel_bundle(const context& ctxt);
 
 template<bundle_state State>                       // (2)
-bool has_kernel_bundle(const context &ctxt, const std::vector<kernel_id> &kernelIds);
+bool has_kernel_bundle(const context& ctxt, const std::vector<kernel_id>& kernelIds);
 ----
 
   . Equivalent to [code]#has_kernel_bundle(ctxt, ctxt.get_devices())#.
@@ -14917,10 +14929,10 @@ bool has_kernel_bundle(const context &ctxt, const std::vector<kernel_id> &kernel
 [source]
 ----
 template<typename KernelName, bundle_state State>  // (1)
-bool has_kernel_bundle(const context &ctxt);
+bool has_kernel_bundle(const context& ctxt);
 
 template<typename KernelName, bundle_state State>  // (2)
-bool has_kernel_bundle(const context &ctxt, const std::vector<device> &devs);
+bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -14954,7 +14966,7 @@ built-in.
 
 [source]
 ----
-bool is_compatible(const std::vector<kernel_id> &kernelIds, const device &dev);
+bool is_compatible(const std::vector<kernel_id>& kernelIds, const device& dev);
 ----
 
 _Returns:_ [code]#true# if all of the kernels identified by [code]#kernelIds#
@@ -14963,7 +14975,7 @@ are compatible with the device [code]#dev#.
 [source]
 ----
 template<typename KernelName>
-bool is_compatible(const device &dev);
+bool is_compatible(const device& dev);
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -14990,7 +15002,7 @@ creates a new bundle from the result.
 [source]
 ----
 template<bundle_state State>
-kernel_bundle<State> join(const std::vector<kernel_bundle<State>> &bundles);
+kernel_bundle<State> join(const std::vector<kernel_bundle<State>>& bundles);
 ----
 
 _Returns:_ A new kernel bundle that contains a copy of all the device images in
@@ -15027,9 +15039,9 @@ specify these properties as an extension.
 [source]
 ----
 kernel_bundle<bundle_state::object>
-compile(const kernel_bundle<bundle_state::input> &inputBundle,
-        const std::vector<device> &devs,
-        const property_list &propList = {});
+compile(const kernel_bundle<bundle_state::input>& inputBundle,
+        const std::vector<device>& devs,
+        const property_list& propList = {});
 ----
 
 _Effects:_ The device images from [code]#inputBundle# are translated into one
@@ -15058,9 +15070,9 @@ _Throws:_
 [source]
 ----
 kernel_bundle<bundle_state::executable>
-link(const std::vector<kernel_bundle<bundle_state::object>> &objectBundles,
-     const std::vector<device> &devs,
-     const property_list &propList = {});
+link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
+     const std::vector<device>& devs,
+     const property_list& propList = {});
 ----
 
 _Effects:_ Duplicate device images from [code]#objectBundles# are eliminated
@@ -15095,9 +15107,9 @@ _Throws:_
 [source]
 ----
 kernel_bundle<bundle_state::executable>
-build(const kernel_bundle<bundle_state::input> &inputBundle,
-      const std::vector<device> &devs,
-      const property_list &propList = {});
+build(const kernel_bundle<bundle_state::input>& inputBundle,
+      const std::vector<device>& devs,
+      const property_list& propList = {});
 ----
 
 _Effects:_ This function performs both an online compile and link operation,
@@ -15129,25 +15141,25 @@ _Throws:_
 [source]
 ----
 kernel_bundle<bundle_state::object>                               // (1)
-compile(const kernel_bundle<bundle_state::input> &inputBundle,
-        const property_list &propList = {});
+compile(const kernel_bundle<bundle_state::input>& inputBundle,
+        const property_list& propList = {});
 
 kernel_bundle<bundle_state::executable>                           // (2)
-link(const kernel_bundle<bundle_state::object> &objectBundle,
-     const std::vector<device> &devs,
-     const property_list &propList = {});
+link(const kernel_bundle<bundle_state::object>& objectBundle,
+     const std::vector<device>& devs,
+     const property_list& propList = {});
 
 kernel_bundle<bundle_state::executable>                           // (3)
-link(const std::vector<kernel_bundle<bundle_state::object>> &objectBundles,
-     const property_list &propList = {});
+link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
+     const property_list& propList = {});
 
 kernel_bundle<bundle_state::executable>                           // (4)
-link(const kernel_bundle<bundle_state::object> &objectBundle,
-     const property_list &propList = {});
+link(const kernel_bundle<bundle_state::object>& objectBundle,
+     const property_list& propList = {});
 
 kernel_bundle<bundle_state::executable>                           // (5)
-build(const kernel_bundle<bundle_state::input> &inputBundle,
-      const property_list &propList = {});
+build(const kernel_bundle<bundle_state::input>& inputBundle,
+      const property_list& propList = {});
 ----
 
   . Equivalent to
@@ -15221,8 +15233,8 @@ _Returns:_ The set of devices that is associated with the kernel bundle.
 
 [source]
 ----
-bool has_kernel(const kernel_id &kernelId) const noexcept;                     // (1)
-bool has_kernel(const kernel_id &kernelId, const device &dev) const noexcept;  // (2)
+bool has_kernel(const kernel_id& kernelId) const noexcept;                     // (1)
+bool has_kernel(const kernel_id& kernelId, const device& dev) const noexcept;  // (2)
 ----
 
   . _Returns:_ [code]#true# only if the kernel bundle contains the kernel
@@ -15237,7 +15249,7 @@ template<typename KernelName>
 bool has_kernel() const noexcept;                   // (1)
 
 template<typename KernelName>
-bool has_kernel(const device &dev) const noexcept;  // (2)
+bool has_kernel(const device& dev) const noexcept;  // (2)
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -15264,7 +15276,7 @@ the kernel bundle.
 
 [source]
 ----
-kernel get_kernel(const kernel_id &kernelId) const;
+kernel get_kernel(const kernel_id& kernelId) const;
 ----
 
 _Preconditions:_ This member function is only available if the kernel bundle's
@@ -15469,7 +15481,7 @@ which it is invoked.
 [source]
 ----
 template <typename Param>
-typename Param::return_type get_info(const device &dev) const;
+typename Param::return_type get_info(const device& dev) const;
 ----
 
 _Preconditions:_ The [code]#Param# must be one of the
@@ -15675,8 +15687,8 @@ There is no public constructor for this class.
 
 [source]
 ----
-bool has_kernel(const kernel_id &kernelId) const noexcept;                     // (1)
-bool has_kernel(const kernel_id &kernelId, const device &dev) const noexcept;  // (2)
+bool has_kernel(const kernel_id& kernelId) const noexcept;                     // (1)
+bool has_kernel(const kernel_id& kernelId, const device& dev) const noexcept;  // (2)
 ----
 
   . _Returns:_ [code]#true# only if the device image contains the kernel
@@ -16185,7 +16197,7 @@ const std::error_category& category() const noexcept
 a@
 [source]
 ----
-const char *what() const
+const char* what() const
 ----
    a@ Returns an implementation-defined non-null constant C-style string that describes the error that triggered the exception.
 
@@ -16506,7 +16518,7 @@ vec()
 a@
 [source]
 ----
-explicit constexpr vec(const DataT &arg)
+explicit constexpr vec(const DataT& arg)
 ----
    a@ Construct a vector of element type [code]#DataT# and
       [code]#NumElements# dimensions by setting each value to [code]#arg# by
@@ -16523,7 +16535,7 @@ constexpr vec(const ArgTN&... args)
 a@
 [source]
 ----
-constexpr vec(const vec<DataT, NumElements> &rhs)
+constexpr vec(const vec<DataT, NumElements>& rhs)
 ----
    a@ Construct a vector of element type [code]#DataT# and number of elements [code]#NumElements# by copy from another similar vector.
 
@@ -16757,28 +16769,28 @@ template <access::address_space AddressSpace, access::decorated IsDecorated>
 a@
 [source]
 ----
-DataT &operator[](int index)
+DataT& operator[](int index)
 ----
    a@ Returns a reference to the element stored within this SYCL [code]#vec# at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-const DataT &operator[](int index) const
+const DataT& operator[](int index) const
 ----
    a@ Returns a const reference to the element stored within this SYCL [code]#vec# at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-vec &operator=(const vec &rhs)
+vec& operator=(const vec& rhs)
 ----
    a@ Assign each element of the [code]#rhs# SYCL [code]#vec# to each element of this SYCL [code]#vec# and return a reference to this SYCL [code]#vec#.
 
 a@
 [source]
 ----
-vec &operator=(const DataT &rhs)
+vec& operator=(const DataT& rhs)
 ----
    a@ Assign each element of the [code]#rhs# scalar to each element of this SYCL [code]#vec# and return a reference to this SYCL [code]#vec#.
 
@@ -16794,7 +16806,7 @@ vec &operator=(const DataT &rhs)
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const vec &rhs)
+vec operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16805,7 +16817,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const DataT &rhs)
+vec operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16816,7 +16828,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const vec &rhs)
+vec& operatorOP(vec& lhs, const vec& rhs)
 ----
    a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16827,7 +16839,7 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#, [cod
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const DataT &rhs)
+vec& operatorOP(vec& lhs, const DataT& rhs)
 ----
    a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16838,7 +16850,7 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#, [cod
 a@
 [source]
 ----
-vec &operatorOP(vec &v)
+vec& operatorOP(vec& v)
 ----
    a@ Perform an in-place element-wise [code]#OP# prefix arithmetic operation on each element of [code]#lhs# [code]#vec#, assigning the result of each element to the corresponding element of [code]#lhs# [code]#vec# and return [code]#lhs# [code]#vec#.
 
@@ -16847,7 +16859,7 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 a@
 [source]
 ----
-vec operatorOP(vec &v, int)
+vec operatorOP(vec& v, int)
 ----
    a@ Perform an in-place element-wise [code]#OP# postfix arithmetic operation on each element of [code]#lhs# [code]#vec#, assigning the result of each element to the corresponding element of [code]#lhs# [code]#vec# and returns a copy of [code]#lhs# [code]#vec# before the operation is performed.
 
@@ -16856,7 +16868,7 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 a@
 [source]
 ----
-vec operatorOP(const vec &v)
+vec operatorOP(const vec& v)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# unary arithmetic operation on each element of this SYCL [code]#vec#.
 
@@ -16865,7 +16877,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const vec &rhs)
+vec operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16876,7 +16888,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const DataT &rhs)
+vec operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16887,7 +16899,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const vec &rhs)
+vec& operatorOP(vec& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16898,7 +16910,7 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const DataT &rhs)
+vec& operatorOP(vec& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16909,7 +16921,7 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const vec &lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
@@ -16920,7 +16932,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const vec &lhs, const DataT &rhs)
+vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -16931,7 +16943,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const vec &rhs)
+vec operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16942,7 +16954,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-vec operatorOP(const vec &lhs, const DataT &rhs)
+vec operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16953,7 +16965,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const vec &rhs)
+vec& operatorOP(vec& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16964,7 +16976,7 @@ Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 a@
 [source]
 ----
-vec &operatorOP(vec &lhs, const DataT &rhs)
+vec& operatorOP(vec& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -16975,7 +16987,7 @@ Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const vec& lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.
 
@@ -16986,7 +16998,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const vec &lhs, const DataT &rhs)
+vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# is a NaN.
 
@@ -16997,7 +17009,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-vec operatorOP(const DataT &lhs, const vec &rhs)
+vec operatorOP(const DataT& lhs, const vec& rhs)
 ----
    a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17014,7 +17026,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
 a@
 [source]
 ----
-vec operatorOP(const DataT &lhs, const vec &rhs)
+vec operatorOP(const DataT& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17028,7 +17040,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const DataT &lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17044,7 +17056,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-vec operatorOP(const DataT &lhs, const vec &rhs)
+vec operatorOP(const DataT& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with
       the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -17061,7 +17073,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const DataT &lhs, const vec &rhs)
+vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with
       the element type [code]#RET# with each element of the new SYCL
@@ -17092,7 +17104,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-vec &operator~(const vec &v)
+vec& operator~(const vec& v)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17101,7 +17113,7 @@ Construct a new instance of the SYCL [code]#vec# class template with the same te
 a@
 [source]
 ----
-vec<RET, NumElements> operator!(const vec &v)
+vec<RET, NumElements> operator!(const vec& v)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
 
@@ -17190,9 +17202,9 @@ For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
     or escape the expression it was constructed in. For example
     [code]#auto x = f4.x()# would not be valid.
   * The [code]#+__swizzled_vec__+# class template should return
-    [code]#+__swizzled_vec__ &+# for each operator inherited from the
+    [code]#+__swizzled_vec__&+# for each operator inherited from the
     [code]#vec# class template interface which would return
-    [code]#vec<DataT, NumElements> &#.
+    [code]#vec<DataT, NumElements>&#.
 
 
 ==== Rounding modes
@@ -17335,7 +17347,7 @@ marray()
 a@
 [source]
 ----
-explicit constexpr marray(const DataT &arg)
+explicit constexpr marray(const DataT& arg)
 ----
    a@ Construct an array of element type [code]#DataT# and
       [code]#NumElements# dimensions by setting each value to [code]#arg# by
@@ -17352,14 +17364,14 @@ constexpr marray(const ArgTN&... args)
 a@
 [source]
 ----
-constexpr marray(const marray<DataT, NumElements> &rhs)
+constexpr marray(const marray<DataT, NumElements>& rhs)
 ----
    a@ Construct an array of element type [code]#DataT# and number of elements [code]#NumElements# by copy from another similar vector.
 
 a@
 [source]
 ----
-constexpr marray(marray<DataT, NumElements> &&rhs)
+constexpr marray(marray<DataT, NumElements>&& rhs)
 ----
    a@ Construct an array of element type [code]#DataT# and number of elements
       [code]#NumElements# by moving from another similar vector.
@@ -17398,28 +17410,28 @@ static constexpr std::size_t size() noexcept
 a@
 [source]
 ----
-DataT &operator[](std::size_t index)
+DataT& operator[](std::size_t index)
 ----
    a@ Returns a reference to the element stored within this SYCL [code]#marray# at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-const DataT &operator[](std::size_t index) const
+const DataT& operator[](std::size_t index) const
 ----
    a@ Returns a const reference to the element stored within this SYCL [code]#marray# at the index specified by [code]#index#.
 
 a@
 [source]
 ----
-marray &operator=(const marray &rhs)
+marray& operator=(const marray& rhs)
 ----
    a@ Assign each element of the [code]#rhs# SYCL [code]#marray# to each element of this SYCL [code]#marray# and return a reference to this SYCL [code]#marray#.
 
 a@
 [source]
 ----
-marray &operator=(const DataT &rhs)
+marray& operator=(const DataT& rhs)
 ----
    a@ Assign each element of the [code]#rhs# scalar to each element of this SYCL [code]#marray# and return a reference to this SYCL [code]#marray#.
 
@@ -17464,7 +17476,7 @@ const_iterator end() const
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const marray &rhs)
+marray operatorOP(const marray& lhs, const marray& rhs)
 ----
    a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17475,7 +17487,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const DataT &rhs)
+marray operatorOP(const marray& lhs, const DataT& rhs)
 ----
    a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17486,7 +17498,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const marray &rhs)
+marray& operatorOP(marray& lhs, const marray& rhs)
 ----
    a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17497,7 +17509,7 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#, [cod
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const DataT &rhs)
+marray& operatorOP(marray& lhs, const DataT& rhs)
 ----
    a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17508,7 +17520,7 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#, [cod
 a@
 [source]
 ----
-marray &operatorOP(marray &v)
+marray& operatorOP(marray& v)
 ----
    a@ Perform an in-place element-wise [code]#OP# prefix arithmetic operation on each element of [code]#lhs# [code]#marray#, assigning the result of each element to the corresponding element of [code]#lhs# [code]#marray# and return [code]#lhs# [code]#marray#.
 
@@ -17517,7 +17529,7 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 a@
 [source]
 ----
-marray operatorOP(marray &v, int)
+marray operatorOP(marray& v, int)
 ----
    a@ Perform an in-place element-wise [code]#OP# postfix arithmetic operation on each element of [code]#lhs# [code]#marray#, assigning the result of each element to the corresponding element of [code]#lhs# [code]#marray# and returns a copy of [code]#lhs# [code]#marray# before the operation is performed.
 
@@ -17526,7 +17538,7 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 a@
 [source]
 ----
-marray operatorOP(marray &v)
+marray operatorOP(marray& v)
 ----
    a@ Construct a new instance of the SYCL [code]#marray# class template with the same template parameters as this SYCL [code]#marray# with each element of the new SYCL [code]#marray# instance the result of an element-wise [code]#OP# unary arithmetic operation on each element of this SYCL [code]#marray#.
 
@@ -17535,7 +17547,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const marray &rhs)
+marray operatorOP(const marray& lhs, const marray& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17546,7 +17558,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const DataT &rhs)
+marray operatorOP(const marray& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17557,7 +17569,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const marray &rhs)
+marray& operatorOP(marray& lhs, const marray& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17568,7 +17580,7 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const DataT &rhs)
+marray& operatorOP(marray& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17579,7 +17591,7 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-marray<bool, NumElements> operatorOP(const marray &lhs, const marray &rhs)
+marray<bool, NumElements> operatorOP(const marray& lhs, const marray& rhs)
 ----
    a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and each element of the [code]#rhs# [code]#marray#.
 
@@ -17588,7 +17600,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-marray<bool, NumElements> operatorOP(const marray &lhs, const DataT &rhs)
+marray<bool, NumElements> operatorOP(const marray& lhs, const DataT& rhs)
 ----
    a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#marray# and the [code]#rhs# scalar.
 
@@ -17597,7 +17609,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const marray &rhs)
+marray operatorOP(const marray& lhs, const marray& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17608,7 +17620,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-marray operatorOP(const marray &lhs, const DataT &rhs)
+marray operatorOP(const marray& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17619,7 +17631,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const marray &rhs)
+marray& operatorOP(marray& lhs, const marray& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17630,7 +17642,7 @@ Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 a@
 [source]
 ----
-marray &operatorOP(marray &lhs, const DataT &rhs)
+marray& operatorOP(marray& lhs, const DataT& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17641,7 +17653,7 @@ Where [code]#OP# is: [code]#+<<=+#, [code]#>>=#.
 a@
 [source]
 ----
-marray<bool, NumElements> operatorOP(const marray& lhs, const marray &rhs)
+marray<bool, NumElements> operatorOP(const marray& lhs, const marray& rhs)
 ----
    a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
       with each element of the new [code]#marray# instance is the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#marray#
@@ -17657,7 +17669,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-marray<bool, NumElements> operatorOP(const marray &lhs, const DataT &rhs)
+marray<bool, NumElements> operatorOP(const marray& lhs, const DataT& rhs)
 ----
    a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#marray#
@@ -17673,7 +17685,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-marray operatorOP(const DataT &lhs, const marray &rhs)
+marray operatorOP(const DataT& lhs, const marray& rhs)
 ----
    a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17690,7 +17702,7 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
 a@
 [source]
 ----
-marray operatorOP(const DataT &lhs, const marray &rhs)
+marray operatorOP(const DataT& lhs, const marray& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17704,7 +17716,7 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray<RET, NumElements> operatorOP(const DataT &lhs, const marray &rhs)
+marray<RET, NumElements> operatorOP(const DataT& lhs, const marray& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17718,7 +17730,7 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-marray operatorOP(const DataT &lhs, const marray &rhs)
+marray operatorOP(const DataT& lhs, const marray& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#marray# class template with
       the same template parameters as the [code]#rhs# SYCL [code]#marray#
@@ -17735,7 +17747,7 @@ Where [code]#OP# is: [code]#<<#, [code]#>>#.
 a@
 [source]
 ----
-marray<bool, NumElements> operatorOP(const DataT &lhs, const marray &rhs)
+marray<bool, NumElements> operatorOP(const DataT& lhs, const marray& rhs)
 ----
    a@ Construct a new instance of the [code]#marray# class template with
       [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
@@ -17752,7 +17764,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-marray &operator~(const marray &v)
+marray& operator~(const marray& v)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -17761,7 +17773,7 @@ Construct a new instance of the SYCL [code]#marray# class template with the same
 a@
 [source]
 ----
-marray<bool, NumElements> operator!(const marray &v)
+marray<bool, NumElements> operator!(const marray& v)
 ----
    a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and same NumElements as [code]#v# [code]#marray#
       with each element of the new [code]#marray# instance the result of an element-wise logical [code]#!# operation on each element of [code]#v# [code]#marray#.
@@ -18075,7 +18087,7 @@ T exchange(T operand,
 a@
 [source]
 ----
-bool compare_exchange_weak(T &expected, T desired,
+bool compare_exchange_weak(T& expected, T desired,
     memory_order success,
     memory_order failure,
     memory_scope scope = default_scope) const
@@ -18098,7 +18110,7 @@ This function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-bool compare_exchange_weak(T &expected, T desired,
+bool compare_exchange_weak(T& expected, T desired,
     memory_order order = default_read_modify_write_order,
     memory_scope scope = default_scope) const
 ----
@@ -18107,7 +18119,7 @@ bool compare_exchange_weak(T &expected, T desired,
 a@
 [source]
 ----
-bool compare_exchange_strong(T &expected, T desired,
+bool compare_exchange_strong(T& expected, T desired,
     memory_order success,
     memory_order failure,
     memory_scope scope = default_scope) const
@@ -18129,7 +18141,7 @@ This function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-bool compare_exchange_strong(T &expected, T desired,
+bool compare_exchange_strong(T& expected, T desired,
     memory_order order =
     default_read_modify_write_order) const
 ----
@@ -18559,7 +18571,7 @@ types on devices that have [code]#aspect::atomic64#.
 a@
 [source]
 ----
-bool compare_exchange_strong(T &expected, T desired,
+bool compare_exchange_strong(T& expected, T desired,
     memory_order successMemoryOrder =
     memory_order::relaxed,
     memory_order failMemoryOrder =
@@ -18757,7 +18769,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 bool atomic_compare_exchange_strong(
-    atomic<T, AddressSpace> object, T &expected, T desired,
+    atomic<T, AddressSpace> object, T& expected, T desired,
     memory_order successMemoryOrder =
     memory_order::relaxed
     memory_order failMemoryOrder =
@@ -18935,14 +18947,14 @@ float, double, half
 a@
 [source]
 ----
-char *, const char *
+char*, const char*
 ----
    a@ Outputs the string.
 
 a@
 [source]
 ----
-T *, const T *, multi_ptr
+T*, const T*, multi_ptr
 ----
    a@ Outputs the address of the pointer as a stream of characters.
 
@@ -19092,7 +19104,7 @@ a@
 stream(size_t totalBufferSize,
        size_t workItemBufferSize,
        handler& cgh,
-       const property_list &propList = {})
+       const property_list& propList = {})
 ----
    a@ Constructs a SYCL [code]#stream# instance associated with the command group
       specified by [code]#cgh#, with a maximum buffer size in bytes per kernel
@@ -19149,7 +19161,7 @@ size_t get_max_statement_size() const
 a@
 [source]
 ----
-template <typename T> const stream& operator<<(const stream& os, const T &rhs)
+template <typename T> const stream& operator<<(const stream& os, const T& rhs)
 ----
    a@ Outputs any valid values (see <<table.operands.stream>>) as a stream of characters and applies any valid manipulator (see <<table.manipulators.stream>>) to the current stream.
 

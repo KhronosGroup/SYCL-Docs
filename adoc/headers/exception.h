@@ -7,27 +7,30 @@ using async_handler = std::function<void(sycl::exception_list)>;
 
 class exception : public virtual std::exception {
  public:
-    exception(std::error_code ec, const std::string& what_arg);
-    exception(std::error_code ec, const char * what_arg);
-    exception(std::error_code ec);
-    exception(int ev, const std::error_category& ecat, const std::string& what_arg);
-    exception(int ev, const std::error_category& ecat, const char* what_arg);
-    exception(int ev, const std::error_category& ecat);
+  exception(std::error_code ec, const std::string& what_arg);
+  exception(std::error_code ec, const char* what_arg);
+  exception(std::error_code ec);
+  exception(int ev, const std::error_category& ecat,
+            const std::string& what_arg);
+  exception(int ev, const std::error_category& ecat, const char* what_arg);
+  exception(int ev, const std::error_category& ecat);
 
-    exception(context ctx, std::error_code ec, const std::string& what_arg);
-    exception(context ctx, std::error_code ec, const char* what_arg);
-    exception(context ctx, std::error_code ec);
-    exception(context ctx, int ev, const std::error_category& ecat, const std::string& what_arg);
-    exception(context ctx, int ev, const std::error_category& ecat, const char* what_arg);
-    exception(context ctx, int ev, const std::error_category& ecat);
+  exception(context ctx, std::error_code ec, const std::string& what_arg);
+  exception(context ctx, std::error_code ec, const char* what_arg);
+  exception(context ctx, std::error_code ec);
+  exception(context ctx, int ev, const std::error_category& ecat,
+            const std::string& what_arg);
+  exception(context ctx, int ev, const std::error_category& ecat,
+            const char* what_arg);
+  exception(context ctx, int ev, const std::error_category& ecat);
 
-    const std::error_code& code() const noexcept;
-    const std::error_category& category() const noexcept;
+  const std::error_code& code() const noexcept;
+  const std::error_category& category() const noexcept;
 
-    const char *what() const;
+  const char* what() const;
 
-    bool has_context() const noexcept;
-    context get_context() const;
+  bool has_context() const noexcept;
+  context get_context() const;
 };
 
 class exception_list {
@@ -41,8 +44,8 @@ class exception_list {
   using const_iterator = /*unspecified*/;
 
   size_type size() const;
-  iterator begin() const;  // first asynchronous exception
-  iterator end() const;    // refer to past-the-end last asynchronous exception
+  iterator begin() const; // first asynchronous exception
+  iterator end() const;   // refer to past-the-end last asynchronous exception
 };
 
 enum class errc : /* unspecified */ {
@@ -63,21 +66,18 @@ enum class errc : /* unspecified */ {
   backend_mismatch
 };
 
-template<backend b>
-using errc_for = typename backend_traits<b>::errc;
+template <backend b> using errc_for = typename backend_traits<b>::errc;
 
 std::error_code make_error_code(errc e) noexcept;
 
 const std::error_category& sycl_category() noexcept;
 
-template<backend b>
-const std::error_category& error_category_for() noexcept;
+template <backend b> const std::error_category& error_category_for() noexcept;
 
-}  // namespace sycl
+} // namespace sycl
 
 namespace std {
 
-  template <>
-  struct is_error_code_enum</* see below */> : true_type {};
+template <> struct is_error_code_enum</* see below */> : true_type {};
 
-}  // namespace std
+} // namespace std

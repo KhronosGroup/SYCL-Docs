@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-template <int Dimensions = 1>
-class nd_item {
-public:
+template <int Dimensions = 1> class nd_item {
+ public:
   nd_item() = delete;
 
-   /* -- common interface members -- */
+  /* -- common interface members -- */
 
   id<Dimensions> get_global_id() const;
 
@@ -48,21 +47,26 @@ public:
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-    decorated_global_ptr<DataT> src, size_t numElements) const;
+                                     decorated_global_ptr<DataT> src,
+                                     size_t numElements) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-    decorated_local_ptr<DataT> src, size_t numElements) const;
+                                     decorated_local_ptr<DataT> src,
+                                     size_t numElements) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-    decorated_global_ptr<DataT> src, size_t numElements, size_t srcStride) const;
+                                     decorated_global_ptr<DataT> src,
+                                     size_t numElements,
+                                     size_t srcStride) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-    decorated_local_ptr<DataT> src, size_t numElements, size_t destStride) const;
+                                     decorated_local_ptr<DataT> src,
+                                     size_t numElements,
+                                     size_t destStride) const;
 
-  template <typename... EventTN>
-  void wait_for(EventTN... events) const;
+  template <typename... EventTN> void wait_for(EventTN... events) const;
 };
-}  // namespace sycl
+} // namespace sycl

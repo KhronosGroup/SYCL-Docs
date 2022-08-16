@@ -19,7 +19,6 @@ enum class stream_manipulator : /* unspecified */ {
   defaultfloat
 };
 
-
 const stream_manipulator flush = stream_manipulator::flush;
 
 const stream_manipulator dec = stream_manipulator::dec;
@@ -52,9 +51,8 @@ __width_manipulator__ setw(int width);
 
 class stream {
  public:
-
-  stream(size_t totalBufferSize, size_t workItemBufferSize, handler& cgh
-         const property_list &propList = {});
+  stream(size_t totalBufferSize, size_t workItemBufferSize,
+         handler& cgh const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -67,13 +65,12 @@ class stream {
 
   size_t get_work_item_buffer_size() const;
 
-  /* get_max_statement_size() has the same functionality as get_work_item_buffer_size(),
-     and is provided for backward compatibility.  get_max_statement_size() is a deprecated
-     query. */
+  /* get_max_statement_size() has the same functionality as
+     get_work_item_buffer_size(), and is provided for backward compatibility.
+     get_max_statement_size() is a deprecated query. */
   size_t get_max_statement_size() const;
 };
 
-template <typename T>
-const stream& operator<<(const stream& os, const T &rhs);
+template <typename T> const stream& operator<<(const stream& os, const T& rhs);
 
-}  // namespace sycl
+} // namespace sycl

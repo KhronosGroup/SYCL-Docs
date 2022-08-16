@@ -7,7 +7,8 @@ struct known_identity {
 };
 
 template <typename BinaryOperation, typename AccumulatorT>
-inline constexpr AccumulatorT known_identity_v = known_identity<BinaryOperation, AccumulatorT>::value;
+inline constexpr AccumulatorT known_identity_v =
+    known_identity<BinaryOperation, AccumulatorT>::value;
 
 template <typename BinaryOperation, typename AccumulatorT>
 struct has_known_identity {
@@ -15,4 +16,5 @@ struct has_known_identity {
 };
 
 template <typename BinaryOperation, typename AccumulatorT>
-inline constexpr bool has_known_identity_v = has_known_identity<BinaryOperation, AccumulatorT>::value;
+inline constexpr bool has_known_identity_v =
+    has_known_identity<BinaryOperation, AccumulatorT>::value;

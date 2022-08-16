@@ -9,8 +9,9 @@ int main() {
   // Create a default queue to enqueue work to the default device
   queue myQueue;
 
-  // Allocate shared memory bound to the device and context associated to the queue
-  int *data = sycl::malloc_device<int>(1024, myQueue);
+  // Allocate shared memory bound to the device and context associated to the
+  // queue
+  int* data = sycl::malloc_device<int>(1024, myQueue);
 
   myQueue.parallel_for(1024, [=](id<1> idx) {
     // Initialize each buffer element with its own rank number starting at 0
@@ -23,13 +24,13 @@ int main() {
   // Create an array to receive the device content
   int hostData[1024];
   // Receive the content from the device
-  myQueue.memcpy(hostData, data, 1024*sizeof(int));
+  myQueue.memcpy(hostData, data, 1024 * sizeof(int));
   // Wait for the copy to complete
   myQueue.wait();
 
   // Print result
   for (int i = 0; i < 1024; i++)
-    std::cout <<"hostData["<< i << "] = " << hostData[i] << std::endl;
+    std::cout << "hostData[" << i << "] = " << hostData[i] << std::endl;
 
   return 0;
 }

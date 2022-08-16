@@ -7,7 +7,7 @@ namespace event {
 
 struct command_execution_status;
 
-}  // namespace event
+} // namespace event
 
 enum class event_command_status : /* unspecified */ {
   submitted,
@@ -21,6 +21,6 @@ struct command_submit;
 struct command_start;
 struct command_end;
 
-}  // namespace event_profiling
-}  // namespace info
-}  // namespace sycl
+} // namespace event_profiling
+} // namespace info
+} // namespace sycl

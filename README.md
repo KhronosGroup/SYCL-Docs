@@ -2,8 +2,8 @@
 
 <!-- to update to newer CI when going public ![Build Status](https://api.travis-ci.com/KhronosGroup/SYCL-Docs.svg?branch=master) -->
 <!-- to update to newer CI when going public [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://khronosgroup.github.io/SYCL-Docs/sycl/sycl.pdf) -->
-[![SPEC 2020-4](https://img.shields.io/badge/SPEC-2020--4-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/pdf/sycl-2020.pdf)
-[![SPEC 2020-4](https://img.shields.io/badge/SPEC-2020--4-orange.svg?logo=HTML5)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html)
+[![SPEC 2020-5](https://img.shields.io/badge/SPEC-2020--5-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/pdf/sycl-2020.pdf)
+[![SPEC 2020-5](https://img.shields.io/badge/SPEC-2020--5-orange.svg?logo=HTML5)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html)
 [![SPEC latest](https://img.shields.io/badge/SPEC-latest-red.svg?logo=adobe-acrobat-reader)](https://github.com/KhronosGroup/SYCL-Docs/actions?query=branch%3ASYCL-2020%2Fmaster+is%3Asuccess)
 [![Join the Slack group](https://img.shields.io/badge/chat-on%20slack-blue.svg?logo=slack)](https://khr.io/slack)
 
@@ -115,8 +115,16 @@ Dockerfile at
 
 https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile
 
-Note that the Khronos Docker image layers on the official Ruby 2.7 Docker
+Note that the Khronos Docker image layers on the official Ruby 3.1 Docker
 image, so you must install Ruby first.
+
+If you have installed an older version of the tools and the Khronos image is
+updated, there may be minor changes in the Makefile and markup required by
+the new versions. For example, updating from asciidoctor-pdf 1.6.1 to 2.2.0
+required changing the `pdf-stylesdir` attribute in the asciidoctor build to
+`pdf-themesdir`. Eventually, these changes may make using the older tools
+impractical. If this happens, update your tools to match the latest Docker
+image, and rebase your working branch on current `main` branch.
 
 
 ### Building Using GitLab CI

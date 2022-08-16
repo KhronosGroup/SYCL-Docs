@@ -3,8 +3,8 @@
 
 namespace sycl {
 namespace property {
-  struct no_init {};
-}  // namespace property
+struct no_init {};
+} // namespace property
 
 inline constexpr property::no_init no_init;
-}  // namespace sycl
+} // namespace sycl
