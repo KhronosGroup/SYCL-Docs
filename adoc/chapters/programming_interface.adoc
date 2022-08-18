@@ -815,16 +815,16 @@ an integer ranking value to all the devices on the system.
 [[sec:device-selector]]
 ==== Device selector
 
-The actual interface for a <<device-selector>> is a callable
-taking a [code]#const device# reference and returning a
-value implicitly convertible to an [code]#int#.
+The interface for a <<device-selector>> is any object that meets the C++ named
+requirement [code]#Callable#, taking a parameter of type [code]#const device &#
+and returning a value that is implicitly convertible to [code]#int#.
 
-At any point where the <<sycl-runtime>> needs to select a SYCL
-[code]#device# using a <<device-selector>>, the system will query
-all available SYCL [code]#devices# from all <<backend, SYCL backends>> in the
-system, will call the <<device-selector>> on each device and select the one
-which returns the highest score. If the highest value is strictly
-negative no device is selected.
+At any point where the <<sycl-runtime>> needs to select a SYCL [code]#device#
+using a <<device-selector>>, the system queries all
+<<root-device, root devices>> from all <<backend, SYCL backends>> in the
+system, calls the <<device-selector>> on each device and selects the one
+which returns the highest score. If the highest value is strictly negative no
+device is selected.
 
 In places where only one device has to be picked and the high score is
 obtained by more than one device, then one of the tied devices will be
