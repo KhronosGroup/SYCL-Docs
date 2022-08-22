@@ -44,7 +44,7 @@ inline namespace other {
 int same_name; // ILLEGAL: shadows "specialization_id" variable with same name in
                // enclosing namespace scope
 }
-inline namespace {
+inline namespace other2 {
 namespace foo { // ILLEGAL: namespace name shadows "::foo" namespace which contains
                 // "specialization_id" variable.
 } // namespace foo
