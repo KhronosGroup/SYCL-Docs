@@ -41,12 +41,11 @@ namespace {
 constexpr specialization_id<int> same_name { 12 }; // OK
 }
 inline namespace other {
-int same_name; // ILLEGAL: shadows "specialization_id"
-               // variable with same name in enclosing
-               // namespace scope
+int same_name; // ILLEGAL: shadows "specialization_id" variable with same name in
+               // enclosing namespace scope
 }
 inline namespace {
-namespace foo { // ILLEGAL: namespace name shadows "::foo"
+namespace foo { // ILLEGAL: namespace name shadows "::foo" namespace which contains
+                // "specialization_id" variable.
 } // namespace foo
-  // "specialization_id" variable.
 } // namespace
