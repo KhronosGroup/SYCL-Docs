@@ -6393,7 +6393,8 @@ class in the sections that follow.
 Accessors of type [code]#accessor#, [code]#host_accessor#, and
 [code]#local_accessor# can have zero, one, two, or three Dimensions.  A zero
 dimension accessor provides access to a single scalar element via an implicit
-conversion operator to the underlying type of that element.
+conversion operator to the underlying type of that element and via an overloaded
+assignment operator from the underlying type of the element.
 
 One, two, or three dimensional specializations of these accessors provide
 access to the elements they contain in two ways.  The first way is through a
@@ -8337,6 +8338,22 @@ For [code]#host_accessor# and [code]#local_accessor# available only when
 [code]#(Dimensions == 0)#.
 
 Returns a reference to the single element that is accessed by this accessor.
+
+For [code]#accessor# and [code]#local_accessor#, this function may only be
+called from within a <<command>>.
+
+a@
+[source]
+----
+reference operator=(const value_type &&other) const
+----
+   a@ For [code]#accessor# available only when
+      [code]#(AccessMode != access_mode::atomic && Dimensions == 0)#.
+
+For [code]#host_accessor# and [code]#local_accessor# available only when
+[code]#(Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
