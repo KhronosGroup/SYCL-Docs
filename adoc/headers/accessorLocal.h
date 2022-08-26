@@ -48,10 +48,10 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   operator reference() const;
 
   /* Available only when: (Dimensions == 0) */
-  local_accessor &operator=(const value_type &Other) const;
+  const local_accessor &operator=(const value_type &Other) const;
 
   /* Available only when: (Dimensions == 0) */
-  local_accessor &operator=(const value_type &&Other) const;
+  const local_accessor &operator=(const value_type &&Other) const;
 
   /* Available only when: (Dimensions > 0) */
   reference operator[](id<Dimensions> index) const;
