@@ -83,7 +83,10 @@ class host_accessor {
   operator reference() const;
 
   /* Available only when: (Dimensions == 0) */
-  reference operator=(const value_type &&other) const;
+  host_accessor &operator=(const value_type &other) const;
+
+  /* Available only when: (Dimensions == 0) */
+  host_accessor &operator=(const value_type &&other) const;
 
   /* Available only when: (Dimensions > 0) */
   reference operator[](id<Dimensions> index) const;
