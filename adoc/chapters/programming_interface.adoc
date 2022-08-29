@@ -3555,6 +3555,33 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
+event prefetch_host(void* ptr, size_t numBytes)
+----
+a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::prefetch_host(ptr, numBytes)#.
+a@
+[source]
+----
+event prefetch_host(void* ptr, size_t numBytes,
+               event depEvent)
+----
+a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvent)# and
+[code]#handler::prefetch_host(ptr, numBytes)#.
+a@
+[source]
+----
+event prefetch_host(void* ptr, size_t numBytes,
+               const std::vector<event>& depEvents)
+----
+a@ <<sec:usm, USM>>
+a@ Equivalent to submitting a command-group containing
+[code]#handler::depends_on(depEvents)# and
+[code]#handler::prefetch_host(ptr, numBytes)#.
+a@
+[source]
 event mem_advise(void* ptr, size_t numBytes, int advice)
 ----
 a@ <<sec:usm, USM>>
@@ -10046,13 +10073,19 @@ modification of shared allocations through the aspect
 See <<table.device.aspect>> in <<sec:device-aspects>> for more details.
 
 Performance hints for shared allocations may be specified by the user
-by enqueueing [code]#prefetch# operations on a device.  These operations
-inform the SYCL runtime that the specified shared allocation is
-likely to be accessed on the device in the future, and that it is free
+by enqueueing [code]#prefetch# or [code]#prefetch_host#.
+
+[code]#prefetch# inform the SYCL runtime that the specified shared allocation is
+likely to be accessed by the device associated with the queue, and that it is free
 to migrate the allocation to the device. 
-More about [code]#prefetch# is found in <<table.members.queue>> and
+
+[code]#prefetch_host# inform the SYCL runtime that the specified shared allocation is
+likely to be accessed on the host in the future, and that it is free
+to migrate the allocation to the host.
+
+More about [code]#prefetch# and [code]#prefetch_host# is found in <<table.members.queue>> and
 <<table.members.handler.copy>>.  If a device supports concurrent access to
-shared allocations, then [code]#prefetch# operations may be overlapped
+shared allocations, then [code]#prefetch# and [code]#prefetch_host# operations may be overlapped
 with kernel execution.
 
 Additionally, users may use the [code]#mem_advise# member function to annotate
@@ -13958,6 +13991,15 @@ a@
 void prefetch(void* ptr, size_t numBytes)
 ----
 a@ Enqueues a prefetch of [code]#num_bytes# of data pointed to by
+the USM pointer [code]#ptr#.
+For more detail on USM, please see <<sec:usm>>.
+
+a@
+[source]
+----
+void prefetch_hosts(void* ptr, size_t numBytes)
+----
+a@ Enqueues a prefetch host of [code]#num_bytes# of data pointed to by
 the USM pointer [code]#ptr#.
 For more detail on USM, please see <<sec:usm>>.
 

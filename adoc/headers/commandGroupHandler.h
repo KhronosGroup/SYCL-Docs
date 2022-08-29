@@ -78,6 +78,8 @@ class handler {
 
   void prefetch(void* ptr, size_t numBytes);
 
+  void prefetch_host(void* ptr, size_t numBytes);
+
   void mem_advise(void* ptr, size_t numBytes, int advice);
 
   //------ Explicit memory operation APIs

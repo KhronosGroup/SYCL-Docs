@@ -161,6 +161,7 @@ module Rouge
         param_traits
         permute_group_by_xor
         prefetch
+        prefetch_host
         reduce
         reduce_over_group
         reinterpret

@@ -144,6 +144,11 @@ class queue {
   event prefetch(void* ptr, size_t numBytes,
                  const std::vector<event>& depEvents);
 
+  event prefetch_host(void* ptr, size_t numBytes);
+  event prefetch_host(void* ptr, size_t numBytes, event depEvent);
+  event prefetch_host(void* ptr, size_t numBytes,
+                      const std::vector<event>& depEvents);
+
   event mem_advise(void* ptr, size_t numBytes, int advice);
   event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent);
   event mem_advise(void* ptr, size_t numBytes, int advice,
