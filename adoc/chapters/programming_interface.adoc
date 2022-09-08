@@ -12509,10 +12509,13 @@ multiple reductions reference the same reduction variable, or a reduction
 variable is accessed directly during the lifetime of a reduction (e.g. via an
 [code]#accessor# or USM pointer), the behavior is undefined.
 
-Certain implementations of reductions can be made more efficient if the
-reduction operator has an identity value and this value is known to the
-implementation. For standard binary operators (e.g. [code]#plus# on arithmetic
-types), an implementation can determine the correct identity value
+Some of the overloads for the [code]#reduction# function take an identity value
+and some do not. An implementation is required to compute a correct reduction
+even when the application does not specify an identity value. However, the
+implementation may be more efficient when the identity value is either provided
+by the application or is known by the implementation. For reductions using
+standard binary operators and fundamental types (e.g. [code]#plus# and
+arithmetic types), an implementation can determine the correct identity value
 automatically in order to avoid performance penalties.
 
 If an implementation can identify an identity value for a given combination of
