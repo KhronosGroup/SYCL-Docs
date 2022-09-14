@@ -4795,7 +4795,7 @@ a@
 template <typename ReinterpretT, int ReinterpretDim>
     buffer<ReinterpretT, ReinterpretDim,
            typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             ReinterpretT>>
+             std::remove_const_t<ReinterpretT>>>
     reinterpret(range<ReinterpretDim> reinterpretRange) const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
@@ -4821,7 +4821,7 @@ a@
 template <typename ReinterpretT, int ReinterpretDim = Dimensions>
     buffer<ReinterpretT, ReinterpretDim,
            typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             ReinterpretT>>
+             std::remove_const_t<ReinterpretT>>>
     reinterpret() const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
