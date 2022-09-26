@@ -604,8 +604,7 @@ unique <<work-group-id>> with the same dimensionality as the index space used fo
 the work-items. Work-items are each assigned a <<local-id>>, unique within the
 work-group, so that a single work-item can be uniquely identified by its global
 id or by a combination of its local id and work-group id.  The work-items in a
-given work-group execute concurrently on the processing elements of a single
-compute unit.
+given work-group execute on the processing elements of a single compute unit.
 
 When work-groups are used in SYCL, the index space is called an <<nd-range>>.
 An ND-range is an
@@ -1100,10 +1099,9 @@ to the buffer or USM allocation from device code.
 ==== Forward progress
 
 Memory consistency guarantees are independent of any forward progress
-guarantees.  A SYCL implementation must execute work-items concurrently
-and must ensure that the work-items in a group obey the semantics of
-<<group-barrier,group barriers>>, but are not required to provide any
-additional forward progress guarantees.
+guarantees.  A SYCL implementation must ensure that the work-items in a group
+obey the semantics of <<group-barrier,group barriers>>, but is not required to
+provide any additional forward progress guarantees.
 
 Synchronizing work-items via memory operations is unsafe in general, but is
 supported if and only if the following conditions are true:
