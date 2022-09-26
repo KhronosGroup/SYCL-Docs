@@ -1110,11 +1110,11 @@ supported if and only if the following conditions are true:
   * acquire-release or sequentially consistent memory ordering is supported
     at the scope containing the set of work-items being synchronized;
 
-  * the work-items being synchronized are guaranteed to make forward progress
-    with respect to one another.
+  * the work-items being synchronized both provide concurrent forward progress
+    guarantees.
 
-The ability of work-items to make forward progress with respect to other
-work-items is implementation-defined.
+The forward progress guarantee provided by each work-item is
+implementation-defined.
 
 // Later, this label will move onto a new subsection - see below
 [[sec:progmodel.cpp]]
@@ -1223,9 +1223,8 @@ by calling the [code]#group_barrier# function.
 
 To maximize portability across devices, developers should not assume that
 work-items within a sub-group execute in any particular order, that work-groups
-are subdivided into sub-groups in a specific way, nor that two sub-groups
-within a work-group will make forward progress with respect to one
-another.
+are subdivided into sub-groups in a specific way, nor that the work-items
+within a sub-group provide specific forward progress guarantees.
 
 Variables with <<reduction>> semantics can be added to work-group data
 parallel kernels using the features described in <<sec:reduction>>.
