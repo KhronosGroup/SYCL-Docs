@@ -331,10 +331,10 @@ multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType*);
 template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder,
           class T>
 multi_ptr(accessor<T, Dimensions, Mode, target::device, IsPlaceholder>)
-    -> multi_ptr<T, access::address_space::global_space>;
+    -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
 template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder,
           class T>
 multi_ptr(local_accessor<T, Dimensions>)
-    -> multi_ptr<T, access::address_space::local_space>;
+    -> multi_ptr<T, access::address_space::local_space, access::decorated::no>;
 
 } // namespace sycl
