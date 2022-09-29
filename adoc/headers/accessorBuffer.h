@@ -153,8 +153,14 @@ class accessor {
   /* Available only when: (Dimensions > 0) */
   id<Dimensions> get_offset() const;
 
-  /* Available only when: (Dimensions == 0) */
+  /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 0) */
   operator reference() const;
+
+  /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 0) */
+  const accessor& operator=(const value_type& other) const;
+
+  /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 0) */
+  const accessor& operator=(value_type&& other) const;
 
   /* Available only when: (Dimensions > 0) */
   reference operator[](id<Dimensions> index) const;
