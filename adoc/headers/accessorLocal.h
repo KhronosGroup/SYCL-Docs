@@ -47,6 +47,12 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   /* Available only when: (Dimensions == 0) */
   operator reference() const;
 
+  /* Available only when: (Dimensions == 0) */
+  const local_accessor& operator=(const value_type& other) const;
+
+  /* Available only when: (Dimensions == 0) */
+  const local_accessor& operator=(value_type&& other) const;
+
   /* Available only when: (Dimensions > 0) */
   reference operator[](id<Dimensions> index) const;
 

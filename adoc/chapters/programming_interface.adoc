@@ -6393,7 +6393,8 @@ class in the sections that follow.
 Accessors of type [code]#accessor#, [code]#host_accessor#, and
 [code]#local_accessor# can have zero, one, two, or three Dimensions.  A zero
 dimension accessor provides access to a single scalar element via an implicit
-conversion operator to the underlying type of that element.
+conversion operator to the underlying type of that element and via an overloaded
+copy/move assignment operators from the underlying type of the element.
 
 One, two, or three dimensional specializations of these accessors provide
 access to the elements they contain in two ways.  The first way is through a
@@ -6892,6 +6893,30 @@ accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
       buffer, even if this is a <<ranged-accessor>> whose range does not start
       at the beginning of the buffer.  The return value is unspecified if the
       accessor is empty.
+
+This function may only be called from within a <<command>>.
+
+a@
+[source]
+----
+const accessor& operator=(const value_type& other) const
+----
+   a@ Available only when
+      [code]#(AccessMode != access_mode::atomic && Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
+
+This function may only be called from within a <<command>>.
+
+a@
+[source]
+----
+const accessor& operator=(value_type&& other) const
+----
+   a@ Available only when
+      [code]#(AccessMode != access_mode::atomic && Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
 
 This function may only be called from within a <<command>>.
 
@@ -7959,6 +7984,24 @@ If this is a <<ranged-accessor>>, returns the offset that was specified when the
 accessor was constructed.  For other accessors, returns the default constructed
 [code]#id<Dimensions>{}#.
 
+a@
+[source]
+----
+const host_accessor& operator=(const value_type& other) const
+----
+   a@ Available only when [code]#(Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
+
+a@
+[source]
+----
+const host_accessor& operator=(value_type&& other) const
+----
+   a@ Available only when [code]#(Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
+
 |====
 
 
@@ -8155,6 +8198,28 @@ accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
       unspecified if the accessor is empty.
 
 This function may only be called from within a <<sycl-kernel-function>>.
+
+a@
+[source]
+----
+const local_accessor& operator=(const value_type& other) const
+----
+   a@ Available only when [code]#(Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
+
+This function may only be called from within a <<command>>.
+
+a@
+[source]
+----
+const local_accessor& operator=(const value_type&& other) const
+----
+   a@ Available only when [code]#(Dimensions == 0)#.
+
+Assignment to the single element that is accessed by this accessor.
+
+This function may only be called from within a <<command>>.
 
 |====
 
