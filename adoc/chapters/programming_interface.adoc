@@ -902,15 +902,14 @@ cpu_selector_v
 a@
 [source]
 ----
-__unspecified_callable__ aspect_selector(
-   const std::vector<aspect>& aspectList,
-   const std::vector<aspect>& denyList = {});
+__unspecified_callable__
+aspect_selector(const std::vector<aspect>& aspectList,
+                const std::vector<aspect>& denyList = {});
 
 template <typename... AspectList>
 __unspecified_callable__ aspect_selector(AspectList... aspectList);
 
-template <aspect... AspectList>
-__unspecified_callable__ aspect_selector();
+template <aspect... AspectList> __unspecified_callable__ aspect_selector();
 ----
 a@ The free function [code]#aspect_selector# has several overloads,
 each of which returns a selector object that selects a
@@ -3583,9 +3582,8 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename SrcT, int SrcDims, access_mode SrcMode,
-         target SrcTgt, access::placeholder IsPlaceholder,
-         typename DestT>
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+          access::placeholder IsPlaceholder, typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
            std::shared_ptr<DestT> dest);
 ----
@@ -3596,12 +3594,10 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename SrcT, typename DestT, int DestDims,
-          access_mode DestMode, target DestTgt,
-          access::placeholder IsPlaceholder>
-event
-copy(std::shared_ptr<SrcT> src,
-     accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+          target DestTgt, access::placeholder IsPlaceholder>
+event copy(std::shared_ptr<SrcT> src,
+           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -3610,9 +3606,8 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename SrcT, int SrcDims, access_mode SrcMode,
-          target SrcTgt, access::placeholder IsPlaceholder,
-          typename DestT>
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+          access::placeholder IsPlaceholder, typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
            DestT* dest);
 ----
@@ -3623,12 +3618,10 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename SrcT, typename DestT, int DestDims,
-          access_mode DestMode, target DestTgt,
-          access::placeholder IsPlaceholder>
-event
-copy(const SrcT* src,
-     accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+          target DestTgt, access::placeholder IsPlaceholder>
+event copy(const SrcT* src,
+           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -3637,13 +3630,13 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename SrcT, int SrcDims, access_mode SrcMode,
-          target SrcTgt, access::placeholder IsSrcPlaceholder,
-          typename DestT, int DestDims, access_mode DestMode,
-          target DestTgt, access::placeholder IsDestPlaceholder>
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+          access::placeholder IsSrcPlaceholder, typename DestT, int DestDims,
+          access_mode DestMode, target DestTgt,
+          access::placeholder IsDestPlaceholder>
 event copy(
-   accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
-   accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
+    accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
+    accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -3652,9 +3645,9 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-  template <typename T, int Dims, access_mode Mode, target Tgt,
-            access::placeholder IsPlaceholder>
-  event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
+template <typename T, int Dims, access_mode Mode, target Tgt,
+          access::placeholder IsPlaceholder>
+event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -3663,9 +3656,9 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-  template <typename T, int Dims, access_mode Mode, target Tgt,
-            access::placeholder IsPlaceholder>
-  event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src);
+template <typename T, int Dims, access_mode Mode, target Tgt,
+          access::placeholder IsPlaceholder>
+event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src);
 ----
 a@ <<subsec:explicitmemory,Explicit copy>>
 a@ Equivalent to submitting a command-group containing
@@ -9213,7 +9206,8 @@ a@
 [source]
 ----
 template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
-multi_ptr(accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
+multi_ptr(
+    accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 ----
    a@ Available only when:
       [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
@@ -9240,7 +9234,8 @@ a@
 [source]
 ----
 template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
-multi_ptr(accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
+multi_ptr(
+    accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
 ----
    a@ Deprecated in SYCL 2020.  Use the overload with
       [code]#local_accessor# instead.
@@ -14076,8 +14071,7 @@ include::{header_dir}/expressingParallelism/classSpecializationId.h[lines=4..-1]
 
 [source]
 ----
-template<class... Args>
-explicit constexpr specialization_id(Args&&... args);
+template <class... Args> explicit constexpr specialization_id(Args&&... args);
 ----
 
 _Constraints:_ Available only when [code]#+std::is_constructible_v<T, Args...>+#
@@ -14120,7 +14114,7 @@ another invocation of the same <<command-group-function-object>>.
 
 [source]
 ----
-template<auto& SpecName>
+template <auto& SpecName>
 void set_specialization_constant(
     typename std::remove_reference_t<decltype(SpecName)>::value_type value);
 ----
@@ -14142,8 +14136,9 @@ _Throws:_
 
 [source]
 ----
-template<auto& SpecName>
-typename std::remove_reference_t<decltype(SpecName)>::value_type get_specialization_constant();
+template <auto& SpecName>
+typename std::remove_reference_t<decltype(SpecName)>::value_type
+get_specialization_constant();
 ----
 
 _Returns:_ The value of the specialization constant whose address is
@@ -14712,8 +14707,7 @@ identifier for a device's built-in kernels by querying the device with
 
 [source]
 ----
-template <typename KernelName>
-kernel_id get_kernel_id();
+template <typename KernelName> kernel_id get_kernel_id();
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -14752,8 +14746,9 @@ specialization constants in the bundle will have their default values.
 
 [source]
 ----
-template<bundle_state State>
-kernel_bundle<State> get_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
+template <bundle_state State>
+kernel_bundle<State> get_kernel_bundle(const context& ctxt,
+                                       const std::vector<device>& devs);
 ----
 
 _Returns:_ A kernel bundle in state [code]#State# which contains all of the
@@ -14788,8 +14783,9 @@ _Throws:_
 
 [source]
 ----
-template<bundle_state State>
-kernel_bundle<State> get_kernel_bundle(const context& ctxt, const std::vector<device>& devs,
+template <bundle_state State>
+kernel_bundle<State> get_kernel_bundle(const context& ctxt,
+                                       const std::vector<device>& devs,
                                        const std::vector<kernel_id>& kernelIds);
 ----
 
@@ -14833,7 +14829,7 @@ _Throws:_
 
 [source]
 ----
-template<bundle_state State, typename Selector>
+template <bundle_state State, typename Selector>
 kernel_bundle<State> get_kernel_bundle(const context& ctxt,
                                        const std::vector<device>& devs,
                                        Selector selector);
@@ -14885,14 +14881,14 @@ several bundles together with [code]#join()#.
 
 [source]
 ----
-template<bundle_state State>                       // (1)
+template <bundle_state State> // (1)
 kernel_bundle<State> get_kernel_bundle(const context& ctxt);
 
-template<bundle_state State>                       // (2)
+template <bundle_state State> // (2)
 kernel_bundle<State> get_kernel_bundle(const context& ctxt,
                                        const std::vector<kernel_id>& kernelIds);
 
-template<bundle_state State, typename Selector>    // (3)
+template <bundle_state State, typename Selector> // (3)
 kernel_bundle<State> get_kernel_bundle(const context& ctxt, Selector selector);
 ----
 
@@ -14904,11 +14900,12 @@ kernel_bundle<State> get_kernel_bundle(const context& ctxt, Selector selector);
 
 [source]
 ----
-template<typename KernelName, bundle_state State>  // (1)
+template <typename KernelName, bundle_state State> // (1)
 kernel_bundle<State> get_kernel_bundle(const context& ctxt);
 
-template<typename KernelName, bundle_state State>  // (2)
-kernel_bundle<State> get_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
+template <typename KernelName, bundle_state State> // (2)
+kernel_bundle<State> get_kernel_bundle(const context& ctxt,
+                                       const std::vector<device>& devs);
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -14933,7 +14930,7 @@ bundle with the requested characteristics exists.
 
 [source]
 ----
-template<bundle_state State>
+template <bundle_state State>
 bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 ----
 
@@ -14958,7 +14955,7 @@ _Throws:_
 
 [source]
 ----
-template<bundle_state State>
+template <bundle_state State>
 bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs,
                        const std::vector<kernel_id>& kernelIds);
 ----
@@ -14985,11 +14982,12 @@ _Throws:_
 
 [source]
 ----
-template<bundle_state State>                       // (1)
+template <bundle_state State> // (1)
 bool has_kernel_bundle(const context& ctxt);
 
-template<bundle_state State>                       // (2)
-bool has_kernel_bundle(const context& ctxt, const std::vector<kernel_id>& kernelIds);
+template <bundle_state State> // (2)
+bool has_kernel_bundle(const context& ctxt,
+                       const std::vector<kernel_id>& kernelIds);
 ----
 
   . Equivalent to [code]#has_kernel_bundle(ctxt, ctxt.get_devices())#.
@@ -14998,10 +14996,10 @@ bool has_kernel_bundle(const context& ctxt, const std::vector<kernel_id>& kernel
 
 [source]
 ----
-template<typename KernelName, bundle_state State>  // (1)
+template <typename KernelName, bundle_state State> // (1)
 bool has_kernel_bundle(const context& ctxt);
 
-template<typename KernelName, bundle_state State>  // (2)
+template <typename KernelName, bundle_state State> // (2)
 bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 ----
 
@@ -15044,8 +15042,7 @@ are compatible with the device [code]#dev#.
 
 [source]
 ----
-template<typename KernelName>
-bool is_compatible(const device& dev);
+template <typename KernelName> bool is_compatible(const device& dev);
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -15071,7 +15068,7 @@ creates a new bundle from the result.
 
 [source]
 ----
-template<bundle_state State>
+template <bundle_state State>
 kernel_bundle<State> join(const std::vector<kernel_bundle<State>>& bundles);
 ----
 
@@ -15110,8 +15107,7 @@ specify these properties as an extension.
 ----
 kernel_bundle<bundle_state::object>
 compile(const kernel_bundle<bundle_state::input>& inputBundle,
-        const std::vector<device>& devs,
-        const property_list& propList = {});
+        const std::vector<device>& devs, const property_list& propList = {});
 ----
 
 _Effects:_ The device images from [code]#inputBundle# are translated into one
@@ -15141,8 +15137,7 @@ _Throws:_
 ----
 kernel_bundle<bundle_state::executable>
 link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
-     const std::vector<device>& devs,
-     const property_list& propList = {});
+     const std::vector<device>& devs, const property_list& propList = {});
 ----
 
 _Effects:_ Duplicate device images from [code]#objectBundles# are eliminated
@@ -15178,8 +15173,7 @@ _Throws:_
 ----
 kernel_bundle<bundle_state::executable>
 build(const kernel_bundle<bundle_state::input>& inputBundle,
-      const std::vector<device>& devs,
-      const property_list& propList = {});
+      const std::vector<device>& devs, const property_list& propList = {});
 ----
 
 _Effects:_ This function performs both an online compile and link operation,
@@ -15210,24 +15204,23 @@ _Throws:_
 
 [source]
 ----
-kernel_bundle<bundle_state::object>                               // (1)
+kernel_bundle<bundle_state::object> // (1)
 compile(const kernel_bundle<bundle_state::input>& inputBundle,
         const property_list& propList = {});
 
-kernel_bundle<bundle_state::executable>                           // (2)
+kernel_bundle<bundle_state::executable> // (2)
 link(const kernel_bundle<bundle_state::object>& objectBundle,
-     const std::vector<device>& devs,
-     const property_list& propList = {});
+     const std::vector<device>& devs, const property_list& propList = {});
 
-kernel_bundle<bundle_state::executable>                           // (3)
+kernel_bundle<bundle_state::executable> // (3)
 link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
      const property_list& propList = {});
 
-kernel_bundle<bundle_state::executable>                           // (4)
+kernel_bundle<bundle_state::executable> // (4)
 link(const kernel_bundle<bundle_state::object>& objectBundle,
      const property_list& propList = {});
 
-kernel_bundle<bundle_state::executable>                           // (5)
+kernel_bundle<bundle_state::executable> // (5)
 build(const kernel_bundle<bundle_state::input>& inputBundle,
       const property_list& propList = {});
 ----
@@ -15303,8 +15296,9 @@ _Returns:_ The set of devices that is associated with the kernel bundle.
 
 [source]
 ----
-bool has_kernel(const kernel_id& kernelId) const noexcept;                     // (1)
-bool has_kernel(const kernel_id& kernelId, const device& dev) const noexcept;  // (2)
+bool has_kernel(const kernel_id& kernelId) const noexcept; // (1)
+bool has_kernel(const kernel_id& kernelId,
+                const device& dev) const noexcept; // (2)
 ----
 
   . _Returns:_ [code]#true# only if the kernel bundle contains the kernel
@@ -15315,11 +15309,10 @@ bool has_kernel(const kernel_id& kernelId, const device& dev) const noexcept;  /
 
 [source]
 ----
-template<typename KernelName>
-bool has_kernel() const noexcept;                   // (1)
+template <typename KernelName> bool has_kernel() const noexcept; // (1)
 
-template<typename KernelName>
-bool has_kernel(const device& dev) const noexcept;  // (2)
+template <typename KernelName>
+bool has_kernel(const device& dev) const noexcept; // (2)
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -15362,8 +15355,7 @@ _Throws:_
 
 [source]
 ----
-template<typename KernelName>
-kernel get_kernel() const;
+template <typename KernelName> kernel get_kernel() const;
 ----
 
 _Preconditions:_ This member function is only available if the kernel bundle's
@@ -15424,8 +15416,7 @@ in all of the bundle's device images.
 
 [source]
 ----
-template<auto& SpecName>
-bool has_specialization_constant() const noexcept;
+template <auto& SpecName> bool has_specialization_constant() const noexcept;
 ----
 
 _Returns:_ [code]#true# if any device image in the kernel bundle uses the
@@ -15433,9 +15424,9 @@ specialization constant whose address is [code]#SpecName#.
 
 [source]
 ----
-template<auto& SpecName>
+template <auto& SpecName>
 void set_specialization_constant(
-  typename std::remove_reference_t<decltype(SpecName)>::value_type value);
+    typename std::remove_reference_t<decltype(SpecName)>::value_type value);
 ----
 
 _Preconditions:_ This member function is only available if the kernel bundle's
@@ -15451,7 +15442,7 @@ uses it; doing so has no effect on the execution of kernels from that bundle.
 
 [source]
 ----
-template<auto& SpecName>
+template <auto& SpecName>
 typename std::remove_reference_t<decltype(SpecName)>::value_type
 get_specialization_constant() const;
 ----
@@ -15485,8 +15476,8 @@ containing [code]#kernel_bundle#.
 
 [source]
 ----
-device_image_iterator begin() const;  // (1)
-device_image_iterator end() const;    // (2)
+device_image_iterator begin() const; // (1)
+device_image_iterator end() const;   // (2)
 ----
 
   .  _Returns:_ An iterator to the first <<device-image>> contained by the
@@ -15537,8 +15528,7 @@ _Returns:_ The kernel bundle that contains this kernel.
 
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_info() const;
+template <typename Param> typename Param::return_type get_info() const;
 ----
 
 _Preconditions:_ The [code]#Param# must be one of the [code]#info::kernel#
@@ -15570,8 +15560,7 @@ _Throws:_
 
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_backend_info() const;
+template <typename Param> typename Param::return_type get_backend_info() const;
 ----
 
 _Preconditions:_ The [code]#Param# must be one of a descriptor defined by a
@@ -15757,8 +15746,9 @@ There is no public constructor for this class.
 
 [source]
 ----
-bool has_kernel(const kernel_id& kernelId) const noexcept;                     // (1)
-bool has_kernel(const kernel_id& kernelId, const device& dev) const noexcept;  // (2)
+bool has_kernel(const kernel_id& kernelId) const noexcept; // (1)
+bool has_kernel(const kernel_id& kernelId,
+                const device& dev) const noexcept; // (2)
 ----
 
   . _Returns:_ [code]#true# only if the device image contains the kernel
@@ -21737,7 +21727,7 @@ This is equivalent to:
 [source]
 ----
 gentype t;
-t = clamp ((x <= edge0) / (edge1 >= edge0), 0, 1);
+t = clamp((x <= edge0) / (edge1 >= edge0), 0, 1);
 return t * t * (3 - 2 * t);
 ----
 
@@ -21862,9 +21852,9 @@ infinitely precise result of
 [source]
 ----
 if (all(p == 0.0f))
-    result = p;
+  result = p;
 else
-    result = p/sqrt (pow(p.x,2) + pow(p.y,2) + ... );
+  result = p / sqrt(pow(p.x, 2) + pow(p.y, 2) + ...);
 ----
 
 with the following exceptions:
