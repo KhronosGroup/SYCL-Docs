@@ -353,8 +353,7 @@ kernel
 a@
 [source]
 ----
-template <bundle_state State>
-kernel_bundle<State>
+template <bundle_state State> kernel_bundle<State>
 ----
    a@ [code]#cl_program#
    a@ [code]#std::vector<cl_program>#
@@ -482,17 +481,15 @@ The OpenCL backend provides the following specializations of the
 a@
 [source]
 ----
-context make_context(
-    const cl_context& clContext,
-    const async_handler& asyncHandler = {})
+context make_context(const cl_context& clContext,
+                     const async_handler& asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#context# instance from an OpenCL [code]#cl_context# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-event make_event(
-    const std::vector<cl_event>& clEvents,
-    const context& syclContext)
+event make_event(const std::vector<cl_event>& clEvents,
+                 const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#event# instance from a vector of OpenCL
       [code]#cl_event# objects in accordance with the requirements described in
@@ -500,24 +497,20 @@ event make_event(
 a@
 [source]
 ----
-device make_device(
-    const cl_device_id& clDeviceId)
+device make_device(const cl_device_id& clDeviceId)
 ----
    a@ Constructs a SYCL [code]#device# instance from an OpenCL [code]#cl_device_id# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-platform make_platform(
-    const cl_platform_id& clPlatformId)
+platform make_platform(const cl_platform_id& clPlatformId)
 ----
    a@ Constructs a SYCL [code]#platform# instance from an OpenCL [code]#cl_platform_id# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
 [source]
 ----
-queue make_queue(
-    const cl_command_queue& clQueue,
-    const context& syclContext,
-    const async_handler& asyncHandler = {})
+queue make_queue(const cl_command_queue& clQueue, const context& syclContext,
+                 const async_handler& asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#queue# instance with an optional
       [code]#async_handler# from an OpenCL [code]#cl_command_queue#
@@ -528,10 +521,9 @@ a@
 ----
 template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-buffer<T, Dimensions, AllocatorT> make_buffer(
-    const cl_mem& clMemObject,
-    const context& syclContext,
-    event availableEvent)
+buffer<T, Dimensions, AllocatorT> make_buffer(const cl_mem& clMemObject,
+                                              const context& syclContext,
+                                              event availableEvent)
 ----
    a@ Available only when: [code]#Dimensions == 1#.
 
@@ -544,9 +536,8 @@ a@
 ----
 template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
-buffer<T, Dimensions, AllocatorT> make_buffer(
-    const cl_mem& clMemObject,
-    const context& syclContext)
+buffer<T, Dimensions, AllocatorT> make_buffer(const cl_mem& clMemObject,
+                                              const context& syclContext)
 ----
    a@ Available only when: [code]#Dimensions == 1#.
 
@@ -555,13 +546,10 @@ Constructs a SYCL [code]#buffer# instance from an OpenCL [code]#cl_mem# in accor
 a@
 [source]
 ----
-template <int Dimensions = 1,
-          typename AllocatorT = image_allocator>
-sampled_image<Dimensions, AllocatorT> make_sampled_image(
-    const cl_mem& clMemObject,
-    const context& syclContext,
-    image_sampler syclImageSampler,
-    event availableEvent)
+template <int Dimensions = 1, typename AllocatorT = image_allocator>
+sampled_image<Dimensions, AllocatorT>
+make_sampled_image(const cl_mem& clMemObject, const context& syclContext,
+                   image_sampler syclImageSampler, event availableEvent)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The instance of the SYCL [code]#image# class template being constructed must wait for the SYCL [code]#event# parameter, [code]#availableEvent# to signal that the [code]#cl_mem# instance is ready to be used.
@@ -570,12 +558,10 @@ sampled_image<Dimensions, AllocatorT> make_sampled_image(
 a@
 [source]
 ----
-template <int Dimensions = 1,
-          typename AllocatorT = image_allocator>
-sampled_image<Dimensions, AllocatorT> make_sampled_image(
-    const cl_mem& clMemObject,
-    const context& syclContext,
-    image_sampler syclImageSampler)
+template <int Dimensions = 1, typename AllocatorT = image_allocator>
+sampled_image<Dimensions, AllocatorT>
+make_sampled_image(const cl_mem& clMemObject, const context& syclContext,
+                   image_sampler syclImageSampler)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The SYCL [code]#context# parameter [code]#syclContext# is the context associated with the memory object.
@@ -583,12 +569,10 @@ sampled_image<Dimensions, AllocatorT> make_sampled_image(
 a@
 [source]
 ----
-template <int Dimensions = 1,
-          typename AllocatorT = image_allocator>
-unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
-    const cl_mem& clMemObject,
-    const context& syclContext,
-    event availableEvent)
+template <int Dimensions = 1, typename AllocatorT = image_allocator>
+unsampled_image<Dimensions, AllocatorT>
+make_unsampled_image(const cl_mem& clMemObject, const context& syclContext,
+                     event availableEvent)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The instance of the SYCL [code]#image# class template being constructed must wait for the SYCL [code]#event# parameter, [code]#availableEvent# to signal that the [code]#cl_mem# instance is ready to be used.
@@ -597,11 +581,9 @@ unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
 a@
 [source]
 ----
-template <int Dimensions = 1,
-          typename AllocatorT = image_allocator>
-unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
-    const cl_mem& clMemObject,
-    const context& syclContext)
+template <int Dimensions = 1, typename AllocatorT = image_allocator>
+unsampled_image<Dimensions, AllocatorT>
+make_unsampled_image(const cl_mem& clMemObject, const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
@@ -614,9 +596,8 @@ a@
 [source]
 ----
 template <bundle_state State>
-kernel_bundle<State> make_kernel_bundle(
-    const cl_program& clProgram,
-    const context& syclContext)
+kernel_bundle<State> make_kernel_bundle(const cl_program& clProgram,
+                                        const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#kernel_bundle# instance from an OpenCL
       [code]#cl_program# for the devices in [code]#syclContext#
@@ -661,9 +642,8 @@ through the following functions provided in the [code]#sycl::opencl# namespace.
 a@
 [source]
 ----
-bool has_extension(
-    const sycl::platform& syclPlatform,
-    const std::string& extension)
+bool has_extension(const sycl::platform& syclPlatform,
+                   const std::string& extension)
 ----
    a@ Returns true if the OpenCL platform associated with [code]#syclPlatform#
    supports the extension identified by [code]#extension#, otherwise it returns
@@ -673,9 +653,7 @@ bool has_extension(
 a@
 [source]
 ----
-bool has_extension(
-    const sycl::device& syclDevice,
-    const std::string& extension)
+bool has_extension(const sycl::device& syclDevice, const std::string& extension)
 ----
    a@ Returns true if the OpenCL device associated with [code]#syclDevice#
    supports the extension identified by [code]#extension#, otherwise it returns
@@ -697,8 +675,7 @@ convenience, the following function is provided in the
 a@
 [source]
 ----
-template <typename openCLT>
-    cl_uint get_reference_count(openCLT obj)
+template <typename openCLT> cl_uint get_reference_count(openCLT obj)
 ----
    a@ Returns the reference count of the given object
 |====

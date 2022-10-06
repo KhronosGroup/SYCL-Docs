@@ -700,8 +700,7 @@ include::{header_dir}/properties.h[lines=4..-1]
 a@
 [source]
 ----
-template <typename Property>
-struct is_property
+template <typename Property> struct is_property
 ----
    a@ An explicit specialization of [code]#is_property# that inherits
       from [code]#std::true_type# must be provided for each property,
@@ -722,8 +721,7 @@ inline constexpr bool is_property_v;
 a@
 [source]
 ----
-template <typename Property, SyclObject>
-struct is_property_of
+template <typename Property, SyclObject> struct is_property_of
 ----
    a@ An explicit specialization of [code]#is_property_of# that
       inherits from [code]#std::true_type# must be provided for each
@@ -754,8 +752,7 @@ inline constexpr bool is_property_of_v;
 a@
 [source]
 ----
-template <typename Property>
-bool has_property() const noexcept
+template <typename Property> bool has_property() const noexcept
 ----
    a@ Returns true if [code]#T# was constructed with the property
       specified by [code]#Property#. Returns false if it was
@@ -764,8 +761,7 @@ bool has_property() const noexcept
 a@
 [source]
 ----
-template <typename Property>
-Property get_property() const
+template <typename Property> Property get_property() const
 ----
    a@ Returns a copy of the property of type [code]#Property#
       that [code]#T# was constructed with. Must throw an
@@ -785,8 +781,7 @@ Property get_property() const
 a@
 [source]
 ----
-template <typename... PropertyN>
-property_list(PropertyN... props)
+template <typename... PropertyN> property_list(PropertyN... props)
 ----
    a@ Available only when: [code]#is_property<property>::value#
       evaluates to [code]#true# where [code]#property# is each
@@ -1088,8 +1083,7 @@ platform()
 a@
 [source]
 ----
-template <typename DeviceSelector>
-    explicit platform(const DeviceSelector&)
+template <typename DeviceSelector> explicit platform(const DeviceSelector&)
 ----
    a@ Constructs a SYCL [code]#platform# instance that is a copy of the
       [code]#platform# which contains the device returned by the
@@ -1157,9 +1151,8 @@ Returns true if this SYCL [code]#platform# supports the extension queried by the
 a@
 [source]
 ----
-std::vector<device> get_devices(
-    info::device_type deviceType =
-    info::device_type::all) const
+std::vector<device>
+get_devices(info::device_type deviceType = info::device_type::all) const
 ----
    a@ Returns a [code]#std::vector# containing all the
       <<root-device, root devices>> associated with this SYCL [code]#platform#
@@ -1313,8 +1306,7 @@ explicit context(async_handler asyncHandler = {})
 a@
 [source]
 ----
-explicit context(const device& dev,
-    async_handler asyncHandler = {})
+explicit context(const device& dev, async_handler asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#context# instance using the [code]#dev# parameter as the associated SYCL [code]#device# and the SYCL [code]#platform# associated with the [code]#dev# parameter as the associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
 
@@ -1322,7 +1314,7 @@ a@
 [source]
 ----
 explicit context(const std::vector<device>& deviceList,
-    async_handler asyncHandler = {})
+                 async_handler asyncHandler = {})
 ----
    a@ Constructs a SYCL [code]#context# instance using the SYCL [code]#device(s)# in the [code]#deviceList# parameter as the associated SYCL [code]#device(s)# and the SYCL [code]#platform# associated with each SYCL [code]#device# in the [code]#deviceList# parameter as the associated SYCL [code]#platform#. This requires that all SYCL [code]#devices# in the [code]#deviceList# parameter have the same associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
 
@@ -1358,8 +1350,7 @@ template <typename Param> typename Param::return_type get_info() const
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_backend_info() const
+template <typename Param> typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#context# for <<backend>>-specific information
       requested by the template parameter [code]#Param#.
@@ -1379,8 +1370,7 @@ platform get_platform() const
 a@
 [source]
 ----
-std::vector<device>
-    get_devices() const
+std::vector<device> get_devices() const
 ----
    a@ Returns a [code]#std::vector# containing all SYCL [code]#devices# that are associated with this SYCL [code]#context#. The value returned must be equal to that returned by [code]#get_info<info::context::devices>()#.
 
@@ -1544,8 +1534,7 @@ device()
 a@
 [source]
 ----
-template <typename DeviceSelector>
-    explicit device(const DeviceSelector&)
+template <typename DeviceSelector> explicit device(const DeviceSelector&)
 ----
    a@ Constructs a SYCL [code]#device# instance that is a copy of the device
       returned by the <<device-selector>> parameter.
@@ -1599,8 +1588,7 @@ bool is_accelerator() const
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_info() const
+template <typename Param> typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#device# for information requested by the
       template parameter [code]#Param#.
@@ -1612,8 +1600,7 @@ typename Param::return_type get_info() const
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_backend_info() const
+template <typename Param> typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#device# for <<backend>>-specific information
       requested by the template parameter [code]#Param#.
@@ -1635,8 +1622,7 @@ bool has(aspect asp) const
 a@
 [source]
 ----
-bool has_extension(
-    const std::string& extension) const
+bool has_extension(const std::string& extension) const
 ----
    a@ Deprecated, use [code]#has()# instead.
 
@@ -1646,8 +1632,7 @@ a@
 [source]
 ----
 template <info::partition_property Prop>
-std::vector<device> create_sub_devices(
-    size_t count) const
+std::vector<device> create_sub_devices(size_t count) const
 ----
    a@ Available only when [code]#Prop# is
       [code]#info::partition_property::partition_equally#.  Returns a
@@ -1669,8 +1654,7 @@ a@
 [source]
 ----
 template <info::partition_property Prop>
-std::vector<device> create_sub_devices(
-    const std::vector<size_t>& counts) const
+std::vector<device> create_sub_devices(const std::vector<size_t>& counts) const
 ----
    a@ Available only when [code]#Prop# is
       [code]#info::partition_property::partition_by_counts#.  Returns a
@@ -1693,8 +1677,8 @@ a@
 [source]
 ----
 template <info::partition_property Prop>
-std::vector<device> create_sub_devices(
-    info::partition_affinity_domain domain) const
+std::vector<device>
+create_sub_devices(info::partition_affinity_domain domain) const
 ----
 // WARNING: The Asciidoctor PDF renderer seems to be unable to generate a table
 // where any single row is taller than a page.  This row is already close to
@@ -1750,8 +1734,8 @@ with the [code]#errc::feature_not_supported# error code must be thrown.
 a@
 [source]
 ----
-static std::vector<device> get_devices(
-    info::device_type deviceType = info::device_type::all)
+static std::vector<device>
+get_devices(info::device_type deviceType = info::device_type::all)
 ----
    a@ Returns a [code]#std::vector# containing all the
       <<root-device, root devices>> from all <<backend, SYCL backends>>
@@ -3034,8 +3018,7 @@ an instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const device& syclDevice,
-               const property_list& propList = {})
+explicit queue(const device& syclDevice, const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice# provided. Zero or more properties can be provided to the
 constructed SYCL [code]#queue# via an instance of [code]#property_list#.
@@ -3043,8 +3026,7 @@ constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const device& syclDevice,
-               const async_handler& asyncHandler,
+explicit queue(const device& syclDevice, const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using the [code]#syclDevice# provided. Zero or more
@@ -3055,8 +3037,7 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-explicit queue(const context& syclContext,
-               const DeviceSelector& deviceSelector,
+explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
                const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance that is associated
@@ -3074,8 +3055,7 @@ a@
 [source]
 ----
 template <typename DeviceSelector>
-explicit queue(const context& syclContext,
-               const DeviceSelector& deviceSelector,
+explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
@@ -3094,8 +3074,7 @@ instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const context& syclContext,
-               const device& syclDevice,
+explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
 a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice#
@@ -3108,8 +3087,7 @@ the constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 a@
 [source]
 ----
-explicit queue(const context& syclContext,
-               const device& syclDevice,
+explicit queue(const context& syclContext, const device& syclDevice,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
@@ -3141,7 +3119,7 @@ with this [code]#queue#.
 a@
 [source]
 ----
-context get_context () const
+context get_context() const
 ----
 a@ Returns the SYCL queue's context.
 Reports errors using SYCL exception classes.
@@ -3150,7 +3128,7 @@ The value returned must be equal to that returned by [code]#get_info<info::queue
 a@
 [source]
 ----
-device get_device () const
+device get_device() const
 ----
 a@ Returns the SYCL device the queue is associated with.
 Reports errors using SYCL exception classes.
@@ -3177,7 +3155,7 @@ exceptions.
 a@
 [source]
 ----
-void wait_and_throw ()
+void wait_and_throw()
 ----
 a@ Performs a blocking wait for the completion of all enqueued tasks
 in the queue.  Synchronous errors will be reported through SYCL
@@ -3191,7 +3169,7 @@ described in <<subsubsec:exception.nohandler>>.
 a@
 [source]
 ----
-void throw_asynchronous ()
+void throw_asynchronous()
 ----
 a@ Checks to see if any unconsumed <<async-error,asynchronous errors>> have been produced by
 the queue and if so reports them by passing them to the
@@ -3204,8 +3182,7 @@ described in <<subsubsec:exception.nohandler>>.
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_info() const
+template <typename Param> typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#queue# for information requested by the
       template parameter [code]#Param#.
@@ -3217,8 +3194,7 @@ typename Param::return_type get_info() const
 a@
 [source]
 ----
-template <typename T>
-event submit(T cgf)
+template <typename T> event submit(T cgf)
 ----
 a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
 for execution on the device.
@@ -3226,8 +3202,7 @@ for execution on the device.
 a@
 [source]
 ----
-template <typename T>
-event submit(T cgf, queue& secondaryQueue)
+template <typename T> event submit(T cgf, queue& secondaryQueue)
 ----
 a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
 for execution on the device. On a kernel error, this <<command-group-function-object>>
@@ -3238,8 +3213,7 @@ is being enqueued on.
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_backend_info() const
+template <typename Param> typename Param::return_type get_backend_info() const
 ----
 a@ Queries this SYCL [code]#queue# for <<backend>>-specific information
 requested by the template parameter [code]#Param#.
@@ -3307,8 +3281,7 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-event single_task(event depEvent,
-                  const KernelType& kernelFunc)
+event single_task(event depEvent, const KernelType& kernelFunc)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3328,11 +3301,8 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename KernelName,
-          int Dimensions,
-          typename... Rest>
-event parallel_for(range<Dimensions> numWorkItems,
-                   Rest&&... rest)
+template <typename KernelName, int Dimensions, typename... Rest>
+event parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3340,11 +3310,8 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename KernelName,
-          int Dimensions,
-          typename... Rest>
-event parallel_for(range<Dimensions> numWorkItems,
-                   event depEvent,
+template <typename KernelName, int Dimensions, typename... Rest>
+event parallel_for(range<Dimensions> numWorkItems, event depEvent,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
@@ -3354,12 +3321,9 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename KernelName,
-          int Dimensions,
-          typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>
 event parallel_for(range<Dimensions> numWorkItems,
-                   const std::vector<event>& depEvents,
-                   Rest&&... rest)
+                   const std::vector<event>& depEvents, Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3368,11 +3332,8 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename KernelName,
-          int Dimensions,
-          typename... Rest>
-event parallel_for(nd_range<Dimensions> executionRange,
-                   Rest&&... rest)
+template <typename KernelName, int Dimensions, typename... Rest>
+event parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3380,11 +3341,8 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename KernelName,
-          int Dimensions,
-          typename... Rest>
-event parallel_for(nd_range<Dimensions> executionRange,
-                   event depEvent,
+template <typename KernelName, int Dimensions, typename... Rest>
+event parallel_for(nd_range<Dimensions> executionRange, event depEvent,
                    Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
@@ -3394,12 +3352,9 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename KernelName,
-          int Dimensions,
-          typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>
 event parallel_for(nd_range<Dimensions> executionRange,
-                   const std::vector<event>& depEvents,
-                   Rest&&... rest)
+                   const std::vector<event>& depEvents, Rest&&... rest)
 ----
 a@ <<sycl-kernel-function, Kernel function>>
 a@ Equivalent to submitting a command-group containing
@@ -3416,8 +3371,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-event memcpy(void* dest, const void* src, size_t numBytes,
-             event depEvent)
+event memcpy(void* dest, const void* src, size_t numBytes, event depEvent)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3436,8 +3390,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename T>
-event copy(const T* src, T* dest, size_t count)
+template <typename T> event copy(const T* src, T* dest, size_t count)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3446,8 +3399,7 @@ a@
 [source]
 ----
 template <typename T>
-event copy(const T* src, T* dest, size_t count,
-           event depEvent)
+event copy(const T* src, T* dest, size_t count, event depEvent)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3475,8 +3427,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-event memset(void* ptr, int value, size_t numBytes,
-             event depEvent)
+event memset(void* ptr, int value, size_t numBytes, event depEvent)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3495,8 +3446,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-template <typename T>
-event fill(void* ptr, const T& pattern, size_t count)
+template <typename T> event fill(void* ptr, const T& pattern, size_t count)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3505,8 +3455,7 @@ a@
 [source]
 ----
 template <typename T>
-event fill(void* ptr, const T& pattern, size_t count,
-           event depEvent)
+event fill(void* ptr, const T& pattern, size_t count, event depEvent)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3534,8 +3483,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-event prefetch(void* ptr, size_t numBytes,
-               event depEvent)
+event prefetch(void* ptr, size_t numBytes, event depEvent)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3544,8 +3492,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-event prefetch(void* ptr, size_t numBytes,
-               const std::vector<event>& depEvents)
+event prefetch(void* ptr, size_t numBytes, const std::vector<event>& depEvents)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3562,8 +3509,7 @@ a@ Equivalent to submitting a command-group containing
 a@
 [source]
 ----
-event mem_advise(void* ptr, size_t numBytes, int advice,
-                 event depEvent)
+event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent)
 ----
 a@ <<sec:usm, USM>>
 a@ Equivalent to submitting a command-group containing
@@ -3840,7 +3786,7 @@ include::{header_dir}/event.h[lines=4..-1]
 a@
 [source]
 ----
-event ()
+event()
 ----
    a@ Constructs an [code]#event# that is immediately ready.  The
       [code]#event# has no dependencies and no associated commands.
@@ -3906,16 +3852,14 @@ described in <<subsubsec:exception.nohandler>>.
 a@
 [source]
 ----
-static void wait(
-    const std::vector<event>& eventList)
+static void wait(const std::vector<event>& eventList)
 ----
    a@ Synchronously wait on a list of events.
 
 a@
 [source]
 ----
-static void wait_and_throw(
-    const std::vector<event>& eventList)
+static void wait_and_throw(const std::vector<event>& eventList)
 ----
    a@ Synchronously wait on a list of events.
 
@@ -3942,8 +3886,7 @@ template <typename Param> typename Param::return_type get_info() const
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_backend_info() const
+template <typename Param> typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#event# for <<backend>>-specific information
       requested by the template parameter [code]#Param#.
@@ -3956,8 +3899,7 @@ typename Param::return_type get_backend_info() const
 a@
 [source]
 ----
-template <typename Param>
-typename Param::return_type get_profiling_info () const
+template <typename Param> typename Param::return_type get_profiling_info() const
 ----
    a@ Queries this SYCL [code]#event# for profiling information requested
       by the parameter [code]#Param#. If the requested profiling information
@@ -4187,8 +4129,7 @@ user to handle the potential race conditions.
 a@
 [source]
 ----
-template <class T>
-buffer_allocator
+template <class T> buffer_allocator
 ----
    a@ It is the default buffer allocator used by the runtime, when no allocator is
       defined by the user.
@@ -4295,8 +4236,7 @@ include::{header_dir}/buffer.h[lines=4..-1]
 a@
 [source]
 ----
-buffer(const range<Dimensions>& bufferRange,
-const property_list& propList = {})
+buffer(const range<Dimensions>& bufferRange, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -4307,9 +4247,8 @@ const property_list& propList = {})
 a@
 [source]
 ----
-buffer(const range<Dimensions>& bufferRange,
-AllocatorT allocator,
-    const property_list& propList = {})
+buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
+       const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
       The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
@@ -4320,9 +4259,8 @@ AllocatorT allocator,
 a@
 [source]
 ----
-buffer(T* hostData,
-const range<Dimensions>& bufferRange,
-    const property_list& propList = {})
+buffer(T* hostData, const range<Dimensions>& bufferRange,
+       const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
       The buffer is initialized with the memory specified by [code]#hostData#.
@@ -4334,10 +4272,8 @@ const range<Dimensions>& bufferRange,
 a@
 [source]
 ----
-buffer(T* hostData,
-const range<Dimensions>& bufferRange,
-    AllocatorT allocator,
-    const property_list& propList = {})
+buffer(T* hostData, const range<Dimensions>& bufferRange, AllocatorT allocator,
+       const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
       The buffer is initialized with the memory specified by [code]#hostData#.
@@ -4349,9 +4285,8 @@ const range<Dimensions>& bufferRange,
 a@
 [source]
 ----
-buffer(const T* hostData,
-const range<Dimensions>& bufferRange,
-    const property_list& propList = {})
+buffer(const T* hostData, const range<Dimensions>& bufferRange,
+       const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the
       [code]#hostData# parameter provided. The ownership of this
@@ -4382,10 +4317,8 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-buffer(const T* hostData,
-const range<Dimensions>& bufferRange,
-    AllocatorT allocator,
-    const property_list& propList = {})
+buffer(const T* hostData, const range<Dimensions>& bufferRange,
+       AllocatorT allocator, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the
       [code]#hostData# parameter provided. The ownership of this
@@ -4418,8 +4351,7 @@ a@
 [source]
 ----
 template <typename Container>
-buffer(Container& container,
-    const property_list& propList = {})
+buffer(Container& container, const property_list& propList = {})
 ----
    a@ Construct a one dimensional SYCL [code]#buffer# instance
       from the elements starting at [code]#std::data(container)#
@@ -4448,9 +4380,8 @@ a@
 [source]
 ----
 template <typename Container>
-buffer(Container& container,
-    AllocatorT allocator,
-    const property_list& propList = {})
+buffer(Container& container, AllocatorT allocator,
+       const property_list& propList = {})
 ----
    a@ Construct a one dimensional SYCL [code]#buffer# instance
       from the elements starting at [code]#std::data(container)#
@@ -4478,9 +4409,8 @@ is convertible to [code]#T*#.
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T>& hostData,
-const range<Dimensions>&  bufferRange,
-    const property_list& propList = {})
+buffer(const std::shared_ptr<T>& hostData, const range<Dimensions>& bufferRange,
+       const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -4490,10 +4420,8 @@ const range<Dimensions>&  bufferRange,
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T>& hostData,
-const range<Dimensions>&  bufferRange,
-    AllocatorT allocator,
-    const property_list& propList = {})
+buffer(const std::shared_ptr<T>& hostData, const range<Dimensions>& bufferRange,
+       AllocatorT allocator, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
       The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
@@ -4530,7 +4458,7 @@ a@
 ----
 template <typename InputIterator>
 buffer(InputIterator first, InputIterator last,
-    const property_list& propList = {})
+       const property_list& propList = {})
 ----
    a@ Create a new allocated 1D buffer initialized from the given elements
       ranging from [code]#first# up to one before [code]#last#.
@@ -4543,9 +4471,8 @@ a@
 [source]
 ----
 template <typename InputIterator>
-buffer(InputIterator first, InputIterator last,
-    AllocatorT allocator = {},
-    const property_list& propList = {})
+buffer(InputIterator first, InputIterator last, AllocatorT allocator = {},
+       const property_list& propList = {})
 ----
    a@ Create a new allocated 1D buffer initialized from the given elements
       ranging from [code]#first# up to one before [code]#last#.
@@ -4558,7 +4485,7 @@ a@
 [source]
 ----
 buffer(buffer& b, const id<Dimensions>& baseIndex,
-      const range<Dimensions>& subRange)
+       const range<Dimensions>& subRange)
 ----
    a@ Create a new sub-buffer without allocation to have separate
       accessors later. [code]#b# is the buffer with the real data, which must not be a sub-buffer.
@@ -4648,10 +4575,9 @@ AllocatorT get_allocator() const
 a@
 [source]
 ----
-template<access_mode Mode = access_mode::read_write,
-         target Targ = target::device>
-accessor<T, Dimensions, Mode, Targ>
-    get_access(handler& commandGroupHandler)
+template <access_mode Mode = access_mode::read_write,
+          target Targ = target::device>
+accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler)
 ----
    a@ Returns a valid [code]#accessor# to the buffer with the specified
       access mode and target in the command group buffer.
@@ -4661,9 +4587,8 @@ accessor<T, Dimensions, Mode, Targ>
 a@
 [source]
 ----
-template<access_mode Mode>
-accessor<T, Dimensions, Mode, target::host_buffer>
-    get_access()
+template <access_mode Mode>
+accessor<T, Dimensions, Mode, target::host_buffer> get_access()
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
 
@@ -4673,12 +4598,11 @@ access mode and target.
 a@
 [source]
 ----
-template<access_mode Mode = access_mode::read_write,
-         target Targ=target::device>
-accessor<T, Dimensions, Mode, Targ>
-    get_access(handler& commandGroupHandler,
-               range<Dimensions> accessRange,
-               id<Dimensions> accessOffset = {})
+template <access_mode Mode = access_mode::read_write,
+          target Targ = target::device>
+accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler,
+                                               range<Dimensions> accessRange,
+                                               id<Dimensions> accessOffset = {})
 ----
    a@ Returns a valid [code]#accessor# to the buffer with the specified access
       mode and target in the command group buffer.  The accessor is a
@@ -4693,9 +4617,9 @@ the buffer in any dimension.
 a@
 [source]
 ----
-template<access_mode Mode>
+template <access_mode Mode>
 accessor<T, Dimensions, Mode, target::host_buffer>
-    get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {})
+get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {})
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
 
@@ -4711,8 +4635,7 @@ the buffer in any dimension.
 a@
 [source]
 ----
-template<typename... Ts>
-    auto get_access(Ts... args)
+template <typename... Ts> auto get_access(Ts... args)
 ----
    a@ Returns a valid [code]#accessor# as if constructed via passing the buffer
       and all provided arguments to the [code]#accessor# constructor.
@@ -4724,8 +4647,7 @@ Possible implementation:
 a@
 [source]
 ----
-template<typename... Ts>
-    auto get_host_access(Ts... args)
+template <typename... Ts> auto get_host_access(Ts... args)
 ----
    a@ Returns a valid [code]#host_accessor# as if constructed via passing the
       buffer and all provided arguments to the [code]#host_accessor#
@@ -4739,7 +4661,7 @@ a@
 [source]
 ----
 template <typename Destination = std::nullptr_t>
-    void set_final_data(Destination finalData = nullptr)
+void set_final_data(Destination finalData = nullptr)
 ----
    a@ The [code]#finalData# points to where the outcome of all
       the buffer processing is going to be copied to at destruction
@@ -4786,10 +4708,10 @@ a@
 [source]
 ----
 template <typename ReinterpretT, int ReinterpretDim>
-    buffer<ReinterpretT, ReinterpretDim,
-           typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             ReinterpretT>>
-    reinterpret(range<ReinterpretDim> reinterpretRange) const
+buffer<ReinterpretT, ReinterpretDim,
+       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+           ReinterpretT>>
+reinterpret(range<ReinterpretDim> reinterpretRange) const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
       with the type specified by [code]#ReinterpretT#,
@@ -4812,10 +4734,10 @@ a@
 [source]
 ----
 template <typename ReinterpretT, int ReinterpretDim = Dimensions>
-    buffer<ReinterpretT, ReinterpretDim,
-           typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             ReinterpretT>>
-    reinterpret() const
+buffer<ReinterpretT, ReinterpretDim,
+       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+           ReinterpretT>>
+reinterpret() const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
       with the type specified by [code]#ReinterpretT# and
@@ -5151,9 +5073,8 @@ include::{header_dir}/unsampledImage.h[lines=4..-1]
 a@
 [source]
 ----
-unsampled_image(image_format format,
-const range<Dimensions>& rangeRef,
-    const property_list& propList = {})
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
       uninitialized memory.
@@ -5176,10 +5097,8 @@ const range<Dimensions>& rangeRef,
 a@
 [source]
 ----
-unsampled_image(image_format format,
-const range<Dimensions>& rangeRef,
-    AllocatorT allocator,
-    const property_list& propList = {})
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                AllocatorT allocator, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
       uninitialized memory.
@@ -5202,10 +5121,9 @@ const range<Dimensions>& rangeRef,
 a@
 [source]
 ----
-unsampled_image(image_format format,
-const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    const property_list& propList = {})
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5230,11 +5148,9 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(image_format format,
-const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    AllocatorT allocator,
-    const property_list& propList = {})
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5259,10 +5175,9 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(void* hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    const property_list& propList = {})
+unsampled_image(void* hostPointer, image_format format,
+                const range<Dimensions>& rangeRef,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5287,11 +5202,9 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(void* hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    AllocatorT allocator,
-    const property_list& propList = {})
+unsampled_image(void* hostPointer, image_format format,
+                const range<Dimensions>& rangeRef, AllocatorT allocator,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5315,11 +5228,10 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(void* hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    const property_list& propList = {})
+unsampled_image(void* hostPointer, image_format format,
+                const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#
 
@@ -5346,12 +5258,10 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(void* hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    AllocatorT allocator,
-    const property_list& propList = {})
+unsampled_image(void* hostPointer, image_format format,
+                const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5377,10 +5287,9 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    const property_list& propList = {})
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                const range<Dimensions>& rangeRef,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5404,11 +5313,9 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    AllocatorT allocator,
-    const property_list& propList = {})
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                const range<Dimensions>& rangeRef, AllocatorT allocator,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5432,11 +5339,10 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    const property_list& propList = {})
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5460,12 +5366,10 @@ image_format format,
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-image_format format,
-    const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    AllocatorT allocator,
-    const property_list& propList = {})
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5508,7 +5412,7 @@ range<Dimensions> get_range() const
 a@
 [source]
 ----
-range<Dimensions-1> get_pitch() const
+range<Dimensions - 1> get_pitch() const
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5543,8 +5447,7 @@ AllocatorT get_allocator() const
 a@
 [source]
 ----
-template<typename... Ts>
-    auto get_access(Ts... args)
+template <typename... Ts> auto get_access(Ts... args)
 ----
    a@ Returns a valid [code]#unsampled_image_accessor# as if constructed via
       passing the image and all provided arguments to the
@@ -5557,8 +5460,7 @@ Possible implementation:
 a@
 [source]
 ----
-template<typename... Ts>
-    auto get_host_access(Ts... args)
+template <typename... Ts> auto get_host_access(Ts... args)
 ----
    a@ Returns a valid [code]#host_unsampled_image_accessor# as if constructed
       via passing the image and all provided arguments to the
@@ -5572,7 +5474,7 @@ a@
 [source]
 ----
 template <typename Destination = std::nullptr_t>
-    void set_final_data(Destination finalData = nullptr)
+void set_final_data(Destination finalData = nullptr)
 ----
    a@ The [code]#finalData# point to where the output of all
       the image processing is going to be copied to at destruction
@@ -5638,11 +5540,9 @@ include::{header_dir}/sampledImage.h[lines=4..-1]
 a@
 [source]
 ----
-sampled_image(const void* hostPointer,
-image_format format,
-    image_sampler sampler,
-    const range<Dimensions>& rangeRef,
-    const property_list& propList = {})
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
+              const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5667,12 +5567,10 @@ image_format format,
 a@
 [source]
 ----
-sampled_image(const void* hostPointer,
-image_format format,
-    image_sampler sampler,
-    const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    const property_list& propList = {})
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5699,11 +5597,9 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-sampled_image(std::shared_ptr<const void>& hostPointer,
-image_format format,
-    image_sampler sampler,
-    const range<Dimensions>& rangeRef,
-    const property_list& propList = {})
+sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
+              const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5728,12 +5624,10 @@ image_format format,
 a@
 [source]
 ----
-sampled_image(std::shared_ptr<const void>& hostPointer,
-image_format format,
-    image_sampler sampler,
-    const range<Dimensions>& rangeRef,
-    const range<Dimensions-1>& pitch,
-    const property_list& propList = {})
+sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
       [code]#hostPointer# parameter provided. The ownership of this
@@ -5777,7 +5671,7 @@ range<Dimensions> get_range() const
 a@
 [source]
 ----
-range<Dimensions-1> get_pitch() const
+range<Dimensions - 1> get_pitch() const
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
@@ -5805,8 +5699,7 @@ size_t byte_size() const noexcept
 a@
 [source]
 ----
-template<typename... Ts>
-    auto get_access(Ts... args)
+template <typename... Ts> auto get_access(Ts... args)
 ----
    a@ Returns a valid [code]#sampled_image_accessor# as if constructed via
       passing the image and all provided arguments to the
@@ -5819,8 +5712,7 @@ Possible implementation:
 a@
 [source]
 ----
-template<typename... Ts>
-    auto get_host_access(Ts... args)
+template <typename... Ts> auto get_host_access(Ts... args)
 ----
    a@ Returns a valid [code]#host_sampled_image_accessor# as if constructed
       via passing the image and all provided arguments to the
@@ -6554,8 +6446,7 @@ include::{header_dir}/accessorBuffer.h[lines=4..-1]
 a@
 [source]
 ----
-template <access::decorated IsDecorated>
-accessor_ptr
+template <access::decorated IsDecorated> accessor_ptr
 ----
    a@ If [code]#(AccessTarget == target::device)#:
       [code]#multi_ptr<value_type, access::address_space::global_space, IsDecorated>#.
@@ -6594,7 +6485,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -6607,8 +6498,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -6622,7 +6512,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6634,8 +6524,8 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    TagT tag, const property_list& propList = {})
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6649,8 +6539,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6664,8 +6553,8 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    TagT tag, const property_list& propList = {})
+         handler& commandGroupHandlerRef, TagT tag,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6681,8 +6570,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    const property_list& propList = {})
+         range<Dimensions> accessRange, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6698,8 +6586,8 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    TagT tag, const property_list& propList = {})
+         range<Dimensions> accessRange, TagT tag,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6717,9 +6605,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    const property_list& propList = {})
+         range<Dimensions> accessRange, id<Dimensions> accessOffset,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6737,9 +6624,8 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    TagT tag, const property_list& propList = {})
+         range<Dimensions> accessRange, id<Dimensions> accessOffset, TagT tag,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6758,9 +6644,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    range<Dimensions> accessRange,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, range<Dimensions> accessRange,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6778,9 +6663,8 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    range<Dimensions> accessRange,
-    TagT tag, const property_list& propList = {})
+         handler& commandGroupHandlerRef, range<Dimensions> accessRange,
+         TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6800,10 +6684,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, range<Dimensions> accessRange,
+         id<Dimensions> accessOffset, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -6822,10 +6704,9 @@ a@
 ----
 template <typename AllocatorT, typename TagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    TagT tag, const property_list& propList = {})
+         handler& commandGroupHandlerRef, range<Dimensions> accessRange,
+         id<Dimensions> accessOffset, TagT tag,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7103,7 +6984,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7116,8 +6997,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7131,7 +7011,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7144,8 +7024,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7159,8 +7038,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    const property_list& propList = {})
+         range<Dimensions> accessRange, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7176,9 +7054,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    const property_list& propList = {})
+         range<Dimensions> accessRange, id<Dimensions> accessOffset,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7196,9 +7073,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    range<Dimensions> accessRange,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, range<Dimensions> accessRange,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7216,10 +7092,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    handler& commandGroupHandlerRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    const property_list& propList = {})
+         handler& commandGroupHandlerRef, range<Dimensions> accessRange,
+         id<Dimensions> accessOffset, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7322,7 +7196,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7335,7 +7209,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7348,8 +7222,7 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    const property_list& propList = {})
+         range<Dimensions> accessRange, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7366,9 +7239,8 @@ a@
 ----
 template <typename AllocatorT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    const property_list& propList = {})
+         range<Dimensions> accessRange, id<Dimensions> accessOffset,
+         const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7458,8 +7330,7 @@ include::{header_dir}/accessorDeprecatedLocal.h[lines=4..-1]
 a@
 [source]
 ----
-accessor(handler& commandGroupHandlerRef,
-         const property_list& propList = {})
+accessor(handler& commandGroupHandlerRef, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7471,8 +7342,7 @@ associated with [code]#commandGroupHandlerRef#.  The optional
 a@
 [source]
 ----
-accessor(range<Dimensions> allocationSize,
-         handler& commandGroupHandlerRef,
+accessor(range<Dimensions> allocationSize, handler& commandGroupHandlerRef,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7506,7 +7376,8 @@ that this accessor is accessing.
 a@
 [source]
 ----
-atomic<DataT, access::address_space::local_space> operator[](id<Dimensions> index) const
+atomic<DataT, access::address_space::local_space>
+operator[](id<Dimensions> index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions > 0)#.
@@ -7728,8 +7599,8 @@ access to the single element that is accessed by this accessor.
 a@
 [source]
 ----
-atomic<DataT, access::address_space::global_space> operator[](
-  id<Dimensions> index) const
+atomic<DataT, access::address_space::global_space>
+operator[](id<Dimensions> index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions > 0)#.
@@ -7745,8 +7616,8 @@ the accessor's offset to [code]#index#.
 a@
 [source]
 ----
-atomic<DataT, access::address_space::global_space> operator[](
-  size_t index) const
+atomic<DataT, access::address_space::global_space>
+operator[](size_t index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions == 1)#.
@@ -7829,7 +7700,7 @@ a@
 ----
 template <typename AllocatorT>
 host_accessor(buffer<DataT, 1, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+              const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -7841,9 +7712,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_accessor(
-    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    const property_list& propList = {})
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+              const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7855,9 +7725,8 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-host_accessor(
-    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    TagT tag, const property_list& propList = {})
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+              const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7870,10 +7739,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_accessor(
-    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    const property_list& propList = {})
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+              range<Dimensions> accessRange, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7890,10 +7757,9 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-host_accessor(
-    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    TagT tag, const property_list& propList = {})
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+              range<Dimensions> accessRange, TagT tag,
+              const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7910,11 +7776,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_accessor(
-    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    const property_list& propList = {})
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+              range<Dimensions> accessRange, id<Dimensions> accessOffset,
+              const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7931,11 +7795,9 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-host_accessor(
-    buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-    range<Dimensions> accessRange,
-    id<Dimensions> accessOffset,
-    TagT tag, const property_list& propList = {})
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
+              range<Dimensions> accessRange, id<Dimensions> accessOffset,
+              TagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -8107,8 +7969,7 @@ include::{header_dir}/accessorLocal.h[lines=4..-1]
 a@
 [source]
 ----
-template <access::decorated IsDecorated>
-accessor_ptr
+template <access::decorated IsDecorated> accessor_ptr
 ----
    a@ Equal to
       [code]#multi_ptr<value_type, access::address_space::local_space, IsDecorated>#.
@@ -8140,7 +8001,7 @@ a@
 [source]
 ----
 local_accessor(handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions == 0)#.
 
@@ -8153,8 +8014,8 @@ a@
 [source]
 ----
 local_accessor(range<Dimensions> allocationSize,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+               handler& commandGroupHandlerRef,
+               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -8695,10 +8556,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT>& imageRef,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
+                         handler& commandGroupHandlerRef,
+                         const property_list& propList = {})
 ----
    a@ Constructs an [code]#unsampled_image_accessor# for accessing an
       [code]#unsampled_image# within a <<command>> on the [code]#queue#
@@ -8714,10 +8574,9 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT>& imageRef,
-    handler& commandGroupHandlerRef, TagT tag,
-    const property_list& propList = {})
+unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
+                         handler& commandGroupHandlerRef, TagT tag,
+                         const property_list& propList = {})
 ----
    a@ Constructs an [code]#unsampled_image_accessor# for accessing an
       [code]#unsampled_image# within a <<command>> on the [code]#queue#
@@ -8743,9 +8602,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT>& imageRef,
-    const property_list& propList = {})
+host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
+                              const property_list& propList = {})
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
       [code]#unsampled_image# immediately on the host.  The optional
@@ -8755,9 +8613,8 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-host_unsampled_image_accessor(
-    unsampled_image<Dimensions, AllocatorT>& imageRef,
-    TagT tag, const property_list& propList = {})
+host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
+                              TagT tag, const property_list& propList = {})
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
       [code]#unsampled_image# immediately on the host.  The [code]#tag# is used
@@ -8784,8 +8641,7 @@ size_t size() const noexcept
 a@
 [source]
 ----
-template <typename CoordT>
-DataT read(const CoordT& coords) const
+template <typename CoordT> DataT read(const CoordT& coords) const
 ----
    a@ Available only when [code]#(AccessMode == access_mode::read ||
       AccessMode == access_mode::read_write)#.
@@ -8964,10 +8820,9 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-sampled_image_accessor(
-    sampled_image<Dimensions, AllocatorT>& imageRef,
-    handler& commandGroupHandlerRef,
-    const property_list& propList = {})
+sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
+                       handler& commandGroupHandlerRef,
+                       const property_list& propList = {})
 ----
    a@ Constructs a [code]#sampled_image_accessor# for accessing a
       [code]#sampled_image# within a <<command>> on the [code]#queue#
@@ -8983,10 +8838,9 @@ a@
 [source]
 ----
 template <typename AllocatorT, typename TagT>
-sampled_image_accessor(
-    sampled_image<Dimensions, AllocatorT>& imageRef,
-    handler& commandGroupHandlerRef, TagT tag,
-    const property_list& propList = {})
+sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
+                       handler& commandGroupHandlerRef, TagT tag,
+                       const property_list& propList = {})
 ----
    a@ Constructs a [code]#sampled_image_accessor# for accessing a
       [code]#sampled_image# within a <<command>> on the [code]#queue#
@@ -9012,9 +8866,8 @@ a@
 [source]
 ----
 template <typename AllocatorT>
-host_sampled_image_accessor(
-    sampled_image<Dimensions, AllocatorT>& imageRef,
-    const property_list& propList = {})
+host_sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
+                            const property_list& propList = {})
 ----
    a@ Constructs a [code]#host_sampled_image_accessor# for accessing a
       [code]#sampled_image# immediately on the host.  The optional
@@ -9039,8 +8892,7 @@ size_t size() const noexcept
 a@
 [source]
 ----
-template <typename CoordT>
-DataT read(const CoordT& coords) const
+template <typename CoordT> DataT read(const CoordT& coords) const
 ----
    a@ Reads and returns a sampled element of the [code]#sampled_image# at the
       coordinates specified by [code]#coords#.  Permitted types for
@@ -9220,8 +9072,7 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions>
-multi_ptr(local_accessor<ElementType, Dimensions>)
+template <int Dimensions> multi_ptr(local_accessor<ElementType, Dimensions>)
 ----
    a@ Available only when:
       [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
@@ -9250,7 +9101,8 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <typename ElementType, access::address_space Space, access::decorated DecorateAddress>
+template <typename ElementType, access::address_space Space,
+          access::decorated DecorateAddress>
 multi_ptr<ElementType, Space, DecorateAddress> make_ptr(ElementType* pointer)
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#address_space_cast# instead.
@@ -9265,10 +9117,10 @@ with [code]#Space#.
 a@
 [source]
 ----
-template <access::address_space Space,
-          access::decorated DecorateAddress,
+template <access::address_space Space, access::decorated DecorateAddress,
           typename ElementType>
-    multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType* pointer)
+multi_ptr<ElementType, Space, DecorateAddress>
+address_space_cast(ElementType* pointer)
 ----
    a@ Global function to create a [code]#multi_ptr# instance from
       [code]#pointer#, using the address space and decoration specified
@@ -9312,7 +9164,7 @@ multi_ptr& operator=(std::nullptr_t)
 a@
 [source]
 ----
-template<access::address_space AS, access::decorated IsDecorated>
+template <access::address_space AS, access::decorated IsDecorated>
 multi_ptr& operator=(const multi_ptr<value_type, AS, IsDecorated>&)
 ----
    a@ Available only when: [code]#Space == access::address_space::generic_space && AS != access::address_space::constant_space#.
@@ -9369,7 +9221,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<value_type, access::address_space::private_space, IsDecorated>() const
+explicit operator multi_ptr<value_type, access::address_space::private_space,
+                            IsDecorated>() const
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space#.
@@ -9382,7 +9235,9 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<const value_type, access::address_space::private_space, IsDecorated>() const
+explicit
+operator multi_ptr<const value_type, access::address_space::private_space,
+                   IsDecorated>() const
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space#.
@@ -9395,7 +9250,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<value_type, access::address_space::global_space, IsDecorated>() const
+explicit operator multi_ptr<value_type, access::address_space::global_space,
+                            IsDecorated>() const
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space#.
@@ -9408,7 +9264,9 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<const value_type, access::address_space::global_space, IsDecorated>() const
+explicit
+operator multi_ptr<const value_type, access::address_space::global_space,
+                   IsDecorated>() const
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space#.
@@ -9421,7 +9279,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<value_type, access::address_space::local_space, IsDecorated>() const
+explicit operator multi_ptr<value_type, access::address_space::local_space,
+                            IsDecorated>() const
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space#.
@@ -9434,7 +9293,9 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<const value_type, access::address_space::local_space, IsDecorated>() const
+explicit
+operator multi_ptr<const value_type, access::address_space::local_space,
+                   IsDecorated>() const
 ----
    a@ Available only when:
       [code]#Space == access::address_space::generic_space#.
@@ -10272,8 +10133,7 @@ public:
 a@
 [source]
 ----
-usm_allocator(const context& syclContext,
-              const device& syclDevice,
+usm_allocator(const context& syclContext, const device& syclDevice,
               const property_list& propList = {})
 ----
 a@ Constructs a [code]#usm_allocator# instance that allocates USM for the
@@ -10296,8 +10156,7 @@ synchronous [code]#exception# with the [code]#errc::invalid# error code.
 a@
 [source]
 ----
-usm_allocator(const queue& syclQueue,
-              const property_list& propList = {})
+usm_allocator(const queue& syclQueue, const property_list& propList = {})
 ----
 a@ Simplified constructor form where [code]#syclQueue# provides the
 [code]#device# and [code]#context#.
@@ -10320,8 +10179,7 @@ these functions return [code]#nullptr#.
 a@
 [source]
 ----
-void* sycl::malloc_device(size_t numBytes,
-                          const device& syclDevice,
+void* sycl::malloc_device(size_t numBytes, const device& syclDevice,
                           const context& syclContext,
                           const property_list& propList = {})
 ----
@@ -10338,8 +10196,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_device(size_t count,
-                       const device& syclDevice,
+T* sycl::malloc_device(size_t count, const device& syclDevice,
                        const context& syclContext,
                        const property_list& propList = {})
 ----
@@ -10356,8 +10213,7 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void* sycl::malloc_device(size_t numBytes,
-                          const queue& syclQueue,
+void* sycl::malloc_device(size_t numBytes, const queue& syclQueue,
                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -10367,8 +10223,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_device(size_t count,
-                       const queue& syclQueue,
+T* sycl::malloc_device(size_t count, const queue& syclQueue,
                        const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -10377,12 +10232,10 @@ a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 a@
 [source]
 ----
-void*
-sycl::aligned_alloc_device(size_t alignment,
-                           size_t numBytes,
-                           const device& syclDevice,
-                           const context& syclContext,
-                           const property_list& propList = {})
+void* sycl::aligned_alloc_device(size_t alignment, size_t numBytes,
+                                 const device& syclDevice,
+                                 const context& syclContext,
+                                 const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is allocated on
 [code]#syclDevice#.  The allocation is specified in bytes and aligned according
@@ -10398,12 +10251,10 @@ a@
 [source]
 ----
 template <typename T>
-T*
-sycl::aligned_alloc_device(size_t alignment,
-                           size_t count,
-                           const device& syclDevice,
-                           const context& syclContext,
-                           const property_list& propList = {})
+T* sycl::aligned_alloc_device(size_t alignment, size_t count,
+                              const device& syclDevice,
+                              const context& syclContext,
+                              const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is allocated on
 [code]#syclDevice#.  The allocation is specified in number of elements of type
@@ -10418,11 +10269,9 @@ the [code]#errc::invalid# error code.
 a@
 [source]
 ----
-void*
-sycl::aligned_alloc_device(size_t alignment,
-                           size_t numBytes,
-                           const queue& syclQueue,
-                           const property_list& propList = {})
+void* sycl::aligned_alloc_device(size_t alignment, size_t numBytes,
+                                 const queue& syclQueue,
+                                 const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10431,11 +10280,9 @@ a@
 [source]
 ----
 template <typename T>
-T*
-sycl::aligned_alloc_device(size_t alignment,
-                           size_t count,
-                           const queue& syclQueue,
-                           const property_list& propList = {})
+T* sycl::aligned_alloc_device(size_t alignment, size_t count,
+                              const queue& syclQueue,
+                              const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10458,8 +10305,7 @@ these functions return [code]#nullptr#.
 a@
 [source]
 ----
-void* sycl::malloc_host(size_t numBytes,
-                        const context& syclContext,
+void* sycl::malloc_host(size_t numBytes, const context& syclContext,
                         const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
@@ -10471,8 +10317,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_host(size_t count,
-                     const context& syclContext,
+T* sycl::malloc_host(size_t count, const context& syclContext,
                      const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
@@ -10483,8 +10328,7 @@ device in [code]#syclContext# has [code]#aspect::usm_host_allocations#.
 a@
 [source]
 ----
-void* sycl::malloc_host(size_t numBytes,
-                        const queue& syclQueue,
+void* sycl::malloc_host(size_t numBytes, const queue& syclQueue,
                         const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
@@ -10493,8 +10337,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_host(size_t count,
-                     const queue& syclQueue,
+T* sycl::malloc_host(size_t count, const queue& syclQueue,
                      const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
@@ -10502,11 +10345,9 @@ a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 a@
 [source]
 ----
-void*
-sycl::aligned_alloc_host(size_t alignment,
-                         size_t numBytes,
-                         const context& syclContext,
-                         const property_list& propList = {})
+void* sycl::aligned_alloc_host(size_t alignment, size_t numBytes,
+                               const context& syclContext,
+                               const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
 specified in bytes and aligned according to [code]#alignment#.  Throws a
@@ -10518,11 +10359,9 @@ a@
 [source]
 ----
 template <typename T>
-T*
-sycl::aligned_alloc_host(size_t alignment,
-                         size_t count,
-                         const context& syclContext,
-                         const property_list& propList = {})
+T* sycl::aligned_alloc_host(size_t alignment, size_t count,
+                            const context& syclContext,
+                            const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
 specified in elements of type [code]#T# and aligned according to
@@ -10533,11 +10372,9 @@ specified in elements of type [code]#T# and aligned according to
 a@
 [source]
 ----
-void*
-sycl::aligned_alloc_host(size_t alignment,
-                         size_t numBytes,
-                         const queue& syclQueue,
-                         const property_list& propList = {})
+void* sycl::aligned_alloc_host(size_t alignment, size_t numBytes,
+                               const queue& syclQueue,
+                               const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -10545,11 +10382,9 @@ a@
 [source]
 ----
 template <typename T>
-void*
-sycl::aligned_alloc_host(size_t alignment,
-                         size_t count,
-                         const queue& syclQueue,
-                         const property_list& propList = {})
+void* sycl::aligned_alloc_host(size_t alignment, size_t count,
+                               const queue& syclQueue,
+                               const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -10571,8 +10406,7 @@ these functions return [code]#nullptr#.
 a@
 [source]
 ----
-void* sycl::malloc_shared(size_t numBytes,
-                          const device& syclDevice,
+void* sycl::malloc_shared(size_t numBytes, const device& syclDevice,
                           const context& syclContext,
                           const property_list& propList = {})
 ----
@@ -10589,8 +10423,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_shared(size_t count,
-                       const device& syclDevice,
+T* sycl::malloc_shared(size_t count, const device& syclDevice,
                        const context& syclContext,
                        const property_list& propList = {})
 ----
@@ -10607,8 +10440,7 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void* sycl::malloc_shared(size_t numBytes,
-                          const queue& syclQueue,
+void* sycl::malloc_shared(size_t numBytes, const queue& syclQueue,
                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -10618,8 +10450,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_shared(size_t count,
-                       const queue& syclQueue,
+T* sycl::malloc_shared(size_t count, const queue& syclQueue,
                        const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -10628,12 +10459,10 @@ a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 a@
 [source]
 ----
-void*
-sycl::aligned_alloc_shared(size_t alignment,
-                           size_t numBytes,
-                           const device& syclDevice,
-                           const context& syclContext,
-                           const property_list& propList = {})
+void* sycl::aligned_alloc_shared(size_t alignment, size_t numBytes,
+                                 const device& syclDevice,
+                                 const context& syclContext,
+                                 const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is associated with
 [code]#syclDevice#.  This allocation is specified in bytes and aligned
@@ -10649,12 +10478,10 @@ a@
 [source]
 ----
 template <typename T>
-T*
-sycl::aligned_alloc_shared(size_t alignment,
-                           size_t count,
-                           const device& syclDevice,
-                           const context& syclContext,
-                           const property_list& propList = {})
+T* sycl::aligned_alloc_shared(size_t alignment, size_t count,
+                              const device& syclDevice,
+                              const context& syclContext,
+                              const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory, which is associated with
 [code]#syclDevice#.  This allocation is specified in number of elements of
@@ -10669,11 +10496,9 @@ synchronous [code]#exception# with the [code]#errc::invalid# error code.
 a@
 [source]
 ----
-void*
-sycl::aligned_alloc_shared(size_t alignment,
-                           size_t numBytes,
-                           const queue& syclQueue,
-                           const property_list& propList = {})
+void* sycl::aligned_alloc_shared(size_t alignment, size_t numBytes,
+                                 const queue& syclQueue,
+                                 const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10682,11 +10507,9 @@ a@
 [source]
 ----
 template <typename T>
-T*
-sycl::aligned_alloc_shared(size_t alignment,
-                           size_t count,
-                           const queue& syclQueue,
-                           const property_list& propList = {})
+T* sycl::aligned_alloc_shared(size_t alignment, size_t count,
+                              const queue& syclQueue,
+                              const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 [code]#context#.
@@ -10719,10 +10542,8 @@ memory, these functions return [code]#nullptr#.
 a@
 [source]
 ----
-void* sycl::malloc(size_t numBytes,
-                   const device& syclDevice,
-                   const context& syclContext,
-                   usm::alloc kind,
+void* sycl::malloc(size_t numBytes, const device& syclDevice,
+                   const context& syclContext, usm::alloc kind,
                    const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
@@ -10737,10 +10558,8 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc(size_t count,
-                const device& syclDevice,
-                const context& syclContext,
-                usm::alloc kind,
+T* sycl::malloc(size_t count, const device& syclDevice,
+                const context& syclContext, usm::alloc kind,
                 const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
@@ -10755,9 +10574,7 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void* sycl::malloc(size_t numBytes,
-                   const queue& syclQueue,
-                   usm::alloc kind,
+void* sycl::malloc(size_t numBytes, const queue& syclQueue, usm::alloc kind,
                    const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
@@ -10767,9 +10584,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc(size_t count,
-                const queue& syclQueue,
-                usm::alloc kind,
+T* sycl::malloc(size_t count, const queue& syclQueue, usm::alloc kind,
                 const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
@@ -10778,12 +10593,9 @@ necessary [code]#device#.
 a@
 [source]
 ----
-void* sycl::aligned_alloc(size_t alignment,
-                          size_t numBytes,
-                          const device& syclDevice,
-                          const context& syclContext,
-                          usm::alloc kind,
-                          const property_list& propList = {})
+void* sycl::aligned_alloc(size_t alignment, size_t numBytes,
+                          const device& syclDevice, const context& syclContext,
+                          usm::alloc kind, const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
 allocation is specified in bytes and is aligned according to [code]#alignment#.
@@ -10798,11 +10610,8 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc(size_t alignment,
-                       size_t count,
-                       const device& syclDevice,
-                       const context& syclContext,
-                       usm::alloc kind,
+T* sycl::aligned_alloc(size_t alignment, size_t count, const device& syclDevice,
+                       const context& syclContext, usm::alloc kind,
                        const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
@@ -10817,10 +10626,8 @@ is contained by that context, otherwise this function throws a synchronous
 a@
 [source]
 ----
-void* sycl::aligned_alloc(size_t alignment,
-                          size_t numBytes,
-                          const queue& syclQueue,
-                          usm::alloc kind,
+void* sycl::aligned_alloc(size_t alignment, size_t numBytes,
+                          const queue& syclQueue, usm::alloc kind,
                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
@@ -10830,11 +10637,8 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc(size_t alignment,
-                       size_t count,
-                       const queue& syclQueue,
-                       usm::alloc kind,
-                       const property_list& propList = {})
+T* sycl::aligned_alloc(size_t alignment, size_t count, const queue& syclQueue,
+                       usm::alloc kind, const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
 necessary [code]#device#.
@@ -10886,8 +10690,7 @@ are only supported on the host.
 a@
 [source]
 ----
-usm::alloc get_pointer_type(const void* ptr,
-                            const context& syclContext)
+usm::alloc get_pointer_type(const void* ptr, const context& syclContext)
 ----
 a@ Returns the USM allocation type for [code]#ptr# if [code]#ptr# falls inside
 a valid USM allocation for the context [code]#syclContext#.  Returns
@@ -10897,8 +10700,7 @@ allocation from [code]#syclContext#.
 a@
 [source]
 ----
-device get_pointer_device(const void* ptr,
-                          const context& syclContext)
+device get_pointer_device(const void* ptr, const context& syclContext)
 ----
 a@ Returns the [code]#device# associated with the USM allocation.  If
 [code]#ptr# points within a device USM allocation or a shared USM allocation
@@ -11217,7 +11019,7 @@ the [code]#rhs# SYCL [code]#range#.
 a@
 [source]
 ----
-range&  operatorOP(range& rhs)
+range& operatorOP(range& rhs)
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -11280,7 +11082,7 @@ a@
 [source]
 ----
 nd_range<Dimensions>(
-    range<Dimensions> globalSize,
+range<Dimensions> globalSize,
     range<Dimensions> localSize)
     id<Dimensions> offset = id<Dimensions>())
 ----
@@ -11325,7 +11127,7 @@ a@
 [source]
 ----
 id<Dimensions> get_offset() const
-// Deprecated in SYCL 2020.
+    // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
    Return the constituent offset.
@@ -11657,7 +11459,7 @@ a@
 [source]
 ----
 id<Dimensions> get_offset() const
-// Deprecated in SYCL 2020.
+    // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
       Returns an [code]#id# representing the _n_-dimensional offset
@@ -11869,7 +11671,7 @@ a@
 [source]
 ----
 id<Dimensions> get_offset() const
-// Deprecated in SYCL 2020.
+    // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
       Returns an <<id>> representing the n-dimensional offset
@@ -11887,9 +11689,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
-    size_t numElements) const
+device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
+                                   decorated_global_ptr<DataT> src,
+                                   size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -11900,9 +11702,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
-    size_t numElements) const
+device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
+                                   decorated_local_ptr<DataT> src,
+                                   size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -11913,9 +11715,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
-    size_t numElements, size_t srcStride) const
+device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
+                                   decorated_global_ptr<DataT> src,
+                                   size_t numElements, size_t srcStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -11927,9 +11729,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
-    size_t numElements, size_t destStride) const
+device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
+                                   decorated_local_ptr<DataT> src,
+                                   size_t numElements, size_t destStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -11940,8 +11742,7 @@ template <typename DataT>
 a@
 [source]
 ----
-template <typename... EventTN>
-    void wait_for(EventTN... events) const
+template <typename... EventTN> void wait_for(EventTN... events) const
 ----
    a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
@@ -12313,7 +12114,7 @@ a@
 [source]
 ----
 template <typename WorkItemFunctionT>
-    void parallel_for_work_item(const WorkItemFunctionT& func) const
+void parallel_for_work_item(const WorkItemFunctionT& func) const
 ----
    a@ Launch the work-items for this work-group.
 
@@ -12335,8 +12136,8 @@ a@
 [source]
 ----
 template <typename WorkItemFunctionT>
-    void parallel_for_work_item(range<Dimensions>
-    logicalRange, const WorkItemFunctionT& func) const
+void parallel_for_work_item(range<Dimensions> logicalRange,
+                            const WorkItemFunctionT& func) const
 ----
    a@ Launch the work-items for this work-group using a logical local range.
       The function object [code]#func# is executed as if the kernel were
@@ -12362,9 +12163,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
-    size_t numElements) const
+device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
+                                   decorated_global_ptr<DataT> src,
+                                   size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -12375,9 +12176,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
-    size_t numElements) const
+device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
+                                   decorated_local_ptr<DataT> src,
+                                   size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -12388,9 +12189,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_local_ptr<DataT> dest, decorated_global_ptr<DataT> src,
-    size_t numElements, size_t srcStride) const
+device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
+                                   decorated_global_ptr<DataT> src,
+                                   size_t numElements, size_t srcStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -12402,9 +12203,9 @@ a@
 [source]
 ----
 template <typename DataT>
-    device_event async_work_group_copy(
-    decorated_global_ptr<DataT> dest, decorated_local_ptr<DataT> src,
-    size_t numElements, size_t destStride) const
+device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
+                                   decorated_local_ptr<DataT> src,
+                                   size_t numElements, size_t destStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
       Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
@@ -12415,8 +12216,7 @@ template <typename DataT>
 a@
 [source]
 ----
-template <typename... EventTN>
-    void wait_for(EventTN... events) const
+template <typename... EventTN> void wait_for(EventTN... events) const
 ----
    a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
@@ -12650,7 +12450,8 @@ a@
 [source]
 ----
 reduction<BufferT, BinaryOperation>(BufferT vars, handler& cgh,
-BinaryOperation combiner, const property_list& propList = {})
+                                    BinaryOperation combiner,
+                                    const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable(s) described by [code]#vars# using the combination
@@ -12662,8 +12463,8 @@ BinaryOperation combiner, const property_list& propList = {})
 a@
 [source]
 ----
-reduction<T, BinaryOperation>(T* var,
-BinaryOperation combiner, const property_list& propList = {})
+reduction<T, BinaryOperation>(T* var, BinaryOperation combiner,
+                              const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable described by [code]#var# using the combination
@@ -12673,8 +12474,8 @@ BinaryOperation combiner, const property_list& propList = {})
 a@
 [source]
 ----
-reduction<T, BinaryOperation>(span<T, Extent> vars,
-BinaryOperation combiner, const property_list& propList = {})
+reduction<T, BinaryOperation>(span<T, Extent> vars, BinaryOperation combiner,
+                              const property_list& propList = {})
 ----
    a@ Available only when [code]#Extent != sycl::dynamic_extent#.
       Construct an unspecified object representing a reduction
@@ -12686,8 +12487,9 @@ a@
 [source]
 ----
 reduction<BufferT, BinaryOperation>(BufferT vars, handler& cgh,
-const BufferT::value_type& identity, BinaryOperation combiner,
-const property_list& propList = {})
+                                    const BufferT::value_type& identity,
+                                    BinaryOperation combiner,
+                                    const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable(s) described by [code]#vars# using the combination
@@ -12702,7 +12504,8 @@ a@
 [source]
 ----
 reduction<T, BinaryOperation>(T* var, const T& identity,
-BinaryOperation combiner, const property_list& propList = {})
+                              BinaryOperation combiner,
+                              const property_list& propList = {})
 ----
    a@ Construct an unspecified object representing a reduction
       of the variable described by [code]#var# using the combination
@@ -12715,7 +12518,8 @@ a@
 [source]
 ----
 reduction<T, BinaryOperation>(span<T, Extent> vars, const T& identity,
-BinaryOperation combiner, const property_list& propList = {})
+                              BinaryOperation combiner,
+                              const property_list& propList = {})
 ----
    a@ Available only when [code]#Extent != sycl::dynamic_extent#.
       Construct an unspecified object representing a reduction
@@ -12860,7 +12664,7 @@ T identity() const
 a@
 [source]
 ----
-    reducer& operator+=(reducer& accum, const T& partial)
+reducer& operator+=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 &&
@@ -12869,7 +12673,7 @@ a@
 a@
 [source]
 ----
-    reducer& operator*=(reducer& accum, const T& partial)
+reducer& operator*=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 &&
@@ -12878,7 +12682,7 @@ a@
 a@
 [source]
 ----
-    reducer& operator&=(reducer& accum, const T& partial)
+reducer& operator&=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
@@ -12887,7 +12691,7 @@ a@
 a@
 [source]
 ----
-    reducer& operator|=(reducer& accum, const T& partial)
+reducer& operator|=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
@@ -12896,7 +12700,7 @@ a@
 a@
 [source]
 ----
-    reducer& operator^=(reducer& accum, const T& partial)
+reducer& operator^=(reducer& accum, const T& partial)
 ----
    a@ Equivalent to calling [code]#accum.combine(partial)#.
       Available only when: [code]#Dimensions == 0 && is_integral_v<T> &&
@@ -12905,7 +12709,7 @@ a@
 a@
 [source]
 ----
-    reducer& operator++(reducer& accum)
+reducer& operator++(reducer& accum)
 ----
    a@ Equivalent to calling [code]#accum.combine(1)#.
       Available only when: [code]#Dimensions == 0 && std::is_integral_v<T> && !std::is_same_v<T, bool> &&
@@ -13026,10 +12830,10 @@ are added when code calls the [code]#handler::depends_on()# member function.
 a@
 [source]
 ----
-template <typename DataT, int Dimensions,
-access_mode AccessMode, target AccessTarget, access::placeholder IsPlaceholder>
-    void require(accessor<DataT, Dimensions, AccessMode, AccessTarget, IsPlaceholder>
-    acc)
+template <typename DataT, int Dimensions, access_mode AccessMode,
+          target AccessTarget, access::placeholder IsPlaceholder>
+void require(
+    accessor<DataT, Dimensions, AccessMode, AccessTarget, IsPlaceholder> acc)
 ----
    a@ Requires access to the memory object associated with the accessor.
 
@@ -13088,8 +12892,7 @@ is used to encapsulate all the member functions provided in a command group scop
 a@
 [source]
 ----
-template <typename T>
-    void set_arg(int argIndex, T&& arg)
+template <typename T> void set_arg(int argIndex, T&& arg)
 ----
    a@ This function must only be used to set arguments for a kernel that
       was constructed using a backend specific interoperability function
@@ -13101,8 +12904,7 @@ template <typename T>
 a@
 [source]
 ----
-template <typename... Ts>
-    void set_args(Ts&&... args)
+template <typename... Ts> void set_args(Ts&&... args)
 ----
    a@ Set all arguments for a given kernel, as if each argument in
       [code]#args# was passed to [code]#set_arg# in the same order and
@@ -13112,7 +12914,7 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-    void single_task(const KernelType& kernelFunc)
+void single_task(const KernelType& kernelFunc)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
       or a named function object type.
@@ -13127,9 +12929,7 @@ a@
 [source]
 ----
 template <typename KernelName, int Dimensions, typename... Rest>
-    void parallel_for(
-    range<Dimensions> numWorkItems,
-    Rest&&... rest)
+void parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
       or a named function object type,
@@ -13153,11 +12953,9 @@ a@
 [source]
 ----
 template <typename KernelName, int Dimensions, typename... Rest>
-    void parallel_for(
-    range<Dimensions> numWorkItems,
-    id<Dimensions> workItemOffset,
-    const KernelType& kernelFunc)
-// Deprecated in SYCL 2020.
+void parallel_for(range<Dimensions> numWorkItems, id<Dimensions> workItemOffset,
+                  const KernelType& kernelFunc)
+    // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
       Defines and invokes a <<sycl-kernel-function>> as a lambda function
@@ -13181,9 +12979,7 @@ a@
 [source]
 ----
 template <typename KernelName, int Dimensions, typename... Rest>
-    void parallel_for(
-    nd_range<Dimensions> executionRange,
-    Rest&&... rest)
+void parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
       or a named function object type,
@@ -13211,9 +13007,8 @@ a@
 [source]
 ----
 template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
-    void parallel_for_work_group(
-    range<Dimensions> numWorkGroups,
-    const WorkgroupFunctionType& kernelFunc)
+void parallel_for_work_group(range<Dimensions> numWorkGroups,
+                             const WorkgroupFunctionType& kernelFunc)
 ----
    a@ Defines and invokes a hierarchical kernel as a lambda function
       or a named function object type,
@@ -13232,10 +13027,9 @@ a@
 [source]
 ----
 template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
-    void parallel_for_work_group(
-    range<Dimensions> numWorkGroups,
-    range<Dimensions> workGroupSize,
-    const WorkgroupFunctionType& kernelFunc)
+void parallel_for_work_group(range<Dimensions> numWorkGroups,
+                             range<Dimensions> workGroupSize,
+                             const WorkgroupFunctionType& kernelFunc)
 ----
    a@ Defines and invokes a hierarchical kernel as a lambda function
       or a named function object type,
@@ -13275,9 +13069,8 @@ associated with the secondary queue (if specified).
 a@
 [source]
 ----
-template <int Dimensions> void parallel_for(
-    range<Dimensions> numWorkItems,
-    const kernel& kernelObject)
+template <int Dimensions>
+void parallel_for(range<Dimensions> numWorkItems, const kernel& kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
@@ -13298,9 +13091,9 @@ associated with the secondary queue (if specified).
 a@
 [source]
 ----
-template <int Dimensions> void parallel_for(
-    nd_range<Dimensions> executionRange,
-    const kernel& kernelObject)
+template <int Dimensions>
+void parallel_for(nd_range<Dimensions> executionRange,
+                  const kernel& kernelObject)
 ----
    a@ This function must only be used to invoke a kernel that was constructed
       using a backend specific interoperability function or to invoke a device
@@ -13745,12 +13538,9 @@ explicit copy operations.
 a@
 [source]
 ----
-template <typename SrcT, int SrcDims, access_mode SrcMode,
-          target SrcTgt, typename DestT,
-          access::placeholder IsPlaceholder>
-void copy(accessor<SrcT, SrcDims,
-                   SrcMode, SrcTgt,
-                   IsPlaceholder> src,
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+          typename DestT, access::placeholder IsPlaceholder>
+void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
           std::shared_ptr<DestT> dest)
 ----
 a@ Copies the contents of the memory object accessed by
@@ -13761,13 +13551,10 @@ as many bytes as the range accessed by [code]#src#.
 a@
 [source]
 ----
-template <typename SrcT, typename DestT, int DestDims,
-          access_mode DestMode, target DestTgt,
-          access::placeholder IsPlaceholder>
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+          target DestTgt, access::placeholder IsPlaceholder>
 void copy(std::shared_ptr<SrcT> src,
-          accessor<DestT, DestDims,
-                   DestMode, DestTgt,
-                   IsPlaceholder> dest)
+          accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest)
 ----
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
@@ -13777,12 +13564,9 @@ as many bytes as the range accessed by [code]#dest#.
 a@
 [source]
 ----
-template <typename SrcT, int SrcDims, access_mode SrcMode,
-          target SrcTgt, typename DestT,
-          access::placeholder IsPlaceholder>
-void copy(accessor<SrcT, SrcDims,
-                   SrcMode, SrcTgt,
-                   IsPlaceholder> src,
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+          typename DestT, access::placeholder IsPlaceholder>
+void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
           DestT* dest)
 ----
 a@ Copies the contents of the memory object accessed by
@@ -13793,13 +13577,10 @@ as many bytes as the range accessed by [code]#src#.
 a@
 [source]
 ----
-template <typename SrcT, typename DestT, int DestDims,
-          access_mode DestMode, target DestTgt,
-          access::placeholder IsPlaceholder>
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+          target DestTgt, access::placeholder IsPlaceholder>
 void copy(const SrcT* src,
-          accessor<DestT, DestDims,
-                   DestMode, DestTgt,
-                   IsPlaceholder> dest)
+          accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest)
 ----
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
@@ -13809,18 +13590,12 @@ as many bytes as the range accessed by [code]#dest#.
 a@
 [source]
 ----
-template <typename SrcT, int SrcDims,
-          access_mode SrcMode, target SrcTgt,
-          access::placeholder IsSrcPlaceholder,
-          typename DestT, int DestDims,
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+          access::placeholder IsSrcPlaceholder, typename DestT, int DestDims,
           access_mode DestMode, target DestTgt,
           access::placeholder IsDestPlaceholder>
-void copy(accessor<SrcT, SrcDims,
-                   SrcMode, SrcTgt,
-                   IsSrcPlaceholder> src,
-          accessor<DestT, DestDims,
-                   DestMode, DestTgt,
-                   IsDestPlaceholder> dest)
+void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
+          accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest)
 ----
 a@ Copies the contents of the memory object accessed by [code]#src#
 into the memory object accessed by [code]#dest#.  The size of the [code]#src#
@@ -13832,12 +13607,9 @@ implementation throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-template <typename T, int Dims,
-          access_mode Mode, target Tgt,
+template <typename T, int Dims, access_mode Mode, target Tgt,
           access::placeholder IsPlaceholder>
-void update_host(accessor<T, Dims,
-                          Mode, Tgt,
-                          IsPlaceholder> acc)
+void update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc)
 ----
 a@ The contents of the memory object accessed via [code]#acc#
 on the host are guaranteed to be up-to-date after this
@@ -13846,11 +13618,9 @@ on the host are guaranteed to be up-to-date after this
 a@
 [source]
 ----
-template <typename T, int Dims,
-          access_mode Mode, target Tgt,
+template <typename T, int Dims, access_mode Mode, target Tgt,
           access::placeholder IsPlaceholder>
-void fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest,
-          const T& src)
+void fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src)
 ----
 a@ Replicates the value of [code]#src# into the
 memory object accessed by [code]#dest#.
@@ -13870,8 +13640,7 @@ detail on USM, please see <<sec:usm>>.
 a@
 [source]
 ----
-template <typename T>
-void copy(const T* src, T* dest, size_t count)
+template <typename T> void copy(const T* src, T* dest, size_t count)
 ----
 a@ Copies [code]#count# elements of type [code]#T# from the pointer [code]#src#
 to the pointer [code]#dest#.  The [code]#dest# and [code]#src# parameters must
@@ -13894,8 +13663,7 @@ from the queue's device.  Note that [code]#value# is interpreted as an
 a@
 [source]
 ----
-template <typename T>
-void fill(void* ptr, const T& pattern, size_t count)
+template <typename T> void fill(void* ptr, const T& pattern, size_t count)
 ----
 a@ Replicates the provided [code]#pattern# into the memory at address
 [code]#ptr#.  The [code]#ptr# must point within a USM allocation from the same
@@ -16222,14 +15990,16 @@ exception(context ctx, std::error_code ec)
 a@
 [source]
 ----
-exception(context ctx, int ev, const std::error_category& ecat, const std::string& what_arg)
+exception(context ctx, int ev, const std::error_category& ecat,
+          const std::string& what_arg)
 ----
    a@ Constructs an [code]#exception# with an associated SYCL context [code]#ctx#, the error code ev and the underlying error category [code]#ecat#. The string returned by [code]#what()# is guaranteed to contain [code]#what_arg# as a substring.
 
 a@
 [source]
 ----
-exception(context ctx, int ev, const std::error_category& ecat, const char* what_arg)
+exception(context ctx, int ev, const std::error_category& ecat,
+          const char* what_arg)
 ----
    a@ Constructs an [code]#exception# with an associated SYCL context [code]#ctx#, the error code ev and the underlying error category [code]#ecat#. The string returned by [code]#what()# is guaranteed to contain [code]#what_arg# as a substring.
 
@@ -16587,8 +16357,7 @@ explicit constexpr vec(const DataT& arg)
 a@
 [source]
 ----
-template <typename... ArgTN>
-constexpr vec(const ArgTN&... args)
+template <typename... ArgTN> constexpr vec(const ArgTN&... args)
 ----
    a@ Construct a SYCL [code]#vec# instance from any combination of scalar and SYCL [code]#vec# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#NumElements# of this [code]#vec# specialization.
 
@@ -16673,24 +16442,23 @@ size_t get_size() const
 a@
 [source]
 ----
-template<typename ConvertT, rounding_mode RoundingMode = rounding_mode::automatic>
-    vec<ConvertT, NumElements> convert() const
+template <typename ConvertT,
+          rounding_mode RoundingMode = rounding_mode::automatic>
+vec<ConvertT, NumElements> convert() const
 ----
    a@ Converts this SYCL [code]#vec# to a SYCL [code]#vec# of a different element type specified by [code]#ConvertT# using the rounding mode specified by [code]#RoundingMode#. The new SYCL [code]#vec# type must have the same number of elements as this SYCL [code]#vec#. The different rounding modes are described in <<table.vec.roundingmodes>>.
 
 a@
 [source]
 ----
-template<typename asT>
-    asT as() const
+template <typename asT> asT as() const
 ----
    a@ Bitwise reinterprets this SYCL [code]#vec# as a SYCL [code]#vec# of a different element type and number of elements specified by [code]#asT#. The new SYCL [code]#vec# type must have the same storage size in bytes as this SYCL [code]#vec#.
 
 a@
 [source]
 ----
-template<int... swizzleIndexes>
-    __swizzled_vec__ swizzle() const
+template <int... swizzleIndexes> __swizzled_vec__ swizzle() const
 ----
    a@ Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
 
@@ -16814,7 +16582,7 @@ a@
 [source]
 ----
 template <access::address_space AddressSpace, access::decorated IsDecorated>
-    void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
+void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
 ----
    a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#, into the components of this SYCL [code]#vec#.
 
@@ -16822,7 +16590,7 @@ a@
 [source]
 ----
 template <access::address_space AddressSpace, access::decorated IsDecorated>
-    void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 ----
    a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#.
 
@@ -17416,8 +17184,7 @@ explicit constexpr marray(const DataT& arg)
 a@
 [source]
 ----
-template <typename... ArgTN>
-constexpr marray(const ArgTN&... args)
+template <typename... ArgTN> constexpr marray(const ArgTN&... args)
 ----
    a@ Construct a SYCL [code]#marray# instance from any combination of scalar and SYCL [code]#marray# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#NumElements# of this [code]#marray# specialization.
 
@@ -18093,9 +17860,8 @@ bool is_lock_free() const
 a@
 [source]
 ----
-void store(T operand,
-    memory_order order = default_write_order,
-    memory_scope scope = default_scope) const
+void store(T operand, memory_order order = default_write_order,
+           memory_scope scope = default_scope) const
 ----
    a@ Atomically stores [code]#operand# to the object referenced by
       this [code]#atomic_ref#.  The memory order of this atomic operation
@@ -18114,9 +17880,8 @@ T operator=(T desired) const
 a@
 [source]
 ----
-T load(
-    memory_order order = default_read_order
-    memory_scope scope = default_scope) const
+T load(memory_order order = default_read_order memory_scope scope =
+           default_scope) const
 ----
    a@ Atomically loads the value of the object referenced by this
       [code]#atomic_ref#.  The memory order of this atomic operation must be
@@ -18134,9 +17899,8 @@ operator T() const
 a@
 [source]
 ----
-T exchange(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T exchange(T operand, memory_order order = default_read_modify_write_order,
+           memory_scope scope = default_scope) const
 ----
    a@ Atomically replaces the value of the object referenced by this
       [code]#atomic_ref# with value [code]#operand# and
@@ -18147,10 +17911,9 @@ T exchange(T operand,
 a@
 [source]
 ----
-bool compare_exchange_weak(T& expected, T desired,
-    memory_order success,
-    memory_order failure,
-    memory_scope scope = default_scope) const
+bool compare_exchange_weak(T& expected, T desired, memory_order success,
+                           memory_order failure,
+                           memory_scope scope = default_scope) const
 ----
    a@ Atomically compares the value of the object referenced by this [code]#atomic_ref#
       against the value of [code]#expected#. If the values are
@@ -18171,18 +17934,17 @@ a@
 [source]
 ----
 bool compare_exchange_weak(T& expected, T desired,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+                           memory_order order = default_read_modify_write_order,
+                           memory_scope scope = default_scope) const
 ----
    a@ Equivalent to [code]#compare_exchange_weak(expected, desired, order, order, scope)#.
 
 a@
 [source]
 ----
-bool compare_exchange_strong(T& expected, T desired,
-    memory_order success,
-    memory_order failure,
-    memory_scope scope = default_scope) const
+bool compare_exchange_strong(T& expected, T desired, memory_order success,
+                             memory_order failure,
+                             memory_scope scope = default_scope) const
 ----
    a@ Atomically compares the value of the object referenced by this [code]#atomic_ref#
       against the value of [code]#expected#. If the values are equal,
@@ -18201,9 +17963,9 @@ This function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-bool compare_exchange_strong(T& expected, T desired,
-    memory_order order =
-    default_read_modify_write_order) const
+bool compare_exchange_strong(
+    T& expected, T desired,
+    memory_order order = default_read_modify_write_order) const
 ----
    a@ Equivalent to [code]#compare_exchange_strong(expected, desired, order, order, scope)#.
 
@@ -18219,9 +17981,8 @@ bool compare_exchange_strong(T& expected, T desired,
 a@
 [source]
 ----
-T fetch_add(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_add(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically adds [code]#operand# to the value
       of the object referenced by this [code]#atomic_ref# and assigns
@@ -18253,9 +18014,8 @@ T operator++() const
 a@
 [source]
 ----
-T fetch_sub(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_sub(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically subtracts [code]#operand# from the value
       of the object referenced by this [code]#atomic_ref# and assigns
@@ -18287,9 +18047,8 @@ T operator--() const
 a@
 [source]
 ----
-T fetch_and(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_and(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically performs a bitwise AND between [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18308,9 +18067,8 @@ T operator&=(T operand) const
 a@
 [source]
 ----
-T fetch_or(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_or(T operand, memory_order order = default_read_modify_write_order,
+           memory_scope scope = default_scope) const
 ----
    a@ Atomically performs a bitwise OR between [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18329,9 +18087,8 @@ T operator|=(T operand) const
 a@
 [source]
 ----
-T fetch_xor(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_xor(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically performs a bitwise XOR between [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18350,9 +18107,8 @@ T operator^=(T operand) const
 a@
 [source]
 ----
-T fetch_min(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_min(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically computes the minimum of [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18364,9 +18120,8 @@ T fetch_min(T operand,
 a@
 [source]
 ----
-T fetch_max(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_max(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically computes the maximum of [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18387,9 +18142,8 @@ T fetch_max(T operand,
 a@
 [source]
 ----
-T fetch_add(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_add(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically adds [code]#operand# to the value
       of the object referenced by this [code]#atomic_ref# and assigns
@@ -18407,9 +18161,8 @@ T operator+=(T operand) const
 a@
 [source]
 ----
-T fetch_sub(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_sub(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically subtracts [code]#operand# from the value
       of the object referenced by this [code]#atomic_ref# and assigns
@@ -18427,9 +18180,8 @@ T operator-=(T operand) const
 a@
 [source]
 ----
-T fetch_min(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_min(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically computes the minimum of [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18440,9 +18192,8 @@ T fetch_min(T operand,
 a@
 [source]
 ----
-T fetch_max(T operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+T fetch_max(T operand, memory_order order = default_read_modify_write_order,
+            memory_scope scope = default_scope) const
 ----
    a@ Atomically computes the maximum of [code]#operand#
       and the value of the object referenced by this [code]#atomic_ref#,
@@ -18463,8 +18214,8 @@ a@
 [source]
 ----
 T* fetch_add(ptrdiff_t operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+             memory_order order = default_read_modify_write_order,
+             memory_scope scope = default_scope) const
 ----
    a@ Atomically adds [code]#operand# to the value
       of the object referenced by this [code]#atomic_ref# and assigns
@@ -18497,8 +18248,8 @@ a@
 [source]
 ----
 T* fetch_sub(ptrdiff_t operand,
-    memory_order order = default_read_modify_write_order,
-    memory_scope scope = default_scope) const
+             memory_order order = default_read_modify_write_order,
+             memory_scope scope = default_scope) const
 ----
    a@ Atomically subtracts [code]#operand# from the value
       of the object referenced by this [code]#atomic_ref# and assigns
@@ -18567,8 +18318,7 @@ include::{header_dir}/atomicoperations.h[lines=4..-1]
 a@
 [source]
 ----
-template <typename pointerT>
-atomic(multi_ptr<pointerT, AddressSpace> ptr)
+template <typename pointerT> atomic(multi_ptr<pointerT, AddressSpace> ptr)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18589,8 +18339,7 @@ instance of SYCL [code]#atomic# which is associated with the pointer
 a@
 [source]
 ----
-void store(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+void store(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18602,8 +18351,7 @@ types on devices that have [code]#aspect::atomic64#.
 a@
 [source]
 ----
-T load(memory_order memoryOrder =
-    memory_order::relaxed) const
+T load(memory_order memoryOrder = memory_order::relaxed) const
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18618,8 +18366,7 @@ only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-T exchange(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T exchange(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18631,11 +18378,10 @@ types on devices that have [code]#aspect::atomic64#.
 a@
 [source]
 ----
-bool compare_exchange_strong(T& expected, T desired,
-    memory_order successMemoryOrder =
-    memory_order::relaxed,
-    memory_order failMemoryOrder =
-    memory_order::relaxed)
+bool compare_exchange_strong(
+    T& expected, T desired,
+    memory_order successMemoryOrder = memory_order::relaxed,
+    memory_order failMemoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18656,8 +18402,7 @@ supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-T fetch_add(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_add(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18675,8 +18420,7 @@ function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-T fetch_sub(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_sub(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18695,8 +18439,7 @@ function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-T fetch_and(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_and(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18713,8 +18456,7 @@ types on devices that have [code]#aspect::atomic64#.
 a@
 [source]
 ----
-T fetch_or(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_or(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18731,8 +18473,7 @@ types on devices that have [code]#aspect::atomic64#.
 a@
 [source]
 ----
-T fetch_xor(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_xor(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18749,8 +18490,7 @@ types on devices that have [code]#aspect::atomic64#.
 a@
 [source]
 ----
-T fetch_min(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_min(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18766,8 +18506,7 @@ This function is only supported for 64-bit data types on devices that have
 a@
 [source]
 ----
-T fetch_max(T operand, memory_order memoryOrder =
-    memory_order::relaxed)
+T fetch_max(T operand, memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18796,7 +18535,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_load(atomic<T, AddressSpace> object,
-    memory_order memoryOrder = memory_order::relaxed)
+              memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18807,7 +18546,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 void atomic_store(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                  memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18818,7 +18557,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_exchange(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                  memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18830,10 +18569,8 @@ a@
 template <typename T, access::address_space AddressSpace>
 bool atomic_compare_exchange_strong(
     atomic<T, AddressSpace> object, T& expected, T desired,
-    memory_order successMemoryOrder =
-    memory_order::relaxed
-    memory_order failMemoryOrder =
-    memory_order::relaxed)
+    memory_order successMemoryOrder = memory_order::relaxed memory_order
+        failMemoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18844,7 +18581,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_add(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                   memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18855,7 +18592,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_sub(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                   memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18866,7 +18603,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_and(atomic<T> operand, T object,
-    memory_order memoryOrder = memory_order::relaxed)
+                   memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18877,7 +18614,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_or(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                  memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18888,7 +18625,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_xor(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                   memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18899,7 +18636,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_min(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                   memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18910,7 +18647,7 @@ a@
 ----
 template <typename T, access::address_space AddressSpace>
 T atomic_fetch_max(atomic<T, AddressSpace> object, T operand,
-    memory_order memoryOrder = memory_order::relaxed)
+                   memory_order memoryOrder = memory_order::relaxed)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -18993,7 +18730,8 @@ include::{header_dir}/stream.h[lines=4..-1]
 a@
 [source]
 ----
-char, signed char, unsigned char, int, unsigned int, short, unsigned short, long int, unsigned long int, long long int, unsigned long long int
+char, signed char, unsigned char, int, unsigned int, short, unsigned short,
+long int, unsigned long int, long long int, unsigned long long int
 ----
    a@ Outputs the value as a stream of characters.
 
@@ -19161,9 +18899,7 @@ defaultfloat
 a@
 [source]
 ----
-stream(size_t totalBufferSize,
-       size_t workItemBufferSize,
-       handler& cgh,
+stream(size_t totalBufferSize, size_t workItemBufferSize, handler& cgh,
        const property_list& propList = {})
 ----
    a@ Constructs a SYCL [code]#stream# instance associated with the command group
@@ -20620,91 +20356,91 @@ precision requirements for both host and device, are described in
 a@
 [source]
 ----
-genfloat acos (genfloat x)
+genfloat acos(genfloat x)
 ----
    a@ Inverse cosine function.
 
 a@
 [source]
 ----
-genfloat acosh (genfloat x)
+genfloat acosh(genfloat x)
 ----
    a@ Inverse hyperbolic cosine.
 
 a@
 [source]
 ----
-genfloat acospi (genfloat x)
+genfloat acospi(genfloat x)
 ----
    a@ Compute latexmath:[{\arccos(x)} \over \pi]
 
 a@
 [source]
 ----
-genfloat asin (genfloat x)
+genfloat asin(genfloat x)
 ----
    a@ Inverse sine function.
 
 a@
 [source]
 ----
-genfloat asinh (genfloat x)
+genfloat asinh(genfloat x)
 ----
    a@ Inverse hyperbolic sine.
 
 a@
 [source]
 ----
-genfloat asinpi (genfloat x)
+genfloat asinpi(genfloat x)
 ----
    a@ Compute latexmath:[{\arcsin(x)} \over \pi]
 
 a@
 [source]
 ----
-genfloat atan (genfloat y_over_x)
+genfloat atan(genfloat y_over_x)
 ----
    a@ Inverse tangent function.
 
 a@
 [source]
 ----
-genfloat atan2 (genfloat y, genfloat x)
+genfloat atan2(genfloat y, genfloat x)
 ----
    a@ Compute latexmath:[\arctan({y \over x})].
 
 a@
 [source]
 ----
-genfloat atanh (genfloat x)
+genfloat atanh(genfloat x)
 ----
    a@ Hyperbolic inverse tangent.
 
 a@
 [source]
 ----
-genfloat atanpi (genfloat x)
+genfloat atanpi(genfloat x)
 ----
    a@ Compute latexmath:[{\arctan(x)} \over \pi].
 
 a@
 [source]
 ----
-genfloat atan2pi (genfloat y, genfloat x)
+genfloat atan2pi(genfloat y, genfloat x)
 ----
    a@ Compute latexmath:[{\operatorname{atan2}(y,x)} \over \pi].
 
 a@
 [source]
 ----
-genfloat cbrt (genfloat x)
+genfloat cbrt(genfloat x)
 ----
    a@ Compute cube-root.
 
 a@
 [source]
 ----
-genfloat ceil (genfloat x)
+genfloat ceil(genfloat x)
 ----
    a@ Round to integral value using the round to positive infinity
       rounding mode.
@@ -20712,7 +20448,7 @@ genfloat ceil (genfloat x)
 a@
 [source]
 ----
-genfloat copysign (genfloat x, genfloat y)
+genfloat copysign(genfloat x, genfloat y)
 ----
    a@ Returns x with its sign changed to match
       the sign of y.
@@ -20720,35 +20456,35 @@ genfloat copysign (genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat cos (genfloat x)
+genfloat cos(genfloat x)
 ----
    a@ Compute cosine.
 
 a@
 [source]
 ----
-genfloat cosh (genfloat x)
+genfloat cosh(genfloat x)
 ----
    a@ Compute hyperbolic cosine.
 
 a@
 [source]
 ----
-genfloat cospi (genfloat x)
+genfloat cospi(genfloat x)
 ----
    a@ Compute latexmath:[\cos (\pi x)].
 
 a@
 [source]
 ----
-genfloat erfc (genfloat x)
+genfloat erfc(genfloat x)
 ----
    a@ Complementary error function.
 
 a@
 [source]
 ----
-genfloat erf (genfloat x)
+genfloat erf(genfloat x)
 ----
    a@ Error function encountered in integrating the normal
       distribution.
@@ -20756,42 +20492,42 @@ genfloat erf (genfloat x)
 a@
 [source]
 ----
-genfloat exp (genfloat x )
+genfloat exp(genfloat x)
 ----
    a@ Compute the base-_e_ exponential of x.
 
 a@
 [source]
 ----
-genfloat exp2 (genfloat x)
+genfloat exp2(genfloat x)
 ----
    a@ Exponential base 2 function.
 
 a@
 [source]
 ----
-genfloat exp10 (genfloat x)
+genfloat exp10(genfloat x)
 ----
    a@ Exponential base 10 function.
 
 a@
 [source]
 ----
-genfloat expm1 (genfloat x)
+genfloat expm1(genfloat x)
 ----
    a@ Compute latexmath:[e^x-1.0].
 
 a@
 [source]
 ----
-genfloat fabs (genfloat x)
+genfloat fabs(genfloat x)
 ----
    a@ Compute absolute value of a floating-point number.
 
 a@
 [source]
 ----
-genfloat fdim (genfloat x, genfloat y)
+genfloat fdim(genfloat x, genfloat y)
 ----
    a@ latexmath:[x - y]  if latexmath:[x > y], +0 if x is less than or
       equal to y.
@@ -20799,7 +20535,7 @@ genfloat fdim (genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat floor (genfloat x)
+genfloat floor(genfloat x)
 ----
    a@ Round to integral value using the round to negative infinity
       rounding mode.
@@ -20807,7 +20543,7 @@ genfloat floor (genfloat x)
 a@
 [source]
 ----
-genfloat fma (genfloat a, genfloat b, genfloat c)
+genfloat fma(genfloat a, genfloat b, genfloat c)
 ----
    a@ Returns the correctly rounded floating-point
       representation of the sum of c with the infinitely
@@ -20818,8 +20554,8 @@ genfloat fma (genfloat a, genfloat b, genfloat c)
 a@
 [source]
 ----
-genfloat fmax (genfloat x, genfloat y)
-genfloat fmax (genfloat x, sgenfloat y)
+genfloat fmax(genfloat x, genfloat y)
+genfloat fmax(genfloat x, sgenfloat y)
 ----
    a@ Returns y if latexmath:[x < y], otherwise it returns x. If one
       argument is a NaN, fmax() returns the other
@@ -20829,8 +20565,8 @@ genfloat fmax (genfloat x, sgenfloat y)
 a@
 [source]
 ----
-genfloat fmin (genfloat x, genfloat y)
-genfloat fmin (genfloat x, sgenfloat y)
+genfloat fmin(genfloat x, genfloat y)
+genfloat fmin(genfloat x, sgenfloat y)
 ----
    a@ Returns y if latexmath:[y < x], otherwise it returns x. If one
       argument is a NaN, fmin() returns the other
@@ -20840,14 +20576,14 @@ genfloat fmin (genfloat x, sgenfloat y)
 a@
 [source]
 ----
-genfloat fmod (genfloat x, genfloat y)
+genfloat fmod(genfloat x, genfloat y)
 ----
    a@ Modulus. Returns latexmath:[x - y \cdot \mathrm{trunc}(x/y)].
 
 a@
 [source]
 ----
-genfloat fract (genfloat x, genfloatptr iptr)
+genfloat fract(genfloat x, genfloatptr iptr)
 ----
    a@ Returns fmin(x - floor(x), nextafter(genfloat(1.0), genfloat(0.0)) ).
       floor(x) is returned in iptr.
@@ -20855,7 +20591,7 @@ genfloat fract (genfloat x, genfloatptr iptr)
 a@
 [source]
 ----
-genfloat frexp (genfloat x,  genintptr exp)
+genfloat frexp(genfloat x, genintptr exp)
 ----
    a@ Extract mantissa and exponent from x. For each
       component the mantissa returned is a float with
@@ -20865,7 +20601,7 @@ genfloat frexp (genfloat x,  genintptr exp)
 a@
 [source]
 ----
-genfloat hypot (genfloat x, genfloat y)
+genfloat hypot(genfloat x, genfloat y)
 ----
    a@ Compute the value of the square root of x^2^ + y^2^ without undue overflow
       or underflow.
@@ -20873,22 +20609,22 @@ genfloat hypot (genfloat x, genfloat y)
 a@
 [source]
 ----
-genint ilogb (genfloat x)
+genint ilogb(genfloat x)
 ----
    a@ Compute the integral part of logr (latexmath:[|x|]) and return the result as an integer, where r is the value returned by [code]#std::numeric_limits<genfloat>::radix#.
 
 a@
 [source]
 ----
-genfloat ldexp (genfloat x, genint k)
-genfloat ldexp (genfloat x, int k)
+genfloat ldexp(genfloat x, genint k)
+genfloat ldexp(genfloat x, int k)
 ----
    a@ Multiply x by 2^k^.
 
 a@
 [source]
 ----
-genfloat lgamma (genfloat x)
+genfloat lgamma(genfloat x)
 ----
    a@ Log gamma function. Returns the natural
       logarithm of the absolute value of the gamma
@@ -20897,7 +20633,7 @@ genfloat lgamma (genfloat x)
 a@
 [source]
 ----
-genfloat lgamma_r (genfloat x, genintptr signp)
+genfloat lgamma_r(genfloat x, genintptr signp)
 ----
    a@ Log gamma function. Returns the natural
       logarithm of the absolute value of the gamma
@@ -20907,42 +20643,42 @@ genfloat lgamma_r (genfloat x, genintptr signp)
 a@
 [source]
 ----
-genfloat log (genfloat x)
+genfloat log(genfloat x)
 ----
    a@ Compute natural logarithm.
 
 a@
 [source]
 ----
-genfloat log2 (genfloat x)
+genfloat log2(genfloat x)
 ----
    a@ Compute a base 2 logarithm.
 
 a@
 [source]
 ----
-genfloat log10 (genfloat x)
+genfloat log10(genfloat x)
 ----
    a@ Compute a base 10 logarithm.
 
 a@
 [source]
 ----
-genfloat log1p (genfloat x)
+genfloat log1p(genfloat x)
 ----
    a@ Compute latexmath:[\log_e(1.0 + x)].
 
 a@
 [source]
 ----
-genfloat logb (genfloat x)
+genfloat logb(genfloat x)
 ----
    a@ Compute the integral part of logr (latexmath:[|x|]), where r is the value returned by [code]#std::numeric_limits<genfloat>::radix#.
 
 a@
 [source]
 ----
-genfloat mad (genfloat a,genfloat b, genfloat c)
+genfloat mad(genfloat a, genfloat b, genfloat c)
 ----
    a@ mad approximates a * b + c. Whether or how the
       product of a * b is rounded and how supernormal or
@@ -20953,7 +20689,7 @@ genfloat mad (genfloat a,genfloat b, genfloat c)
 a@
 [source]
 ----
-genfloat maxmag (genfloat x, genfloat y)
+genfloat maxmag(genfloat x, genfloat y)
 ----
    a@ Returns x if latexmath:[|x| > |y|], y if latexmath:[|y| > |x|], otherwise
       fmax(x, y).
@@ -20961,7 +20697,7 @@ genfloat maxmag (genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat minmag (genfloat x, genfloat y)
+genfloat minmag(genfloat x, genfloat y)
 ----
    a@ Returns x if latexmath:[|x| < |y|], y if latexmath:[|y| < |x|], otherwise
       fmin(x, y).
@@ -20969,7 +20705,7 @@ genfloat minmag (genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat modf (genfloat x, genfloatptr iptr)
+genfloat modf(genfloat x, genfloatptr iptr)
 ----
    a@ Decompose a floating-point number. The modf
       function breaks the argument x into integral and
@@ -20980,8 +20716,8 @@ genfloat modf (genfloat x, genfloatptr iptr)
 a@
 [source]
 ----
-genfloatf nan (ugenint nancode)
-genfloatd nan (ugenlonginteger nancode)
+genfloatf nan(ugenint nancode)
+genfloatd nan(ugenlonginteger nancode)
 ----
    a@ Returns a quiet NaN. The nancode may be placed
       in the significand of the resulting NaN.
@@ -20989,8 +20725,7 @@ genfloatd nan (ugenlonginteger nancode)
 a@
 [source]
 ----
-genfloat nextafter (genfloat x,
-genfloat y)
+genfloat nextafter(genfloat x, genfloat y)
 ----
    a@ Computes the next representable single-precision
       floating-point value following x in the direction of
@@ -21001,28 +20736,28 @@ genfloat y)
 a@
 [source]
 ----
-genfloat pow (genfloat x, genfloat y)
+genfloat pow(genfloat x, genfloat y)
 ----
    a@ Compute x to the power y.
 
 a@
 [source]
 ----
-genfloat pown (genfloat x, genint y)
+genfloat pown(genfloat x, genint y)
 ----
    a@ Compute x to the power y, where y is an integer.
 
 a@
 [source]
 ----
-genfloat powr (genfloat x, genfloat y)
+genfloat powr(genfloat x, genfloat y)
 ----
    a@ Compute x to the power y, where latexmath:[x \geq 0].
 
 a@
 [source]
 ----
-genfloat remainder (genfloat x, genfloat y)
+genfloat remainder(genfloat x, genfloat y)
 ----
    a@ Compute the value r such that r = x - n*y, where n
       is the integer nearest the exact value of x/y. If there
@@ -21032,7 +20767,7 @@ genfloat remainder (genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat remquo (genfloat x, genfloat y, genintptr quo)
+genfloat remquo(genfloat x, genfloat y, genintptr quo)
 ----
    a@ The remquo function computes the value r such
       that r = x - k*y, where k is the integer nearest the
@@ -21048,7 +20783,7 @@ genfloat remquo (genfloat x, genfloat y, genintptr quo)
 a@
 [source]
 ----
-genfloat rint (genfloat x)
+genfloat rint(genfloat x)
 ----
    a@ Round to integral value (using round to nearest
       even rounding mode) in floating-point format.
@@ -21059,14 +20794,14 @@ genfloat rint (genfloat x)
 a@
 [source]
 ----
-genfloat rootn (genfloat x, genint y)
+genfloat rootn(genfloat x, genint y)
 ----
    a@ Compute x to the power 1/y.
 
 a@
 [source]
 ----
-genfloat round (genfloat x)
+genfloat round(genfloat x)
 ----
    a@ Return the integral value nearest to x rounding
       halfway cases away from zero, regardless of the
@@ -21075,21 +20810,21 @@ genfloat round (genfloat x)
 a@
 [source]
 ----
-genfloat rsqrt (genfloat x)
+genfloat rsqrt(genfloat x)
 ----
    a@ Compute inverse square root.
 
 a@
 [source]
 ----
-genfloat sin (genfloat x)
+genfloat sin(genfloat x)
 ----
    a@ Compute sine.
 
 a@
 [source]
 ----
-genfloat sincos (genfloat x, genfloatptr cosval)
+genfloat sincos(genfloat x, genfloatptr cosval)
 ----
    a@ Compute sine and cosine of x. The computed sine
       is the return value and computed cosine is returned
@@ -21098,56 +20833,56 @@ genfloat sincos (genfloat x, genfloatptr cosval)
 a@
 [source]
 ----
-genfloat sinh (genfloat x)
+genfloat sinh(genfloat x)
 ----
    a@ Compute hyperbolic sine.
 
 a@
 [source]
 ----
-genfloat sinpi (genfloat x)
+genfloat sinpi(genfloat x)
 ----
    a@ Compute _sin({pi} x)_.
 
 a@
 [source]
 ----
-genfloat sqrt (genfloat x)
+genfloat sqrt(genfloat x)
 ----
    a@ Compute square root.
 
 a@
 [source]
 ----
-genfloat tan (genfloat x)
+genfloat tan(genfloat x)
 ----
    a@ Compute tangent.
 
 a@
 [source]
 ----
-genfloat tanh (genfloat x)
+genfloat tanh(genfloat x)
 ----
    a@ Compute hyperbolic tangent.
 
 a@
 [source]
 ----
-genfloat tanpi (genfloat x)
+genfloat tanpi(genfloat x)
 ----
    a@ Compute _tan({pi} x)_.
 
 a@
 [source]
 ----
-genfloat tgamma (genfloat x)
+genfloat tgamma(genfloat x)
 ----
    a@ Compute the gamma function.
 
 a@
 [source]
 ----
-genfloat trunc (genfloat x)
+genfloat trunc(genfloat x)
 ----
    a@ Round to integral value using the round to zero
       rounding mode.
@@ -21169,7 +20904,7 @@ that are available within this namespace are specified in
 a@
 [source]
 ----
-genfloatf cos (genfloatf x)
+genfloatf cos(genfloatf x)
 ----
    a@ Compute cosine over an implementation-defined range.
       The maximum error is implementation-defined.
@@ -21177,7 +20912,7 @@ genfloatf cos (genfloatf x)
 a@
 [source]
 ----
-genfloatf divide (genfloatf x, genfloatf y)
+genfloatf divide(genfloatf x, genfloatf y)
 ----
    a@ Compute x / y over an implementation-defined range.
       The maximum error is implementation-defined.
@@ -21185,7 +20920,7 @@ genfloatf divide (genfloatf x, genfloatf y)
 a@
 [source]
 ----
-genfloatf exp (genfloatf x)
+genfloatf exp(genfloatf x)
 ----
    a@ Compute the base- e exponential of x over an
       implementation-defined range. The maximum error is
@@ -21194,7 +20929,7 @@ genfloatf exp (genfloatf x)
 a@
 [source]
 ----
-genfloatf exp2 (genfloatf x)
+genfloatf exp2(genfloatf x)
 ----
    a@ Compute the base- 2 exponential of x over an
       implementation-defined range. The maximum error is
@@ -21203,7 +20938,7 @@ genfloatf exp2 (genfloatf x)
 a@
 [source]
 ----
-genfloatf exp10 (genfloatf x)
+genfloatf exp10(genfloatf x)
 ----
    a@ Compute the base- 10 exponential of x over an
       implementation-defined range. The maximum error is
@@ -21212,7 +20947,7 @@ genfloatf exp10 (genfloatf x)
 a@
 [source]
 ----
-genfloatf log (genfloatf x)
+genfloatf log(genfloatf x)
 ----
    a@ Compute natural logarithm over an implementation-defined range.
       The maximum error is implementation-defined.
@@ -21220,7 +20955,7 @@ genfloatf log (genfloatf x)
 a@
 [source]
 ----
-genfloatf log2 (genfloatf x)
+genfloatf log2(genfloatf x)
 ----
    a@ Compute a base 2 logarithm over an implementation-defined
       range. The maximum error is implementation-defined.
@@ -21228,7 +20963,7 @@ genfloatf log2 (genfloatf x)
 a@
 [source]
 ----
-genfloatf log10 (genfloatf x)
+genfloatf log10(genfloatf x)
 ----
    a@ Compute a base 10 logarithm over an implementation-defined
       range. The maximum error is implementation-defined.
@@ -21236,7 +20971,7 @@ genfloatf log10 (genfloatf x)
 a@
 [source]
 ----
-genfloatf powr (genfloatf x, genfloatf y)
+genfloatf powr(genfloatf x, genfloatf y)
 ----
    a@ Compute x to the power y, where latexmath:[x \geq 0]. The range of
       x and y are implementation-defined. The maximum error
@@ -21245,7 +20980,7 @@ genfloatf powr (genfloatf x, genfloatf y)
 a@
 [source]
 ----
-genfloatf recip (genfloatf x)
+genfloatf recip(genfloatf x)
 ----
    a@ Compute reciprocal over an implementation-defined
       range. The maximum error is implementation-defined.
@@ -21253,7 +20988,7 @@ genfloatf recip (genfloatf x)
 a@
 [source]
 ----
-genfloatf rsqrt (genfloatf x)
+genfloatf rsqrt(genfloatf x)
 ----
    a@ Compute inverse square root over an implementation-defined
       range. The maximum error is implementation-defined.
@@ -21261,7 +20996,7 @@ genfloatf rsqrt (genfloatf x)
 a@
 [source]
 ----
-genfloatf sin (genfloatf x)
+genfloatf sin(genfloatf x)
 ----
    a@ Compute sine over an implementation-defined range.
       The maximum error is implementation-defined.
@@ -21269,7 +21004,7 @@ genfloatf sin (genfloatf x)
 a@
 [source]
 ----
-genfloatf sqrt (genfloatf x)
+genfloatf sqrt(genfloatf x)
 ----
    a@ Compute square root over an implementation-defined
       range. The maximum error is implementation-defined.
@@ -21277,7 +21012,7 @@ genfloatf sqrt (genfloatf x)
 a@
 [source]
 ----
-genfloatf tan (genfloatf x)
+genfloatf tan(genfloatf x)
 ----
    a@ Compute tangent over an implementation-defined range.
       The maximum error is implementation-defined.
@@ -21301,84 +21036,84 @@ less than or equal to 8192 ulp.
 a@
 [source]
 ----
-genfloatf cos (genfloatf x)
+genfloatf cos(genfloatf x)
 ----
    a@ Compute cosine. x must be in the range -216 to +216.
 
 a@
 [source]
 ----
-genfloatf divide (genfloatf x, genfloatf y)
+genfloatf divide(genfloatf x, genfloatf y)
 ----
    a@ Compute x / y.
 
 a@
 [source]
 ----
-genfloatf exp (genfloatf x)
+genfloatf exp(genfloatf x)
 ----
    a@ Compute the base- e exponential of x.
 
 a@
 [source]
 ----
-genfloatf exp2 (genfloatf x)
+genfloatf exp2(genfloatf x)
 ----
    a@ Compute the base- 2 exponential of x.
 
 a@
 [source]
 ----
-genfloatf exp10 (genfloatf x)
+genfloatf exp10(genfloatf x)
 ----
    a@ Compute the base- 10 exponential of x.
 
 a@
 [source]
 ----
-genfloatf log (genfloatf x)
+genfloatf log(genfloatf x)
 ----
    a@ Compute natural logarithm.
 
 a@
 [source]
 ----
-genfloatf log2 (genfloatf x)
+genfloatf log2(genfloatf x)
 ----
    a@ Compute a base 2 logarithm.
 
 a@
 [source]
 ----
-genfloatf log10 (genfloatf x)
+genfloatf log10(genfloatf x)
 ----
    a@ Compute a base 10 logarithm.
 
 a@
 [source]
 ----
-genfloatf powr (genfloatf x, genfloatf y)
+genfloatf powr(genfloatf x, genfloatf y)
 ----
    a@ Compute x to the power y, where latexmath:[x \geq 0].
 
 a@
 [source]
 ----
-genfloatf recip (genfloatf x)
+genfloatf recip(genfloatf x)
 ----
    a@ Compute reciprocal.
 
 a@
 [source]
 ----
-genfloatf rsqrt (genfloatf x)
+genfloatf rsqrt(genfloatf x)
 ----
    a@ Compute inverse square root.
 
 a@
 [source]
 ----
-genfloatf sin (genfloatf x)
+genfloatf sin(genfloatf x)
 ----
    a@ Compute sine. x must be in the range -216
       to +216.
@@ -21386,14 +21121,14 @@ genfloatf sin (genfloatf x)
 a@
 [source]
 ----
-genfloatf sqrt (genfloatf x)
+genfloatf sqrt(genfloatf x)
 ----
    a@ Compute square root.
 
 a@
 [source]
 ----
-genfloatf tan (genfloatf x)
+genfloatf tan(genfloatf x)
 ----
    a@ Compute tangent. x must be in the range
       -216 to +216.
@@ -21425,28 +21160,28 @@ supported integer math functions are described in
 a@
 [source]
 ----
-geninteger abs (geninteger x)
+geninteger abs(geninteger x)
 ----
    a@ Returns latexmath:[|x|].
 
 a@
 [source]
 ----
-ugeninteger abs_diff (geninteger x, geninteger y)
+ugeninteger abs_diff(geninteger x, geninteger y)
 ----
    a@ Returns latexmath:[|x - y|] without modulo overflow.
 
 a@
 [source]
 ----
-geninteger add_sat (geninteger x, geninteger y)
+geninteger add_sat(geninteger x, geninteger y)
 ----
    a@ Returns latexmath:[x + y] and saturates the result.
 
 a@
 [source]
 ----
-geninteger hadd (geninteger x, geninteger y)
+geninteger hadd(geninteger x, geninteger y)
 ----
    a@ Returns latexmath:[(x + y) >> 1]. The intermediate sum does
       not modulo overflow.
@@ -21454,7 +21189,7 @@ geninteger hadd (geninteger x, geninteger y)
 a@
 [source]
 ----
-geninteger rhadd (geninteger x, geninteger y)
+geninteger rhadd(geninteger x, geninteger y)
 ----
    a@ Returns latexmath:[(x + y + 1) >> 1]. The intermediate sum
       does not modulo overflow.
@@ -21462,8 +21197,8 @@ geninteger rhadd (geninteger x, geninteger y)
 a@
 [source]
 ----
-geninteger clamp (geninteger x, geninteger minval, geninteger maxval)
-geninteger clamp (geninteger x, sgeninteger minval, sgeninteger maxval)
+geninteger clamp(geninteger x, geninteger minval, geninteger maxval)
+geninteger clamp(geninteger x, sgeninteger minval, sgeninteger maxval)
 ----
    a@ Returns min(max(x, minval), maxval).
       Results are undefined if latexmath:[\mathrm{minval} > \mathrm{maxval}].
@@ -21471,7 +21206,7 @@ geninteger clamp (geninteger x, sgeninteger minval, sgeninteger maxval)
 a@
 [source]
 ----
-geninteger clz (geninteger x)
+geninteger clz(geninteger x)
 ----
    a@ Returns the number of leading 0-bits in x, starting
       at the most significant bit position. If x is 0,
@@ -21481,7 +21216,7 @@ geninteger clz (geninteger x)
 a@
 [source]
 ----
-geninteger ctz (geninteger x)
+geninteger ctz(geninteger x)
 ----
    a@ Returns the count of trailing 0-bits in x. If x is 0,
       returns the size in bits of the type of x or component type of x,
@@ -21490,39 +21225,37 @@ geninteger ctz (geninteger x)
 a@
 [source]
 ----
-geninteger mad_hi (
-    geninteger a, geninteger b, geninteger c)
+geninteger mad_hi(geninteger a, geninteger b, geninteger c)
 ----
    a@ Returns [code]#pass:[mul_hi(a, b)+c]#.
 
 a@
 [source]
 ----
-geninteger mad_sat (geninteger a,
-    geninteger b, geninteger c)
+geninteger mad_sat(geninteger a, geninteger b, geninteger c)
 ----
    a@ Returns [code]#pass:[a * b + c]# and saturates the result.
 
 a@
 [source]
 ----
-geninteger max (geninteger x, geninteger y)
-geninteger max (geninteger x, sgeninteger y)
+geninteger max(geninteger x, geninteger y)
+geninteger max(geninteger x, sgeninteger y)
 ----
    a@ Returns y if latexmath:[x < y], otherwise it returns x.
 
 a@
 [source]
 ----
-geninteger min (geninteger x, geninteger y)
-geninteger min (geninteger x, sgeninteger y)
+geninteger min(geninteger x, geninteger y)
+geninteger min(geninteger x, sgeninteger y)
 ----
    a@ Returns y if latexmath:[y < x], otherwise it returns x.
 
 a@
 [source]
 ----
-geninteger mul_hi (geninteger x, geninteger y)
+geninteger mul_hi(geninteger x, geninteger y)
 ----
    a@ Computes [code]#x * y# and returns the high half of the
       product of x and y.
@@ -21530,7 +21263,7 @@ geninteger mul_hi (geninteger x, geninteger y)
 a@
 [source]
 ----
-geninteger rotate (geninteger v, geninteger i)
+geninteger rotate(geninteger v, geninteger i)
 ----
    a@ For each element in v, the bits are shifted left by
       the number of bits given by the corresponding
@@ -21543,63 +21276,63 @@ geninteger rotate (geninteger v, geninteger i)
 a@
 [source]
 ----
-geninteger sub_sat (geninteger x, geninteger y)
+geninteger sub_sat(geninteger x, geninteger y)
 ----
    a@ Returns latexmath:[x - y] and saturates the result.
 
 a@
 [source]
 ----
-ugeninteger16bit upsample (ugeninteger8bit hi, ugeninteger8bit lo)
+ugeninteger16bit upsample(ugeninteger8bit hi, ugeninteger8bit lo)
 ----
    a@ [code]#result[i] = ((ushort)hi[i] << 8) | lo[i]#
 
 a@
 [source]
 ----
-igeninteger16bit upsample (igeninteger8bit hi, ugeninteger8bit lo)
+igeninteger16bit upsample(igeninteger8bit hi, ugeninteger8bit lo)
 ----
    a@ [code]#result[i] = ((short)hi[i] << 8) | lo[i]#
 
 a@
 [source]
 ----
-ugeninteger32bit upsample (ugeninteger16bit hi, ugeninteger16bit lo)
+ugeninteger32bit upsample(ugeninteger16bit hi, ugeninteger16bit lo)
 ----
    a@ [code]#result[i] = ((uint)hi[i] << 16) | lo[i]#
 
 a@
 [source]
 ----
-igeninteger32bit upsample (igeninteger16bit hi, ugeninteger16bit lo)
+igeninteger32bit upsample(igeninteger16bit hi, ugeninteger16bit lo)
 ----
    a@ [code]#result[i] = ((int)hi[i] << 16) | lo[i]#
 
 a@
 [source]
 ----
-ugeninteger64bit upsample (ugeninteger32bit hi, ugeninteger32bit lo)
+ugeninteger64bit upsample(ugeninteger32bit hi, ugeninteger32bit lo)
 ----
    a@ [code]#result[i] = ((ulonglong)hi[i] << 32) | lo[i]#
 
 a@
 [source]
 ----
-igeninteger64bit upsample (igeninteger32bit hi, ugeninteger32bit lo)
+igeninteger64bit upsample(igeninteger32bit hi, ugeninteger32bit lo)
 ----
    a@ [code]#result[i] = ((longlong)hi[i] << 32) | lo[i]#
 
 a@
 [source]
 ----
-geninteger popcount (geninteger x)
+geninteger popcount(geninteger x)
 ----
    a@ Returns the number of non-zero bits in x.
 
 a@
 [source]
 ----
-geninteger32bit mad24 (geninteger32bit x, geninteger32bit y, geninteger32bit z)
+geninteger32bit mad24(geninteger32bit x, geninteger32bit y, geninteger32bit z)
 ----
    a@ Multiply two 24-bit integer values x and y and add
       the 32-bit integer result to the 32-bit integer z.
@@ -21609,7 +21342,7 @@ geninteger32bit mad24 (geninteger32bit x, geninteger32bit y, geninteger32bit z)
 a@
 [source]
 ----
-geninteger32bit mul24 (geninteger32bit x, geninteger32bit y)
+geninteger32bit mul24(geninteger32bit x, geninteger32bit y)
 ----
    a@ Multiply two 24-bit integer values x and y. x and y
       are 32-bit integers but only the low 24-bits are used
@@ -21642,9 +21375,9 @@ functions can take as input [code]#float# or optionally
 a@
 [source]
 ----
-genfloat clamp (genfloat x, genfloat minval, genfloat maxval)
-genfloatf clamp (genfloatf x, float minval, float maxval)
-genfloatd clamp (genfloatd x, double minval, double maxval)
+genfloat clamp(genfloat x, genfloat minval, genfloat maxval)
+genfloatf clamp(genfloatf x, float minval, float maxval)
+genfloatd clamp(genfloatd x, double minval, double maxval)
 ----
    a@ Returns fmin(fmax(x, minval), maxval).
       Results are undefined if latexmath:[\mathrm{minval} > \mathrm{maxval}].
@@ -21652,7 +21385,7 @@ genfloatd clamp (genfloatd x, double minval, double maxval)
 a@
 [source]
 ----
-genfloat degrees (genfloat radians)
+genfloat degrees(genfloat radians)
 ----
    a@ Converts radians to degrees,
       i.e. latexmath:[{180 \over \pi} \times radians].
@@ -21660,9 +21393,9 @@ genfloat degrees (genfloat radians)
 a@
 [source]
 ----
-genfloat max (genfloat x, genfloat y)
-genfloatf max (genfloatf x, float y)
-genfloatd max (genfloatd x, double y)
+genfloat max(genfloat x, genfloat y)
+genfloatf max(genfloatf x, float y)
+genfloatd max(genfloatd x, double y)
 ----
    a@ Returns y if latexmath:[x < y], otherwise it returns x. If x or y
       are infinite or NaN, the return values are undefined.
@@ -21670,9 +21403,9 @@ genfloatd max (genfloatd x, double y)
 a@
 [source]
 ----
-genfloat min (genfloat x, genfloat y)
-genfloatf min (genfloatf x, float y)
-genfloatd min (genfloatd x, double y)
+genfloat min(genfloat x, genfloat y)
+genfloatf min(genfloatf x, float y)
+genfloatd min(genfloatd x, double y)
 ----
    a@ Returns y if latexmath:[y < x], otherwise it returns x. If x or y
       are infinite or NaN, the return values are undefined.
@@ -21680,9 +21413,9 @@ genfloatd min (genfloatd x, double y)
 a@
 [source]
 ----
-genfloat mix (genfloat x, genfloat y, genfloat a)
-genfloatf mix (genfloatf x, genfloatf y, float a)
-genfloatd mix (genfloatd x, genfloatd y, double a)
+genfloat mix(genfloat x, genfloat y, genfloat a)
+genfloatf mix(genfloatf x, genfloatf y, float a)
+genfloatd mix(genfloatd x, genfloatd y, double a)
 ----
    a@ Returns the linear blend of x and y implemented as:
       latexmath:[x + (y - x) \times a].
@@ -21693,16 +21426,16 @@ genfloatd mix (genfloatd x, genfloatd y, double a)
 a@
 [source]
 ----
-genfloat radians (genfloat degrees)
+genfloat radians(genfloat degrees)
 ----
    a@ Converts degrees to radians, i.e. latexmath:[(\pi / 180) \times degrees].
 
 a@
 [source]
 ----
-genfloat step (genfloat edge, genfloat x)
-genfloatf step (float edge, genfloatf x)
-genfloatd step (double edge, genfloatd x)
+genfloat step(genfloat edge, genfloat x)
+genfloatf step(float edge, genfloatf x)
+genfloatd step(double edge, genfloatd x)
 ----
    a@ Returns 0.0 if latexmath:[x < edge], otherwise it returns 1.0.
 
@@ -21737,7 +21470,7 @@ edge0 or edge1 is a NaN.
 a@
 [source]
 ----
-genfloat sign (genfloat x)
+genfloat sign(genfloat x)
 ----
    a@ Returns 1.0 if latexmath:[x > 0], -0.0 if latexmath:[x = -0.0], +0.0 if latexmath:[x =+0.0], or -1.0
       if latexmath:[x < 0]. Returns 0.0 if x is a NaN.
@@ -21768,10 +21501,10 @@ geometric functions.
 a@
 [source]
 ----
-float4 cross (float4 p0, float4 p1)
-float3 cross (float3 p0, float3 p1)
-double4 cross (double4 p0, double4 p1)
-double3 cross (double3 p0, double3 p1)
+float4 cross(float4 p0, float4 p1)
+float3 cross(float3 p0, float3 p1)
+double4 cross(double4 p0, double4 p1)
+double3 cross(double3 p0, double3 p1)
 ----
    a@ Returns the cross product of p0.xyz and p1.xyz. The
       _w_ component of [code]#float4# result returned will be 0.0.
@@ -21779,26 +21512,26 @@ double3 cross (double3 p0, double3 p1)
 a@
 [source]
 ----
-mfloat4 cross (mfloat4 p0, mfloat4 p1)
-mfloat3 cross (mfloat3 p0, mfloat3 p1)
-mdouble4 cross (mdouble4 p0, mdouble4 p1)
-mdouble3 cross (mdouble3 p0, mdouble3 p1)
+mfloat4 cross(mfloat4 p0, mfloat4 p1)
+mfloat3 cross(mfloat3 p0, mfloat3 p1)
+mdouble4 cross(mdouble4 p0, mdouble4 p1)
+mdouble3 cross(mdouble3 p0, mdouble3 p1)
 ----
    a@ Returns the cross product of first 3 components of p0 and p1. The 4th component of result returned will be 0.0.
 
 a@
 [source]
 ----
-float dot (gengeofloat p0, gengeofloat p1)
-double dot (gengeodouble p0, gengeodouble p1)
+float dot(gengeofloat p0, gengeofloat p1)
+double dot(gengeodouble p0, gengeodouble p1)
 ----
    a@ Compute dot product.
 
 a@
 [source]
 ----
-float distance (gengeofloat p0, gengeofloat p1)
-double distance (gengeodouble p0, gengeodouble p1)
+float distance(gengeofloat p0, gengeofloat p1)
+double distance(gengeodouble p0, gengeodouble p1)
 ----
    a@ Returns the distance between p0 and p1. This is
       calculated as [code]#length(p0 - p1)#.
@@ -21806,8 +21539,8 @@ double distance (gengeodouble p0, gengeodouble p1)
 a@
 [source]
 ----
-float length (gengeofloat p)
-double length (gengeodouble p)
+float length(gengeofloat p)
+double length(gengeodouble p)
 ----
    a@ Return the length of vector p, i.e.,
       latexmath:[\sqrt{ p.x^2 + p.y^2 + ...}]
@@ -21815,8 +21548,8 @@ double length (gengeodouble p)
 a@
 [source]
 ----
-gengeofloat normalize (gengeofloat p)
-gengeodouble normalize (gengeodouble p)
+gengeofloat normalize(gengeofloat p)
+gengeodouble normalize(gengeodouble p)
 ----
    a@ Returns a vector in the same direction as p but with a
       length of 1.
@@ -21824,14 +21557,14 @@ gengeodouble normalize (gengeodouble p)
 a@
 [source]
 ----
-float fast_distance (gengeofloat p0, gengeofloat p1)
+float fast_distance(gengeofloat p0, gengeofloat p1)
 ----
    a@ Returns [code]#fast_length(p0 - p1)#.
 
 a@
 [source]
 ----
-float fast_length (gengeofloat p)
+float fast_length(gengeofloat p)
 ----
    a@ Returns the length of vector p computed as:
       [code]#pass:[sqrt((half)(pow(p.x,2) + pow(p.y,2) + ...))]#
@@ -21839,7 +21572,7 @@ float fast_length (gengeofloat p)
 a@
 [source]
 ----
-gengeofloat fast_normalize (gengeofloat p)
+gengeofloat fast_normalize(gengeofloat p)
 ----
    a@ Returns a vector in the same direction as p but with a
       length of 1. fast_normalize is computed as:
@@ -21901,63 +21634,63 @@ the [code]#vec# type.
 a@
 [source]
 ----
-vec<int16_t,{n}> isequal (half{n} x, half{n} y)
-vec<int32_t,{n}> isequal (float{n} x, float{n} y)
-vec<int64_t,{n}> isequal (double{n} x, double{n} y)
+vec<int16_t, { n }> isequal(half { n } x, half { n } y)
+vec<int32_t, { n }> isequal(float { n } x, float { n } y)
+vec<int64_t, { n }> isequal(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of [code]#x == y#.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isnotequal (half{n} x, half{n} y)
-vec<int32_t,{n}> isnotequal (float{n} x, float{n} y)
-vec<int64_t,{n}> isnotequal (double{n} x, double{n} y)
+vec<int16_t, { n }> isnotequal(half { n } x, half { n } y)
+vec<int32_t, { n }> isnotequal(float { n } x, float { n } y)
+vec<int64_t, { n }> isnotequal(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of [code]#x != y#.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isgreater (half{n} x, half{n} y)
-vec<int32_t,{n}> isgreater (float{n} x, float{n} y)
-vec<int64_t,{n}> isgreater (double{n} x, double{n} y)
+vec<int16_t, { n }> isgreater(half { n } x, half { n } y)
+vec<int32_t, { n }> isgreater(float { n } x, float { n } y)
+vec<int64_t, { n }> isgreater(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of [code]#x > y#.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isgreaterequal (half{n} x, half{n} y)
-vec<int32_t,{n}> isgreaterequal (float{n} x, float{n} y)
-vec<int64_t,{n}> isgreaterequal (double{n} x, double{n} y)
+vec<int16_t, { n }> isgreaterequal(half { n } x, half { n } y)
+vec<int32_t, { n }> isgreaterequal(float { n } x, float { n } y)
+vec<int64_t, { n }> isgreaterequal(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of [code]#x >= y#.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isless (half{n} x, half{n} y)
-vec<int32_t,{n}> isless (float{n} x, float{n} y)
-vec<int64_t,{n}> isless (double{n} x, double{n} y)
+vec<int16_t, { n }> isless(half { n } x, half { n } y)
+vec<int32_t, { n }> isless(float { n } x, float { n } y)
+vec<int64_t, { n }> isless(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of [code]#x < y#.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> islessequal (half{n} x, half{n} y)
-vec<int32_t,{n}> islessequal (float{n} x, float{n} y)
-vec<int64_t,{n}> islessequal (double{n} x, double{n} y)
+vec<int16_t, { n }> islessequal(half { n } x, half { n } y)
+vec<int32_t, { n }> islessequal(float { n } x, float { n } y)
+vec<int64_t, { n }> islessequal(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of [code]#+x <= y+#.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> islessgreater (half{n} x, half{n} y)
-vec<int32_t,{n}> islessgreater (float{n} x, float{n} y)
-vec<int64_t,{n}> islessgreater (double{n} x, double{n} y)
+vec<int16_t, { n }> islessgreater(half { n } x, half { n } y)
+vec<int32_t, { n }> islessgreater(float { n } x, float { n } y)
+vec<int64_t, { n }> islessgreater(double { n } x, double { n } y)
 ----
    a@ Returns the component-wise compare of
       [code]#(x < y) || (x > y)#.
@@ -21965,45 +21698,45 @@ vec<int64_t,{n}> islessgreater (double{n} x, double{n} y)
 a@
 [source]
 ----
-vec<int16_t,{n}> isfinite (half{n} x)
-vec<int32_t,{n}> isfinite (float{n} x)
-vec<int64_t,{n}> isfinite (double{n} x)
+vec<int16_t, { n }> isfinite(half { n } x)
+vec<int32_t, { n }> isfinite(float { n } x)
+vec<int64_t, { n }> isfinite(double { n } x)
 ----
    a@ Test for finite value.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isinf (half{n} x)
-vec<int32_t,{n}> isinf (float{n} x)
-vec<int64_t,{n}> isinf (double{n} x)
+vec<int16_t, { n }> isinf(half { n } x)
+vec<int32_t, { n }> isinf(float { n } x)
+vec<int64_t, { n }> isinf(double { n } x)
 ----
    a@ Test for infinity value (positive or negative) .
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isnan (half{n} x)
-vec<int32_t,{n}> isnan (float{n} x)
-vec<int64_t,{n}> isnan (double{n} x)
+vec<int16_t, { n }> isnan(half { n } x)
+vec<int32_t, { n }> isnan(float { n } x)
+vec<int64_t, { n }> isnan(double { n } x)
 ----
    a@ Test for a NaN.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isnormal (half{n} x)
-vec<int32_t,{n}> isnormal (float{n} x)
-vec<int64_t,{n}> isnormal (double{n} x)
+vec<int16_t, { n }> isnormal(half { n } x)
+vec<int32_t, { n }> isnormal(float { n } x)
+vec<int64_t, { n }> isnormal(double { n } x)
 ----
    a@ Test for a normal value.
 
 a@
 [source]
 ----
-vec<int16_t,{n}> isordered (half{n} x, half{n} y)
-vec<int32_t,{n}> isordered (float{n} x, float{n} y)
-vec<int64_t,{n}> isordered (double{n} x, double{n} y)
+vec<int16_t, { n }> isordered(half { n } x, half { n } y)
+vec<int32_t, { n }> isordered(float { n } x, float { n } y)
+vec<int64_t, { n }> isordered(double { n } x, double { n } y)
 ----
    a@ Test if arguments are ordered. [code]#isordered()# takes arguments
       [code]#x# and [code]#y#, and returns the result
@@ -22012,9 +21745,9 @@ vec<int64_t,{n}> isordered (double{n} x, double{n} y)
 a@
 [source]
 ----
-vec<int16_t,{n}> isunordered (half{n} x, half{n} y)
-vec<int32_t,{n}> isunordered (float{n} x, float{n} y)
-vec<int64_t,{n}> isunordered (double{n} x, double{n} y)
+vec<int16_t, { n }> isunordered(half { n } x, half { n } y)
+vec<int32_t, { n }> isunordered(float { n } x, float { n } y)
+vec<int64_t, { n }> isunordered(double { n } x, double { n } y)
 ----
    a@ Test if arguments are unordered. [code]#isunordered()# takes arguments
       [code]#x# and [code]#y#, returning non-zero if [code]#x# or [code]#y# is
@@ -22023,9 +21756,9 @@ vec<int64_t,{n}> isunordered (double{n} x, double{n} y)
 a@
 [source]
 ----
-vec<int16_t,{n}> signbit (half{n} x)
-vec<int32_t,{n}> signbit (float{n} x)
-vec<int64_t,{n}> signbit (double{n} x)
+vec<int16_t, { n }> signbit(half { n } x)
+vec<int32_t, { n }> signbit(float { n } x)
+vec<int64_t, { n }> signbit(double { n } x)
 ----
    a@ Test for sign bit.  Returns the following for each component in
       [code]#x#: -1 (i.e all bits set) if the sign bit in the component value
@@ -22034,7 +21767,7 @@ vec<int64_t,{n}> signbit (double{n} x)
 a@
 [source]
 ----
-int any (vigeninteger x)
+int any(vigeninteger x)
 ----
    a@ Returns 1 if the most significant bit in any
       component of [code]#x# is set; otherwise returns 0.
@@ -22042,7 +21775,7 @@ int any (vigeninteger x)
 a@
 [source]
 ----
-int all (vigeninteger x)
+int all(vigeninteger x)
 ----
    a@ Returns 1 if the most significant bit in all
       components of [code]#x# is set; otherwise returns 0.
@@ -22050,7 +21783,7 @@ int all (vigeninteger x)
 a@
 [source]
 ----
-vgentype bitselect (vgentype a, vgentype b, vgentype c)
+vgentype bitselect(vgentype a, vgentype b, vgentype c)
 ----
    a@ Each bit of the result is the corresponding bit of [code]#a#
       if the corresponding bit of [code]#c# is 0. Otherwise it is
@@ -22059,8 +21792,8 @@ vgentype bitselect (vgentype a, vgentype b, vgentype c)
 a@
 [source]
 ----
-vgentype select (vgentype a, vgentype b, vigeninteger c)
-vgentype select (vgentype a, vgentype b, vugeninteger c)
+vgentype select(vgentype a, vgentype b, vigeninteger c)
+vgentype select(vgentype a, vgentype b, vugeninteger c)
 ----
    a@ For each component of a vector type:
 
@@ -22083,56 +21816,56 @@ for the [code]#marray# type and for scalar data types.
 a@
 [source]
 ----
-bool isequal (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isequal (mgenfloat x, mgenfloat y)
+bool isequal(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x == y#.
 
 a@
 [source]
 ----
-bool isnotequal (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isnotequal (mgenfloat x, mgenfloat y)
+bool isnotequal(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isnotequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x != y#.
 
 a@
 [source]
 ----
-bool isgreater (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isgreater (mgenfloat x, mgenfloat y)
+bool isgreater(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isgreater(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x > y#.
 
 a@
 [source]
 ----
-bool isgreaterequal (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isgreaterequal (mgenfloat x, mgenfloat y)
+bool isgreaterequal(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isgreaterequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x >= y#.
 
 a@
 [source]
 ----
-bool isless (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isless (mgenfloat x, mgenfloat y)
+bool isless(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isless(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x < y#.
 
 a@
 [source]
 ----
-bool islessequal (sgenfloat x, sgenfloat y)
-marray<bool,{N}> islessequal (mgenfloat x, mgenfloat y)
+bool islessequal(sgenfloat x, sgenfloat y)
+marray<bool, { N }> islessequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#+x <= y+#.
 
 a@
 [source]
 ----
-bool islessgreater (sgenfloat x, sgenfloat y)
-marray<bool,{N}> islessgreater (mgenfloat x, mgenfloat y)
+bool islessgreater(sgenfloat x, sgenfloat y)
+marray<bool, { N }> islessgreater(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of
       [code]#(x < y) || (x > y)#.
@@ -22140,40 +21873,40 @@ marray<bool,{N}> islessgreater (mgenfloat x, mgenfloat y)
 a@
 [source]
 ----
-bool isfinite (sgenfloat x)
-marray<bool,{N}> isfinite (mgenfloat x)
+bool isfinite(sgenfloat x)
+marray<bool, { N }> isfinite(mgenfloat x)
 ----
    a@ Test for finite value.
 
 a@
 [source]
 ----
-bool isinf (sgenfloat x)
-marray<bool,{N}> isinf (mgenfloat x)
+bool isinf(sgenfloat x)
+marray<bool, { N }> isinf(mgenfloat x)
 ----
    a@ Test for infinity value (positive or negative) .
 
 a@
 [source]
 ----
-bool isnan (sgenfloat x)
-marray<bool,{N}> isnan (mgenfloat x)
+bool isnan(sgenfloat x)
+marray<bool, { N }> isnan(mgenfloat x)
 ----
    a@ Test for a NaN.
 
 a@
 [source]
 ----
-bool isnormal (sgenfloat x)
-marray<bool,{N}> isnormal (mgenfloat x)
+bool isnormal(sgenfloat x)
+marray<bool, { N }> isnormal(mgenfloat x)
 ----
    a@ Test for a normal value.
 
 a@
 [source]
 ----
-bool isordered (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isordered (mgenfloat x, mgenfloat y)
+bool isordered(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isordered(mgenfloat x, mgenfloat y)
 ----
    a@ Test if arguments are ordered. [code]#isordered()# takes arguments
       [code]#x# and [code]#y#, and returns the result
@@ -22182,8 +21915,8 @@ marray<bool,{N}> isordered (mgenfloat x, mgenfloat y)
 a@
 [source]
 ----
-bool isunordered (sgenfloat x, sgenfloat y)
-marray<bool,{N}> isunordered (mgenfloat x, mgenfloat y)
+bool isunordered(sgenfloat x, sgenfloat y)
+marray<bool, { N }> isunordered(mgenfloat x, mgenfloat y)
 ----
    a@ Test if arguments are unordered. [code]#isunordered()#
       takes arguments [code]#x# and [code]#y#, returning [code]#true# if
@@ -22192,8 +21925,8 @@ marray<bool,{N}> isunordered (mgenfloat x, mgenfloat y)
 a@
 [source]
 ----
-bool signbit (sgenfloat x)
-marray<bool,{N}> signbit (mgenfloat x)
+bool signbit(sgenfloat x)
+marray<bool, { N }> signbit(mgenfloat x)
 ----
    a@ Test for sign bit, returning [code]#true# if the sign bit
       in [code]#x# is set, and [code]#false# otherwise.
@@ -22201,8 +21934,8 @@ marray<bool,{N}> signbit (mgenfloat x)
 a@
 [source]
 ----
-bool any (sigeninteger x)
-bool any (migeninteger x)
+bool any(sigeninteger x)
+bool any(migeninteger x)
 ----
    a@ Returns [code]#true# if the most significant bit in any component of
       [code]#x# is set; otherwise returns [code]#false#.
@@ -22210,8 +21943,8 @@ bool any (migeninteger x)
 a@
 [source]
 ----
-bool all (sigeninteger x)
-bool all (migeninteger x)
+bool all(sigeninteger x)
+bool all(migeninteger x)
 ----
    a@ Returns [code]#true# if the most significant bit in all components of
       [code]#x# is set; otherwise returns [code]#false#.
@@ -22219,8 +21952,8 @@ bool all (migeninteger x)
 a@
 [source]
 ----
-sgentype bitselect (sgentype a, sgentype b, sgentype c)
-mgentype bitselect (mgentype a, mgentype b, mgentype c)
+sgentype bitselect(sgentype a, sgentype b, sgentype c)
+mgentype bitselect(mgentype a, mgentype b, mgentype c)
 ----
    a@ Each bit of the result is the corresponding bit of [code]#a#
       if the corresponding bit of [code]#c# is 0. Otherwise it is
@@ -22229,8 +21962,8 @@ mgentype bitselect (mgentype a, mgentype b, mgentype c)
 a@
 [source]
 ----
-sgentype select (sgentype a, sgentype b, bool c)
-mgentype select (mgentype a, mgentype b, marray<bool,{N}> c)
+sgentype select(sgentype a, sgentype b, bool c)
+mgentype select(mgentype a, mgentype b, marray<bool, { N }> c)
 ----
    a@ Returns the component-wise [code]#result = c ? b : a#.
 
