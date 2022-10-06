@@ -12574,10 +12574,13 @@ multiple reductions reference the same reduction variable, or a reduction
 variable is accessed directly during the lifetime of a reduction (e.g. via an
 [code]#accessor# or USM pointer), the behavior is undefined.
 
-Certain implementations of reductions can be made more efficient if the
-reduction operator has an identity value and this value is known to the
-implementation. For standard binary operators (e.g. [code]#plus# on arithmetic
-types), an implementation can determine the correct identity value
+Some of the overloads for the [code]#reduction# function take an identity value
+and some do not. An implementation is required to compute a correct reduction
+even when the application does not specify an identity value. However, the
+implementation may be more efficient when the identity value is either provided
+by the application or is known by the implementation. For reductions using
+standard binary operators and fundamental types (e.g. [code]#plus# and
+arithmetic types), an implementation can determine the correct identity value
 automatically in order to avoid performance penalties.
 
 If an implementation can identify an identity value for a given combination of
@@ -12589,6 +12592,182 @@ be tested using the [code]#has_known_identity# trait class.
 ----
 include::{header_dir}/identity.h[lines=4..-1]
 ----
+
+For each of the partial specializations listed in <<table.identities>>,
+[code]#known_identity# exists and has the value shown.
+
+[[table.identities]]
+.Known identities.
+[width="100%",options="header",separator="@",cols="25%,55%,20%"]
+|====
+@ Operator @ Available Only When @ Identity
+
+a@
+[source]
+----
+sycl::plus
+----
+a@
+[source]
+----
+std::is_arithmetic_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::multiplies
+----
+a@
+[source]
+----
+std::is_arithmetic_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{1}
+----
+
+a@
+[source]
+----
+sycl::bit_and
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+~AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::bit_or
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::bit_xor
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::logical_and
+----
+a@
+[source]
+----
+std::is_same_v<std::remove_v_t<AccumulatorT>, bool>
+----
+a@
+----
+true
+----
+
+a@
+[source]
+----
+sycl::logical_or
+----
+a@
+[source]
+----
+std::is_same_v<std::remove_v_t<AccumulatorT>, bool>
+----
+a@
+----
+false
+----
+
+a@
+[source]
+----
+sycl::minimum
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+std::numeric_limits<AccumulatorT>::max()
+----
+
+a@
+[source]
+----
+sycl::minimum
+----
+a@
+[source]
+----
+std::is_floating_point_v<AccumulatorT> || std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+----
+a@
+----
+std::numeric_limits<AccumulatorT>::infinity()
+----
+
+a@
+[source]
+----
+sycl::maximum
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+std::numeric_limits<AccumulatorT>::lowest()
+----
+
+a@
+[source]
+----
+sycl::maximum
+----
+a@
+[source]
+----
+std::is_floating_point_v<AccumulatorT> || std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+----
+a@
+----
+-std::numeric_limits<AccumulatorT>::infinity()
+----
+
+|====
 
 The reduction interface is limited to reduction variables whose size can be
 determined at compile-time.  As such, [code]#buffer# and USM pointer arguments
@@ -16517,7 +16696,8 @@ half
 ----
    a@ A 16-bit floating-point. The half data type must conform to the IEEE
       754-2008 half precision storage format. This type is only supported
-      on devices that have [code]#aspect::fp16#.
+      on devices that have [code]#aspect::fp16#. [code]#std::numeric_limits#
+      must be specialized for the half data type.
 
 |====
 
