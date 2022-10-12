@@ -5052,11 +5052,10 @@ lifetime, and the contents of this memory are unspecified for the
 lifetime of the buffer. If the container memory is modified by the host
 during the lifetime of this buffer, then the results are undefined.
 
-When the buffer is destroyed, if the return type of
-[code]#std::data(container)# is not [code]#const# then the destructor
-will block until all work in queues on the buffer have completed, and will
-then copy the contents of the buffer to the container (if required)
-and then return.
+When the buffer is destroyed, the destructor will block until all work in
+queues on the buffer have completed.  If the return type of
+[code]#std::data(container)# is not [code]#const# then the destructor will also
+copy the contents of the buffer to the container (if required).
 --
 
 
