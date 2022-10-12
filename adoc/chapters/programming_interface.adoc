@@ -4241,6 +4241,11 @@ merely allocate uninitialized memory, and the application is responsible for
 constructing objects by calling placement-new and for destroying them later
 by manually calling the object's destructor.
 
+For the overloads that do copy objects from host memory, the [code]#hostData#
+pointer must point to _N_ bytes of memory where _N_ is
+[code]#sizeof(T) * bufferRange.size()#.  If _N_ is zero, [code]#hostData# is
+permitted to be [code]#nullptr# or an empty [code]#std::shared_ptr#.
+
 A SYCL [code]#buffer# can construct an instance of a SYCL [code]#buffer#
 that reinterprets the original SYCL [code]#buffer# with a different
 type, dimensionality and range using the member function
@@ -6052,10 +6057,6 @@ constructor, then the buffer object and the developer's application share
 the memory region. If the shared pointer is still used on the application's
 side then the data will be copied back from the buffer or image and will be
 available to the application after the buffer or image is destroyed.
-
-If the [code]#shared_ptr# is not empty, the contents of the referenced
-memory are used to initialize the buffer.  If the [code]#shared_ptr# is
-empty, then the buffer is created with uninitialized memory.
 
 When the buffer is destroyed and the data have potentially been updated, if
 the number of copies of the shared pointer outside the runtime is 0, there
