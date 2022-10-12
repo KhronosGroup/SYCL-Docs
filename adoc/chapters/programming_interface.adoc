@@ -4162,6 +4162,19 @@ host. Note that in this case the runtime will raise an error if it requires
 host memory but it is not available (e.g when moving data across <<backend>>
 contexts).
 
+In some cases, the implementation may retain a copy of the allocator object
+even after the buffer is destroyed.  For example, this can happen when the
+buffer object is destroyed before commands using accessors to the buffer have
+completed.  Therefore, the application must be prepared for calls to the
+allocator even after the buffer is destroyed.
+
+[NOTE]
+====
+If the application needs to know when the implementation has destroyed all
+copies of the allocator, it can maintain a reference count within the
+allocator.
+====
+
 The definition of allocators extends the current functionality of SYCL,
 ensuring that users can define allocator functions for specific hardware or
 certain complex shared memory mechanisms (e.g. NUMA), and improves
