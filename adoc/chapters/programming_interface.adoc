@@ -4162,6 +4162,19 @@ host. Note that in this case the runtime will raise an error if it requires
 host memory but it is not available (e.g when moving data across <<backend>>
 contexts).
 
+In some cases, the implementation may retain a copy of the allocator object
+even after the buffer is destroyed.  For example, this can happen when the
+buffer object is destroyed before commands using accessors to the buffer have
+completed.  Therefore, the application must be prepared for calls to the
+allocator even after the buffer is destroyed.
+
+[NOTE]
+====
+If the application needs to know when the implementation has destroyed all
+copies of the allocator, it can maintain a reference count within the
+allocator.
+====
+
 The definition of allocators extends the current functionality of SYCL,
 ensuring that users can define allocator functions for specific hardware or
 certain complex shared memory mechanisms (e.g. NUMA), and improves
@@ -4976,20 +4989,20 @@ with attached host memory and is still in use.
 
 More precisely:
 
-  . A buffer can be constructed with just a size and using the default
-    buffer allocator. The memory management for this type of buffer is
-    entirely handled by the SYCL system. The destructor for this type of
+  . A buffer can be constructed from a [code]#range# (and without a
+    [code]#hostData# pointer).  The memory management for this type of buffer
+    is entirely handled by the SYCL system. The destructor for this type of
     buffer does not need to block, even if work on the buffer has not
     completed. Instead, the SYCL system frees any storage required for the
     buffer asynchronously when it is no longer in use in queues. The initial
     contents of the buffer are unspecified.
-  . A buffer can be constructed with associated host memory and a default
-    buffer allocator. The buffer will use this host memory for its full
-    lifetime, but the contents of this host memory are unspecified for the
-    lifetime of the buffer. If the host memory is modified by the host, or
-    mapped to another buffer or image during the lifetime of this buffer,
-    then the results are undefined. The initial contents of the buffer will
-    be the contents of the host memory at the time of construction.
+  . A buffer can be constructed from a [code]#hostData# pointer.  The buffer
+    will use this host memory for its full lifetime, but the contents of this
+    host memory are unspecified for the lifetime of the buffer. If the host
+    memory is modified on the host or if it is used to construct another
+    buffer or image during the lifetime of this buffer, then the results are
+    undefined.  The initial contents of the buffer will be the contents of the
+    host memory at the time of construction.
 +
 --
 When the buffer is destroyed, the destructor will block until all
