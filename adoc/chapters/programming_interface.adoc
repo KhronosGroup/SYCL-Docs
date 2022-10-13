@@ -5029,20 +5029,30 @@ copy of data back to host.
 When the buffer is destroyed, the destructor will block until all work
 in queues on the buffer have completed.
 --
-  . A buffer can be constructed using a [code]#shared_ptr# to host
-    data. This pointer is shared between the SYCL application and the
-    runtime. In order to allow synchronization between the application and
-    the runtime a [code]#mutex# is used which will be locked by the
-    runtime whenever the data is in use, and unlocked when it is no longer
-    needed.
+  . A buffer can be constructed using a [code]#std::shared_ptr# to host
+    data.  This is similar to the case when the buffer is constructed using a
+    raw [code]#hostData# pointer, except that the SYCL runtime holds a
+    reference count to the [code]#shared_ptr# for the lifetime of the buffer.
+    Thus, the application can release its [code]#shared_ptr# even before the
+    buffer is destroyed.  The buffer will use this host memory for its full
+    lifetime, but the contents of this host memory are unspecified for the
+    lifetime of the buffer.  If the host memory is modified on the host or if
+    it is used to construct another buffer or image during the lifetime of this
+    buffer, then the results are undefined.  The initial contents of the buffer
+    will be the contents of the host memory at the time of construction.
 +
 --
-The [code]#shared_ptr# reference counting is used in order to prevent
-destroying the buffer host data prematurely. If the [code]#shared_ptr#
-is deleted from the user application before buffer destruction, the buffer
-can continue securely because the pointer hasn't been destroyed yet. It will
-not copy data back to the host before destruction, however, as the
-application side has already deleted its copy.
+When the buffer is destroyed, the destructor is guaranteed to block if the
+application still holds a reference count to the [code]#shared_ptr# at the
+point when the destructor runs.  In this case, the destructor will block until
+all work in queues on the buffer have completed.  The buffer destructor may
+also copy-back data to host memory.  This happens only if the application still
+holds a reference count to the [code]#shared_ptr# and only if it is otherwise
+necessary to copy this data back.
+
+If the underlying type of the [code]#shared_ptr# is [code]#const#, then the
+buffer is read-only; only read accessors are allowed on the buffer and no
+copy-back to host memory is performed.
 
 Note that since there is an implicit conversion of a
 [code]#std::unique_ptr# to a [code]#std::shared_ptr#, a
@@ -6053,57 +6063,6 @@ buffer construction.
   // There is nowhere to copy data back.
   // To get copy back, a location can be specified:
   b.set_final_data(std::weak_ptr<int> { .... })
-}
-----
-
-
-==== Shared SYCL ownership of the host memory
-
-When an instance of [code]#std::shared_ptr# is passed to the buffer
-constructor, then the buffer object and the developer's application share
-the memory region. If the shared pointer is still used on the application's
-side then the data will be copied back from the buffer or image and will be
-available to the application after the buffer or image is destroyed.
-
-If the [code]#shared_ptr# is not empty, the contents of the referenced
-memory are used to initialize the buffer.  If the [code]#shared_ptr# is
-empty, then the buffer is created with uninitialized memory.
-
-When the buffer is destroyed and the data have potentially been updated, if
-the number of copies of the shared pointer outside the runtime is 0, there
-is no user-side shared pointer to read the data. Therefore the data is not
-copied out, and the buffer destructor does not need to wait for the data
-processes to be finished, as the outcome is not needed on the application's
-side.
-
-This behavior can be overridden using the [code]#set_final_data()#
-member function of the buffer class, which will by any means force the buffer
-destructor to wait until the data is copied to wherever the
-[code]#set_final_data()# member function has put the data (or not wait nor copy
-if set final data is [code]#nullptr)#.
-
-[source,,linenums]
-----
-{
-  std::shared_ptr<int> ptr { data };
-  {
-    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
-    // update the data
-    [...]
-  } // Data is copied back because there is an user side shared_ptr
-}
-----
-
-[source,,linenums]
-----
-{
-  std::shared_ptr<int> ptr { data };
-  {
-    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
-    // update the data
-    [...]
-    ptr.reset();
-  } // Data is not copied back, there is no user side shared_ptr.
 }
 ----
 
