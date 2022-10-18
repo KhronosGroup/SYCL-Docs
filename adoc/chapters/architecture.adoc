@@ -1098,11 +1098,11 @@ to the buffer or USM allocation from device code.
 
 ==== Forward progress
 
-Memory consistency guarantees are independent of any forward progress
-guarantees.  A SYCL implementation must ensure that the work-items in a group
-obey the semantics of <<group-barrier,group barriers>>, but is not required to
-provide any additional forward progress guarantees; each work-item is required
-only to provide weakly parallel forward progress guarantees.
+Each work-item in SYCL is a separate thread of execution, providing at least
+weakly parallel forward progress guarantees.  Whether work-items provide
+stronger forward progress guarantees is implementation-defined.  All
+implementations must ensure that the work-items in a group obey the semantics
+of <<group-barrier,group barriers>>, regardless of other progress guarantees.
 
 Synchronizing work-items via memory operations is unsafe in general, but is
 supported if and only if the following conditions are true:
@@ -1112,9 +1112,6 @@ supported if and only if the following conditions are true:
 
   * the work-items being synchronized both provide concurrent forward progress
     guarantees.
-
-The forward progress guarantee provided by each work-item is
-implementation-defined.
 
 // Later, this label will move onto a new subsection - see below
 [[sec:progmodel.cpp]]
