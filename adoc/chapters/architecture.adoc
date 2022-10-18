@@ -1106,9 +1106,13 @@ forward progress guarantee delegation.
 
 Each work-item in SYCL is a separate thread of execution, providing at least
 weakly parallel forward progress guarantees.  Whether work-items provide
-stronger forward progress guarantees is implementation-defined.  All
-implementations must ensure that the work-items in a group obey the semantics
-of <<group-barrier,group barriers>>, regardless of other progress guarantees.
+stronger forward progress guarantees is implementation-defined.
+
+All implementations must additionally ensure that the work-items in a group
+obey the semantics of <<group-barrier,group barriers>>: when a work-item
+arrives at a group barrier acting on group _G_, implementations must eventually
+select and potentially strengthen another work-item in group _G_ that has not
+yet arrived at the barrier.
 
 Synchronizing work-items via memory operations is unsafe in general, but is
 supported if and only if the following conditions are true:
