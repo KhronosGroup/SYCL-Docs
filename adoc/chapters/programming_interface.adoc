@@ -4721,10 +4721,10 @@ a@
 [source]
 ----
 template <typename ReinterpretT, int ReinterpretDim>
-    buffer<ReinterpretT, ReinterpretDim,
-           typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             std::remove_const_t<ReinterpretT>>>
-    reinterpret(range<ReinterpretDim> reinterpretRange) const
+buffer<ReinterpretT, ReinterpretDim,
+       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+           std::remove_const_t<ReinterpretT>>>
+reinterpret(range<ReinterpretDim> reinterpretRange) const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
       with the type specified by [code]#ReinterpretT#,
@@ -4747,10 +4747,10 @@ a@
 [source]
 ----
 template <typename ReinterpretT, int ReinterpretDim = Dimensions>
-    buffer<ReinterpretT, ReinterpretDim,
-           typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             std::remove_const_t<ReinterpretT>>>
-    reinterpret() const
+buffer<ReinterpretT, ReinterpretDim,
+       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+           std::remove_const_t<ReinterpretT>>>
+reinterpret() const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
       with the type specified by [code]#ReinterpretT# and
@@ -12537,7 +12537,8 @@ sycl::minimum
 a@
 [source]
 ----
-std::is_floating_point_v<AccumulatorT> || std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+std::is_floating_point_v<AccumulatorT> ||
+    std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
 ----
 a@
 ----
@@ -12567,7 +12568,8 @@ sycl::maximum
 a@
 [source]
 ----
-std::is_floating_point_v<AccumulatorT> || std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+std::is_floating_point_v<AccumulatorT> ||
+    std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
 ----
 a@
 ----
