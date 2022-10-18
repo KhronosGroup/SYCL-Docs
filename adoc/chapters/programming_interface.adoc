@@ -4097,6 +4097,19 @@ host. Note that in this case the runtime will raise an error if it requires
 host memory but it is not available (e.g when moving data across <<backend>>
 contexts).
 
+In some cases, the implementation may retain a copy of the allocator object
+even after the buffer is destroyed.  For example, this can happen when the
+buffer object is destroyed before commands using accessors to the buffer have
+completed.  Therefore, the application must be prepared for calls to the
+allocator even after the buffer is destroyed.
+
+[NOTE]
+====
+If the application needs to know when the implementation has destroyed all
+copies of the allocator, it can maintain a reference count within the
+allocator.
+====
+
 The definition of allocators extends the current functionality of SYCL,
 ensuring that users can define allocator functions for specific hardware or
 certain complex shared memory mechanisms (e.g. NUMA), and improves
@@ -4708,10 +4721,10 @@ a@
 [source]
 ----
 template <typename ReinterpretT, int ReinterpretDim>
-buffer<ReinterpretT, ReinterpretDim,
-       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-           ReinterpretT>>
-reinterpret(range<ReinterpretDim> reinterpretRange) const
+    buffer<ReinterpretT, ReinterpretDim,
+           typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+             std::remove_const_t<ReinterpretT>>>
+    reinterpret(range<ReinterpretDim> reinterpretRange) const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
       with the type specified by [code]#ReinterpretT#,
@@ -4734,10 +4747,10 @@ a@
 [source]
 ----
 template <typename ReinterpretT, int ReinterpretDim = Dimensions>
-buffer<ReinterpretT, ReinterpretDim,
-       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-           ReinterpretT>>
-reinterpret() const
+    buffer<ReinterpretT, ReinterpretDim,
+           typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+             std::remove_const_t<ReinterpretT>>>
+    reinterpret() const
 ----
    a@ Creates and returns a reinterpreted SYCL [code]#buffer#
       with the type specified by [code]#ReinterpretT# and
@@ -4891,20 +4904,20 @@ with attached host memory and is still in use.
 
 More precisely:
 
-  . A buffer can be constructed with just a size and using the default
-    buffer allocator. The memory management for this type of buffer is
-    entirely handled by the SYCL system. The destructor for this type of
+  . A buffer can be constructed from a [code]#range# (and without a
+    [code]#hostData# pointer).  The memory management for this type of buffer
+    is entirely handled by the SYCL system. The destructor for this type of
     buffer does not need to block, even if work on the buffer has not
     completed. Instead, the SYCL system frees any storage required for the
     buffer asynchronously when it is no longer in use in queues. The initial
     contents of the buffer are unspecified.
-  . A buffer can be constructed with associated host memory and a default
-    buffer allocator. The buffer will use this host memory for its full
-    lifetime, but the contents of this host memory are unspecified for the
-    lifetime of the buffer. If the host memory is modified by the host, or
-    mapped to another buffer or image during the lifetime of this buffer,
-    then the results are undefined. The initial contents of the buffer will
-    be the contents of the host memory at the time of construction.
+  . A buffer can be constructed from a [code]#hostData# pointer.  The buffer
+    will use this host memory for its full lifetime, but the contents of this
+    host memory are unspecified for the lifetime of the buffer. If the host
+    memory is modified on the host or if it is used to construct another
+    buffer or image during the lifetime of this buffer, then the results are
+    undefined.  The initial contents of the buffer will be the contents of the
+    host memory at the time of construction.
 +
 --
 When the buffer is destroyed, the destructor will block until all
@@ -4967,11 +4980,10 @@ lifetime, and the contents of this memory are unspecified for the
 lifetime of the buffer. If the container memory is modified by the host
 during the lifetime of this buffer, then the results are undefined.
 
-When the buffer is destroyed, if the return type of
-[code]#std::data(container)# is not [code]#const# then the destructor
-will block until all work in queues on the buffer have completed, and will
-then copy the contents of the buffer to the container (if required)
-and then return.
+When the buffer is destroyed, the destructor will block until all work in
+queues on the buffer have completed.  If the return type of
+[code]#std::data(container)# is not [code]#const# then the destructor will also
+copy the contents of the buffer to the container (if required).
 --
 
 
@@ -12369,10 +12381,13 @@ multiple reductions reference the same reduction variable, or a reduction
 variable is accessed directly during the lifetime of a reduction (e.g. via an
 [code]#accessor# or USM pointer), the behavior is undefined.
 
-Certain implementations of reductions can be made more efficient if the
-reduction operator has an identity value and this value is known to the
-implementation. For standard binary operators (e.g. [code]#plus# on arithmetic
-types), an implementation can determine the correct identity value
+Some of the overloads for the [code]#reduction# function take an identity value
+and some do not. An implementation is required to compute a correct reduction
+even when the application does not specify an identity value. However, the
+implementation may be more efficient when the identity value is either provided
+by the application or is known by the implementation. For reductions using
+standard binary operators and fundamental types (e.g. [code]#plus# and
+arithmetic types), an implementation can determine the correct identity value
 automatically in order to avoid performance penalties.
 
 If an implementation can identify an identity value for a given combination of
@@ -12384,6 +12399,182 @@ be tested using the [code]#has_known_identity# trait class.
 ----
 include::{header_dir}/identity.h[lines=4..-1]
 ----
+
+For each of the partial specializations listed in <<table.identities>>,
+[code]#known_identity# exists and has the value shown.
+
+[[table.identities]]
+.Known identities.
+[width="100%",options="header",separator="@",cols="25%,55%,20%"]
+|====
+@ Operator @ Available Only When @ Identity
+
+a@
+[source]
+----
+sycl::plus
+----
+a@
+[source]
+----
+std::is_arithmetic_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::multiplies
+----
+a@
+[source]
+----
+std::is_arithmetic_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{1}
+----
+
+a@
+[source]
+----
+sycl::bit_and
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+~AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::bit_or
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::bit_xor
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+AccumulatorT{}
+----
+
+a@
+[source]
+----
+sycl::logical_and
+----
+a@
+[source]
+----
+std::is_same_v<std::remove_v_t<AccumulatorT>, bool>
+----
+a@
+----
+true
+----
+
+a@
+[source]
+----
+sycl::logical_or
+----
+a@
+[source]
+----
+std::is_same_v<std::remove_v_t<AccumulatorT>, bool>
+----
+a@
+----
+false
+----
+
+a@
+[source]
+----
+sycl::minimum
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+std::numeric_limits<AccumulatorT>::max()
+----
+
+a@
+[source]
+----
+sycl::minimum
+----
+a@
+[source]
+----
+std::is_floating_point_v<AccumulatorT> || std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+----
+a@
+----
+std::numeric_limits<AccumulatorT>::infinity()
+----
+
+a@
+[source]
+----
+sycl::maximum
+----
+a@
+[source]
+----
+std::is_integral_v<AccumulatorT>
+----
+a@
+----
+std::numeric_limits<AccumulatorT>::lowest()
+----
+
+a@
+[source]
+----
+sycl::maximum
+----
+a@
+[source]
+----
+std::is_floating_point_v<AccumulatorT> || std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+----
+a@
+----
+-std::numeric_limits<AccumulatorT>::infinity()
+----
+
+|====
 
 The reduction interface is limited to reduction variables whose size can be
 determined at compile-time.  As such, [code]#buffer# and USM pointer arguments
@@ -16277,7 +16468,8 @@ half
 ----
    a@ A 16-bit floating-point. The half data type must conform to the IEEE
       754-2008 half precision storage format. This type is only supported
-      on devices that have [code]#aspect::fp16#.
+      on devices that have [code]#aspect::fp16#. [code]#std::numeric_limits#
+      must be specialized for the half data type.
 
 |====
 
@@ -19623,8 +19815,8 @@ a@
 ----
 T operator()(const T& x, const T& y) const
 ----
-   a@ Applies [code]#std::less# to its arguments, in the same order, then
-      returns the lesser argument unchanged.
+   a@ Returns the smaller value. Returns the first argument when the arguments
+      are equivalent.
 
 |====
 
@@ -19638,8 +19830,8 @@ a@
 ----
 T operator()(const T& x, const T& y) const
 ----
-   a@ Applies [code]#std::greater# to its arguments, in the same order, then
-      returns the greater argument unchanged.
+   a@ Returns the larger value. Returns the first argument when the arguments
+      are equivalent.
 
 |====
 
