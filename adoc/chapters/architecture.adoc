@@ -1123,6 +1123,14 @@ When a host thread blocks on the completion of a command previously submitted
 to a SYCL queue (for example, via the [code]#sycl::queue::wait# function), it
 blocks with forward progress guarantee delegation.
 
+[NOTE]
+====
+SYCL commands submitted to a queue are not guaranteed to begin executing until
+a host thread blocks on their completion.  In the absence of multiple host
+threads, there is no guarantee that host and device code will execute
+concurrently.
+====
+
 // Later, this label will move onto a new subsection - see below
 [[sec:progmodel.cpp]]
 == The SYCL programming model
