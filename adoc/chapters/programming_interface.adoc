@@ -18254,12 +18254,16 @@ The static members [code]#default_read_order#, [code]#default_write_order# and
 each type of atomic operation, consistent with the [code]#DefaultOrder# template.
 
 The atomic operations and member functions behave as described in the {cpp}
-specification, barring the restrictions discussed above. Note that care
-must be taken when using atomics to implement synchronization routines, because
-work-items are only required to provide weakly parallel forward progress
-guarantees.  No work-item may be dependent on another work-item to make
-progress if the code is to be portable.
+specification, barring the restrictions discussed above.
 
+[NOTE]
+====
+Care must be taken when using atomics for work-item coordination, because
+work-items are not required to provide stronger than weakly parallel forward
+progress guarantees. Operations that block a work-item, such as continuously
+checking the value of an atomic variable until some condition holds, or using
+atomic operations that are not lock-free, may prevent overall progress.
+====
 
 [[table.atomic-refs.constructors]]
 .Constructors of the SYCL [code]#atomic_ref# class template
