@@ -52,7 +52,7 @@ __width_manipulator__ setw(int width);
 class stream {
  public:
   stream(size_t totalBufferSize, size_t workItemBufferSize,
-         handler& cgh const property_list& propList = {});
+         handler& cgh, const property_list& propList = {});
 
   /* -- common interface members -- */
 
