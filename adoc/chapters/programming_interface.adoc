@@ -19904,7 +19904,7 @@ include::{header_dir}/groups/broadcast.h[lines=4..-1]
 +
 --
 _Returns:_ The value of [code]#x# from the work-item with the smallest linear
-id within the group.
+id within group [code]#g#.
 --
 
   . _Constraints:_ Available only if
@@ -19916,7 +19916,7 @@ _Preconditions:_ [code]#local_linear_id# must be the same for all work-items in
 the group.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified linear
-id within the group.
+id within group [code]#g#.
 --
 
   . _Constraints:_ Available only if
@@ -19928,7 +19928,7 @@ _Preconditions:_ [code]#local_id# must be the same for all work-items in the
 group, and its dimensionality must match the dimensionality of the group.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified id
-within the group.
+within group [code]#g#.
 --
 
 ==== [code]#group_barrier#
@@ -19945,17 +19945,18 @@ include::{header_dir}/groups/barrier.h[lines=4..-1]
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Effects:_ Synchronizes all work-items in the group. The current work-item will
-wait at the barrier until all work-items in the group have reached the barrier.
-In addition, the barrier performs <<mem-fence>> operations ensuring that
+_Effects:_ Synchronizes all work-items in group [code]#g#. The current
+work-item will wait at the barrier until all work-items in group [code]#g# have
+reached the barrier. In addition, the barrier performs <<mem-fence>> operations ensuring that
 memory accesses issued before the barrier are not re-ordered with those issued
-after the barrier: all work-items in the group execute a release fence prior to
-synchronizing at the barrier, all work-items in the group execute an
-acquire fence afterwards, and there is an implicit synchronization of these
-fences as if provided by an explicit atomic operation on an atomic object.
+after the barrier: all work-items in group [code]#g# execute a release fence
+prior to synchronizing at the barrier, all work-items in group [code]#g#
+execute an acquire fence afterwards, and there is an implicit synchronization
+of these fences as if provided by an explicit atomic operation on an atomic
+object.
 
 By default, the scope of these fences is set to the narrowest
-scope including all work-items in the group (as reported by
+scope including all work-items in group [code]#g# (as reported by
 [code]#Group::fence_scope#).  This scope may be optionally overridden
 with a broader scope, specified by the [code]#fence_scope# argument.
 --
@@ -20022,8 +20023,8 @@ include::{header_dir}/algorithms/any_of.h[lines=4..-1]
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
-work-items in the group, and [code]#pred# must be an immutable callable with
-the same type and state for all work-items in the group.
+work-items in group [code]#g#, and [code]#pred# must be an immutable callable
+with the same type and state for all work-items in group [code]#g#.
 
 _Returns:_ true if [code]#pred# returns true when applied to the result of
 dereferencing any iterator in the range [code]#[first, last)#.
@@ -20034,16 +20035,17 @@ dereferencing any iterator in the range [code]#[first, last)#.
 +
 --
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
-and state for all work-items in the group.
+and state for all work-items in group [code]#g#.
 
-_Returns:_ true if [code]#pred(x)# returns true for any work-item in the group.
+_Returns:_ true if [code]#pred(x)# returns true for any work-item in group
+[code]#g#.
 --
 
   . _Constraints:_ Available only if
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Returns:_ true if [code]#pred# is true for any work-item in the group.
+_Returns:_ true if [code]#pred# is true for any work-item in group [code]#g#.
 --
 
 [source,,linenums]
@@ -20057,8 +20059,8 @@ include::{header_dir}/algorithms/all_of.h[lines=4..-1]
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
-work-items in the group, and [code]#pred# must be an immutable callable with
-the same type and state for all work-items in the group.
+work-items in group [code]#g#, and [code]#pred# must be an immutable callable
+with the same type and state for all work-items in group [code]#g#.
 
 _Returns:_ true if [code]#pred# returns true when applied to the result of
 dereferencing all iterators in the range [code]#[first, last)#.
@@ -20069,16 +20071,17 @@ dereferencing all iterators in the range [code]#[first, last)#.
 +
 --
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
-and state for all work-items in the group.
+and state for all work-items in group [code]#g#.
 
-_Returns:_ true if [code]#pred(x)# returns true for all work-items in the group.
+_Returns:_ true if [code]#pred(x)# returns true for all work-items in group
+[code]#g#.
 --
 
   . _Constraints:_ Available only if
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Returns:_ true if [code]#pred# is true for all work-items in the group.
+_Returns:_ true if [code]#pred# is true for all work-items in group [code]#g#.
 --
 
 [source,,linenums]
@@ -20092,8 +20095,8 @@ include::{header_dir}/algorithms/none_of.h[lines=4..-1]
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
-work-items in the group, and [code]#pred# must be an immutable callable with
-the same type and state for all work-items in the group.
+work-items in group [code]#g#, and [code]#pred# must be an immutable callable
+with the same type and state for all work-items in group [code]#g#.
 
 _Returns:_ true if [code]#pred# returns false when applied to the result of
 dereferencing all iterators in the range [code]#[first, last)#.
@@ -20104,16 +20107,17 @@ dereferencing all iterators in the range [code]#[first, last)#.
 +
 --
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
-and state for all work-items in the group.
+and state for all work-items in group [code]#g#.
 
-_Returns:_ true if [code]#pred(x)# returns false for all work-items in the group.
+_Returns:_ true if [code]#pred(x)# returns false for all work-items in group
+[code]#g#.
 --
 
   . _Constraints:_ Available only if
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Returns:_ true if [code]#pred# is false for all work-items in the group.
+_Returns:_ true if [code]#pred# is false for all work-items in group [code]#g#.
 --
 
 ==== [code]#shift_left# and [code]#shift_right#
@@ -20124,7 +20128,7 @@ move values in a range down (to the left) or up (to the right) respectively.
 SYCL provides similar algorithms compatible with the [code]#sub_group# class:
 
 . [code]#shift_group_left# and [code]#shift_group_right# move values held by
-the work-items in a group directly to another work-item in the group, by
+the work-items in a group directly to another work-item in group [code]#g#, by
 shifting values a fixed number of work-items to the left or right.
 
 [source,,linenums]
@@ -20194,7 +20198,7 @@ SYCL provides an algorithm to directly exchange the values held by work-items in
 a sub-group:
 
 . [code]#select_from_group# allows work-items to obtain a copy of a value held
-by any other work-item in the group.
+by any other work-item in group [code]#g#.
 
 [source,,linenums]
 ----
@@ -20246,8 +20250,8 @@ _Mandates:_ [code]#binary_op(*first, *first)# must return a value of type
 [code]#std::iterator_traits<Ptr>::value_type#.
 
 _Preconditions:_ [code]#first#, [code]#last# and the type of [code]#binary_op#
-must be the same for all work-items in the group. [code]#binary_op# must be an
-instance of a SYCL function object.
+must be the same for all work-items in group [code]#g#. [code]#binary_op# must
+be an instance of a SYCL function object.
 
 _Returns:_ The result of combining the values resulting from dereferencing all
 iterators in the range [code]#[first, last)# using the operator
@@ -20265,7 +20269,7 @@ _Mandates:_ [code]#binary_op(init, *first)# must return a value of type
 [code]#T#.
 
 _Preconditions:_ [code]#first#, [code]#last#, [code]#init# and the type of
-[code]#binary_op# must be the same for all work-items in the group.
+[code]#binary_op# must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object.
 
 _Returns:_ The result of combining the values resulting from dereferencing all
@@ -20286,8 +20290,8 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The result of combining all the values of [code]#x# specified by
-each work-item in the group using the operator [code]#binary_op#, where the
-values are combined according to the generalized sum defined in standard {cpp}.
+each work-item in group [code]#g# using the operator [code]#binary_op#, where
+the values are combined according to the generalized sum defined in standard {cpp}.
 --
 
   . _Constraints:_ Available only if
@@ -20302,7 +20306,7 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The result of combining all the values of [code]#x# specified by
-each work-item in the group and the initial value [code]#init# using the
+each work-item in group [code]#g# and the initial value [code]#init# using the
 operator [code]#binary_op#, where the values are combined according to the
 generalized sum defined in standard {cpp}.
 --
@@ -20348,7 +20352,7 @@ _Mandates:_ [code]#binary_op(*first, *first)# must return a value of type
 [code]#std::iterator_traits<OutPtr>::value_type#.
 
 _Preconditions:_ [code]#first#, [code]#last#, [code]#result# and the type of
-[code]#binary_op# must be the same for all work-items in the group.
+[code]#binary_op# must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object. 
 
 [NOTE]
@@ -20377,8 +20381,8 @@ _Mandates:_ [code]#binary_op(init, *first)# must return a value of type
 [code]#T#.
 
 _Preconditions:_ [code]#first#, [code]#last#, [code]#result#, [code]#init# and the
-type of [code]#binary_op# must be the same for all work-items in the group.
-[code]#binary_op# must be an instance of a SYCL function object. 
+type of [code]#binary_op# must be the same for all work-items in group
+[code]#g#. [code]#binary_op# must be an instance of a SYCL function object. 
 
 [NOTE]
 ====
@@ -20406,11 +20410,11 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of
-the first _i_ values in the group and the identity value of [code]#binary_op#
-(as identified by [code]#sycl::known_identity#), using the operator
-[code]#binary_op#.  The scan is computed using a generalized noncommutative sum
-as defined in standard {cpp}.  For multi-dimensional groups, the order of
-work-items in the group is determined by their linear id.
+the first _i_ values in group [code]#g# and the identity value of
+[code]#binary_op# (as identified by [code]#sycl::known_identity#), using the
+operator [code]#binary_op#.  The scan is computed using a generalized
+noncommutative sum as defined in standard {cpp}.  For multi-dimensional groups,
+the order of work-items in group [code]#g# is determined by their linear id.
 --
 
   . _Constraints:_ Available only if
@@ -20425,11 +20429,11 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of
-the first _i_ values in the group and an initial value specified by
+the first _i_ values in group [code]#g# and an initial value specified by
 [code]#init#, using the operator [code]#binary_op#.  The scan is computed using
 a generalized noncommutative sum as defined in standard {cpp}.  For
-multi-dimensional groups, the order of work-items in the group is determined by
-their linear id.
+multi-dimensional groups, the order of work-items in group [code]#g# is
+determined by their linear id.
 --
 
 [source,,linenums]
@@ -20447,7 +20451,7 @@ _Mandates:_ [code]#binary_op(*first, *first)# must return a value of type
 [code]#std::iterator_traits<OutPtr>::value_type#.
 
 _Preconditions:_ [code]#first#, [code]#last#, [code]#result# and the type of
-[code]#binary_op# must be the same for all work-items in the group.
+[code]#binary_op# must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object. 
 
 [NOTE]
@@ -20473,8 +20477,8 @@ _Mandates:_ [code]#binary_op(init, *first)# must return a value of type
 [code]#T#.
 
 _Preconditions:_ [code]#first#, [code]#last#, [code]#result#, [code]#init# and the
-type of [code]#binary_op# must be the same for all work-items in the group.
-[code]#binary_op# must be an instance of a SYCL function object. 
+type of [code]#binary_op# must be the same for all work-items in group
+[code]#g#. [code]#binary_op# must be an instance of a SYCL function object. 
 
 [NOTE]
 ====
@@ -20502,10 +20506,10 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of
-the first _i_ values in the group, using the operator [code]#binary_op#.  The
-scan is computed using a generalized noncommutative sum as defined in standard
-{cpp}.  For multi-dimensional groups, the order of work-items in the group is
-determined by their linear id.
+the first _i_ values in group [code]#g#, using the operator [code]#binary_op#.
+The scan is computed using a generalized noncommutative sum as defined in
+standard {cpp}.  For multi-dimensional groups, the order of work-items in group
+[code]#g# is determined by their linear id.
 --
 
   . _Constraints:_ Available only if
@@ -20520,11 +20524,11 @@ _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of
-the first _i_ values in the group and an initial value specified by
+the first _i_ values in group [code]#g# and an initial value specified by
 [code]#init#, using the operator [code]#binary_op#.  The scan is computed using
 a generalized noncommutative sum as defined in standard {cpp}.  For
-multi-dimensional groups, the order of work-items in the group is determined by
-their linear id.
+multi-dimensional groups, the order of work-items in group [code]#g# is
+determined by their linear id.
 --
 
 === Math functions
