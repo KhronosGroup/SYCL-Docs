@@ -1108,11 +1108,11 @@ Each work-item in SYCL is a separate thread of execution, providing at least
 weakly parallel forward progress guarantees.  Whether work-items provide
 stronger forward progress guarantees is implementation-defined.
 
-All implementations must additionally ensure that the work-items in a group
-obey the semantics of <<group-barrier,group barriers>>: when a work-item
-arrives at a group barrier acting on group _G_, implementations must eventually
-select and potentially strengthen another work-item in group _G_ that has not
-yet arrived at the barrier.
+All implementations must additionally ensure that a work-item arriving at a
+<<group-barrier, group barrier>> does not prevent other work-items in the same
+group from making progress. When a work-item arrives at a group barrier acting
+on group _G_, implementations must eventually select and potentially strengthen
+another work-item in group _G_ that has not yet arrived at the barrier.
 
 When a host thread blocks on the completion of a command previously submitted
 to a SYCL queue (for example, via the [code]#sycl::queue::wait# function), it
