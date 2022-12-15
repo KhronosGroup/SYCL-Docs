@@ -604,8 +604,7 @@ unique <<work-group-id>> with the same dimensionality as the index space used fo
 the work-items. Work-items are each assigned a <<local-id>>, unique within the
 work-group, so that a single work-item can be uniquely identified by its global
 id or by a combination of its local id and work-group id.  The work-items in a
-given work-group execute concurrently on the processing elements of a single
-compute unit.
+given work-group execute on the processing elements of a single compute unit.
 
 When work-groups are used in SYCL, the index space is called an <<nd-range>>.
 An ND-range is an
@@ -1099,23 +1098,33 @@ to the buffer or USM allocation from device code.
 
 ==== Forward progress
 
-Memory consistency guarantees are independent of any forward progress
-guarantees.  A SYCL implementation must execute work-items concurrently
-and must ensure that the work-items in a group obey the semantics of
-<<group-barrier,group barriers>>, but are not required to provide any
-additional forward progress guarantees.
+This section, and any subsequent section referring to progress guarantees, uses
+the following terms as defined in the {cpp} core language: thread of
+execution; weakly parallel forward progress guarantees; parallel forward
+progress guarantees; concurrent forward progress guarantees; and block with
+forward progress guarantee delegation.
 
-Synchronizing work-items via memory operations is unsafe in general, but is
-supported if and only if the following conditions are true:
+Each work-item in SYCL is a separate thread of execution, providing at least
+weakly parallel forward progress guarantees.  Whether work-items provide
+stronger forward progress guarantees is implementation-defined.
 
-  * acquire-release or sequentially consistent memory ordering is supported
-    at the scope containing the set of work-items being synchronized;
+All implementations must additionally ensure that a work-item arriving at a
+<<group-barrier, group barrier>> does not prevent other work-items in the same
+group from making progress. When a work-item arrives at a group barrier acting
+on group _G_, implementations must eventually select and potentially strengthen
+another work-item in group _G_ that has not yet arrived at the barrier.
 
-  * the work-items being synchronized are guaranteed to make forward progress
-    with respect to one another.
+When a host thread blocks on the completion of a command previously submitted
+to a SYCL queue (for example, via the [code]#sycl::queue::wait# function), it
+blocks with forward progress guarantee delegation.
 
-The ability of work-items to make forward progress with respect to other
-work-items is implementation-defined.
+[NOTE]
+====
+SYCL commands submitted to a queue are not guaranteed to begin executing until
+a host thread blocks on their completion.  In the absence of multiple host
+threads, there is no guarantee that host and device code will execute
+concurrently.
+====
 
 // Later, this label will move onto a new subsection - see below
 [[sec:progmodel.cpp]]
@@ -1224,9 +1233,8 @@ by calling the [code]#group_barrier# function.
 
 To maximize portability across devices, developers should not assume that
 work-items within a sub-group execute in any particular order, that work-groups
-are subdivided into sub-groups in a specific way, nor that two sub-groups
-within a work-group will make forward progress with respect to one
-another.
+are subdivided into sub-groups in a specific way, nor that the work-items
+within a sub-group provide specific forward progress guarantees.
 
 Variables with <<reduction>> semantics can be added to work-group data
 parallel kernels using the features described in <<sec:reduction>>.

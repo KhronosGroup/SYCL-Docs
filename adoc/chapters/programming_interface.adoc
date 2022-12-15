@@ -11968,9 +11968,8 @@ The local range stored in the group class is provided either by
 the programmer, when it is passed as an optional parameter to
 [code]#parallel_for_work_group#, or by the runtime system when it
 selects the optimal work-group size. This allows the developer to
-always know how many concurrent work-items are active in each
-executing work-group, even through the abstracted iteration range of the
-[code]#parallel_for_work_item# loops.
+always know how many work-items are in each executing work-group, even through
+the abstracted iteration range of the [code]#parallel_for_work_item# loops.
 
 The SYCL [code]#group# class template provides the common by-value
 semantics (see <<sec:byval-semantics>>).
@@ -12793,11 +12792,11 @@ reference to a variable of any [code]#reducer# type.  Kernels written as
 lambdas should employ [code]#auto&# or [code]#+auto&...+#, and kernels written as
 function objects should employ template parameters or template parameter packs.
 
-An implementation must guarantee that it is safe for each concurrently
-executing work-item in a kernel to call the combine function of a
-[code]#reducer# in parallel. An implementation is free to re-use reducer
-variables (e.g. across work-groups scheduled to the same compute unit) if it
-can guarantee that it is safe to do so.
+An implementation must guarantee that it is safe for multiple work-items in a
+kernel to call the combine function of a [code]#reducer# concurrently. An
+implementation is free to re-use reducer variables (e.g. across work-groups
+scheduled to the same compute unit) if it can guarantee that it is safe to do
+so.
 
 The member functions of the [code]#reducer# class are listed in
 <<table.members.reducer>>.  Additional shorthand operators may be made
@@ -18014,12 +18013,16 @@ The static members [code]#default_read_order#, [code]#default_write_order# and
 each type of atomic operation, consistent with the [code]#DefaultOrder# template.
 
 The atomic operations and member functions behave as described in the {cpp}
-specification, barring the restrictions discussed above. Note that care
-must be taken when using atomics to implement synchronization routines due
-to the lack of forward progress guarantees between work-items in SYCL.  No
-work-item may be dependent on another work-item to make progress if the code
-is to be portable.
+specification, barring the restrictions discussed above.
 
+[NOTE]
+====
+Care must be taken when using atomics for work-item coordination, because
+work-items are not required to provide stronger than weakly parallel forward
+progress guarantees. Operations that block a work-item, such as continuously
+checking the value of an atomic variable until some condition holds, or using
+atomic operations that are not lock-free, may prevent overall progress.
+====
 
 [[table.atomic-refs.constructors]]
 .Constructors of the SYCL [code]#atomic_ref# class template
