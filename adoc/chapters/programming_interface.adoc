@@ -6788,7 +6788,8 @@ a@
 const accessor& operator=(const value_type& other) const
 ----
    a@ Available only when
-      [code]#(AccessMode != access_mode::atomic && Dimensions == 0)#.
+      [code]#(AccessMode != access_mode::atomic &&
+      AccessMode != access_mode::read && Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
@@ -6800,7 +6801,8 @@ a@
 const accessor& operator=(value_type&& other) const
 ----
    a@ Available only when
-      [code]#(AccessMode != access_mode::atomic && Dimensions == 0)#.
+      [code]#(AccessMode != access_mode::atomic &&
+      AccessMode != access_mode::read && Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
@@ -7856,7 +7858,8 @@ a@
 ----
 const host_accessor& operator=(const value_type& other) const
 ----
-   a@ Available only when [code]#(Dimensions == 0)#.
+   a@ Available only when [code]#(AccessMode != access_mode::read &&
+      Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
@@ -7865,7 +7868,8 @@ a@
 ----
 const host_accessor& operator=(value_type&& other) const
 ----
-   a@ Available only when [code]#(Dimensions == 0)#.
+   a@ Available only when [code]#(AccessMode != access_mode::read &&
+      Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
@@ -8070,7 +8074,7 @@ a@
 ----
 const local_accessor& operator=(const value_type& other) const
 ----
-   a@ Available only when [code]#(Dimensions == 0)#.
+   a@ Available only when [code]#(!std::is_const_v<DataT> && Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
@@ -8081,7 +8085,7 @@ a@
 ----
 const local_accessor& operator=(const value_type&& other) const
 ----
-   a@ Available only when [code]#(Dimensions == 0)#.
+   a@ Available only when [code]#(!std::is_const_v<DataT> && Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
