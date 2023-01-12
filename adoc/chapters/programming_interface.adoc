@@ -52,6 +52,8 @@ _backend_name_ is the associated identifier from [code]#backend# in
 all upper-case.  See <<chapter.extensions>> for the name of the macro
 if the vendor defines the <<backend>> outside of the Khronos SYCL group.
 
+If a backend listed in [code]#enum class backend# is not available at compile
+time, the associated macro will be left undefined.
 
 [[sec:generic-vs-non-generic]]
 == Generic vs non-generic SYCL
@@ -242,7 +244,8 @@ A series of type traits are provided for <<backend>> interoperability,
 defined in the [code]#backend_traits# class.
 
 A specialization of [code]#backend_traits# must be provided for each named
-<<backend>> enumerated in the enum class [code]#backend#.
+<<backend>> enumerated in the enum class [code]#backend# that is available at
+compile time.
 
   * For each <<sycl-runtime>> class [code]#T# which supports
     <<sycl-application>> interoperability with the <<backend>>, a
