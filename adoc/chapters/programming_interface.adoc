@@ -4703,8 +4703,7 @@ void set_write_back(bool flag = true)
       the value of [code]#flag#.
 
 Forcing the write-back is similar to what happens during a
-normal write-back as described in <<sec:buf-sync-rules>>
-and <<sec:sharing-host-memory-with-dm>>.
+normal write-back as described in <<sec:buf-sync-rules>>.
 
 If there is nowhere to write-back, using this function does not
 have any effect.
@@ -4886,127 +4885,134 @@ context property::buffer::context_bound::get_context() const
 [[sec:buf-sync-rules]]
 ==== Buffer synchronization rules
 
-Buffers are reference-counted. When a buffer value is constructed
-from another buffer, the two values reference the same buffer and a
-reference count is incremented. When a buffer value is destroyed,
-the reference count is decremented. Only when there are no more
-buffer values that reference a specific buffer is the actual
-buffer destroyed and the buffer destruction behavior defined
-below is followed.
+This section describes the behavior of the buffer destructor in more depth.
+Under certain circumstances, the buffer destructor may block execution of the
+calling thread and it may cause data to be copied from the device to the host.
 
-If any error occurs on buffer destruction, it is reported
-via the associated queue's asynchronous error handling mechanism.
+Since the buffer class follows the common reference semantics, each buffer
+object behaves as though it has an internal reference count.  That reference
+count is incremented when a buffer object is copied, and it is decremented when
+a buffer object is destroyed.  The behavior of the buffer destructor described
+below occurs only when a buffer destructor releases the last reference count in
+the object.
 
-The basic rule for the blocking behavior of a buffer destructor is
-that it blocks if there is some data to write back because a
-write accessor on it has been created, or if the buffer was constructed
-with attached host memory and is still in use.
+In general, the buffer destructor blocks under two circumstances: if the buffer
+assume exclusive access to some host memory passed to its constructor or if
+some data needs to be copied back to the host upon completion of commands
+associated with the buffer.
 
-More precisely:
+The following paragraphs describe these rules more precisely for each overload
+of the buffer constructor:
 
-  . A buffer can be constructed from a [code]#range# (and without a
-    [code]#hostData# pointer).  The memory management for this type of buffer
-    is entirely handled by the SYCL system. The destructor for this type of
-    buffer does not need to block, even if work on the buffer has not
-    completed. Instead, the SYCL system frees any storage required for the
-    buffer asynchronously when it is no longer in use in queues. The initial
-    contents of the buffer are unspecified.
-  . A buffer can be constructed from a [code]#hostData# pointer.  The buffer
-    will use this host memory for its full lifetime, but the contents of this
-    host memory are unspecified for the lifetime of the buffer. If the host
-    memory is modified on the host or if it is used to construct another
-    buffer or image during the lifetime of this buffer, then the results are
-    undefined.  The initial contents of the buffer will be the contents of the
-    host memory at the time of construction.
+* A buffer object that was constructed from a [code]#range# and without any
+  [code]#hostData# pointer.
 +
 --
-When the buffer is destroyed, the destructor will block until all
-work in queues on the buffer have completed, then copy the contents
-of the buffer back to the host memory (if required) and then
-return.
-
-  .. If the type of the host data is [code]#const#, then the buffer is
-    read-only; only read accessors are allowed on the buffer and
-    no-copy-back to host memory is performed (although the host memory must
-    still be kept available for use by SYCL). When using the default buffer
-    allocator, the const-ness of the type will be removed in order to allow
-    host allocation of memory, which will allow temporary host copies of the
-    data by the <<sycl-runtime>>, for example for speeding up host
-    accesses.
-+
-When the buffer is destroyed, the destructor will block until all work
-in queues on the buffer have completed and then return, as there is no
-copy of data back to host.
-  .. If the type of the host data is not [code]#const# but the pointer
-    to host data is [code]#const#, then the read-only restriction
-    applies only on host and not on device accesses.
-+
-When the buffer is destroyed, the destructor will block until all work
-in queues on the buffer have completed.
+The destructor does not block, even if there are uncompleted commands that
+may write to the buffer's contents, and the destructor does not cause any
+data to be copied back to the host.  If the implementation allocates internal
+host memory for the buffer, this memory can be deallocated asynchronously when
+it is no longer needed by any command.
 --
-  . A buffer can be constructed using a [code]#shared_ptr# to host
-    data. This pointer is shared between the SYCL application and the
-    runtime. In order to allow synchronization between the application and
-    the runtime a [code]#mutex# is used which will be locked by the
-    runtime whenever the data is in use, and unlocked when it is no longer
-    needed.
+
+* A buffer object that was constructed from a raw [code]#hostData# pointer.
 +
 --
-The [code]#shared_ptr# reference counting is used in order to prevent
-destroying the buffer host data prematurely. If the [code]#shared_ptr#
-is deleted from the user application before buffer destruction, the buffer
-can continue securely because the pointer hasn't been destroyed yet. It will
-not copy data back to the host before destruction, however, as the
-application side has already deleted its copy.
+The buffer object assumes exclusive access to the [code]#hostData# memory for
+the duration of the buffer's lifetime.  If the application references this
+memory during the lifetime of the buffer object, or if the application
+constructs another buffer or image from this same memory before the the first
+buffer is destroyed, then the behavior is undefined.
 
-Note that since there is an implicit conversion of a
-[code]#std::unique_ptr# to a [code]#std::shared_ptr#, a
-[code]#std::unique_ptr# can also be used to pass the ownership to the
-<<sycl-runtime>>.
+The destructor blocks until all outstanding commands with accessors to this
+buffer have completed.
+
+After blocking, the destructor ensures that the content of [code]#hostData#
+reflects the actions of any commands that had write accessors to this buffer
+(e.g. by copying data back to the host) subject to the following rules:
+
+* If the buffer's underlying type [code]#T# is [code]#const#, then accessors to
+  the buffer must be read-only.  As a result, there is no need for the
+  destructor to copy data back to [code]#hostData#.
+
+* If the buffer's underlying type [code]#T# is not [code]#const# but the type
+  of the [code]#hostData# parameter passed to the constructor was
+  [code]#const T *#, then writable accessors to the buffer are allowed.
+  However, modifications made to the buffer's content via writable accessors
+  are not reflected in the [code]#hostData# memory after the buffer's
+  destruction.  As a result, there is no need for the destructor to copy data
+  back to [code]#hostData#.
 --
-  . A buffer can be constructed from a pair of iterator values. In this
-    case, the buffer construction will copy the data from the data range
-    defined by the iterator pair. The destructor will not copy back any data
-    and does not need to block.
 
-  . A buffer can be constructed from a container on which
-    [code]#std::data(container)# and [code]#std::size(container)#
-    are well-formed. The initial contents of the buffer will
-    be the contents of the container at the time of construction.
+* A buffer object that was constructed from [code]#hostData# that is a
+  [code]#std::shared_ptr#.
 +
 --
-The buffer may use the memory within the container for its full
-lifetime, and the contents of this memory are unspecified for the
-lifetime of the buffer. If the container memory is modified by the host
-during the lifetime of this buffer, then the results are undefined.
+If [code]#hostData# is not an empty [code]#shared_ptr#, the buffer object
+creates its own internal [code]#shared_ptr# that shares ownership of the
+[code]#hostData# object, and the buffer assumes exclusive access to this object
+for the duration of the buffer's lifetime.  If the application references this
+memory during the lifetime of the buffer object, or if the application
+constructs another buffer or image from this same memory before the the first
+buffer is destroyed, then the behavior is undefined.
 
-When the buffer is destroyed, the destructor will block until all work in
-queues on the buffer have completed.  If the return type of
-[code]#std::data(container)# is not [code]#const# then the destructor will also
-copy the contents of the buffer to the container (if required).
+The destructor blocks only if the application still has a [code]#shared_ptr#
+that shares ownership of the [code]#hostData# object at the point when the
+buffer destructor runs.  In this case, the destructor blocks until all
+outstanding commands with accessors to this buffer have completed.
+
+If the application still has a [code]#shared_ptr# that shares ownership of the
+[code]#hostData# object after the destructor blocks, the destructor ensures
+that the content of [code]#shared_ptr# reflects the actions of any commands
+that had write accessors to this buffer (e.g. by copying data back to the host)
+subject to the following rules:
+
+* If the buffer's underlying type [code]#T# is [code]#const#, then accessors to
+  the buffer must be read-only.  As a result, there is no need for the
+  destructor to copy data back to [code]#shared_ptr#.
+
+Finally, the destructor releases its ownership of the [code]#shared_ptr#
+object.
 --
 
+* A buffer object that was constructed from a pair of iterator values.
++
+--
+The destructor does not block, even if there are uncompleted commands that
+may write to the buffer's contents, and the destructor does not cause any
+data to be copied back to the host.  If the implementation allocates internal
+host memory for the buffer, this memory can be deallocated asynchronously when
+it is no longer needed by any command.
+--
 
-If [code]#set_final_data()# is used to change where to write the
-data back to, then the destructor of the buffer will block if a
-write accessor on it has been created.
+* A buffer object that was constructed from a container on which
+  [code]#std::data(container)# and [code]#std::size(container)# are
+  well-formed.
++
+--
+The buffer object assumes exclusive access to the container for the duration of
+the buffer's lifetime.  The behavior is undefined if the application modifies
+the container, references any element in the container, or constructs another
+buffer or image from this same container before the first buffer is destroyed.
 
-A sub-buffer object can be created which is a sub-range reference to a
-base buffer. This sub-buffer can be used to create accessors to the
-base buffer, which have access to the range specified at time
-of construction of the sub-buffer.  Sub-buffers cannot be created from
-sub-buffers, but only from a base buffer which is not already a sub-buffer.
+The destructor blocks until all outstanding commands with accessors to this
+buffer have completed.
 
-Sub-buffers must be constructed from a contiguous region of memory in a
-buffer. This requirement is potentially non-intuitive when working with
-buffers that have dimensionality larger than one, but maps to
-one-dimensional <<backend>> native allocations without performance cost due
-to index mapping computation. For example:
+If the return type of [code]#std::data(container)# is not [code]#const#, the
+destructor ensures that the contents of the container reflect the actions of
+any commands that had write accessors to this buffer (e.g. by copying data back
+to the container's memory).
+--
 
-[source,,linenums]
-----
-include::{code_dir}/subbuffer.cpp[lines=4..-1]
-----
+Regardless of which overload was used to construct the buffer, 
+
+TODO: Describe set_final_data and set_write_back rules.
+
+It is possible that the buffer destructor may encounter an error (e.g. when
+copying data back to the host).  If this occurs, it is reported as an
+asynchronous error to the [code]#queue# or [code]#context# object that is
+associated with the copy back operation as described in
+<<subsubsec:exception.async>>.
 
 
 [[subsec:images]]
@@ -5515,8 +5521,7 @@ void set_write_back(bool flag = true)
       the value of [code]#flag#.
 
 Forcing the write-back is similar to what happens during a
-normal write-back as described in <<sec:image-sync-rules>>
-and <<sec:sharing-host-memory-with-dm>>.
+normal write-back as described in <<sec:image-sync-rules>>.
 
 If there is nowhere to write-back, using this function does not
 have any effect.
@@ -5870,126 +5875,221 @@ with a storage object, then the storage object defines what
 synchronization or copying behavior occurs on image object destruction.
 
 
-[[sec:sharing-host-memory-with-dm]]
-=== Sharing host memory with the SYCL data management classes
+=== Example buffer usage
 
-In order to allow the <<sycl-runtime>> to do memory management and allow
-for data dependencies, there are two classes defined, buffer and image. The
-default behavior for them is that a "`raw`" pointer is given during the
-construction of the data management class, with full ownership to use it until
-the destruction of the SYCL object.
+This section provides some examples showing typical use cases for buffers.
+These examples are intended to clarify the definition of the buffer interfaces,
+but the content of this section is non-normative.
 
-In this section we go in greater detail on sharing or explicitly not
-sharing host memory with the SYCL data classes, and we will use the buffer
-class as an example. The same rules will apply to images as well.
+==== Buffer created with no host data
 
-
-==== Default behavior
-
-When using a SYCL buffer, the ownership of the pointer passed to the constructor
-of the class is, by default, passed to <<sycl-runtime>>, and that pointer cannot be used
-on the host side until the buffer or image is destroyed.
-A SYCL application can access the contents of the memory managed by a SYCL buffer
-by using a [code]#host_accessor# as defined in <<subsec:accessors>>.
-However, there is no guarantee that the host accessor synchronizes with the
-original host address used in its constructor.
-
-The pointer passed in is the one used to copy data back to the host, if needed,
-before buffer destruction.  The memory pointed by <<host-pointer>>
-will not be de-allocated by the runtime,
-and the data is copied back from the device if there is
-a need for it.
-
-
-==== SYCL ownership of the host memory
-
-In the case where there is host memory to be used for initialization of data
-but there is no intention of using that host memory after the buffer is
-destroyed, then the buffer can take full ownership of that host memory.
-
-When a buffer owns the <<host-pointer>> there is no copy back, by
-default.  In this situation, the SYCL application may pass a unique
-pointer to the host data, which will be then used by the runtime
-internally to initialize the data in the device.
-
-For example, the following could be used:
+A buffer can be created by specifying only a range and with no pointer to any
+host data.  In this case, the buffer's initial contents are undefined values,
+and the SYCL runtime manages any internal host memory that is needed for the
+buffer.  The buffer destructor does not block.
 
 [source,,linenums]
 ----
 {
-  auto ptr = std::make_unique<int>(-1234);
-  buffer<int, 1> b { std::move(ptr), range { 1 } };
-  // ptr is not valid anymore.
-  // There is nowhere to copy data back
-}
-----
-
-However, optionally the [code]#buffer::set_final_data()# can be
-set to a [code]#std::weak_ptr# to enable copying data
-back, to another host memory address that is going to be valid after
-buffer construction.
-
-[source,,linenums]
-----
-{
-  auto ptr = std::make_unique<int>(-42);
-  buffer<int, 1> b { std::move(ptr), range { 1 } };
-  // ptr is not valid anymore.
-  // There is nowhere to copy data back.
-  // To get copy back, a location can be specified:
-  b.set_final_data(std::weak_ptr<int> { .... })
-}
-----
-
-
-==== Shared SYCL ownership of the host memory
-
-When an instance of [code]#std::shared_ptr# is passed to the buffer
-constructor, then the buffer object and the developer's application share
-the memory region. If the shared pointer is still used on the application's
-side then the data will be copied back from the buffer or image and will be
-available to the application after the buffer or image is destroyed.
-
-If the [code]#shared_ptr# is not empty, the contents of the referenced
-memory are used to initialize the buffer.  If the [code]#shared_ptr# is
-empty, then the buffer is created with uninitialized memory.
-
-When the buffer is destroyed and the data have potentially been updated, if
-the number of copies of the shared pointer outside the runtime is 0, there
-is no user-side shared pointer to read the data. Therefore the data is not
-copied out, and the buffer destructor does not need to wait for the data
-processes to be finished, as the outcome is not needed on the application's
-side.
-
-This behavior can be overridden using the [code]#set_final_data()#
-member function of the buffer class, which will by any means force the buffer
-destructor to wait until the data is copied to wherever the
-[code]#set_final_data()# member function has put the data (or not wait nor copy
-if set final data is [code]#nullptr)#.
-
-[source,,linenums]
-----
-{
-  std::shared_ptr<int> ptr { data };
+  queue q;
   {
-    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
-    // update the data
-    [...]
-  } // Data is copied back because there is an user side shared_ptr
+    buffer<int> b{{4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};  // accessor to 4 integers
+      /* ... */
+    });
+    // Buffer destructor does not block
+  }
 }
 ----
+
+If the application wants to read the content of the buffer after a command
+completes, it can create a host accessor.
 
 [source,,linenums]
 ----
 {
-  std::shared_ptr<int> ptr { data };
+  queue q;
   {
-    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
-    // update the data
-    [...]
-    ptr.reset();
-  } // Data is not copied back, there is no user side shared_ptr.
+    buffer<int> b{{4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};  // accessor to 4 integers
+      /* ... */
+    });
+    host_accessor ha{b};   // blocks until command completes
+    // Can read contents of buffer through "ha"
+  }
 }
+----
+
+==== Buffer created from raw host pointer
+
+A buffer can be created by specifying both a range and a pointer to host
+memory.  In this case, the buffer's initial contents are taken from that
+host memory, and the SYCL runtime assumes exclusive access to that pointer's
+memory for the duration of the buffer's lifetime.  If the application submits
+any commands that create writable accessors to that buffer, the buffer
+destructor blocks until those commands complete and the contents of the host
+pointer are updated with the written data by the time the buffer destructor
+returns.
+
+[source,,linenums]
+----
+{
+  queue q;
+  int data[4] = {0};
+  {
+    buffer b{data, {4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};  // read-write accessor
+      /* ... */
+    });
+    // Buffer destructor blocks until command completes
+  }
+  // Can read final content of buffer from "data"
+}
+----
+
+However, if the application submits only commands with read accessors to the
+buffer, then the buffer destructor does not block.
+
+[source,,linenums]
+----
+{
+  queue q;
+  int data[] = {1, 2, 3, 4};
+  {
+    buffer b{data, {4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh, read_only};  // read-only accessor
+      /* ... */
+    });
+    // Buffer destructor does not block
+  }
+}
+----
+
+==== Transferring ownership of host memory to SYCL
+
+A buffer can be created from a range and a [code]#std::unique_ptr# to host
+memory.  This is useful when the application wants to initialize the contents
+of the buffer but has no further use of the host memory after the buffer is
+destroyed.  The SYCL runtime assumes ownership of the memory and deletes it
+when it is no longer needed.  The buffer destructor does not block in this
+case.
+
+[source,,linenums]
+----
+{
+  queue q;
+  auto p = std::make_unique<int[]>(4);
+  std::iota(&p[0], &p[4], 1);
+  {
+    buffer<int> b{std::move(p), {4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};
+      /* ... */
+    });
+    // Buffer destructor does not block
+    // SYCL runtime automatically frees the host memory
+  }
+}
+----
+
+==== Sharing ownership of host memory with SYCL
+
+A buffer can be created from a range and a [code]#std::shared_ptr# to host
+memory.  In this case, the application and the SYCL runtime share ownership of
+the host memory region.  The buffer destructor only blocks if the application
+still holds a [code]#std::shared_ptr# to the memory region.  In this case,
+the buffer destructor ensures that the contents of the memory reflect any
+modifications made by commands that had writable accessors to the buffer.
+
+[source,,linenums]
+----
+{
+  queue q;
+  std::shared_ptr<int[]> p{new int[4]};
+  std::iota(&p[0], &p[4], 1);
+  {
+    buffer b{p, {4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};
+      /* ... */
+    });
+    // Buffer destructor blocks because application has shared_ptr to "p"
+  }
+  // Can read final content of buffer from "p"
+}
+----
+
+The buffer destructor does not block if the application releases its
+[code]#shared_ptr# to the memory region.
+
+[source,,linenums]
+----
+{
+  queue q;
+  std::shared_ptr<int[]> p{new int[4]};
+  std::iota(&p[0], &p[4], 1);
+  {
+    buffer b{p, {4}};
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};
+      /* ... */
+    });
+    p.reset();
+    // Buffer destructor does not block because application has no shared_ptr to "p"
+    // SYCL runtime frees the host memory
+  }
+}
+----
+
+==== Changing the write-back location of the buffer
+
+The [code]#set_final_data# function can be used to cause the buffer's content
+to be written to the host even in cases when the content is not normally
+written back to the host.  In this case, the buffer destructor blocks until all
+commands with writable accessors to the buffer have completed.
+
+[source,,linenums]
+----
+{
+  queue q;
+  int result[4];
+  {
+    buffer<int> b{{4}}; // Buffer created with no host memory
+    q.submit([&](handler &cgh) {
+      accessor a{b, cgh};
+      /* ... */
+    });
+    b.set_final_data(result);
+    // Buffer destructor blocks, then writes data to "result"
+  }
+}
+----
+
+==== Creating a sub-buffer
+
+A buffer can be created as a sub-buffer from a range of elements of some other
+buffer object.  This allows a command to depend on only a subset of the
+buffer's elements.  A sub-buffer must be constructed from a contiguous region
+of the primary buffer.  This requirement is potentially non-intuitive when
+working with multi-dimensional buffers.  For example:
+
+[source,,linenums]
+----
+buffer<int, 2> parent_buffer{{8,8}}; // Create 2-d buffer with 8x8 ints
+
+// OK: Contiguous region from middle of buffer
+buffer<int, 2> sub_buf1{parent_buffer, /*offset*/ {2,0}, /*size*/ {2,8}};
+
+// invalid exception: Non-contiguous regions of 2-d buffer
+buffer<int, 2> sub_buf2{parent_buffer, /*offset*/ {2,0}, /*size*/ {2,2}};
+buffer<int, 2> sub_buf3{parent_buffer, /*offset*/ {2,2}, /*size*/ {2,6}};
+
+// invalid exception: Out-of-bounds size
+buffer<int, 2> sub_buf4{parent_buffer, /*offset*/ {2,2}, /*size*/ {2,8}};
 ----
 
 
