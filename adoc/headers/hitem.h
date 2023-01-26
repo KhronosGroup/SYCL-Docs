@@ -4,6 +4,8 @@
 namespace sycl {
 template <int Dimensions> class h_item {
  public:
+  static constexpr int dimensions = Dimensions;
+
   h_item() = delete;
 
   /* -- common interface members -- */

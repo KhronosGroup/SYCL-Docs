@@ -4,6 +4,8 @@
 namespace sycl {
 template <int Dimensions = 1> class range {
  public:
+  static constexpr int dimensions = Dimensions;
+
   /* The following constructor is only available in the range class
    * specialization where: Dimensions==1 */
   range(size_t dim0);

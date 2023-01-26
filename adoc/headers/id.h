@@ -4,6 +4,8 @@
 namespace sycl {
 template <int Dimensions = 1> class id {
  public:
+  static constexpr int dimensions = Dimensions;
+
   id();
 
   /* The following constructor is only available in the id class

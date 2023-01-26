@@ -4,6 +4,8 @@
 namespace sycl {
 template <int Dimensions = 1> class nd_range {
  public:
+  static constexpr int dimensions = Dimensions;
+
   /* -- common interface members -- */
 
   // The offset is deprecated in SYCL 2020.
