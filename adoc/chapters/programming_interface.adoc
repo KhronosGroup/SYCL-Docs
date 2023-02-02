@@ -2906,9 +2906,12 @@ function.
 
 All member functions of the [code]#queue# class are synchronous and errors
 are handled by throwing synchronous SYCL exceptions. The [code]#submit#
-member function schedules <<command-group,command groups>> asynchronously, so any errors
-in the submission of a <<command-group>> are handled by throwing synchronous
-SYCL exceptions. Any exceptions from the <<command-group>> after it has
+member function synchronously invokes the provided
+<<command-group-function-object>> (as described in
+<<sec:command-groups-exec-order>>) in the calling thread, thereby scheduling a
+<<command-group>> for asynchronous execution. Any error in the submission of a
+<<command-group>> is handled by throwing a synchronous SYCL exception.
+Any exceptions from the <<command-group>> after it has
 been submitted are handled by passing <<async-error,asynchronous errors>> at specific times to an
 <<async-handler>>, as described in <<error-handling>>.
 
