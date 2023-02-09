@@ -18009,14 +18009,6 @@ those defined by [code]#info::device::single_fp_config# and
 [code]#info::device::double_fp_config# (i.e. floating-point atomics may use
 different rounding modes and may have different exception behavior).
 
-If the code using [code]#sycl::atomic_ref# is submitted to a device that has
-[code]#aspect::usm_atomic_host_allocations# or
-[code]#aspect::usm_atomic_shared_allocations#, then atomic operations in device
-code (using [code]#sycl::atomic_ref#) are guaranteed to be atomic with respect
-to atomic operations performed in host code (using [code]#std::atomic_ref#),
-when they operate on the same object and when the memory scope is
-[code]#memory_scope::system#.
-
 The atomic types are defined as follows.
 
 [source,,linenums]
@@ -18888,6 +18880,35 @@ Equivalent to calling [code]#object.fetch_max(operand, memoryOrder)#.
 
 |====
 
+
+=== Interaction with host code
+
+When a kernel runs on a device that has either
+[code]#aspect::usm_atomic_host_allocations# or
+[code]#aspect::usm_atomic_shared_allocations#, the device code and the host
+code can concurrently access the same memory.  Device code and host code can
+perform fence and atomic operations on objects in this memory, and those
+operations are guaranteed to interoperate in the following ways when the device
+code uses memory scope [code]#memory_scope::system#.
+
+Atomic operations in device code using [code]#sycl::atomic_ref# on an object
+_M_ are guaranteed to be atomic with respect to atomic operations in host code
+using [code]#std::atomic_ref# on that same object _M_.
+
+Fence operations in device code using [code]#sycl::atomic_fence# synchronize
+with fence operations in host code using [code]#std::atomic_thread_fence# if
+the fence operations shared the same atomic object _M_ and follow the rules for
+fence synchronization defined in the {cpp} core language.
+
+Fence operations in device code using [code]#sycl::atomic_fence# synchronize
+with atomic operations in host code using [code]#std::atomic_ref# if the
+operations share the same atomic object _M_ and follow the rules for fence
+synchronization defined in the {cpp} core language.
+
+Atomic operations in device code using [code]#sycl::atomic_ref# synchronize
+with fence operations in host code using [code]#std::atomic_thread_fence# if
+the operations share the same atomic object _M_ and follow the rules for fence
+synchronization defined in the {cpp} core language.
 
 
 [[subsec:stream]]
