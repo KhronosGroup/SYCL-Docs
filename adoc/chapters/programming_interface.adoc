@@ -3682,10 +3682,14 @@ a@
 property::queue::in_order
 ----
    a@ The [code]#in_order# property adds the requirement that
-      the SYCL [code]#queue# provides in-order semantics where
-      tasks are executed in the order in which they are submitted.
-      Tasks submitted in this fashion can be viewed as having an
-      implicit dependence on the previously submitted operation.
+      a SYCL [code]#queue# provides in-order semantics whereby
+      commands submitted to said [code]#queue# are executed in
+      the order in which they are submitted.
+      Commands submitted in this fashion can be viewed as-if
+      having an implicit dependence on the previous command
+      submitted to that [code]#queue#. Using the [code]#in_order#
+      property makes no guarantees about the ordering of commands
+      submitted to different queues with respect to each other.
 
 |====
 
