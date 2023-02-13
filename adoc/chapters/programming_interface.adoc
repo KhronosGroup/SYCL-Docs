@@ -18886,10 +18886,15 @@ Equivalent to calling [code]#object.fetch_max(operand, memoryOrder)#.
 When a kernel runs on a device that has either
 [code]#aspect::usm_atomic_host_allocations# or
 [code]#aspect::usm_atomic_shared_allocations#, the device code and the host
-code can concurrently access the same memory.  Device code and host code can
-perform fence and atomic operations on objects in this memory, and those
-operations are guaranteed to interoperate in the following ways when the device
-code uses memory scope [code]#memory_scope::system#.
+code can concurrently access the same memory.  This has a ramification on the
+atomic operations because it is possible for device code and host code to
+perform atomic operations on the same object _M_ in this shared memory.  It
+also has a ramification on the fence operations because the {cpp} core language
+defines the semantics of these fence operations in relation to atomic
+operations on some shared object _M_.  The following paragraphs specify the
+guarantees that the SYCL implementation provides when the application performs
+atomic or fence operations in device code using the memory scope
+[code]#memory_scope::system#.
 
 Atomic operations in device code using [code]#sycl::atomic_ref# on an object
 _M_ are guaranteed to be atomic with respect to atomic operations in host code
