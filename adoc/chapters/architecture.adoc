@@ -1778,8 +1778,13 @@ certain arguments to a <<sycl-kernel-function>> (as described in
 <<device-copyable>> as defined below.
 
 Any type that is trivially copyable (as defined by the {cpp} core language) is
-implicitly device copyable.  In addition, the following types from the {cpp}
-core language are implicitly device copyable:
+implicitly device copyable.
+
+Although implementations are not required to support device code that calls
+library functions from the {cpp} core language, some implementations may
+provide device support for some of these functions.  If the implementation
+provides device support for one of the following classes, that type is also
+implicitly device copyable:
 
   * [code]#std::array<T, 0>#;
   * [code]#std::array<T, N># if [code]#T# is device copyable;
@@ -1793,7 +1798,12 @@ core language are implicitly device copyable:
     [code]#Types# are device copyable;
   * [code]#std::basic_string_view<CharT, Traits>#;
   * [code]#std::span<ElementType, Extent># (the [code]#std::span# type has
-    been introduced in {cpp}20).
+    been introduced in {cpp}20);
+  * [code]#sycl::span<ElementType, Extent>#.
+
+If the implementation provides device support for one of the classes listed
+above, arrays of that class and cv-qualified versions of that class are also
+device copyable.
 
 [NOTE]
 ====
@@ -1829,7 +1839,8 @@ have this support.  When the implementation has this support, a class type
 
 When the application explicitly declares a class type to be device copyable,
 arrays of that type and cv-qualified versions of that type are also device
-copyable.
+copyable, and the implementation sets the [code]#is_device_copyable_v# trait to
+[code]#true# for these array and cv-qualified types.
 
 [NOTE]
 ====
