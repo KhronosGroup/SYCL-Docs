@@ -3673,8 +3673,11 @@ property::queue::enable_profiling
       the <<command-group,command groups>> that are submitted from this SYCL
       [code]#queue# and provide said information via the SYCL
       [code]#event# class [code]#get_profiling_info# member
-      function, if the associated SYCL [code]#device# has
-      [code]#aspect::queue_profiling#.
+      function.  If the queue's associated device does not have
+      [code]#aspect::queue_profiling#, passing this property to the queue's
+      constructor causes the constructor to throw a synchronous
+      [code]#exception# with the [code]#errc::feature_not_supported# error
+      code.
 
 a@
 [source]
