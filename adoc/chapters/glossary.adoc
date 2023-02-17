@@ -432,14 +432,16 @@ object. For the full description please refer to <<subsec:buffers>>.
     be inlined, public and defaulted, none of them should be explicitly
     declared.
 
-[[smcp]]SMCP::
-    The single-source multiple compiler-passes (SMCP) technique allows a
-    single source file to be parsed by multiple compilers for building
-    native programs per compilation target. For example, a standard {cpp} CPU
-    compiler for targeting <<host>> will parse the <<sycl-file>> to
-    create the {cpp} <<sycl-application>> which offloads parts of the
-    computation to other <<device,devices>>. A SYCL device compiler will parse
-    the same source file and target only SYCL kernels.
+[[smcp]]SMCP:: The single-source multiple compiler-passes (SMCP)
+    technique allows a single-source file to be parsed by multiple
+    compilers for building native programs per compilation target. For
+    example, a standard {cpp} CPU compiler for targeting <<host>> will
+    parse the <<sycl-file>> to create the {cpp} <<sycl-application>>
+    which offloads parts of the computation to other
+    <<device,devices>>. A SYCL device compiler will parse the same
+    source file and target only SYCL kernels. For the full description
+    please refer to <<subsec:smcp>>.  See <<sscp>> for the dual
+    approach.
 
 [[specialization-constant]]specialization constant::
     A constant variable where the value is not known until compilation of
@@ -450,6 +452,16 @@ object. For the full description please refer to <<subsec:buffers>>.
     <<specialization-constant>> both in the <<sycl-application>> for setting
     the value prior to the compilation of a <<kernel-bundle>> and in a
     <<sycl-kernel-function>> for retrieving the value during invocation.
+
+[[sscp]]SSCP:: The single-source single compiler-pass (SSCP) technique
+    allows a single-source file to be parsed only once by a single
+    compiler. For example, the SYCL compiler will parse the
+    <<sycl-file>> once. Then, from this single intermediate
+    representation, for each kind of device architecture a compilation
+    flow will be generate the binary for each kernel and another
+    compilation flow will generate the <<host>> code of the {cpp}
+    <<sycl-application>>. For the full description please refer to
+    <<subsec:sscp>>. See <<smcp>> for the dual approach.
 
 [[string-kernel-name]]string kernel name::
     The name of a <<sycl-kernel-function>> in string form, this can be the
