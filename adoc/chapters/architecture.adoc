@@ -1681,6 +1681,7 @@ implementations need not follow the guidelines listed here.  However, this
 section is intended to help readers understand the possible strategies that can
 be used to implement SYCL.
 
+[[subsec:smcp]]
 === Single source multiple compiler passes
 
 With this technique, known as <<smcp>>, there are separate host and device
@@ -1722,13 +1723,15 @@ do not require a <<kernel-name>> at the invocation site, so they must implement
 some other way to make the association.
 
 
+[[subsec:sscp]]
 === Single source single compiler pass
 
-With this technique, the vendor implements a custom compiler that reads each
-SYCL source file only once, and that compiler generates the host code as well
-as the <<device-image, device images>> for the <<sycl-kernel-function,
-SYCL kernel functions>>.  As in the <<smcp>> case, each <<device-image>> could
-either contain native device ISA or an intermediate language.
+With this technique, known as <<sscp>>, the vendor implements a custom
+compiler that reads each SYCL source file only once, and that compiler
+generates the host code as well as the <<device-image, device images>>
+for the <<sycl-kernel-function, SYCL kernel functions>>.  As in the
+<<smcp>> case, each <<device-image>> could either contain native
+device ISA or an intermediate language.
 
 === Library-only implementation
 
