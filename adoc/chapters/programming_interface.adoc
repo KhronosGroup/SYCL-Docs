@@ -17958,43 +17958,69 @@ device_event(___unspecified___)
 [[sec:atomic-references]]
 === Atomic references
 
-The SYCL specification provides atomic operations based on the library
-syntax from the next {cpp} specification. The set of supported orderings is
+The [code]#sycl::atomic_ref# class provides the ability to perform atomic
+operations in device code with a syntax similar to the {cpp} standard
+[code]#std::atomic_ref#.  The [code]#sycl::atomic_ref# class must not be used
+in host code.
+
+Unlike [code]#std::atomic_ref#, [code]#sycl::atomic_ref# does not provide a
+default memory ordering for its operations.  Instead, the application must
+specify a default ordering via the [code]#DefaultOrder# template parameter.
+This ordering is used as a default for most of the atomic operations, but
+most member functions also provide an optional parameter that allows the
+application to override this default.  The set of supported orderings is
 specific to a device, but every device is guaranteed to support at least
-[code]#memory_order::relaxed#. Since different devices have different
-capabilities, there is no default ordering in SYCL and the default order
-used by each instance of [code]#sycl::atomic_ref# is set by a template
-argument. If the default order is set to [code]#memory_order::relaxed#,
-all memory order arguments default to [code]#memory_order::relaxed#. If
-the default order is set to [code]#memory_order::acq_rel#, memory order
-arguments default to [code]#memory_order::acquire# for load operations,
+[code]#memory_order::relaxed#.  If the default order is set to
+[code]#memory_order::relaxed#, all memory order arguments default to
+[code]#memory_order::relaxed#.  If the default order is set to
+[code]#memory_order::acq_rel#, memory order arguments default to
+[code]#memory_order::acquire# for load operations,
 [code]#memory_order::release# for store operations and
-[code]#memory_order::acq_rel# for read-modify-write operations. If the
+[code]#memory_order::acq_rel# for read-modify-write operations.  If the
 default order is set to [code]#memory_order::seq_cst#, all memory order
 arguments default to [code]#memory_order::seq_cst#.
 
-The SYCL atomic library may map directly to the underlying {cpp} library in
-<<sycl-application>> code, and must interact safely with the host {cpp}
-atomic library when used in host code. The SYCL library must be used in
-device code to ensure that only the limited subset of functionality is
-available. SYCL device compilers should give a compilation error on use of
-the [code]#std::atomic# and [code]#std::atomic_ref# classes and
-functions in device code.
+The [code]#sycl::atomic_ref# class has a template parameter
+[code]#DefaultScope#, which allows the application to define a default memory
+scope for the atomic operations.  Most member functions also provide an
+optional parameter that allows the application to override this default.
 
-The template parameter [code]#Space# is permitted to be
-[code]#access::address_space::generic_space#,
-[code]#access::address_space::global_space# or [code]#access::address_space::local_space#.
+The [code]#sycl::atomic_ref# class also has a template parameter
+[code]#AddressSpace#, which allows the application to make an assertion about
+the address space of the object of type [code]#T# that it references.  The
+default value for this parameter is
+[code]#access::address_space::generic_space#, which indicates that the object
+could be in either the global or local address spaces.  If the application
+knows the address space, it can set this template parameter to either
+[code]#access::address_space::global_space# or
+[code]#access::address_space::local_space# as an assertion to the
+implementation.  Specifying the address space via this template parameter may
+allow the implementation to perform certain optimizations.  Specifying an
+address space that does not match the object's actual address space results in
+undefined behavior.
 
-The data type [code]#T# is permitted to be [code]#int#, [code]#unsigned int#, [code]#long#,
-[code]#unsigned long#,
-[code]#long long#,
-[code]#unsigned long long#, [code]#float# or
-[code]#double#.  For floating-point types, the member functions of the
-[code]#atomic_ref# class may be emulated, and may use a different
-floating-point environment to those defined by
-[code]#info::device::single_fp_config# and
-[code]#info::device::double_fp_config# (i.e. floating-point atomics may
-use different rounding modes and may have different exception behavior).
+The template parameter [code]#T# must be one of the following types:
+
+* [code]#int#,
+* [code]#unsigned int#,
+* [code]#long#,
+* [code]#unsigned long#,
+* [code]#long long#,
+* [code]#unsigned long long#,
+* [code]#float#, or
+* [code]#double#.
+
+In addition, the type [code]#T# must satisfy one of the following conditions:
+
+* [code]#sizeof(T) == 4#, or
+* [code]#sizeof(T) == 8# and the code containing this [code]#atomic_ref# was
+  submitted to a device that has [code]#aspect::atomic64#.
+
+For floating-point types, the member functions of the [code]#atomic_ref# class
+may be emulated, and they may use a different floating-point environment from
+those defined by [code]#info::device::single_fp_config# and
+[code]#info::device::double_fp_config# (i.e. floating-point atomics may use
+different rounding modes and may have different exception behavior).
 
 The atomic types are defined as follows.
 
@@ -18867,6 +18893,40 @@ Equivalent to calling [code]#object.fetch_max(operand, memoryOrder)#.
 
 |====
 
+
+=== Interaction with host code
+
+When a kernel runs on a device that has either
+[code]#aspect::usm_atomic_host_allocations# or
+[code]#aspect::usm_atomic_shared_allocations#, the device code and the host
+code can concurrently access the same memory.  This has a ramification on the
+atomic operations because it is possible for device code and host code to
+perform atomic operations on the same object _M_ in this shared memory.  It
+also has a ramification on the fence operations because the {cpp} core language
+defines the semantics of these fence operations in relation to atomic
+operations on some shared object _M_.  The following paragraphs specify the
+guarantees that the SYCL implementation provides when the application performs
+atomic or fence operations in device code using the memory scope
+[code]#memory_scope::system#.
+
+Atomic operations in device code using [code]#sycl::atomic_ref# on an object
+_M_ are guaranteed to be atomic with respect to atomic operations in host code
+using [code]#std::atomic_ref# on that same object _M_.
+
+Fence operations in device code using [code]#sycl::atomic_fence# synchronize
+with fence operations in host code using [code]#std::atomic_thread_fence# if
+the fence operations shared the same atomic object _M_ and follow the rules for
+fence synchronization defined in the {cpp} core language.
+
+Fence operations in device code using [code]#sycl::atomic_fence# synchronize
+with atomic operations in host code using [code]#std::atomic_ref# if the
+operations share the same atomic object _M_ and follow the rules for fence
+synchronization defined in the {cpp} core language.
+
+Atomic operations in device code using [code]#sycl::atomic_ref# synchronize
+with fence operations in host code using [code]#std::atomic_thread_fence# if
+the operations share the same atomic object _M_ and follow the rules for fence
+synchronization defined in the {cpp} core language.
 
 
 [[subsec:stream]]
