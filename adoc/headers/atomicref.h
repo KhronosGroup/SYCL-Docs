@@ -22,7 +22,7 @@ template <> struct memory_order_traits<memory_order::seq_cst> {
 };
 
 template <typename T, memory_order DefaultOrder, memory_scope DefaultScope,
-          access::address_space Space = access::address_space::generic_space>
+          access::address_space AddressSpace = access::address_space::generic_space>
 class atomic_ref {
  public:
   using value_type = T;
@@ -76,8 +76,8 @@ class atomic_ref {
 
 // Partial specialization for integral types
 template <memory_order DefaultOrder, memory_scope DefaultScope,
-          access::address_space Space = access::address_space::generic_space>
-class atomic_ref<Integral, DefaultOrder, DefaultScope, Space> {
+          access::address_space AddressSpace = access::address_space::generic_space>
+class atomic_ref<Integral, DefaultOrder, DefaultScope, AddressSpace> {
 
   /* All other members from atomic_ref<T> are available */
 
@@ -120,8 +120,8 @@ class atomic_ref<Integral, DefaultOrder, DefaultScope, Space> {
 
 // Partial specialization for floating-point types
 template <memory_order DefaultOrder, memory_scope DefaultScope,
-          access::address_space Space = access::address_space::generic_space>
-class atomic_ref<Floating, DefaultOrder, DefaultScope, Space> {
+          access::address_space AddressSpace = access::address_space::generic_space>
+class atomic_ref<Floating, DefaultOrder, DefaultScope, AddressSpace> {
 
   /* All other members from atomic_ref<T> are available */
 
@@ -149,8 +149,8 @@ class atomic_ref<Floating, DefaultOrder, DefaultScope, Space> {
 
 // Partial specialization for pointers
 template <typename T, memory_order DefaultOrder, memory_scope DefaultScope,
-          access::address_space Space = access::address_space::generic_space>
-class atomic_ref<T*, DefaultOrder, DefaultScope, Space> {
+          access::address_space AddressSpace = access::address_space::generic_space>
+class atomic_ref<T*, DefaultOrder, DefaultScope, AddressSpace> {
 
   using value_type = T*;
   using difference_type = ptrdiff_t;
