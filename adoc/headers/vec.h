@@ -134,10 +134,12 @@ template <typename DataT, int NumElements> class vec {
   }
 
   // OP is prefix ++, --
+  // Available only when: DataT != bool
   friend vec& operatorOP(vec& rhs) { /* ... */
   }
 
   // OP is postfix ++, --
+  // Available only when: DataT != bool
   friend vec operatorOP(vec& lhs, int) { /* ... */
   }
 
