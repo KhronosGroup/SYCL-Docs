@@ -2833,14 +2833,13 @@ aspect::usm_system_allocations
 |====
 
 The implementation also provides two traits that the application can use to
-query aspects at compilation time.  The trait [code]#any_device_has<aspect>#
-inherits from [code]#std::true_type# if the compilation environment supports
-any device which has the specified aspect, and it inherits from
-[code]#std::false_type# if no device has the aspect.  The trait
-[code]#all_devices_have<aspect># inherits from [code]#std::true_type# if all
-devices supported by the compilation environment have the specified aspect,
-and it inherits from [code]#std::false_type# if any device does not have the
-aspect.
+query aspects at compilation time.  The traits [code]#any_device_has<aspect>#
+and [code]#all_devices_have<aspect># are set according to the collection of
+devices _D_ that can possibly execute device code, as determined by the
+compilation environment.  The trait [code]#any_device_has<aspect># inherits
+from [code]#std::true_type# only if at least one device in _D_ has the
+specified aspect.  The trait [code]#all_devices_have<aspect># inherits from
+[code]#std::true_type# only if all devices in _D_ have the specified aspect.
 
 [source,,linenums]
 ----
@@ -2886,6 +2885,15 @@ affect these traits.  For example, if an implementation provides a command line
 option that disables [code]#aspect::accelerator# devices, the trait
 [code]#any_device_has_v<aspect::accelerator># would be [code]#false# when that
 command line option was specified.
+====
+
+[NOTE]
+====
+These traits only reflect the supported devices at the time the SYCL
+application is compiled.  It's possible that unsupported devices are still
+visible to the application when it runs.  However, if a device _D_ is not
+supported when the application is compiled, the application will not be able
+to submit kernels to that device _D_.
 ====
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end device_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
