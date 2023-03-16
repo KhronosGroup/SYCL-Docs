@@ -12514,7 +12514,7 @@ sycl::logical_and
 a@
 [source]
 ----
-std::is_same_v<std::remove_v_t<AccumulatorT>, bool>
+std::is_same_v<std::remove_cv_t<AccumulatorT>, bool>
 ----
 a@
 ----
@@ -12529,7 +12529,7 @@ sycl::logical_or
 a@
 [source]
 ----
-std::is_same_v<std::remove_v_t<AccumulatorT>, bool>
+std::is_same_v<std::remove_cv_t<AccumulatorT>, bool>
 ----
 a@
 ----
@@ -17566,7 +17566,7 @@ a@
 ----
 marray& operatorOP(marray& v)
 ----
-   a@ Perform an in-place element-wise [code]#OP# prefix arithmetic operation on each element of [code]#lhs# [code]#marray#, assigning the result of each element to the corresponding element of [code]#lhs# [code]#marray# and return [code]#lhs# [code]#marray#.
+   a@ Perform an in-place element-wise [code]#OP# prefix arithmetic operation on each element of [code]#v# [code]#marray#, assigning the result of each element to the corresponding element of [code]#v# [code]#marray# and return [code]#v# [code]#marray#.
 
 Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 
@@ -17575,7 +17575,7 @@ a@
 ----
 marray operatorOP(marray& v, int)
 ----
-   a@ Perform an in-place element-wise [code]#OP# postfix arithmetic operation on each element of [code]#lhs# [code]#marray#, assigning the result of each element to the corresponding element of [code]#lhs# [code]#marray# and returns a copy of [code]#lhs# [code]#marray# before the operation is performed.
+   a@ Perform an in-place element-wise [code]#OP# postfix arithmetic operation on each element of [code]#v# [code]#marray#, assigning the result of each element to the corresponding element of [code]#v# [code]#marray# and returns a copy of [code]#v# [code]#marray# before the operation is performed.
 
 Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 
@@ -17760,12 +17760,10 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
-marray<RET, NumElements> operatorOP(const DataT& lhs, const marray& rhs)
+marray<bool, NumElements> operatorOP(const DataT& lhs, const marray& rhs)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
-
-Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and
-same NumElements as [code]#lhs# [code]#marray# with each element of the new [code]#marray# instance
+   a@ Construct a new instance of the [code]#marray# class template with [code]#DataT = bool# and
+same NumElements as [code]#rhs# [code]#marray# with each element of the new [code]#marray# instance
 the result of an element-wise [code]#OP# logical operation between the [code]#lhs#
 scalar and each element of the [code]#rhs# [code]#marray#.
 
@@ -17794,7 +17792,7 @@ a@
 marray<bool, NumElements> operatorOP(const DataT& lhs, const marray& rhs)
 ----
    a@ Construct a new instance of the [code]#marray# class template with
-      [code]#DataT = bool# and same NumElements as [code]#lhs# [code]#marray#
+      [code]#DataT = bool# and same NumElements as [code]#rhs# [code]#marray#
       with each element of the new SYCL [code]#marray# instance the result of
       an element-wise [code]#OP# relational operation between the [code]#lhs#
       scalar and each element of the [code]#rhs# [code]#marray#.  The
