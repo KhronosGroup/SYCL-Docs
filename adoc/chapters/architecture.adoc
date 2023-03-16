@@ -1205,14 +1205,14 @@ kernels using the features described in <<sec:reduction>>.
 
 === Work-group data parallel kernels
 
-Data parallel <<kernel>>s can also execute in a mode where the set of
-<<work-item>>s is divided into <<work-group>>s of user-defined dimensions.
-The user specifies the global <<range>> and local work-group size as
-parameters to the [code]#sycl::parallel_for# function with a
+Data parallel <<kernel,kernels>> can also execute in a mode where the set of
+<<work-item,work-items>> is divided into <<work-group,work-groups>> of
+user-defined dimensions.  The user specifies the global <<range>> and local
+work-group size as parameters to the [code]#sycl::parallel_for# function with a
 [code]#sycl::nd_range# parameter. In this mode of execution,
 kernels execute over the <<nd-range>> in work-groups of the specified
 size. It is possible to share data among work-items within the same
-work-group in <<local memory,local>> or <<global memory>> and to synchronize between
+work-group in <<local-memory,local>> or <<global-memory>> and to synchronize between
 work-items in the same work-group by calling the
 [code]#group_barrier# function. All work-groups in a given
 [code]#parallel_for# will be the same size, and the global size
@@ -1221,9 +1221,10 @@ each dimension, or the global size must be zero. When the global size
 is zero, the kernel function is not executed, the local size is ignored, and
 any dependencies are satisfied.
 
-Work-groups may be further subdivided into <<sub-group>>s.
-The size and number of sub-groups is implementation-defined and may differ for
-each kernel, and different devices may make different guarantees with respect
+Work-groups may be further subdivided into <<sub-group,sub-groups>>.  The
+work-items that compose a sub-group are selected in an implementation-defined
+way, and therefore the size and number of sub-groups may differ for each
+kernel.  Moreover, different devices may make different guarantees with respect
 to how sub-groups within a work-group are scheduled.  The maximum number of
 work-items in any sub-group in a kernel is based on a combination of the kernel
 and its dispatch dimensions.  The size of any sub-group in the dispatch is
@@ -1232,10 +1233,10 @@ sub-group is invariant for the duration of a kernel's execution.  Similarly
 to work-groups, the work-items within the same sub-group can be synchronized
 by calling the [code]#group_barrier# function.
 
-To maximize portability across devices, developers should not assume that
-work-items within a sub-group execute in any particular order, that work-groups
-are subdivided into sub-groups in a specific way, nor that the work-items
-within a sub-group provide specific forward progress guarantees.
+Portable device code must not assume that work-items within a sub-group execute
+in any particular order, that work-groups are subdivided into sub-groups in a
+specific way, nor that the work-items within a sub-group provide specific
+forward progress guarantees.
 
 Variables with <<reduction>> semantics can be added to work-group data
 parallel kernels using the features described in <<sec:reduction>>.

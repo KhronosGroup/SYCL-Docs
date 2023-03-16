@@ -12011,8 +12011,11 @@ a@
 ----
 id<Dimensions> get_group_id() const
 ----
-   a@ Return an <<id>> representing the index of the work-group
-      within the <<nd-range>> for every dimension.
+   a@ Return an <<id>> representing the index of the work-group within the
+      global <<nd-range>> for every dimension.  Since the work-items in a
+      work-group have a defined position within the global nd-range, the
+      returned group id can be used along with the local id to uniquely
+      identify the work-item in the global nd-range.
 
 a@
 [source]
@@ -12037,7 +12040,7 @@ a@
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the calling work-item's position within the <<work-group>> in the specified dimension.
+   a@ Return the same value as [code]#get_local_id()[dimension]#.
 
 It is undefined behavior for this member function to be invoked from within
 a [code]#parallel_for_work_item# context.
@@ -12055,7 +12058,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the dimension of the local range specified by the [code]#dimension# parameter.
+   a@ Return the same value as [code]#get_local_range()[dimension]#.
 
 a@
 [source]
@@ -12069,7 +12072,7 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return element [code]#dimension# from the constituent group range.
+   a@ Return the same value as [code]#get_group_range()[dimension]#.
 
 a@
 [source]
@@ -12284,8 +12287,12 @@ a@
 ----
 id<1> get_group_id() const
 ----
-   a@ Return an <<id>> representing the index of the sub-group
-      within the <<work-group>>.
+   a@ Return an <<id>> representing the index of the sub-group within the
+      <<work-group>>.  Since the work-items that compose a sub-group are chosen
+      in an implementation defined way, the returned sub-group id cannot be
+      used to identify a particular work-item in the global nd-range.  Rather,
+      the returned sub-group id is merely an abstract identifier of the
+      sub-group containing this work-item.
 
 a@
 [source]
@@ -12311,8 +12318,8 @@ a@
 ----
 range<1> get_group_range() const
 ----
-   a@ Return a [code]#range# representing the number of <<sub-group>>s in the
-      <<work-group>>.
+   a@ Return a [code]#range# representing the number of
+      <<sub-group,sub-groups>> in the <<work-group>>.
 
 a@
 [source]
@@ -12329,28 +12336,28 @@ a@
 ----
 uint32_t get_group_linear_id() const
 ----
-   a@ Equivalent to [code]#get_group_id()#.
+   a@ Return the same value as [code]#get_group_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_group_linear_range() const
 ----
-   a@ Equivalent to [code]#get_group_range()#.
+   a@ Return the same value as [code]#get_group_range()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_id() const
 ----
-   a@ Equivalent to [code]#get_local_id()#.
+   a@ Return the same value as [code]#get_local_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_range() const
 ----
-   a@ Equivalent to [code]#get_local_range()#.
+   a@ Return the same value as [code]#get_local_range()[0]#.
 
 a@
 [source]
