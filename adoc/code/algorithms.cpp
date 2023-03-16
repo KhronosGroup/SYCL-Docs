@@ -31,5 +31,5 @@ myQueue.submit([&](handler& cgh) {
   });
 });
 
-assert(outputBuf.get_host_access()[0] == 523776 &&
-       outputBuf.get_host_access()[1] == 120);
+host_accessor a { outputBuf };
+assert(a[0] == 523776 && a[1] == 120);
