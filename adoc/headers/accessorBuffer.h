@@ -156,10 +156,12 @@ class accessor {
   /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 0) */
   operator reference() const;
 
-  /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 0) */
+  /* Available only when: (AccessMode != access_mode::atomic &&
+                           AccessMode != access_mode::read && Dimensions == 0) */
   const accessor& operator=(const value_type& other) const;
 
-  /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 0) */
+  /* Available only when: (AccessMode != access_mode::atomic &&
+                           AccessMode != access_mode::read && Dimensions == 0) */
   const accessor& operator=(value_type&& other) const;
 
   /* Available only when: (Dimensions > 0) */
