@@ -99,6 +99,10 @@ class atomic_ref<Integral, DefaultOrder, DefaultScope, AddressSpace> {
                     memory_order order = default_read_modify_write_order,
                     memory_scope scope = default_scope) const noexcept;
 
+  Integral fetch_xor(Integral operand,
+                     memory_order order = default_read_modify_write_order,
+                     memory_scope scope = default_scope) const noexcept;
+
   Integral fetch_min(Integral operand,
                      memory_order order = default_read_modify_write_order,
                      memory_scope scope = default_scope) const noexcept;
