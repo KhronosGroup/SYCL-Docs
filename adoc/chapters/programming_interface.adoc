@@ -20011,7 +20011,7 @@ id within group [code]#g#.
 +
 --
 _Preconditions:_ [code]#local_linear_id# must be the same for all work-items in
-the group.
+the group, and must be in the range [code]#[0, get_local_linear_range())#.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified linear
 id within group [code]#g#.
@@ -20024,6 +20024,9 @@ id within group [code]#g#.
 --
 _Preconditions:_ [code]#local_id# must be the same for all work-items in the
 group, and its dimensionality must match the dimensionality of the group.
+The value of [code]#local_id# in each dimension must be greater than or equal
+to 0, and less than the value of [code]#get_local_range()# in the same
+dimension.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified id
 within group [code]#g#.
