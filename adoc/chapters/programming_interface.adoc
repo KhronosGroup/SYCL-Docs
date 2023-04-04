@@ -9218,14 +9218,17 @@ multi_ptr(std::nullptr_t)
 a@
 [source]
 ----
-template <int Dimensions, access_mode Mode,
+template <typename AccDataT, int Dimensions,
+          access_mode Mode,
           access::placeholder IsPlaceholder>
-multi_ptr(
-    accessor<ElementType, Dimensions, Mode, target::device,
-             IsPlaceholder>);
+multi_ptr(accessor<AccDataT, Dimensions, Mode,
+                   target::device, IsPlaceholder>)
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::global_space || Space == access::address_space::generic_space) &&
+      (std::is_void_v<ElementType> || std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+      (std::is_const_v<ElementType> ||
+      !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::device, IsPlaceholder>::value_type>)#.
 
 Constructs a [code]#multi_ptr# from an accessor of
 [code]#target::device#.
@@ -9235,11 +9238,13 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions>
-multi_ptr(local_accessor<ElementType, Dimensions>)
+template <typename AccDataT, int Dimensions>
+multi_ptr(local_accessor<AccDataT, Dimensions>)
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::local_space || Space == access::address_space::generic_space) &&
+      (std::is_void_v<ElementType> || std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+      (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)#.
 
 Constructs a [code]#multi_ptr# from a [code]#local_accessor#.
 
@@ -9248,17 +9253,19 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions, access_mode Mode,
+template <typename AccDataT, int Dimensions,
+          access_mode Mode,
           access::placeholder IsPlaceholder>
-multi_ptr(
-    accessor<ElementType, Dimensions, Mode, target::local,
-             IsPlaceholder>);
+multi_ptr(accessor<AccDataT, Dimensions, Mode,
+                   target::local, IsPlaceholder>)
 ----
    a@ Deprecated in SYCL 2020.  Use the overload with
       [code]#local_accessor# instead.
 
 Available only when:
-[code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
+[code]#(Space == access::address_space::local_space || Space == access::address_space::generic_space) &&
+(std::is_void_v<ElementType> || std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+(std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)#.
 
 Constructs a [code]#multi_ptr# from an accessor of [code]#target::local#.
 
@@ -9418,7 +9425,7 @@ operator multi_ptr<const value_type,
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
 
-Conversion from [code]#generic_ptr# to [code]#private_ptr#.
+Conversion from [code]#generic_ptr# to [code]#private_ptr# of const data.
 The result is undefined if the pointer does not address the private
 address space.
 
@@ -9450,7 +9457,7 @@ operator multi_ptr<const value_type,
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
 
-Conversion from [code]#generic_ptr# to [code]#global_ptr#.
+Conversion from [code]#generic_ptr# to [code]#global_ptr# of const data.
 The result is undefined if the pointer does not address the global
 address space.
 
@@ -9482,7 +9489,7 @@ operator multi_ptr<const value_type,
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
 
-Conversion from [code]#generic_ptr# to [code]#local_ptr#.
+Conversion from [code]#generic_ptr# to [code]#local_ptr# of const data.
 The result is undefined if the pointer does not address the local
 address space.
 

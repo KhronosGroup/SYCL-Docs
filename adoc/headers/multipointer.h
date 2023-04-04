@@ -55,23 +55,34 @@ class multi_ptr {
 
   // Available only when:
   //   (Space == access::address_space::global_space ||
-  //    Space == access::address_space::generic_space)
-  template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> ||
+  //    !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::device,
+  //                              IsPlaceholder>::value_type>)
+  template <typename AccDataT, int Dimensions, access_mode Mode,
+            access::placeholder IsPlaceholder>
   multi_ptr(
-      accessor<value_type, Dimensions, Mode, target::device, IsPlaceholder>);
+      accessor<AccDataT, Dimensions, Mode, target::device, IsPlaceholder>);
 
   // Available only when:
   //   (Space == access::address_space::local_space ||
-  //    Space == access::address_space::generic_space)
-  template <int Dimensions> multi_ptr(local_accessor<ElementType, Dimensions>);
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)
+  template <typename AccDataT, int Dimensions>
+  multi_ptr(local_accessor<AccDataT, Dimensions>);
 
   // Deprecated
   // Available only when:
   //   (Space == access::address_space::local_space ||
-  //    Space == access::address_space::generic_space)
-  template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)
+  template <typename AccDataT, int Dimensions, access_mode Mode,
+            access::placeholder IsPlaceholder>
   multi_ptr(
-      accessor<value_type, Dimensions, Mode, target::local, IsPlaceholder>);
+      accessor<AccDataT, Dimensions, Mode, target::local, IsPlaceholder>);
 
   // Assignment and access operators
   multi_ptr& operator=(const multi_ptr&);
@@ -108,7 +119,7 @@ class multi_ptr {
   explicit operator multi_ptr<value_type, access::address_space::private_space,
                               DecorateAddress>();
 
-  // Cast to private_ptr
+  // Cast to private_ptr of const data
   // Available only when: (Space == access::address_space::generic_space)
   explicit operator multi_ptr<const value_type, access::address_space::private_space,
                               DecorateAddress>() const;
@@ -118,7 +129,7 @@ class multi_ptr {
   explicit operator multi_ptr<value_type, access::address_space::global_space,
                               DecorateAddress>();
 
-  // Cast to global_ptr
+  // Cast to global_ptr of const data
   // Available only when: (Space == access::address_space::generic_space)
   explicit operator multi_ptr<const value_type, access::address_space::global_space,
                               DecorateAddress>() const;
@@ -128,7 +139,7 @@ class multi_ptr {
   explicit operator multi_ptr<value_type, access::address_space::local_space,
                               DecorateAddress>();
 
-  // Cast to local_ptr
+  // Cast to local_ptr of const data
   // Available only when: (Space == access::address_space::generic_space)
   explicit operator multi_ptr<const value_type, access::address_space::local_space,
                               DecorateAddress>() const;
@@ -247,20 +258,28 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   multi_ptr(std::nullptr_t);
 
   // Available only when:
-  //   (Space == access::address_space::global_space)
+  //   (Space == access::address_space::global_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> ||
+  //    !std::is_const_v<accessor<ElementType, Dimensions, Mode, target::device,
+  //                              IsPlaceholder>::value_type>)
   template <typename ElementType, int Dimensions, access_mode Mode,
             access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 
   // Available only when:
-  //   (Space == access::address_space::local_space)
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
   template <typename ElementType, int Dimensions>
   multi_ptr(local_accessor<ElementType, Dimensions>);
 
   // Deprecated
   // Available only when:
-  //   (Space == access::address_space::local_space)
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
   template <typename ElementType, int Dimensions, access_mode Mode,
             access::placeholder IsPlaceholder>
   multi_ptr(
@@ -342,9 +361,16 @@ template <access::address_space Space, access::decorated DecorateAddress,
 multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType*);
 
 // Deduction guides
-template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder,
-          class T>
-multi_ptr(accessor<T, Dimensions, Mode, target::device, IsPlaceholder>)
+template <typename T, int Dimensions, access::placeholder IsPlaceholder>
+multi_ptr(accessor<T, Dimensions, access_mode::read, target::device, IsPlaceholder>)
+    -> multi_ptr<const T, access::address_space::global_space, access::decorated::no>;
+
+template <typename T, int Dimensions, access::placeholder IsPlaceholder>
+multi_ptr(accessor<T, Dimensions, access_mode::write, target::device, IsPlaceholder>)
+    -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
+
+template <typename T, int Dimensions, access::placeholder IsPlaceholder>
+multi_ptr(accessor<T, Dimensions, access_mode::read_write, target::device, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
 
 template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder,
