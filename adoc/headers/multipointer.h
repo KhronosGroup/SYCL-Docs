@@ -96,31 +96,37 @@ class multi_ptr {
 
   // Only if Space == address_space::generic_space
   // Cast to private_ptr
+  template <access::decorated IsDecorated>
   explicit operator multi_ptr<value_type, access::address_space::private_space,
-                              DecorateAddress>();
+                              IsDecorated>() const;
   // Only if Space == address_space::generic_space
   // Cast to private_ptr
+  template <access::decorated IsDecorated>
   explicit
   operator multi_ptr<const value_type, access::address_space::private_space,
-                     DecorateAddress>() const;
+                     IsDecorated>() const;
   // Only if Space == address_space::generic_space
   // Cast to global_ptr
+  template <access::decorated IsDecorated>
   explicit operator multi_ptr<value_type, access::address_space::global_space,
-                              DecorateAddress>();
+                              IsDecorated>() const;
   // Only if Space == address_space::generic_space
   // Cast to global_ptr
+  template <access::decorated IsDecorated>
   explicit
   operator multi_ptr<const value_type, access::address_space::global_space,
-                     DecorateAddress>() const;
+                     IsDecorated>() const;
   // Only if Space == address_space::generic_space
   // Cast to local_ptr
+  template <access::decorated IsDecorated>
   explicit operator multi_ptr<value_type, access::address_space::local_space,
-                              DecorateAddress>();
+                              IsDecorated>() const;
   // Only if Space == address_space::generic_space
   // Cast to local_ptr
+  template <access::decorated IsDecorated>
   explicit
   operator multi_ptr<const value_type, access::address_space::local_space,
-                     DecorateAddress>() const;
+                     IsDecorated>() const;
 
   // Implicit conversion to a multi_ptr<void>.
   // Only available when value_type is not const-qualified.
@@ -144,6 +150,7 @@ class multi_ptr {
   // Only available when is_decorated is false.
   operator multi_ptr<value_type, Space, access::decorated::yes>() const;
 
+  // Available only when: (Space == address_space::global_space)
   void prefetch(size_t numElements) const;
 
   // Arithmetic operators
@@ -328,12 +335,11 @@ template <access::address_space Space, access::decorated DecorateAddress,
 multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType*);
 
 // Deduction guides
-template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder,
-          class T>
+template <typename T, int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, Mode, target::device, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
-template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder,
-          class T>
+
+template <typename T, int Dimensions>
 multi_ptr(local_accessor<T, Dimensions>)
     -> multi_ptr<T, access::address_space::local_space, access::decorated::no>;
 

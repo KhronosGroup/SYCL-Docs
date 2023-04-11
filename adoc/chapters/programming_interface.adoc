@@ -9077,7 +9077,7 @@ multi_ptr(multi_ptr&&)
 a@
 [source]
 ----
-explicit multi_ptr(multi_ptr<ElementType, Space, yes>::pointer)
+explicit multi_ptr(multi_ptr<ElementType, Space, access::decorated::yes>::pointer)
 ----
    a@ Constructor that takes as an argument a decorated pointer.
 
@@ -9126,7 +9126,7 @@ multi_ptr(
       [code]#local_accessor# instead.
 
 Available only when:
-[code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
+[code]#Space == access::address_space::local_space || Space == access::address_space::generic_space#.
 
 Constructs a [code]#multi_ptr# from an accessor of [code]#target::local#.
 
@@ -9372,7 +9372,7 @@ operator multi_ptr<const value_type, Space, IsDecorated>() const
 a@
 [source]
 ----
-operator multi_ptr<const value_type, Space, access::decorated::no>() const
+operator multi_ptr<value_type, Space, access::decorated::no>() const
 ----
    a@ Available only when:
       [code]#is_decorated == true#.
@@ -9383,7 +9383,7 @@ decorated pointers or references.
 a@
 [source]
 ----
-operator multi_ptr<const value_type, Space, access::decorated::yes>() const
+operator multi_ptr<value_type, Space, access::decorated::yes>() const
 ----
    a@ Available only when:
       [code]#is_decorated == false#.
