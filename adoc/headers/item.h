@@ -4,6 +4,8 @@
 namespace sycl {
 template <int Dimensions = 1, bool WithOffset = true> class item {
  public:
+  static constexpr int dimensions = Dimensions;
+
   item() = delete;
 
   /* -- common interface members -- */
