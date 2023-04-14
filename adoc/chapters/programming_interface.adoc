@@ -12864,7 +12864,8 @@ implementation is free to re-use reducer variables (e.g. across work-groups
 scheduled to the same compute unit) if it can guarantee that it is safe to do
 so.
 
-The member functions of the [code]#reducer# class are listed in
+The type aliases and constant static members of the [code]#reducer# class are
+listed in <<table.types.reducer>> and its member functions are listed in
 <<table.members.reducer>>.  Additional shorthand operators may be made
 available for certain combinations of reduction variable type and combination
 operation, as described in <<table.operators.reducer>>.
@@ -12873,6 +12874,41 @@ operation, as described in <<table.operators.reducer>>.
 ----
 include::{header_dir}/reducer.h[lines=4..-1]
 ----
+
+[[table.types.reducer]]
+.Member types and constants of the [code]#reducer# class
+[width="100%",options="header",separator="@",cols="50%,50%"]
+|====
+@ Member @ Description
+a@
+[source]
+----
+value_type
+----
+   a@ The data type of the reduction variable.  If this reducer object was
+      created from a buffer type [code]#BufferT#, this type is
+      [code]#BufferT::value_type#.  If this reducer object was created from a
+      USM pointer [code]#T*# or a span [code]#span<T, Extent>#, this type is
+      [code]#T#.
+
+a@
+[source]
+----
+binary_operation
+----
+   a@ The type of the combiner operator [code]#BinaryOperation# that was
+      passed to the reduction function that created this reducer object.
+
+a@
+[source]
+----
+static constexpr int dimensions
+----
+   a@ The number of dimensions of the reduction variable.  If this reducer
+      object was created from a buffer or a USM pointer, the number of
+      dimensions is [code]#0#.  If this reducer object was created from a span,
+      the number of dimensions is [code]#1#.
+|====
 
 [[table.members.reducer]]
 .Member functions of the [code]#reducer# class
