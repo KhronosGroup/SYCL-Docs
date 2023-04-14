@@ -4210,6 +4210,11 @@ merely allocate uninitialized memory, and the application is responsible for
 constructing objects by calling placement-new and for destroying them later
 by manually calling the object's destructor.
 
+For the overloads that do copy objects from host memory, the [code]#hostData#
+pointer must point to at least _N_ bytes of memory where _N_ is
+[code]#sizeof(T) * bufferRange.size()#.  If _N_ is zero, [code]#hostData# is
+permitted to be a null pointer.
+
 A SYCL [code]#buffer# can construct an instance of a SYCL [code]#buffer#
 that reinterprets the original SYCL [code]#buffer# with a different
 type, dimensionality and range using the member function
@@ -4271,7 +4276,8 @@ include::{header_dir}/buffer.h[lines=4..-1]
 a@
 [source]
 ----
-buffer(const range<Dimensions>& bufferRange, const property_list& propList = {})
+buffer(const range<Dimensions>& bufferRange,
+       const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -4282,7 +4288,8 @@ buffer(const range<Dimensions>& bufferRange, const property_list& propList = {})
 a@
 [source]
 ----
-buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
+buffer(const range<Dimensions>& bufferRange,
+       AllocatorT allocator,
        const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
@@ -4297,36 +4304,43 @@ a@
 buffer(T* hostData, const range<Dimensions>& bufferRange,
        const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
-      The buffer is initialized with the memory specified by [code]#hostData#.
-      The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
-      The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
+      parameter provided.  The buffer is initialized with the memory specified
+      by [code]#hostData#, and the buffer assumes exclusive access to this
+      memory for the duration of its lifetime.  The constructed SYCL
+      [code]#buffer# will use a default constructed [code]#AllocatorT# when
+      allocating memory on the host.  The range of the constructed SYCL
+      [code]#buffer# is specified by the [code]#bufferRange# parameter
+      provided.  Zero or more properties can be provided to the constructed
+      SYCL [code]#buffer# via an instance of [code]#property_list#.
 
 a@
 [source]
 ----
-buffer(T* hostData, const range<Dimensions>& bufferRange, AllocatorT allocator,
+buffer(T* hostData, const range<Dimensions>& bufferRange,
+       AllocatorT allocator,
        const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided.
-      The buffer is initialized with the memory specified by [code]#hostData#.
-      The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
-      The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
+      parameter provided.  The buffer is initialized with the memory specified
+      by [code]#hostData#, and the buffer assumes exclusive access to this
+      memory for the duration of its lifetime.  The constructed SYCL
+      [code]#buffer# will use the [code]#allocator# parameter provided when
+      allocating memory on the host.  The range of the constructed SYCL
+      [code]#buffer# is specified by the [code]#bufferRange# parameter
+      provided.  Zero or more properties can be provided to the constructed
+      SYCL [code]#buffer# via an instance of [code]#property_list#.
 
 a@
 [source]
 ----
-buffer(const T* hostData, const range<Dimensions>& bufferRange,
+buffer(const T* hostData,
+       const range<Dimensions>& bufferRange,
        const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the
-      [code]#hostData# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#buffer# for
-      the duration of its lifetime.
+   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
+      parameter provided.  The buffer assumes exclusive access to this memory
+      for the duration of its lifetime.
 
 The constructed SYCL [code]#buffer# will use a default
 constructed [code]#AllocatorT# when allocating memory on
@@ -4352,13 +4366,14 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-buffer(const T* hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator, const property_list& propList = {})
+buffer(const T* hostData,
+       const range<Dimensions>& bufferRange,
+       AllocatorT allocator,
+       const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the
-      [code]#hostData# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#buffer# for
-      the duration of its lifetime.
+   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
+      parameter provided.  The buffer assumes exclusive access to this
+      memory for the duration of its lifetime.
 
 The constructed SYCL [code]#buffer# will use the
 [code]#allocator# parameter provided when allocating
@@ -4386,14 +4401,14 @@ a@
 [source]
 ----
 template <typename Container>
-buffer(Container& container, const property_list& propList = {})
+buffer(Container& container,
+       const property_list& propList = {})
 ----
    a@ Construct a one dimensional SYCL [code]#buffer# instance
       from the elements starting at [code]#std::data(container)#
       and containing [code]#std::size(container)# number of elements.
       The buffer is initialized with the contents of [code]#container#,
-      and the ownership of this [code]#Container# is given to the
-      constructed SYCL [code]#buffer# for
+      and the buffer assumes exclusive access to [code]#container# for
       the duration of its lifetime.
 
 Data is written back to [code]#container# before the completion of
@@ -4422,8 +4437,7 @@ buffer(Container& container, AllocatorT allocator,
       from the elements starting at [code]#std::data(container)#
       and containing [code]#std::size(container)# number of elements.
       The buffer is initialized with the contents of [code]#container#,
-      and the ownership of this [code]#Container# is given to the
-      constructed SYCL [code]#buffer# for
+      and the buffer assumes exclusive access to [code]#container# for
       the duration of its lifetime.
 
 Data is written back to [code]#container# before the completion of
@@ -4444,49 +4458,100 @@ is convertible to [code]#T*#.
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T>& hostData, const range<Dimensions>& bufferRange,
+buffer(const std::shared_ptr<T>& hostData,
+       const range<Dimensions>& bufferRange,
        const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
-      The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
+      contents of its stored pointer.  The buffer assumes exclusive access to
+      this memory for the duration of its lifetime.  The buffer also creates
+      its own internal copy of the [code]#shared_ptr# that shares ownership of
+      the [code]#hostData# memory, which means the application can safely
+      release ownership of this [code]#shared_ptr# when the constructor
+      returns.
+
+When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
+memory.
+
+The constructed SYCL [code]#buffer# will use a default constructed
+[code]#AllocatorT# when allocating memory on the host.  The range of the
+constructed SYCL [code]#buffer# is specified by the [code]#bufferRange#
+parameter provided.  Zero or more properties can be provided to the
+constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
 
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T>& hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator, const property_list& propList = {})
+buffer(const std::shared_ptr<T>& hostData,
+       const range<Dimensions>& bufferRange,
+       AllocatorT allocator,
+       const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
-      The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
+      contents of its stored pointer.  The buffer assumes exclusive access to
+      this memory for the duration of its lifetime.  The buffer also creates
+      its own internal copy of the [code]#shared_ptr# that shares ownership of
+      the [code]#hostData# memory, which means the application can safely
+      release ownership of this [code]#shared_ptr# when the constructor
+      returns.
+
+When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
+memory.
+
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.  The range of the constructed SYCL
+[code]#buffer# is specified by the [code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
 a@
 [source,c++]
 ----
 buffer(const std::shared_ptr<T[]>& hostData,
-const range<Dimensions>&  bufferRange,
-    const property_list& propList = {})
+       const range<Dimensions>&  bufferRange,
+       const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
-      The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
+      contents of its stored pointer.  The buffer assumes exclusive access to
+      this memory for the duration of its lifetime.  The buffer also creates
+      its own internal copy of the [code]#shared_ptr# that shares ownership of
+      the [code]#hostData# memory, which means the application can safely
+      release ownership of this [code]#shared_ptr# when the constructor
+      returns.
+
+When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
+memory.
+
+The constructed SYCL [code]#buffer# will use a default constructed
+[code]#AllocatorT# when allocating memory on the host.  The range of the
+constructed SYCL [code]#buffer# is specified by the [code]#bufferRange#
+parameter provided.  Zero or more properties can be provided to the
+constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
 
 a@
 [source,c++]
 ----
 buffer(const std::shared_ptr<T[]>& hostData,
-const range<Dimensions>& bufferRange,
-    AllocatorT allocator,
-    const property_list& propList = {})
+       const range<Dimensions>& bufferRange,
+       AllocatorT allocator,
+       const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData# parameter provided. The ownership of this memory is given to the constructed SYCL [code]#buffer# for the duration of its lifetime.
-      The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
+      contents of its stored pointer.  The buffer assumes exclusive access to
+      this memory for the duration of its lifetime.  The buffer also creates
+      its own internal copy of the [code]#shared_ptr# that shares ownership of
+      the [code]#hostData# memory, which means the application can safely
+      release ownership of this [code]#shared_ptr# when the constructor
+      returns.
+
+When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
+memory.
+
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.  The range of the constructed SYCL
+[code]#buffer# is specified by the [code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
 a@
 [source]
@@ -4506,7 +4571,8 @@ a@
 [source]
 ----
 template <typename InputIterator>
-buffer(InputIterator first, InputIterator last, AllocatorT allocator = {},
+buffer(InputIterator first, InputIterator last,
+       AllocatorT allocator = {},
        const property_list& propList = {})
 ----
    a@ Create a new allocated 1D buffer initialized from the given elements
@@ -5107,7 +5173,8 @@ include::{header_dir}/unsampledImage.h[lines=4..-1]
 a@
 [source]
 ----
-unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+unsampled_image(image_format format,
+                const range<Dimensions>& rangeRef,
                 const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
@@ -5131,8 +5198,10 @@ unsampled_image(image_format format, const range<Dimensions>& rangeRef,
 a@
 [source]
 ----
-unsampled_image(image_format format, const range<Dimensions>& rangeRef,
-                AllocatorT allocator, const property_list& propList = {})
+unsampled_image(image_format format,
+                const range<Dimensions>& rangeRef,
+                AllocatorT allocator,
+                const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
       uninitialized memory.
@@ -5155,7 +5224,8 @@ unsampled_image(image_format format, const range<Dimensions>& rangeRef,
 a@
 [source]
 ----
-unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+unsampled_image(image_format format,
+                const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {})
 ----
@@ -5182,8 +5252,10 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(image_format format, const range<Dimensions>& rangeRef,
-                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+unsampled_image(image_format format,
+                const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
@@ -5214,9 +5286,8 @@ unsampled_image(void* hostPointer, image_format format,
                 const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#unsampled_image#
-      for the duration of its lifetime.
+      [code]#hostPointer# parameter provided.  The [code]#unsampled_image#
+      assumes exclusive access to this memory for the duration of its lifetime.
       The constructed SYCL [code]#unsampled_image# will use a default
       constructed [code]#AllocatorT# when allocating memory on the
       host.
@@ -5237,13 +5308,13 @@ a@
 [source]
 ----
 unsampled_image(void* hostPointer, image_format format,
-                const range<Dimensions>& rangeRef, AllocatorT allocator,
+                const range<Dimensions>& rangeRef,
+                AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#unsampled_image#
-      for the duration of its lifetime.
+      [code]#hostPointer# parameter provided.  The [code]#unsampled_image#
+      assumes exclusive access to this memory for the duration of its lifetime.
       The constructed SYCL [code]#unsampled_image# will use the
       [code]#allocator# parameter provided when allocating memory on
       the host.
@@ -5270,9 +5341,8 @@ unsampled_image(void* hostPointer, image_format format,
    a@ Available only when: [code]#Dimensions > 1#
 
 Construct a SYCL [code]#unsampled_image# instance with the
-[code]#hostPointer# parameter provided. The ownership of this
-memory is given to the constructed SYCL [code]#unsampled_image#
-for the duration of its lifetime.
+[code]#hostPointer# parameter provided.  The [code]#unsampled_image# assumes
+exclusive access to this memory for the duration of its lifetime.
 The constructed SYCL [code]#unsampled_image# will use a default
 constructed [code]#AllocatorT# when allocating memory on the
 host.
@@ -5294,15 +5364,15 @@ a@
 ----
 unsampled_image(void* hostPointer, image_format format,
                 const range<Dimensions>& rangeRef,
-                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const range<Dimensions - 1>& pitch,
+                AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
 Construct a SYCL [code]#unsampled_image# instance with the
-[code]#hostPointer# parameter provided. The ownership of this
-memory is given to the constructed SYCL [code]#unsampled_image#
-for the duration of its lifetime.
+[code]#hostPointer# parameter provided. The [code]#unsampled_image# assumes
+exclusive access to this memory for the duration of its lifetime.
 The constructed SYCL [code]#unsampled_image# will use the
 [code]#allocator# parameter provided when allocating memory on
 the host.
@@ -5321,108 +5391,142 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+unsampled_image(std::shared_ptr<void>& hostPointer,
+                image_format format,
                 const range<Dimensions>& rangeRef,
                 const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#unsampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#unsampled_image#
-      for the duration of its lifetime.
-      The constructed SYCL [code]#unsampled_image# will use a default
-      constructed [code]#AllocatorT# when allocating memory on the
-      host.
-      The element size of the constructed SYCL [code]#unsampled_image#
-      will be derived from the [code]#format# parameter.
-      The range of the constructed SYCL [code]#unsampled_image# is
-      specified by the [code]#rangeRef# parameter provided.
-      The pitch of the constructed SYCL [code]#unsampled_image# will be
-      the default size determined by the <<sycl-runtime>>.
-      Unless the member function [code]#set_final_data()# is called
-      with a valid non-null pointer, any memory allocated by the
-      <<sycl-runtime>> is written back to [code]#hostPointer#.
-      Zero or more properties can be provided to the constructed SYCL
-      [code]#unsampled_image# via an instance of [code]#property_list#.
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#unsampled_image# with the contents of its stored pointer.  The
+      [code]#unsampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#unsampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#unsampled_image#
+with uninitialized memory.
+
+The constructed SYCL [code]#unsampled_image# will use a default
+constructed [code]#AllocatorT# when allocating memory on the
+host.
+The element size of the constructed SYCL [code]#unsampled_image#
+will be derived from the [code]#format# parameter.
+The range of the constructed SYCL [code]#unsampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#unsampled_image# will be
+the default size determined by the <<sycl-runtime>>.
+Unless the member function [code]#set_final_data()# is called
+with a valid non-null pointer, any memory allocated by the
+<<sycl-runtime>> is written back to [code]#hostPointer#.
+Zero or more properties can be provided to the constructed SYCL
+[code]#unsampled_image# via an instance of [code]#property_list#.
 
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
-                const range<Dimensions>& rangeRef, AllocatorT allocator,
+unsampled_image(std::shared_ptr<void>& hostPointer,
+                image_format format,
+                const range<Dimensions>& rangeRef,
+                AllocatorT allocator,
                 const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#unsampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#unsampled_image#
-      for the duration of its lifetime.
-      The constructed SYCL [code]#unsampled_image# will use the
-      [code]#allocator# parameter provided when allocating memory on
-      the host.
-      The element size of the constructed SYCL [code]#unsampled_image#
-      will be derived from the [code]#format# parameter.
-      The range of the constructed SYCL [code]#unsampled_image# is
-      specified by the [code]#rangeRef# parameter provided.
-      The pitch of the constructed SYCL [code]#unsampled_image# will be
-      the default size determined by the <<sycl-runtime>>.
-      Unless the member function [code]#set_final_data()# is called
-      with a valid non-null pointer, any memory allocated by the
-      <<sycl-runtime>> is written back to [code]#hostPointer#.
-      Zero or more properties can be provided to the constructed SYCL
-      [code]#unsampled_image# via an instance of [code]#property_list#.
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#unsampled_image# with the contents of its stored pointer.  The
+      [code]#unsampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#unsampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#unsampled_image#
+with uninitialized memory.
+
+The constructed SYCL [code]#unsampled_image# will use the
+[code]#allocator# parameter provided when allocating memory on
+the host.
+The element size of the constructed SYCL [code]#unsampled_image#
+will be derived from the [code]#format# parameter.
+The range of the constructed SYCL [code]#unsampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#unsampled_image# will be
+the default size determined by the <<sycl-runtime>>.
+Unless the member function [code]#set_final_data()# is called
+with a valid non-null pointer, any memory allocated by the
+<<sycl-runtime>> is written back to [code]#hostPointer#.
+Zero or more properties can be provided to the constructed SYCL
+[code]#unsampled_image# via an instance of [code]#property_list#.
 
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+unsampled_image(std::shared_ptr<void>& hostPointer,
+                image_format format,
                 const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#unsampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#unsampled_image#
-      for the duration of its lifetime.
-      The constructed SYCL [code]#unsampled_image# will use a default
-      constructed [code]#AllocatorT# when allocating memory on the
-      host.
-      The element size of the constructed SYCL [code]#unsampled_image#
-      will be derived from the [code]#format# parameter.
-      The range of the constructed SYCL [code]#unsampled_image# is
-      specified by the [code]#rangeRef# parameter provided.
-      The pitch of the constructed SYCL [code]#unsampled_image# will be
-      the [code]#pitch# parameter provided.
-      Unless the member function [code]#set_final_data()# is called
-      with a valid non-null pointer, any memory allocated by the
-      <<sycl-runtime>> is written back to [code]#hostPointer#.
-      Zero or more properties can be provided to the constructed SYCL
-      [code]#unsampled_image# via an instance of [code]#property_list#.
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#unsampled_image# with the contents of its stored pointer.  The
+      [code]#unsampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#unsampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#unsampled_image#
+with uninitialized memory.
+
+The constructed SYCL [code]#unsampled_image# will use a default
+constructed [code]#AllocatorT# when allocating memory on the
+host.
+The element size of the constructed SYCL [code]#unsampled_image#
+will be derived from the [code]#format# parameter.
+The range of the constructed SYCL [code]#unsampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#unsampled_image# will be
+the [code]#pitch# parameter provided.
+Unless the member function [code]#set_final_data()# is called
+with a valid non-null pointer, any memory allocated by the
+<<sycl-runtime>> is written back to [code]#hostPointer#.
+Zero or more properties can be provided to the constructed SYCL
+[code]#unsampled_image# via an instance of [code]#property_list#.
 
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+unsampled_image(std::shared_ptr<void>& hostPointer,
+                image_format format,
                 const range<Dimensions>& rangeRef,
-                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const range<Dimensions - 1>& pitch,
+                AllocatorT allocator,
                 const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#unsampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#unsampled_image#
-      for the duration of its lifetime.
-      The constructed SYCL [code]#unsampled_image# will use the
-      [code]#allocator# parameter provided when allocating memory on
-      the host.
-      The element size of the constructed SYCL [code]#unsampled_image#
-      will be derived from the [code]#format# parameter.
-      The range of the constructed SYCL [code]#unsampled_image# is
-      specified by the [code]#rangeRef# parameter provided.
-      The pitch of the constructed SYCL [code]#unsampled_image# will be
-      the [code]#pitch# parameter provided.
-      Unless the member function [code]#set_final_data()# is called
-      with a valid non-null pointer, any memory allocated by the
-      <<sycl-runtime>> is written back to [code]#hostPointer#.
-      Zero or more properties can be provided to the constructed SYCL
-      [code]#unsampled_image# via an instance of [code]#property_list#.
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#unsampled_image# with the contents of its stored pointer.  The
+      [code]#unsampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#unsampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#unsampled_image#
+with uninitialized memory.
+
+The constructed SYCL [code]#unsampled_image# will use the
+[code]#allocator# parameter provided when allocating memory on
+the host.
+The element size of the constructed SYCL [code]#unsampled_image#
+will be derived from the [code]#format# parameter.
+The range of the constructed SYCL [code]#unsampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#unsampled_image# will be
+the [code]#pitch# parameter provided.
+Unless the member function [code]#set_final_data()# is called
+with a valid non-null pointer, any memory allocated by the
+<<sycl-runtime>> is written back to [code]#hostPointer#.
+Zero or more properties can be provided to the constructed SYCL
+[code]#unsampled_image# via an instance of [code]#property_list#.
 
 |====
 
@@ -5575,13 +5679,13 @@ a@
 [source]
 ----
 sampled_image(const void* hostPointer, image_format format,
-              image_sampler sampler, const range<Dimensions>& rangeRef,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#sampled_image# for
-      the duration of its lifetime.
+      [code]#hostPointer# parameter provided.  The [code]#sampled_image#
+      assumes exclusive access to this memory for the duration of its lifetime.
       The host address is [code]#const#, so the host accesses must be
       read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
       initialized with this memory and there is no write after its
@@ -5602,16 +5706,16 @@ a@
 [source]
 ----
 sampled_image(const void* hostPointer, image_format format,
-              image_sampler sampler, const range<Dimensions>& rangeRef,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
 
-Construct a SYCL [code]#sampled_image# instance with the
-[code]#hostPointer# parameter provided. The ownership of this
-memory is given to the constructed SYCL [code]#sampled_image# for
-the duration of its lifetime.
+Construct a SYCL [code]#sampled_image# instance with the [code]#hostPointer#
+parameter provided.  The [code]#sampled_image# assumes exclusive access to this
+memory for the duration of its lifetime.
 The host address is [code]#const#, so the host accesses must be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this
 image is only initialized with this memory and there is no write after
@@ -5631,57 +5735,75 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
-              image_sampler sampler, const range<Dimensions>& rangeRef,
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#sampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#sampled_image# for
-      the duration of its lifetime.
-      The host address is [code]#const#, so the host accesses must be
-      read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
-      initialized with this memory and there is no write after its
-      destruction.
-      The element size of the constructed SYCL [code]#sampled_image#
-      will be derived from the [code]#format# parameter.
-      Accessors that read the constructed SYCL [code]#sampled_image# will
-      use the [code]#sampler# parameter to sample the image.
-      The range of the constructed SYCL [code]#sampled_image# is
-      specified by the [code]#rangeRef# parameter provided.
-      The pitch of the constructed SYCL [code]#sampled_image# will be
-      the default size determined by the <<sycl-runtime>>.
-      Zero or more properties can be provided to the constructed SYCL
-      [code]#sampled_image# via an instance of
-      [code]#property_list#.
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the default size determined by the <<sycl-runtime>>.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
 
 a@
 [source]
 ----
-sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
-              image_sampler sampler, const range<Dimensions>& rangeRef,
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
-   a@ Construct a SYCL [code]#sampled_image# instance with the
-      [code]#hostPointer# parameter provided. The ownership of this
-      memory is given to the constructed SYCL [code]#sampled_image# for
-      the duration of its lifetime.
-      The host address is [code]#const#, so the host accesses can be
-      read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
-      initialized with this memory and there is no write after its
-      destruction.
-      The element size of the constructed SYCL [code]#sampled_image#
-      will be derived from the [code]#format# parameter.
-      Accessors that read the constructed SYCL [code]#sampled_image# will
-      use the [code]#sampler# parameter to sample the image.
-      The range of the constructed SYCL [code]#sampled_image# is
-      specified by the [code]#rangeRef# parameter provided.
-      The pitch of the constructed SYCL [code]#sampled_image# will be
-      the [code]#pitch# parameter provided.
-      Zero or more properties can be provided to the constructed SYCL
-      [code]#sampled_image# via an instance of
-      [code]#property_list#.
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses can be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
 
 |====
 
