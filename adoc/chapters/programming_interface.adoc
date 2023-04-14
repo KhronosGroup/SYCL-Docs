@@ -22,7 +22,7 @@ specifically indicates a values for the enumerator.
 [[sec:backends]]
 == Backends
 
-The <<backend, SYCL backends>> that are available to a SYCL implementation can be identified
+The <<backend, SYCL backends>> that can be supported by a SYCL implementation are identified
 using the [code]#enum class backend#.
 
 [source,,linenums]
@@ -30,9 +30,10 @@ using the [code]#enum class backend#.
 include::{header_dir}/backends.h[lines=4..-1]
 ----
 
-The [code]#enum class backend# is implementation-defined and must be
-populated with a unique identifier for each <<backend>> that the SYCL
-implementation supports.
+The [code]#enum class backend# is implementation-defined and must be populated
+with a unique identifier for each <<backend>> that the SYCL implementation can
+support. Note that the <<backend, SYCL backends>> listed in the [code]#enum
+class backend# are not guaranteed to be available in a given installation.
 
 Each named <<backend>> enumerated in the [code]#enum class backend#
 must be associated with a <<backend>> specification.
@@ -44,7 +45,7 @@ will refer to the associated <<backend>> specification.
 === Backend macros
 
 As the identifiers defined in [code]#enum class backend# are
-implementation-defined,
+implementation-defined, and the associated backends not guaranteed to be available,
 a SYCL implementation must also define a preprocessor macro for each of
 these identifiers.  If the <<backend>> is defined by the Khronos SYCL group, the
 name of the macro has the form [code]#SYCL_BACKEND_<backend_name>#, where
@@ -52,6 +53,8 @@ _backend_name_ is the associated identifier from [code]#backend# in
 all upper-case.  See <<chapter.extensions>> for the name of the macro
 if the vendor defines the <<backend>> outside of the Khronos SYCL group.
 
+If a backend listed in the [code]#enum class backend# is not available, the
+associated macro must be left undefined.
 
 [[sec:generic-vs-non-generic]]
 == Generic vs non-generic SYCL
@@ -242,7 +245,8 @@ A series of type traits are provided for <<backend>> interoperability,
 defined in the [code]#backend_traits# class.
 
 A specialization of [code]#backend_traits# must be provided for each named
-<<backend>> enumerated in the enum class [code]#backend#.
+<<backend>> enumerated in the enum class [code]#backend# that is available at
+compile time.
 
   * For each <<sycl-runtime>> class [code]#T# which supports
     <<sycl-application>> interoperability with the <<backend>>, a
