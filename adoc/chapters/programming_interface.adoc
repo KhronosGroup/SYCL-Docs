@@ -2867,14 +2867,14 @@ function is never instantiated with support for the [code]#sycl::half# type.
 
 [NOTE]
 ====
-Like any trait, the values of [code]#any_device_has_v# and
-[code]#all_devices_have_v# have a uniform value across all parts of a SYCL
-application.  If an implementation uses <<smcp>>, all compiler passes define a
-particular aspect's specialization of the traits the same way, regardless of
-whether that compiler pass' device supports the aspect.  Thus,
-[code]#any_device_has# and [code]#all_devices_have# cannot be used to determine
-whether any particular device supports an aspect.  Instead, applications must
-use [code]#device::has()# or [code]#platform::has()# for this.
+Like any trait, the definitions of [code]#any_device_has# and
+[code]#all_devices_have# are uniform across all parts of a SYCL application.
+If an implementation uses <<smcp>>, all compiler passes define a particular
+aspect's specialization of the traits the same way, regardless of whether that
+compiler pass' device supports the aspect.  Thus, [code]#any_device_has# and
+[code]#all_devices_have# cannot be used to determine whether any particular
+device supports an aspect.  Instead, applications must use
+[code]#device::has()# or [code]#platform::has()# for this.
 ====
 
 [NOTE]
@@ -2883,8 +2883,8 @@ An implementation could choose to provide command line options which affect the
 set of devices that it supports.  If so, those command line options would also
 affect these traits.  For example, if an implementation provides a command line
 option that disables [code]#aspect::accelerator# devices, the trait
-[code]#any_device_has_v<aspect::accelerator># would be [code]#false# when that
-command line option was specified.
+[code]#any_device_has<aspect::accelerator># would inherit from
+[code]#std::false_type# when that command line option was specified.
 ====
 
 [NOTE]
