@@ -6887,7 +6887,7 @@ specializations shown in <<table.accessors.command.buffer.read-only>>, provided
 that all other template parameters are the same.
 
 [[table.accessors.command.buffer.read-write]]
-.Specializations of [code]#host_accessor# that are read-write
+.Specializations of [code]#accessor# that are read-write
 [width="100%",options="header",cols="50%,50%"]
 |====
 | Data type | Access mode
@@ -9077,7 +9077,8 @@ multi_ptr(multi_ptr&&)
 a@
 [source]
 ----
-explicit multi_ptr(multi_ptr<ElementType, Space, yes>::pointer)
+explicit
+multi_ptr(multi_ptr<ElementType, Space, yes>::pointer)
 ----
    a@ Constructor that takes as an argument a decorated pointer.
 
@@ -9091,9 +9092,11 @@ multi_ptr(std::nullptr_t)
 a@
 [source]
 ----
-template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+template <int Dimensions, access_mode Mode,
+          access::placeholder IsPlaceholder>
 multi_ptr(
-    accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
+    accessor<ElementType, Dimensions, Mode, target::device,
+             IsPlaceholder>);
 ----
    a@ Available only when:
       [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
@@ -9106,7 +9109,8 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions> multi_ptr(local_accessor<ElementType, Dimensions>)
+template <int Dimensions>
+multi_ptr(local_accessor<ElementType, Dimensions>)
 ----
    a@ Available only when:
       [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
@@ -9118,9 +9122,11 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
+template <int Dimensions, access_mode Mode,
+          access::placeholder IsPlaceholder>
 multi_ptr(
-    accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
+    accessor<ElementType, Dimensions, Mode, target::local,
+             IsPlaceholder>);
 ----
    a@ Deprecated in SYCL 2020.  Use the overload with
       [code]#local_accessor# instead.
@@ -9135,9 +9141,11 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <typename ElementType, access::address_space Space,
+template <typename ElementType,
+          access::address_space Space,
           access::decorated DecorateAddress>
-multi_ptr<ElementType, Space, DecorateAddress> make_ptr(ElementType* pointer)
+multi_ptr<ElementType, Space, DecorateAddress>
+make_ptr(ElementType* pointer)
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#address_space_cast# instead.
 
@@ -9151,7 +9159,8 @@ with [code]#Space#.
 a@
 [source]
 ----
-template <access::address_space Space, access::decorated DecorateAddress,
+template <access::address_space Space,
+          access::decorated DecorateAddress,
           typename ElementType>
 multi_ptr<ElementType, Space, DecorateAddress>
 address_space_cast(ElementType* pointer)
@@ -9198,21 +9207,25 @@ multi_ptr& operator=(std::nullptr_t)
 a@
 [source]
 ----
-template <access::address_space AS, access::decorated IsDecorated>
-multi_ptr& operator=(const multi_ptr<value_type, AS, IsDecorated>&)
+template <access::address_space AS,
+          access::decorated IsDecorated>
+multi_ptr&
+operator=(const multi_ptr<value_type, AS, IsDecorated>&)
 ----
-   a@ Available only when: [code]#Space == access::address_space::generic_space && AS != access::address_space::constant_space#.
+   a@ Available only when: [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
 Assigns the value of the left hand side [code]#multi_ptr# into the [code]#generic_ptr#.
 
 a@
 [source]
 ----
-template<access::address_space AS, access::decorated IsDecorated>
-multi_ptr& operator=(multi_ptr<value_type, AS, IsDecorated>&&
+template<access::address_space AS,
+         access::decorated IsDecorated>
+multi_ptr&
+operator=(multi_ptr<value_type, AS, IsDecorated>&&)
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space && AS != access::address_space::constant_space#.
+      [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
 Move the value of the left hand side [code]#multi_ptr# into the [code]#generic_ptr#.
 
@@ -9221,7 +9234,7 @@ a@
 ----
 reference operator[](std::ptrdiff_t i) const
 ----
-   a@ Available only when: [code]#!std::is_void<value_type>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<value_type>)#.
 
 Returns a reference to the i-th pointed value. The value i can be negative.
 
@@ -9230,7 +9243,7 @@ a@
 ----
 pointer operator->() const
 ----
-   a@ Available only when: [code]#!std::is_void<value_type>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<value_type>)#.
 
 Returns the underlying pointer.
 
@@ -9239,7 +9252,7 @@ a@
 ----
 reference operator*() const
 ----
-   a@ Available only when: [code]#!std::is_void<value_type>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<value_type>)#.
 
 Returns a reference to the pointed value.
 
@@ -9255,11 +9268,13 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<value_type, access::address_space::private_space,
-                            IsDecorated>() const
+explicit
+operator multi_ptr<value_type,
+                   access::address_space::private_space,
+                   IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::generic_space)#.
 
 Conversion from [code]#generic_ptr# to [code]#private_ptr#.
 The result is undefined if the pointer does not address the private
@@ -9270,11 +9285,12 @@ a@
 ----
 template <access::decorated IsDecorated>
 explicit
-operator multi_ptr<const value_type, access::address_space::private_space,
+operator multi_ptr<const value_type,
+                   access::address_space::private_space,
                    IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::generic_space)#.
 
 Conversion from [code]#generic_ptr# to [code]#private_ptr#.
 The result is undefined if the pointer does not address the private
@@ -9284,11 +9300,13 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<value_type, access::address_space::global_space,
-                            IsDecorated>() const
+explicit
+operator multi_ptr<value_type,
+                   access::address_space::global_space,
+                   IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::generic_space)#.
 
 Conversion from [code]#generic_ptr# to [code]#global_ptr#.
 The result is undefined if the pointer does not address the global
@@ -9299,11 +9317,12 @@ a@
 ----
 template <access::decorated IsDecorated>
 explicit
-operator multi_ptr<const value_type, access::address_space::global_space,
+operator multi_ptr<const value_type,
+                   access::address_space::global_space,
                    IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::generic_space)#.
 
 Conversion from [code]#generic_ptr# to [code]#global_ptr#.
 The result is undefined if the pointer does not address the global
@@ -9313,11 +9332,13 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit operator multi_ptr<value_type, access::address_space::local_space,
-                            IsDecorated>() const
+explicit
+operator multi_ptr<value_type,
+                   access::address_space::local_space,
+                   IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::generic_space)#.
 
 Conversion from [code]#generic_ptr# to [code]#local_ptr#.
 The result is undefined if the pointer does not address the local
@@ -9328,11 +9349,12 @@ a@
 ----
 template <access::decorated IsDecorated>
 explicit
-operator multi_ptr<const value_type, access::address_space::local_space,
+operator multi_ptr<const value_type,
+                   access::address_space::local_space,
                    IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::generic_space)#.
 
 Conversion from [code]#generic_ptr# to [code]#local_ptr#.
 The result is undefined if the pointer does not address the local
@@ -9345,7 +9367,7 @@ template <access::decorated IsDecorated>
 operator multi_ptr<void, Space, IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#!std::is_void<value_type>::value && !std::is_const<value_type>::value#.
+      [code]#(!std::is_void_v<value_type> && !std::is_const_v<value_type>)#.
 
 Implicit conversion to a [code]#multi_ptr# of type [code]#void#.
 
@@ -9356,7 +9378,7 @@ template <access::decorated IsDecorated>
 operator multi_ptr<const void, Space, IsDecorated>() const
 ----
    a@ Available only when:
-      [code]#!std::is_void<value_type>::value && std::is_const<value_type>::value#.
+      [code]#(!std::is_void_v<value_type> && std::is_const_v<value_type>)#.
 
 Implicit conversion to a [code]#multi_ptr# of type [code]#const void#.
 
@@ -9364,7 +9386,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-operator multi_ptr<const value_type, Space, IsDecorated>() const
+operator multi_ptr<const value_type, Space,
+                   IsDecorated>() const
 ----
    a@ Implicit conversion to a [code]#multi_ptr#
       of type [code]#const value_type#.
@@ -9372,10 +9395,11 @@ operator multi_ptr<const value_type, Space, IsDecorated>() const
 a@
 [source]
 ----
-operator multi_ptr<const value_type, Space, access::decorated::no>() const
+operator multi_ptr<const value_type, Space,
+                   access::decorated::no>() const
 ----
    a@ Available only when:
-      [code]#is_decorated == true#.
+      [code]#(is_decorated == true)#.
 
 Implicit conversion to the equivalent [code]#multi_ptr# object that does not expose
 decorated pointers or references.
@@ -9383,10 +9407,11 @@ decorated pointers or references.
 a@
 [source]
 ----
-operator multi_ptr<const value_type, Space, access::decorated::yes>() const
+operator multi_ptr<const value_type, Space,
+                   access::decorated::yes>() const
 ----
    a@ Available only when:
-      [code]#is_decorated == false#.
+      [code]#(is_decorated == false)#.
 
 Implicit conversion to the equivalent [code]#multi_ptr# object that exposes
 decorated pointers and references.
@@ -9449,7 +9474,7 @@ a@
 ----
 reference operator*(const multi_ptr& mp)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Operator that returns a reference to the [code]#value_type#
 of [code]#mp#.
@@ -9459,7 +9484,7 @@ a@
 ----
 multi_ptr& operator++(multi_ptr& mp)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Increments [code]#mp# by [code]#1# and returns  [code]#mp#.
 
@@ -9468,7 +9493,7 @@ a@
 ----
 multi_ptr operator++(multi_ptr& mp, int)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Increments [code]#mp# by [code]#1# and returns a new [code]#multi_ptr#
 with the value of the original [code]#mp#.
@@ -9478,7 +9503,7 @@ a@
 ----
 multi_ptr& operator--(multi_ptr& mp)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Decrements [code]#mp# by [code]#1# and returns [code]#mp#.
 
@@ -9487,7 +9512,7 @@ a@
 ----
 multi_ptr operator--(multi_ptr& mp, int)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Decrements [code]#mp# by [code]#1# and returns a new [code]#multi_ptr#
 with the value of the original [code]#mp#.
@@ -9497,7 +9522,7 @@ a@
 ----
 multi_ptr& operator+=(multi_ptr& lhs, difference_type r)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Moves [code]#mp# forward by [code]#r# and returns  [code]#lhs#.
 
@@ -9506,7 +9531,7 @@ a@
 ----
 multi_ptr& operator-=(multi_ptr& lhs, difference_type r)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Moves [code]#mp# backward by [code]#r# and returns  [code]#lhs#.
 
@@ -9515,7 +9540,7 @@ a@
 ----
 multi_ptr operator+(const multi_ptr& lhs, difference_type r)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Creates a new [code]#multi_ptr# that points [code]#r# forward
 compared to [code]#lhs#.
@@ -9525,7 +9550,7 @@ a@
 ----
 multi_ptr operator-(const multi_ptr& lhs, difference_type r)
 ----
-   a@ Available only when: [code]#!std::is_void<ElementType>::value#.
+   a@ Available only when: [code]#(!std::is_void_v<ElementType>)#.
 
 Creates a new [code]#multi_ptr# that points [code]#r# backward
 compared to [code]#lhs#.
