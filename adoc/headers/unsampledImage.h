@@ -96,7 +96,7 @@ class unsampled_image {
   template <typename... Ts> auto get_host_access(Ts... args);
 
   template <typename Destination = std::nullptr_t>
-  void set_final_data(Destination finalData = std::nullptr);
+  void set_final_data(Destination finalData = nullptr);
 
   void set_write_back(bool flag = true);
 };
