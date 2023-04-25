@@ -53,16 +53,22 @@ class multi_ptr {
       typename multi_ptr<ElementType, Space, access::decorated::yes>::pointer);
   multi_ptr(std::nullptr_t);
 
-  // Only if Space == global_space or generic_space
+  // Available only when:
+  //   (Space == access::address_space::global_space ||
+  //    Space == access::address_space::generic_space)
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<value_type, Dimensions, Mode, target::device, IsPlaceholder>);
 
-  // Only if Space == local_space or generic_space
+  // Available only when:
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space)
   template <int Dimensions> multi_ptr(local_accessor<ElementType, Dimensions>);
 
   // Deprecated
-  // Only if Space == local_space or generic_space
+  // Available only when:
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space)
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<value_type, Dimensions, Mode, target::local, IsPlaceholder>);
@@ -72,12 +78,15 @@ class multi_ptr {
   multi_ptr& operator=(multi_ptr&&);
   multi_ptr& operator=(std::nullptr_t);
 
-  // Only if Space == address_space::generic_space
-  // and AS != access::address_space::constant_space
+  // Available only when:
+  //   (Space == access::address_space::generic_space &&
+  //    AS != access::address_space::constant_space)
   template <access::address_space AS, access::decorated IsDecorated>
   multi_ptr& operator=(const multi_ptr<value_type, AS, IsDecorated>&);
-  // Only if Space == address_space::generic_space
-  // and AS != access::address_space::constant_space
+
+  // Available only when:
+  //   (Space == access::address_space::generic_space &&
+  //    AS != access::address_space::constant_space)
   template <access::address_space AS, access::decorated IsDecorated>
   multi_ptr& operator=(multi_ptr<value_type, AS, IsDecorated>&&);
 
@@ -94,60 +103,62 @@ class multi_ptr {
   // Deprecated, get() should be used instead.
   operator pointer() const;
 
-  // Only if Space == address_space::generic_space
   // Cast to private_ptr
+  // Available only when: (Space == access::address_space::generic_space)
   template <access::decorated IsDecorated>
   explicit operator multi_ptr<value_type, access::address_space::private_space,
                               IsDecorated>() const;
-  // Only if Space == address_space::generic_space
+
   // Cast to private_ptr
+  // Available only when: (Space == access::address_space::generic_space)
   template <access::decorated IsDecorated>
-  explicit
-  operator multi_ptr<const value_type, access::address_space::private_space,
-                     IsDecorated>() const;
-  // Only if Space == address_space::generic_space
+  explicit operator multi_ptr<const value_type, access::address_space::private_space,
+                              IsDecorated>() const;
+
   // Cast to global_ptr
+  // Available only when: (Space == access::address_space::generic_space)
   template <access::decorated IsDecorated>
   explicit operator multi_ptr<value_type, access::address_space::global_space,
                               IsDecorated>() const;
-  // Only if Space == address_space::generic_space
+
   // Cast to global_ptr
+  // Available only when: (Space == access::address_space::generic_space)
   template <access::decorated IsDecorated>
-  explicit
-  operator multi_ptr<const value_type, access::address_space::global_space,
-                     IsDecorated>() const;
-  // Only if Space == address_space::generic_space
+  explicit operator multi_ptr<const value_type, access::address_space::global_space,
+                              IsDecorated>() const;
+
   // Cast to local_ptr
+  // Available only when: (Space == access::address_space::generic_space)
   template <access::decorated IsDecorated>
   explicit operator multi_ptr<value_type, access::address_space::local_space,
                               IsDecorated>() const;
-  // Only if Space == address_space::generic_space
+
   // Cast to local_ptr
+  // Available only when: (Space == access::address_space::generic_space)
   template <access::decorated IsDecorated>
-  explicit
-  operator multi_ptr<const value_type, access::address_space::local_space,
-                     IsDecorated>() const;
+  explicit operator multi_ptr<const value_type, access::address_space::local_space,
+                              IsDecorated>() const;
 
   // Implicit conversion to a multi_ptr<void>.
-  // Only available when value_type is not const-qualified.
-  template <access::decorated DecorateAddress2>
-  operator multi_ptr<void, Space, DecorateAddress2>() const;
+  // Available only when: (!std::is_const_v<value_type>)
+  template <access::decorated IsDecorated>
+  operator multi_ptr<void, Space, IsDecorated>() const;
 
   // Implicit conversion to a multi_ptr<const void>.
-  // Only available when value_type is const-qualified.
-  template <access::decorated DecorateAddress2>
-  operator multi_ptr<const void, Space, DecorateAddress2>() const;
+  // Available only when: (std::is_const_v<value_type>)
+  template <access::decorated IsDecorated>
+  operator multi_ptr<const void, Space, IsDecorated>() const;
 
   // Implicit conversion to multi_ptr<const value_type, Space>.
-  template <access::decorated DecorateAddress2>
-  operator multi_ptr<const value_type, Space, DecorateAddress2>() const;
+  template <access::decorated IsDecorated>
+  operator multi_ptr<const value_type, Space, IsDecorated>() const;
 
   // Implicit conversion to the non-decorated version of multi_ptr.
-  // Only available when is_decorated is true.
+  // Available only when: (is_decorated == true)
   operator multi_ptr<value_type, Space, access::decorated::no>() const;
 
   // Implicit conversion to the decorated version of multi_ptr.
-  // Only available when is_decorated is false.
+  // Available only when: (is_decorated == false)
   operator multi_ptr<value_type, Space, access::decorated::yes>() const;
 
   // Available only when: (Space == address_space::global_space)
@@ -242,18 +253,21 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
       typename multi_ptr<VoidType, Space, access::decorated::yes>::pointer);
   multi_ptr(std::nullptr_t);
 
-  // Only if Space == global_space
+  // Available only when:
+  //   (Space == access::address_space::global_space)
   template <typename ElementType, int Dimensions, access_mode Mode,
             access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 
-  // Only if Space == local_space
+  // Available only when:
+  //   (Space == access::address_space::local_space)
   template <typename ElementType, int Dimensions>
   multi_ptr(local_accessor<ElementType, Dimensions>);
 
   // Deprecated
-  // Only if Space == local_space
+  // Available only when:
+  //   (Space == access::address_space::local_space)
   template <typename ElementType, int Dimensions, access_mode Mode,
             access::placeholder IsPlaceholder>
   multi_ptr(
@@ -270,16 +284,16 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   explicit operator pointer() const;
 
   // Explicit conversion to a multi_ptr<ElementType>
-  // If VoidType is const, ElementType must be as well
+  // Available only when: (std::is_const_v<ElementType> || !std::is_const_v<VoidType>)
   template <typename ElementType>
   explicit operator multi_ptr<ElementType, Space, DecorateAddress>() const;
 
   // Implicit conversion to the non-decorated version of multi_ptr.
-  // Only available when is_decorated is true.
+  // Available only when: (is_decorated == true)
   operator multi_ptr<value_type, Space, access::decorated::no>() const;
 
   // Implicit conversion to the decorated version of multi_ptr.
-  // Only available when is_decorated is false.
+  // Available only when: (is_decorated == false)
   operator multi_ptr<value_type, Space, access::decorated::yes>() const;
 
   // Implicit conversion to multi_ptr<const void, Space>
