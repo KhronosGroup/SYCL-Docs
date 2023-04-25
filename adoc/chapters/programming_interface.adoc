@@ -8079,7 +8079,7 @@ template parameters are the same.
 The [code]#local_accessor# class allocates device local memory and provides
 access to this memory from within a <<sycl-kernel-function>>.  The
 <<local-memory>> that is allocated is shared between all
-<<work-item,work items>> of a <<work-group>>.  If multiple work-groups execute
+<<work-item,work-items>> of a <<work-group>>.  If multiple work-groups execute
 simultaneously in an implementation, each work-group receives its own
 independent copy of the allocated local memory.
 
@@ -11818,14 +11818,14 @@ a@
 ----
 range<Dimensions> get_group_range() const
 ----
-   a@ Returns the number of <<work-group,work groups>> in the iteration space.
+   a@ Returns the number of <<work-group,work-groups>> in the iteration space.
 
 a@
 [source]
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return the number of <<work-group,work groups>> for [code]#Dimension# in the
+   a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
 
 a@
@@ -12230,7 +12230,7 @@ a@
 ----
 range<Dimensions> get_group_range() const
 ----
-   a@ Return a [code]#range# representing the number of <<work-group,work groups>> in the [code]#nd_range#.
+   a@ Return a [code]#range# representing the number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
@@ -13287,7 +13287,7 @@ by each event in [code]#depEvents# must complete before executing this
 
 <<kernel,Kernels>> can be invoked as [keyword]#single tasks#, basic
 [keyword]#data-parallel# <<kernel,kernels>>, <<nd-range>> in
-<<work-group,work groups>>, or [keyword]#hierarchical parallelism#.
+<<work-group,work-groups>>, or [keyword]#hierarchical parallelism#.
 
 Each function takes an optional kernel name template parameter. The user
 may optionally provide a <<kernel-name>>, otherwise an implementation-defined name
@@ -13781,7 +13781,7 @@ heuristic suggests that it is more efficient to do so, this code will be
 executed for each work-item.
 
 Within this region any variable declared will have the semantics of
-<<local-memory>>, shared between all <<work-item,work items>> in the
+<<local-memory>>, shared between all <<work-item,work-items>> in the
 <<work-group>>. If the
 device compiler can prove that an array of such variables is accessed only by
 a single work-item throughout the lifetime of the work-group, for
@@ -13814,7 +13814,7 @@ a@
 ----
 private_memory(const group<Dimensions>&)
 ----
-   a@ Place an object of type [code]#T# in the underlying private memory of each <<work-item,work items>>.
+   a@ Place an object of type [code]#T# in the underlying private memory of each <<work-item,work-items>>.
       The type [code]#T# must be default constructible.
       The underlying constructor will be called for each <<work-item>>.
 
@@ -13830,7 +13830,7 @@ a@
 ----
 T& operator()(const h_item<Dimensions>& id)
 ----
-   a@ Retrieve a reference to the object for the <<work-item,work items>>.
+   a@ Retrieve a reference to the object for the <<work-item,work-items>>.
 
 |====
 
@@ -16030,7 +16030,7 @@ _RandomFiller_, which initializes a buffer with a random number. The
 random number is generated during the construction of the function object
 while processing the command group. The [code]#operator()# member
 function of the function object receives an [code]#item# object. This
-member function will be called for each work item of the execution range. The value
+member function will be called for each work-item of the execution range. The value
 of the random number will be assigned to each element of the buffer. In this
 case, the accessor and the scalar random number are members of the function
 object and therefore will be arguments to the device kernel. Usual
@@ -19159,13 +19159,13 @@ There are two limits that are relevant for the [code]#stream# class.  The
 [code]#totalBufferSize# limit specifies the maximum size of the overall
 character stream that can be output during a kernel invocation, and the
 [code]#workItemBufferSize# limit specifies the maximum size of the
-character stream that can be output within a work item before a flush must be
+character stream that can be output within a work-item before a flush must be
 performed.  Both of these limits are specified in bytes.  The
 [code]#totalBufferSize# limit must be sufficient to contain the characters
 output by all stream statements during execution of a kernel invocation (the
-aggregate of outputs from all work items), and the
+aggregate of outputs from all work-items), and the
 [code]#workItemBufferSize# limit must be sufficient to contain the
-characters output within a work item between stream flush operations.
+characters output within a work-item between stream flush operations.
 
 If the [code]#totalBufferSize# or [code]#workItemBufferSize#
 limits are exceeded, it is implementation-defined whether the streamed
@@ -19271,10 +19271,10 @@ a@
 ----
 flush
 ----
-   a@ Triggers a flush operation, which synchronizes the work item stream buffer
-      with the global stream buffer, and then empties the work item stream
+   a@ Triggers a flush operation, which synchronizes the work-item stream buffer
+      with the global stream buffer, and then empties the work-item stream
       buffer. After a flush, the full [code]#workItemBufferSize# is
-      available again for subsequent streaming within the work item.
+      available again for subsequent streaming within the work-item.
 
 a@
 [source]
@@ -19392,7 +19392,7 @@ stream(size_t totalBufferSize, size_t workItemBufferSize, handler& cgh,
    a@ Constructs a SYCL [code]#stream# instance associated with the command group
       specified by [code]#cgh#, with a maximum buffer size in bytes per kernel
       invocation specified by the parameter [code]#totalBufferSize#, and a maximum
-      stream size that can be buffered by a work item between stream flushes
+      stream size that can be buffered by a work-item between stream flushes
       specified by the parameter [code]#workItemBufferSize#.
       Zero or more properties can be provided to the constructed SYCL
       [code]#stream# via an instance of [code]#property_list#.
@@ -19423,7 +19423,7 @@ a@
 ----
 size_t get_work_item_buffer_size() const
 ----
-   a@ Returns the buffer size per work item, in bytes.
+   a@ Returns the buffer size per work-item, in bytes.
 
 a@
 [source]
@@ -19463,17 +19463,17 @@ performed are implementation-defined. For example it is valid for an implementat
 [code]#printf()#.
 
 The SYCL [code]#stream# class is required to output the content of each stream, between flushes (up to
-[code]#workItemBufferSize)#, without mixing with content from the same stream in other work items.
-There are no other output order guarantees between work items or between streams.  The stream flush
+[code]#workItemBufferSize)#, without mixing with content from the same stream in other work-items.
+There are no other output order guarantees between work-items or between streams.  The stream flush
 operation therefore delimits the unit of output that is guaranteed to be displayed without mixing with
-other work items, with respect to a single stream.
+other work-items, with respect to a single stream.
 
 
 === Implicit flush
 
 There is guaranteed to be an implicit flush of each stream used by a
 kernel, at the end of kernel execution, from the perspective of each
-work item.  There is also an implicit flush when the endl stream
+work-item.  There is also an implicit flush when the endl stream
 manipulator is executed.  No other implicit flushes are permitted in
 an implementation.
 
