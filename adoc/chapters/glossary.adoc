@@ -199,12 +199,12 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[global-id]]global id::
     As in OpenCL, a global ID is used to uniquely identify a <<work-item>>
-    and is derived from the number of global <<work-item,work items>> specified
+    and is derived from the number of global <<work-item,work-items>> specified
     when executing a kernel. A global ID is a one, two or three-dimensional
     value that starts at 0 per dimension.
 
 [[global-memory]]global memory::
-    Global memory is a memory region accessible to all <<work-item,work items>>
+    Global memory is a memory region accessible to all <<work-item,work-items>>
     executing on a <<device>>.
 
 [[group]]group::
@@ -212,8 +212,8 @@ object. For the full description please refer to <<subsec:buffers>>.
     such as a <<work-group>> or <<sub-group>>.
 
 [[group-barrier]]group barrier::
-    A synchronization function within a group of <<work-item,work items>>. All the
-    <<work-item,work items>> of a group must execute the barrier construct before any
+    A synchronization function within a group of <<work-item,work-items>>. All the
+    <<work-item,work-items>> of a group must execute the barrier construct before any
     <<work-item>> continues execution beyond the barrier. Additionally all work-items
     in the group execute a release <<mem-fence>> prior to synchronizing at the
     barrier, all work-items in the group execute an acquire <<mem-fence>> after
@@ -349,16 +349,16 @@ object. For the full description please refer to <<subsec:buffers>>.
 [[nd-item]]nd-item::
     A unique identifier representing a single <<work-item>> and
     <<work-group>> within the index space of a SYCL kernel execution. Can
-    be one, two or three dimensional. In the SYCL interface a <<nd-item>>
+    be one, two or three dimensional. In the SYCL interface an <<nd-item>>
     is represented by the [code]#nd_item# class (see
     <<nditem-class>>).
 
 [[nd-range]]nd-range::
     A representation of the index space of a SYCL kernel execution, the
-    distribution of <<work-item,work items>> within into <<work-group,work groups>>.
+    distribution of <<work-item,work-items>> within into <<work-group,work-groups>>.
     Contains a <<range>> specifying the number of global
-    <<work-item,work items>>, a <<range>> specifying the number of local
-    <<work-item,work items>> and a <<id>> specifying the global offset. Can be
+    <<work-item,work-items>>, a <<range>> specifying the number of local
+    <<work-item,work-items>> and a <<id>> specifying the global offset. Can be
     one, two or three dimensional. The minimum size of <<range>>
     within the <<nd-range>> is 0 per dimension; where any dimension is set to zero,
     the index space in all dimensions will be zero.
@@ -399,10 +399,11 @@ object. For the full description please refer to <<subsec:buffers>>.
     please refer to <<sec:interface.queue.class>>.
 
 [[range]]range::
-    A representation of a number of <<work-item,work items>> or <<work-group>>
-    within the index space of a SYCL kernel execution. Can be one, two or
-    three dimensional. In the SYCL interface a <<work-group>> is
-    represented by the [code]#group# class (see <<group-class>>).
+    A representation of a number of <<work-item,work-items>> or
+    <<work-group,work-groups>> within the index space of a SYCL kernel
+    execution. Can be one, two or three dimensional. In the SYCL interface a
+    <<range>> is represented by the [code]#range# class
+    (see <<range-class>>).
 
 [[ranged-accessor]]ranged accessor::
     A ranged accessor is a host or buffer <<accessor>> that was constructed
@@ -477,10 +478,10 @@ object. For the full description please refer to <<subsec:buffers>>.
     see <<sub-group-class>>.
 
 [[sub-group-barrier]]sub-group barrier::
-    A <<group-barrier>> for all <<work-item,work items>> in a <<sub-group>>.
+    A <<group-barrier>> for all <<work-item,work-items>> in a <<sub-group>>.
 
 [[sub-group-mem-fence]]sub-group mem-fence::
-    A <<mem-fence>> for all <<work-item,work items>> in a <<sub-group>>.
+    A <<mem-fence>> for all <<work-item,work-items>> in a <<sub-group>>.
 
 [[sycl-application]]SYCL application::
     A SYCL application is a {cpp} application which uses the SYCL programming
@@ -542,20 +543,20 @@ See <<sec:usm>>
 
 [[work-group]]work-group::
     The SYCL work-group ([code]#sycl::group# class) is a representation
-    of a collection of related <<work-item,work items>> that execute on a single
-    compute unit. The <<work-item,work items>> in the group execute the same
+    of a collection of related <<work-item,work-items>> that execute on a single
+    compute unit. The <<work-item,work-items>> in the group execute the same
     kernel-instance and <<opencl12, share local memory and work-group functions>>.
     For further details for the [code]#sycl::group#
     class see <<group-class>>.
 
 [[work-group-barrier]]work-group barrier::
-    A <<group-barrier>> for all <<work-item,work items>> in a <<work-group>>.
+    A <<group-barrier>> for all <<work-item,work-items>> in a <<work-group>>.
 
 [[work-group-mem-fence]]work-group mem-fence::
-    A <<mem-fence>> for all <<work-item,work items>> in a <<work-group>>.
+    A <<mem-fence>> for all <<work-item,work-items>> in a <<work-group>>.
 
 [[work-group-id]]work-group id::
-    As in OpenCL, SYCL kernels execute in <<work-group,work groups>>. The group ID
+    As in OpenCL, SYCL kernels execute in <<work-group,work-groups>>. The group ID
     is the ID of the <<work-group>> that a <<work-item>> is executing
     within. A group ID is an one, two or three dimensional value that starts
     at 0 per dimension.
@@ -568,7 +569,7 @@ See <<sec:usm>>
     collection of parallel executions of a kernel invoked on a <<device>>
     by a <<command>>. A <<opencl12, work-item>> is executed by one or more processing
     elements as part of a <<work-group>> executing on a compute unit. A
-    <<work-item>> is distinguished from other <<work-item,work items>> by its
+    <<work-item>> is distinguished from other <<work-item,work-items>> by its
     <<global-id>> or the combination of its <<work-group-id>> and its
     <<local-id>> within a <<work-group>>.
 
