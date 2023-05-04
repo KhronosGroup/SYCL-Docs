@@ -51,23 +51,23 @@ template <int Dimensions = 1> class group {
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                     decorated_global_ptr<DataT> src,
+                                     decorated_global_ptr<const DataT> src,
                                      size_t numElements) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                     decorated_local_ptr<DataT> src,
+                                     decorated_local_ptr<const DataT> src,
                                      size_t numElements) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                     decorated_global_ptr<DataT> src,
+                                     decorated_global_ptr<const DataT> src,
                                      size_t numElements,
                                      size_t srcStride) const;
 
   template <typename DataT>
   device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                     decorated_local_ptr<DataT> src,
+                                     decorated_local_ptr<const DataT> src,
                                      size_t numElements,
                                      size_t destStride) const;
 
