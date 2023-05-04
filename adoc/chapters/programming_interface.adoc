@@ -15084,7 +15084,12 @@ application is compatible with a device unless:
   in <<sec:optional-kernel-features>>; or
 * It is decorated with a [code]#[[sycl::device_has()]]# {cpp} attribute that
   lists an aspect that is not supported by the device, as described in
-  <<sec:kernel.attributes>>.
+  <<sec:kernel.attributes>>; or
+* The translation unit containing the kernel was compiled in a compilation
+  environment that does not support the device.  Each implementation defines
+  the specific criteria for which devices are supported in its compilation
+  environment.  For example, this might be dependent on options passed to the
+  compiler.
 
 A device built-in kernel is only compatible with the device for which it is
 built-in.
