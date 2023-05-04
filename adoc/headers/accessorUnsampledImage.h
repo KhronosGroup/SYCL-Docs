@@ -19,11 +19,6 @@ class unsampled_image_accessor {
                            handler& commandGroupHandlerRef,
                            const property_list& propList = {});
 
-  template <typename AllocatorT, typename TagT>
-  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
-                           handler& commandGroupHandlerRef, TagT tag,
-                           const property_list& propList = {});
-
   /* -- common interface members -- */
 
   /* -- property interface members -- */
@@ -58,11 +53,6 @@ class host_unsampled_image_accessor {
   template <typename AllocatorT>
   host_unsampled_image_accessor(
       unsampled_image<Dimensions, AllocatorT>& imageRef,
-      const property_list& propList = {});
-
-  template <typename AllocatorT, typename TagT>
-  host_unsampled_image_accessor(
-      unsampled_image<Dimensions, AllocatorT>& imageRef, TagT tag,
       const property_list& propList = {});
 
   /* -- common interface members -- */

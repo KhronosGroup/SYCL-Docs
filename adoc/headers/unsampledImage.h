@@ -91,9 +91,19 @@ class unsampled_image {
 
   AllocatorT get_allocator() const;
 
-  template <typename... Ts> auto get_access(Ts... args);
+  template <typename DataT,
+            access_mode Mode = (std::is_const_v<DataT>
+                                    ? access_mode::read
+                                    : access_mode::read_write),
+            image_target Targ = image_target::device>
+  unsampled_image_accessor<DataT, Dimensions, Mode, Targ>
+  get_access(handler& commandGroupHandler, const property_list& propList = {});
 
-  template <typename... Ts> auto get_host_access(Ts... args);
+  template <typename DataT, access_mode Mode = (std::is_const_v<DataT>
+                                                    ? access_mode::read
+                                                    : access_mode::read_write)>
+  host_unsampled_image_accessor<DataT, Dimensions, Mode>
+  get_host_access(const property_list& propList = {});
 
   template <typename Destination = std::nullptr_t>
   void set_final_data(Destination finalData = std::nullptr);

@@ -18,10 +18,6 @@ class sampled_image_accessor {
                          handler& commandGroupHandlerRef,
                          const property_list& propList = {});
 
-  template <typename AllocatorT, typename TagT>
-  sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
-                         handler& commandGroupHandlerRef, TagT tag,
-                         const property_list& propList = {});
 
   /* -- common interface members -- */
 
