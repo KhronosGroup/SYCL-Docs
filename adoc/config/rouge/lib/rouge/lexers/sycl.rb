@@ -500,7 +500,11 @@ module Rouge
         memory_scope_work_item
         no_init
         read_only
+        read_only_host_task
+        read_write
+        read_write_host_task
         write_only
+        write_only_host_task
       )
 
       # Here are some interesting tokens
