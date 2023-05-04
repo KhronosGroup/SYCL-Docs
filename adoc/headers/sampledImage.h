@@ -53,9 +53,13 @@ class sampled_image {
 
   size_t size() const;
 
-  template <typename... Ts> auto get_access(Ts... args);
+  template <typename DataT, image_target Targ = image_target::device>
+  sampled_image_accessor<DataT, Dimensions, Targ>
+  get_access(handler& commandGroupHandler, const property_list& propList = {});
 
-  template <typename... Ts> auto get_host_access(Ts... args);
+  template <typename DataT>
+  host_sampled_image_accessor<DataT, Dimensions>
+  get_host_access(const property_list& propList = {});
 };
 
 } // namespace sycl

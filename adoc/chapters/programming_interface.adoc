@@ -5585,28 +5585,27 @@ AllocatorT get_allocator() const
 a@
 [source]
 ----
-template <typename... Ts> auto get_access(Ts... args)
+template <typename DataT,
+         access_mode Mode = (std::is_const_v<DataT>
+                                 ? access_mode::read
+                                 : access_mode::read_write),
+         image_target Targ = image_target::device>
+unsampled_image_accessor<DataT, Dimensions, Mode, Targ>
+get_access(handler& commandGroupHandler)
 ----
-   a@ Returns a valid [code]#unsampled_image_accessor# as if constructed via
-      passing the image and all provided arguments to the
-      [code]#unsampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return unsampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#unsampled_image_accessor# to the unsampled image
+      with the specified data type, access mode and target in the command group.
 
 a@
 [source]
 ----
-template <typename... Ts> auto get_host_access(Ts... args)
+template <typename DataT, access_mode Mode = (std::is_const_v<DataT>
+                                                   ? access_mode::read
+                                                   : access_mode::read_write)>
+host_unsampled_image_accessor<DataT, Dimensions, Mode> get_host_access();
 ----
-   a@ Returns a valid [code]#host_unsampled_image_accessor# as if constructed
-      via passing the image and all provided arguments to the
-      [code]#host_unsampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return host_unsampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#host_unsampled_image_accessor# to the unsampled
+      image with the specified data type and access mode.
 
 a@
 [source]
@@ -5855,28 +5854,21 @@ size_t byte_size() const noexcept
 a@
 [source]
 ----
-template <typename... Ts> auto get_access(Ts... args)
+template <typename DataT, image_target Targ = image_target::device>
+sampled_image_accessor<DataT, Dimensions, Targ>
+get_access(handler& commandGroupHandler)
 ----
-   a@ Returns a valid [code]#sampled_image_accessor# as if constructed via
-      passing the image and all provided arguments to the
-      [code]#sampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return sampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#sampled_image_accessor# to the sampled image with
+      the specified data type and target in the command group.
 
 a@
 [source]
 ----
-template <typename... Ts> auto get_host_access(Ts... args)
+template <typename DataT>
+host_sampled_image_accessor<DataT, Dimensions> get_host_access()
 ----
-   a@ Returns a valid [code]#host_sampled_image_accessor# as if constructed
-      via passing the image and all provided arguments to the
-      [code]#host_sampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return host_sampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#host_sampled_image_accessor# to the sampled image
+      with the specified data type in the command group.
 
 |====
 
@@ -8730,26 +8722,6 @@ If [code]#AccessTarget# is [code]#image_target::device#, throws an
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
 
-a@
-[source]
-----
-template <typename AllocatorT, typename TagT>
-unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
-                         handler& commandGroupHandlerRef, TagT tag,
-                         const property_list& propList = {})
-----
-   a@ Constructs an [code]#unsampled_image_accessor# for accessing an
-      [code]#unsampled_image# within a <<command>> on the [code]#queue#
-      associated with [code]#commandGroupHandlerRef#.  The [code]#tag# is used
-      to deduce template arguments of the [code]#unsampled_image_accessor# as
-      described in <<sec:accessor.unsampled.image.tags>>.  The optional
-      [code]#property_list# provides properties for the constructed object.
-
-If [code]#AccessTarget# is [code]#image_target::device#, throws an
-[code]#exception# with the [code]#errc::feature_not_supported# error code if
-the device associated with [code]#commandGroupHandlerRef# does not have
-[code]#aspect::image#.
-
 |====
 
 
@@ -8767,19 +8739,6 @@ host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
       [code]#unsampled_image# immediately on the host.  The optional
-      [code]#property_list# provides properties for the constructed object.
-
-a@
-[source]
-----
-template <typename AllocatorT, typename TagT>
-host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
-                              TagT tag, const property_list& propList = {})
-----
-   a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
-      [code]#unsampled_image# immediately on the host.  The [code]#tag# is used
-      to deduce template arguments of the [code]#host_unsampled_image_accessor#
-      as described in <<sec:accessor.unsampled.image.tags>>.  The optional
       [code]#property_list# provides properties for the constructed object.
 
 |====
@@ -8831,52 +8790,6 @@ are [code]#int# when [code]#Dimensions == 1#, [code]#int2# when
 For [code]#unsampled_image_accessor#, this function may only be called from
 within a <<command>>.
 
-|====
-
-
-[[sec:accessor.unsampled.image.tags]]
-===== Deduction tags for unsampled image accessors
-
-Some [code]#unsampled_image_accessor# constructors take a [code]#TagT#
-parameter, which is used to deduce template arguments.  The permissible values
-for this parameter are listed in <<table.accessors.unsampled.image.tags>> along
-with the access mode and accessor target that they imply.
-
-[[table.accessors.unsampled.image.tags]]
-.Enumeration of tags available for [code]#unsampled_image_accessor# construction
-[width="100%",options="header",cols="33%,33%,34%"]
-|====
-| Tag value | Access mode | Accessor target
-| [code]#read_only#
-    | [code]#access_mode::read#
-    | [code]#image_target::device#
-| [code]#write_only#
-    | [code]#access_mode::write#
-    | [code]#image_target::device#
-| [code]#read_only_host_task#
-    | [code]#access_mode::read#
-    | [code]#image_target::host_task#
-| [code]#write_only_host_task#
-    | [code]#access_mode::write#
-    | [code]#image_target::host_task#
-|====
-
-Some [code]#host_unsampled_image_accessor# constructors also take a
-[code]#TagT# parameter.  The permissible values for this parameter are listed
-in <<table.accessors.host.unsampled.image.tags>> along with the access mode
-that they imply.
-
-[[table.accessors.host.unsampled.image.tags]]
-.Enumeration of tags available for [code]#host_unsampled_image_accessor# construction
-[width="100%",options="header",cols="50%,50%"]
-|====
-| Tag value | Access mode
-| [code]#read_only#
-    | [code]#access_mode::read#
-| [code]#write_only#
-    | [code]#access_mode::write#
-| [code]#read_write#
-    | [code]#access_mode::read_write#
 |====
 
 
@@ -8994,26 +8907,6 @@ If [code]#AccessTarget# is [code]#image_target::device#, throws an
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
 
-a@
-[source]
-----
-template <typename AllocatorT, typename TagT>
-sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
-                       handler& commandGroupHandlerRef, TagT tag,
-                       const property_list& propList = {})
-----
-   a@ Constructs a [code]#sampled_image_accessor# for accessing a
-      [code]#sampled_image# within a <<command>> on the [code]#queue#
-      associated with [code]#commandGroupHandlerRef#.  The [code]#tag# is used
-      to deduce template arguments of the [code]#sampled_image_accessor# as
-      described in <<sec:accessor.sampled.image.tags>>.  The optional
-      [code]#property_list# provides properties for the constructed object.
-
-If [code]#AccessTarget# is [code]#image_target::device#, throws an
-[code]#exception# with the [code]#errc::feature_not_supported# error code if
-the device associated with [code]#commandGroupHandlerRef# does not have
-[code]#aspect::image#.
-
 |====
 
 
@@ -9063,26 +8956,6 @@ template <typename CoordT> DataT read(const CoordT& coords) const
 For [code]#sampled_image_accessor#, this function may only be called from
 within a <<command>>.
 
-|====
-
-
-[[sec:accessor.sampled.image.tags]]
-===== Deduction tags for sampled image accessors
-
-Some [code]#sampled_image_accessor# constructors take a [code]#TagT# parameter,
-which is used to deduce template arguments.  The permissible values for this
-parameter are listed in <<table.accessors.sampled.image.tags>> along with the
-accessor target that they imply.
-
-[[table.accessors.sampled.image.tags]]
-.Enumeration of tags available for [code]#sampled_image_accessor# construction
-[width="100%",options="header",cols="50%,50%"]
-|====
-| Tag value | Accessor target
-| [code]#read_only#
-    | [code]#image_target::device#
-| [code]#read_only_host_task#
-    | [code]#image_target::host_task#
 |====
 
 
