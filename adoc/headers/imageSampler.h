@@ -20,7 +20,7 @@ enum class coordinate_normalization_mode : /* unspecified */ {
 
 struct image_sampler {
   addressing_mode addressing;
-  coordinate_mode coordinate;
+  coordinate_normalization_mode coordinate;
   filtering_mode filtering;
 };
 
