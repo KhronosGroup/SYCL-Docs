@@ -171,8 +171,7 @@ these restrictions:
   * Exception-handling cannot be used inside a
     <<device-function>>.
     [code]#noexcept# is allowed.
-  * Recursion is not allowed in a <<device-function>> except in a
-    constant evaluation.
+  * Recursion is not allowed in a <<device-function>>.
   * Variables with thread storage duration ([code]#thread_local#
     storage class specifier) are not allowed to be odr-used in a
     <<device-function>>.
@@ -180,11 +179,18 @@ these restrictions:
     <<device-function>>, must be [code]#const#
     or [code]#constexpr# and zero-initialized or constant-initialized.
 
+In the case of a manifestly constant-evaluated expression or
+conversion, any code accepted by the C++ standard in this case is also
+accepted in SYCL <<device-function>>.
+
 [NOTE]
 ====
 Amongst other things, this restriction makes it illegal for a
 <<device-function>> to access a global variable that isn't [code]#const#
 or [code]#constexpr#.
+
+The restriction waiver in manifestly constant-evaluated expressions
+allows any kind of meta-programming in a <<device-function>>.
 ====
 
   * The rules for kernels apply to both the kernel function objects
