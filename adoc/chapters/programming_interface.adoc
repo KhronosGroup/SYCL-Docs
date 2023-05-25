@@ -1428,9 +1428,11 @@ info::context::atomic_memory_order_capabilities
 
 Returns the set of memory orders supported by these atomic operations.  When a
 context returns a "stronger" memory order in this set, it must also return all
-"weaker" memory orders.  The memory orders [code]#memory_order::acquire#,
-[code]#memory_order::release#, and [code]#memory_order::acq_rel# are all the
-same strength.  If a context returns one of these, it must return them all.
+"weaker" memory orders.  (See <<sec:memory-ordering>> for a definition of
+"stronger" and "weaker" memory orders.) The memory orders
+[code]#memory_order::acquire#, [code]#memory_order::release#, and
+[code]#memory_order::acq_rel# are all the same strength.  If a context returns
+one of these, it must return them all.
 
 At a minimum, each context must support [code]#memory_order::relaxed#.
 
@@ -1449,7 +1451,8 @@ info::context::atomic_fence_order_capabilities
 
 Returns the set of memory orders supported by these [code]#atomic_fence#
 operations.  When a context returns a "stronger" memory order in this set, it
-must also return all "weaker" memory orders.
+must also return all "weaker" memory orders.  (See <<sec:memory-ordering>> for
+a definition of "stronger" and "weaker" memory orders.)
 
 At a minimum, each context must support [code]#memory_order::relaxed#,
 [code]#memory_order::acquire#, [code]#memory_order::release#, and
@@ -1464,8 +1467,9 @@ info::context::atomic_memory_scope_capabilities
     @ [.code]#std::vector<memory_scope>#
    a@ Returns the set of memory scopes supported by atomic operations on all
       devices in the context.  When a context returns a "wider" memory scope
-      in this set, it must also return all "narrower" memory scopes.  At a
-      minimum, each context must support [code]#memory_scope::work_item#,
+      in this set, it must also return all "narrower" memory scopes.  (See
+      <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+      At a minimum, each context must support [code]#memory_scope::work_item#,
       [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
 
 a@
@@ -1477,9 +1481,11 @@ info::context::atomic_fence_scope_capabilities
     @ [.code]#std::vector<memory_scope>#
    a@ Returns the set of memory orderings supported by [code]#atomic_fence# on
       all devices in the context.  When a context returns a "wider" memory
-      scope in this set, it must also return all "narrower" memory scopes.  At
-      a minimum, each context must support [code]#memory_scope::work_item#,
-      [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+      scope in this set, it must also return all "narrower" memory scopes.
+      (See <<sec:memory-scope>> for a definition of "wider" and "narrower"
+      scopes.) At a minimum, each context must support
+      [code]#memory_scope::work_item#, [code]#memory_scope::sub_group#, and
+      [code]#memory_scope::work_group#.
 
 |====
 
@@ -2273,10 +2279,12 @@ info::device::atomic_memory_order_capabilities
     @ [.code]#std::vector<memory_order>#
    a@ Returns the set of memory orders supported by atomic operations on the
       device.  When a device returns a "stronger" memory order in this set, it
-      must also return all "weaker" memory orders.  The memory orders
-      [code]#memory_order::acquire#, [code]#memory_order::release#, and
-      [code]#memory_order::acq_rel# are all the same strength.  If a device
-      returns one of these, it must return them all.
+      must also return all "weaker" memory orders.  (See
+      <<sec:memory-ordering>> for a definition of "stronger" and "weaker"
+      memory orders.) The memory orders [code]#memory_order::acquire#,
+      [code]#memory_order::release#, and [code]#memory_order::acq_rel# are all
+      the same strength.  If a device returns one of these, it must return them
+      all.
 
 At a minimum, each device must support [code]#memory_order::relaxed#.
 
@@ -2289,10 +2297,11 @@ info::device::atomic_fence_order_capabilities
     @ [.code]#std::vector<memory_order>#
    a@ Returns the set of memory orders supported by [code]#atomic_fence# on
       the device.  When a device returns a "stronger" memory order in this set,
-      it must also return all "weaker" memory orders.  At a minimum, each
-      device must support [code]#memory_order::relaxed#,
-      [code]#memory_order::acquire#, [code]#memory_order::release#, and
-      [code]#memory_order::acq_rel#.
+      it must also return all "weaker" memory orders.  (See
+      <<sec:memory-ordering>> for a definition of "stronger" and "weaker"
+      memory orders.) At a minimum, each device must support
+      [code]#memory_order::relaxed#, [code]#memory_order::acquire#,
+      [code]#memory_order::release#, and [code]#memory_order::acq_rel#.
 
 a@
 [source]
@@ -2303,8 +2312,9 @@ info::device::atomic_memory_scope_capabilities
     @ [.code]#std::vector<memory_scope>#
    a@ Returns the set of memory scopes supported by atomic operations on the
       device.  When a device returns a "wider" memory scope in this set, it
-      must also return all "narrower" memory scopes.  At a minimum, each device
-      must support [code]#memory_scope::work_item#,
+      must also return all "narrower" memory scopes.  (See <<sec:memory-scope>>
+      for a definition of "wider" and "narrower" scopes.) At a minimum, each
+      device must support [code]#memory_scope::work_item#,
       [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
 
 a@
@@ -2316,8 +2326,9 @@ info::device::atomic_fence_scope_capabilities
     @ [.code]#std::vector<memory_scope>#
    a@ Returns the set of memory scopes supported by [code]#atomic_fence# on the
       device.  When a device returns a "wider" memory scope in this set, it
-      must also return all "narrower" memory scopes.  At a minimum, each device
-      must support [code]#memory_scope::work_item#,
+      must also return all "narrower" memory scopes.  (See <<sec:memory-scope>>
+      for a definition of "wider" and "narrower" scopes.)  At a minimum, each
+      device must support [code]#memory_scope::work_item#,
       [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
 
 a@
@@ -20072,7 +20083,7 @@ object.
 By default, the scope of these fences is set to the narrowest
 scope including all work-items in group [code]#g# (as reported by
 [code]#Group::fence_scope#).  This scope may be optionally overridden
-with a broader scope, specified by the [code]#fence_scope# argument.
+with a wider scope, specified by the [code]#fence_scope# argument.
 --
 
 [[sec:algorithms]]
