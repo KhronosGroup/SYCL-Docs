@@ -49,9 +49,9 @@ class sampled_image {
   /* Available only when: Dimensions > 1 */
   range<Dimensions - 1> get_pitch() const;
 
-  size_t byte_size() const;
+  size_t byte_size() const noexcept;
 
-  size_t size() const;
+  size_t size() const noexcept;
 
   template <typename DataT, image_target Targ = image_target::device>
   sampled_image_accessor<DataT, Dimensions, Targ>
