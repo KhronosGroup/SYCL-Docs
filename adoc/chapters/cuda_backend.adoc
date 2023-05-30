@@ -1,0 +1,551 @@
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin cuda_backend %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[appendix]
+[[chapter:cuda-backend]]
+= CUDA backend specification
+
+This chapter describes the behavior of the [code]#sycl::backend::cuda# backend
+and how it relates to the SYCL general programming model.
+This backend is implemented on top of the CUDA SDK and exposes NVIDIA
+devices to the SYCL general programming model.
+This chapter also describes how the SYCL generic interoperability interface is
+implemented for the [code]#sycl::backend::cuda# backend.
+
+The CUDA backend is enabled using the [code]#sycl::backend::cuda# value of [code]#enum
+class backend#. That means that when the CUDA backend is active the
+preprocessor macro [code]#SYCL_BACKEND_CUDA# will be defined.
+
+The CUDA backend requires an installation of CUDA SDK as well as one or more
+CUDA devices available in the system.
+[[sec:cuda:introduction]]
+== Introduction
+
+[[sec:cuda:mapping_of_sycl_programming_model]]
+== Mapping of SYCL programming model
+
+This section gives a general overview of how the SYCL programming model maps to
+CUDA. These two programming models are pretty similar in essence however they do
+have a few differences in terminology and architecture.
+
+[[sub:cuda:platform_model]]
+=== Platform Model
+
+A SYCL device maps to a single CUDA device.  As CUDA does not split into
+separate platforms there is no 'platform' concept in CUDA corresponding to the
+SYCL platform. Instead, a SYCL platform maps to a collection of CUDA devices
+represented by [code]#std::vector<CUdevice>#.
+
+A SYCL <<context>> simply maps to one, or multiple CUDA contexts. Indeed while
+a CUDA context is tied to a single device, this is not the case for a SYCL
+<<context>> and the CUDA backend implementation may use multiple CUDA contexts
+to emulate a SYCL <<context>> containing multiple devices.
+
+In CUDA, contexts and devices may need to be set as active on a thread for the
+CUDA Driver or CUDA Runtime APIs to use. Therefore the SYCL API entry points
+may change the active context or device whenever required for proper execution
+of SYCL operations, and no guarantee is provided that any prior active context
+or active device will be restored by the SYCL API entry points before returning
+to the user application.
+
+A SYCL <<queue>> simply maps to one or multiple CUDA streams. Indeed while a
+CUDA stream is in-order, a SYCL <<queue>> isn't, so a CUDA backend implementation
+may use multiple CUDA streams to implement an out of order SYCL <<queue>>.
+
+[[sub:cuda:memory_model]]
+=== Memory model
+
+==== Accessing memory on a different GPU
+
+Devices belonging to the same context must be able to access (directly or indirectly) each other's global memory. This is done in one of the following ways:
+
+- Device directly accesses memory on another device (peer-to-peer memory access).
+- CUDA-runtime-managed memory is used. CUDA runtime copies the data from one device to another.
+- Peer copy (one of [code]#CuMemcpyPeerAsync# or [code]#CuMemcpy3DPeerAsync#) is used to directly copy the data from one device to another.
+- The data is copied from one device to the host, and then from host to another device.
+
+==== Shared USM memory advices
+
+Values for the [code]#advice# parameter of [code]#sycl::queue::mem_advise# and [code]#sycl::handler::mem_advise# and their mapping to CUDA equivalent are defined in table <<table.cuda.memmodel.advices>>.
+
+[[table.cuda.memmodel.advices]]
+.Valid shared USM advices and their equivalents in CUDA
+[width="100%",options="header",cols="40%,30%,30%"]
+|====
+| SYCL shared USM advice | CUDA managed memory advice | processor, the advice is set for
+| [code]#sycl::cuda::advice::cuda_mem_advise_set_read_mostly# | [code]#cudaMemAdviseSetReadMostly# | device associated with the queue/handler
+| [code]#sycl::cuda::advice::cuda_mem_advise_unset_read_mostly# | [code]#cudaMemAdviceUnsetReadMostly# | device associated with the queue/handler
+| [code]#sycl::cuda::advice::cuda_mem_advise_set_preferred_location# | [code]#cudaMemAdviseSetPreferredLocation# | device associated with the queue/handler
+| [code]#sycl::cuda::advice::cuda_mem_advise_unset_preferred_location# | [code]#cudaMemAdviseUnsetPreferredLocation# | device associated with the queue/handler
+| [code]#sycl::cuda::advice::cuda_mem_advise_set_accessed_by# | [code]#cudaMemAdviseSetAccessedBy# | device associated with the queue/handler
+| [code]#sycl::cuda::advice::cuda_mem_advise_unset_accessed_by# | [code]#cudaMemAdviseUnsetAccessedBy# | device associated with the queue/handler
+| [code]#sycl::cuda::advice::cuda_mem_advise_set_preferred_location_host# | [code]#cudaMemAdviseSetPreferredLocation# | host
+| [code]#sycl::cuda::advice::cuda_mem_advise_unset_preferred_location_host# | [code]#cudaMemAdviseUnsetPreferredLocation# | host
+| [code]#sycl::cuda::advice::cuda_mem_advise_set_accessed_by_host# | [code]#cudaMemAdviseSetAccessedBy# | host
+| [code]#sycl::cuda::advice::cuda_mem_advise_unset_accessed_by_host# | [code]#cudaMemAdviseUnsetAccessedBy# | host
+|====
+
+==== Supported image formats
+
+Supported image formats are:
+
+* r8g8b8a8_unorm
+* r16g16b16a16_unorm
+* r8g8b8a8_sint
+* r16g16b16a16_sint
+* r32b32g32a32_sint
+* r8g8b8a8_uint
+* r16g16b16a16_uint
+* r32b32g32a32_uint
+* r16b16g16a16_sfloat
+* r32g32b32a32_sfloat
+* b8g8r8a8_unorm
+
+==== Samplers
+
+In both SYCL and CUDA samplers consist of addressing mode, filtering mode and coordinate normalization mode. Mapping between SYCL and CUDA values is defined in tables <<table.cuda.memmodel.sampler_addressing>>, <<table.cuda.memmodel.sampler_filtering>> and <<table.cuda.memmodel.sampler_normalization>>. In CUDA addressing modes for all dimesnions will be the same, as CUDA allows different addressing modes for different dimesnions, while SYCL does not. 
+
+[[table.cuda.memmodel.sampler_addressing]]
+.Mapping of SYCL sampler addressing modes to CUDA
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL sampler addressing mode | CUDA sampler addressing mode
+| [code]#sycl::addressing_mode::mirrored_repeat# | [code]#cudaAddressModeMirror#
+| [code]#sycl::addressing_mode::repeat# | [code]#cudaAddressModeWrap#
+| [code]#sycl::addressing_mode::clamp_to_edge# | [code]#cudaAddressModeClamp#
+| [code]#sycl::addressing_mode::clamp# | [code]#cudaAddressModeClamp#
+| [code]#sycl::addressing_mode::none# | [code]#cudaAddressModeBorder#
+|====
+
+SYCL allows [code]#sycl::addressing_mode::mirrored_repeat# and [code]#sycl::addressing_mode::repeat# to be used together with unnormalized coordinates. In this case the resulting coordinates are undefined. CUDA does not allow this, so if [code]#sycl::addressing_mode::mirrored_repeat# or [code]#sycl::addressing_mode::repeat# is specified together with unnormalized coordinates, [code]#cudaAddressModeBorder# is used instead.
+
+[[table.cuda.memmodel.sampler_filtering]]
+.Mapping of SYCL sampler filtering modes to CUDA
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL sampler filtering mode | CUDA sampler filtering mode
+| [code]#sycl::filtering_mode::nearest# | [code]#cudaFilterModePoint#
+| [code]#sycl::filtering_mode::linear# | [code]#cudaFilterModeLinear#
+|====
+
+[[table.cuda.memmodel.sampler_normalization]]
+.Mapping of SYCL sampler coordinate normalization modes to CUDA
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL sampler coordinate normalization mode | CUDA sampler coordinate normalization mode
+| [code]#sycl::coordinate_normalization_mode::normalized# | [code]#normalizedCoords = true#
+| [code]#sycl::coordinate_normalization_mode::unnormalized# | [code]#normalizedCoords = false#
+|====
+
+==== Address Spaces
+
+Table <<table.cuda.memmodel.address_spaces>> maps SYCL address spaces to CUDA address spaces.
+
+[[table.cuda.memmodel.address_spaces]]
+.Mapping from SYCL address spaces to CUDA address spaces
+[width="100%",options="header",cols="50%,50%"]
+|====
+| SYCL Address Space | CUDA Address Space
+| Global memory | global
+| Local memory | shared
+| Private memory | registers or local
+| Generic memory | generic
+| Constant memory | const
+|====
+
+==== Atomics
+
+Prior to Volta (Compute Capability 7.0) the CUDA Parallel Thread eXecution model (PTX) used weak memory models that apparently lacked any published
+definitions and corresponding formal proofs. PTX ISA 6.0 introduced a memory consistency model that provides scoped synchronization primitives supported by Volta and later devices.
+A formal analysis of this memory consistency model has been published by Nvidia.
+
+Sequentially consistent atomics are currently not supported in the CUDA backend. The mappings of other memory orders is defined in table <<table.cuda.memmodel.memory_orders>>.
+If a memory order is not specified then [code]#memory_order::relaxed# is assumed. A memory order can only be specified for Volta and later devices.
+
+[[table.cuda.memmodel.memory_orders]]
+.Mapping from [code]#sycl::memory_order# to PTX ISA memory orders
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#sycl::memory_order# | PTX ISA Memory Order
+| [code]#memory_order::relaxed# | relaxed
+| [code]#memory_order::acquire# | acquire
+| [code]#memory_order::release# | release
+| [code]#memory_order::acq_rel# | acq_rel
+| [code]#memory_order::seq_cst# | undefined
+|====
+
+In the CUDA backend memory scopes are defined for Pascal (Compute Capability 6.0) and later devices. Mapping of memory scopes is defined in table <<table.cuda.memmodel.memory_scopes>>. [code]#memory_scope::work_item# does not require any consistency between different work items, so it can be mapped to non-atomic operations.
+
+[[table.cuda.memmodel.memory_scopes]]
+.Mapping from [code]#sycl::memory_scope# to PTX ISA memory scopes
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#sycl::memory_scope# | PTX ISA Memory Scope
+| [code]#memory_scope::work_item# | 
+| [code]#memory_scope::sub_group# | cta
+| [code]#memory_scope::work_group# | cta
+| [code]#memory_scope::device# | gpu
+| [code]#memory_scope::system# | system
+|====
+
+==== Fences
+
+If a device supports the [code]#fence# PTX instruction the mapping of memory orders is defined in <<table.cuda.memmodel.fence_memory_orders>>. Otherwise all memory orders (except relaxed) are mapped to the [code]#membar# instruction.
+
+[[table.cuda.memmodel.fence_memory_orders]]
+.Mapping from [code]#sycl::memory_order# to PTX ISA memory orders when used in fences
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#sycl::memory_order# | PTX ISA Memory Order
+| [code]#memory_order::relaxed# | none
+| [code]#memory_order::acquire# | acq_rel
+| [code]#memory_order::release# | acq_rel
+| [code]#memory_order::acq_rel# | acq_rel
+| [code]#memory_order::seq_cst# | sc
+|====
+
+If future versions of PTX ISA define fence instructions with only acquire or only release memory order, these can be used as well for [code]#memory_order::acquire# and [code]#memory_order::release# on devices that support them.
+
+Mapping of SYCL memory scopes to PTX ISA is the same as for atomics. It is defined in <<table.cuda.memmodel.memory_scopes>>.
+
+[[sub:cuda:execution_model]]
+=== Execution Model
+
+CUDA's execution model is similar to SYCL's. CUDA uses kernels to
+offload computation, splitting the host and GPU into asynchronous 
+computing devices. In general, except for CUDA's dynamic 
+parallelism extensions, kernels are called by the host. 
+
+CUDA GPUs are constructed out of streaming multiprocessors (SM) 
+which perform the actual computation. Each SM consists of 8 scalar 
+cores, shared memory, registers, a load/store unit, and a scheduler 
+unit. CUDA uses a hierarchy of threads to organize the execution of
+kernels. Kernels are split up into thread blocks. The thread blocks
+form a grid and each thread can identify its location within the grid
+using a block ID. The grid is a concept used to index thread blocks
+and can be one, two, or three dimensional. Each thread block is
+tied to a single SM. Similar to a thread block's location within the 
+grid, each thread's position within the block can be identified with 
+a one, two, or three dimensional thread ID. 
+
+Pre-Volta GPU architectures break thread blocks into warps which
+consist of 32 threads. The warp is processed by the SM concurrently. 
+For one warp instruction to be executed requires 4 SM clock cycles. 
+SM's execute multiple warp instructions. The warps instructions are 
+prioritized and scheduled to minimize overhead. 
+
+Volta and more recent GPU architectures use independent thread 
+scheduling. In addition, each thread can access memory within a 
+unified virtual address space. Threads must synchronize with other 
+threads using execution barriers, synchronization primitives and 
+Cooperative Groups to utilize unified memory.
+
+In SYCL, group functions and synchronizations are convergent, meaning 
+all work-items must reach them by the same control flow. Work-items 
+encountering a group function or synchronization point under diverse 
+conditions results in undefined behaviour. Therefore, any device specific 
+capability of independent forward progress among work-items is not exposed 
+in SYCL, and will not be observable to users. Independent forward progress
+of work-items may be achieved through the CUDA interop API, which gives
+the same guarantees as native CUDA.
+
+SYCL has a similar execution hierarchy consisting of kernels. 
+The kernel is broken down into work-items. Each work-item concurrently
+executes an instance of the kernel on a piece of memory. Work-items 
+can be combined into work-groups that have designated shared memory.
+Work-groups can synchronize their work-items with work-group barriers.
+
+There are some equivalences between CUDA and SYCL execution models. 
+For example, CUDA's stream multiprocessor is equal to a SYCL compute 
+unit. CUDA's grid is similar to SYCL's nd_range as it is the highest 
+level grouping of threads, not including the whole kernel. Both 
+nd_range and grid can segment the groups of threads into one, two, or 
+three dimensions. SYCL sub-groups roughly map to
+cooperative groups [code]#thread_block_tile# as it allows for the
+work-group/thread block to be further subdivided into concurrent threads.
+Likewise, thread blocks map directly to work-groups, and a
+single thread is a SYCL work-item.
+
+CUDA primarily synchronizes the threads through two functions,
+[code]#cudaStreamSynchronize()# and [code]#\__syncthreads()#.
+[code]#cudaStreamSynchronize()# blocks work from being performed until all
+threads on the device has been completed.
+[code]#__syncthreads()# waits for
+all threads within a thread block to reach the same point. So 
+[code]#cudaStreamSynchronize()# is similar to queue.wait(), buffer
+destruction, and other host-device synchronization events within SYCL.
+[code]#__syncthreads()# synchronizes the threads within a thread block which
+is analogous to the work-group barrier.
+
+CUDA's warp concept has no SYCL equivalent. If a user were to write 
+warp aware code it would be non-generic SYCL code and specific to the 
+CUDA backend.
+
+CUDA allows for more detailed thread and memory management through 
+Cooperative Groups. Cooperative Groups allow for synchronizing at the 
+grid level and organizing subgroups in sizes smaller than a warp. 
+Cooperative Groups do not have an equivalent within SYCL 2020 and are 
+not yet supported.
+
+==== Work Item Mapping
+
+The SYCL specification specifies that work-items must be arranged in a row major
+fashion, making work-items with ids `(a, b, c)` and `(a, b, c+1)` adjacent.
+
+In native CUDA, work-items are arranged in a column major fashion, making 
+work-items with ids `(a, b, c)` and `(a+1, b, c)` adjacent.
+
+In order for a given SYCL implementation's CUDA backend to conform to the SYCL
+specification, the implementation must map the row major ordering of SYCL to the
+column major ordering specific to the CUDA backend. The underlying column major
+ordering of work-items in CUDA is therefore should be transparent to the user,
+however, could still be observable in kernel code which uses backend
+interoperability.
+
+[[table.cuda.CUDA_features_to_SYCL]]
+.CUDA execution features with their corresponding SYCL features
+[width="100%",options="header",cols="50%,50%"]
+|====
+| [code]#SYCL#                                                       | [code]#CUDA#
+| [code]#Compute unit#                                               | [code]#Streaming multiprocessor#
+| [code]#nd_range#                                                   | [code]#grid#
+| [code]#work-group#                                                 | [code]#Thread block#
+| [code]#sub-group#                                                  | [code]#thread_block_tile#
+| [code]#work-item#                                                  | [code]#Thread#
+| [code]#SYCL nd_item synchronization#                               | [code]#cudaStreamSynchronize#
+| [code]#work-group barrier#                                         | [code]#__syncthreads#
+|====
+
+[[sec::programming_interface]]
+== Programming Interface
+
+[[sub:cuda:queries]]
+=== Queries
+
+For all event information profiling descriptors, the calls to 
+[code]#sycl::event::get_profiling_info# return the time difference (in nanoseconds)
+between the creation of the platform (which happens when the application is started)
+and the descriptor time for the associated event. The "Resolution" (timing error)
+of the returned value is the same as that provided by the CUDA driver API call,
+[code]#cuEventElapsedTime#: +/- 0.5 microseconds. All event information profiling
+descriptors, defined by the SYCL specification, are supported by the CUDA backend.
+
+Currently no restrictions are defined for parameters of [code]#get_info# member
+function in classes [code]#platform#, [code]#context#, [code]#device#, 
+[code]#queue#, [code]#event# and [code]#kernel#. All parameter values defined 
+in the SYCL specification are supported.
+
+Querying for [code]#info::device::version# by calling [code]#device::get_info#
+returns the CUDA compute capability of the device, in the format
+[code]#<major>.<minor>#.
+
+Currently no parameters are defined for [code]#get_backend_info# member 
+functions of classes [code]#platform#, [code]#context#, [code]#device#, 
+[code]#queue#, [code]#event# and [code]#kernel#.
+
+[[sub:cuda:application_interoperability]]
+=== Application Interoperability
+
+This section describes the API level interoperability between SYCL and CUDA.
+
+The CUDA backend supports API interoperability for [code]#device#,
+[code]#context#, [code]#queue#, and [code]#event#. Interoperability for [code]#platform#, [code]#buffer#,
+[code]#kernel#, [code]#kernel_bundle#, [code]#device_image#, [code]#sampled_image# and
+[code]#unsampled_image# are not supported.
+
+[[table.cuda.appinterop.nativeobjects]]
+.Types of native backend objects application interoperability
+[width="100%",options="header",cols="20%,20%,20%,40%"]
+|====
+| [code]#SyclType# | [code]#backend_input_t<backend::cuda, SyclType># | [code]#backend_return_t<backend::cuda, SyclType># | Description
+| [code]#device#   | [code]#CUdevice#                | [code]#CUdevice#               | A SYCL device encapsulates a CUDA device.
+| [code]#context#  | [code]#CUcontext#               | [code]#std::vector<CUcontext># | A SYCL context can encapsulate multiple CUDA contexts, however, it is not possible to create a SYCL context from multiple CUDA contexts.
+| [code]#queue#    | [code]#CUstream#   | [code]#CUstream# | A SYCL queue can encapsulates multiple CUDA stream, however, a SYCL queue can only be created from or produce one, and any synchronization required should be performed.
+| [code]#event#    | [code]#CUevent#    | [code]#CUevent#  | A SYCL event can encapsulates multiple CUDA events, however, a SYCL event can only be created from or produce one, and a CUevent produced from a SYCL event may or may not be valid, use [code]#sycl::cuda::has_native_event# to query this.
+| [code]#buffer# | NA | [code]#void *# | A SYCL buffer encapsulates a CUDA device pointer. If the SYCL buffer is a sub-buffer, the returned [code]#void *# is offset to the beginning of the sub-buffer.
+|====
+
+[[table.cuda.appinterop.make_interop_APIs]]
+.[code]#make_*# Interoperability APIs for native backend objects.
+[width="100%",options="header",cols="40%,60%"]
+|====
+| CUDA interoperability function                                    |  Description
+| [code]#template<backend Backend> +
+device +
+make_device(const backend_input_t<Backend, device> &backendObject);# 
+        | Construct a SYCL [code]#device# from a CUDA device. As the SYCL execution environment for the CUDA backend contains a fixed number of devices that are enumerated via [code]#sycl::device::get_devices()#. Calling this function does not create a new device. Rather it merely creates a [code]#sycl::device# object that is a copy of one of the devices from that enumeration.
+
+| [code]#template<backend Backend> +
+context +
+make_context(const backend_input_t<Backend, context> &backendObject,
+                     const async_handler asyncHandler = {});# 
+        | Create a SYCL [code]#context# from a CUDA context.
+
+| [code]#template<backend Backend> +
+queue +
+make_queue(const backend_input_t<Backend, queue> &backendObject,
+                 const context &targetContext,
+                 const async_handler asyncHandler = {});# 
+        | Create a SYCL [code]#queue# from a CUDA stream. The provided [code]#targetContext# must encapsulate the same CUDA context as the provided CUDA stream.
+
+| [code]#template<backend Backend> +
+event +
+make_event(const backend_input_t<Backend, event> &backendObject,
+                 const context &targetContext);# 
+        | Create a SYCL [code]#event# from a CUDA event.
+
+|====
+
+==== Ownership of native backend objects
+
+The CUDA backend retains ownership of all native CUDA objects obtained through
+the interoperability API, therefore associated SYCL objects must be kept alive
+for the duration of the CUDA work using these native CUDA objects.
+
+When creating a SYCL object from a native CUDA object SYCL does not take
+ownership of the object and it is up to the application to dispose of them when
+appropriate.
+
+[[sub:cuda:kernel_function_interoperability]]
+=== Kernel Function Interoperability
+
+This section describes the kernel function interoperability for the CUDA
+backend.
+
+The CUDA backend supports kernel function interoperability for the [code]#accessor#,
+[code]#local_accessor#, [code]#sampled_image_accessor# and [code]#unsampled_image_accessor#
+classes. These are exposed with [code]#get_native# free template function.
+
+The CUDA backend does not support interoperability for the [code]#device_event# class
+as there's no equivalent in CUDA.
+
+Address spaces in CUDA are associated with variable decorations rather than the
+type, so when pointers are passed as parameters to a function the parameter
+types does not need to be decorated with an address space, instead it's simply a
+raw un-decorated pointer. For this reason the [code]#accessor# and  [code]#local_accessor# 
+classes map to a raw undecorated pointer which can be implemented using the 
+generic address space.
+
+Other kernel function types in CUDA are represented by aliases provided in the
+[code]#sycl::cuda# namespace. These are provided for the [code]#sampled_image_accessor#,
+and [code]#unsampled_image_accessor# classes; [code]#sycl::cuda::texture# and
+[code]#sycl::cuda::surface# respectively.
+
+Below is a table of the [code]#backend_return_t# specializations
+for the SYCL classes which support kernel function interoperability.
+
+[[table.cuda.kernelinterop.nativeobjects]]
+.Types of native backend objects kernel function interoperability
+[width="100%",options="header",cols="30%,20%,50%"]
+|====
+| [code]#SyclType#                                                   | [code]#backend_return_t<backend::cuda, SyclType># | Description
+| [code]#accessor<T, Dims, Mode, target::device>#                    | void * | Convert a SYCL [code]#accessor# to an undecorated raw pointer.
+| [code]#accessor<T, Dims, Mode, target::constant_buffer>#           | void * | Convert a SYCL [code]#accessor# to an undecorated raw pointer.
+| [code]#accessor<T, Dims, Mode, target::local>#                     | void * | Convert a SYCL [code]#accessor# to an undecorated raw pointer.
+| [code]#local_accessor<T, Dims>#                                    | void * | Convert a SYCL [code]#local_accessor# to an undecorated raw pointer.
+| [code]#sampled_image_accessor<T, 1, Mode, image_target::device>#   | sycl::cuda::texture<T, 1> | Convert a SYCL [code]#sampled_image_accessor# to the [code]#sycl::cuda::texture# interoperability type with the same type and dimensions.
+| [code]#sampled_image_accessor<T, 2, Mode, image_target::device>#   | sycl::cuda::texture<T, 2> | Convert a SYCL [code]#sampled_image_accessor# to the [code]#sycl::cuda::texture# interoperability type with the same type and dimensions.
+| [code]#sampled_image_accessor<T, 3, Mode, image_target::device>#   | sycl::cuda::texture<T, 3> | Convert a SYCL [code]#sampled_image_accessor# to the [code]#sycl::cuda::texture# interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 1, Mode, image_target::device># | sycl::cuda::surface<T, 1> | Convert a SYCL [code]#unsampled_image_accessor# to the [code]#sycl::cuda::surface# interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 2, Mode, image_target::device># | sycl::cuda::surface<T, 2> | Convert a SYCL [code]#unsampled_image_accessor# to the [code]#sycl::cuda::surface# interoperability type with the same type and dimensions.
+| [code]#unsampled_image_accessor<T, 3, Mode, image_target::device># | sycl::cuda::surface<T, 3> | Convert a SYCL [code]#unsampled_image_accessor# to the [code]#sycl::cuda::surface# interoperability type with the same type and dimensions.
+|====
+
+[[sec:cuda_support_of_core_features]]
+== CUDA Support of Core SYCL Features
+
+Some core SYCL features require a minimum compute capability for the CUDA
+backend.
+
+[[table.coresupport]]
+.CUDA support for Core SYCL API features
+[width="100%",options="header",cols="33%,33%,33%"]
+|====
+| Feature                                   | SYCL Aspect               | Required Compute Capability 
+| [code]#16-bit floating point#             | [code]#aspect::fp16#      | 5.3 or greater
+|====
+
+[[sec:non_core_features_and_extensions]]
+== Non-core features and extensions
+
+Some additional functions are provided for the CUDA backend in the
+[code]#sycl::cuda# namespace.
+
+[[table.noncorefeatures]]
+.CUDA support for non-Core SYCL APIs
+[width="100%",options="header",cols="50%,50%"]
+|====
+| API                                                    | Description
+| [code]#bool sycl::cuda::has_native_event(sycl::event)# | Returns [code]#true# if the SYCL event has a valid [code]#CUevent# that can be queries via application interop.
+|====
+
+Additional CUDA features are available depending upon the device's compute 
+capability. SYCL can support these optional CUDA features with extensions.
+
+Use of CUDA extensions requires that the API for a given extension is available
+to the SYCL implementation. This needs to be determined at compile time. 
+Checking for the existence of feature test macros is the preferred method
+for checking whether an API exists. The feature test macro format 
+is [code]#SYCL_EXT_<vendor>_<feature>#. The [code]#<vendor># string may also contain the
+word [code]#CUDA# for features specific to CUDA. For example, the feature test macro
+for CUDA extensions in oneAPI may be either [code]#SYCL_EXT_ONEAPI_CUDA_<feature>#,
+or just [code]#SYCL_EXT_ONEAPI_<feature>#.
+
+Use of a given CUDA extension also requires that a chosen device has the
+required compute capability to use the CUDA extension. This can be determined
+using [code]#sycl::aspect#s. Non-core SYCL aspects may be defined by an
+implementation which would allow this check to happen at runtime.
+
+The table below shows a proposal for SYCL supported CUDA extensions. This should
+be populated by other members of the SYCL community.
+
+[[table.extensionsupport]]
+.SYCL support for CUDA 11.3 extensions
+[width="100%",options="header",cols="35%,35%,15%, 15"]
+|====
+| CUDA Extension                            | SYCL Aspect   | Feature Test Macro               | Required Compute Capability 
+|====
+
+[[sub:cuda:builtin-kernel-functions]]
+=== Built-in Kernel Functions
+The CUDA backend specification currently does not define any built-in kernel 
+functions.
+
+[[sub:cuda:error_handling]]
+=== Error Handling
+
+SYCL uses [code]#sycl::errc# as an enum class to hold the Standard SYCL Error Codes.
+These error codes may originate in the SYCL runtime or be created from an error
+originating in a backend. When a [code]#sycl::exception# is thrown, the [code]#sycl::errc# can
+be queried using the exception's [code]#.code()# method.
+
+If there is a CUDA driver API error associated with an exception triggered, then the
+A CUDA error code can be obtained by the free function
+[code]#CUresult sycl::cuda::get_error_code(const sycl::exception&)#.
+In the case where there is no CUDA error associated with the exception triggered,
+the CUDA error code will be [code]#CUDA_SUCCESS#.
+
+The default [code]#sycl::errc# that a CUDA error is mapped to is [code]#sycl::errc::runtime#.
+An exception, [code]#cuda_exception#, that was created due to a CUDA error, will,
+upon execution of [code]#cuda_exception.code()#, return a [code]#std::error_code#
+relating to the [code]#sycl::errc# case that the CUDA error maps to; whilst
+[code]#sycl::cuda::get_error_code(cuda_exception)# will return the original CUDA error code.
+
+[[sub:cuda:non_core_properties]]
+=== Non-Core Properties
+
+The constructors for most SYCL library objects, such as for [code]#sycl::queue# or
+[code]#sycl::context#, accept the parameter [code]#sycl::property_list#, which can affect
+the semantics of the compilation or linking operation.
+
+There are currently no CUDA backend specific properties, meaning any properties
+relating to the CUDA backend will be defined by a given implementation.
+
+[[sub:cuda:graphics_apis_interop]]
+=== Interoperability with Graphics APIs
+
+Interoperability between SYCL and OpenGL or DirectX is not directly provided 
+by the SYCL interface. However, since the CUDA API provides interoperability 
+with these APIs, interoperability between SYCL and OpenGL or DirectX is best 
+done indirectly through interoperability with the CUDA API.
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%% end cuda_backend %%%%%%%%%%%%%%%%%%%%%%%%%%%%
