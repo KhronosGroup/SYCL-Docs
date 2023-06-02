@@ -19401,26 +19401,109 @@ that all of the built-in functions fulfill the same requirements for both
 host and device.
 
 
-=== Description of the built-in types available for SYCL host and device
+=== Description of generic type names
 
-All of the OpenCL built-in types are available in the namespace
-[code]#sycl#. For the purposes of this document we use
-generic type names for describing sets of valid SYCL types. The
-generic type names themselves are not valid SYCL types, but they
-represent a set of valid types, as defined in
-<<table.gentypes>>. Each generic type within a section is
-comprised of a combination of scalar, SYCL [code]#vec# and/or [code]#marray# class
-specializations. The letters [code]#{n}# and [code]#{N}# define valid sizes for
-class specializations, where [code]#{n}# means 2,3,4,8,16 and [code]#{N}# means
-any positive value of size_t type. Note that any reference to the base type
-refers to the type of a scalar or the element type of a SYCL [code]#vec# or
-[code]#marray# specialization.
+The functions defined in sections <<sec:math-functions>> through
+<<sec::relational-functions>> are specified using a set of generic type names.
+These are not actual type names available to SYCL applications.  Instead, they
+are a shorthand used in this document to describe the set of overloads for
+these functions.  For example the [code]#fmax# function is specified as:
 
+[source]
+----
+genfloat fmax(genfloat x, genfloat y)
+----
 
+The generic type [code]#genfloat# is a stand-in for a set of a actual type
+names: [code]#float#, [code]#double#, etc.  To construct the actual overloads
+that are available, replace the generic type name with the name of each of
+these actual types:
+
+[source]
+----
+float fmax(float x, float y)
+double fmax(double x, double y)
+template<int N> vec<float,N> fmax(vec<float,N> x, vec<float,N> y)
+template<size_t M> marray<float,M> fmax(marray<float,M> x, marray<float,M> y)
+// etc.
+----
+
+When determining the set of overloads that are available, use the following
+rules:
+
+* If the specification of a function has several occurrences of the same
+  generic type name, replace each occurrence with the same actual type.  For
+  example, the [code]#fmax# example above has three occurrences of
+  [code]#genfloat#: one for the return type and one for each parameter type.
+  The available overloads include only the cases where both parameters have
+  the same type, and the return type always matches the type of the parameters.
+
+* Some of the generic type names can be replaced with a templated type, where
+  the identifiers [code]#N#, [code]#M#, [code]#Space#, and [code]#IsDecorated#
+  represent template parameters.  When this happens, the overload is a
+  templated function, as shown above with the [code]#fmax# example.  Only a few
+  combinations of template parameters are possible, and the following list
+  tells the order and type of the template parameters for each possible
+  combination:
+
+** If there is a single template parameter [code]#N# (number of dimensions of
+   the [code]#vec# type):
++
+[source]
+----
+template<int N>
+----
+
+** If there is a single template parameter [code]#M# (number of dimensions of
+   the [code]#marray# type):
++
+[source]
+----
+template<size_t M>
+----
+
+** If there are two template parameters [code]#Space# and [code]#IsDecorated#
+   (address space and decoration for the [code]#multi_ptr# type):
++
+[source]
+----
+template<access::address_space Space, access::decorated IsDecorated>
+----
+
+** If there are three template parameters [code]#N#, [code]#Space# and
+   [code]#IsDecorated#:
++
+[source]
+----
+template<int N, access::address_space Space, access::decorated IsDecorated>
+----
+
+** If there are three template parameters [code]#M#, [code]#Space# and
+   [code]#IsDecorated#:
++
+[source]
+----
+template<size_t M, access::address_space Space, access::decorated IsDecorated>
+----
+
+* Unless specified otherwise, the template parameter [code]#N# is constrained
+  to the values 2, 3, 4, 8, or 16.
+
+* Unless specified otherwise, the template parameter [code]#M# is constrained
+  to a positive value.
+
+* Unless specified otherwise, the template parameter [code]#Space# is
+  constrained to the values [code]#access::address_space::global_space#,
+  [code]#access::address_space::local_space#, or
+  [code]#access::address_space::private_space#.
+
+* Unless specified otherwise, the template parameter [code]#IsDecorated# is
+  constrained to the values [code]#access::decorated::yes# or
+  [code]#access::decorated::no#.
 
 [[table.gentypes]]
-.Generic type name description, which serves as a description for all valid types of <<opencl12, parameters to kernel functions>>.
-[width="100%",options="header",separator="@",cols="65%,35%"]
+.Generic type name descriptions.
+[width="100%",options="header",separator="@",cols="25%,75%"]
 |====
 @ Generic type name  @ Description
 a@
@@ -19428,454 +19511,557 @@ a@
 ----
 floatn
 ----
-   a@ [code]#float{n}#, [code]#mfloat{n}#, [code]#marray<{N},float>#
+   a@ [code]#vec<float,N># +
+      [code]#marray<float,M>#
+
+a@
+[source]
+----
+vfloatn
+----
+   a@ [code]#vec<float,N>#
+
+a@
+[source]
+----
+vfloat3or4
+----
+   a@ [code]#vec<float,N>#
+
+Where the [code]#N# template parameter is constrained to the values 3 or 4.
+
+a@
+[source]
+----
+mfloatn
+----
+   a@ [code]#marray<float,M>#
+
+a@
+[source]
+----
+mfloat3or4
+----
+   a@ [code]#marray<float,M>#
+
+Where the [code]#M# template parameter is constrained to the values 3 or 4.
 
 a@
 [source]
 ----
 genfloatf
 ----
-   a@ [code]#float#, [code]#floatn#
+   a@ [code]#float# +
+      [code]#vec<float,N># +
+      [code]#marray<float,M>#
 
 a@
 [source]
 ----
 doublen
 ----
-   a@ [code]#double{n}#, [code]#mdouble{n}#, [code]#marray<{N},double>#
+   a@ [code]#vec<double,N># +
+      [code]#marray<double,M>#
+
+a@
+[source]
+----
+vdoublen
+----
+   a@ [code]#vec<double,N>#
+
+a@
+[source]
+----
+vdouble3or4
+----
+   a@ [code]#vec<double,N>#
+
+Where the [code]#N# template parameter is constrained to the values 3 or 4.
+
+a@
+[source]
+----
+mdoublen
+----
+   a@ [code]#marray<double,M>#
+
+a@
+[source]
+----
+mdouble3or4
+----
+   a@ [code]#marray<double,M>#
+
+Where the [code]#M# template parameter is constrained to the values 3 or 4.
 
 a@
 [source]
 ----
 genfloatd
 ----
-   a@ [code]#double#, [code]#doublen#
+   a@ [code]#double# +
+      [code]#vec<double,N># +
+      [code]#marray<double,M>#
 
 a@
 [source]
 ----
 halfn
 ----
-   a@ [code]#half{n}#, [code]#mhalf{n}#, [code]#marray<{N},half>#
+   a@ [code]#vec<half,N># +
+      [code]#marray<half,M>#
+
+a@
+[source]
+----
+vhalfn
+----
+   a@ [code]#vec<half,N>#
+
+a@
+[source]
+----
+mhalfn
+----
+   a@ [code]#marray<half,M>#
 
 a@
 [source]
 ----
 genfloath
 ----
-   a@ [code]#half#, [code]#halfn#
+   a@ [code]#half# +
+      [code]#vec<half,N># +
+      [code]#marray<half,M>#
 
 a@
 [source]
 ----
 genfloat
 ----
-   a@ [code]#genfloatf#, [code]#genfloatd#, [code]#genfloath#
+   a@ [code]#float# +
+      [code]#double# +
+      [code]#half# +
+      [code]#vec<float,N># +
+      [code]#vec<double,N># +
+      [code]#vec<half,N># +
+      [code]#marray<float,M># +
+      [code]#marray<double,M># +
+      [code]#marray<half,M>#
 
 a@
 [source]
 ----
 sgenfloat
 ----
-   a@ [code]#float#, [code]#double#, [code]#half#
-
-a@
-[source]
-----
-vgenfloat
-----
-   a@ [code]#float{n}#, [code]#double{n}#, [code]#half{n}#
+   a@ [code]#float# +
+      [code]#double# +
+      [code]#half#
 
 a@
 [source]
 ----
 mgenfloat
 ----
-   a@ [code]#marray<float,{N}>#, [code]#marray<double,{N}>#,
-      [code]#marray<half,{N}>#
+   a@ [code]#marray<float,M># +
+      [code]#marray<double,M># +
+      [code]#marray<half,M>#
 
 a@
 [source]
 ----
 gengeofloat
 ----
-   a@ [code]#float#, [code]#float2#, [code]#float3#, [code]#float4#, [code]#mfloat2#,
-      [code]#mfloat3#, [code]#mfloat4#
+   a@ [code]#float# +
+      [code]#vec<float,N># +
+      [code]#marray<float,M>#
+
+Where the [code]#N# and [code]#M# template parameters are constrained to the
+values 2, 3 or 4.
 
 a@
 [source]
 ----
 gengeodouble
 ----
-   a@ [code]#double#, [code]#double2#, [code]#double3#, [code]#double4#, [code]#mdouble2#,
-      [code]#mdouble3#, [code]#mdouble4#
+   a@ [code]#double# +
+      [code]#vec<double,N># +
+      [code]#marray<double,M>#
+
+Where the [code]#N# and [code]#M# template parameters are constrained to the
+values 2, 3 or 4.
 
 a@
 [source]
 ----
-charn
+vint8n
 ----
-   a@ [code]#char{n}#, [code]#mchar{n}#, [code]#marray<{N},char>#
+   a@ [code]#vec<int8_t,N>#
 
 a@
 [source]
 ----
-scharn
+vint16n
 ----
-   a@ [code]#schar{n}#, [code]#mschar{n}#, [code]#marray<{N},signed char>#
+   a@ [code]#vec<int16_t,N>#
 
 a@
 [source]
 ----
-ucharn
+vint32n
 ----
-   a@ [code]#uchar{n}#, [code]#muchar{n}#, [code]#marray<{N},unsigned char>#
+   a@ [code]#vec<int32_t,N>#
 
 a@
 [source]
 ----
-igenchar
+vint64n
 ----
-   a@ [code]#signed# char, [code]#scharn#
+   a@ [code]#vec<int64_t,N>#
 
 a@
 [source]
 ----
-ugenchar
+vuint8n
 ----
-   a@ [code]#unsigned# char, [code]#ucharn#
+   a@ [code]#vec<uint8_t,N>#
 
 a@
 [source]
 ----
-genchar
+vuint16n
 ----
-   a@ [code]#char#, [code]#charn#, [code]#igenchar#, [code]#ugenchar#
+   a@ [code]#vec<uint16_t,N>#
 
 a@
 [source]
 ----
-shortn
+vuint32n
 ----
-   a@ [code]#short{n}#, [code]#mshort{n}#, [code]#marray<{N},short>#
+   a@ [code]#vec<uint32_t,N>#
 
 a@
 [source]
 ----
-genshort
+vuint64n
 ----
-   a@ [code]#short#, [code]#shortn#
+   a@ [code]#vec<uint64_t,N>#
 
 a@
 [source]
 ----
-ushortn
+mint8n
 ----
-   a@ [code]#ushort{n}#, [code]#mushort{n}#, [code]#marray<{N},unsigned short>#
+   a@ [code]#marray<int8_t,M>#
 
 a@
 [source]
 ----
-ugenshort
+mint16n
 ----
-   a@ [code]#unsigned# short, [code]#ushortn#
+   a@ [code]#marray<int16_t,M>#
 
 a@
 [source]
 ----
-uintn
+mint32n
 ----
-   a@ [code]#uint{n}#, [code]#muint{n}#, [code]#marray<{N},unsigned int>#
+   a@ [code]#marray<int32_t,M>#
 
 a@
 [source]
 ----
-ugenint
+mint64n
 ----
-   a@ [code]#unsigned# int, [code]#uintn#
+   a@ [code]#marray<int64_t,M>#
 
 a@
 [source]
 ----
-intn
+muint8n
 ----
-   a@ [code]#int{n}#, [code]#mint{n}#, [code]#marray<{N},int>#
+   a@ [code]#marray<uint8_t,M>#
 
 a@
 [source]
 ----
-genint
+muint16n
 ----
-   a@ [code]#int#, [code]#intn#
+   a@ [code]#marray<uint16_t,M>#
 
 a@
 [source]
 ----
-ulongn
+muint32n
 ----
-   a@ [code]#ulong{n}#, [code]#mulong{n}#, [code]#marray<{N},unsigned long int>#
+   a@ [code]#marray<uint32_t,M>#
 
 a@
 [source]
 ----
-ugenlong
+muint64n
 ----
-   a@ [code]#unsigned# long int, [code]#ulongn#
+   a@ [code]#marray<uint64_t,M>#
 
 a@
 [source]
 ----
-longn
+mintn
 ----
-   a@ [code]#long{n}#, [code]#mlong{n}#, [code]#marray<{N},long int>#
+   a@ [code]#marray<int,M>#
 
 a@
 [source]
 ----
-genlong
+mushortn
 ----
-   a@ [code]#long# int, [code]#longn#
+   a@ [code]#marray<unsigned short,M>#
 
 a@
 [source]
 ----
-ulonglongn
+muintn
 ----
-   a@ [code]#ulonglong{n}#, [code]#mulonglong{n}#, [code]#marray<{N},unsigned long long
-      int>#
+   a@ [code]#marray<unsigned int,M>#
 
 a@
 [source]
 ----
-ugenlonglong
+mulongn
 ----
-   a@ [code]#unsigned# long long int, [code]#ulonglongn#
+   a@ [code]#marray<unsigned long,M>#
 
 a@
 [source]
 ----
-longlongn
+mbooln
 ----
-   a@ [code]#longlong{n}#, [code]#mlonglong{n}#, [code]#marray<{N},long long int>#
-
-a@
-[source]
-----
-genlonglong
-----
-   a@ [code]#long# long int, [code]#longlongn#
-
-a@
-[source]
-----
-igenlonginteger
-----
-   a@ [code]#genlong#, [code]#genlonglong#
-
-a@
-[source]
-----
-ugenlonginteger
-----
-   a@ [code]#ugenlong#, [code]#ugenlonglong#
+   a@ [code]#marray<bool,M>#
 
 a@
 [source]
 ----
 geninteger
 ----
-   a@ [code]#genchar#, [code]#genshort#, [code]#ugenshort#, [code]#genint#, [code]#ugenint#,
-      [code]#igenlonginteger#, [code]#ugenlonginteger#
-
-a@
-[source]
-----
-genintegerNbit
-----
-   a@ [code]#All# types within geninteger whose base type are _N_ bits in size,
-      where _N_ = 8, 16, 32, 64.
-
-a@
-[source]
-----
-igeninteger
-----
-   a@ [code]#igenchar#, [code]#genshort#, [code]#genint#, [code]#igenlonginteger#
-
-a@
-[source]
-----
-igenintegerNbit
-----
-   a@ [code]#All# types within igeninteger whose base type are _N_ bits in size,
-      where _N_ = 8, 16, 32, 64.
+   a@ [code]#char# +
+      [code]#signed char# +
+      [code]#short# +
+      [code]#int# +
+      [code]#long# +
+      [code]#long long# +
+      [code]#unsigned char# +
+      [code]#unsigned short# +
+      [code]#unsigned int# +
+      [code]#unsigned long# +
+      [code]#unsigned long long# +
+      [code]#vec<int8_t,N># +
+      [code]#vec<int16_t,N># +
+      [code]#vec<int32_t,N># +
+      [code]#vec<int64_t,N># +
+      [code]#vec<uint8_t,N># +
+      [code]#vec<uint16_t,N># +
+      [code]#vec<uint32_t,N># +
+      [code]#vec<uint64_t,N># +
+      [code]#marray<char,M># +
+      [code]#marray<signed char,M># +
+      [code]#marray<short,M># +
+      [code]#marray<int,M># +
+      [code]#marray<long,M># +
+      [code]#marray<long long,M># +
+      [code]#marray<unsigned char,M># +
+      [code]#marray<unsigned short,M># +
+      [code]#marray<unsigned int,M># +
+      [code]#marray<unsigned long,M># +
+      [code]#marray<unsigned long long,M>#
 
 a@
 [source]
 ----
 sigeninteger
 ----
-   a@ [code]#signed char#,
-      [code]#short#,
-      [code]#int#,
-      [code]#long int#,
-      [code]#long long int#
+   a@ [code]#signed char# +
+      [code]#short# +
+      [code]#int# +
+      [code]#long# +
+      [code]#long long#
 
 a@
 [source]
 ----
 vigeninteger
 ----
-   a@ [code]#schar{n}#,
-      [code]#short{n}#,
-      [code]#int{n}#,
-      [code]#long{n}#,
-      [code]#longlong{n}#
+   a@ [code]#vec<int8_t,N># +
+      [code]#vec<int16_t,N># +
+      [code]#vec<int32_t,N># +
+      [code]#vec<int64_t,N>#
 
 a@
 [source]
 ----
 migeninteger
 ----
-   a@ [code]#marray<signed char,{N}>#,
-      [code]#marray<short,{N}>#,
-      [code]#marray<int,{N}>#,
-      [code]#marray<long,{N}>#,
-      [code]#marray<long long,{N}>#
-
-a@
-[source]
-----
-ugeninteger
-----
-   a@ [code]#ugenchar#, [code]#ugenshort#, [code]#ugenint#, [code]#ugenlonginteger#
-
-a@
-[source]
-----
-ugenintegerNbit
-----
-   a@ [code]#All# types within ugeninteger whose base type are _N_ bits in size,
-      where _N_ = 8, 16, 32, 64.
-
-a@
-[source]
-----
-sugeninteger
-----
-   a@ [code]#unsigned char#,
-      [code]#unsigned short#,
-      [code]#unsigned int#,
-      [code]#unsigned long int#,
-      [code]#unsigned long long int#
+   a@ [code]#marray<signed char,M># +
+      [code]#marray<short,M># +
+      [code]#marray<int,M># +
+      [code]#marray<long,M># +
+      [code]#marray<long long,M>#
 
 a@
 [source]
 ----
 vugeninteger
 ----
-   a@ [code]#uchar{n}#,
-      [code]#ushort{n}#,
-      [code]#uint{n}#,
-      [code]#ulong{n}#,
-      [code]#ulonglong{n}#
-
-a@
-[source]
-----
-mugeninteger
-----
-   a@ [code]#marray<unsigned char,{N}>#,
-      [code]#marray<unsigned short,{N}>#,
-      [code]#marray<unsigned int,{N}>#,
-      [code]#marray<unsigned long int,{N}>#,
-      [code]#marray<unsigned long long int,{N}>#
-
-a@
-[source]
-----
-sgeninteger
-----
-   a@ [code]#char#, [code]#sigeninteger#, [code]#sugeninteger#
-
-a@
-[source]
-----
-vgeninteger
-----
-   a@ [code]#char{n}#, [code]#vigeninteger#, [code]#vugeninteger#
-
-a@
-[source]
-----
-mgeninteger
-----
-   a@ [code]#marray<char,{N}>#, [code]#migeninteger#, [code]#mugeninteger#
-
-a@
-[source]
-----
-gentype
-----
-   a@ [code]#genfloat#, [code]#geninteger#
+   a@ [code]#vec<uint8_t,N># +
+      [code]#vec<uint16_t,N># +
+      [code]#vec<uint32_t,N># +
+      [code]#vec<uint64_t,N>#
 
 a@
 [source]
 ----
 sgentype
 ----
-   a@ [code]#sgenfloat#, [code]#sgeninteger#
+   a@ [code]#char# +
+      [code]#signed char# +
+      [code]#short# +
+      [code]#int# +
+      [code]#long# +
+      [code]#long long# +
+      [code]#unsigned char# +
+      [code]#unsigned short# +
+      [code]#unsigned int# +
+      [code]#unsigned long# +
+      [code]#unsigned long long# +
+      [code]#float# +
+      [code]#double# +
+      [code]#half#
 
 a@
 [source]
 ----
 vgentype
 ----
-   a@ [code]#vgenfloat#, [code]#vgeninteger#
+   a@ [code]#vec<int8_t,N># +
+      [code]#vec<int16_t,N># +
+      [code]#vec<int32_t,N># +
+      [code]#vec<int64_t,N># +
+      [code]#vec<uint8_t,N># +
+      [code]#vec<uint16_t,N># +
+      [code]#vec<uint32_t,N># +
+      [code]#vec<uint64_t,N># +
+      [code]#vec<float,N># +
+      [code]#vec<double,N># +
+      [code]#vec<half,N>#
 
 a@
 [source]
 ----
 mgentype
 ----
-   a@ [code]#mgenfloat#, [code]#mgeninteger#
+   a@ [code]#marray<char,M># +
+      [code]#marray<signed char,M># +
+      [code]#marray<short,M># +
+      [code]#marray<int,M># +
+      [code]#marray<long,M># +
+      [code]#marray<long long,M># +
+      [code]#marray<unsigned char,M># +
+      [code]#marray<unsigned short,M># +
+      [code]#marray<unsigned int,M># +
+      [code]#marray<unsigned long,M># +
+      [code]#marray<unsigned long long,M># +
+      [code]#marray<float,M># +
+      [code]#marray<double,M># +
+      [code]#marray<half,M>#
 
 a@
 [source]
 ----
-genfloatptr
+intptr
 ----
-   a@ All permutations of [code]#multi_ptr<DataT, AddressSpace, IsDecorated># where [code]#DataT# is all types within [code]#genfloat#,
-      [code]#AddressSpace# is [code]#access::address_space::global_space#,
-      [code]#access::address_space::local_space# and
-      [code]#access::address_space::private_space# and [code]#IsDecorated# is
-      [code]#access::decorated::yes# and [code]#access::decorated::no#.
+   a@ [code]#multi_ptr<int, Space, IsDecorated>#
 
 a@
 [source]
 ----
-genintptr
+floatptr
 ----
-   a@ All permutations of [code]#multi_ptr<DataT, AddressSpace,
-      IsDecorated># where [code]#DataT# is all types within [code]#genint#,
-      [code]#AddressSpace# is [code]#access::address_space::global_space#,
-      [code]#access::address_space::local_space# and
-      [code]#access::address_space::private_space# and [code]#IsDecorated# is
-      [code]#access::decorated::yes# and [code]#access::decorated::no#.
+   a@ [code]#multi_ptr<float, Space, IsDecorated>#
 
 a@
 [source]
 ----
-booln
+doubleptr
 ----
-   a@ [code]#marray<{N},bool>#
+   a@ [code]#multi_ptr<double, Space, IsDecorated>#
 
 a@
 [source]
 ----
-genbool
+halfptr
 ----
-   a@ [code]#bool#, [code]#booln#
+   a@ [code]#multi_ptr<half, Space, IsDecorated>#
+
+a@
+[source]
+----
+floatnptr
+----
+   a@ [code]#multi_ptr<vec<float,N>, Space, IsDecorated># +
+      [code]#multi_ptr<marray<float,M>, Space, IsDecorated>#
+
+a@
+[source]
+----
+doublenptr
+----
+   a@ [code]#multi_ptr<vec<double,N>, Space, IsDecorated># +
+      [code]#multi_ptr<marray<double,M>, Space, IsDecorated>#
+
+a@
+[source]
+----
+halfnptr
+----
+   a@ [code]#multi_ptr<vec<half,N>, Space, IsDecorated># +
+      [code]#multi_ptr<marray<half,M>, Space, IsDecorated>#
+
+a@
+[source]
+----
+mintnptr
+----
+   a@ [code]#multi_ptr<marray<int,M>, Space, IsDecorated>#
+
+a@
+[source]
+----
+vint32nptr
+----
+   a@ [code]#multi_ptr<vec<int32_t,N>, Space, IsDecorated>#
+
+a@
+[source]
+----
+elementtype
+----
+   a@ This generic type is always used in a function description that also uses
+      the [code]#geninteger# generic type, and the replacement of these two
+      generic types are correlated.  If the [code]#geninteger# is replaced with
+      a [code]#vec# or [code]#marray# type, then the [code]#elementtype# must
+      be replaced with the element type of that [code]#vec# or [code]#marray#.
+      If the [code]#geninteger# is replaced with a scalar type, the
+      [code]#elementtype# must be replaced with that same scalar type.
+
+a@
+[source]
+----
+unsignedtype
+----
+   a@ This generic type is always used in a function description that also uses
+      the [code]#geninteger# generic type, and the replacement of these two
+      generic types are correlated.  The [code]#unsignedtype# must be replaced
+      with the unsigned equivalent of the type specified by [code]#geninteger#.
 
 |====
 
@@ -20719,6 +20905,7 @@ multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
 --
 
+[[sec:math-functions]]
 === Math functions
 
 In SYCL the OpenCL math functions are available in the namespace
@@ -20943,7 +21130,9 @@ a@
 [source]
 ----
 genfloat fmax(genfloat x, genfloat y)
-genfloat fmax(genfloat x, sgenfloat y)
+genfloatf fmax(genfloatf x, float y)
+genfloatd fmax(genfloatd x, double y)
+genfloath fmax(genfloath x, half y)
 ----
    a@ Returns y if latexmath:[x < y], otherwise it returns x. If one
       argument is a NaN, fmax() returns the other
@@ -20954,7 +21143,9 @@ a@
 [source]
 ----
 genfloat fmin(genfloat x, genfloat y)
-genfloat fmin(genfloat x, sgenfloat y)
+genfloatf fmin(genfloatf x, float y)
+genfloatd fmin(genfloatd x, double y)
+genfloath fmin(genfloath x, half y)
 ----
    a@ Returns y if latexmath:[y < x], otherwise it returns x. If one
       argument is a NaN, fmin() returns the other
@@ -20971,7 +21162,12 @@ genfloat fmod(genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat fract(genfloat x, genfloatptr iptr)
+floatn fract(floatn x, floatnptr iptr)
+float fract(float x, floatptr iptr)
+doublen fract(doublen x, doublenptr iptr)
+double fract(double x, doubleptr iptr)
+halfn fract(halfn x, halfnptr iptr)
+half fract(half x, halfptr iptr)
 ----
    a@ Returns fmin(x - floor(x), nextafter(genfloat(1.0), genfloat(0.0)) ).
       floor(x) is returned in iptr.
@@ -20979,7 +21175,15 @@ genfloat fract(genfloat x, genfloatptr iptr)
 a@
 [source]
 ----
-genfloat frexp(genfloat x, genintptr exp)
+vfloatn frexp(vfloatn x, vint32nptr exp)
+mfloatn frexp(mfloatn x, mintnptr exp)
+float frexp(float x, intptr exp)
+vdoublen frexp(vdoublen x, vint32nptr exp)
+mdoublen frexp(mdoublen x, mintnptr exp)
+double frexp(double x, intptr exp)
+vhalfn frexp(vhalfn x, vint32nptr exp)
+mhalfn frexp(mhalfn x, mintnptr exp)
+half frexp(half x, intptr exp)
 ----
    a@ Extract mantissa and exponent from x. For each
       component the mantissa returned is a float with
@@ -20997,15 +21201,33 @@ genfloat hypot(genfloat x, genfloat y)
 a@
 [source]
 ----
-genint ilogb(genfloat x)
+vint32n ilogb(vfloatn x)
+mintn ilogb(mfloatn x)
+int ilogb(float x)
+vint32n ilogb(vdoublen x)
+mintn ilogb(mdoublen x)
+int ilogb(double x)
+vint32n ilogb(vhalfn x)
+mintn ilogb(mhalfn x)
+int ilogb(half x)
 ----
    a@ Compute the integral part of logr (latexmath:[|x|]) and return the result as an integer, where r is the value returned by [code]#std::numeric_limits<genfloat>::radix#.
 
 a@
 [source]
 ----
-genfloat ldexp(genfloat x, genint k)
-genfloat ldexp(genfloat x, int k)
+vfloatn ldexp(vfloatn x, vint32n k)
+mfloatn ldexp(mfloatn x, mintn k)
+floatn ldexp(floatn x, int k)
+float ldexp(float x, int k)
+vdoublen ldexp(vdoublen x, vint32n k)
+mdoublen ldexp(mdoublen x, mintn k)
+doublen ldexp(doublen x, int k)
+double ldexp(double x, int k)
+vhalfn ldexp(vhalfn x, vint32n k)
+mhalfn ldexp(mhalfn x, mintn k)
+halfn ldexp(halfn x, int k)
+half ldexp(half x, int k)
 ----
    a@ Multiply x by 2^k^.
 
@@ -21021,7 +21243,15 @@ genfloat lgamma(genfloat x)
 a@
 [source]
 ----
-genfloat lgamma_r(genfloat x, genintptr signp)
+vfloatn lgamma_r(vfloatn x, vint32nptr signp)
+mfloatn lgamma_r(mfloatn x, mintnptr signp)
+float lgamma_r(float x, intptr signp)
+vdoublen lgamma_r(vdoublen x, vint32nptr signp)
+mdoublen lgamma_r(mdoublen x, mintnptr signp)
+double lgamma_r(double x, intptr signp)
+vhalfn lgamma_r(vhalfn x, vint32nptr signp)
+mhalfn lgamma_r(mhalfn x, mintnptr signp)
+half lgamma_r(half x, intptr signp)
 ----
    a@ Log gamma function. Returns the natural
       logarithm of the absolute value of the gamma
@@ -21093,7 +21323,12 @@ genfloat minmag(genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat modf(genfloat x, genfloatptr iptr)
+floatn modf(floatn x, floatnptr iptr)
+float modf(float x, floatptr iptr)
+doublen modf(doublen x, doublenptr iptr)
+double modf(double x, doubleptr iptr)
+halfn modf(halfn x, halfnptr iptr)
+half modf(half x, halfptr iptr)
 ----
    a@ Decompose a floating-point number. The modf
       function breaks the argument x into integral and
@@ -21104,8 +21339,15 @@ genfloat modf(genfloat x, genfloatptr iptr)
 a@
 [source]
 ----
-genfloatf nan(ugenint nancode)
-genfloatd nan(ugenlonginteger nancode)
+vfloatn nan(vuint32n nancode)
+mfloatn nan(muintn nancode)
+float nan(unsigned int nancode)
+vdoublen nan(vuint64n nancode)
+mdoublen nan(mulongn nancode)
+double nan(unsigned long nancode)
+vhalfn nan(vuint16n nancode)
+mhalfn nan(mushortn nancode)
+half nan(unsigned short nancode)
 ----
    a@ Returns a quiet NaN. The nancode may be placed
       in the significand of the resulting NaN.
@@ -21131,7 +21373,15 @@ genfloat pow(genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat pown(genfloat x, genint y)
+vfloatn pown(vfloatn x, vint32n y)
+mfloatn pown(mfloatn x, mintn y)
+float pown(float x, int y)
+vdoublen pown(vdoublen x, vint32n y)
+mdoublen pown(mdoublen x, mintn y)
+double pown(double x, int y)
+vhalfn pown(vhalfn x, vint32n y)
+mhalfn pown(mhalfn x, mintn y)
+half pown(half x, int y)
 ----
    a@ Compute x to the power y, where y is an integer.
 
@@ -21155,7 +21405,15 @@ genfloat remainder(genfloat x, genfloat y)
 a@
 [source]
 ----
-genfloat remquo(genfloat x, genfloat y, genintptr quo)
+vfloatn remquo(vfloatn x, vfloatn y, vint32nptr quo)
+mfloatn remquo(mfloatn x, mfloatn y, mintnptr quo)
+float remquo(float x, float y, intptr quo)
+vdoublen remquo(vdoublen x, vdoublen y, vint32nptr quo)
+mdoublen remquo(mdoublen x, mdoublen y, mintnptr quo)
+double remquo(double x, double y, intptr quo)
+vhalfn remquo(vhalfn x, vhalfn y, vint32nptr quo)
+mhalfn remquo(mhalfn x, mhalfn y, mintnptr quo)
+half remquo(half x, half y, intptr quo)
 ----
    a@ The remquo function computes the value r such
       that r = x - k*y, where k is the integer nearest the
@@ -21182,7 +21440,15 @@ genfloat rint(genfloat x)
 a@
 [source]
 ----
-genfloat rootn(genfloat x, genint y)
+vfloatn rootn(vfloatn x, vint32n y)
+mfloatn rootn(mfloatn x, mintn y)
+float rootn(float x, int y)
+vdoublen rootn(vdoublen x, vint32n y)
+mdoublen rootn(mdoublen x, mintn y)
+double rootn(double x, int y)
+vhalfn rootn(vhalfn x, vint32n y)
+mhalfn rootn(mhalfn x, mintn y)
+half rootn(half x, int y)
 ----
    a@ Compute x to the power 1/y.
 
@@ -21212,7 +21478,12 @@ genfloat sin(genfloat x)
 a@
 [source]
 ----
-genfloat sincos(genfloat x, genfloatptr cosval)
+floatn sincos(floatn x, floatnptr cosval)
+float sincos(float x, floatptr cosval)
+doublen sincos(doublen x, doublenptr cosval)
+double sincos(double x, doubleptr cosval)
+halfn sincos(halfn x, halfnptr cosval)
+half sincos(half x, halfptr cosval)
 ----
    a@ Compute sine and cosine of x. The computed sine
       is the return value and computed cosine is returned
@@ -21555,7 +21826,7 @@ geninteger abs(geninteger x)
 a@
 [source]
 ----
-ugeninteger abs_diff(geninteger x, geninteger y)
+unsignedtype abs_diff(geninteger x, geninteger y)
 ----
    a@ Returns latexmath:[|x - y|] without modulo overflow.
 
@@ -21586,7 +21857,7 @@ a@
 [source]
 ----
 geninteger clamp(geninteger x, geninteger minval, geninteger maxval)
-geninteger clamp(geninteger x, sgeninteger minval, sgeninteger maxval)
+geninteger clamp(geninteger x, elementtype minval, elementtype maxval)
 ----
    a@ Returns min(max(x, minval), maxval).
       Results are undefined if latexmath:[\mathrm{minval} > \mathrm{maxval}].
@@ -21628,7 +21899,7 @@ a@
 [source]
 ----
 geninteger max(geninteger x, geninteger y)
-geninteger max(geninteger x, sgeninteger y)
+geninteger max(geninteger x, elementtype y)
 ----
    a@ Returns y if latexmath:[x < y], otherwise it returns x.
 
@@ -21636,7 +21907,7 @@ a@
 [source]
 ----
 geninteger min(geninteger x, geninteger y)
-geninteger min(geninteger x, sgeninteger y)
+geninteger min(geninteger x, elementtype y)
 ----
    a@ Returns y if latexmath:[y < x], otherwise it returns x.
 
@@ -21671,44 +21942,56 @@ geninteger sub_sat(geninteger x, geninteger y)
 a@
 [source]
 ----
-ugeninteger16bit upsample(ugeninteger8bit hi, ugeninteger8bit lo)
+uint16_t upsample(uint8_t hi, uint8_t lo)
+muint16n upsample(muint8n hi, muint8n lo)
+vuint16n upsample(vuint8n hi, vuint8n lo)
 ----
-   a@ [code]#result[i] = ((ushort)hi[i] << 8) | lo[i]#
+   a@ [code]#result[i] = ((uint16_t)hi[i] << 8) | lo[i]#
 
 a@
 [source]
 ----
-igeninteger16bit upsample(igeninteger8bit hi, ugeninteger8bit lo)
+int16_t upsample(int8_t hi, uint8_t lo)
+mint16n upsample(mint8n hi, muint8n lo)
+vint16n upsample(vint8n hi, vuint8n lo)
 ----
-   a@ [code]#result[i] = ((short)hi[i] << 8) | lo[i]#
+   a@ [code]#result[i] = ((int16_t)hi[i] << 8) | lo[i]#
 
 a@
 [source]
 ----
-ugeninteger32bit upsample(ugeninteger16bit hi, ugeninteger16bit lo)
+uint32_t upsample(uint16_t hi, uint16_t lo)
+muint32n upsample(muint16n hi, muint16n lo)
+vuint32n upsample(vuint16n hi, vuint16n lo)
 ----
-   a@ [code]#result[i] = ((uint)hi[i] << 16) | lo[i]#
+   a@ [code]#result[i] = ((uint32_t)hi[i] << 16) | lo[i]#
 
 a@
 [source]
 ----
-igeninteger32bit upsample(igeninteger16bit hi, ugeninteger16bit lo)
+int32_t upsample(int16_t hi, uint16_t lo)
+mint32n upsample(mint32n hi, muint32n lo)
+vint32n upsample(vint32n hi, vuint32n lo)
 ----
-   a@ [code]#result[i] = ((int)hi[i] << 16) | lo[i]#
+   a@ [code]#result[i] = ((int32_t)hi[i] << 16) | lo[i]#
 
 a@
 [source]
 ----
-ugeninteger64bit upsample(ugeninteger32bit hi, ugeninteger32bit lo)
+uint64_t upsample(uint32_t hi, uint32_t lo)
+muint64n upsample(muint32n hi, muint32n lo)
+vuint64n upsample(vuint32n hi, vuint32n lo)
 ----
-   a@ [code]#result[i] = ((ulonglong)hi[i] << 32) | lo[i]#
+   a@ [code]#result[i] = ((uint64_t)hi[i] << 32) | lo[i]#
 
 a@
 [source]
 ----
-igeninteger64bit upsample(igeninteger32bit hi, ugeninteger32bit lo)
+int64_t upsample(int32_t hi, uint32_t lo)
+mint64n upsample(mint32n hi, muint32n lo)
+vint64n upsample(vint32n hi, vuint32n lo)
 ----
-   a@ [code]#result[i] = ((longlong)hi[i] << 32) | lo[i]#
+   a@ [code]#result[i] = ((int64_t)hi[i] << 32) | lo[i]#
 
 a@
 [source]
@@ -21720,7 +22003,12 @@ geninteger popcount(geninteger x)
 a@
 [source]
 ----
-geninteger32bit mad24(geninteger32bit x, geninteger32bit y, geninteger32bit z)
+int32_t mad24(int32_t x, int32_t y, int32_t z)
+uint32_t mad24(uint32_t x, uint32_t y, uint32_t z)
+mint32n mad24(mint32n x, mint32n y, mint32n z)
+muint32n mad24(muint32n x, muint32n y, muint32n z)
+vint32n mad24(vint32n x, vint32n y, vint32n z)
+vuint32n mad24(vuint32n x, vuint32n y, vuint32n z)
 ----
    a@ Multiply two 24-bit integer values x and y and add
       the 32-bit integer result to the 32-bit integer z.
@@ -21730,7 +22018,12 @@ geninteger32bit mad24(geninteger32bit x, geninteger32bit y, geninteger32bit z)
 a@
 [source]
 ----
-geninteger32bit mul24(geninteger32bit x, geninteger32bit y)
+int32_t mul24(int32_t x, int32_t y)
+uint32_t mul24(uint32_t x, uint32_t y)
+mint32n mul24(mint32n x, mint32n y)
+muint32n mul24(muint32n x, muint32n y)
+vint32n mul24(vint32n x, vint32n y)
+vuint32n mul24(vuint32n x, vuint32n y)
 ----
    a@ Multiply two 24-bit integer values x and y. x and y
       are 32-bit integers but only the low 24-bits are used
@@ -21847,7 +22140,7 @@ This is equivalent to:
 
 [source]
 ----
-gentype t;
+genfloat t;
 t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
 return t * t * (3 - 2 * t);
 ----
@@ -21889,10 +22182,8 @@ geometric functions.
 a@
 [source]
 ----
-float4 cross(float4 p0, float4 p1)
-float3 cross(float3 p0, float3 p1)
-double4 cross(double4 p0, double4 p1)
-double3 cross(double3 p0, double3 p1)
+vfloat3or4 cross(vfloat3or4 p0, vfloat3or4 p1)
+vdouble3or4 cross(vdouble3or4 p0, vdouble3or4 p1)
 ----
    a@ Returns the cross product of p0.xyz and p1.xyz. The
       _w_ component of [code]#float4# result returned will be 0.0.
@@ -21900,10 +22191,8 @@ double3 cross(double3 p0, double3 p1)
 a@
 [source]
 ----
-mfloat4 cross(mfloat4 p0, mfloat4 p1)
-mfloat3 cross(mfloat3 p0, mfloat3 p1)
-mdouble4 cross(mdouble4 p0, mdouble4 p1)
-mdouble3 cross(mdouble3 p0, mdouble3 p1)
+mfloat3or4 cross(mfloat3or4 p0, mfloat3or4 p1)
+mdouble3or4 cross(mdouble3or4 p0, mdouble3or4 p1)
 ----
    a@ Returns the cross product of first 3 components of p0 and p1. The 4th component of result returned will be 0.0.
 
@@ -21994,6 +22283,7 @@ with the following exceptions:
 
 
 
+[[sec::relational-functions]]
 === Relational functions
 
 The follow free functions are defined in the [code]#sycl# namespace and are
@@ -22022,63 +22312,63 @@ the [code]#vec# type.
 a@
 [source]
 ----
-vec<int16_t, { n }> isequal(half { n } x, half { n } y)
-vec<int32_t, { n }> isequal(float { n } x, float { n } y)
-vec<int64_t, { n }> isequal(double { n } x, double { n } y)
+vint16n isequal(vhalfn x, vhalfn y)
+vint32n isequal(vfloatn x, vfloatn y)
+vint64n isequal(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of [code]#x == y#.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isnotequal(half { n } x, half { n } y)
-vec<int32_t, { n }> isnotequal(float { n } x, float { n } y)
-vec<int64_t, { n }> isnotequal(double { n } x, double { n } y)
+vint16n isnotequal(vhalfn x, vhalfn y)
+vint32n isnotequal(vfloatn x, vfloatn y)
+vint64n isnotequal(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of [code]#x != y#.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isgreater(half { n } x, half { n } y)
-vec<int32_t, { n }> isgreater(float { n } x, float { n } y)
-vec<int64_t, { n }> isgreater(double { n } x, double { n } y)
+vint16n isgreater(vhalfn x, vhalfn y)
+vint32n isgreater(vfloatn x, vfloatn y)
+vint64n isgreater(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of [code]#x > y#.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isgreaterequal(half { n } x, half { n } y)
-vec<int32_t, { n }> isgreaterequal(float { n } x, float { n } y)
-vec<int64_t, { n }> isgreaterequal(double { n } x, double { n } y)
+vint16n isgreaterequal(vhalfn x, vhalfn y)
+vint32n isgreaterequal(vfloatn x, vfloatn y)
+vint64n isgreaterequal(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of [code]#x >= y#.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isless(half { n } x, half { n } y)
-vec<int32_t, { n }> isless(float { n } x, float { n } y)
-vec<int64_t, { n }> isless(double { n } x, double { n } y)
+vint16n isless(vhalfn x, vhalfn y)
+vint32n isless(vfloatn x, vfloatn y)
+vint64n isless(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of [code]#x < y#.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> islessequal(half { n } x, half { n } y)
-vec<int32_t, { n }> islessequal(float { n } x, float { n } y)
-vec<int64_t, { n }> islessequal(double { n } x, double { n } y)
+vint16n islessequal(vhalfn x, vhalfn y)
+vint32n islessequal(vfloatn x, vfloatn y)
+vint64n islessequal(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of [code]#+x <= y+#.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> islessgreater(half { n } x, half { n } y)
-vec<int32_t, { n }> islessgreater(float { n } x, float { n } y)
-vec<int64_t, { n }> islessgreater(double { n } x, double { n } y)
+vint16n islessgreater(vhalfn x, vhalfn y)
+vint32n islessgreater(vfloatn x, vfloatn y)
+vint64n islessgreater(vdoublen x, vdoublen y)
 ----
    a@ Returns the component-wise compare of
       [code]#(x < y) || (x > y)#.
@@ -22086,45 +22376,45 @@ vec<int64_t, { n }> islessgreater(double { n } x, double { n } y)
 a@
 [source]
 ----
-vec<int16_t, { n }> isfinite(half { n } x)
-vec<int32_t, { n }> isfinite(float { n } x)
-vec<int64_t, { n }> isfinite(double { n } x)
+vint16n isfinite(vhalfn x)
+vint32n isfinite(vfloatn x)
+vint64n isfinite(vdoublen x)
 ----
    a@ Test for finite value.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isinf(half { n } x)
-vec<int32_t, { n }> isinf(float { n } x)
-vec<int64_t, { n }> isinf(double { n } x)
+vint16n isinf(vhalfn x)
+vint32n isinf(vfloatn x)
+vint64n isinf(vdoublen x)
 ----
    a@ Test for infinity value (positive or negative) .
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isnan(half { n } x)
-vec<int32_t, { n }> isnan(float { n } x)
-vec<int64_t, { n }> isnan(double { n } x)
+vint16n isnan(vhalfn x)
+vint32n isnan(vfloatn x)
+vint64n isnan(vdoublen x)
 ----
    a@ Test for a NaN.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isnormal(half { n } x)
-vec<int32_t, { n }> isnormal(float { n } x)
-vec<int64_t, { n }> isnormal(double { n } x)
+vint16n isnormal(vhalfn x)
+vint32n isnormal(vfloatn x)
+vint64n isnormal(vdoublen x)
 ----
    a@ Test for a normal value.
 
 a@
 [source]
 ----
-vec<int16_t, { n }> isordered(half { n } x, half { n } y)
-vec<int32_t, { n }> isordered(float { n } x, float { n } y)
-vec<int64_t, { n }> isordered(double { n } x, double { n } y)
+vint16n isordered(vhalfn x, vhalfn y)
+vint32n isordered(vfloatn x, vfloatn y)
+vint64n isordered(vdoublen x, vdoublen y)
 ----
    a@ Test if arguments are ordered. [code]#isordered()# takes arguments
       [code]#x# and [code]#y#, and returns the result
@@ -22133,9 +22423,9 @@ vec<int64_t, { n }> isordered(double { n } x, double { n } y)
 a@
 [source]
 ----
-vec<int16_t, { n }> isunordered(half { n } x, half { n } y)
-vec<int32_t, { n }> isunordered(float { n } x, float { n } y)
-vec<int64_t, { n }> isunordered(double { n } x, double { n } y)
+vint16n isunordered(vhalfn x, vhalfn y)
+vint32n isunordered(vfloatn x, vfloatn y)
+vint64n isunordered(vdoublen x, vdoublen y)
 ----
    a@ Test if arguments are unordered. [code]#isunordered()# takes arguments
       [code]#x# and [code]#y#, returning non-zero if [code]#x# or [code]#y# is
@@ -22144,9 +22434,9 @@ vec<int64_t, { n }> isunordered(double { n } x, double { n } y)
 a@
 [source]
 ----
-vec<int16_t, { n }> signbit(half { n } x)
-vec<int32_t, { n }> signbit(float { n } x)
-vec<int64_t, { n }> signbit(double { n } x)
+vint16n signbit(vhalfn x)
+vint32n signbit(vfloatn x)
+vint64n signbit(vdoublen x)
 ----
    a@ Test for sign bit.  Returns the following for each component in
       [code]#x#: -1 (i.e all bits set) if the sign bit in the component value
@@ -22205,7 +22495,7 @@ a@
 [source]
 ----
 bool isequal(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isequal(mgenfloat x, mgenfloat y)
+mbooln isequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x == y#.
 
@@ -22213,7 +22503,7 @@ a@
 [source]
 ----
 bool isnotequal(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isnotequal(mgenfloat x, mgenfloat y)
+mbooln isnotequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x != y#.
 
@@ -22221,7 +22511,7 @@ a@
 [source]
 ----
 bool isgreater(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isgreater(mgenfloat x, mgenfloat y)
+mbooln isgreater(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x > y#.
 
@@ -22229,7 +22519,7 @@ a@
 [source]
 ----
 bool isgreaterequal(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isgreaterequal(mgenfloat x, mgenfloat y)
+mbooln isgreaterequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x >= y#.
 
@@ -22237,7 +22527,7 @@ a@
 [source]
 ----
 bool isless(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isless(mgenfloat x, mgenfloat y)
+mbooln isless(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#x < y#.
 
@@ -22245,7 +22535,7 @@ a@
 [source]
 ----
 bool islessequal(sgenfloat x, sgenfloat y)
-marray<bool, { N }> islessequal(mgenfloat x, mgenfloat y)
+mbooln islessequal(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of [code]#+x <= y+#.
 
@@ -22253,7 +22543,7 @@ a@
 [source]
 ----
 bool islessgreater(sgenfloat x, sgenfloat y)
-marray<bool, { N }> islessgreater(mgenfloat x, mgenfloat y)
+mbooln islessgreater(mgenfloat x, mgenfloat y)
 ----
    a@ Returns the component-wise compare of
       [code]#(x < y) || (x > y)#.
@@ -22262,7 +22552,7 @@ a@
 [source]
 ----
 bool isfinite(sgenfloat x)
-marray<bool, { N }> isfinite(mgenfloat x)
+mbooln isfinite(mgenfloat x)
 ----
    a@ Test for finite value.
 
@@ -22270,7 +22560,7 @@ a@
 [source]
 ----
 bool isinf(sgenfloat x)
-marray<bool, { N }> isinf(mgenfloat x)
+mbooln isinf(mgenfloat x)
 ----
    a@ Test for infinity value (positive or negative) .
 
@@ -22278,7 +22568,7 @@ a@
 [source]
 ----
 bool isnan(sgenfloat x)
-marray<bool, { N }> isnan(mgenfloat x)
+mbooln isnan(mgenfloat x)
 ----
    a@ Test for a NaN.
 
@@ -22286,7 +22576,7 @@ a@
 [source]
 ----
 bool isnormal(sgenfloat x)
-marray<bool, { N }> isnormal(mgenfloat x)
+mbooln isnormal(mgenfloat x)
 ----
    a@ Test for a normal value.
 
@@ -22294,7 +22584,7 @@ a@
 [source]
 ----
 bool isordered(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isordered(mgenfloat x, mgenfloat y)
+mbooln isordered(mgenfloat x, mgenfloat y)
 ----
    a@ Test if arguments are ordered. [code]#isordered()# takes arguments
       [code]#x# and [code]#y#, and returns the result
@@ -22304,7 +22594,7 @@ a@
 [source]
 ----
 bool isunordered(sgenfloat x, sgenfloat y)
-marray<bool, { N }> isunordered(mgenfloat x, mgenfloat y)
+mbooln isunordered(mgenfloat x, mgenfloat y)
 ----
    a@ Test if arguments are unordered. [code]#isunordered()#
       takes arguments [code]#x# and [code]#y#, returning [code]#true# if
@@ -22314,7 +22604,7 @@ a@
 [source]
 ----
 bool signbit(sgenfloat x)
-marray<bool, { N }> signbit(mgenfloat x)
+mbooln signbit(mgenfloat x)
 ----
    a@ Test for sign bit, returning [code]#true# if the sign bit
       in [code]#x# is set, and [code]#false# otherwise.
@@ -22351,7 +22641,7 @@ a@
 [source]
 ----
 sgentype select(sgentype a, sgentype b, bool c)
-mgentype select(mgentype a, mgentype b, marray<bool, { N }> c)
+mgentype select(mgentype a, mgentype b, mbooln c)
 ----
    a@ Returns the component-wise [code]#result = c ? b : a#.
 

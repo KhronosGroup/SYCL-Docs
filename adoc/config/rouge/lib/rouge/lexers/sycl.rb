@@ -184,77 +184,67 @@ module Rouge
       # Generic types used in SYCL pseudo code descriptions like Gen,
       # SGen, GenVec...
       sycl_generic_types = %w(
-        charn
-        doublen
         floatn
-        genchar
-        genfloat
-        genfloatd
+        vfloatn
+        vfloat3or4
+        mfloatn
+        mfloat3or4
         genfloatf
-        genfloath
-        genfloatptr
-        gengeodouble
-        gengeofloat
-        genhalf
-        genint
-        geninteger
-        geninteger16bit
-        geninteger32bit
-        geninteger64bit
-        geninteger8bit
-        genintegerNbit
-        genintptr
-        genlong
-        genlonglong
-        genshort
-        gentype
-        genvector
+        doublen
+        vdoublen
+        vdouble3or4
+        mdoublen
+        mdouble3or4
+        genfloatd
         halfn
-        igenchar
-        igeninteger
-        igeninteger16bit
-        igeninteger32bit
-        igeninteger64bit
-        igeninteger8bit
-        igenintegerNbit
-        igenlonginteger
-        intn
-        longlongn
-        longn
-        mgenfloat
-        mgeninteger
-        mgentype
-        migeninteger
-        mugeninteger
-        scharn
+        vhalfn
+        mhalfn
+        genfloath
+        genfloat
         sgenfloat
-        sgeninteger
-        sgentype
-        shortn
+        mgenfloat
+        gengeofloat
+        gengeodouble
+        vint8n
+        vint16n
+        vint32n
+        vint64n
+        vuint8n
+        vuint16n
+        vuint32n
+        vuint64n
+        mint8n
+        mint16n
+        mint32n
+        mint64n
+        muint8n
+        muint16n
+        muint32n
+        muint64n
+        mintn
+        mushortn
+        muintn
+        mulongn
+        mbooln
+        geninteger
         sigeninteger
-        sugeninteger
-        ucharn
-        ugenchar
-        ugenint
-        ugeninteger
-        ugeninteger16bit
-        ugeninteger32bit
-        ugeninteger64bit
-        ugeninteger8bit
-        ugenintegerNbit
-        ugenlong
-        ugenlonginteger
-        ugenlonglong
-        ugenshort
-        uintn
-        ulonglongn
-        ulongn
-        ushortn
-        vgenfloat
-        vgeninteger
-        vgentype
         vigeninteger
+        migeninteger
         vugeninteger
+        sgentype
+        vgentype
+        mgentype
+        intptr
+        floatptr
+        doubleptr
+        halfptr
+        floatnptr
+        doublenptr
+        halfnptr
+        mintnptr
+        vint32nptr
+        elementtype
+        unsignedtype
       )
 
       sycl_macros = %w(
