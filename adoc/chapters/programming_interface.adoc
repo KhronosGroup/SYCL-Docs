@@ -13842,7 +13842,8 @@ void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
 [code]#dest# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#src#.
+as many bytes as the range accessed by [code]#src#.  The
+type [code]#DestT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -13855,7 +13856,8 @@ void copy(std::shared_ptr<SrcT> src,
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
 [code]#src# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#dest#.
+as many bytes as the range accessed by [code]#dest#.  The type
+[code]#SrcT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -13868,7 +13870,8 @@ void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
 [code]#dest# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#src#.
+as many bytes as the range accessed by [code]#src#.  The type
+[code]#DestT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -13881,7 +13884,8 @@ void copy(const SrcT* src,
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
 [code]#src# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#dest#.
+as many bytes as the range accessed by [code]#dest#.  The type
+[code]#SrcT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -13945,6 +13949,8 @@ accessible on the handler's device.  If a pointer is to a USM allocation, that
 allocation must have been created from the same context as the handler's queue.
 For more detail on USM, please see <<sec:usm>>.
 
+The type [code]#T# must be <<device-copyable>>.
+
 a@
 [source]
 ----
@@ -13966,6 +13972,8 @@ a@ Replicates the provided [code]#pattern# into the memory at address
 context as the handler's queue, and the pointer must be accessible from the
 queue's device.  The [code]#pattern# is filled [code]#count# times.  For more
 detail on USM, please see <<sec:usm>>.
+
+The type [code]#T# must be <<device-copyable>>.
 
 a@
 [source]
