@@ -231,6 +231,7 @@ module Rouge
         vigeninteger
         migeninteger
         vugeninteger
+        genint32
         sgentype
         vgentype
         mgentype
