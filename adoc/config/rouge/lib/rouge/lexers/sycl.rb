@@ -238,9 +238,12 @@ module Rouge
         floatptr
         doubleptr
         halfptr
-        floatnptr
-        doublenptr
-        halfnptr
+        vfloatnptr
+        vdoublenptr
+        vhalfnptr
+        mfloatnptr
+        mdoublenptr
+        mhalfnptr
         mintnptr
         vint32nptr
         elementtype
