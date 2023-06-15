@@ -1014,6 +1014,7 @@ supporting concurrent atomic accesses to USM allocations and acquire-release or 
 consistent memory orderings, cross-device memory consistency can be
 enforced through the use of <<mem-fence>> and atomic operations.
 
+[[sec:memory-ordering]]
 ==== Memory ordering
 
 [source,,linenums]
@@ -1034,11 +1035,13 @@ values:
 The meanings of these values are identical to those defined in the {cpp} core
 language.
 
+These memory orders are listed above from weakest
+([code]#memory_order::relaxed#) to strongest ([code]#memory_order::seq_cst#).
+
 The complete set of memory orders is not guaranteed to be supported by every
-device, nor across all combinations of devices within a context.  The memory
-orders supported by a specific device and context can be queried using
-functionalities of the [code]#sycl::device# and [code]#sycl::context# classes,
-respectively.
+device, nor across all combinations of devices within a platform.  The set of
+supported memory orders can be queried via the information descriptors for the
+[code]#sycl::device# and [code]#sycl::context# classes.
 
 [NOTE]
 ====
@@ -1048,6 +1051,7 @@ device kernel results in undefined behavior. Developers are encouraged to use
 [code]#sycl::memory_order::acquire# instead.
 ====
 
+[[sec:memory-scope]]
 ==== Memory scope
 
 [source,,linenums]
@@ -1074,11 +1078,18 @@ values:
     access the memory allocation containing the referenced object, as
     defined by the capabilities of <<buffer,buffers>> and <<usm>>.
 
-The broadest scope that can be applied to an atomic operation corresponds to
+The memory scopes are listed above from narrowest
+([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
+
+The complete set of memory scopes is not guaranteed to be supported by every
+device.  The set of supported memory scopes can be queried via the information
+descriptors for the [code]#sycl::device# and [code]#sycl::context# classes.
+
+The widest scope that can be applied to an atomic operation corresponds to
 the set of work-items which can access the associated memory location.  For
-example, the broadest scope that can be applied to atomic operations in
+example, the widest scope that can be applied to atomic operations in
 work-group local memory is [code]#sycl::memory_scope::work_group#.  If a
-broader scope is supplied, the behavior is as-if the narrowest scope containing
+wider scope is supplied, the behavior is as-if the narrowest scope containing
 all work-items which can access the associated memory location was supplied.
 
 [NOTE]
