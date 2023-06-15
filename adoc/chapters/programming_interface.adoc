@@ -1118,7 +1118,7 @@ template <typename Param> typename Param::return_type get_info() const
    a@ Queries this SYCL [code]#platform# for information requested by
       the template parameter [code]#Param#.
       The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.device.info>> to
+      accordance with the info parameters in <<table.platform.info>> to
       facilitate returning the type associated with the [code]#Param#
       parameter.
 
@@ -5585,28 +5585,27 @@ AllocatorT get_allocator() const
 a@
 [source]
 ----
-template <typename... Ts> auto get_access(Ts... args)
+template <typename DataT,
+         access_mode Mode = (std::is_const_v<DataT>
+                                 ? access_mode::read
+                                 : access_mode::read_write),
+         image_target Targ = image_target::device>
+unsampled_image_accessor<DataT, Dimensions, Mode, Targ>
+get_access(handler& commandGroupHandler)
 ----
-   a@ Returns a valid [code]#unsampled_image_accessor# as if constructed via
-      passing the image and all provided arguments to the
-      [code]#unsampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return unsampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#unsampled_image_accessor# to the unsampled image
+      with the specified data type, access mode and target in the command group.
 
 a@
 [source]
 ----
-template <typename... Ts> auto get_host_access(Ts... args)
+template <typename DataT, access_mode Mode = (std::is_const_v<DataT>
+                                                   ? access_mode::read
+                                                   : access_mode::read_write)>
+host_unsampled_image_accessor<DataT, Dimensions, Mode> get_host_access();
 ----
-   a@ Returns a valid [code]#host_unsampled_image_accessor# as if constructed
-      via passing the image and all provided arguments to the
-      [code]#host_unsampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return host_unsampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#host_unsampled_image_accessor# to the unsampled
+      image with the specified data type and access mode.
 
 a@
 [source]
@@ -5855,28 +5854,21 @@ size_t byte_size() const noexcept
 a@
 [source]
 ----
-template <typename... Ts> auto get_access(Ts... args)
+template <typename DataT, image_target Targ = image_target::device>
+sampled_image_accessor<DataT, Dimensions, Targ>
+get_access(handler& commandGroupHandler)
 ----
-   a@ Returns a valid [code]#sampled_image_accessor# as if constructed via
-      passing the image and all provided arguments to the
-      [code]#sampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return sampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#sampled_image_accessor# to the sampled image with
+      the specified data type and target in the command group.
 
 a@
 [source]
 ----
-template <typename... Ts> auto get_host_access(Ts... args)
+template <typename DataT>
+host_sampled_image_accessor<DataT, Dimensions> get_host_access()
 ----
-   a@ Returns a valid [code]#host_sampled_image_accessor# as if constructed
-      via passing the image and all provided arguments to the
-      [code]#host_sampled_image_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return host_sampled_image_accessor{*this, args...};+#
+   a@ Returns a valid [code]#host_sampled_image_accessor# to the sampled image
+      with the specified data type in the command group.
 
 |====
 
@@ -8079,7 +8071,7 @@ template parameters are the same.
 The [code]#local_accessor# class allocates device local memory and provides
 access to this memory from within a <<sycl-kernel-function>>.  The
 <<local-memory>> that is allocated is shared between all
-<<work-item,work items>> of a <<work-group>>.  If multiple work-groups execute
+<<work-item,work-items>> of a <<work-group>>.  If multiple work-groups execute
 simultaneously in an implementation, each work-group receives its own
 independent copy of the allocated local memory.
 
@@ -8730,26 +8722,6 @@ If [code]#AccessTarget# is [code]#image_target::device#, throws an
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
 
-a@
-[source]
-----
-template <typename AllocatorT, typename TagT>
-unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
-                         handler& commandGroupHandlerRef, TagT tag,
-                         const property_list& propList = {})
-----
-   a@ Constructs an [code]#unsampled_image_accessor# for accessing an
-      [code]#unsampled_image# within a <<command>> on the [code]#queue#
-      associated with [code]#commandGroupHandlerRef#.  The [code]#tag# is used
-      to deduce template arguments of the [code]#unsampled_image_accessor# as
-      described in <<sec:accessor.unsampled.image.tags>>.  The optional
-      [code]#property_list# provides properties for the constructed object.
-
-If [code]#AccessTarget# is [code]#image_target::device#, throws an
-[code]#exception# with the [code]#errc::feature_not_supported# error code if
-the device associated with [code]#commandGroupHandlerRef# does not have
-[code]#aspect::image#.
-
 |====
 
 
@@ -8767,19 +8739,6 @@ host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
 ----
    a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
       [code]#unsampled_image# immediately on the host.  The optional
-      [code]#property_list# provides properties for the constructed object.
-
-a@
-[source]
-----
-template <typename AllocatorT, typename TagT>
-host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
-                              TagT tag, const property_list& propList = {})
-----
-   a@ Constructs a [code]#host_unsampled_image_accessor# for accessing an
-      [code]#unsampled_image# immediately on the host.  The [code]#tag# is used
-      to deduce template arguments of the [code]#host_unsampled_image_accessor#
-      as described in <<sec:accessor.unsampled.image.tags>>.  The optional
       [code]#property_list# provides properties for the constructed object.
 
 |====
@@ -8831,52 +8790,6 @@ are [code]#int# when [code]#Dimensions == 1#, [code]#int2# when
 For [code]#unsampled_image_accessor#, this function may only be called from
 within a <<command>>.
 
-|====
-
-
-[[sec:accessor.unsampled.image.tags]]
-===== Deduction tags for unsampled image accessors
-
-Some [code]#unsampled_image_accessor# constructors take a [code]#TagT#
-parameter, which is used to deduce template arguments.  The permissible values
-for this parameter are listed in <<table.accessors.unsampled.image.tags>> along
-with the access mode and accessor target that they imply.
-
-[[table.accessors.unsampled.image.tags]]
-.Enumeration of tags available for [code]#unsampled_image_accessor# construction
-[width="100%",options="header",cols="33%,33%,34%"]
-|====
-| Tag value | Access mode | Accessor target
-| [code]#read_only#
-    | [code]#access_mode::read#
-    | [code]#image_target::device#
-| [code]#write_only#
-    | [code]#access_mode::write#
-    | [code]#image_target::device#
-| [code]#read_only_host_task#
-    | [code]#access_mode::read#
-    | [code]#image_target::host_task#
-| [code]#write_only_host_task#
-    | [code]#access_mode::write#
-    | [code]#image_target::host_task#
-|====
-
-Some [code]#host_unsampled_image_accessor# constructors also take a
-[code]#TagT# parameter.  The permissible values for this parameter are listed
-in <<table.accessors.host.unsampled.image.tags>> along with the access mode
-that they imply.
-
-[[table.accessors.host.unsampled.image.tags]]
-.Enumeration of tags available for [code]#host_unsampled_image_accessor# construction
-[width="100%",options="header",cols="50%,50%"]
-|====
-| Tag value | Access mode
-| [code]#read_only#
-    | [code]#access_mode::read#
-| [code]#write_only#
-    | [code]#access_mode::write#
-| [code]#read_write#
-    | [code]#access_mode::read_write#
 |====
 
 
@@ -8994,26 +8907,6 @@ If [code]#AccessTarget# is [code]#image_target::device#, throws an
 the device associated with [code]#commandGroupHandlerRef# does not have
 [code]#aspect::image#.
 
-a@
-[source]
-----
-template <typename AllocatorT, typename TagT>
-sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
-                       handler& commandGroupHandlerRef, TagT tag,
-                       const property_list& propList = {})
-----
-   a@ Constructs a [code]#sampled_image_accessor# for accessing a
-      [code]#sampled_image# within a <<command>> on the [code]#queue#
-      associated with [code]#commandGroupHandlerRef#.  The [code]#tag# is used
-      to deduce template arguments of the [code]#sampled_image_accessor# as
-      described in <<sec:accessor.sampled.image.tags>>.  The optional
-      [code]#property_list# provides properties for the constructed object.
-
-If [code]#AccessTarget# is [code]#image_target::device#, throws an
-[code]#exception# with the [code]#errc::feature_not_supported# error code if
-the device associated with [code]#commandGroupHandlerRef# does not have
-[code]#aspect::image#.
-
 |====
 
 
@@ -9063,26 +8956,6 @@ template <typename CoordT> DataT read(const CoordT& coords) const
 For [code]#sampled_image_accessor#, this function may only be called from
 within a <<command>>.
 
-|====
-
-
-[[sec:accessor.sampled.image.tags]]
-===== Deduction tags for sampled image accessors
-
-Some [code]#sampled_image_accessor# constructors take a [code]#TagT# parameter,
-which is used to deduce template arguments.  The permissible values for this
-parameter are listed in <<table.accessors.sampled.image.tags>> along with the
-accessor target that they imply.
-
-[[table.accessors.sampled.image.tags]]
-.Enumeration of tags available for [code]#sampled_image_accessor# construction
-[width="100%",options="header",cols="50%,50%"]
-|====
-| Tag value | Accessor target
-| [code]#read_only#
-    | [code]#image_target::device#
-| [code]#read_only_host_task#
-    | [code]#image_target::host_task#
 |====
 
 
@@ -9219,14 +9092,17 @@ multi_ptr(std::nullptr_t)
 a@
 [source]
 ----
-template <int Dimensions, access_mode Mode,
+template <typename AccDataT, int Dimensions,
+          access_mode Mode,
           access::placeholder IsPlaceholder>
-multi_ptr(
-    accessor<ElementType, Dimensions, Mode, target::device,
-             IsPlaceholder>);
+multi_ptr(accessor<AccDataT, Dimensions, Mode,
+                   target::device, IsPlaceholder>)
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::global_space || Space == access::address_space::generic_space) &&
+      (std::is_void_v<ElementType> || std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+      (std::is_const_v<ElementType> ||
+      !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::device, IsPlaceholder>::value_type>)#.
 
 Constructs a [code]#multi_ptr# from an accessor of
 [code]#target::device#.
@@ -9236,11 +9112,13 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions>
-multi_ptr(local_accessor<ElementType, Dimensions>)
+template <typename AccDataT, int Dimensions>
+multi_ptr(local_accessor<AccDataT, Dimensions>)
 ----
    a@ Available only when:
-      [code]#Space == access::address_space::global_space || Space == access::address_space::generic_space#.
+      [code]#(Space == access::address_space::local_space || Space == access::address_space::generic_space) &&
+      (std::is_void_v<ElementType> || std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+      (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)#.
 
 Constructs a [code]#multi_ptr# from a [code]#local_accessor#.
 
@@ -9249,17 +9127,19 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <int Dimensions, access_mode Mode,
+template <typename AccDataT, int Dimensions,
+          access_mode Mode,
           access::placeholder IsPlaceholder>
-multi_ptr(
-    accessor<ElementType, Dimensions, Mode, target::local,
-             IsPlaceholder>);
+multi_ptr(accessor<AccDataT, Dimensions, Mode,
+                   target::local, IsPlaceholder>)
 ----
    a@ Deprecated in SYCL 2020.  Use the overload with
       [code]#local_accessor# instead.
 
 Available only when:
-[code]#Space == access::address_space::local_space || Space == access::address_space::generic_space#.
+[code]#(Space == access::address_space::local_space || Space == access::address_space::generic_space) &&
+(std::is_void_v<ElementType> || std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+(std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)#.
 
 Constructs a [code]#multi_ptr# from an accessor of [code]#target::local#.
 
@@ -9419,7 +9299,7 @@ operator multi_ptr<const value_type,
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
 
-Conversion from [code]#generic_ptr# to [code]#private_ptr#.
+Conversion from [code]#generic_ptr# to [code]#private_ptr# of const data.
 The result is undefined if the pointer does not address the private
 address space.
 
@@ -9451,7 +9331,7 @@ operator multi_ptr<const value_type,
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
 
-Conversion from [code]#generic_ptr# to [code]#global_ptr#.
+Conversion from [code]#generic_ptr# to [code]#global_ptr# of const data.
 The result is undefined if the pointer does not address the global
 address space.
 
@@ -9483,7 +9363,7 @@ operator multi_ptr<const value_type,
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
 
-Conversion from [code]#generic_ptr# to [code]#local_ptr#.
+Conversion from [code]#generic_ptr# to [code]#local_ptr# of const data.
 The result is undefined if the pointer does not address the local
 address space.
 
@@ -11660,14 +11540,14 @@ id<Dimensions> get_offset() const
       represents a global range. For an item converted from an item with
       no offset this will always return an [code]#id# of all 0 values.
 
-This member function is only available if [code]#with_offset# is [code]#true#.
+This member function is only available if [code]#WithOffset# is [code]#true#.
 
 a@
 [source]
 ----
 operator item<Dimensions, true>() const
 ----
-   a@ Available only when: [code]#with_offset == false#
+   a@ Available only when: [code]#WithOffset == false#
 
 Returns an [code]#item# representing the same information as the object holds
 but also includes the offset set to 0. This conversion allow users to seamlessly
@@ -11819,14 +11699,14 @@ a@
 ----
 range<Dimensions> get_group_range() const
 ----
-   a@ Returns the number of <<work-group,work groups>> in the iteration space.
+   a@ Returns the number of <<work-group,work-groups>> in the iteration space.
 
 a@
 [source]
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return the number of <<work-group,work groups>> for [code]#Dimension# in the
+   a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
 
 a@
@@ -11882,7 +11762,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<DataT> src,
+                                   decorated_global_ptr<const DataT> src,
                                    size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -11895,7 +11775,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<DataT> src,
+                                   decorated_local_ptr<const DataT> src,
                                    size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -11908,7 +11788,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<DataT> src,
+                                   decorated_global_ptr<const DataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -11922,7 +11802,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<DataT> src,
+                                   decorated_local_ptr<const DataT> src,
                                    size_t numElements, size_t destStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -12231,7 +12111,7 @@ a@
 ----
 range<Dimensions> get_group_range() const
 ----
-   a@ Return a [code]#range# representing the number of <<work-group,work groups>> in the [code]#nd_range#.
+   a@ Return a [code]#range# representing the number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
@@ -12269,7 +12149,7 @@ a@
 ----
 size_t get_group_linear_range() const
 ----
-   a@ Return the total number of <<work-group>>s in the [code]#nd_range#.
+   a@ Return the total number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
@@ -12358,7 +12238,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<DataT> src,
+                                   decorated_global_ptr<const DataT> src,
                                    size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -12371,7 +12251,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<DataT> src,
+                                   decorated_local_ptr<const DataT> src,
                                    size_t numElements) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -12384,7 +12264,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<DataT> src,
+                                   decorated_global_ptr<const DataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -12398,7 +12278,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<DataT> src,
+                                   decorated_local_ptr<const DataT> src,
                                    size_t numElements, size_t destStride) const
 ----
    a@ Permitted types for [code]#DataT# are all scalar and vector types.
@@ -13288,7 +13168,7 @@ by each event in [code]#depEvents# must complete before executing this
 
 <<kernel,Kernels>> can be invoked as [keyword]#single tasks#, basic
 [keyword]#data-parallel# <<kernel,kernels>>, <<nd-range>> in
-<<work-group,work groups>>, or [keyword]#hierarchical parallelism#.
+<<work-group,work-groups>>, or [keyword]#hierarchical parallelism#.
 
 Each function takes an optional kernel name template parameter. The user
 may optionally provide a <<kernel-name>>, otherwise an implementation-defined name
@@ -13713,7 +13593,7 @@ within the range specified by the [code]#nd_range# parameter. The
 [code]#nd_item# parameter makes all information about the work-item and
 its position in the range available, and provides access to functions
 enabling the use of a <<work-group-barrier>> to synchronize between the
-<<work-item>>s in the <<work-group>>.
+<<work-item,work-items>> in the <<work-group>>.
 
 [NOTE]
 ====
@@ -13766,7 +13646,7 @@ include::{code_dir}/parallelForWithKernelHandler.cpp[lines=4..-1]
 The hierarchical parallel kernel execution interface provides the same
 functionality as is available from the <<nd-range>> interface, but
 exposed differently. To execute the same sixty-four work-items in
-sixteen work-groups that we saw in the previous example, we execute an
+eight work-groups that we saw in a previous example, we execute an
 outer [code]#parallel_for_work_group# call to create the
 groups. The member function
 [code]#handler::parallel_for_work_group# is parameterized by the
@@ -13782,7 +13662,7 @@ heuristic suggests that it is more efficient to do so, this code will be
 executed for each work-item.
 
 Within this region any variable declared will have the semantics of
-<<local-memory>>, shared between all <<work-item,work items>> in the
+<<local-memory>>, shared between all <<work-item,work-items>> in the
 <<work-group>>. If the
 device compiler can prove that an array of such variables is accessed only by
 a single work-item throughout the lifetime of the work-group, for
@@ -13815,7 +13695,7 @@ a@
 ----
 private_memory(const group<Dimensions>&)
 ----
-   a@ Place an object of type [code]#T# in the underlying private memory of each <<work-item,work items>>.
+   a@ Place an object of type [code]#T# in the underlying private memory of each <<work-item,work-items>>.
       The type [code]#T# must be default constructible.
       The underlying constructor will be called for each <<work-item>>.
 
@@ -13831,7 +13711,7 @@ a@
 ----
 T& operator()(const h_item<Dimensions>& id)
 ----
-   a@ Retrieve a reference to the object for the <<work-item,work items>>.
+   a@ Retrieve a reference to the object for the <<work-item,work-items>>.
 
 |====
 
@@ -13963,7 +13843,8 @@ void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
 [code]#dest# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#src#.
+as many bytes as the range accessed by [code]#src#.  The
+type [code]#DestT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -13976,7 +13857,8 @@ void copy(std::shared_ptr<SrcT> src,
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
 [code]#src# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#dest#.
+as many bytes as the range accessed by [code]#dest#.  The type
+[code]#SrcT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -13989,7 +13871,8 @@ void copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
 a@ Copies the contents of the memory object accessed by
 [code]#src# into the memory pointed to by [code]#dest#.
 [code]#dest# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#src#.
+as many bytes as the range accessed by [code]#src#.  The type
+[code]#DestT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -14002,7 +13885,8 @@ void copy(const SrcT* src,
 a@ Copies the contents of the memory pointed to by [code]#src#
 into the memory object accessed by [code]#dest#.
 [code]#src# must be a host pointer and must have at least
-as many bytes as the range accessed by [code]#dest#.
+as many bytes as the range accessed by [code]#dest#.  The type
+[code]#SrcT# must be <<device-copyable>>.
 
 a@
 [source]
@@ -14066,6 +13950,8 @@ accessible on the handler's device.  If a pointer is to a USM allocation, that
 allocation must have been created from the same context as the handler's queue.
 For more detail on USM, please see <<sec:usm>>.
 
+The type [code]#T# must be <<device-copyable>>.
+
 a@
 [source]
 ----
@@ -14087,6 +13973,8 @@ a@ Replicates the provided [code]#pattern# into the memory at address
 context as the handler's queue, and the pointer must be accessible from the
 queue's device.  The [code]#pattern# is filled [code]#count# times.  For more
 detail on USM, please see <<sec:usm>>.
+
+The type [code]#T# must be <<device-copyable>>.
 
 a@
 [source]
@@ -15212,7 +15100,12 @@ application is compatible with a device unless:
   in <<sec:optional-kernel-features>>; or
 * It is decorated with a [code]#[[sycl::device_has()]]# {cpp} attribute that
   lists an aspect that is not supported by the device, as described in
-  <<sec:kernel.attributes>>.
+  <<sec:kernel.attributes>>; or
+* The translation unit containing the kernel was compiled in a compilation
+  environment that does not support the device.  Each implementation defines
+  the specific criteria for which devices are supported in its compilation
+  environment.  For example, this might be dependent on options passed to the
+  compiler.
 
 A device built-in kernel is only compatible with the device for which it is
 built-in.
@@ -16031,7 +15924,7 @@ _RandomFiller_, which initializes a buffer with a random number. The
 random number is generated during the construction of the function object
 while processing the command group. The [code]#operator()# member
 function of the function object receives an [code]#item# object. This
-member function will be called for each work item of the execution range. The value
+member function will be called for each work-item of the execution range. The value
 of the random number will be assigned to each element of the buffer. In this
 case, the accessor and the scalar random number are members of the function
 object and therefore will be arguments to the device kernel. Usual
@@ -19160,13 +19053,13 @@ There are two limits that are relevant for the [code]#stream# class.  The
 [code]#totalBufferSize# limit specifies the maximum size of the overall
 character stream that can be output during a kernel invocation, and the
 [code]#workItemBufferSize# limit specifies the maximum size of the
-character stream that can be output within a work item before a flush must be
+character stream that can be output within a work-item before a flush must be
 performed.  Both of these limits are specified in bytes.  The
 [code]#totalBufferSize# limit must be sufficient to contain the characters
 output by all stream statements during execution of a kernel invocation (the
-aggregate of outputs from all work items), and the
+aggregate of outputs from all work-items), and the
 [code]#workItemBufferSize# limit must be sufficient to contain the
-characters output within a work item between stream flush operations.
+characters output within a work-item between stream flush operations.
 
 If the [code]#totalBufferSize# or [code]#workItemBufferSize#
 limits are exceeded, it is implementation-defined whether the streamed
@@ -19272,10 +19165,10 @@ a@
 ----
 flush
 ----
-   a@ Triggers a flush operation, which synchronizes the work item stream buffer
-      with the global stream buffer, and then empties the work item stream
+   a@ Triggers a flush operation, which synchronizes the work-item stream buffer
+      with the global stream buffer, and then empties the work-item stream
       buffer. After a flush, the full [code]#workItemBufferSize# is
-      available again for subsequent streaming within the work item.
+      available again for subsequent streaming within the work-item.
 
 a@
 [source]
@@ -19393,7 +19286,7 @@ stream(size_t totalBufferSize, size_t workItemBufferSize, handler& cgh,
    a@ Constructs a SYCL [code]#stream# instance associated with the command group
       specified by [code]#cgh#, with a maximum buffer size in bytes per kernel
       invocation specified by the parameter [code]#totalBufferSize#, and a maximum
-      stream size that can be buffered by a work item between stream flushes
+      stream size that can be buffered by a work-item between stream flushes
       specified by the parameter [code]#workItemBufferSize#.
       Zero or more properties can be provided to the constructed SYCL
       [code]#stream# via an instance of [code]#property_list#.
@@ -19424,7 +19317,7 @@ a@
 ----
 size_t get_work_item_buffer_size() const
 ----
-   a@ Returns the buffer size per work item, in bytes.
+   a@ Returns the buffer size per work-item, in bytes.
 
 a@
 [source]
@@ -19464,17 +19357,17 @@ performed are implementation-defined. For example it is valid for an implementat
 [code]#printf()#.
 
 The SYCL [code]#stream# class is required to output the content of each stream, between flushes (up to
-[code]#workItemBufferSize)#, without mixing with content from the same stream in other work items.
-There are no other output order guarantees between work items or between streams.  The stream flush
+[code]#workItemBufferSize)#, without mixing with content from the same stream in other work-items.
+There are no other output order guarantees between work-items or between streams.  The stream flush
 operation therefore delimits the unit of output that is guaranteed to be displayed without mixing with
-other work items, with respect to a single stream.
+other work-items, with respect to a single stream.
 
 
 === Implicit flush
 
 There is guaranteed to be an implicit flush of each stream used by a
 kernel, at the end of kernel execution, from the perspective of each
-work item.  There is also an implicit flush when the endl stream
+work-item.  There is also an implicit flush when the endl stream
 manipulator is executed.  No other implicit flushes are permitted in
 an implementation.
 

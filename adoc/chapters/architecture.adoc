@@ -599,7 +599,7 @@ a [code]#range<N># representing the number of work-items executing the kernel.
 
 ==== ND-range kernels
 
-Work-items can be organized into <<work-group,work groups>>, providing a more
+Work-items can be organized into <<work-group,work-groups>>, providing a more
 coarse-grained decomposition of the index space.  Each work-group is assigned a
 unique <<work-group-id>> with the same dimensionality as the index space used for
 the work-items. Work-items are each assigned a <<local-id>>, unique within the
@@ -915,7 +915,7 @@ Work-items executing in a kernel have access to three distinct address spaces
     of correct results unless <<mem-fence>> and atomic operations are used.
   * <<local-memory,Local-memory>> is accessible to all work-items in a single
     work-group. Attempting to access local memory in one work-group from
-    another work group results in undefined behavior. This memory region can be
+    another work-group results in undefined behavior. This memory region can be
     used to allocate variables that are shared by all work-items in a
     work-group. Work-group-level visibility allows local memory to be
     implemented as dedicated regions of the device memory where this is
@@ -1055,7 +1055,7 @@ device kernel results in undefined behavior. Developers are encouraged to use
 include::{header_dir}/memoryScope.h[lines=4..-1]
 ----
 
-The set of <<work-item,work items>> and devices to which the memory ordering
+The set of <<work-item,work-items>> and devices to which the memory ordering
 constraints of a given atomic operation apply is controlled by a
 [code]#sycl::memory_scope# parameter, which can take one of the following
 values:
@@ -1192,8 +1192,8 @@ sections of this specification.
 
 === Basic data parallel kernels
 
-Data-parallel <<kernel>>s that execute as
-multiple <<work-item>>s and where no local synchronization is required are enqueued
+Data-parallel <<kernel,kernels>> that execute as
+multiple <<work-item,work-items>> and where no local synchronization is required are enqueued
 with the [code]#sycl::parallel_for# function parameterized by a
 [code]#sycl::range# parameter. These kernels will execute the kernel
 function body once for each work-item in the specified <<range>>.

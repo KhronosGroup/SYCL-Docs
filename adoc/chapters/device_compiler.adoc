@@ -176,8 +176,9 @@ these restrictions:
     storage class specifier) are not allowed to be odr-used in a
     <<device-function>>.
   * Variables with static storage duration that are odr-used inside a
-    <<device-function>>, must be [code]#const#
-    or [code]#constexpr# and zero-initialized or constant-initialized.
+    <<device-function>>, must be either [code]#const#
+    or [code]#constexpr#, and must also be either
+    zero-initialized or constant-initialized.
 
 [NOTE]
 ====
@@ -520,11 +521,11 @@ reqd_work_group_size(dim0, dim1, dim2)
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
 
-Each device may have limitations on the work group sizes that it supports.  If
+Each device may have limitations on the work-group sizes that it supports.  If
 a kernel is decorated with this attribute and then submitted to a device that
-does not support the work group size, the implementation must throw a
+does not support the work-group size, the implementation must throw a
 synchronous [code]#exception# with the [code]#errc::kernel_not_supported# error
-code.  If the kernel is submitted to a device that does support the work group
+code.  If the kernel is submitted to a device that does support the work-group
 size, but the application provides an [code]#nd_range# that does not match the
 size from the attribute, then the implementation must throw a synchronous
 [code]#exception# with the [code]#errc::nd_range# error code.
