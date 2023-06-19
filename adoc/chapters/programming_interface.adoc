@@ -6551,19 +6551,20 @@ Certain [code]#accessor# constructors create a "placeholder" accessor.  Such
 an accessor is bound to a [code]#buffer# and its semantics such as access
 target and access mode are defined.  However, a placeholder accessor is not
 yet bound to a <<command-group>>.  Before such an accessor can be used in a
-<<command>>, it must be bound by calling [code]#handler::require()#.  If a
-placeholder accessor is passed as an argument to a <<command>> without first
-being bound to a <<command-group>> with [code]#handler::require()#, the
-implementation may throw a synchronous [code]#exception# with the
-[code]#errc::kernel_argument# error code when the <<command>> is submitted. If
-the implementation does not throw an synchronous [code]#exception# upon
-<<command>> submission, an asynchronous [code]#exception# will be thrown during
-the execution of the <<command>> if it calls any of the member functions stating
-so (see <<sec:accessors.command.buffer.interface>> and
-<<sec:accessor.common.members>>.)
+<<command>>, it must be bound by calling [code]#handler::require()#.  Passing a
+placeholder accessor as an argument to a <<command>> without first being bound
+to a <<command-group>> with [code]#handler::require()# will result in undefined
+behavior.
+
+[NOTE]
+====
+Implementations are encouraged to throw either a synchronous or an asynchronous
+exception when a placeholder accessor, that has not been bound to the
+corresponding <<command-group>> with [code]#handler::require()#, is either
+passed as an argument to or is used inside a <<command>>.
+====
 
 
-[[sec:accessors.command.buffer.interface]]
 ===== Interface for buffer command accessors
 
 A synopsis of the [code]#accessor# class is provided below, showing the
@@ -6924,11 +6925,6 @@ accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 
 This function may only be called from within a <<command>>.
 
-A <<command>> calling this function will throw an asynchronous
-[code]#exception# with [code]#exception#errc::kernel_argument# if this is a
-placeholder accessor that has not been bound to a <<command>> by calling
-[code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -6941,11 +6937,6 @@ const accessor& operator=(const value_type& other) const
 Assignment to the single element that is accessed by this accessor.
 
 This function may only be called from within a <<command>>.
-
-A <<command>> calling this function will throw an asynchronous
-[code]#exception# with [code]#exception#errc::kernel_argument# if this is a
-placeholder accessor that has not been bound to a <<command>> by calling
-[code]#handler::require()#.
 
 a@
 [source]
@@ -7099,7 +7090,6 @@ size_t get_count() const
 |====
 
 
-[[sec:accessor.command.buffer.constant.specialization]]
 ====== Accessor specialization with [code]#target::constant_buffer#
 
 The [code]#accessor# class may be specialized with target
@@ -7120,15 +7110,9 @@ This specialization of [code]#accessor# is available only for the access mode
 This accessor type can be constructed as a "placeholder" accessor.  As with
 other [code]#accessor# specializations that are placeholders,
 [code]#handler::require()# must be called before passing a placeholder accessor
-to a <<command>>.  If the application neglects to call
-[code]#handler::require()# on a placeholder accessor, the implementation may
-throw a synchronous [code]#exception# with the [code]#errc::kernel_argument#
-error code when the <<command>> is submitted. If the implementation does not
-throw an synchronous [code]#exception# upon <<command>> submission, an
-asynchronous [code]#exception# will be thrown during the execution of the
-<<command>> if it calls any of the member functions stating so (see
-<<sec:accessor.command.buffer.constant.specialization>> and
-<<sec:accessor.deprecated.common.members>>.)
+to a <<command>>.  Passing a placeholder accessor as an argument to a
+<<command>> without first being bound to a <<command-group>> with
+[code]#handler::require()# will result in undefined behavior.
 
 A synopsis for this specialization of [code]#accessor# is provided below.
 Since some of the class types and member functions have the same name and
@@ -7322,11 +7306,6 @@ constant_ptr<DataT> get_pointer() const noexcept
       accessor is empty.
 
 This function may only be called from within a <<command>>.
-
-A <<command>> calling this function will throw an asynchronous
-[code]#exception# with [code]#exception#errc::kernel_argument# if this is a
-placeholder accessor that has not been bound to a <<command>> by calling
-[code]#handler::require()#.
 
 |====
 
@@ -7714,12 +7693,6 @@ Returns a reference to the single element that is accessed by this accessor.
 When [code]#AccessTarget# is [code]#target::local# or [code]#target::constant#,
 this function may only be called from within a <<command>>.
 
-When [code]#AccessTarget# is [code]#target::constant# or
-[code]#target::constant#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -7738,12 +7711,6 @@ If this is a <<ranged-accessor>>, the element is determined by adding
 
 When [code]#AccessTarget# is [code]#target::local# or [code]#target::constant#,
 this function may only be called from within a <<command>>.
-
-When [code]#AccessTarget# is [code]#target::constant# or
-[code]#target::constant#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 a@
 [source]
@@ -7765,12 +7732,6 @@ instance also includes the accessor's offset.
 When [code]#AccessTarget# is [code]#target::local# or [code]#target::constant#,
 this function may only be called from within a <<command>>.
 
-When [code]#AccessTarget# is [code]#target::constant# or
-[code]#target::constant#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -7789,12 +7750,6 @@ If this is a <<ranged-accessor>>, the element is determined by adding
 
 When [code]#AccessTarget# is [code]#target::local# or [code]#target::constant#,
 this function may only be called from within a <<command>>.
-
-When [code]#AccessTarget# is [code]#target::constant# or
-[code]#target::constant#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 |====
 
@@ -8490,11 +8445,6 @@ Returns a reference to the single element that is accessed by this accessor.
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8512,11 +8462,6 @@ If this is a <<ranged-accessor>>, the element is determined by adding
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
-
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 a@
 [source]
@@ -8538,11 +8483,6 @@ instance also includes the accessor's offset.
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8561,11 +8501,6 @@ If this is a <<ranged-accessor>>, the element is determined by adding
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8582,11 +8517,6 @@ The return value is unspecified if the accessor is empty.
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8601,11 +8531,6 @@ iterator to first element within the accessor's range.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
-
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 a@
 [source]
@@ -8623,11 +8548,6 @@ range.
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8642,11 +8562,6 @@ const iterator to first element within the accessor's range.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
-
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 a@
 [source]
@@ -8664,11 +8579,6 @@ accessor's range.
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8683,11 +8593,6 @@ iterator adaptor to the last element within the accessor's range.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
-
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 a@
 [source]
@@ -8705,11 +8610,6 @@ within the accessor's range.
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
 
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
-
 a@
 [source]
 ----
@@ -8724,11 +8624,6 @@ an const iterator adaptor to last element within the accessor's range.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
-
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 a@
 [source]
@@ -8745,11 +8640,6 @@ within the accessor's range.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
-
-For [code]#accessor#, a <<command>> calling this function will throw an
-asynchronous [code]#exception# with [code]#exception#errc::kernel_argument# if
-this is a placeholder accessor that has not been bound to a <<command>> by
-calling [code]#handler::require()#.
 
 |====
 
