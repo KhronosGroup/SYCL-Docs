@@ -273,8 +273,6 @@ compile time.
     <<native-backend-object>> associated with [code]#T# for the
     <<backend>>, specified in the backend specification.
     See the relevant backend specification for details.
-  * A specialization of [code]#errc# must be defined as the
-    <<backend>> error code type.
 
 The type alias [code]#backend_input_t# is provided
 to enable less verbose access to the [code]#input_type# type
@@ -16244,16 +16242,6 @@ Below is an example of catching a SYCL [code]#exception# with the
 include::{code_dir}/handlingErrorCode.cpp[lines=4..-1]
 ----
 
-Below is an example of catching a SYCL [code]#exception#, checking for the
-<<backend>> by inspecting the category and handling the OpenCL <<backend>>
-error codes if the category is that of the OpenCL <<backend>> otherwise
-checking the standard error code.
-
-[source,,linenums]
-----
-include::{code_dir}/handlingBackendErrorCode.cpp[lines=4..-1]
-----
-
 
 [[subsec:exception.class]]
 === Exception class interface
@@ -16274,9 +16262,7 @@ corresponding information.
 from [code]#sycl::exception# object, or any of its derived classes.
 
 A specialization of [code]#std::is_error_code_enum# must be defined
-for [code]#sycl::errc# and [code]#backend_traits<Backend>::errc#
-inheriting from [code]#std::true_type# for each [code]#Backend#, where
-[code]#backend# is each enumeration of the enum class [code]#backend#.
+for [code]#sycl::errc# that inherits from [code]#std::true_type#.
 
 
 [[table.members.exception]]

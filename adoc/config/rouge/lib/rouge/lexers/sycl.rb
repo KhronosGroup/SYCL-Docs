@@ -51,7 +51,6 @@ module Rouge
         create_bundle
         create_sub_devices
         depends_on
-        error_category_for
         exchange
         exclusive_scan
         exclusive_scan_over_group
@@ -399,7 +398,6 @@ module Rouge
         device_image_iterator
         device_type
         elem
-        errc_for
         event
         event_command_status
         exception
