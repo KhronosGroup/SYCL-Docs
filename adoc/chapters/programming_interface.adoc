@@ -19423,8 +19423,13 @@ these actual types:
 ----
 float fmax(float x, float y)
 double fmax(double x, double y)
-template<int N> vec<float,N> fmax(vec<float,N> x, vec<float,N> y)
-template<size_t M> marray<float,M> fmax(marray<float,M> x, marray<float,M> y)
+vec<float,1> fmax(vec<float,1> x, vec<float,1> y)
+vec<float,2> fmax(vec<float,2> x, vec<float,2> y)
+vec<float,3> fmax(vec<float,3> x, vec<float,3> y)
+vec<float,4> fmax(vec<float,4> x, vec<float,4> y)
+vec<float,8> fmax(vec<float,8> x, vec<float,8> y)
+vec<float,16> fmax(vec<float,16> x, vec<float,16> y)
+template<size_t N> marray<float,N> fmax(marray<float,N> x, marray<float,N> y)
 // etc.
 ----
 
@@ -19438,28 +19443,57 @@ rules:
   The available overloads include only the cases where both parameters have
   the same type, and the return type always matches the type of the parameters.
 
+* The following generic type names sometimes appear together in the same
+  function description:
++
+--
+** [code]#vfloatn#
+** [code]#vdoublen#
+** [code]#vhalfn#
+** [code]#vint8n#
+** [code]#vint16n#
+** [code]#vint32n#
+** [code]#vint64n#
+** [code]#vuint8n#
+** [code]#vuint32n#
+** [code]#vuint64n#
+** [code]#vfloatnptr#
+** [code]#vdoublenptr#
+** [code]#vhalfnptr#
+** [code]#vint32nptr#
+--
++
+When this occurs, the replacement of the generic type names are correlated.
+If one of these generic type names is replaced with a [code]#vec# of length
+_Len_, then all other occurrences of these generic type names in that same
+function description must also be replaced with a [code]#vec# of length _Len_.
+For example, if a function takes one parameter of type [code]#vfloatn# and
+another of type [code]#vfloatnptr#, there are overloads like:
++
+[source]
+----
+func(vec<float,1>, multi_ptr<vec<float,1>, Space, IsDecorated>)
+func(vec<float,2>, multi_ptr<vec<float,2>, Space, IsDecorated>)
+// ...
+----
++
+However, there are no overloads where the two parameters have different
+vector lengths.
+
 * Some of the generic type names can be replaced with a templated type, where
-  the identifiers [code]#N#, [code]#M#, [code]#Space#, and [code]#IsDecorated#
-  represent template parameters.  When this happens, the overload is a
-  templated function, as shown above with the [code]#fmax# example.  Only a few
+  the identifiers [code]#N#, [code]#Space#, and [code]#IsDecorated# represent
+  template parameters.  When this happens, the overload is a templated
+  function, as shown above with the [code]#fmax# example.  Only a few
   combinations of template parameters are possible, and the following list
   tells the order and type of the template parameters for each possible
   combination:
 
 ** If there is a single template parameter [code]#N# (number of dimensions of
-   the [code]#vec# type):
-+
-[source]
-----
-template<int N>
-----
-
-** If there is a single template parameter [code]#M# (number of dimensions of
    the [code]#marray# type):
 +
 [source]
 ----
-template<size_t M>
+template<size_t N>
 ----
 
 ** If there are two template parameters [code]#Space# and [code]#IsDecorated#
@@ -19475,15 +19509,7 @@ template<access::address_space Space, access::decorated IsDecorated>
 +
 [source]
 ----
-template<int N, access::address_space Space, access::decorated IsDecorated>
-----
-
-** If there are three template parameters [code]#M#, [code]#Space# and
-   [code]#IsDecorated#:
-+
-[source]
-----
-template<size_t M, access::address_space Space, access::decorated IsDecorated>
+template<size_t N, access::address_space Space, access::decorated IsDecorated>
 ----
 
 * Unless specified otherwise, the template parameter [code]#Space# is
@@ -19508,564 +19534,1005 @@ a@
 ----
 floatn
 ----
-   a@ [code]#vec<float,N># +
-      [code]#marray<float,M>#
+a@
+[source]
+----
+vec<float,1>
+vec<float,2>
+vec<float,3>
+vec<float,4>
+vec<float,8>
+vec<float,16>
+marray<float,N>
+----
 
 a@
 [source]
 ----
 vfloatn
 ----
-   a@ [code]#vec<float,N>#
+a@
+[source]
+----
+vec<float,1>
+vec<float,2>
+vec<float,3>
+vec<float,4>
+vec<float,8>
+vec<float,16>
+----
 
 a@
 [source]
 ----
 vfloat3or4
 ----
-   a@ [code]#vec<float,N>#
-
-Where the [code]#N# template parameter is constrained to the values 3 or 4.
+a@
+[source]
+----
+vec<float,3>
+vec<float,4>
+----
 
 a@
 [source]
 ----
 mfloatn
 ----
-   a@ [code]#marray<float,M>#
+a@
+[source]
+----
+marray<float,N>
+----
 
 a@
 [source]
 ----
 mfloat3or4
 ----
-   a@ [code]#marray<float,M>#
-
-Where the [code]#M# template parameter is constrained to the values 3 or 4.
-
 a@
 [source]
 ----
-genfloatf
+marray<float,N>
 ----
-   a@ [code]#float# +
-      [code]#vec<float,N># +
-      [code]#marray<float,M>#
-
-a@
-[source]
-----
-doublen
-----
-   a@ [code]#vec<double,N># +
-      [code]#marray<double,M>#
-
-a@
-[source]
-----
-vdoublen
-----
-   a@ [code]#vec<double,N>#
-
-a@
-[source]
-----
-vdouble3or4
-----
-   a@ [code]#vec<double,N>#
 
 Where the [code]#N# template parameter is constrained to the values 3 or 4.
 
 a@
 [source]
 ----
+genfloatf
+----
+a@
+[source]
+----
+float
+vec<float,1>
+vec<float,2>
+vec<float,3>
+vec<float,4>
+vec<float,8>
+vec<float,16>
+marray<float,N>
+----
+
+a@
+[source]
+----
+doublen
+----
+a@
+[source]
+----
+vec<double,1>
+vec<double,2>
+vec<double,3>
+vec<double,4>
+vec<double,8>
+vec<double,16>
+marray<double,N>
+----
+
+a@
+[source]
+----
+vdoublen
+----
+a@
+[source]
+----
+vec<double,1>
+vec<double,2>
+vec<double,3>
+vec<double,4>
+vec<double,8>
+vec<double,16>
+----
+
+a@
+[source]
+----
+vdouble3or4
+----
+a@
+[source]
+----
+vec<double,3>
+vec<double,4>
+----
+
+a@
+[source]
+----
 mdoublen
 ----
-   a@ [code]#marray<double,M>#
+a@
+[source]
+----
+marray<double,N>
+----
 
 a@
 [source]
 ----
 mdouble3or4
 ----
-   a@ [code]#marray<double,M>#
+a@
+[source]
+----
+marray<double,N>
+----
 
-Where the [code]#M# template parameter is constrained to the values 3 or 4.
+Where the [code]#N# template parameter is constrained to the values 3 or 4.
 
 a@
 [source]
 ----
 genfloatd
 ----
-   a@ [code]#double# +
-      [code]#vec<double,N># +
-      [code]#marray<double,M>#
+a@
+[source]
+----
+double
+vec<double,1>
+vec<double,2>
+vec<double,3>
+vec<double,4>
+vec<double,8>
+vec<double,16>
+marray<double,N>
+----
 
 a@
 [source]
 ----
 halfn
 ----
-   a@ [code]#vec<half,N># +
-      [code]#marray<half,M>#
+a@
+[source]
+----
+vec<half,1>
+vec<half,2>
+vec<half,3>
+vec<half,4>
+vec<half,8>
+vec<half,16>
+marray<half,N>
+----
 
 a@
 [source]
 ----
 vhalfn
 ----
-   a@ [code]#vec<half,N>#
+a@
+[source]
+----
+vec<half,1>
+vec<half,2>
+vec<half,3>
+vec<half,4>
+vec<half,8>
+vec<half,16>
+----
 
 a@
 [source]
 ----
 mhalfn
 ----
-   a@ [code]#marray<half,M>#
+a@
+[source]
+----
+marray<half,N>
+----
 
 a@
 [source]
 ----
 genfloath
 ----
-   a@ [code]#half# +
-      [code]#vec<half,N># +
-      [code]#marray<half,M>#
+a@
+[source]
+----
+half
+vec<half,1>
+vec<half,2>
+vec<half,3>
+vec<half,4>
+vec<half,8>
+vec<half,16>
+marray<half,N>
+----
 
 a@
 [source]
 ----
 genfloat
 ----
-   a@ [code]#float# +
-      [code]#double# +
-      [code]#half# +
-      [code]#vec<float,N># +
-      [code]#vec<double,N># +
-      [code]#vec<half,N># +
-      [code]#marray<float,M># +
-      [code]#marray<double,M># +
-      [code]#marray<half,M>#
+a@
+[source]
+----
+float
+double
+half
+vec<float,1>
+vec<float,2>
+vec<float,3>
+vec<float,4>
+vec<float,8>
+vec<float,16>
+vec<double,1>
+vec<double,2>
+vec<double,3>
+vec<double,4>
+vec<double,8>
+vec<double,16>
+vec<half,1>
+vec<half,2>
+vec<half,3>
+vec<half,4>
+vec<half,8>
+vec<half,16>
+marray<float,N>
+marray<double,N>
+marray<half,N>
+----
 
 a@
 [source]
 ----
 sgenfloat
 ----
-   a@ [code]#float# +
-      [code]#double# +
-      [code]#half#
+a@
+[source]
+----
+float
+double
+half
+----
 
 a@
 [source]
 ----
 mgenfloat
 ----
-   a@ [code]#marray<float,M># +
-      [code]#marray<double,M># +
-      [code]#marray<half,M>#
+a@
+[source]
+----
+marray<float,N>
+marray<double,N>
+marray<half,N>
+----
 
 a@
 [source]
 ----
 gengeofloat
 ----
-   a@ [code]#float# +
-      [code]#vec<float,N># +
-      [code]#marray<float,M>#
+a@
+[source]
+----
+float
+vec<float,2>
+vec<float,3>
+vec<float,4>
+marray<float,N>
+----
 
-Where the [code]#N# and [code]#M# template parameters are constrained to the
-values 2, 3 or 4.
+Where the [code]#N# template parameter is constrained to the values 2, 3 or 4.
 
 a@
 [source]
 ----
 gengeodouble
 ----
-   a@ [code]#double# +
-      [code]#vec<double,N># +
-      [code]#marray<double,M>#
+a@
+[source]
+----
+double
+vec<double,2>
+vec<double,3>
+vec<double,4>
+marray<double,N>
+----
 
-Where the [code]#N# and [code]#M# template parameters are constrained to the
-values 2, 3 or 4.
+Where the [code]#N# template parameter is constrained to the values 2, 3 or 4.
 
 a@
 [source]
 ----
 vint8n
 ----
-   a@ [code]#vec<int8_t,N>#
+a@
+[source]
+----
+vec<int8_t,1>
+vec<int8_t,2>
+vec<int8_t,3>
+vec<int8_t,4>
+vec<int8_t,8>
+vec<int8_t,16>
+----
 
 a@
 [source]
 ----
 vint16n
 ----
-   a@ [code]#vec<int16_t,N>#
+a@
+[source]
+----
+vec<int16_t,1>
+vec<int16_t,2>
+vec<int16_t,3>
+vec<int16_t,4>
+vec<int16_t,8>
+vec<int16_t,16>
+----
 
 a@
 [source]
 ----
 vint32n
 ----
-   a@ [code]#vec<int32_t,N>#
+a@
+[source]
+----
+vec<int32_t,1>
+vec<int32_t,2>
+vec<int32_t,3>
+vec<int32_t,4>
+vec<int32_t,8>
+vec<int32_t,16>
+----
 
 a@
 [source]
 ----
 vint64n
 ----
-   a@ [code]#vec<int64_t,N>#
+a@
+[source]
+----
+vec<int64_t,1>
+vec<int64_t,2>
+vec<int64_t,3>
+vec<int64_t,4>
+vec<int64_t,8>
+vec<int64_t,16>
+----
 
 a@
 [source]
 ----
 vuint8n
 ----
-   a@ [code]#vec<uint8_t,N>#
+a@
+[source]
+----
+vec<uint8_t,1>
+vec<uint8_t,2>
+vec<uint8_t,3>
+vec<uint8_t,4>
+vec<uint8_t,8>
+vec<uint8_t,16>
+----
 
 a@
 [source]
 ----
 vuint16n
 ----
-   a@ [code]#vec<uint16_t,N>#
+a@
+[source]
+----
+vec<uint16_t,1>
+vec<uint16_t,2>
+vec<uint16_t,3>
+vec<uint16_t,4>
+vec<uint16_t,8>
+vec<uint16_t,16>
+----
 
 a@
 [source]
 ----
 vuint32n
 ----
-   a@ [code]#vec<uint32_t,N>#
+a@
+[source]
+----
+vec<uint32_t,1>
+vec<uint32_t,2>
+vec<uint32_t,3>
+vec<uint32_t,4>
+vec<uint32_t,8>
+vec<uint32_t,16>
+----
 
 a@
 [source]
 ----
 vuint64n
 ----
-   a@ [code]#vec<uint64_t,N>#
+a@
+[source]
+----
+vec<uint64_t,1>
+vec<uint64_t,2>
+vec<uint64_t,3>
+vec<uint64_t,4>
+vec<uint64_t,8>
+vec<uint64_t,16>
+----
 
 a@
 [source]
 ----
 mint8n
 ----
-   a@ [code]#marray<int8_t,M>#
+a@
+[source]
+----
+marray<int8_t,N>
+----
 
 a@
 [source]
 ----
 mint16n
 ----
-   a@ [code]#marray<int16_t,M>#
+a@
+[source]
+----
+marray<int16_t,N>
+----
 
 a@
 [source]
 ----
 mint32n
 ----
-   a@ [code]#marray<int32_t,M>#
+a@
+[source]
+----
+marray<int32_t,N>
+----
 
 a@
 [source]
 ----
 mint64n
 ----
-   a@ [code]#marray<int64_t,M>#
+a@
+[source]
+----
+marray<int64_t,N>
+----
 
 a@
 [source]
 ----
 muint8n
 ----
-   a@ [code]#marray<uint8_t,M>#
+a@
+[source]
+----
+marray<uint8_t,N>
+----
 
 a@
 [source]
 ----
 muint16n
 ----
-   a@ [code]#marray<uint16_t,M>#
+a@
+[source]
+----
+marray<uint16_t,N>
+----
 
 a@
 [source]
 ----
 muint32n
 ----
-   a@ [code]#marray<uint32_t,M>#
+a@
+[source]
+----
+marray<uint32_t,N>
+----
 
 a@
 [source]
 ----
 muint64n
 ----
-   a@ [code]#marray<uint64_t,M>#
+a@
+[source]
+----
+marray<uint64_t,N>
+----
 
 a@
 [source]
 ----
 mintn
 ----
-   a@ [code]#marray<int,M>#
+a@
+[source]
+----
+marray<int,N>
+----
 
 a@
 [source]
 ----
 mushortn
 ----
-   a@ [code]#marray<unsigned short,M>#
+a@
+[source]
+----
+marray<unsigned short,N>
+----
 
 a@
 [source]
 ----
 muintn
 ----
-   a@ [code]#marray<unsigned int,M>#
+a@
+[source]
+----
+marray<unsigned int,N>
+----
 
 a@
 [source]
 ----
 mulongn
 ----
-   a@ [code]#marray<unsigned long,M>#
+a@
+[source]
+----
+marray<unsigned long,N>
+----
 
 a@
 [source]
 ----
 mbooln
 ----
-   a@ [code]#marray<bool,M>#
+a@
+[source]
+----
+marray<bool,N>
+----
 
 a@
 [source]
 ----
 geninteger
 ----
-   a@ [code]#char# +
-      [code]#signed char# +
-      [code]#short# +
-      [code]#int# +
-      [code]#long# +
-      [code]#long long# +
-      [code]#unsigned char# +
-      [code]#unsigned short# +
-      [code]#unsigned int# +
-      [code]#unsigned long# +
-      [code]#unsigned long long# +
-      [code]#vec<int8_t,N># +
-      [code]#vec<int16_t,N># +
-      [code]#vec<int32_t,N># +
-      [code]#vec<int64_t,N># +
-      [code]#vec<uint8_t,N># +
-      [code]#vec<uint16_t,N># +
-      [code]#vec<uint32_t,N># +
-      [code]#vec<uint64_t,N># +
-      [code]#marray<char,M># +
-      [code]#marray<signed char,M># +
-      [code]#marray<short,M># +
-      [code]#marray<int,M># +
-      [code]#marray<long,M># +
-      [code]#marray<long long,M># +
-      [code]#marray<unsigned char,M># +
-      [code]#marray<unsigned short,M># +
-      [code]#marray<unsigned int,M># +
-      [code]#marray<unsigned long,M># +
-      [code]#marray<unsigned long long,M>#
+a@
+[source]
+----
+char
+signed char
+short
+int
+long
+long long
+unsigned char
+unsigned short
+unsigned int
+unsigned long
+unsigned long long
+vec<int8_t,1>   vec<int8_t,2>   vec<int8_t,3>
+vec<int8_t,4>   vec<int8_t,8>   vec<int8_t,16>
+vec<int16_t,1>  vec<int16_t,2>  vec<int16_t,3>
+vec<int16_t,4>  vec<int16_t,8>  vec<int16_t,16>
+vec<int32_t,1>  vec<int32_t,2>  vec<int32_t,3>
+vec<int32_t,4>  vec<int32_t,8>  vec<int32_t,16>
+vec<int64_t,1>  vec<int64_t,2>  vec<int64_t,3>
+vec<int64_t,4>  vec<int64_t,8>  vec<int64_t,16>
+vec<uint8_t,1>  vec<uint8_t,2>  vec<uint8_t,3>
+vec<uint8_t,4>  vec<uint8_t,8>  vec<uint8_t,16>
+vec<uint16_t,1> vec<uint16_t,2> vec<uint16_t,3>
+vec<uint16_t,4> vec<uint16_t,8> vec<uint16_t,16>
+vec<uint32_t,1> vec<uint32_t,2> vec<uint32_t,3>
+vec<uint32_t,4> vec<uint32_t,8> vec<uint32_t,16>
+vec<uint64_t,1> vec<uint64_t,2> vec<uint64_t,3>
+vec<uint64_t,4> vec<uint64_t,8> vec<uint64_t,16>
+marray<char,N>
+marray<signed char,N>
+marray<short,N>
+marray<int,N>
+marray<long,N>
+marray<long long,N>
+marray<unsigned char,N>
+marray<unsigned short,N>
+marray<unsigned int,N>
+marray<unsigned long,N>
+marray<unsigned long long,N>
+----
 
 a@
 [source]
 ----
 sigeninteger
 ----
-   a@ [code]#signed char# +
-      [code]#short# +
-      [code]#int# +
-      [code]#long# +
-      [code]#long long#
+a@
+[source]
+----
+signed char
+short
+int
+long
+long long
+----
 
 a@
 [source]
 ----
 vigeninteger
 ----
-   a@ [code]#vec<int8_t,N># +
-      [code]#vec<int16_t,N># +
-      [code]#vec<int32_t,N># +
-      [code]#vec<int64_t,N>#
+a@
+[source]
+----
+vec<int8_t,1>
+vec<int8_t,2>
+vec<int8_t,3>
+vec<int8_t,4>
+vec<int8_t,8>
+vec<int8_t,16>
+vec<int16_t,1>
+vec<int16_t,2>
+vec<int16_t,3>
+vec<int16_t,4>
+vec<int16_t,8>
+vec<int16_t,16>
+vec<int32_t,1>
+vec<int32_t,2>
+vec<int32_t,3>
+vec<int32_t,4>
+vec<int32_t,8>
+vec<int32_t,16>
+vec<int64_t,1>
+vec<int64_t,2>
+vec<int64_t,3>
+vec<int64_t,4>
+vec<int64_t,8>
+vec<int64_t,16>
+----
 
 a@
 [source]
 ----
 migeninteger
 ----
-   a@ [code]#marray<signed char,M># +
-      [code]#marray<short,M># +
-      [code]#marray<int,M># +
-      [code]#marray<long,M># +
-      [code]#marray<long long,M>#
+a@
+[source]
+----
+marray<signed char,N>
+marray<short,N>
+marray<int,N>
+marray<long,N>
+marray<long long,N>
+----
 
 a@
 [source]
 ----
 vugeninteger
 ----
-   a@ [code]#vec<uint8_t,N># +
-      [code]#vec<uint16_t,N># +
-      [code]#vec<uint32_t,N># +
-      [code]#vec<uint64_t,N>#
+a@
+[source]
+----
+vec<uint8_t,1>
+vec<uint8_t,2>
+vec<uint8_t,3>
+vec<uint8_t,4>
+vec<uint8_t,8>
+vec<uint8_t,16>
+vec<uint16_t,1>
+vec<uint16_t,2>
+vec<uint16_t,3>
+vec<uint16_t,4>
+vec<uint16_t,8>
+vec<uint16_t,16>
+vec<uint32_t,1>
+vec<uint32_t,2>
+vec<uint32_t,3>
+vec<uint32_t,4>
+vec<uint32_t,8>
+vec<uint32_t,16>
+vec<uint64_t,1>
+vec<uint64_t,2>
+vec<uint64_t,3>
+vec<uint64_t,4>
+vec<uint64_t,8>
+vec<uint64_t,16>
+----
 
 a@
 [source]
 ----
 genint32
 ----
-   a@ [code]#int32_t# +
-      [code]#uint32_t# +
-      [code]#vec<int32_t,N># +
-      [code]#vec<uint32_t,N># +
-      [code]#marray<int32_t,M># +
-      [code]#marray<uint32_t,M>#
+a@
+[source]
+----
+int32_t
+uint32_t
+vec<int32_t,1>
+vec<int32_t,2>
+vec<int32_t,3>
+vec<int32_t,4>
+vec<int32_t,8>
+vec<int32_t,16>
+vec<uint32_t,1>
+vec<uint32_t,2>
+vec<uint32_t,3>
+vec<uint32_t,4>
+vec<uint32_t,8>
+vec<uint32_t,16>
+marray<int32_t,N>
+marray<uint32_t,N>
+----
 
 a@
 [source]
 ----
 sgentype
 ----
-   a@ [code]#char# +
-      [code]#signed char# +
-      [code]#short# +
-      [code]#int# +
-      [code]#long# +
-      [code]#long long# +
-      [code]#unsigned char# +
-      [code]#unsigned short# +
-      [code]#unsigned int# +
-      [code]#unsigned long# +
-      [code]#unsigned long long# +
-      [code]#float# +
-      [code]#double# +
-      [code]#half#
+a@
+[source]
+----
+char
+signed char
+short
+int
+long
+long long
+unsigned char
+unsigned short
+unsigned int
+unsigned long
+unsigned long long
+float
+double
+half
+----
 
 a@
 [source]
 ----
 vgentype
 ----
-   a@ [code]#vec<int8_t,N># +
-      [code]#vec<int16_t,N># +
-      [code]#vec<int32_t,N># +
-      [code]#vec<int64_t,N># +
-      [code]#vec<uint8_t,N># +
-      [code]#vec<uint16_t,N># +
-      [code]#vec<uint32_t,N># +
-      [code]#vec<uint64_t,N># +
-      [code]#vec<float,N># +
-      [code]#vec<double,N># +
-      [code]#vec<half,N>#
+a@
+[source]
+----
+vec<int8_t,1>   vec<int8_t,2>   vec<int8_t,3>
+vec<int8_t,4>   vec<int8_t,8>   vec<int8_t,16>
+vec<int16_t,1>  vec<int16_t,2>  vec<int16_t,3>
+vec<int16_t,4>  vec<int16_t,8>  vec<int16_t,16>
+vec<int32_t,1>  vec<int32_t,2>  vec<int32_t,3>
+vec<int32_t,4>  vec<int32_t,8>  vec<int32_t,16>
+vec<int64_t,1>  vec<int64_t,2>  vec<int64_t,3>
+vec<int64_t,4>  vec<int64_t,8>  vec<int64_t,16>
+vec<uint8_t,1>  vec<uint8_t,2>  vec<uint8_t,3>
+vec<uint8_t,4>  vec<uint8_t,8>  vec<uint8_t,16>
+vec<uint16_t,1> vec<uint16_t,2> vec<uint16_t,3>
+vec<uint16_t,4> vec<uint16_t,8> vec<uint16_t,16>
+vec<uint32_t,1> vec<uint32_t,2> vec<uint32_t,3>
+vec<uint32_t,4> vec<uint32_t,8> vec<uint32_t,16>
+vec<uint64_t,1> vec<uint64_t,2> vec<uint64_t,3>
+vec<uint64_t,4> vec<uint64_t,8> vec<uint64_t,16>
+vec<float,1>    vec<float,2>    vec<float,3>
+vec<float,4>    vec<float,8>    vec<float,16>
+vec<double,1>   vec<double,2>   vec<double,3>
+vec<double,4>   vec<double,8>   vec<double,16>
+vec<half,1>     vec<half,2>     vec<half,3>
+vec<half,4>     vec<half,8>     vec<half,16>
+----
 
 a@
 [source]
 ----
 mgentype
 ----
-   a@ [code]#marray<char,M># +
-      [code]#marray<signed char,M># +
-      [code]#marray<short,M># +
-      [code]#marray<int,M># +
-      [code]#marray<long,M># +
-      [code]#marray<long long,M># +
-      [code]#marray<unsigned char,M># +
-      [code]#marray<unsigned short,M># +
-      [code]#marray<unsigned int,M># +
-      [code]#marray<unsigned long,M># +
-      [code]#marray<unsigned long long,M># +
-      [code]#marray<float,M># +
-      [code]#marray<double,M># +
-      [code]#marray<half,M>#
+a@
+[source]
+----
+marray<char,N>
+marray<signed char,N>
+marray<short,N>
+marray<int,N>
+marray<long,N>
+marray<long long,N>
+marray<unsigned char,N>
+marray<unsigned short,N>
+marray<unsigned int,N>
+marray<unsigned long,N>
+marray<unsigned long long,N>
+marray<float,N>
+marray<double,N>
+marray<half,N>
+----
 
 a@
 [source]
 ----
 intptr
 ----
-   a@ [code]#multi_ptr<int, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<int, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 floatptr
 ----
-   a@ [code]#multi_ptr<float, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<float, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 doubleptr
 ----
-   a@ [code]#multi_ptr<double, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<double, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 halfptr
 ----
-   a@ [code]#multi_ptr<half, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<half, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 vfloatnptr
 ----
-   a@ [code]#multi_ptr<vec<float,N>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<vec<float,1>, Space, IsDecorated>
+multi_ptr<vec<float,2>, Space, IsDecorated>
+multi_ptr<vec<float,3>, Space, IsDecorated>
+multi_ptr<vec<float,4>, Space, IsDecorated>
+multi_ptr<vec<float,8>, Space, IsDecorated>
+multi_ptr<vec<float,16>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 vdoublenptr
 ----
-   a@ [code]#multi_ptr<vec<double,N>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<vec<double,1>, Space, IsDecorated>
+multi_ptr<vec<double,2>, Space, IsDecorated>
+multi_ptr<vec<double,3>, Space, IsDecorated>
+multi_ptr<vec<double,4>, Space, IsDecorated>
+multi_ptr<vec<double,8>, Space, IsDecorated>
+multi_ptr<vec<double,16>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 vhalfnptr
 ----
-   a@ [code]#multi_ptr<vec<half,N>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<vec<half,1>, Space, IsDecorated>
+multi_ptr<vec<half,2>, Space, IsDecorated>
+multi_ptr<vec<half,3>, Space, IsDecorated>
+multi_ptr<vec<half,4>, Space, IsDecorated>
+multi_ptr<vec<half,8>, Space, IsDecorated>
+multi_ptr<vec<half,16>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 mfloatnptr
 ----
-   a@ [code]#multi_ptr<marray<float,M>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<marray<float,N>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 mdoublenptr
 ----
-   a@ [code]#multi_ptr<marray<double,M>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<marray<double,N>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 mhalfnptr
 ----
-   a@ [code]#multi_ptr<marray<half,M>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<marray<half,N>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 mintnptr
 ----
-   a@ [code]#multi_ptr<marray<int,M>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<marray<int,N>, Space, IsDecorated>
+----
 
 a@
 [source]
 ----
 vint32nptr
 ----
-   a@ [code]#multi_ptr<vec<int32_t,N>, Space, IsDecorated>#
+a@
+[source]
+----
+multi_ptr<vec<int32_t,1>, Space, IsDecorated>
+multi_ptr<vec<int32_t,2>, Space, IsDecorated>
+multi_ptr<vec<int32_t,3>, Space, IsDecorated>
+multi_ptr<vec<int32_t,4>, Space, IsDecorated>
+multi_ptr<vec<int32_t,8>, Space, IsDecorated>
+multi_ptr<vec<int32_t,16>, Space, IsDecorated>
+----
 
 a@
 [source]
