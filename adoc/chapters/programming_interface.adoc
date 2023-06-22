@@ -6962,6 +6962,20 @@ accessor was constructed.  For other accessors, returns the default constructed
 a@
 [source]
 ----
+accessor_ptr<access::decorated::legacy> get_pointer() const noexcept
+----
+   a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
+      buffer, even if this is a <<ranged-accessor>> whose range does not start
+      at the beginning of the buffer.  The return value is unspecified if the
+      accessor is empty.
+
+This function may only be called from within a <<command>>.
+
+Deprecated in SYCL 2020.  Use [code]#get_multi_ptr# instead.
+
+a@
+[source]
+----
 template <access::decorated IsDecorated>
 accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----

@@ -184,7 +184,7 @@ class accessor {
   cl::sycl::atomic<DataT, access::address_space::global_space>
   operator[](id<Dimensions> index) const;
 
-  std::add_pointer_t<value_type> get_pointer() const noexcept;
+  accessor_ptr<access::decorated::legacy> get_pointer() const noexcept;
 
   template <access::decorated IsDecorated>
   accessor_ptr<IsDecorated> get_multi_ptr() const noexcept;

@@ -12,7 +12,11 @@ enum class address_space : /* unspecified */ {
   generic_space
 };
 
-enum class decorated : /* unspecified */ { no, yes, legacy };
+enum class decorated : /* unspecified */ {
+  no,
+  yes,
+  legacy // Deprecated in SYCL 2020
+};
 
 } // namespace access
 
@@ -23,7 +27,7 @@ template <typename T> struct remove_decoration {
 template <typename T> using remove_decoration_t = remove_decoration<T>::type;
 
 template <typename ElementType, access::address_space Space,
-          access::decorated DecorateAddress>
+          access::decorated DecorateAddress = access::decorated::legacy>
 class multi_ptr {
  public:
   static constexpr bool is_decorated =

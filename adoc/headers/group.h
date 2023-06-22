@@ -49,6 +49,32 @@ template <int Dimensions = 1> class group {
   void parallel_for_work_item(range<Dimensions> logicalRange,
                               const WorkItemFunctionT& func) const;
 
+  // Deprecated in SYCL 2020. 
+  template <typename DataT>
+  device_event async_work_group_copy(local_ptr<DataT> dest,
+                                     global_ptr<const DataT> src,
+                                     size_t numElements) const;
+
+  // Deprecated in SYCL 2020.
+  template <typename DataT>
+  device_event async_work_group_copy(global_ptr<DataT> dest,
+                                     local_ptr<const DataT> src,
+                                     size_t numElements) const;
+
+  // Deprecated in SYCL 2020.
+  template <typename DataT>
+  device_event async_work_group_copy(local_ptr<DataT> dest,
+                                     global_ptr<const DataT> src,
+                                     size_t numElements,
+                                     size_t srcStride) const;
+
+  // Deprecated in SYCL 2020.
+  template <typename DataT>
+  device_event async_work_group_copy(global_ptr<DataT> dest,
+                                     local_ptr<const DataT> src,
+                                     size_t numElements,
+                                     size_t destStride) const;
+
   template <typename DataT>
   device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
                                      decorated_global_ptr<const DataT> src,
