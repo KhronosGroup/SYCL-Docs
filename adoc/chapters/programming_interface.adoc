@@ -8085,6 +8085,16 @@ accessor was constructed.  For other accessors, returns the default constructed
 a@
 [source]
 ----
+std::add_pointer_t<value_type> get_pointer() const noexcept
+----
+   a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
+      buffer, even if this is a <<ranged-accessor>> whose range does not start
+      at the beginning of the buffer.  The return value is unspecified if the
+      accessor is empty.
+
+a@
+[source]
+----
 const host_accessor& operator=(const value_type& other) const
 ----
    a@ Available only when [code]#(AccessMode != access_mode::read &&
@@ -8285,6 +8295,20 @@ void swap(local_accessor& other);
 ----
    a@ Swaps the contents of the current accessor with the contents of
       [code]#other#.
+
+@
+[source]
+----
+accessor_ptr<access::decorated::legacy> get_pointer() const noexcept
+----
+   a@ Returns a [code]#multi_ptr# to the start of this accessor's local memory
+      region which corresponds to the calling work-group. The return value is
+      unspecified if the accessor is empty.
+
+This function may only be called from within a <<command>>.
+
+Deprecated in SYCL 2020.  Use [code]#get_multi_ptr# instead.
+
 
 a@
 [source]
@@ -8557,22 +8581,6 @@ For [code]#host_accessor# and [code]#local_accessor# available only when
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
 [code]#index# to the accessor's offset.
-
-For [code]#accessor# and [code]#local_accessor#, this function may only be
-called from within a <<command>>.
-
-a@
-[source]
-----
-std::add_pointer_t<value_type> get_pointer() const noexcept
-----
-   a@ Returns a pointer to the start of this accessor's memory.
-
-For a buffer accessor this is a pointer to the start of the underlying buffer,
-even if this is a <<ranged-accessor>> whose range does not start at the
-beginning of the buffer.
-
-The return value is unspecified if the accessor is empty.
 
 For [code]#accessor# and [code]#local_accessor#, this function may only be
 called from within a <<command>>.
@@ -11854,6 +11862,58 @@ a@
 [source]
 ----
 template <typename DataT>
+device_event async_work_group_copy(local_ptr<DataT> dest,
+                                   global_ptr<const DataT> src,
+                                   size_t numElements) const
+----
+   a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(global_ptr<DataT> dest,
+                                   local_ptr<const DataT> src,
+                                   size_t numElements) const
+----
+   a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(local_ptr<DataT> dest,
+                                   global_ptr<const DataT> src,
+                                   size_t numElements, size_t srcStride) const
+----
+   a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(global_ptr<DataT> dest,
+                                   local_ptr<const DataT> src,
+                                   size_t numElements, size_t destStride) const
+----
+    a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
 device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
                                    decorated_global_ptr<const DataT> src,
                                    size_t numElements) const
@@ -12325,6 +12385,58 @@ different logical range sizes.
 
 This member function can only be invoked within a
 [code]#parallel_for_work_group# context.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(local_ptr<DataT> dest,
+                                   global_ptr<const DataT> src,
+                                   size_t numElements) const
+----
+   a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(global_ptr<DataT> dest,
+                                   local_ptr<const DataT> src,
+                                   size_t numElements) const
+----
+   a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(local_ptr<DataT> dest,
+                                   global_ptr<const DataT> src,
+                                   size_t numElements, size_t srcStride) const
+----
+   a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+
+a@
+[source]
+----
+template <typename DataT>
+device_event async_work_group_copy(global_ptr<DataT> dest,
+                                   local_ptr<const DataT> src,
+                                   size_t numElements, size_t destStride) const
+----
+    a@ Deprecated in SYCL 2020.
+      Has the same effect as the overload taking [code]#decorated_local_ptr#
+      and [code]#decorated_global_ptr# except that the dest and src parameters
+      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
 
 a@
 [source]

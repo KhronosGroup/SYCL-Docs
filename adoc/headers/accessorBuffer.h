@@ -184,6 +184,7 @@ class accessor {
   cl::sycl::atomic<DataT, access::address_space::global_space>
   operator[](id<Dimensions> index) const;
 
+  /* Deprecated in SYCL 2020 */
   accessor_ptr<access::decorated::legacy> get_pointer() const noexcept;
 
   template <access::decorated IsDecorated>
