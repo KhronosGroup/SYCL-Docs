@@ -19430,18 +19430,19 @@ vec<float,4> fmax(vec<float,4> x, vec<float,4> y)
 vec<float,8> fmax(vec<float,8> x, vec<float,8> y)
 vec<float,16> fmax(vec<float,16> x, vec<float,16> y)
 template<size_t N> marray<float,N> fmax(marray<float,N> x, marray<float,N> y)
-// etc.
+// ...
 ----
 
 When determining the set of overloads that are available, use the following
 rules:
 
 * If the specification of a function has several occurrences of the same
-  generic type name, replace each occurrence with the same actual type.  For
-  example, the [code]#fmax# example above has three occurrences of
-  [code]#genfloat#: one for the return type and one for each parameter type.
-  The available overloads include only the cases where both parameters have
-  the same type, and the return type always matches the type of the parameters.
+  generic type name, replace each occurrence in the same overload with the same
+  actual type.  For example, the [code]#fmax# example above has three
+  occurrences of [code]#genfloat#: one for the return type and one for each
+  parameter type.  The available overloads include only the cases where both
+  parameters have the same type, and the return type always matches the type of
+  the parameters.
 
 * The following generic type names sometimes appear together in the same
   function description:
@@ -19480,8 +19481,8 @@ func(vec<float,2>, multi_ptr<vec<float,2>, Space, IsDecorated>)
 However, there are no overloads where the two parameters have different
 vector lengths.
 
-* Some of the generic type names can be replaced with a templated type, where
-  the identifiers [code]#N#, [code]#Space#, and [code]#IsDecorated# represent
+* Some of the generic type names are replaced with a templated type, where the
+  identifiers [code]#N#, [code]#Space#, and [code]#IsDecorated# represent
   template parameters.  When this happens, the overload is a templated
   function, as shown above with the [code]#fmax# example.  Only a few
   combinations of template parameters are possible, and the following list
