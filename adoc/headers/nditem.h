@@ -50,26 +50,26 @@ template <int Dimensions = 1> class nd_item {
   // Deprecated in SYCL 2020. 
   template <typename DataT>
   device_event async_work_group_copy(local_ptr<DataT> dest,
-                                     global_ptr<const DataT> src,
+                                     global_ptr<DataT> src,
                                      size_t numElements) const;
 
   // Deprecated in SYCL 2020.
   template <typename DataT>
   device_event async_work_group_copy(global_ptr<DataT> dest,
-                                     local_ptr<const DataT> src,
+                                     local_ptr<DataT> src,
                                      size_t numElements) const;
 
   // Deprecated in SYCL 2020.
   template <typename DataT>
   device_event async_work_group_copy(local_ptr<DataT> dest,
-                                     global_ptr<const DataT> src,
+                                     global_ptr<DataT> src,
                                      size_t numElements,
                                      size_t srcStride) const;
 
   // Deprecated in SYCL 2020.
   template <typename DataT>
   device_event async_work_group_copy(global_ptr<DataT> dest,
-                                     local_ptr<const DataT> src,
+                                     local_ptr<DataT> src,
                                      size_t numElements,
                                      size_t destStride) const;
 

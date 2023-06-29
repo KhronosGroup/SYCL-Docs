@@ -11863,7 +11863,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<const DataT> src,
+                                   global_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -11876,7 +11876,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<const DataT> src,
+                                   local_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -11889,7 +11889,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<const DataT> src,
+                                   global_ptr<DataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -11902,7 +11902,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<const DataT> src,
+                                   local_ptr<DataT> src,
                                    size_t numElements, size_t destStride) const
 ----
     a@ Deprecated in SYCL 2020.
@@ -12391,7 +12391,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<const DataT> src,
+                                   global_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -12404,7 +12404,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<const DataT> src,
+                                   local_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -12417,7 +12417,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<const DataT> src,
+                                   global_ptr<DataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -12430,7 +12430,7 @@ a@
 ----
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<const DataT> src,
+                                   local_ptr<DataT> src,
                                    size_t numElements, size_t destStride) const
 ----
     a@ Deprecated in SYCL 2020.
@@ -19707,8 +19707,11 @@ template<access::address_space Space, access::decorated IsDecorated>
 template<size_t N, access::address_space Space, access::decorated IsDecorated>
 ----
 
-* Unless specified otherwise, the template parameters [code]#Space# and
-  [code]#IsDecorated# are unconstrained.
+* Unless specified otherwise, the template parameter [code]#Space# is
+  constrained to the values [code]#access::address_space::global_space#,
+  [code]#access::address_space::local_space#,
+  [code]#access::address_space::private_space# or 
+  [code]#access::address_space::generic_space.
 
 * Other template parameters are not constrained to particular values unless a
   constraint is specifically mentioned in <<table.gentypes>>.
