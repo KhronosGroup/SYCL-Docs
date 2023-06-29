@@ -6598,11 +6598,18 @@ Certain [code]#accessor# constructors create a "placeholder" accessor.  Such
 an accessor is bound to a [code]#buffer# and its semantics such as access
 target and access mode are defined.  However, a placeholder accessor is not
 yet bound to a <<command-group>>.  Before such an accessor can be used in a
-<<command>>, it must be bound by calling [code]#handler::require()#.  If a
-placeholder accessor is passed as an argument to a <<command>> without first
-being bound to a <<command-group>> with [code]#handler::require()#, the
-implementation throws a synchronous [code]#exception# with the
-[code]#errc::kernel_argument# error code when the <<command>> is submitted.
+<<command>>, it must be bound by calling [code]#handler::require()#.  Passing a
+placeholder accessor as an argument to a <<command>> without first being bound
+to a <<command-group>> with [code]#handler::require()# will result in undefined
+behavior.
+
+[NOTE]
+====
+Implementations are encouraged to throw either a synchronous or an asynchronous
+exception when a placeholder accessor, that has not been bound to the
+corresponding <<command-group>> with [code]#handler::require()#, is either
+passed as an argument to or is used inside a <<command>>.
+====
 
 
 ===== Interface for buffer command accessors
@@ -7145,10 +7152,9 @@ This specialization of [code]#accessor# is available only for the access mode
 This accessor type can be constructed as a "placeholder" accessor.  As with
 other [code]#accessor# specializations that are placeholders,
 [code]#handler::require()# must be called before passing a placeholder accessor
-to a <<command>>.  If the application neglects to call
-[code]#handler::require()# on a placeholder accessor, the implementation throws
-a synchronous [code]#exception# with the [code]#errc::kernel_argument# error
-code when the <<command>> is submitted.
+to a <<command>>.  Passing a placeholder accessor as an argument to a
+<<command>> without first being bound to a <<command-group>> with
+[code]#handler::require()# will result in undefined behavior.
 
 A synopsis for this specialization of [code]#accessor# is provided below.
 Since some of the class types and member functions have the same name and
@@ -7340,6 +7346,8 @@ constant_ptr<DataT> get_pointer() const noexcept
       buffer, even if this is a <<ranged-accessor>> whose range does not start
       at the beginning of the buffer.  The return value is unspecified if the
       accessor is empty.
+
+This function may only be called from within a <<command>>.
 
 |====
 
@@ -7570,6 +7578,8 @@ Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing.
 
+This function may only be called from within a <<command>>.
+
 a@
 [source]
 ----
@@ -7583,6 +7593,8 @@ Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing, at the index specified by [code]#index#.
 
+This function may only be called from within a <<command>>.
+
 a@
 [source]
 ----
@@ -7595,6 +7607,8 @@ Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing, at the index specified by [code]#index#.
 
+This function may only be called from within a <<command>>.
+
 a@
 [source]
 ----
@@ -7603,6 +7617,8 @@ local_ptr<DataT> get_pointer() const noexcept
    a@ Returns a [code]#multi_ptr# to the work-group's local memory allocation
       that this accessor is accessing.  The return value is unspecified if the
       accessor is empty.
+
+This function may only be called from within a <<command>>.
 
 |====
 
@@ -7716,6 +7732,10 @@ When [code]#AccessTarget# is [code]#target::local#, available only when
 
 Returns a reference to the single element that is accessed by this accessor.
 
+When [code]#AccessTarget# is [code]#target::local# or
+[code]#target::constant_buffer#, this function may only be called from within a
+<<command>>.
+
 a@
 [source]
 ----
@@ -7731,6 +7751,10 @@ When [code]#AccessTarget# is [code]#target::local#, available only when
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
 [code]#index# to the accessor's offset.
+
+When [code]#AccessTarget# is [code]#target::local# or
+[code]#target::constant_buffer#, this function may only be called from within a
+<<command>>.
 
 a@
 [source]
@@ -7749,6 +7773,10 @@ appropriate for the type it represents (including this subscript operator).
 If this is a <<ranged-accessor>>, the implicit [code]#id# in the returned
 instance also includes the accessor's offset.
 
+When [code]#AccessTarget# is [code]#target::local# or
+[code]#target::constant_buffer#, this function may only be called from within a
+<<command>>.
+
 a@
 [source]
 ----
@@ -7764,6 +7792,10 @@ When [code]#AccessTarget# is [code]#target::local#, available only when
 Returns a reference to the element at the location specified by [code]#index#.
 If this is a <<ranged-accessor>>, the element is determined by adding
 [code]#index# to the accessor's offset.
+
+When [code]#AccessTarget# is [code]#target::local# or
+[code]#target::constant_buffer#, this function may only be called from within a
+<<command>>.
 
 |====
 
