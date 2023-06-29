@@ -66,13 +66,9 @@ enum class errc : /* unspecified */ {
   backend_mismatch
 };
 
-template <backend b> using errc_for = typename backend_traits<b>::errc;
-
 std::error_code make_error_code(errc e) noexcept;
 
 const std::error_category& sycl_category() noexcept;
-
-template <backend b> const std::error_category& error_category_for() noexcept;
 
 } // namespace sycl
 
