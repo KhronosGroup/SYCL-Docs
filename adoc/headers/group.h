@@ -75,25 +75,33 @@ template <int Dimensions = 1> class group {
                                      size_t numElements,
                                      size_t destStride) const;
 
-  template <typename DataT>
-  device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                     decorated_global_ptr<const DataT> src,
+  /* Available only when: (std::is_same_v<DestDataT,
+       std::remove_const_t<SrcDataT>> == true) */
+  template <typename DestDataT, typename SrcDataT>
+  device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
+                                     decorated_global_ptr<SrcDataT> src,
                                      size_t numElements) const;
 
-  template <typename DataT>
-  device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                     decorated_local_ptr<const DataT> src,
+  /* Available only when: (std::is_same_v<DestDataT,
+       std::remove_const_t<SrcDataT>> == true) */
+  template <typename DestDataT, typename SrcDataT>
+  device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
+                                     decorated_local_ptr<SrcDataT> src,
                                      size_t numElements) const;
 
-  template <typename DataT>
-  device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                     decorated_global_ptr<const DataT> src,
+  /* Available only when: (std::is_same_v<DestDataT,
+       std::remove_const_t<SrcDataT>> == true) */
+  template <typename DestDataT, typename SrcDataT>
+  device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
+                                     decorated_global_ptr<SrcDataT> src,
                                      size_t numElements,
                                      size_t srcStride) const;
 
-  template <typename DataT>
-  device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                     decorated_local_ptr<const DataT> src,
+  /* Available only when: (std::is_same_v<DestDataT,
+       std::remove_const_t<SrcDataT>> == true) */
+  template <typename DestDataT, typename SrcDataT>
+  device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
+                                     decorated_local_ptr<SrcDataT> src,
                                      size_t numElements,
                                      size_t destStride) const;
 

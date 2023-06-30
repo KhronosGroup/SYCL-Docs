@@ -63,7 +63,7 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   reference operator[](size_t index) const;
 
   /* Deprecated in SYCL 2020 */
-  accessor_ptr<access::decorated::legacy> get_pointer() const noexcept;
+  local_ptr<DataT> get_pointer() const noexcept;
 
   template <access::decorated IsDecorated>
   accessor_ptr<IsDecorated> get_multi_ptr() const noexcept;

@@ -6962,16 +6962,31 @@ accessor was constructed.  For other accessors, returns the default constructed
 a@
 [source]
 ----
-accessor_ptr<access::decorated::legacy> get_pointer() const noexcept
+global_ptr<access::decorated::legacy> get_pointer() const noexcept
 ----
-   a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
-      buffer, even if this is a <<ranged-accessor>> whose range does not start
-      at the beginning of the buffer.  The return value is unspecified if the
-      accessor is empty.
+   a@ Available only when [code]#(AccessTarget == target::device)#.
+
+Returns a [code]#multi_ptr# to the start of this accessor's underlying buffer,
+even if this is a <<ranged-accessor>> whose range does not start at the
+beginning of the buffer.  The return value is unspecified if the accessor is
+empty.
 
 This function may only be called from within a <<command>>.
 
 Deprecated in SYCL 2020.  Use [code]#get_multi_ptr# instead.
+
+a@
+[source]
+----
+std::add_pointer_t<value_type> get_pointer() const noexcept
+----
+   a@ Available only when [code]#(AccessTarget == target::host_task)#.
+
+Returns a pointer to the start of this accessor's underlying buffer, even if
+this is a <<ranged-accessor>> whose range does not start at the beginning of
+the buffer.  The return value is unspecified if the accessor is empty.
+
+This function may only be called from within a <<command>>.
 
 a@
 [source]
@@ -8087,7 +8102,7 @@ a@
 ----
 std::add_pointer_t<value_type> get_pointer() const noexcept
 ----
-   a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
+   a@ Returns a pointer to the start of this accessor's underlying
       buffer, even if this is a <<ranged-accessor>> whose range does not start
       at the beginning of the buffer.  The return value is unspecified if the
       accessor is empty.
@@ -8299,7 +8314,7 @@ void swap(local_accessor& other);
 @
 [source]
 ----
-accessor_ptr<access::decorated::legacy> get_pointer() const noexcept
+local_ptr<DataT> get_pointer() const noexcept
 ----
    a@ Returns a [code]#multi_ptr# to the start of this accessor's local memory
       region which corresponds to the calling work-group. The return value is
@@ -11913,56 +11928,70 @@ device_event async_work_group_copy(global_ptr<DataT> dest,
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<const DataT> src,
+template <typename DestDataT, typename SrcDataT>
+device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
+                                   decorated_global_ptr<SrcDataT> src,
                                    size_t numElements) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+   a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# and
+returns a SYCL [code]#device_event# which can be used to wait on the completion
+of the copy.
 
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<const DataT> src,
+template <typename DestDataT, typename SrcDataT>
+device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
+                                   decorated_local_ptr<SrcDataT> src,
                                    size_t numElements) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+   a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# and
+returns a SYCL [code]#device_event# which can be used to wait on the
+completion of the copy.
 
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<const DataT> src,
+template <typename DestDataT, typename SrcDataT>
+device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
+                                   decorated_global_ptr<SrcDataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# with a source stride specified by
-      [code]#srcStride# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+   a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# with a
+source stride specified by [code]#srcStride# and returns a SYCL
+[code]#device_event# which can be used to wait on the completion of the copy.
 
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<const DataT> src,
+template <typename DestDataT, SrcDataT>
+device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
+                                   decorated_local_ptr<SrcDataT> src,
                                    size_t numElements, size_t destStride) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# with a destination stride specified by
-      [code]#destStride# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+    a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# with a
+destination stride specified by [code]#destStride# and returns a SYCL
+[code]#device_event# which can be used to wait on the completion of the copy.
 
 a@
 [source]
@@ -12441,56 +12470,53 @@ device_event async_work_group_copy(global_ptr<DataT> dest,
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<const DataT> src,
+template <typename DestDataT, typename SrcDataT>
+device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
+                                   decorated_local_ptr<SrcDataT> src,
                                    size_t numElements) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+   a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# and
+returns a SYCL [code]#device_event# which can be used to wait on the
+completion of the copy.
 
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<const DataT> src,
-                                   size_t numElements) const
-----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
-
-a@
-[source]
-----
-template <typename DataT>
-device_event async_work_group_copy(decorated_local_ptr<DataT> dest,
-                                   decorated_global_ptr<const DataT> src,
+template <typename DestDataT, typename SrcDataT>
+device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
+                                   decorated_global_ptr<SrcDataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# with a source stride specified by
-      [code]#srcStride# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+   a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# with a
+source stride specified by [code]#srcStride# and returns a SYCL
+[code]#device_event# which can be used to wait on the completion of the copy.
 
 a@
 [source]
 ----
-template <typename DataT>
-device_event async_work_group_copy(decorated_global_ptr<DataT> dest,
-                                   decorated_local_ptr<const DataT> src,
+template <typename DestDataT, SrcDataT>
+device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
+                                   decorated_local_ptr<SrcDataT> src,
                                    size_t numElements, size_t destStride) const
 ----
-   a@ Permitted types for [code]#DataT# are all scalar and vector types.
-      Asynchronously copies a number of elements specified by [code]#numElements# from the source pointer [code]#src# to destination
-      pointer [code]#dest# with a destination stride specified by
-      [code]#destStride# and returns a SYCL [code]#device_event#
-      which can be used to wait on the completion of the copy.
+    a@ Available only when: (std::is_same_v<DestDataT,
+        std::remove_const_t<SrcDataT>> == true)
+
+Permitted types for [code]#DataT# are all scalar and vector types.
+Asynchronously copies a number of elements specified by [code]#numElements#
+from the source pointer [code]#src# to destination pointer [code]#dest# with a
+destination stride specified by [code]#destStride# and returns a SYCL
+[code]#device_event# which can be used to wait on the completion of the copy.
 
 a@
 [source]
