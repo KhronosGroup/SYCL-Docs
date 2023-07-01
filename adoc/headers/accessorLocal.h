@@ -62,7 +62,8 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   /* Available only when: (Dimensions == 1) */
   reference operator[](size_t index) const;
 
-  std::add_pointer_t<value_type> get_pointer() const noexcept;
+  /* Deprecated in SYCL 2020 */
+  local_ptr<DataT> get_pointer() const noexcept;
 
   template <access::decorated IsDecorated>
   accessor_ptr<IsDecorated> get_multi_ptr() const noexcept;
