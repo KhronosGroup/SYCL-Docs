@@ -188,9 +188,10 @@ class accessor {
   Available only when: (AccessTarget == target::device) */
   global_ptr<DataT> get_pointer() const noexcept;
 
-  /* Available only when (AccessTarget == target::host_task) */
+  /* Available only when: (AccessTarget == target::host_task) */
   std::add_pointer_t<value_type> get_pointer() const noexcept;
 
+  /* Available only when: (AccessTarget == target::device) */
   template <access::decorated IsDecorated>
   accessor_ptr<IsDecorated> get_multi_ptr() const noexcept;
 

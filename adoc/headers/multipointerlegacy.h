@@ -61,7 +61,7 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
   // Returns the underlying OpenCL C pointer
   pointer_t get() const;
 
-  std::add_pointer_t<value_type> get_raw() const;
+  std::add_pointer_t<ElementType> get_raw() const;
 
   pointer_t get_decorated() const;
 
