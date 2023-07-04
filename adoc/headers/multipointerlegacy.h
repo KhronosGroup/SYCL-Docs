@@ -8,6 +8,7 @@ namespace sycl {
 template <typename ElementType, access::address_space Space>
 class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
  public:
+  using value_type = ElementType;
   using element_type = ElementType;
   using difference_type = std::ptrdiff_t;
 
@@ -61,7 +62,7 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
   // Returns the underlying OpenCL C pointer
   pointer_t get() const;
 
-  std::add_pointer_t<ElementType> get_raw() const;
+  std::add_pointer_t<element_type> get_raw() const;
 
   pointer_t get_decorated() const;
 
@@ -149,6 +150,7 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
 template <access::address_space Space>
 class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
  public:
+  using value_type = ElementType;
   using element_type = VoidType;
   using difference_type = std::ptrdiff_t;
 
@@ -190,6 +192,10 @@ class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
 
   // Returns the underlying OpenCL C pointer
   pointer_t get() const;
+
+  std::add_pointer_t<element_type> get_raw() const;
+
+  pointer_t get_decorated() const;
 
   // Implicit conversion to the underlying pointer type
   operator VoidType*() const;
