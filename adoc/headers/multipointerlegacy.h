@@ -150,7 +150,7 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
 template <access::address_space Space>
 class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
  public:
-  using value_type = ElementType;
+  using value_type = VoidType;
   using element_type = VoidType;
   using difference_type = std::ptrdiff_t;
 
