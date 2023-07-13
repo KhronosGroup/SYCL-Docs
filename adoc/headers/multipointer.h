@@ -385,8 +385,7 @@ multi_ptr(accessor<T, Dimensions, access_mode::read_write, target::device, IsPla
     -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
 
 template <typename T, int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
-multi_ptr(accessor<T, Dimensions, Mode, access::target::constant_buffer,
-                   IsPlaceholder>)
+multi_ptr(accessor<T, Dimensions, Mode, access::target::constant_buffer, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::constant_space, access::decorated::no>;
 
 template <typename T, int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
@@ -396,4 +395,5 @@ multi_ptr(accessor<T, Dimensions, Mode, access::target::local, IsPlaceholder>)
 template <typename T, int Dimensions>
 multi_ptr(local_accessor<T, Dimensions>)
     -> multi_ptr<T, access::address_space::local_space, access::decorated::no>;
+
 } // namespace sycl
