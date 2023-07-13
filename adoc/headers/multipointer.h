@@ -375,19 +375,24 @@ multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType*);
 template <typename T, int Dimensions, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, access_mode::read, target::device, IsPlaceholder>)
     -> multi_ptr<const T, access::address_space::global_space, access::decorated::no>;
+
 template <typename T, int Dimensions, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, access_mode::write, target::device, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
+
 template <typename T, int Dimensions, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, access_mode::read_write, target::device, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
+
 template <typename T, int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, Mode, access::target::constant_buffer,
                    IsPlaceholder>)
     -> multi_ptr<T, access::address_space::constant_space, access::decorated::no>;
+
 template <typename T, int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, Mode, access::target::local, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::local_space, access::decorated::no>;
+
 template <typename T, int Dimensions>
 multi_ptr(local_accessor<T, Dimensions>)
     -> multi_ptr<T, access::address_space::local_space, access::decorated::no>;
