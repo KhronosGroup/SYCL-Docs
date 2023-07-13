@@ -374,7 +374,7 @@ multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(ElementType*);
 // Deduction guides
 template <typename T, int Dimensions, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, access_mode::read, target::device, IsPlaceholder>)
-    -> multi_ptr<const T, access::address_space::global_space,access::decorated::no>;
+    -> multi_ptr<const T, access::address_space::global_space, access::decorated::no>;
 template <typename T, int Dimensions, access::placeholder IsPlaceholder>
 multi_ptr(accessor<T, Dimensions, access_mode::write, target::device, IsPlaceholder>)
     -> multi_ptr<T, access::address_space::global_space, access::decorated::no>;
