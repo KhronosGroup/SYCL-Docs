@@ -44,31 +44,30 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
   ElementType* operator->() const;
 
   // Available only when:
-  // (Space == global_space || Space == generic_space) &&
-  // (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
-  // (std::is_const_v<ElementType> ||
-  // !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::device,
-  //                           IsPlaceholder>::value_type> 
+  //   (Space == access::address_space::global_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> ||
+  //    !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::device,
+  //                              IsPlaceholder>::value_type>)
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 
   // Available only when:
-  // (Space == local_space || Space == generic_space) &&
-  // (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
-  // (std::is_const_v<ElementType> ||
-  // !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::local,
-  //                           IsPlaceholder>::value_type>
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
 
   // Available only when:
-  // (Space == local_space || Space == generic_space) &&
-  // (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
-  // (std::is_const_v<ElementType> ||
-  // !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::local,
-  //                           IsPlaceholder>::value_type>
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)
   template <typename AccDataT, int Dimensions>
   multi_ptr(local_accessor<AccDataT, Dimensions>);
 
@@ -196,30 +195,29 @@ class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
   multi_ptr& operator=(std::nullptr_t);
 
   // Available only when:
-  // (Space == global_space || Space == generic_space) &&
-  // (std::is_const_v<VoidType> ||
-  // !std::is_const_v<accessor<ElementType, Dimensions, Mode, target::device,
-  //                           IsPlaceholder>::value_type>)
+  //   (Space == access::address_space::global_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> ||
+  //    !std::is_const_v<accessor<ElementType, Dimensions, Mode, target::device,
+  //                              IsPlaceholder>::value_type>)
   template <typename ElementType, int Dimensions, access_mode Mode>
   multi_ptr(accessor<ElementType, Dimensions, Mode, target::device>);
 
   // Available only when:
-  // (Space == local_space || Space == generic_space) &&
-  // (std::is_const_v<VoidType> ||
-  // !std::is_const_v<accessor<ElementType, Dimensions, Mode, target::local,
-  //                           IsPlaceholder>::value_type>)
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
   template <typename ElementType, int Dimensions, access_mode Mode>
   multi_ptr(accessor<ElementType, Dimensions, Mode, target::local>);
 
   // Available only when:
-  // (Space == local_space || Space == generic_space) &&
-  // (std::is_const_v<VoidType> ||
-  // !std::is_const_v<accessor<ElementType, Dimensions, Mode, target::local,
-  //                           IsPlaceholder>::value_type>)
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
   template <typename AccDataT, int Dimensions>
   multi_ptr(local_accessor<AccDataT, Dimensions>);
 
-  // Only if Space == constant_space
+  // Only if Space == access::address_space::constant_space
   template <typename ElementType, int Dimensions, access_mode Mode>
   multi_ptr(accessor<ElementType, Dimensions, Mode, target::constant_buffer>);
 
