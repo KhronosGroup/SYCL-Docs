@@ -309,8 +309,7 @@ class multi_ptr<VoidType, Space, DecorateAddress> {
   // Available only when:
   //   Space == access::address_space::constant_space &&
   //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
-  template <typename ElementType, int Dimensions,
-            access::placeholder IsPlaceholder>
+  template <typename ElementType, int Dimensions, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, access_mode::read, target::constant_buffer, IsPlaceholder>);
 
