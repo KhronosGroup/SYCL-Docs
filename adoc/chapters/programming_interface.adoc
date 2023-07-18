@@ -13163,9 +13163,11 @@ to create a *requirement* for a [keyword]#placeholder# accessor, code
 must call the [code]#handler::require()# member function.
 
 Note that the default constructed [code]#accessor# is not a placeholder, so it
-may be passed to a kernel without calling [code]#handler::require()#.  However,
-this accessor also has no underlying memory object, so such an accessor does
-not create any *requirement* for the command group.
+may be passed to a <<sycl-kernel-function>> without calling
+[code]#handler::require()#.  However, this accessor also has no underlying
+memory object, so such an accessor does not create any *requirement* for the
+command group, and attempting to access data elements from it produces
+undefined behavior.
 
 SYCL events may also be used to create requirements for a <<command-group>>.
 Such requirements state that the actions represented by the events must
