@@ -4140,8 +4140,12 @@ data, while allowing exception handling for blocking
 and non-blocking data transfers. Accessors manage data transfers between the host
 and all of the devices in the system, as well as tracking of data dependencies.
 
-Zero-sized buffers are permitted. In this case, the buffer still handles ownership as
-normal, but does not need to store the zero-sized data itself.
+Zero-sized buffers and accessors are permitted, but attempting to access data
+within them produces undefined behavior, similar to dereferencing a null
+pointer in {cpp}.  Note that zero-sized accessors can be created in several
+ways: by creating an accessor from a zero-sized buffer, by creating an accessor
+with a zero-sized buffer sub-range, or by creating an accessor with its default
+constructor.
 
 When using <<usm>> allocations, data storage is managed by USM allocation functions, and
 data access is via pointers.  See <<sec:usm>> for greater detail.
