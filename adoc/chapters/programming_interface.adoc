@@ -6996,10 +6996,12 @@ a@
 template <access::decorated IsDecorated>
 accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----
-   a@ Returns a [code]#multi_ptr# to the start of this accessor's underlying
-      buffer, even if this is a <<ranged-accessor>> whose range does not start
-      at the beginning of the buffer.  The return value is unspecified if the
-      accessor is empty.
+   a@ Available only when [code]#(AccessTarget == target::device)#.
+
+Returns a [code]#multi_ptr# to the start of this accessor's underlying buffer,
+even if this is a <<ranged-accessor>> whose range does not start at the
+beginning of the buffer.  The return value is unspecified if the accessor is
+empty.
 
 This function may only be called from within a <<command>>.
 
