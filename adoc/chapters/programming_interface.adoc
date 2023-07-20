@@ -4138,8 +4138,12 @@ data, while allowing exception handling for blocking
 and non-blocking data transfers. Accessors manage data transfers between the host
 and all of the devices in the system, as well as tracking of data dependencies.
 
-Zero-sized buffers are permitted. In this case, the buffer still handles ownership as
-normal, but does not need to store the zero-sized data itself.
+Zero-sized buffers and accessors are permitted, but attempting to access data
+within them produces undefined behavior, similar to dereferencing a null
+pointer in {cpp}.  Note that zero-sized accessors can be created in several
+ways: by creating an accessor from a zero-sized buffer, by creating an accessor
+with a zero-sized buffer sub-range, or by creating an accessor with its default
+constructor.
 
 When using <<usm>> allocations, data storage is managed by USM allocation functions, and
 data access is via pointers.  See <<sec:usm>> for greater detail.
@@ -6676,10 +6680,8 @@ accessor()
   * All size queries return [code]#0#.
   * The return values of [code]#get_pointer()# and [code]#get_multi_ptr()# are
     unspecified.
-  * Trying to access the underlying memory is undefined behavior.
-
-A default constructed accessor can be passed to a <<sycl-kernel-function>>
-but it is not valid to register it with the command group handler.
+  * A default constructed accessor can be passed to a <<sycl-kernel-function>>,
+    but attempting to access data elements from it produces undefined behavior.
 --
 
 a@
@@ -6945,8 +6947,8 @@ a@
 ----
 bool is_placeholder() const
 ----
-   a@ Returns [code]#true# if the accessor was constructed as a placeholder.
-      Otherwise returns [code]#false#.
+   a@ Returns [code]#true# if the accessor is a placeholder.  Otherwise returns
+      [code]#false#.
 
 a@
 [source]
@@ -8264,7 +8266,9 @@ local_accessor()
   * All size queries return [code]#0#.
   * The return values of [code]#get_pointer()# and [code]#get_multi_ptr()# are
     unspecified.
-  * Trying to access the underlying memory is undefined behavior.
+  * A default constructed local accessor can be passed to a
+    <<sycl-kernel-function>>, but attempting to access data elements from it
+    produces undefined behavior.
 --
 
 a@
@@ -13339,6 +13343,13 @@ this does not happen when creating a [keyword]#placeholder# accessor.  In order
 to create a *requirement* for a [keyword]#placeholder# accessor, code
 must call the [code]#handler::require()# member function.
 
+Note that the default constructed [code]#accessor# is not a placeholder, so it
+may be passed to a <<sycl-kernel-function>> without calling
+[code]#handler::require()#.  However, this accessor also has no underlying
+memory object, so such an accessor does not create any *requirement* for the
+command group, and attempting to access data elements from it produces
+undefined behavior.
+
 SYCL events may also be used to create requirements for a <<command-group>>.
 Such requirements state that the actions represented by the events must
 complete before the <<command-group>> may execute.  Such requirements
@@ -13357,15 +13368,12 @@ template <typename DataT, int Dimensions, access_mode AccessMode,
 void require(
     accessor<DataT, Dimensions, AccessMode, AccessTarget, IsPlaceholder> acc)
 ----
-   a@ Requires access to the memory object associated with the accessor.
-
-The <<command-group>> now has a *requirement* to gain access
-to the given memory object before executing the kernel.
-If the accessor has already been registered with the <<command-group>>,
-calling this function has no effect.
-
-Throws [code]#exception# with the [code]#errc::invalid# error code
-if [code]#(acc.empty() == true)#.
+   a@ Calling this function has no effect unless [code]#acc# is a placeholder
+      accessor.  When [code]#acc# is a placeholder accessor, this function
+      adds a *requirement* to the handler's <<command-group>> for the memory
+      object represented by [code]#acc#.  If the accessor has already been
+      registered with the <<command-group>>, calling this function has no
+      effect.
 
 a@
 [source]
