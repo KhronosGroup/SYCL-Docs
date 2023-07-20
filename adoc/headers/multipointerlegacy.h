@@ -43,15 +43,33 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
   }
   ElementType* operator->() const;
 
-  // Only if Space == global_space
+  // Available only when:
+  //   (Space == access::address_space::global_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> ||
+  //    !std::is_const_v<accessor<AccDataT, Dimensions, Mode, target::device,
+  //                              IsPlaceholder>::value_type>)
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, Mode, target::device, IsPlaceholder>);
 
-  // Only if Space == local_space
+  // Available only when:
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
   multi_ptr(
       accessor<ElementType, Dimensions, Mode, target::local, IsPlaceholder>);
+
+  // Available only when:
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
+  //   (std::is_const_v<ElementType> || !std::is_const_v<AccDataT>)
+  template <typename AccDataT, int Dimensions>
+  multi_ptr(local_accessor<AccDataT, Dimensions>);
 
   // Only if Space == constant_space
   template <int Dimensions, access_mode Mode, access::placeholder IsPlaceholder>
@@ -69,11 +87,11 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
   operator ElementType*() const;
 
   // Implicit conversion to a multi_ptr<void>
-  // Only available when ElementType is not const-qualified
+  // Available only when ElementType is not const-qualified
   operator multi_ptr<void, Space, access::decorated::legacy>() const;
 
   // Implicit conversion to a multi_ptr<const void>
-  // Only available when ElementType is const-qualified
+  // Available only when ElementType is const-qualified
   operator multi_ptr<const void, Space, access::decorated::legacy>() const;
 
   // Implicit conversion to multi_ptr<const ElementType, Space>
@@ -176,15 +194,30 @@ class [[deprecated]] multi_ptr<VoidType, Space, access::decorated::legacy> {
   multi_ptr& operator=(VoidType*);
   multi_ptr& operator=(std::nullptr_t);
 
-  // Only if Space == global_space
+  // Available only when:
+  //   (Space == access::address_space::global_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> ||
+  //    !std::is_const_v<accessor<ElementType, Dimensions, Mode, target::device,
+  //                              IsPlaceholder>::value_type>)
   template <typename ElementType, int Dimensions, access_mode Mode>
   multi_ptr(accessor<ElementType, Dimensions, Mode, target::device>);
 
-  // Only if Space == local_space
+  // Available only when:
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
   template <typename ElementType, int Dimensions, access_mode Mode>
   multi_ptr(accessor<ElementType, Dimensions, Mode, target::local>);
 
-  // Only if Space == constant_space
+  // Available only when:
+  //   (Space == access::address_space::local_space ||
+  //    Space == access::address_space::generic_space) &&
+  //   (std::is_const_v<VoidType> || !std::is_const_v<ElementType>)
+  template <typename AccDataT, int Dimensions>
+  multi_ptr(local_accessor<AccDataT, Dimensions>);
+
+  // Only if Space == access::address_space::constant_space
   template <typename ElementType, int Dimensions, access_mode Mode>
   multi_ptr(accessor<ElementType, Dimensions, Mode, target::constant_buffer>);
 
