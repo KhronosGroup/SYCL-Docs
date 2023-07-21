@@ -25619,7 +25619,7 @@ _Constraints:_ Available only if [code]#GeoFloat# is a _float geometric type_
 as defined above.
 
 _Returns:_ The length of vector [code]#p# computed as:
-[code]#+sqrt((half)(pow(p[0],2) + pow(p[1],2) + ...))+#.
+[code]#+half_precision::sqrt((pow(p[0],2) + pow(p[1],2) + ...))+#.
 
 The return type is [code]#GeoFloat# if the input type is scalar.  Otherwise,
 the return type is [code]#GeoFloat::value_type#.
@@ -25639,7 +25639,8 @@ _Constraints:_ Available only if [code]#GeoFloat# is a _float geometric type_
 as defined above.
 
 _Returns:_ A vector in the same direction as [code]#p# but with a length of 1
-computed as [code]#+p*rsqrt((half)(pow(p[0],2) + pow(p[1],2) + ... ))+#.
+computed as
+[code]#+p * half_precision::rsqrt((pow(p[0],2) + pow(p[1],2) + ... ))+#.
 
 The result shall be within 8192 ulps error from the infinitely precise result
 of
