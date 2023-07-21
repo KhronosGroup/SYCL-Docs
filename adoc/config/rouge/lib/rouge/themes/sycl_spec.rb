@@ -15,8 +15,6 @@ module Rouge
       style Keyword::Pseudo,                  :fg => '#9a32cd', :italic => true
       # sycl_functions #00c5cd Turquoise 3
       style Name::Function::Magic,            :fg => '#00c5cd', :bold => true
-      # sycl_generic_types magenta #ff00ff
-      style Name::Builtin::Pseudo,            :fg => '#ff00ff', :italic => true
       # sycl_macros OliveDrab2 #b3ee3a
       style Generic::Output,                  :fg => '#b3ee3a', :bold => true
       # sycl_namespaces use official SYCL orange defined by Khronos #f35a1c
