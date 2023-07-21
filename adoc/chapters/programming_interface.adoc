@@ -26557,10 +26557,39 @@ a@
 a!
 [source]
 ----
-template<typename GenInt>
+template<typename GenInt>      (1)
 /*return-type*/ any(GenInt x)
+
+template<typename GenInt>      (2)  /* deprecated */
+bool any(GenInt x)
 ----
 !====
+
+*Overload (1):*
+
+_Constraints:_ Available only if [code]#GenInt# is one of the following types:
+
+* [code]#marray<bool, N>#
+* [code]#vec<int8_t, N>#
+* [code]#vec<int16_t, N>#
+* [code]#vec<int32_t, N>#
+* [code]#vec<int64_t, N>#
+* [code]#+__swizzled_vec__<int8_t, N>+#
+* [code]#+__swizzled_vec__<int16_t, N>+#
+* [code]#+__swizzled_vec__<int32_t, N>+#
+* [code]#+__swizzled_vec__<int64_t, N>+#
+
+_Returns:_ When [code]#x# is [code]#marray#, returns a Boolean telling whether
+any element of [code]#x# is true.  When [code]#x# is [code]#vec# or the
+[code]#+__swizzled_vec__+# type, returns the value -1 if any element in
+[code]#x# has its most significant bit set, otherwise returns the value 0.
+
+The return type is [code]#bool# if [code]#GenInt# is [code]#marray#.
+Otherwise, the return type is [code]#int#.
+
+*Overload (2):*
+
+This overload is deprecated in SYCL 2020.
 
 _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 
@@ -26574,24 +26603,11 @@ _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 * [code]#marray<int, N>#
 * [code]#marray<long, N>#
 * [code]#marray<long long, N>#
-* [code]#vec<int8_t, N>#
-* [code]#vec<int16_t, N>#
-* [code]#vec<int32_t, N>#
-* [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__<int8_t, N>+#
-* [code]#+__swizzled_vec__<int16_t, N>+#
-* [code]#+__swizzled_vec__<int32_t, N>+#
-* [code]#+__swizzled_vec__<int64_t, N>+#
 
 _Returns:_ When [code]#x# is a scalar, returns a Boolean telling whether the
 most significant bit of [code]#x# is set.  When [code]#x# is [code]#marray#,
 returns a Boolean telling whether the most significant bit of any element
-in [code]#x# is set.  When [code]#x# is [code]#vec# or the
-[code]#+__swizzled_vec__+# type, returns the value -1 if any element in
-[code]#x# has its most significant bit set, otherwise returns the value 0.
-
-The return type is [code]#bool# if [code]#GenInt# is a scalar or
-[code]#marray#.  Otherwise, the return type is [code]#int#.
+in [code]#x# is set.
 
 a@
 [frame=all,grid=none]
@@ -26599,10 +26615,39 @@ a@
 a!
 [source]
 ----
-template<typename GenInt>
+template<typename GenInt>      (1)
 /*return-type*/ all(GenInt x)
+
+template<typename GenInt>      (2)  /* deprecated */
+bool all(GenInt x)
 ----
 !====
+
+*Overload (1):*
+
+_Constraints:_ Available only if [code]#GenInt# is one of the following types:
+
+* [code]#marray<bool, N>#
+* [code]#vec<int8_t, N>#
+* [code]#vec<int16_t, N>#
+* [code]#vec<int32_t, N>#
+* [code]#vec<int64_t, N>#
+* [code]#+__swizzled_vec__<int8_t, N>+#
+* [code]#+__swizzled_vec__<int16_t, N>+#
+* [code]#+__swizzled_vec__<int32_t, N>+#
+* [code]#+__swizzled_vec__<int64_t, N>+#
+
+_Returns:_ When [code]#x# is [code]#marray#, returns a Boolean telling whether
+all elements of [code]#x# are true.  When [code]#x# is [code]#vec# or the
+[code]#+__swizzled_vec__+# type, returns the value -1 if all elements in
+[code]#x# have their most significant bit set, otherwise returns the value 0.
+
+The return type is [code]#bool# if [code]#GenInt# is [code]#marray#.
+Otherwise, the return type is [code]#int#.
+
+*Overload (2):*
+
+This overload is deprecated in SYCL 2020.
 
 _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 
@@ -26616,24 +26661,11 @@ _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 * [code]#marray<int, N>#
 * [code]#marray<long, N>#
 * [code]#marray<long long, N>#
-* [code]#vec<int8_t, N>#
-* [code]#vec<int16_t, N>#
-* [code]#vec<int32_t, N>#
-* [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__<int8_t, N>+#
-* [code]#+__swizzled_vec__<int16_t, N>+#
-* [code]#+__swizzled_vec__<int32_t, N>+#
-* [code]#+__swizzled_vec__<int64_t, N>+#
 
 _Returns:_ When [code]#x# is a scalar, returns a Boolean telling whether the
 most significant bit of [code]#x# is set.  When [code]#x# is [code]#marray#,
 returns a Boolean telling whether the most significant bit of all elements
-in [code]#x# are set.  When [code]#x# is [code]#vec# or the
-[code]#+__swizzled_vec__+# type, returns the value -1 if all elements in
-[code]#x# have their most significant bit set, otherwise returns the value 0.
-
-The return type is [code]#bool# if [code]#GenInt# is a scalar or
-[code]#marray#.  Otherwise, the return type is [code]#int#.
+in [code]#x# are set.
 
 a@
 [frame=all,grid=none]
