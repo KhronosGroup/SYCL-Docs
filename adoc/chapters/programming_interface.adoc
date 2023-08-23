@@ -22342,7 +22342,7 @@ _Returns:_ A quiet NaN for each element of [code]#nancode#.  Each
 [code]#nancode[i]# may be placed in the significand of the resulting NaN.
 
 The return type depends on [code]#NonScalar#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
 ![code]#marray<unsigned int, N># ![code]#marray<float, N>#
@@ -22350,15 +22350,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<unsigned short, N># ![code]#marray<half, N>#
 
 ![code]#vec<uint32_t, N># +
- [code]#+__swizzled_vec__<uint32_t, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
 ![code]#vec<float, N>#
 
 ![code]#vec<uint64_t, N># +
- [code]#+__swizzled_vec__<uint64_t, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint64_t, N>#
 ![code]#vec<double, N>#
 
 ![code]#vec<uint16_t, N># +
- [code]#+__swizzled_vec__<uint16_t, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint16_t, N>#
 ![code]#vec<half, N>#
 !====
 
@@ -24131,14 +24131,14 @@ to represent the following types:
 * [code]#vec<uint16_t, N>#
 * [code]#vec<uint32_t, N>#
 * [code]#vec<uint64_t, N>#
-* [code]#+__swizzled_vec__<int8_t, N>+#
-* [code]#+__swizzled_vec__<int16_t, N>+#
-* [code]#+__swizzled_vec__<int32_t, N>+#
-* [code]#+__swizzled_vec__<int64_t, N>+#
-* [code]#+__swizzled_vec__<uint8_t, N>+#
-* [code]#+__swizzled_vec__<uint16_t, N>+#
-* [code]#+__swizzled_vec__<uint32_t, N>+#
-* [code]#+__swizzled_vec__<uint64_t, N>+#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int8_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int16_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int64_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint8_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint16_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint64_t, N>#
 
 [[table.integer.functions]]
 .Integer functions
@@ -24878,8 +24878,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#marray<uint32_t, N>#
 ** [code]#vec<int32_t, N>#
 ** [code]#vec<uint32_t, N>#
-** [code]#+__swizzled_vec__<int32_t, N>+#
-** [code]#+__swizzled_vec__<uint32_t, N>+#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
 * If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
   type, then [code]#Int32Bit2# and [code]#Int32Bit# must be the same as
   [code]#Int32Bit1#; and
@@ -24922,8 +24922,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#marray<uint32_t, N>#
 ** [code]#vec<int32_t, N>#
 ** [code]#vec<uint32_t, N>#
-** [code]#+__swizzled_vec__<int32_t, N>+#
-** [code]#+__swizzled_vec__<uint32_t, N>+#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
 * If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
   type, then [code]#Int32Bit2# must be the same as [code]#Int32Bit1#; and
 * If [code]#Int32Bit1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
@@ -24965,9 +24965,9 @@ type_ to represent the following types:
 * [code]#vec<float, N>#
 * [code]#vec<double, N>#
 * [code]#vec<half, N>#
-* [code]#+__swizzled_vec__<float, N>+#
-* [code]#+__swizzled_vec__<double, N>+#
-* [code]#+__swizzled_vec__<half, N>+#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 
 [[table.common.functions]]
 .Common functions
@@ -25429,15 +25429,18 @@ following types:
 * [code]#marray<double, N>#, where [code]#N# is 2, 3, or 4
 * [code]#vec<float, N>#, where [code]#N# is 2, 3, or 4
 * [code]#vec<double, N>#, where [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__<float, N>+#, where [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__<double, N>+#, where [code]#N# is 2, 3, or 4
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#,
+  where [code]#N# is 2, 3, or 4
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#,
+  where [code]#N# is 2, 3, or 4
 
 The term _float geometric type_ represents these types:
 
 * [code]#float#
 * [code]#marray<float, N>#, where [code]#N# is 2, 3, or 4
 * [code]#vec<float, N>#, where [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__<float, N>+#, where [code]#N# is 2, 3, or 4
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#,
+  where [code]#N# is 2, 3, or 4
 
 [[table.geometric.functions]]
 .Geometric functions
@@ -25465,10 +25468,10 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#vec<double, 3>#
 ** [code]#vec<float, 4>#
 ** [code]#vec<double, 4>#
-** [code]#+__swizzled_vec__<float, 3>+#
-** [code]#+__swizzled_vec__<double, 3>+#
-** [code]#+__swizzled_vec__<float, 4>+#
-** [code]#+__swizzled_vec__<double, 4>+#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, 3>#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, 3>#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, 4>#
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, 4>#
 * If [code]#Geo3or4Float1# is [code]#marray#, then [code]#Geo3or4Float2# must
   be the same as [code]#Geo3or4Float1#; and
 * If [code]#Geo3or4Float1# is [code]#vec# or the [code]#+__swizzled_vec__+#
@@ -25757,7 +25760,7 @@ returns the value [code]#((x[i] == y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -25766,15 +25769,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -25817,7 +25820,7 @@ returns the value [code]#((x[i] != y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -25826,15 +25829,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -25877,7 +25880,7 @@ returns the value [code]#((x[i] > y[i]) ? -1 : 0)# for each element
 of [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -25886,15 +25889,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -25937,7 +25940,7 @@ returns the value [code]#((x[i] >= y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -25946,15 +25949,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -25997,7 +26000,7 @@ returns the value [code]#((x[i] < y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -26006,15 +26009,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26057,7 +26060,7 @@ returns the value [code]#+((x[i] <= y[i]) ? -1 : 0)+# for each element of
 [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -26066,15 +26069,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26118,7 +26121,7 @@ _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -26127,15 +26130,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26173,7 +26176,7 @@ returns -1 for each element of [code]#x# if [code]#x[i]# is a finite value and
 returns 0 otherwise.
 
 The return type depends on [code]#NonScalar#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
 ![code]#marray<float, N># +
@@ -26182,15 +26185,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26229,7 +26232,7 @@ returns -1 for each element of [code]#x# if [code]#x[i]# has an infinity
 value and returns 0 otherwise.
 
 The return type depends on [code]#NonScalar#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
 ![code]#marray<float, N># +
@@ -26238,15 +26241,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26284,7 +26287,7 @@ returns -1 for each element of [code]#x# if [code]#x[i]# has a NaN value and
 returns 0 otherwise.
 
 The return type depends on [code]#NonScalar#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
 ![code]#marray<float, N># +
@@ -26293,15 +26296,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26339,7 +26342,7 @@ returns -1 for each element of [code]#x# if [code]#x[i]# has a normal value and
 returns 0 otherwise.
 
 The return type depends on [code]#NonScalar#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
 ![code]#marray<float, N># +
@@ -26348,15 +26351,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26404,7 +26407,7 @@ _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 of [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -26413,15 +26416,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26468,7 +26471,7 @@ returns the value [code]#((isnan(x[i]) || isnan(y[i]) ? -1 : 0)# for each
 element of [code]#x# and [code]#y#.
 
 The return type depends on [code]#NonScalar1#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar1 ! Return Type
 ![code]#marray<float, N># +
@@ -26477,15 +26480,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26523,7 +26526,7 @@ returns -1 for each element of [code]#x# if the sign bit of [code]#x[i]# is set
 and returns 0 otherwise.
 
 The return type depends on [code]#NonScalar#:
-[options="header"]
+[options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
 ![code]#marray<float, N># +
@@ -26532,15 +26535,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__<float, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__<double, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__<half, N>+#
+ [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26571,10 +26574,10 @@ _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 * [code]#vec<int16_t, N>#
 * [code]#vec<int32_t, N>#
 * [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__<int8_t, N>+#
-* [code]#+__swizzled_vec__<int16_t, N>+#
-* [code]#+__swizzled_vec__<int32_t, N>+#
-* [code]#+__swizzled_vec__<int64_t, N>+#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int8_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int16_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int64_t, N>#
 
 _Returns:_ When [code]#x# is a scalar, returns a Boolean telling whether the
 most significant bit of [code]#x# is set.  When [code]#x# is [code]#marray#,
@@ -26613,10 +26616,10 @@ _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 * [code]#vec<int16_t, N>#
 * [code]#vec<int32_t, N>#
 * [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__<int8_t, N>+#
-* [code]#+__swizzled_vec__<int16_t, N>+#
-* [code]#+__swizzled_vec__<int32_t, N>+#
-* [code]#+__swizzled_vec__<int64_t, N>+#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int8_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int16_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
+* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int64_t, N>#
 
 _Returns:_ When [code]#x# is a scalar, returns a Boolean telling whether the
 most significant bit of [code]#x# is set.  When [code]#x# is [code]#marray#,
@@ -26646,8 +26649,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#marray<T, N>#, where [code]#T# is one of the _generic scalar types_;
 ** [code]#vec<T, N>#, where [code]#T# is one of the _vector element types_ as
    defined above; or
-** [code]#+__swizzled_vec__<T, N>+#, where [code]#T# is one of the _vector
-   element types_;
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<T, N>#, where
+   [code]#T# is one of the _vector element types_;
 * If [code]#GenType1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
   type, then [code]#GenType2# and [code]#GenType3# must be the same as
   [code]#GenType1#; and
@@ -26699,8 +26702,8 @@ _Constraints:_ Available only if all of the following conditions are met:
    as defined above;
 ** [code]#vec<T, N>#, where [code]#T# is one of the _vector element types_
    as defined above; or
-** [code]#+__swizzled_vec__+<T, N>#, where [code]#T# is one of the _vector
-   element types_;
+** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<T, N>#, where
+   [code]#T# is one of the _vector element types_;
 * If [code]#NonScalar1# is [code]#marray#, then:
 ** [code]#NonScalar2# must be the same as [code]#NonScalar1#; and
 ** [code]#NonScalar3# must be [code]#marray# with element type [code]#bool#
