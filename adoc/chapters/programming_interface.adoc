@@ -24189,12 +24189,14 @@ _Constraints:_ Available only if all of the following conditions are met:
 
 _Returns:_ When the inputs are scalars, returns |x - y|.  Otherwise, returns
 |x[i] - y[i]| for each element of [code]#x# and [code]#y#.  The subtraction is
-done without modulo overflow.  The behavior is undefined if the result cannot
-be represented by the return type.
+done without modulo overflow.
 
-The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
-corresponding [code]#vec#.
+When [code]#GenInt1# is scalar, the return type is the unsigned equivalent of
+[code]#GenInt1# (when [code]#GenInt1# is signed).  When [code]#GenInt1# is
+[code]#marray# or [code]#vec#, the return type is [code]#marray# or [code]#vec#
+with the equivalent unsigned element type.  When [code]#GenInt1# is the
+[code]#+__swizzled_vec__+# type, the return type is the corresponding
+[code]#vec# with the equivalent unsigned element type.
 
 a@
 [frame=all,grid=none]
