@@ -429,6 +429,12 @@ module Rouge
         write_only_host_task
       )
 
+      # This could be used in the future for syntax coloring of new
+      # keywords that we might add to SYCL.
+      sycl_future_keywords = %w(
+        replace_me  # Replace with list of actual keywords
+      )
+
       # Here are some interesting tokens
       # https://pygments.org/docs/tokens/ unused in C++ we can reuse
       # in SYCL mode:
@@ -438,6 +444,7 @@ module Rouge
       # Literal::String::Regex
       # Literal::String::Symbol
       # Name::Attribute
+      # Name.Builtin.Pseudo
       # Name.Function.Magic
       # Name.Other
       # Name.Variable.Magic
@@ -472,6 +479,8 @@ module Rouge
              Keyword::Reserved
         rule %r/(?:#{sycl_variables.join('|')})\b/,
              Name::Variable::Magic
+        rule %r/(?:#{sycl_future_keywords.join('|')})\b/,
+             Name::Builtin::Pseudo
       end
 
     end
