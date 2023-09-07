@@ -17537,8 +17537,12 @@ available for up to 4 element vectors and are only available when the macro
 
 In both cases the return type is always an instance of
 [code]#+__swizzled_vec__+#, an implementation-defined temporary class
-representing a swizzle of the original SYCL [code]#vec# instance. Both
-kinds of swizzle member functions must not perform the swizzle operation
+representing the result of the swizzle operation on the original [code]#vec#
+instance.
+Since the swizzle operation may result in a different number of elements, the
+[code]#+__swizzled_vec__+# instance may represent a different number of
+elements than the original [code]#vec#.
+Both kinds of swizzle member functions must not perform the swizzle operation
 themselves, instead the swizzle operation must be performed by the returned
 instance of [code]#+__swizzled_vec__+# when used within an expression,
 meaning if the returned [code]#+__swizzled_vec__+# is never used in an
@@ -17555,10 +17559,12 @@ calling the [code]#swizzle# member function template.
 [[swizzled-vec-class]]
 ==== Swizzled [code]#vec# class
 
-The [code]#+__swizzled_vec__+# class must define an unspecified
-temporary which provides the entire interface of the SYCL [code]#vec#
-class template, including swizzled member functions, with the additions and
-alterations described below:
+The [code]#+__swizzled_vec__+# class must define an unspecified temporary
+which provides the entire interface of the SYCL [code]#vec# class template,
+including swizzled member functions, with the additions and alterations
+described below.
+The member functions of the [code]#+__swizzled_vec__+# class behave as though
+they operate on a [code]#vec# that is the result of the swizzle operation.
 
   * The [code]#+__swizzled_vec__+# class template must be readable as an
     r-value reference on the RHS of an expression. In this case the swizzle
