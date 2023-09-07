@@ -35,6 +35,7 @@ struct elem {
 template <typename DataT, int NumElements> class vec {
  public:
   using element_type = DataT;
+  using value_type = DataT;
 
 #ifdef __SYCL_DEVICE_ONLY__
   using vector_t = __unspecified__;

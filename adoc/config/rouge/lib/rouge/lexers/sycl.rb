@@ -180,76 +180,6 @@ module Rouge
         wait_and_throw
       )
 
-      # Generic types used in SYCL pseudo code descriptions like Gen,
-      # SGen, GenVec...
-      sycl_generic_types = %w(
-        floatn
-        vfloatn
-        vfloat3or4
-        mfloatn
-        mfloat3or4
-        genfloatf
-        doublen
-        vdoublen
-        vdouble3or4
-        mdoublen
-        mdouble3or4
-        genfloatd
-        halfn
-        vhalfn
-        mhalfn
-        genfloath
-        genfloat
-        sgenfloat
-        mgenfloat
-        gengeofloat
-        gengeodouble
-        vint8n
-        vint16n
-        vint32n
-        vint64n
-        vuint8n
-        vuint16n
-        vuint32n
-        vuint64n
-        mint8n
-        mint16n
-        mint32n
-        mint64n
-        muint8n
-        muint16n
-        muint32n
-        muint64n
-        mintn
-        mushortn
-        muintn
-        mulongn
-        mbooln
-        geninteger
-        sigeninteger
-        vigeninteger
-        migeninteger
-        vugeninteger
-        genint32
-        sgentype
-        vgentype
-        mgentype
-        intptr
-        floatptr
-        doubleptr
-        halfptr
-        vfloatnptr
-        vdoublenptr
-        vhalfnptr
-        mfloatnptr
-        mdoublenptr
-        mhalfnptr
-        mintnptr
-        vint32nptr
-        elementtype
-        unsignedtype
-      )
-
       sycl_macros = %w(
         __SYCL_DEVICE_ONLY__
         __SYCL_SINGLE_SOURCE__
@@ -499,6 +429,12 @@ module Rouge
         write_only_host_task
       )
 
+      # This could be used in the future for syntax coloring of new
+      # keywords that we might add to SYCL.
+      sycl_future_keywords = %w(
+        replace_me  # Replace with list of actual keywords
+      )
+
       # Here are some interesting tokens
       # https://pygments.org/docs/tokens/ unused in C++ we can reuse
       # in SYCL mode:
@@ -533,8 +469,6 @@ module Rouge
              Keyword::Pseudo
         rule %r/(?:#{sycl_functions.join('|')})\b/,
              Name::Function::Magic
-        rule %r/(?:#{sycl_generic_types.join('|')})\b/,
-             Name::Builtin::Pseudo
         rule %r/(?:#{sycl_macros.join('|')})\b/,
              Generic::Output
         rule %r/(?:#{sycl_namespaces.join('|')})\b/,
@@ -545,6 +479,8 @@ module Rouge
              Keyword::Reserved
         rule %r/(?:#{sycl_variables.join('|')})\b/,
              Name::Variable::Magic
+        rule %r/(?:#{sycl_future_keywords.join('|')})\b/,
+             Name::Builtin::Pseudo
       end
 
     end
