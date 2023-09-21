@@ -16015,6 +16015,22 @@ info::kernel_device_specific::private_mem_size
 a@
 [source]
 ----
+info::kernel_device_specific::local_static_mem_size
+----
+
+    @ [code]#size_t#
+   a@ Returns the amount of local memory, in bytes, used statically by each
+      work-group in the kernel. This value may include any local memory needed
+      by an implementation to execute the kernel, including that used by the
+      language built-ins and variables declared in work-group scope inside a
+      hierarchical parallel kernel.
+
+It does not include local memory to be allocated for arguments to the kernel
+declared as [code]#local_accessor#.
+
+a@
+[source]
+----
 info::kernel_device_specific::max_num_sub_groups
 ----
 
@@ -16050,6 +16066,19 @@ info::kernel_device_specific::compile_sub_group_size
 
 |====
 
+[NOTE]
+====
+The _guaranteed_ minimum amount of local memory available for dynamic allocation
+through [code]#local_accessor# can be calculated by subtracting the value
+returned for [code]#info::kernel_device_specific::local_static_mem_size# from
+the value returned for [code]#info::device::local_mem_size# (see
+<<sec:device-class>>). 
+
+Backends may support reuse of local memory for multiple allocations, resulting
+in more local memory being available for dynamic allocation through
+[code]#local_accessor#, but are not required to do so and relying on this 
+behavior may result in non-portable code.
+====
 
 === The [code]#device_image# class
 

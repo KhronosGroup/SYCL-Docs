@@ -17,6 +17,7 @@ struct work_group_size;
 struct compile_work_group_size;
 struct preferred_work_group_size_multiple;
 struct private_mem_size;
+struct local_static_mem_size;
 struct max_num_sub_groups;
 struct compile_num_sub_groups;
 struct max_sub_group_size;
