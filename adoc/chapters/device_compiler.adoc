@@ -737,8 +737,8 @@ The variable declarations get assigned to an address space depending on their
 scope and storage class:
 
   * Namespace scope
-  ** If the type is [code]#const#, the address space the declaration is assigned
-     to is implementation-defined.
+  ** If the type is [code]#const#, the address space of the declaration is
+     assigned to is implementation-defined.
      If the target of the SYCL backend can represent the generic address space,
      then the assigned address space must be compatible with the generic address
      space.
@@ -761,9 +761,11 @@ device kernel or code called by the device kernel.
   ** Static data members are treated the same way as for variable in namespace
      scope
 
-The result of a prvalue-to-xvalue conversion is assigned to the local address
-space if it happens in a hierarchical context or to the private address space
-otherwise.
+If a prvalue-to-xvalue conversion happens in a block scope or function parameter
+scope, the result is assigned to the local address space if it happens a
+hierarchical context otherwise it is assigned to the private address space.
+It the prvalue-to-xvalue conversion happens in another scope, the result is
+assigned in the same way as declaration in namespace scope.
 
 
 [[subsec:genericAddressSpace]]
