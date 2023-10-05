@@ -1,4 +1,4 @@
-# Copyright 2021 The Khronos Group, Inc.
+# Copyright 2021-2023 The Khronos Group, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 # CI to build asciidoctor spec targets, on push or manually
@@ -30,7 +30,7 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Unfortunately, asciidoctor-pdf gets pathname-specific errors
       # building under the usual $GITHUB_WORKSPACE (/__w). As a workaround,
@@ -41,7 +41,7 @@ jobs:
           cd adoc
           make OUTDIR=/tmp/out QUIET= html pdf
       - name: Archive generated files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: spec-outputs
           path: |
