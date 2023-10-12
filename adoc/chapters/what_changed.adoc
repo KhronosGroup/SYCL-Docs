@@ -147,10 +147,22 @@ the implementation needed to propagate the information up to the enclosing
 kernel.)  The old {cpp} attribute form is no longer included in the SYCL
 specification.
 
-The list of built-in integer math functions was extended with
-[code]#ctz()# in <<table.integer.functions>>.
-Specification of [code]#clz()# was extended with the case
-of argument is 0.
+Changes to the built-in functions specified in <<sycl:builtins>>:
+
+  * The specification no longer uses pseudo "generic type names" to describe
+    these functions, and it now lists the exact synopsis for each function.
+
+  * The return type of the integer [code]#abs# and [code]#abs_diff# functions
+    has changed.  The return type is now the same as the input type, matching
+    the {cpp} [code]#std::abs# function.
+
+  * The geometric functions specified in <<sec:geometric-functions>> now
+    support the [code]#half# data type.
+
+  * The [code]#ctz# function was added to <<sec:integer-functions>>.
+
+  * The specification of [code]#clz# was clarified for the case when the input
+    is zero.
 
 The classes [code]#vector_class#, [code]#string_class#,
 [code]#function_class#, [code]#mutex_class#,
