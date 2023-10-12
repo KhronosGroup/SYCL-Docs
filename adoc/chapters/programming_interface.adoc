@@ -1031,7 +1031,7 @@ which SYCL kernel functions may be executed. A SYCL platform must be
 associated with a single <<backend>>.
 
 A SYCL [code]#platform# is also associated with any number of SYCL
-[code]#devices# associated with the same <<backend>>. A platform might also
+[code]#devices# associated with the same <<backend>>. A platform may
 contain no devices.
 
 All member functions of the [code]#platform# class are synchronous and
@@ -1140,8 +1140,8 @@ a@
 bool has(aspect asp) const
 ----
    a@ Returns true if all of the SYCL [code]#devices# associated with this
-      SYCL [code]#platform# have the given <<aspect>>. If the platform does not
-      contain any devices, returns [code]#false#.
+      SYCL [code]#platform# have the given <<aspect>>. Returns [code]#false# if this SYCL [code]#platform# does not
+      contain any devices.
 
 a@
 [source]
@@ -1150,7 +1150,7 @@ bool has_extension(const std::string& extension) const
 ----
    a@ Deprecated, use [code]#has()# instead.
 
-Returns true if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension. Returns [code]#false# for a platform that does not contain any devices.
+Returns [code]#true# if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension. Returns [code]#false# if this SYCL [code]#platform# does not contain any devices.
 
 a@
 [source]
@@ -1238,7 +1238,7 @@ info::platform::extensions
    a@ Deprecated, use [code]#device::get_info()# with
       [code]#info::device::aspects# instead.
 
-Returns the extensions supported by the <<platform>>. Returns an empty list if the platform does not contain any devices.
+Returns the extensions supported by this [code]#platform#. Returns an empty list if this [code]#platform# does not contain any devices.
 
 |====
 
