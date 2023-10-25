@@ -4,43 +4,50 @@
 = SYCL Extensions
 
 This chapter describes the mechanism by which the <<core-spec>> can be
-extended.  Some parts of this chapter are requirements that all implementations
-must follow if they extend the <<core-spec>>, while other parts of the chapter
-are merely guidelines.  Unless a requirement is specifically stated as
-normative, all content in this chapter is a non-normative guideline.
+extended.
+Some parts of this chapter are requirements that all implementations must
+follow if they extend the <<core-spec>>, while other parts of the chapter
+are merely guidelines.
+Unless a requirement is specifically stated as normative, all content in
+this chapter is a non-normative guideline.
 
-An extension can be either of two flavors: an extension ratified by the Khronos
-SYCL group or a vendor supplied extension.  In both cases, an extension is an
-optional feature set which an implementation need not implement in order to be
-conformant with the <<core-spec>>.
+An extension can be either of two flavors: an extension ratified by the
+Khronos SYCL group or a vendor supplied extension.
+In both cases, an extension is an optional feature set which an
+implementation need not implement in order to be conformant with the
+<<core-spec>>.
 
-Vendors may choose to define extensions in order to expose custom features or
-to gather feedback on an API that is not yet ready for inclusion in the
-<<core-spec>>.  Once a vendor extension has stabilized, the vendor is
-encouraged to promote it to a future version of the <<core-spec>> or to a
-ratified Khronos extension.  Thus, vendor extensions can be viewed as a
-pipeline of features for consideration in future SYCL versions.
+Vendors may choose to define extensions in order to expose custom features
+or to gather feedback on an API that is not yet ready for inclusion in the
+<<core-spec>>.
+Once a vendor extension has stabilized, the vendor is encouraged to promote
+it to a future version of the <<core-spec>> or to a ratified Khronos
+extension.
+Thus, vendor extensions can be viewed as a pipeline of features for
+consideration in future SYCL versions.
 
 The Khronos SYCL group may define extensions for features that are not yet
 ready for the <<core-spec>> but are implemented by more than one vendor.
 These extensions also may be considered for inclusion in a future version of
 the <<core-spec>>.
 
-This chapter does not describe any particular extension to SYCL.  Rather, it
-describes the _mechanism_ for defining an extension.  Each extension is defined
-by its own separate document.  If an extension is ratified by the Khronos SYCL
-group, that group will release a document describing the extension.  If a
-vendor defines an extension, the vendor is responsible for releasing its
-documentation.
+This chapter does not describe any particular extension to SYCL.
+Rather, it describes the _mechanism_ for defining an extension.
+Each extension is defined by its own separate document.
+If an extension is ratified by the Khronos SYCL group, that group will
+release a document describing the extension.
+If a vendor defines an extension, the vendor is responsible for releasing
+its documentation.
 
 
 == Definition of an extension
 
-An extension can take many possible forms.  Some examples include:
+An extension can take many possible forms.
+Some examples include:
 
   * adding new types or free functions to the SYCL runtime;
-  * modifying existing SYCL classes, structs, or enumeration types by
-    adding new members, member functions, or enumerated values;
+  * modifying existing SYCL classes, structs, or enumeration types by adding
+    new members, member functions, or enumerated values;
   * adding new overloads for existing free functions or member functions;
   * defining new specializations for existing SYCL templates;
   * adding new {cpp} attributes;
@@ -48,157 +55,176 @@ An extension can take many possible forms.  Some examples include:
   * adding new keywords to the language;
   * adding a new backend.
 
-An extension may also broaden the definition of existing functions defined in
-the <<core-spec>> by defining semantics for cases that are left unspecified by
-the <<core-spec>>.
+An extension may also broaden the definition of existing functions defined
+in the <<core-spec>> by defining semantics for cases that are left
+unspecified by the <<core-spec>>.
 
 
 == Requirements for an extension
 
-This section is normative.  All vendors which provide an extension must abide
-by the requirements described here.
+This section is normative.
+All vendors which provide an extension must abide by the requirements
+described here.
 
-An extension may not change the definition of existing functions defined by the
-<<core-spec>> in a way that changes their specified behavior.  Also, an
-extension may not remove any feature defined by the <<core-spec>>.
+An extension may not change the definition of existing functions defined by
+the <<core-spec>> in a way that changes their specified behavior.
+Also, an extension may not remove any feature defined by the <<core-spec>>.
 
 The vendor must choose at least one [code]#<vendorstring># which uniquely
-identifies the vendor's SYCL implementation.  The Khronos SYCL group does not
-provide any registry of the strings, so each vendor is responsible for choosing
-its own.  One way to choose a unique string is to use the vendor's company name
-or a marketing name that is associated with the vendor's implementation.
+identifies the vendor's SYCL implementation.
+The Khronos SYCL group does not provide any registry of the strings, so each
+vendor is responsible for choosing its own.
+One way to choose a unique string is to use the vendor's company name or a
+marketing name that is associated with the vendor's implementation.
 Ultimately, it is each vendor's responsibility to choose a string that is
-unique.  The strings "khr" and "KHR" are reserved for the Khronos SYCL group
-for its own extensions, so vendors may not use these as a
-[code]#<vendorstring>#.
+unique.
+The strings "khr" and "KHR" are reserved for the Khronos SYCL group for its
+own extensions, so vendors may not use these as a [code]#<vendorstring>#.
 
 The implementation must predefine at least one macro of the form
 [code]#SYCL_IMPLEMENTATION_<vendorstring># which allows applications to test
-whether they are being compiled with that vendor's implementation.  For
-example, the Acme vendor could predefine a macro whose name is
+whether they are being compiled with that vendor's implementation.
+For example, the Acme vendor could predefine a macro whose name is
 [code]#SYCL_IMPLEMENTATION_ACME#.
 
 
 == Guidelines for portable extensions
 
 Vendors who want to ensure that their extension does not collide with other
-vendors' extensions or with future versions of the <<core-spec>> should follow
-the additional rules specified in this section.  However, this is not a
-requirement for conformance.
+vendors' extensions or with future versions of the <<core-spec>> should
+follow the additional rules specified in this section.
+However, this is not a requirement for conformance.
 
 === Extension namespace
 
-If an extension adds new types or free functions, it should avoid adding these
-directly in the [code]#sycl::# namespace since future versions of the
-<<core-spec>> may also add new identifiers in this namespace.  The namespace
-[code]#sycl::ext::<vendorstring># is reserved for use by extensions.  For
-example, the Acme vendor could define extended types and free functions in the
-namespace [code]#sycl::ext::acme#, and this would guarantee that they will not
-collide with definitions in other vendors' extensions or with future versions
-of the <<core-spec>>.
+If an extension adds new types or free functions, it should avoid adding
+these directly in the [code]#sycl::# namespace since future versions of the
+<<core-spec>> may also add new identifiers in this namespace.
+The namespace [code]#sycl::ext::<vendorstring># is reserved for use by
+extensions.
+For example, the Acme vendor could define extended types and free functions
+in the namespace [code]#sycl::ext::acme#, and this would guarantee that they
+will not collide with definitions in other vendors' extensions or with
+future versions of the <<core-spec>>.
 
 === Names for extensions to existing classes or enumerations
 
-An extension may add new members or member functions to existing SYCL classes
-or new values to existing SYCL enumeration types.  To ensure these extensions
-do not collide, vendors are encouraged to name them with the prefix
-[code]#ext_<vendorstring>_#.  For example, the Acme vendor could add a new
-member function to the [code]#sycl::device# class named
-[code]#device::ext_acme_fancy()# or a new value to the [code]#sycl::aspect#
-enumeration named [code]#aspect::ext_acme_fancier#.
+An extension may add new members or member functions to existing SYCL
+classes or new values to existing SYCL enumeration types.
+To ensure these extensions do not collide, vendors are encouraged to name
+them with the prefix [code]#ext_<vendorstring>_#.
+For example, the Acme vendor could add a new member function to the
+[code]#sycl::device# class named [code]#device::ext_acme_fancy()# or a new
+value to the [code]#sycl::aspect# enumeration named
+[code]#aspect::ext_acme_fancier#.
 
 In some cases, an extension does not have the freedom to choose a specific
-function name.  For example, this could happen if the extension adds a new
-constructor overload for an existing SYCL class.  In cases like this, the
-extension should ensure that one of the function parameters has a type that is
-defined in the extension's namespace.  For example, the Acme vendor could add
-a new constructor for [code]#sycl::context# with the signature
+function name.
+For example, this could happen if the extension adds a new constructor
+overload for an existing SYCL class.
+In cases like this, the extension should ensure that one of the function
+parameters has a type that is defined in the extension's namespace.
+For example, the Acme vendor could add a new constructor for
+[code]#sycl::context# with the signature
 [code]#context(ext::acme::frobber&)#.
 
-A similar situation can occur if an existing SYCL template is specialized with
-an extended enumerated value.
-Obviously, the extension cannot rename the template in this case.  Instead,
-it is sufficient that the template is specialized with an extended enumerated
-value, and this guarantees that the extended specialization will not collide.
+A similar situation can occur if an existing SYCL template is specialized
+with an extended enumerated value.
+Obviously, the extension cannot rename the template in this case.
+Instead, it is sufficient that the template is specialized with an extended
+enumerated value, and this guarantees that the extended specialization will
+not collide.
 
 [NOTE]
 ====
-Vendors are encouraged to use the [code]#ext_<vendorstring>_# prefix form when
-possible for additions to existing SYCL classes because this form makes the
-extension's vendor name apparent.  People reading application code will
-immediately know that a member function is an extension, and they will
-immediately know which vendor's documentation to consult.
+Vendors are encouraged to use the [code]#ext_<vendorstring>_# prefix form
+when possible for additions to existing SYCL classes because this form makes
+the extension's vendor name apparent.
+People reading application code will immediately know that a member function
+is an extension, and they will immediately know which vendor's documentation
+to consult.
 ====
 
 === Feature test macros
 
 Vendors are encouraged to group a related set of extensions together into a
 "feature" and to predefine a feature-test macro when the implementation
-supports the extensions in that feature.  The feature-test macro should have
-the following form to ensure it is unique:
-[code]#SYCL_EXT_<vendorstring>_<featurename>#.  For example, the Acme vendor
-might define a feature-test macro named [code]#SYCL_EXT_ACME_FANCYFEATURE#.
+supports the extensions in that feature.
+The feature-test macro should have the following form to ensure it is
+unique: [code]#SYCL_EXT_<vendorstring>_<featurename>#.
+For example, the Acme vendor might define a feature-test macro named
+[code]#SYCL_EXT_ACME_FANCYFEATURE#.
 This allows applications to protect code using the extension with
 [code]##ifdef#, so that the code is skipped when compiled with an
 implementation that doesn't support the feature.
 
-Since the interface to an extension might change from one release to another,
-vendors are also encouraged to predefine the macro's value to the version of
-the extension.  Vendors should use a numerical value that monotonically
-increases for each revision of the extension API.
+Since the interface to an extension might change from one release to
+another, vendors are also encouraged to predefine the macro's value to the
+version of the extension.
+Vendors should use a numerical value that monotonically increases for each
+revision of the extension API.
 
-Of course, an extension may also predefine other macros.  In order to ensure
-that these macro names do not collide with other extensions or future versions
-of the <<core-spec>>, the name should start with the prefix
-[code]#SYCL_EXT_<vendorstring># or [code]#SYCL_IMPLEMENTATION_<vendorstring>#.
+Of course, an extension may also predefine other macros.
+In order to ensure that these macro names do not collide with other
+extensions or future versions of the <<core-spec>>, the name should start
+with the prefix [code]#SYCL_EXT_<vendorstring># or
+[code]#SYCL_IMPLEMENTATION_<vendorstring>#.
 
 === Attribute namespace
 
-An extension may define new {cpp} attributes.  The attribute namespace
-[code]#sycl::# is reserved for the <<core-spec>>, so vendors should choose a
-different namespace for any attributes they add.
+An extension may define new {cpp} attributes.
+The attribute namespace [code]#sycl::# is reserved for the <<core-spec>>, so
+vendors should choose a different namespace for any attributes they add.
 
 === Include file paths
 
 An extension may define new [code]##include# files under the [code]#"sycl"#
-path.  The path prefix [code]#"sycl/ext/<vendorstring>"# is reserved for this
-purpose.  For example, the Acme vendor could add a header file
+path.
+The path prefix [code]#"sycl/ext/<vendorstring>"# is reserved for this
+purpose.
+For example, the Acme vendor could add a header file
 [code]#"sycl/ext/acme/fancy.h"# and be guaranteed that it would not conflict
 with other extensions or with future versions of the <<core-spec>>.
 
 === Optional kernel features
 
 An extension may also add new optional kernel features -- features which are
-supported on some devices but not on others.  Vendors are encouraged to follow
-the same mechanism outlined in <<sec:optional-kernel-features>>.  Therefore,
-an extended optional kernel feature should have a matching extension to the
-[code]#sycl::aspect# enumerated type.
+supported on some devices but not on others.
+Vendors are encouraged to follow the same mechanism outlined in
+<<sec:optional-kernel-features>>.
+Therefore, an extended optional kernel feature should have a matching
+extension to the [code]#sycl::aspect# enumerated type.
 
 === Adding a backend
 
-An extension may also add a new backend.  If it does, the naming of the
-backend APIs follows the normal guidelines for extensions and also follows
-the naming pattern for backends that are defined in the <<core-spec>>.  To
-illustrate:
+An extension may also add a new backend.
+If it does, the naming of the backend APIs follows the normal guidelines for
+extensions and also follows the naming pattern for backends that are defined
+in the <<core-spec>>.
+To illustrate:
 
-* The extension should add a new value to the [code]#sycl::backend# enumeration
-  type using a naming scheme like [code]#ext_<vendorstring>_<backendname>#.  For
-  example, if the Acme vendor adds a backend named "foo", it would add an
-  enumerated value named [code]#sycl::backend::ext_acme_foo#.
+* The extension should add a new value to the [code]#sycl::backend#
+  enumeration type using a naming scheme like
+  [code]#ext_<vendorstring>_<backendname>#.
+  For example, if the Acme vendor adds a backend named "foo", it would add
+  an enumerated value named [code]#sycl::backend::ext_acme_foo#.
 
 * The extension should define the backend's interop API in a namespace named
-  [code]#sycl::ext::<vendorstring>::<backendname>#.  For our hypothetical Acme
-  example, this would be a namespace named [code]#sycl::ext::acme::foo#.
+  [code]#sycl::ext::<vendorstring>::<backendname>#.
+  For our hypothetical Acme example, this would be a namespace named
+  [code]#sycl::ext::acme::foo#.
 
-* If the backend interop API is available through a separate header file, that
-  header should be named
-  [code]#"sycl/ext/<vendorstring>/backend/<backendname>.hpp"#.  For our
-  hypothetical Acme example this would be
+* If the backend interop API is available through a separate header file,
+  that header should be named
+  [code]#"sycl/ext/<vendorstring>/backend/<backendname>.hpp"#.
+  For our hypothetical Acme example this would be
   [code]#"sycl/ext/acme/backend/foo.hpp"#.
 
-* The extension should predefine a macro for the backend when it is "active".
+* The extension should predefine a macro for the backend when it is
+  "active".
   The name of this macro should be
-  [code]#SYCL_EXT_<vendorstring>_BACKEND_<backendname>#.  For our hypothetical
-  Acme example this would be [code]#SYCL_EXT_ACME_BACKEND_FOO#.
+  [code]#SYCL_EXT_<vendorstring>_BACKEND_<backendname>#.
+  For our hypothetical Acme example this would be
+  [code]#SYCL_EXT_ACME_BACKEND_FOO#.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end extensions %%%%%%%%%%%%%%%%%%%%%%%%%%%%

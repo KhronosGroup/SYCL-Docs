@@ -6,45 +6,48 @@
 
 As of SYCL 2020 there are now two distinct feature sets which a SYCL
 implementation can conform to, in order to better fit the requirements of
-different domains, such as embedded, mobile, and safety critical, which may have
-limitations because of the toolchains used.
+different domains, such as embedded, mobile, and safety critical, which may
+have limitations because of the toolchains used.
 
-A SYCL implementation can choose to conform to either the full feature set or
-the reduced feature set.
+A SYCL implementation can choose to conform to either the full feature set
+or the reduced feature set.
 
 
 [[sec:feature-sets.full]]
 == Full feature set
 
-The full feature set includes all features specified in the <<core-spec>> with
-no exceptions.
+The full feature set includes all features specified in the <<core-spec>>
+with no exceptions.
 
 
 [[sec:feature-sets.reduced]]
 == Reduced feature set
 
 The reduced feature set makes certain features optional or restricted to
-specific forms. The following list defines all the differences between the
-reduced feature set and the full feature set.
+specific forms.
+The following list defines all the differences between the reduced feature
+set and the full feature set.
 
-  . *Un-named SYCL kernel functions:* <<sycl-kernel-function,SYCL kernel functions>>
-    which are defined using a lambda expression and therefore have no standard
-    name are required to be provided a name via the kernel name template parameter
-    of kernel invocation functions such as [code]#parallel_for#. This overrides
-    the <<core-spec>> rules for <<sycl-kernel-function>> naming as specified in
-    <<subsec:invokingkernels>>.
+  . *Un-named SYCL kernel functions:* <<sycl-kernel-function,SYCL kernel
+    functions>> which are defined using a lambda expression and therefore
+    have no standard name are required to be provided a name via the kernel
+    name template parameter of kernel invocation functions such as
+    [code]#parallel_for#.
+    This overrides the <<core-spec>> rules for <<sycl-kernel-function>>
+    naming as specified in <<subsec:invokingkernels>>.
 
   . *Address space mode:* The <<subsec:addrspaceAssignment, address space
     assignment>> mode used in the reduced feature set is not required to be
-    <<subsec:genericAddressSpace, generic address space>>, regardless of SYCL
-    backend in use.
+    <<subsec:genericAddressSpace, generic address space>>, regardless of
+    SYCL backend in use.
     Instead the <<subsec:inferredAddressSpace, inferred address space>> mode
     may always be used.
 
   . *Declarations:* In addition to the requirements specified in
     <<subsec:commonAddressSpace>>, the reduced feature set does not require
-    support for odr-use inside <<device-function,device functions>> of variables
-    declared [code]#const# or [code]#constexpr# with static storage duration.
+    support for odr-use inside <<device-function,device functions>> of
+    variables declared [code]#const# or [code]#constexpr# with static
+    storage duration.
 
 
 [[sec:feature-sets.compatibility]]
@@ -52,23 +55,25 @@ reduced feature set and the full feature set.
 
 In order to avoid introducing any kind of divergence the reduced and full
 feature sets are defined such that the full feature set is a subsumption of
-the reduced feature set. This means that any applications which are
-developed for the reduced feature set will be compatible with both a SYCL
-reduced implementation and a SYCL full implementation.
+the reduced feature set.
+This means that any applications which are developed for the reduced feature
+set will be compatible with both a SYCL reduced implementation and a SYCL
+full implementation.
 
 
 [[sec:feature-sets.conformance]]
 == Conformance
 
 One of the reasons for having this be defined in the specification is that
-hardware vendors which wish to support SYCL on their platform(s) want to be able
-to demonstrate their support for it by passing conformance. However, if passing
-conformance means adopting features which they do not believe to be necessary at
-an additional development effort then this may deter them.
+hardware vendors which wish to support SYCL on their platform(s) want to be
+able to demonstrate their support for it by passing conformance.
+However, if passing conformance means adopting features which they do not
+believe to be necessary at an additional development effort then this may
+deter them.
 
-Each feature set has its own route for passing conformance allowing adopters of
-SYCL to specify the feature set they wish to test conformance against. The
-conformance test suite would then alter or disable the tests within the test
-suite according to how the feature sets are differentiated above.
+Each feature set has its own route for passing conformance allowing adopters
+of SYCL to specify the feature set they wish to test conformance against.
+The conformance test suite would then alter or disable the tests within the
+test suite according to how the feature sets are differentiated above.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end feature_sets %%%%%%%%%%%%%%%%%%%%%%%%%%%%

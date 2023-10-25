@@ -16,37 +16,40 @@
 [[accessor]]accessor::
     An accessor is a class which allows a <<command>> to access data managed
     by a <<buffer>> or <<image>> class or allows a <<sycl-kernel-function>>
-    to access local memory on a <<device>>.  Accessors are also used to express
-    the dependencies among the different <<command group, command groups>>.
+    to access local memory on a <<device>>.
+    Accessors are also used to express the dependencies among the different
+    <<command group, command groups>>.
     For the full description please refer to <<subsec:accessors>>
 
 [[application-scope]]application scope::
     The application scope starts with the construction first
     <<sycl-runtime>> class object and finishes with the destruction of the
-    last one. Application refers to the {cpp} <<sycl-application>> and not
-    the <<sycl-runtime>>.
+    last one.
+    Application refers to the {cpp} <<sycl-application>> and not the
+    <<sycl-runtime>>.
 
 [[aspect]]aspect::
     A characteristic of a <<device>> which determines whether it supports
-    some optional feature. Aspects are always boolean, so a <<device>>
-    either has or does not have an aspect.
+    some optional feature.
+    Aspects are always boolean, so a <<device>> either has or does not have
+    an aspect.
 
 [[async-error]]asynchronous error::
     A SYCL asynchronous error is an error occurring after the host API call
     invoking the error causing action has returned, such that the error
-    cannot be thrown as a typical {cpp} exception from a host API call. Such
-    errors are typically generated from device kernel invocations which are
-    executed when SYCL task graph dependencies are satisfied, which occur
-    asynchronously from host code execution. For the full description and
-    associated asynchronous error handling mechanisms, please refer to
-    <<error-handling>>.
+    cannot be thrown as a typical {cpp} exception from a host API call.
+    Such errors are typically generated from device kernel invocations which
+    are executed when SYCL task graph dependencies are satisfied, which
+    occur asynchronously from host code execution.
+    For the full description and associated asynchronous error handling
+    mechanisms, please refer to <<error-handling>>.
 
 [[async-handler]]async_handler::
     An asynchronous error handler object is a function class instance
     providing necessary code for handling all the asynchronous errors
     triggered from the execution of command groups on a queue, within a
-    context or an associated event. For the full description please refer to
-    <<subsec:exception.class>>.
+    context or an associated event.
+    For the full description please refer to <<subsec:exception.class>>.
 
 [[barrier]]barrier::
     A barrier is either a <<queue-barrier>>, or a kernel execution
@@ -55,27 +58,29 @@
 
 [[blocking-accessor]]blocking accessor::
     A blocking accessor is an <<accessor>> which provides immediate access
-    and continues to provide access until it is destroyed.  For the full
-    description please refer to <<subsec:accessors>>
+    and continues to provide access until it is destroyed.
+    For the full description please refer to <<subsec:accessors>>
 
 [[buffer]]buffer::
 +
 --
 The buffer class manages data for the SYCL {cpp} host application and the
-SYCL device kernels. The buffer class may acquire ownership of some host
-pointers passed to its constructors according to the constructor kind.
+SYCL device kernels.
+The buffer class may acquire ownership of some host pointers passed to its
+constructors according to the constructor kind.
 
 The buffer class, together with the accessor class, is responsible for
 tracking memory transfers and guaranteeing data consistency among the
-different kernels. The <<sycl-runtime>> manages the memory allocations
-on both the host and the <<device>> within the lifetime of the buffer
-object. For the full description please refer to <<subsec:buffers>>.
+different kernels.
+The <<sycl-runtime>> manages the memory allocations on both the host and the
+<<device>> within the lifetime of the buffer object.
+For the full description please refer to <<subsec:buffers>>.
 --
 
 [[bundle-state]]bundle state::
     A SYCL bundle state represents the state of a <<kernel-bundle>> and
-    therefore its capabilities in the SYCL programming API.  Possible states
-    are <<input>>, <<object>> or <<executable>>.
+    therefore its capabilities in the SYCL programming API.
+    Possible states are <<input>>, <<object>> or <<executable>>.
 
 [[command]]command::
     A request to execute work that is submitted to a <<queue>> such as the
@@ -84,61 +89,63 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[command-group]]command group::
     In SYCL, the operations required to process data on a <<device>> are
-    represented using a <<command-group-function-object>>. Each
-    <<command-group-function-object>> is given a unique <<handler>>
+    represented using a <<command-group-function-object>>.
+    Each <<command-group-function-object>> is given a unique <<handler>>
     object to perform all the necessary work required to correctly process
-    data on a <<device>> using a kernel. In this way, the group of
-    commands for transferring and processing data is enqueued as a command
-    group on a <<device>> for execution. A command group is submitted
-    atomically to a SYCL queue.
+    data on a <<device>> using a kernel.
+    In this way, the group of commands for transferring and processing data
+    is enqueued as a command group on a <<device>> for execution.
+    A command group is submitted atomically to a SYCL queue.
 
 [[command-group-function-object]]command group function object::
-    A type which is callable with [code]#operator()# that takes a
-    reference to a <<handler>>, that defines a <<command-group>> which
-    can be submitted by a <<queue>>. The function object can be a named
-    type, lambda function or [code]#std::function#.
+    A type which is callable with [code]#operator()# that takes a reference
+    to a <<handler>>, that defines a <<command-group>> which can be
+    submitted by a <<queue>>.
+    The function object can be a named type, lambda function or
+    [code]#std::function#.
 
 [[handler]]command group handler::
     The command group handler class provides the interface for the commands
-    that can be executed inside the <<command-group-scope>>. It is
-    provided as a scoped object to all of the data access requests within
-    the command group scope. For the full description please refer to
-    <<sec:handlerClass>>.
+    that can be executed inside the <<command-group-scope>>.
+    It is provided as a scoped object to all of the data access requests
+    within the command group scope.
+    For the full description please refer to <<sec:handlerClass>>.
 
 [[command-group-scope]]command group scope::
     The command group scope is the function scope defined by the
-    <<command-group-function-object>>. The command group <<handler>>
-    object lifetime is restricted to the command group scope. For more
-    details see <<sec:command.group.scope>>.
+    <<command-group-function-object>>.
+    The command group <<handler>> object lifetime is restricted to the
+    command group scope.
+    For more details see <<sec:command.group.scope>>.
 
 [[queue-barrier]]command queue barrier::
     The SYCL API provides two variants for functions that force
-    synchronization on a SYCL command queue. The
-    [code]#sycl::queue::wait()# and
-    [code]#sycl::queue::wait_and_throw()# functions force the SYCL
-    command queue to wait for the execution of the
-    <<command-group-function-object>> before it is able to continue
-    executing.
+    synchronization on a SYCL command queue.
+    The [code]#sycl::queue::wait()# and
+    [code]#sycl::queue::wait_and_throw()# functions force the SYCL command
+    queue to wait for the execution of the <<command-group-function-object>>
+    before it is able to continue executing.
 
 [[constant-memory]]constant memory::
-    A region of memory that remains constant during the execution of
-    a kernel. The <<sycl-runtime>> allocates and initializes memory
-    objects placed into constant memory.
+    A region of memory that remains constant during the execution of a
+    kernel.
+    The <<sycl-runtime>> allocates and initializes memory objects placed
+    into constant memory.
 
 [[context]]context::
-    A <<context>> represents the runtime data structures and state
-    required by a <<backend>> API to interact with a group of <<device,devices>>
-    associated with a <<platform>>. The context is defined as the
-    [code]#sycl::context# class, for further details please see
-    <<sec:interface.context.class>>.
+    A <<context>> represents the runtime data structures and state required
+    by a <<backend>> API to interact with a group of <<device,devices>>
+    associated with a <<platform>>.
+    The context is defined as the [code]#sycl::context# class, for further
+    details please see <<sec:interface.context.class>>.
 
 [[control-flow]]control flow::
     When all <<work-item, work-items>> in a <<group>> are executing the same
     sequence of statements, they are said to be executing under _converged_
-    control flow.  Control flow _diverges_ when different work-items in a
-    group execute a different sequence of statements, typically as a result
-    of evaluating conditions differently (e.g. in selection statements or
-    loops).
+    control flow.
+    Control flow _diverges_ when different work-items in a group execute a
+    different sequence of statements, typically as a result of evaluating
+    conditions differently (e.g. in selection statements or loops).
 
 [[core-spec]]core SYCL specification::
     The text of the SYCL language specification (this document), excluding
@@ -146,44 +153,46 @@ object. For the full description please refer to <<subsec:buffers>>.
     extensions.
 
 [[descendent-device]]descendent device::
-    The descendent devices of device _D_ include all of the sub-devices of _D_,
-    all of the sub-devices of those devices, etc.
+    The descendent devices of device _D_ include all of the sub-devices of
+    _D_, all of the sub-devices of those devices, etc.
 
 [[device]]device::
     A SYCL device is an abstraction of a piece of hardware that can execute
     <<sycl-kernel-function,SYCL kernels>>.
 
 [[device-compiler]]device compiler::
-    A SYCL device compiler is a compiler that produces <<device>>
-    binaries from a valid <<sycl-application>>. For the full description
-    please refer to <<chapter.device.compiler>>.
+    A SYCL device compiler is a compiler that produces <<device>> binaries
+    from a valid <<sycl-application>>.
+    For the full description please refer to <<chapter.device.compiler>>.
 
 [[device-copyable]]device copyable::
-    Data that is shared between the host and the devices must generally
-    have a type that abides by the restrictions listed in
+    Data that is shared between the host and the devices must generally have
+    a type that abides by the restrictions listed in
     <<sec::device.copyable>> for a device copyable type.
 
 [[device-function]]device function::
-    A device function is any function in a <<sycl-application>>
-    that can be run on a <<device>>.  This includes
-    <<sycl-kernel-function, SYCL kernel functions>> and, recursively, functions
-    they call.
+    A device function is any function in a <<sycl-application>> that can be
+    run on a <<device>>.
+    This includes <<sycl-kernel-function, SYCL kernel functions>> and,
+    recursively, functions they call.
 
 [[device-image]]device image::
-    A device image is a representation of one or more <<kernel,kernels>> in an
-    implementation-defined format.  A device image could be a compiled version
-    of the kernels in an intermediate language representation which needs to be
-    translated at runtime into a form that can be invoked on a <<device>>, it
-    could be a compiled version of the kernels in a native code format that is
-    ready to be invoked without further translation, or it could be a source
-    code representation which needs to be compiled before it can be invoked.
+    A device image is a representation of one or more <<kernel,kernels>> in
+    an implementation-defined format.
+    A device image could be a compiled version of the kernels in an
+    intermediate language representation which needs to be translated at
+    runtime into a form that can be invoked on a <<device>>, it could be a
+    compiled version of the kernels in a native code format that is ready to
+    be invoked without further translation, or it could be a source code
+    representation which needs to be compiled before it can be invoked.
     Other representations are possible too.
 
 [[device-selector]]device selector::
-    A way to select a device used in various places. This is a callable
-    object taking a <<device>> reference and returning an integer rank.
-    One of the device with the highest non-negative value is selected. See
-    <<sec:device-selector>> for more details.
+    A way to select a device used in various places.
+    This is a callable object taking a <<device>> reference and returning an
+    integer rank.
+    One of the device with the highest non-negative value is selected.
+    See <<sec:device-selector>> for more details.
 
 [[event]]event::
     A SYCL object that represents the status of an operation that is being
@@ -199,41 +208,45 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[global-id]]global id::
     As in OpenCL, a global ID is used to uniquely identify a <<work-item>>
-    and is derived from the number of global <<work-item,work-items>> specified
-    when executing a kernel. A global ID is a one, two or three-dimensional
-    value that starts at 0 per dimension.
+    and is derived from the number of global <<work-item,work-items>>
+    specified when executing a kernel.
+    A global ID is a one, two or three-dimensional value that starts at 0
+    per dimension.
 
 [[global-memory]]global memory::
-    Global memory is a memory region accessible to all <<work-item,work-items>>
-    executing on a <<device>>.
+    Global memory is a memory region accessible to all
+    <<work-item,work-items>> executing on a <<device>>.
 
 [[group]]group::
     A group of work-items within the index space of a SYCL kernel execution,
     such as a <<work-group>> or <<sub-group>>.
 
 [[group-barrier]]group barrier::
-    A synchronization function within a group of <<work-item,work-items>>. All the
-    <<work-item,work-items>> of a group must execute the barrier construct before any
-    <<work-item>> continues execution beyond the barrier. Additionally all work-items
-    in the group execute a release <<mem-fence>> prior to synchronizing at the
-    barrier, all work-items in the group execute an acquire <<mem-fence>> after
-    synchronizing at the barrier, and there is an implicit synchronization between
-    these acquire and release fences as if through an atomic operation on an
-    atomic object internal to the barrier implementation.
+    A synchronization function within a group of <<work-item,work-items>>.
+    All the <<work-item,work-items>> of a group must execute the barrier
+    construct before any <<work-item>> continues execution beyond the
+    barrier.
+    Additionally all work-items in the group execute a release <<mem-fence>>
+    prior to synchronizing at the barrier, all work-items in the group
+    execute an acquire <<mem-fence>> after synchronizing at the barrier, and
+    there is an implicit synchronization between these acquire and release
+    fences as if through an atomic operation on an atomic object internal to
+    the barrier implementation.
 
 [[h-item]]h-item::
-    A unique identifier representing a single <<work-item>> within the
-    index space of a SYCL kernel hierarchical execution. Can be one, two or
-    three dimensional. In the SYCL interface a <<h-item>> is represented
-    by the [code]#h_item# class (see <<hitem-class>>).
+    A unique identifier representing a single <<work-item>> within the index
+    space of a SYCL kernel hierarchical execution.
+    Can be one, two or three dimensional.
+    In the SYCL interface a <<h-item>> is represented by the [code]#h_item#
+    class (see <<hitem-class>>).
 
 [[host]]host::
-    Host is the system that executes the {cpp} application including the SYCL
-    API.
+    Host is the system that executes the {cpp} application including the
+    SYCL API.
 
 [[host-pointer]]host pointer::
-    A pointer to memory on the host. Cannot be accessed directly from a
-    <<device>>.
+    A pointer to memory on the host.
+    Cannot be accessed directly from a <<device>>.
 
 [[host-task]]host task::
     A <<command>> which invokes a native {cpp} callable, scheduled
@@ -244,30 +257,32 @@ object. For the full description please refer to <<subsec:buffers>>.
     to schedule a native {cpp} function.
 
 [[id]]id::
-    It is a unique identifier of an item in an index space. It can be one,
-    two or three dimensional index space, since the SYCL kernel execution
-    model is an <<nd-range>>. It is one of the index space classes. For
-    the full description please refer to <<id-class>>.
+    It is a unique identifier of an item in an index space.
+    It can be one, two or three dimensional index space, since the SYCL
+    kernel execution model is an <<nd-range>>.
+    It is one of the index space classes.
+    For the full description please refer to <<id-class>>.
 
 [[image]]image::
     Images in SYCL, like buffers, are abstractions of multidimensional
-    structured arrays. Image can refer to [code]#unsampled_image# and
-    [code]#sampled_image#. For the full description please refer to
-    <<subsec:images>>.
+    structured arrays.
+    Image can refer to [code]#unsampled_image# and [code]#sampled_image#.
+    For the full description please refer to <<subsec:images>>.
 
 [[implementation-defined]]implementation-defined::
     Behavior that is explicitly allowed to vary between conforming
-    implementations of SYCL. A SYCL implementer is required to document the
-    implementation-defined behavior.
+    implementations of SYCL.
+    A SYCL implementer is required to document the implementation-defined
+    behavior.
 
 [[index-space-classes]]index space classes::
-    Like in OpenCL, the  kernel execution model defines an
-    <<nd-range>> index space.
+    Like in OpenCL, the kernel execution model defines an <<nd-range>> index
+    space.
     The <<sycl-runtime>> class that defines an <<nd-range>> is the
-    [code]#sycl::nd_range#, which takes as input the sizes of global
-    and local work-items, represented using the [code]#sycl::range#
-    class. The kernel library classes for indexing in the defined
-    <<nd-range>> are the following classes:
+    [code]#sycl::nd_range#, which takes as input the sizes of global and
+    local work-items, represented using the [code]#sycl::range# class.
+    The kernel library classes for indexing in the defined <<nd-range>> are
+    the following classes:
 +
   * [code]#sycl::id# : The basic index class representing an <<id>>;
   * [code]#sycl::item# : The <<item>> index class that contains the
@@ -279,28 +294,32 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[input]]input::
     A state which a <<kernel-bundle>> can be in, representing
-    <<sycl-kernel-function,SYCL kernel functions>> as a source or intermediate representation
+    <<sycl-kernel-function,SYCL kernel functions>> as a source or
+    intermediate representation
 
 [[item]]item::
     An item id is an interface used to retrieve the <<global-id>>,
-    <<work-group-id>> and <<local-id>>. For further details see
-    <<subsec:item.class>>.
+    <<work-group-id>> and <<local-id>>.
+    For further details see <<subsec:item.class>>.
 
 [[kernel]]kernel::
-    A kernel represents a <<sycl-kernel-function>> that has been compiled for a
-    device, including all of the <<device-function,device functions>> it calls.
-    A kernel is implicitly created when a <<sycl-kernel-function>> is submitted
-    to a device via a <<kernel-invocation-command>>.  However, a kernel can
-    also be created manually by pre-compiling a <<kernel-bundle>> (see
-    <<sec:interfaces.bundles>>).
+    A kernel represents a <<sycl-kernel-function>> that has been compiled
+    for a device, including all of the <<device-function,device functions>>
+    it calls.
+    A kernel is implicitly created when a <<sycl-kernel-function>> is
+    submitted to a device via a <<kernel-invocation-command>>.
+    However, a kernel can also be created manually by pre-compiling a
+    <<kernel-bundle>> (see <<sec:interfaces.bundles>>).
 
 [[kernel-bundle]]kernel bundle::
-    A kernel bundle is a collection of <<device-image,device images>> that are
-    associated with the same <<context>> and with a set of <<device,devices>>.
+    A kernel bundle is a collection of <<device-image,device images>> that
+    are associated with the same <<context>> and with a set of
+    <<device,devices>>.
     Kernel bundles have one of three states: <<input>>, <<object>> or
-    <<executable>>.  Kernel bundles in the executable state are ready to be
-    invoked on a device, whereas bundles in the other states need to be
-    translated into the executable state before they can be invoked.
+    <<executable>>.
+    Kernel bundles in the executable state are ready to be invoked on a
+    device, whereas bundles in the other states need to be translated into
+    the executable state before they can be invoked.
 
 [[kernel-handler]]kernel handler::
     A representation of a <<sycl-kernel-function>> being invoked that is
@@ -310,23 +329,24 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[kernel-invocation-command]]kernel invocation command::
     A type of command that can be used inside a <<command-group>> in order
-    to schedule a <<sycl-kernel-function>>, includes
-    [code]#single_task#, all variants of [code]#parallel_for# and
-    [code]#parallel_for_workgroup#.
+    to schedule a <<sycl-kernel-function>>, includes [code]#single_task#,
+    all variants of [code]#parallel_for# and [code]#parallel_for_workgroup#.
 
 [[kernel-name]]kernel name::
     A kernel name is a class type that is used to assign a name to the
     kernel function, used to link the host system with the kernel object
-    output by the device compiler. For details on naming kernels please see
-    <<sec:naming.kernels>>.
+    output by the device compiler.
+    For details on naming kernels please see <<sec:naming.kernels>>.
 
 [[kernel-scope]]kernel scope::
     The function scope of the [code]#operator()# on a
-    <<sycl-kernel-function>>. Note that any function or member function called from
-    the kernel is also compiled in kernel scope. The kernel scope allows {cpp}
-    language extensions as well as restrictions to reflect the capabilities
-    of devices. The extensions and restrictions are defined in the
-    SYCL device compiler specification.
+    <<sycl-kernel-function>>.
+    Note that any function or member function called from the kernel is also
+    compiled in kernel scope.
+    The kernel scope allows {cpp} language extensions as well as
+    restrictions to reflect the capabilities of devices.
+    The extensions and restrictions are defined in the SYCL device compiler
+    specification.
 
 [[local-id]]local id::
     A unique identifier of a <<work-item>> among other work-items of a
@@ -338,88 +358,94 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[native-backend-object]]native backend object::
     An opaque object defined by a specific backend that represents a
-    high-level SYCL object on said backend. There is no guarantee of having
-    native backend objects for all SYCL types.
+    high-level SYCL object on said backend.
+    There is no guarantee of having native backend objects for all SYCL
+    types.
 
 [[native-specialization-constant]]native-specialization constant::
-    A <<specialization-constant>> in a device image whose value can be used by
-    an online compiler as an immediate value during the compilation.
+    A <<specialization-constant>> in a device image whose value can be used
+    by an online compiler as an immediate value during the compilation.
 
 
 [[nd-item]]nd-item::
     A unique identifier representing a single <<work-item>> and
-    <<work-group>> within the index space of a SYCL kernel execution. Can
-    be one, two or three dimensional. In the SYCL interface an <<nd-item>>
-    is represented by the [code]#nd_item# class (see
-    <<nditem-class>>).
+    <<work-group>> within the index space of a SYCL kernel execution.
+    Can be one, two or three dimensional.
+    In the SYCL interface an <<nd-item>> is represented by the
+    [code]#nd_item# class (see <<nditem-class>>).
 
 [[nd-range]]nd-range::
     A representation of the index space of a SYCL kernel execution, the
-    distribution of <<work-item,work-items>> within into <<work-group,work-groups>>.
+    distribution of <<work-item,work-items>> within into
+    <<work-group,work-groups>>.
     Contains a <<range>> specifying the number of global
     <<work-item,work-items>>, a <<range>> specifying the number of local
-    <<work-item,work-items>> and a <<id>> specifying the global offset. Can be
-    one, two or three dimensional. The minimum size of <<range>>
-    within the <<nd-range>> is 0 per dimension; where any dimension is set to zero,
-    the index space in all dimensions will be zero.
-    In the SYCL interface an
-    <<nd-range>> is represented by the [code]#nd_range# class (see
-    <<subsubsec:nd-range-class>>).
+    <<work-item,work-items>> and a <<id>> specifying the global offset.
+    Can be one, two or three dimensional.
+    The minimum size of <<range>> within the <<nd-range>> is 0 per
+    dimension; where any dimension is set to zero, the index space in all
+    dimensions will be zero.
+    In the SYCL interface an <<nd-range>> is represented by the
+    [code]#nd_range# class (see <<subsubsec:nd-range-class>>).
 
 [[mem-fence]]mem-fence::
-    A memory fence provides control over re-ordering of memory load
-    and store operations when coupled with an atomic operation that
-    synchronizes two fences with each other (or when the fences are part of
-    a <<group-barrier>> in which case there is implicit synchronization
-    as if an atomic operation has synchronized the fences). The
-    [code]#sycl::atomic_fence# function acts as a fence across all
-    work-items and devices specified by a [code]#memory_scope#
-    argument.
+    A memory fence provides control over re-ordering of memory load and
+    store operations when coupled with an atomic operation that synchronizes
+    two fences with each other (or when the fences are part of a
+    <<group-barrier>> in which case there is implicit synchronization as if
+    an atomic operation has synchronized the fences).
+    The [code]#sycl::atomic_fence# function acts as a fence across all
+    work-items and devices specified by a [code]#memory_scope# argument.
 
 [[object]]object::
     A state which a <<kernel-bundle>> can be in, representing
-    <<sycl-kernel-function,SYCL kernel functions>> as a non-executable object.
+    <<sycl-kernel-function,SYCL kernel functions>> as a non-executable
+    object.
 
 [[platform]]platform::
     A collection of <<device,devices>> managed by a single
     <<backend,backend>>.
 
 [[private-memory]]private memory::
-    A region of memory private to a <<work-item>>. Variables defined in one
-    work-item's private memory are not visible to another work-item.
-    The [code]#sycl::private_memory# class provides
-    access to the work-item's private memory for the hierarchical API as it
-    is described at <<paragraph.private.memory>>.
+    A region of memory private to a <<work-item>>.
+    Variables defined in one work-item's private memory are not visible to
+    another work-item.
+    The [code]#sycl::private_memory# class provides access to the
+    work-item's private memory for the hierarchical API as it is described
+    at <<paragraph.private.memory>>.
 
 [[queue]]queue::
     A SYCL command queue is an object that holds command groups to be
-    executed on a SYCL <<device>>. SYCL provides a heterogeneous platform
-    integration using device queue, which is the minimum requirement for a
-    SYCL application to run on a SYCL <<device>>. For the full description
-    please refer to <<sec:interface.queue.class>>.
+    executed on a SYCL <<device>>.
+    SYCL provides a heterogeneous platform integration using device queue,
+    which is the minimum requirement for a SYCL application to run on a SYCL
+    <<device>>.
+    For the full description please refer to <<sec:interface.queue.class>>.
 
 [[range]]range::
     A representation of a number of <<work-item,work-items>> or
     <<work-group,work-groups>> within the index space of a SYCL kernel
-    execution. Can be one, two or three dimensional. In the SYCL interface a
-    <<range>> is represented by the [code]#range# class
-    (see <<range-class>>).
+    execution.
+    Can be one, two or three dimensional.
+    In the SYCL interface a <<range>> is represented by the [code]#range#
+    class (see <<range-class>>).
 
 [[ranged-accessor]]ranged accessor::
     A ranged accessor is a host or buffer <<accessor>> that was constructed
-    with a non-zero offset into the data buffer or with an access range smaller
-    than the range of the data buffer, or both.  Please refer to
-    <<sec:accessors.ranged>> for more info.
+    with a non-zero offset into the data buffer or with an access range
+    smaller than the range of the data buffer, or both.
+    Please refer to <<sec:accessors.ranged>> for more info.
 
 [[reduction]]reduction::
     An operation that produces a single value by combining multiple values
-    in an unspecified order using a binary operator. If the operator is
-    non-associative or non-commutative, the behavior of a reduction may be
-    non-deterministic.
+    in an unspecified order using a binary operator.
+    If the operator is non-associative or non-commutative, the behavior of a
+    reduction may be non-deterministic.
 
 [[root-device]]root device::
-    A device that is not a sub-device.  The function
-    [code]#device::get_devices()# returns a vector of all the root devices.
+    A device that is not a sub-device.
+    The function [code]#device::get_devices()# returns a vector of all the
+    root devices.
 
 [[rule-of-five]]rule of five::
     For a given class, if at least one of the copy constructor, move
@@ -435,15 +461,15 @@ object. For the full description please refer to <<subsec:buffers>>.
 
 [[smcp]]SMCP::
      The single-source multiple compiler-passes (SMCP)
-    technique allows a single-source file to be parsed by multiple
-    compilers for building native programs per compilation target. For
-    example, a standard {cpp} CPU compiler for targeting <<host>> will
-    parse the <<sycl-file>> to create the {cpp} <<sycl-application>>
-    which offloads parts of the computation to other
-    <<device,devices>>. A SYCL device compiler will parse the same
-    source file and target only SYCL kernels. For the full description
-    please refer to <<subsec:smcp>>.  See <<sscp>> for another
-    approach.
+    technique allows a single-source file to be parsed by multiple compilers
+    for building native programs per compilation target.
+    For example, a standard {cpp} CPU compiler for targeting <<host>> will
+    parse the <<sycl-file>> to create the {cpp} <<sycl-application>> which
+    offloads parts of the computation to other <<device,devices>>.
+    A SYCL device compiler will parse the same source file and target only
+    SYCL kernels.
+    For the full description please refer to <<subsec:smcp>>.
+    See <<sscp>> for another approach.
 
 [[specialization-constant]]specialization constant::
     A constant variable where the value is not known until compilation of
@@ -456,15 +482,15 @@ object. For the full description please refer to <<subsec:buffers>>.
     <<sycl-kernel-function>> for retrieving the value during invocation.
 
 [[sscp]]SSCP::
-    The single-source single compiler-pass (SSCP) technique
-    allows a single-source file to be parsed only once by a single
-    compiler. For example, the SYCL compiler will parse the
-    <<sycl-file>> once. Then, from this single intermediate
-    representation, for each kind of device architecture a compilation
-    flow will generate the binary for each kernel and another
-    compilation flow will generate the <<host>> code of the {cpp}
-    <<sycl-application>>. For the full description please refer to
-    <<subsec:sscp>>. See <<smcp>> for another approach.
+    The single-source single compiler-pass (SSCP) technique allows a
+    single-source file to be parsed only once by a single compiler.
+    For example, the SYCL compiler will parse the <<sycl-file>> once.
+    Then, from this single intermediate representation, for each kind of
+    device architecture a compilation flow will generate the binary for each
+    kernel and another compilation flow will generate the <<host>> code of
+    the {cpp} <<sycl-application>>.
+    For the full description please refer to <<subsec:sscp>>.
+    See <<smcp>> for another approach.
 
 [[string-kernel-name]]string kernel name::
     The name of a <<sycl-kernel-function>> in string form, this can be the
@@ -472,10 +498,10 @@ object. For the full description please refer to <<subsec:buffers>>.
     <<type-kernel-name>>.
 
 [[sub-group]]sub-group::
-    The SYCL sub-group ([code]#sycl::sub_group# class) is a
-    representation of a collection of related work-items within a
-    <<work-group>>. For further details for the [code]#sycl::sub_group# class
-    see <<sub-group-class>>.
+    The SYCL sub-group ([code]#sycl::sub_group# class) is a representation
+    of a collection of related work-items within a <<work-group>>.
+    For further details for the [code]#sycl::sub_group# class see
+    <<sub-group-class>>.
 
 [[sub-group-barrier]]sub-group barrier::
     A <<group-barrier>> for all <<work-item,work-items>> in a <<sub-group>>.
@@ -484,40 +510,43 @@ object. For the full description please refer to <<subsec:buffers>>.
     A <<mem-fence>> for all <<work-item,work-items>> in a <<sub-group>>.
 
 [[sycl-application]]SYCL application::
-    A SYCL application is a {cpp} application which uses the SYCL programming
-    model in order to execute <<kernel,kernels>> on <<device,devices>>.
+    A SYCL application is a {cpp} application which uses the SYCL
+    programming model in order to execute <<kernel,kernels>> on
+    <<device,devices>>.
 
 [[backend]]SYCL backend::
     An implementation of the SYCL programming model using an heterogeneous
-    programming API. A SYCL backend exposes one or multiple SYCL
-    <<platform,platforms>>. For example, the OpenCL backend, via the ICD loader,
-    can expose multiple OpenCL <<platform,platforms>>.
+    programming API.
+    A SYCL backend exposes one or multiple SYCL <<platform,platforms>>.
+    For example, the OpenCL backend, via the ICD loader, can expose multiple
+    OpenCL <<platform,platforms>>.
 
 [[backend-api]]SYCL backend API::
     The exposed API for writing SYCL code against a given <<backend>>.
 
 [[sycl-library]]SYCL {cpp} template library::
-    The template library is a set of {cpp} templated classes which provide the
-    programming interface to the SYCL developer.
+    The template library is a set of {cpp} templated classes which provide
+    the programming interface to the SYCL developer.
 
 [[sycl-file]]SYCL file::
     A SYCL {cpp} source file that contains SYCL API calls.
 
 [[sycl-kernel-function]]SYCL kernel function::
-    A type which is callable with [code]#operator()# that takes an
-    <<id>>, <<item>>, <<nd-item>> or <<work-group>>, and an optional
-    [code]#kernel_handler# as its last parameter. This type can be passed to
-    kernel enqueue member functions of the <<handler>>. A
-    <<sycl-kernel-function>> defines an entry point to a <<kernel>>. The
-    function object can be a named <<device-copyable>> type or lambda
+    A type which is callable with [code]#operator()# that takes an <<id>>,
+    <<item>>, <<nd-item>> or <<work-group>>, and an optional
+    [code]#kernel_handler# as its last parameter.
+    This type can be passed to kernel enqueue member functions of the
+    <<handler>>.
+    A <<sycl-kernel-function>> defines an entry point to a <<kernel>>.
+    The function object can be a named <<device-copyable>> type or lambda
     function.
 
 [[sycl-runtime]]SYCL runtime::
-    A SYCL runtime is an implementation of the SYCL API specification. The
-    SYCL runtime manages the different <<platform,platforms>>,
+    A SYCL runtime is an implementation of the SYCL API specification.
+     The SYCL runtime manages the different <<platform,platforms>>,
      <<device,devices>>, <<context,contexts>> as well as memory
-    handling of data between host and <<backend>> <<context,contexts>>
-    to enable semantically correct execution of SYCL programs.
+    handling of data between host and <<backend>> <<context,contexts>> to
+    enable semantically correct execution of SYCL programs.
 
 [[type-kernel-name]]type kernel name::
     The name of a <<sycl-kernel-function>> in type form, this can be either
@@ -528,7 +557,8 @@ object. For the full description please refer to <<subsec:buffers>>.
 +
 --
 Unified Shared Memory (USM) provides a pointer-based alternative to the
-<<buffer>> programming model. USM enables:
+<<buffer>> programming model.
+USM enables:
 
   * easier integration into existing code bases by representing allocations
     as pointers rather than buffers, with full support for pointer
@@ -542,35 +572,40 @@ See <<sec:usm>>
 --
 
 [[work-group]]work-group::
-    The SYCL work-group ([code]#sycl::group# class) is a representation
-    of a collection of related <<work-item,work-items>> that execute on a single
-    compute unit. The <<work-item,work-items>> in the group execute the same
-    kernel-instance and <<opencl12, share local memory and work-group functions>>.
-    For further details for the [code]#sycl::group#
-    class see <<group-class>>.
+    The SYCL work-group ([code]#sycl::group# class) is a representation of a
+    collection of related <<work-item,work-items>> that execute on a single
+    compute unit.
+    The <<work-item,work-items>> in the group execute the same
+    kernel-instance and <<opencl12, share local memory and work-group
+    functions>>.
+    For further details for the [code]#sycl::group# class see
+    <<group-class>>.
 
 [[work-group-barrier]]work-group barrier::
-    A <<group-barrier>> for all <<work-item,work-items>> in a <<work-group>>.
+    A <<group-barrier>> for all <<work-item,work-items>> in a
+    <<work-group>>.
 
 [[work-group-mem-fence]]work-group mem-fence::
     A <<mem-fence>> for all <<work-item,work-items>> in a <<work-group>>.
 
 [[work-group-id]]work-group id::
-    As in OpenCL, SYCL kernels execute in <<work-group,work-groups>>. The group ID
-    is the ID of the <<work-group>> that a <<work-item>> is executing
-    within. A group ID is an one, two or three dimensional value that starts
-    at 0 per dimension.
+    As in OpenCL, SYCL kernels execute in <<work-group,work-groups>>.
+    The group ID is the ID of the <<work-group>> that a <<work-item>> is
+    executing within.
+    A group ID is an one, two or three dimensional value that starts at 0
+    per dimension.
 
 [[work-group-range]]work-group range::
     A group range is the size of the <<work-group>> for every dimension.
 
 [[work-item]]work-item::
     The SYCL work-item is a representation of a <<work-item>> among a
-    collection of parallel executions of a kernel invoked on a <<device>>
-    by a <<command>>. A <<opencl12, work-item>> is executed by one or more processing
-    elements as part of a <<work-group>> executing on a compute unit. A
-    <<work-item>> is distinguished from other <<work-item,work-items>> by its
-    <<global-id>> or the combination of its <<work-group-id>> and its
+    collection of parallel executions of a kernel invoked on a <<device>> by
+    a <<command>>.
+    A <<opencl12, work-item>> is executed by one or more processing elements
+    as part of a <<work-group>> executing on a compute unit.
+    A <<work-item>> is distinguished from other <<work-item,work-items>> by
+    its <<global-id>> or the combination of its <<work-group-id>> and its
     <<local-id>> within a <<work-group>>.
 
 :work-items: <<work-item, work-items>>
