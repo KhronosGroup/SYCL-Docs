@@ -458,7 +458,7 @@ each other without side effects (i.e., given two requirements _r~j~_ and _r~k~_,
 _(r~j~, r~k~)_ {equiv} _(r~k~, r~j~)_). The intersection of two
 actions is not necessarily empty.
 *Actions* can include (but are not limited to): memory copy operations,
-mapping operations, host side synchronization, or implementation-specific
+mapping operations, coordinating with the host, or implementation-specific
 behavior.
 
 Finally, _Performing an action_ ({SYCLperform}(_a~i~_)) executes the
@@ -559,10 +559,10 @@ image::{images}/three-cg-three-queue.svg[align="center",opts="{imageopts}"]
 ==== Controlling execution order with events
 
 Submitting an action for execution returns an [code]#event# object. Programmers
-may use these events to explicitly synchronize programs. Host code can wait for an
-event to complete, which will block execution on the host until the action represented
-by the event has completed.  The [code]#event# class is described in greater detail
-in <<sec:interface.event>>.
+may use these events to explicitly coordinate host and device execution. Host
+code can wait for an event to complete, which will block execution on the host
+until the action represented by the event has completed.  The [code]#event#
+class is described in greater detail in <<sec:interface.event>>.
 
 Events may also be used to explicitly order the execution of kernels. Host code may
 wait for the completion of specific event, which blocks execution on the host until
@@ -624,7 +624,7 @@ Each work-item in the ND-range is identified by a value of type
 [code]#nd_item<N>#.  The type [code]#nd_item<N># encapsulates a
 global id, local id and work-group id, all of type [code]#id<N>#
 (the iteration space offset also of type [code]#id<N>#, but this is deprecated in SYCL 2020), as well as
-global and local ranges and synchronization operations necessary to
+global and local ranges and coordination mechanisms necessary to
 make work-groups useful. Work-groups are assigned ids using a similar
 approach to that used for work-item global ids.  Work-items are
 assigned to a work-group and given a local id with components in the
@@ -869,7 +869,7 @@ execute concurrently with the barrier.
 Finally, _CG~c~_ will be enqueued after _H(b1~RW~)_ is finished,
 but still has to wait for _CG~b~_ to conclude for all its requirements to
 be satisfied.
-See <<sec:synchronization>> for details on synchronization rules.
+See <<sec:coordination>> for details on host-device coordination.
 
 // Formerly in host_acc.tex
 // Uses same definitions for cga, cgb, cgc, and hostA in code and picture,
@@ -1008,11 +1008,11 @@ made consistent across the work-items in that set through the use of
 <<mem-fence>> and atomic operations.
 
 Memory consistency between the host and SYCL device(s), or different SYCL
-devices in the same context, can be guaranteed through synchronization in
-the host application as defined in <<sec:synchronization>>.  On SYCL devices
-supporting concurrent atomic accesses to USM allocations and acquire-release or sequentially
-consistent memory orderings, cross-device memory consistency can be
-enforced through the use of <<mem-fence>> and atomic operations.
+devices in the same context, can be guaranteed through library calls in the
+host application, as defined in <<sec:coordination>>. On SYCL devices
+supporting concurrent atomic accesses to USM allocations and acquire-release or
+sequentially consistent memory orderings, cross-device memory consistency can
+be enforced through the use of <<mem-fence>> and atomic operations.
 
 [[sec:memory-ordering]]
 ==== Memory ordering
@@ -1204,10 +1204,10 @@ sections of this specification.
 === Basic data parallel kernels
 
 Data-parallel <<kernel,kernels>> that execute as
-multiple <<work-item,work-items>> and where no local synchronization is required are enqueued
-with the [code]#sycl::parallel_for# function parameterized by a
-[code]#sycl::range# parameter. These kernels will execute the kernel
-function body once for each work-item in the specified <<range>>.
+multiple <<work-item,work-items>> and where no work-group-local coordination is
+required are enqueued with the [code]#sycl::parallel_for# function
+parameterized by a [code]#sycl::range# parameter. These kernels will execute
+the kernel function body once for each work-item in the specified <<range>>.
 
 Functionality tied to <<group, groups>> of work-items, including
 <<group-barrier, group barriers>> and <<local-memory>>, must not be used
@@ -1225,10 +1225,10 @@ work-group size as parameters to the [code]#sycl::parallel_for# function with a
 [code]#sycl::nd_range# parameter. In this mode of execution,
 kernels execute over the <<nd-range>> in work-groups of the specified
 size. It is possible to share data among work-items within the same
-work-group in <<local-memory,local>> or <<global-memory>> and to synchronize between
-work-items in the same work-group by calling the
-[code]#group_barrier# function. All work-groups in a given
-[code]#parallel_for# will be the same size, and the global size
+work-group in <<local-memory,local>> or <<global-memory>>, and the
+[code]#group_barrier# function can be used to block a work-item until all
+work-items in the same work-group arrive at the barrier. All work-groups in a
+given [code]#parallel_for# will be the same size, and the global size
 defined in the nd-range must either be a multiple of the work-group size in
 each dimension, or the global size must be zero. When the global size
 is zero, the kernel function is not executed, the local size is ignored, and
@@ -1243,8 +1243,8 @@ work-items in any sub-group in a kernel is based on a combination of the kernel
 and its dispatch dimensions.  The size of any sub-group in the dispatch is
 between 1 and this maximum sub-group size, and the size of an individual
 sub-group is invariant for the duration of a kernel's execution.  Similarly
-to work-groups, the work-items within the same sub-group can be synchronized
-by calling the [code]#group_barrier# function.
+to work-groups, the [code]#group_barrier# function can be used to block a
+work-item until all work-items in the same sub-group arrive at the barrier.
 
 Portable device code must not assume that work-items within a sub-group execute
 in any particular order, that work-groups are subdivided into sub-groups in a
@@ -1316,55 +1316,54 @@ These kernels are not programmable, hence they are not bound by the SYCL
 implementation-defined.
 
 
-[[sec:synchronization]]
-=== Synchronization
+[[sec:coordination]]
+=== Coordination
 
-Synchronization of processing elements executing inside a device is handled
-by the SYCL device kernel following the SYCL kernel execution model.
-The synchronization of the different SYCL device kernels executing with
-the host memory is handled by the SYCL application via the SYCL runtime.
+Coordination between the host and any devices can be expressed in the host SYCL
+application using calls into the SYCL runtime. Coordination between work-items
+executing inside of device code can be expressed using group barriers and
+atomic operations.
 
-==== Synchronization in the SYCL application
+==== Host-Device Coordination
 
-Synchronization points between host and device(s) are exposed through
-the following operations:
+The following operations can be used to coordinate host and device(s):
 
   * _Buffer destruction_: The destructors for
     [code]#sycl::buffer#, [code]#sycl::unsampled_image# and
-    [code]#sycl::sampled_image# objects wait for all submitted work on
-    those objects to complete and to copy the data back to host memory
-    before returning. These destructors only wait if the object was
-    constructed with attached host memory and if data needs to be copied
-    back to the host.
+    [code]#sycl::sampled_image# objects block until all submitted work on
+    those objects completes and copy the data back to host memory before
+    returning. These destructors only block if the object was constructed with
+    attached host memory and if data needs to be copied back to the host.
 +
 --
-More complex forms of synchronization on buffer destruction
-can be specified by the user by constructing buffers with other kinds of
-references to memory, such as [code]#shared_ptr# and [code]#unique_ptr#.
+More complex forms of buffer destruction can be specified by the user by
+constructing buffers with other kinds of references to memory, such as
+[code]#shared_ptr# and [code]#unique_ptr#.
 --
-  * _Host Accessors_: The constructor for a host accessor waits for all
-    kernels that modify the same buffer (or image) in any queues to complete
+  * _Host Accessors_: The constructor for a host accessor blocks until all
+    kernels that modify the same buffer (or image) in any queues complete
     and then copies data back to host memory before the constructor returns.
     Any command groups with requirements to the same memory object cannot
     execute until the host accessor is destroyed as shown on <<fig:host-acc>>.
   * _Command group enqueue_: The <<sycl-runtime>> internally ensures
     that any command groups added to queues have the correct event
     dependencies added to those queues to ensure correct operation. Adding
-    command groups to queues never blocks. Instead any required
-    synchronization is added to the queue and events of type
-    [code]#sycl::event# are returned by the queue's submit function
-    that contain event information related to the specific command group.
+    command groups to queues never blocks, and the [code]#sycl::event# returned
+    by the queue's submit function contains event information related to the
+    specific command group.
   * _Queue operations_: The user can manually use queue operations,
     such as [code]#sycl::queue::wait()# to block execution of the calling thread until all
     the command groups submitted to the queue have finished execution. Note
     that this will also affect the dependencies of those command groups in
     other queues.
   * _SYCL event objects_: SYCL provides [code]#sycl::event#
-    objects which can be used for synchronization. If synchronization is
-    required across SYCL contexts from different <<backend, SYCL backends>>, then the
-    <<sycl-runtime>> ensures that extra host-based synchronization is
-    added to enable the SYCL event objects to operate between contexts
-    correctly.
+    objects which can be used to track and specify dependencies. The
+    <<sycl-runtime>> must ensure that these objects can be used to
+    enforce dependencies that span SYCL contexts from different <<backend, SYCL
+    backends>>.
+
+The operation(s) that unblock calls to these functions always happen before
+returns from any and all calls that are unblocked.
 
 Note that the destructors of other SYCL objects
 ([code]#sycl::queue#, [code]#sycl::context#,{ldots}) do
@@ -1377,22 +1376,18 @@ cases if this does not fit the goal.
 See <<sec:managing-object-lifetimes>> for more information
 on object life time.
 
-==== Synchronization in SYCL kernels
+==== Work-item Coordination
 
-In SYCL, synchronization can be either global or local within a
-group of work-items.  Synchronization between work-items in a single
-group is achieved using a <<group-barrier>>.
-
-All the work-items of a group must execute the barrier before any are
-allowed to continue execution beyond the barrier. Note that the
-group barrier must be encountered by all work-items of a
-group executing the kernel or by none at all. In SYCL,
-<<work-group-barrier>> and <<sub-group-barrier>> functionality is
+A <<group-barrier>> provides a mechanism to coordinate all work-items in the
+same group. All work-items in a group must execute the barrier before any are
+allowed to continue execution beyond the barrier. Note that the group barrier
+must be encountered by all work-items of a group executing the kernel or by
+none at all. <<work-group-barrier>> and <<sub-group-barrier>> functionality is
 exposed via the [code]#group_barrier# function.
 
-Synchronization between work-items in different work-groups via atomic
-operations is possible only on SYCL devices with certain capabilities,
-as described in <<sec:memoryconsistency>>.
+Coordination between work-items in different work-groups must take place via
+atomic operations, and is possible only on SYCL device with certain
+capabilities, as described in <<sec:memoryconsistency>>.
 
 === Error handling
 
@@ -1498,7 +1493,7 @@ provided, which uses move semantics for initializing and using the
 associated host memory. In this case, the behavior of the buffer in
 relation to the user application will be non-blocking on destruction.
 
-As said in <<sec:synchronization>>, the only blocking
+As said in <<sec:coordination>>, the only blocking
 operations in SYCL (apart from explicit wait operations) are:
 
   * host accessor constructor, which waits for any kernels enqueued before
@@ -1621,19 +1616,18 @@ the appropriate image format specified such as four 8-bit
 elements, for example.
 --
 
-Users may want fine-grained control of the synchronization, memory management
-and storage semantics of SYCL image or buffer objects. For example, a user may
-wish to specify the host memory for a memory object to use, but may not want the
-memory object to block on destruction.
+Users may want fine-grained control of the memory management and storage
+semantics of SYCL image or buffer objects. For example, a user may wish to
+specify the host memory for a memory object to use, but may not want the memory
+object to block on destruction.
 
 Depending on the control and the use cases of the SYCL applications,
 well established {cpp} classes and patterns can be used for reference counting and
 sharing data between user applications and the <<sycl-runtime>>. For control over
 memory allocation on the host and mapping between host and device memory,
 pre-defined or user-defined {cpp} [code]#std::allocator# classes are
-used. For better control of synchronization between a SYCL and a non SYCL
-application that share data, [code]#std::shared_ptr# and
-[code]#std::mutex# classes are used.
+used. To avoid data races when sharing data between SYCL and non-SYCL
+applications, [code]#std::shared_ptr# and [code]#std::mutex# classes are used.
 
 
 == Multi-dimensional objects and linearization
