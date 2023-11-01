@@ -113,7 +113,7 @@ environment. However, if you are using Debian/Ubuntu Linux, either native or
 via WSL2, you should be able to install the required tools by looking at the
 Dockerfile at
 
-https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile
+https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.Dockerfile
 
 Note that the Khronos Docker image layers on the official Ruby 3.1 Docker
 image, so you must install Ruby first.
