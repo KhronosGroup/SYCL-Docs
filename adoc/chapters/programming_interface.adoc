@@ -10734,6 +10734,12 @@ which must eventually be deallocated with [code]#sycl::free# in order to avoid
 a memory leak.  If there are not enough resources to allocate the requested
 memory, these functions return [code]#nullptr#.
 
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.  The value returned is unspecified in this case, and the
+returned pointer may not be used to access storage.  If this pointer is not
+null, it must be passed to [code]#sycl::free# to avoid a memory leak.
+
 [[table.usm.param.allocs]]
 .Parameterized USM Allocation Functions
 [width="100%",options="header",separator="@",cols="65%,35%"]
