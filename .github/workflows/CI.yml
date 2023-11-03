@@ -30,7 +30,7 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Unfortunately, asciidoctor-pdf gets pathname-specific errors
       # building under the usual $GITHUB_WORKSPACE (/__w). As a workaround,
@@ -40,8 +40,11 @@ jobs:
         run: |
           cd adoc
           make OUTDIR=/tmp/out QUIET= html pdf
+      - name: Verify reflow conformance
+        run: |
+          ./adoc/script/verify_reflow_conformance.sh
       - name: Archive generated files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: spec-outputs
           path: |
