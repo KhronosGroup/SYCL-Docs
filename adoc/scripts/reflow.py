@@ -74,7 +74,7 @@ class ReflowCallbacks:
     def __init__(self,
                  filename,
                  vuidDict,
-                 margin = 76,
+                 margin = 80,
                  breakPeriod = True,
                  reflow = True,
                  nextvu = None,
