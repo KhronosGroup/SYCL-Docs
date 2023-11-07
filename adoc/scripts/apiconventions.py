@@ -11,11 +11,4 @@
 
 import os
 
-defaultAPI = 'vulkan'
-
-VulkanAPI = os.getenv('VULKAN_API', default=defaultAPI)
-
-if VulkanAPI == 'vulkansc':
-    from vkconventions import VulkanSCConventions as APIConventions
-else:
-    from vkconventions import VulkanConventions as APIConventions
+from syclconventions import SYCLConventions as APIConventions
