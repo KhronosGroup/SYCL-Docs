@@ -1362,8 +1362,10 @@ constructing buffers with other kinds of references to memory, such as
     enforce dependencies that span SYCL contexts from different <<backend, SYCL
     backends>>.
 
-The operation(s) that unblock calls to these functions always happen before
-returns from any and all calls that are unblocked.
+The specification for each of these blocking functions defines some set of
+operations that cause the function to unblock. These operations always happen
+before the blocking function returns (using the definition of "happens before"
+from the C++ specification).
 
 Note that the destructors of other SYCL objects
 ([code]#sycl::queue#, [code]#sycl::context#,{ldots}) do
