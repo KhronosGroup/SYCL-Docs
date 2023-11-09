@@ -1317,12 +1317,17 @@ implementation-defined.
 
 
 [[sec:coordination]]
-=== Coordination
+=== Coordination and Synchronization
 
 Coordination between the host and any devices can be expressed in the host SYCL
 application using calls into the SYCL runtime. Coordination between work-items
-executing inside of device code can be expressed using group barriers and
-atomic operations.
+executing inside of device code can be expressed using group barriers.
+
+Some function calls synchronize with other function calls performed by another
+thread (potentially on another device). Other functions are defined in terms of
+their synchronization operations. Such functions can be used to ensure that
+the host and any devices do not access data concurrently, and/or to reason
+about the ordering of operations across the host and any devices.
 
 ==== Host-Device Coordination
 
