@@ -554,8 +554,8 @@ if __name__ == '__main__':
     parser.add_argument('-noflow', action='store_true', dest='noflow',
                         help='Do not reflow text. Other actions may apply')
     parser.add_argument('-margin', action='store', type=int, dest='margin',
-                        default='76',
-                        help='Width to reflow text, defaults to 76 characters')
+                        default='80',
+                        help='Width to reflow text, defaults to 80 characters')
     parser.add_argument('-suffix', action='store', dest='suffix',
                         default='',
                         help='Set the suffix added to updated file names (default: none)')

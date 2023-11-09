@@ -4,10 +4,10 @@
 [[chapter:opencl-backend]]
 = OpenCL backend specification
 
-This chapter describes how the SYCL general programming model is mapped on
-top of OpenCL, and how the SYCL generic interoperability interface must be
-implemented by vendors providing SYCL for OpenCL implementations to ensure
-SYCL applications written for the OpenCL backend are interoperable.
+This chapter describes how the SYCL general programming model is mapped on top
+of OpenCL, and how the SYCL generic interoperability interface must be
+implemented by vendors providing SYCL for OpenCL implementations to ensure SYCL
+applications written for the OpenCL backend are interoperable.
 
 
 [[sec:opencl:native-interop-application]]
@@ -16,8 +16,8 @@ SYCL applications written for the OpenCL backend are interoperable.
 For each <<sycl-runtime>> class which supports <<sycl-application>>
 interoperability, specializations of [code]#backend_traits::input_type# and
 [code]#backend_traits::return_type# must be defined as the type of
-<<sycl-application>> interoperability <<native-backend-object>> associated
-with [code]#SyclType# for the <<backend>>.
+<<sycl-application>> interoperability <<native-backend-object>> associated with
+[code]#SyclType# for the <<backend>>.
 
 The types of the native backend objects for <<sycl-application>>
 interoperability are described in <<table.opencl.interop>>.
@@ -25,14 +25,13 @@ interoperability are described in <<table.opencl.interop>>.
 [[sec:opencl:native-interop-kernel]]
 == Kernel function interoperability native backend objects
 
-For each <<sycl-runtime>> class which supports kernel function
-interoperability, a specialization of [code]#backend_traits::return_type#
-must be defined as the type of kernel function interoperability
-<<native-backend-object>> associated with [code]#SyclType# for the
-<<backend>>.
+For each <<sycl-runtime>> class which supports kernel function interoperability,
+a specialization of [code]#backend_traits::return_type# must be defined as the
+type of kernel function interoperability <<native-backend-object>> associated
+with [code]#SyclType# for the <<backend>>.
 
-The types of the native backend objects for kernel function interoperability
-are described in <<table.opencl.kernelfunctioninterop.nativeobjects>>.
+The types of the native backend objects for kernel function interoperability are
+described in <<table.opencl.kernelfunctioninterop.nativeobjects>>.
 
 [[table.opencl.kernelfunctioninterop.nativeobjects]]
 .Types of native backend objects kernel function interoperability
@@ -66,14 +65,13 @@ include::{header_dir}/openclBackend/samplerImagePair.h[lines=4..-1]
 
 On destruction of the last copy of an instance of a SYCL class which is
 specified to have reference semantics as described in
-<<sec:reference-semantics>> that was constructed using one of the
-<<backend>> interoperability [code]#make_*# functions specified in
-<<sec:backend-interoperability-make>> additional lifetime related operations
-may be performed which are required for the underlying
-<<native-backend-object>>.
+<<sec:reference-semantics>> that was constructed using one of the <<backend>>
+interoperability [code]#make_*# functions specified in
+<<sec:backend-interoperability-make>> additional lifetime related operations may
+be performed which are required for the underlying <<native-backend-object>>.
 
-The additional behavior performed by the OpenCL <<backend>> for each SYCL
-class is described in <<table.opencl.interop.destructors>>.
+The additional behavior performed by the OpenCL <<backend>> for each SYCL class
+is described in <<table.opencl.interop.destructors>>.
 
 [[table.opencl.interop.destructors]]
 .Destructor behavior of interop constructed objects with reference semantics
@@ -100,29 +98,27 @@ The SYCL framework allows applications to use a host and one or more OpenCL
 devices as a single heterogeneous parallel computer system.
 The framework contains the following components:
 
-  * <<sycl-library>>: The template library provides a set of {cpp} templates
-    and classes which provide the programming model to the user.
-    It enables the creation of runtime classes such as SYCL queues, buffers
-    and images, as well as access to some underlying OpenCL runtime object,
-    such as contexts, platforms, devices and program objects.
-  * <<sycl-runtime>>: The <<sycl-runtime>> interfaces with the underlying
-    OpenCL implementations and handles scheduling of commands in queues,
-    moving of data between host and devices, manages contexts, programs,
-    kernel compilation and memory management.
-  * [keyword]#OpenCL Implementation(s)#: The SYCL system assumes the
-    existence of one or more OpenCL implementations available on the host
-    machine.
-  * SYCL <<device-compiler,device compilers>>: The SYCL
-    <<device-compiler,device compilers>> compile SYCL {cpp} kernels into a
-    format which can be executed on an OpenCL device at runtime.
-    There may be more than one SYCL device compiler in a SYCL
-    implementation.
+  * <<sycl-library>>: The template library provides a set of {cpp} templates and
+    classes which provide the programming model to the user.
+    It enables the creation of runtime classes such as SYCL queues, buffers and
+    images, as well as access to some underlying OpenCL runtime object, such as
+    contexts, platforms, devices and program objects.
+  * <<sycl-runtime>>: The <<sycl-runtime>> interfaces with the underlying OpenCL
+    implementations and handles scheduling of commands in queues, moving of data
+    between host and devices, manages contexts, programs, kernel compilation and
+    memory management.
+  * [keyword]#OpenCL Implementation(s)#: The SYCL system assumes the existence
+    of one or more OpenCL implementations available on the host machine.
+  * SYCL <<device-compiler,device compilers>>: The SYCL <<device-compiler,device
+    compilers>> compile SYCL {cpp} kernels into a format which can be executed
+    on an OpenCL device at runtime.
+    There may be more than one SYCL device compiler in a SYCL implementation.
     The format of the compiled SYCL kernels is not defined.
-    A SYCL device compiler may, or may not, also compile the host parts of
-    the program.
+    A SYCL device compiler may, or may not, also compile the host parts of the
+    program.
 
-The OpenCL backend is enabled using the [code]#sycl::backend::opencl# value
-of [code]#enum class backend#.
+The OpenCL backend is enabled using the [code]#sycl::backend::opencl# value of
+[code]#enum class backend#.
 That means that when the OpenCL backend is active, the value of
 [code]#sycl::is_backend_active<sycl::backend::opencl>::value# will be
 [code]#true#.
@@ -130,8 +126,8 @@ That means that when the OpenCL backend is active, the value of
 
 == Mapping of SYCL programming model on top of OpenCL
 
-The SYCL programming model was originally designed as a high-level model for
-the OpenCL API, hence the mapping of SYCL on the OpenCL API is mostly
+The SYCL programming model was originally designed as a high-level model for the
+OpenCL API, hence the mapping of SYCL on the OpenCL API is mostly
 straightforward.
 
 When the OpenCL backend is active on a SYCL application, all visible OpenCL
@@ -139,12 +135,12 @@ platforms are exported as SYCL platforms.
 
 // From Architecture, Section 3.3
 When a SYCL implementation executes kernels on an OpenCL device, it achieves
-this by enqueuing OpenCL *commands* to execute computations on the
-processing elements within a device.
+this by enqueuing OpenCL *commands* to execute computations on the processing
+elements within a device.
 The processing elements within an OpenCL compute unit may execute a single
 stream of instructions as ALUs within a SIMD unit (which execute in lockstep
-with a single stream of instructions), as independent SPMD units (where each
-PE maintains its own program counter) or as some combination of the two.
+with a single stream of instructions), as independent SPMD units (where each PE
+maintains its own program counter) or as some combination of the two.
 
 
 === Backend specific information descriptors
@@ -164,21 +160,19 @@ properties as described in the table below:
 
 === OpenCL memory model
 
-The memory model for SYCL devices running on OpenCL platforms follows the
-memory model of the OpenCL version they conform to.
+The memory model for SYCL devices running on OpenCL platforms follows the memory
+model of the OpenCL version they conform to.
 
 In addition to <<global-memory>> , <<local-memory>> and <<private-memory>>
-memory, the OpenCL backend permits the use of <<constant-memory>> space in
-SYCL:
+memory, the OpenCL backend permits the use of <<constant-memory>> space in SYCL:
 
   * <<constant-memory,Constant-memory>> is a region of memory that remains
     constant during the execution of a kernel.
-    A pointer to the generic address space cannot represent an address to
-    this memory region.
+    A pointer to the generic address space cannot represent an address to this
+    memory region.
 
-Work-items executing in a kernel have access to four distinct memory
-regions, with the mapping between SYCL and OpenCL described in
-<<table.opencl.memory>>.
+Work-items executing in a kernel have access to four distinct memory regions,
+with the mapping between SYCL and OpenCL described in <<table.opencl.memory>>.
 
 [[table.opencl.memory]]
 .Mapping of SYCL memory regions into OpenCL memory regions
@@ -193,16 +187,16 @@ regions, with the mapping between SYCL and OpenCL described in
 
 === OpenCL interface for buffer command accessors
 
-The enumerator [code]#target::constant_buffer# is deprecated, but will
-remain a part of the OpenCL backend as an extension.
-This enables SYCL kernel functions to access the contents of a buffer
-through the OpenCL device’s constant memory.
+The enumerator [code]#target::constant_buffer# is deprecated, but will remain a
+part of the OpenCL backend as an extension.
+This enables SYCL kernel functions to access the contents of a buffer through
+the OpenCL device’s constant memory.
 
 // From 3.4.1.1 OpenCL resources managed by SYCL Application
 === OpenCL resources managed by SYCL application
 
-In OpenCL, a developer must create a <<context>> to be able to execute
-commands on a device.
+In OpenCL, a developer must create a <<context>> to be able to execute commands
+on a device.
 Creating a context involves choosing a <<platform>> and a list of
 <<device,devices>>.
 In SYCL, contexts, platforms and devices all exist, but the user can choose
@@ -214,39 +208,37 @@ internally.
 
 The resources managed by SYCL are:
 
-  . <<platform,Platforms>>: all features of OpenCL are implemented by
-    platforms.
+  . <<platform,Platforms>>: all features of OpenCL are implemented by platforms.
     A platform can be viewed as a given hardware vendor's runtime and the
     devices accessible through it.
     Some devices will only be accessible to one vendor's runtime and hence
     multiple platforms may be present.
     SYCL manages the different platforms for the user.
-    In SYCL, a platform resource is accessible through a
-    [code]#sycl::platform# object.
-  . <<context,Contexts>>: any OpenCL resource that is acquired by the user
-    is attached to a context.
-    A context contains a collection of devices that the host can use and
-    manages memory objects that can be shared between the devices.
-    Data movement between devices within a context may be efficient and
-    hidden by the underlying OpenCL runtime while data movement between
-    contexts may involve the host.
+    In SYCL, a platform resource is accessible through a [code]#sycl::platform#
+    object.
+  . <<context,Contexts>>: any OpenCL resource that is acquired by the user is
+    attached to a context.
+    A context contains a collection of devices that the host can use and manages
+    memory objects that can be shared between the devices.
+    Data movement between devices within a context may be efficient and hidden
+    by the underlying OpenCL runtime while data movement between contexts may
+    involve the host.
     A given context can only wrap devices owned by a single platform.
-    In SYCL, a context resource is accessible through a
-    [code]#sycl::context# object.
+    In SYCL, a context resource is accessible through a [code]#sycl::context#
+    object.
   . <<device,Devices>>: platforms provide one or more devices for executing
     kernels.
     In SYCL, a device is accessible through a [code]#sycl::device# object.
-  . <<kernel-bundle,Kernel bundles>>: OpenCL objects that store
-    implementation data for the SYCL kernels.
+  . <<kernel-bundle,Kernel bundles>>: OpenCL objects that store implementation
+    data for the SYCL kernels.
     These objects are only required for advanced use in SYCL and are
     encapsulated in the [code]#sycl::kernel_bundle# class.
   . <<queue,Queues>>: SYCL kernels execute in command queues.
     The user must create a queue, which references an associated context,
     platform and device.
-    The context, platform and device may be chosen automatically, or
-    specified by the user.
-    In SYCL, command queues are accessible through [code]#sycl::queue#
-    objects.
+    The context, platform and device may be chosen automatically, or specified
+    by the user.
+    In SYCL, command queues are accessible through [code]#sycl::queue# objects.
 
 // Removed from OpenCL Spec document
 // In OpenCL, queues can operate using in-order execution or out-of-order
@@ -274,53 +266,51 @@ kernels written in {cpp}.
 // Original from 3.6.11, Interfacing with OpenCL
 // https://cvs.khronos.org/bugzilla/show_bug.cgi?id=10426
 
-<<sycl-runtime>> classes which encapsulate an OpenCL opaque type such as
-SYCL [code]#context# or SYCL [code]#queue# must provide an interoperability
+<<sycl-runtime>> classes which encapsulate an OpenCL opaque type such as SYCL
+[code]#context# or SYCL [code]#queue# must provide an interoperability
 constructor taking an instance of the OpenCL opaque type.
 When the OpenCL object supports reference counting, these constructors must
 retain that instance to increase the reference count of the OpenCL resource.
-Likewise, the destructor for the <<sycl-runtime>> classes which encapsulate
-a reference counted OpenCL opaque type must release that instance to
-decrease the reference count of the OpenCL resource.
-Since the OpenCL [code]#platform_id# is not reference counted, the
-encapsulating SYCL [code]#platform# class neither retains nor releases this
-OpenCL resource.
+Likewise, the destructor for the <<sycl-runtime>> classes which encapsulate a
+reference counted OpenCL opaque type must release that instance to decrease the
+reference count of the OpenCL resource.
+Since the OpenCL [code]#platform_id# is not reference counted, the encapsulating
+SYCL [code]#platform# class neither retains nor releases this OpenCL resource.
 
-Note that an instance of a <<sycl-runtime>> class which encapsulates an
-OpenCL opaque type can encapsulate any number of instances of the OpenCL
-type, unless it was constructed via the interoperability constructor, in
-which case it can encapsulate only a single instance of the OpenCL type.
+Note that an instance of a <<sycl-runtime>> class which encapsulates an OpenCL
+opaque type can encapsulate any number of instances of the OpenCL type, unless
+it was constructed via the interoperability constructor, in which case it can
+encapsulate only a single instance of the OpenCL type.
 
-The lifetime of a <<sycl-runtime>> class that encapsulates an OpenCL opaque
-type and the instance of that opaque type retrieved via the
-[code]#get_native()# free function are not tied in either direction given
-correct usage of OpenCL reference counting.
-For example if a user were to retrieve a [code]#cl_command_queue# instance
-from a SYCL [code]#queue# instance and then immediately destroy the SYCL
-[code]#queue# instance, the [code]#cl_command_queue# instance is still
-valid.
+The lifetime of a <<sycl-runtime>> class that encapsulates an OpenCL opaque type
+and the instance of that opaque type retrieved via the [code]#get_native()# free
+function are not tied in either direction given correct usage of OpenCL
+reference counting.
+For example if a user were to retrieve a [code]#cl_command_queue# instance from
+a SYCL [code]#queue# instance and then immediately destroy the SYCL
+[code]#queue# instance, the [code]#cl_command_queue# instance is still valid.
 Or if a user were to construct a SYCL [code]#queue# instance from a
 [code]#cl_command_queue# instance and then immediately release the
 [code]#cl_command_queue# instance, the SYCL [code]#queue# instance is still
 valid.
 
-Note that a <<sycl-runtime>> class that encapsulates an OpenCL opaque type
-is not responsible for any incorrect use of OpenCL reference counting
-outside of the <<sycl-runtime>>.
-For example if a user were to retrieve a [code]#cl_command_queue# instance
-from a SYCL [code]#queue# instance and then release the
-[code]#cl_command_queue# instance more than once without any prior retain
-then the SYCL [code]#queue# instance that the [code]#cl_command_queue#
-instance was retrieved from is now undefined.
+Note that a <<sycl-runtime>> class that encapsulates an OpenCL opaque type is
+not responsible for any incorrect use of OpenCL reference counting outside of
+the <<sycl-runtime>>.
+For example if a user were to retrieve a [code]#cl_command_queue# instance from
+a SYCL [code]#queue# instance and then release the [code]#cl_command_queue#
+instance more than once without any prior retain then the SYCL [code]#queue#
+instance that the [code]#cl_command_queue# instance was retrieved from is now
+undefined.
 
 Note that an instance of the SYCL [code]#buffer# or SYCL [code]#image# class
-templates constructed via the interoperability constructor is free to copy
-from the [code]#cl_mem# into another memory allocation within the
-<<sycl-runtime>> to achieve normal SYCL semantics, for as long as the SYCL
-[code]#buffer# or SYCL [code]#image# instance is alive.
+templates constructed via the interoperability constructor is free to copy from
+the [code]#cl_mem# into another memory allocation within the <<sycl-runtime>> to
+achieve normal SYCL semantics, for as long as the SYCL [code]#buffer# or SYCL
+[code]#image# instance is alive.
 
-<<table.opencl.interop>> relates SYCL objects to their OpenCL native type in
-the SYCL application.
+<<table.opencl.interop>> relates SYCL objects to their OpenCL native type in the
+SYCL application.
 
 [[table.opencl.interop]]
 .List of native types per SYCL object in the OpenCL backend
@@ -426,8 +416,8 @@ unsampled_image
       The interoperability interface will return a list of active images in the SYCL runtime.
 |====
 
-Inside the SYCL kernel, the SYCL API offers interoperability with OpenCL
-device types.
+Inside the SYCL kernel, the SYCL API offers interoperability with OpenCL device
+types.
 <<table.opencl.kerneltypes>> describes the mapping of kernel types.
 
 [[table.opencl.kerneltypes]]
@@ -457,23 +447,23 @@ multi_ptr::get_decorated()
 // From 3.7 memory object
 When a buffer or image is allocated on more than one OpenCL device, if these
 devices are on separate contexts then multiple [code]#cl_mem# objects may be
-allocated for the memory object, depending on whether the object has
-actively been used on these devices yet or not.
+allocated for the memory object, depending on whether the object has actively
+been used on these devices yet or not.
 
 
 // From 3.10 Language restrictions in kernels
 
-The OpenCL C function qualifier [code]#+__kernel+# and the access
-qualifiers: [code]#+__read_only+#, [code]#+__write_only+# and
-[code]#+__read_write+# are not exposed in SYCL via keywords, but are instead
-encapsulated in SYCL's parameter passing system inside accessors.
+The OpenCL C function qualifier [code]#+__kernel+# and the access qualifiers:
+[code]#+__read_only+#, [code]#+__write_only+# and [code]#+__read_write+# are not
+exposed in SYCL via keywords, but are instead encapsulated in SYCL's parameter
+passing system inside accessors.
 Users wishing to achieve the OpenCL equivalent of these qualifiers in SYCL
 should instead use SYCL accessors with equivalent semantics.
 
 // From 3.10.1 SYCL Linker
-Any OpenCL C function included in a pre-built OpenCL library can be defined
-as an [code]#extern "C"# function and the OpenCL program has to be linked
-against any SYCL program that contains kernels using the external function.
+Any OpenCL C function included in a pre-built OpenCL library can be defined as
+an [code]#extern "C"# function and the OpenCL program has to be linked against
+any SYCL program that contains kernels using the external function.
 In this case, the data types used have to comply with the interoperability
 aliases defined in <<table.types.aliases>>.
 
@@ -647,9 +637,8 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code
 === Extension query
 
 Platforms and devices with an OpenCL backend may support extensions.
-For convenience, the extensions supported by a platform or device can be
-queried through the following functions provided in the [code]#sycl::opencl#
-namespace.
+For convenience, the extensions supported by a platform or device can be queried
+through the following functions provided in the [code]#sycl::opencl# namespace.
 
 [width="100%",options="header",separator="@",cols="35%,65%"]
 |====
@@ -727,19 +716,19 @@ triggered, the OpenCL error code will be [code]#CL_SUCCESS#.
 [[sec:opencl:interop-kernel-bundle]]
 === Interoperability with kernel bundles
 
-In <<opencl12, OpenCL>> any kernel function that is enqueued over an
-nd-range is represented by a [code]#cl_kernel# and must be compiled and
-linked via a [code]#cl_program# using [code]#clBuildProgram#,
-[code]#clCompileProgram# and [code]#clLinkProgram#.
+In <<opencl12, OpenCL>> any kernel function that is enqueued over an nd-range is
+represented by a [code]#cl_kernel# and must be compiled and linked via a
+[code]#cl_program# using [code]#clBuildProgram#, [code]#clCompileProgram# and
+[code]#clLinkProgram#.
 
-For OpenCL <<backend>> this detail is abstracted away by
-<<kernel-bundle,kernel bundles>> and a [code]#kernel_bundle# object
-containing all <<sycl-kernel-function,SYCL kernel functions>> is retrieved
-by calling the free function [code]#get_kernel_bundle#.
+For OpenCL <<backend>> this detail is abstracted away by <<kernel-bundle,kernel
+bundles>> and a [code]#kernel_bundle# object containing all
+<<sycl-kernel-function,SYCL kernel functions>> is retrieved by calling the free
+function [code]#get_kernel_bundle#.
 
-The OpenCL <<backend>> specification provides additional free functions
-which provide convenience functions for constructing kernel bundles from
-OpenCL specific objects.
+The OpenCL <<backend>> specification provides additional free functions which
+provide convenience functions for constructing kernel bundles from OpenCL
+specific objects.
 
 [source,,linenums]
 ----
@@ -760,20 +749,19 @@ kernel_bundle<State> create_bundle(const context& ctxt,
     [code]#ctxt#.
 +
 --
-_Effects:_ Constructs a <<kernel-bundle>> in the specified
-[code]#bundle_state# from the provided list of OpenCL programs and
-associated with the <<context>> specified by [code]#syclContext# by invoking
-the necessary OpenCL APIs.
-Follows the same rules as calling [code]#make_kernel_bundle# on a single
-OpenCL program, except that the rules apply to all OpenCL programs in
+_Effects:_ Constructs a <<kernel-bundle>> in the specified [code]#bundle_state#
+from the provided list of OpenCL programs and associated with the <<context>>
+specified by [code]#syclContext# by invoking the necessary OpenCL APIs.
+Follows the same rules as calling [code]#make_kernel_bundle# on a single OpenCL
+program, except that the rules apply to all OpenCL programs in
 [code]#clPrograms#.
-Multiple programs will be linked together into a single one if required by
-the requested [code]#State#.
-The constructed [code]#kernel_bundle# will retain all provided OpenCL
-programs and will also release them on destruction.
+Multiple programs will be linked together into a single one if required by the
+requested [code]#State#.
+The constructed [code]#kernel_bundle# will retain all provided OpenCL programs
+and will also release them on destruction.
 
-_Throws:_ An [code]#exception# with the [code]#errc::build# error code if
-any error is produced by invoking the OpenCL APIs.
+_Throws:_ An [code]#exception# with the [code]#errc::build# error code if any
+error is produced by invoking the OpenCL APIs.
 --
 
 [source,,linenums]
@@ -789,42 +777,41 @@ create_bundle(const context& ctxt, const std::vector<device>& devs,
     [code]#ctxt#.
 +
 --
-_Effects:_ Constructs an executable <<kernel-bundle>> from the provided list
-of OpenCL kernels and associated with the <<context>> specified by
+_Effects:_ Constructs an executable <<kernel-bundle>> from the provided list of
+OpenCL kernels and associated with the <<context>> specified by
 [code]#syclContext# by invoking the necessary OpenCL APIs.
-[code]#cl_kernel# objects might be associated with different
-[code]#cl_program# objects, the kernel bundle will encapsulate all of them.
+[code]#cl_kernel# objects might be associated with different [code]#cl_program#
+objects, the kernel bundle will encapsulate all of them.
 
-_Throws:_ An [code]#exception# with the [code]#errc::build# error code if
-any error is produced by invoking the OpenCL APIs.
+_Throws:_ An [code]#exception# with the [code]#errc::build# error code if any
+error is produced by invoking the OpenCL APIs.
 --
 
 
 === Interoperability with kernels
 
-A [code]#kernel_bundle# object contains one or multiple OpenCL programs and
- one or multiple OpenCL kernels.
- Calling [code]#kernel_bundle::get_kernel# returns a [code]#kernel# object
- which can be invoked by any of
+A [code]#kernel_bundle# object contains one or multiple OpenCL programs and one
+ or multiple OpenCL kernels.
+ Calling [code]#kernel_bundle::get_kernel# returns a [code]#kernel# object which
+ can be invoked by any of
 <<kernel-invocation-command,kernel invocation commands>> such as
 [code]#parallel_for# which take a [code]#kernel# but not
 <<sycl-kernel-function>>.
 
-Calling [code]#make_kernel# must trigger a call to [code]#clRetainKernel#
-and the resulting [code]#kernel# object must call [code]#clReleaseKernel# on
+Calling [code]#make_kernel# must trigger a call to [code]#clRetainKernel# and
+the resulting [code]#kernel# object must call [code]#clReleaseKernel# on
 destruction.
 
 It is also possible to construct a <<kernel-bundle>> from previously created
 OpenCL [code]#cl_kernel# objects by calling the free function
 [code]#create_bundle# as described in <<sec:opencl:interop-kernel-bundle>>.
 
-The kernel arguments for the OpenCL C kernel kernel can either be set prior
-to creating the [code]#kernel# object or by calling [code]#set_arg# or
+The kernel arguments for the OpenCL C kernel kernel can either be set prior to
+creating the [code]#kernel# object or by calling [code]#set_arg# or
 [code]#set_args# member functions of the [code]#handler# class.
 
 If kernel arguments are set prior to creating the [code]#kernel# object the
-<<sycl-runtime>> is not responsible for managing the data of these
-arguments.
+<<sycl-runtime>> is not responsible for managing the data of these arguments.
 
 
 [[sec:opencl:kernel-conventions-sycl]]
@@ -833,22 +820,21 @@ arguments.
 OpenCL and SYCL use opposite conventions for the unit stride dimension.
 SYCL aligns with {cpp} conventions, which is important to understand from a
 performance perspective when porting code to SYCL.
-The unit stride dimension, at least for data, is implicit in the
-linearization equations in SYCL (<<sec:multi-dim-linearization>>) and
-OpenCL.
-SYCL aligns with {cpp} array subscript ordering [code]#arr[a][b][c]#, in
-that range constructor dimension ordering used to launch a kernel (e.g.
-[code]#range<3> R{a,b,c}#) and range and ID queries within a kernel, are
-ordered in the same way as the {cpp} multi-dimensional subscript operators
-(unit stride on the right).
+The unit stride dimension, at least for data, is implicit in the linearization
+equations in SYCL (<<sec:multi-dim-linearization>>) and OpenCL.
+SYCL aligns with {cpp} array subscript ordering [code]#arr[a][b][c]#, in that
+range constructor dimension ordering used to launch a kernel (e.g.
+[code]#range<3> R{a,b,c}#) and range and ID queries within a kernel, are ordered
+in the same way as the {cpp} multi-dimensional subscript operators (unit stride
+on the right).
 
 When specifying a [code]#range# as the global or local size in a
 [code]#parallel_for# that invokes an OpenCL interop kernel (through
-[code]#cl_kernel# interop), the highest dimension of the range in SYCL will
-map to the lowest dimension within the OpenCL kernel.
+[code]#cl_kernel# interop), the highest dimension of the range in SYCL will map
+to the lowest dimension within the OpenCL kernel.
 That statement applies to both an underlying enqueue operation such as
-[code]#clEnqueueNDRangeKernel# in OpenCL, and also ID and size queries
-within the OpenCL kernel.
+[code]#clEnqueueNDRangeKernel# in OpenCL, and also ID and size queries within
+the OpenCL kernel.
 For example, a 3D global range specified in SYCL as:
 
 [source]
@@ -856,8 +842,7 @@ For example, a 3D global range specified in SYCL as:
 range<3> R { r0, r1, r2 };
 ----
 
-maps to an [code]#clEnqueueNDRangeKernel# [code]#global_work_size# argument
-of:
+maps to an [code]#clEnqueueNDRangeKernel# [code]#global_work_size# argument of:
 
 [source]
 ----
@@ -871,27 +856,25 @@ Likewise, a 2D global range specified in SYCL as:
 range<2> R { r0, r1 };
 ----
 
-maps to an [code]#clEnqueueNDRangeKernel# [code]#global_work_size# argument
-of:
+maps to an [code]#clEnqueueNDRangeKernel# [code]#global_work_size# argument of:
 
 [source]
 ----
 size_t cl_interop_range[2] = { r1, r0 };
 ----
 
-The mapping of highest dimension in SYCL to lowest dimension in OpenCL
-applies to all operations where a multi-dimensional construct must be
-mapped, such as when mapping SYCL explicit memory operations to OpenCL APIs
-like [code]#clEnqueueCopyBufferRect#.
+The mapping of highest dimension in SYCL to lowest dimension in OpenCL applies
+to all operations where a multi-dimensional construct must be mapped, such as
+when mapping SYCL explicit memory operations to OpenCL APIs like
+[code]#clEnqueueCopyBufferRect#.
 
-Work-item and work-group ID and range queries have the same reversed
-convention for unit stride dimension between SYCL and OpenCL.
-For example, with three, two, or one dimensional SYCL global ranges, OpenCL
-and SYCL kernel code queries relate to the range as shown in
+Work-item and work-group ID and range queries have the same reversed convention
+for unit stride dimension between SYCL and OpenCL.
+For example, with three, two, or one dimensional SYCL global ranges, OpenCL and
+SYCL kernel code queries relate to the range as shown in
 <<table.syclOpenCL.mapping>>.
-The "SYCL kernel query" column applies for SYCL-defined kernels, and the
-"OpenCL kernel query" column applies for kernels defined through OpenCL
-interop.
+The "SYCL kernel query" column applies for SYCL-defined kernels, and the "OpenCL
+kernel query" column applies for kernels defined through OpenCL interop.
 
 // Jon: Need to code-format most of these cells and use gray backgrounds on
 // column-spanning sub-titles.
@@ -950,8 +933,8 @@ interop.
 === Data types
 
 The OpenCL C language standard <<opencl12, Section 6.11>> defines its own
-built-in scalar data types, and these have additional requirements in terms
-of size and signedness on top of what is guaranteed by ISO {cpp}.
+built-in scalar data types, and these have additional requirements in terms of
+size and signedness on top of what is guaranteed by ISO {cpp}.
 For the purpose of interoperability and portability, SYCL defines a set of
 aliases to {cpp} types within the [code]#sycl::opencl# namespace using the
 [code]#cl_# prefix.
@@ -1066,45 +1049,43 @@ cl_half
 
 === Offline linking with OpenCL C libraries
 
-SYCL supports linking <<sycl-kernel-function,SYCL kernel functions>> with
-OpenCL C libraries during offline compilation or during online compilation
-by the <<sycl-runtime>> within a SYCL application.
+SYCL supports linking <<sycl-kernel-function,SYCL kernel functions>> with OpenCL
+C libraries during offline compilation or during online compilation by the
+<<sycl-runtime>> within a SYCL application.
 
 Linking with OpenCL C kernel functions offline is an optional feature and is
 unspecified.
 Linking with OpenCL C kernel functions online is performed by using the SYCL
-[code]#kernel_bundle# class to compile and link an OpenCL C source; using
-the [code]#compile_with_source# or [code]#build_with_source# member
-functions.
+[code]#kernel_bundle# class to compile and link an OpenCL C source; using the
+[code]#compile_with_source# or [code]#build_with_source# member functions.
 
 OpenCL C functions that are linked with, using either offline or online
 compilation, must be declared as [code]#extern "C"# function declarations.
-The function parameters of these function declarations must be defined as
-the OpenCL C interoperability aliases; [code]#pointer# of the
-[code]#multi_ptr# class template, [code]#vector_t# of the [code]#vec# class
-template and scalar data type aliases described in <<table.types.aliases>>.
+The function parameters of these function declarations must be defined as the
+OpenCL C interoperability aliases; [code]#pointer# of the [code]#multi_ptr#
+class template, [code]#vector_t# of the [code]#vec# class template and scalar
+data type aliases described in <<table.types.aliases>>.
 
 // \include{opencl_extensions}
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin opencl_extensions %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 == SYCL support of non-core OpenCL features
 
-In addition to the OpenCL core features, SYCL also provides support for
-OpenCL extensions which provide features in OpenCL via khr extensions.
+In addition to the OpenCL core features, SYCL also provides support for OpenCL
+extensions which provide features in OpenCL via khr extensions.
 
-Some extensions are natively supported within the SYCL interface, however
-some can only be used via the OpenCL interoperability interface.
+Some extensions are natively supported within the SYCL interface, however some
+can only be used via the OpenCL interoperability interface.
 The SYCL interface required for native extensions must be available.
 However if the respective extension is not supported by the executing SYCL
-[code]#device#, the <<sycl-runtime>> must throw an [code]#exception# with
-the [code]#errc::feature_not_supported# or
-[code]#errc::kernel_not_supported# error codes.
+[code]#device#, the <<sycl-runtime>> must throw an [code]#exception# with the
+[code]#errc::feature_not_supported# or [code]#errc::kernel_not_supported# error
+codes.
 
-The OpenCL backend exposes some khr extensions to SYCL applications through
-the [code]#sycl::aspect# enumerated type.
-Therefore, applications can query for the existence of these khr extensions
-by calling the [code]#device::has()# or [code]#platform::has()# member
-functions.
+The OpenCL backend exposes some khr extensions to SYCL applications through the
+[code]#sycl::aspect# enumerated type.
+Therefore, applications can query for the existence of these khr extensions by
+calling the [code]#device::has()# or [code]#platform::has()# member functions.
 
 All OpenCL extensions are available through the OpenCL interoperability
 interface, but some can also be used through core SYCL APIs.
@@ -1135,13 +1116,13 @@ name to its associated SYCL device [code]#aspect# when one is available.
 === Half precision floating-point
 
 The half scalar data type: [code]#half# and the half vector data types:
-[code]#half1#, [code]#half2#, [code]#half3#, [code]#half4#, [code]#half8#
-and [code]#half16# must be available at compile-time.
+[code]#half1#, [code]#half2#, [code]#half3#, [code]#half4#, [code]#half8# and
+[code]#half16# must be available at compile-time.
 However a kernel using these types is only supported on devices that have
 [code]#aspect::fp16#, as described in <<sec:optional-kernel-features>>.
 
-The conversion rules for half precision types follow the same rules as in
-the OpenCL 1.2 extensions specification <<openclext12, par.
+The conversion rules for half precision types follow the same rules as in the
+OpenCL 1.2 extensions specification <<openclext12, par.
 9.5.1>>.
 
 The math functions for half precision types follow the same rules as in the
@@ -1153,18 +1134,18 @@ corresponding to <<opencl12, Table 6.9 of the OpenCL 1.2 specification>>.
 
 === Writing to 3D image memory objects
 
-The [code]#unsampled_image_accessor# class in SYCL supports member functions
-for writing 3D image memory objects, but this functionality is only allowed
-on a device if the extension [code]#cl_khr_3d_image_writes# is supported on
-that <<device>>.
+The [code]#unsampled_image_accessor# class in SYCL supports member functions for
+writing 3D image memory objects, but this functionality is only allowed on a
+device if the extension [code]#cl_khr_3d_image_writes# is supported on that
+<<device>>.
 
 // TODO: Should opencl::aspect::3d_image_writes be promoted to a core SYCL aspect?
 
 
 === Interoperability with OpenGL
 
-Interoperability between SYCL and OpenGL is not directly provided by the
-SYCL interface, however can be achieved via the SYCL OpenCL interoperability
+Interoperability between SYCL and OpenGL is not directly provided by the SYCL
+interface, however can be achieved via the SYCL OpenCL interoperability
 interface.
 
 
@@ -1177,11 +1158,10 @@ All content in this section is non-normative.
 === Work-item functions
 
 The OpenCL 1.2 specification document <<opencl12, ch.
-6.12.1 in Table 6.7>> defines work-item functions that tell various
-information about the currently executing work-item in an OpenCL kernel.
-SYCL provides equivalent functionality through the item and group classes
-that are defined in <<subsec:item.class>>, <<nditem-class>> and
-<<group-class>>.
+6.12.1 in Table 6.7>> defines work-item functions that tell various information
+about the currently executing work-item in an OpenCL kernel.
+SYCL provides equivalent functionality through the item and group classes that
+are defined in <<subsec:item.class>>, <<nditem-class>> and <<group-class>>.
 
 === Vector data load and store functions
 
@@ -1192,18 +1172,17 @@ specification document <<opencl12, par.
 
 === Synchronization functions
 
-In SYCL the OpenCL [keyword]#synchronization functions# are available
-through the [code]#nd_item# class (<<nditem-class>>), as they are applied to
-work-items for local or global address spaces.
+In SYCL the OpenCL [keyword]#synchronization functions# are available through
+the [code]#nd_item# class (<<nditem-class>>), as they are applied to work-items
+for local or global address spaces.
 Please see <<table.members.nditem>>.
 
 === [code]#printf# function
 
 The functionality of the [code]#printf# function is covered by the
-[code]#stream# class (<<subsec:stream>>), which has the capability to print
-to standard output all of the SYCL classes and primitives, and covers the
-capabilities defined in the OpenCL 1.2 specification document <<opencl12,
-par.
+[code]#stream# class (<<subsec:stream>>), which has the capability to print to
+standard output all of the SYCL classes and primitives, and covers the
+capabilities defined in the OpenCL 1.2 specification document <<opencl12, par.
 6.12.13>>.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end opencl_extensions %%%%%%%%%%%%%%%%%%%%%%%%%%%%

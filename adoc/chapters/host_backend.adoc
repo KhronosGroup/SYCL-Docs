@@ -22,8 +22,8 @@
 = Host backend specification
 
 This chapter describes how SYCL is mapped on the <<host-backend>>.
-The <<host-backend>> exposes the host where the SYCL application is
-executing as a platform to dispatch SYCL kernels.
+The <<host-backend>> exposes the host where the SYCL application is executing as
+a platform to dispatch SYCL kernels.
 The <<host-backend>> exposes at least one <<host-device>>.
 
 
@@ -31,37 +31,37 @@ The <<host-backend>> exposes at least one <<host-device>>.
 
 // From Glossary, reworded to match backend
 
-The SYCL host device implements all functionality required to execute the
-SYCL kernels directly on the host, without relying on a third party API.
+The SYCL host device implements all functionality required to execute the SYCL
+kernels directly on the host, without relying on a third party API.
 It has full SYCL capabilities and reports them through the SYCL information
 retrieval interface.
-At least one SYCL host device must be exposed in the SYCL host backend in
-all SYCL implementations, and it must always be available.
+At least one SYCL host device must be exposed in the SYCL host backend in all
+SYCL implementations, and it must always be available.
 Any {cpp} application debugger, if available on the system, can be used for
 debugging SYCL kernels executing on a SYCL host device.
 
 // From Architecture, Section 3.3
-When a SYCL implementation executes kernels on the host device, it is free
-to use whatever parallel execution facilities available on the host, as long
-as it executes within the semantics of the kernel execution model defined by
-the SYCL kernel execution model.
+When a SYCL implementation executes kernels on the host device, it is free to
+use whatever parallel execution facilities available on the host, as long as it
+executes within the semantics of the kernel execution model defined by the SYCL
+kernel execution model.
 
-Kernel math library functions on the host must conform to OpenCL math
-precision requirements.
+Kernel math library functions on the host must conform to OpenCL math precision
+requirements.
 The SYCL host device needs to be queried for the capabilities it provides.
 This ensures consistency when executing any SYCL general application.
 
-The <<host-device>> must report as supporting images and therefore support
-the minimum image formats.
+The <<host-device>> must report as supporting images and therefore support the
+minimum image formats.
 
 The range of image formats supported by the host device is
-implementation-defined, but must match the minimum requirements of the
-OpenCL specification.
+implementation-defined, but must match the minimum requirements of the OpenCL
+specification.
 
-SYCL implementors can provide extensions on the host-device to match any
-other backend-specific extension.
-This allows developers to rely on the host device to execute their programs
-when said backend is not available.
+SYCL implementors can provide extensions on the host-device to match any other
+backend-specific extension.
+This allows developers to rely on the host device to execute their programs when
+said backend is not available.
 
 
 === SYCL memory model on the host
@@ -82,17 +82,17 @@ All SYCL device memories are available on devices from the host backend.
 
 == Interoperability with the host application
 
-The host backend must ensure all functionality of the SYCL generic
-programming model is always available to developers.
+The host backend must ensure all functionality of the SYCL generic programming
+model is always available to developers.
 However, since there is no heterogeneous API behind the host backend (it
-directly targets the host platform), there are no native types for SYCL
-objects to map to in the SYCL application.
+directly targets the host platform), there are no native types for SYCL objects
+to map to in the SYCL application.
 
-Inside SYCL kernels, the host backend must ensure interoperability with
-existing host code, so that existing host libraries can be used inside SYCL
-kernels executing on the host.
-In particular, when retrieving a raw pointer from a multi pointer object,
-the pointer returned must be usable by any library accessible by the SYCL
+Inside SYCL kernels, the host backend must ensure interoperability with existing
+host code, so that existing host libraries can be used inside SYCL kernels
+executing on the host.
+In particular, when retrieving a raw pointer from a multi pointer object, the
+pointer returned must be usable by any library accessible by the SYCL
 application.
 
 
