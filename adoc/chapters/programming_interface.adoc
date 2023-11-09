@@ -361,7 +361,7 @@ Each of the following <<sycl-runtime>> classes:
 [code]#unsampled_image_accessor#
 must obey the following statements, where [code]#T# is the runtime class type:
 
-  * [code]#T# must be copy constructible and copy assignable on the
+  * [code]#T# must be copy constructible and copy assignable in the
     host application and within SYCL kernel functions in the case that
     [code]#T# is a valid kernel argument. Any instance of
     [code]#T# that is constructed as a copy of another instance, via
@@ -370,21 +370,21 @@ must obey the following statements, where [code]#T# is the runtime class type:
     were also performed on the original instance and must represent the same
     underlying <<native-backend-object>> as the original instance where
     applicable.
-  * [code]#T# must be destructible on the host application and within
+  * [code]#T# must be destructible in the host application and within
     SYCL kernel functions in the case that [code]#T# is a valid kernel
     argument. When any instance of [code]#T# is destroyed, including as
     a result of the copy assignment operator, any behavior specific to
     [code]#T# that is specified as performed on destruction is only
     performed if this instance is the last remaining host copy, in
     accordance with the above definition of a copy.
-  * [code]#T# must be move constructible and move assignable on the
+  * [code]#T# must be move constructible and move assignable in the
     host application and within SYCL kernel functions in the case that T is
     a valid kernel argument. Any instance of T that is constructed as a move
     of another instance, via either the move constructor or move assignment
     operator, must replace the original instance rendering said instance
     invalid and must represent the same underlying <<native-backend-object>> as
     the original instance where applicable.
-  * [code]#T# must be equality comparable on the host application.
+  * [code]#T# must be equality comparable in the host application.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be true if one instance is a copy of the other and non-equality
     between two instances of [code]#T# (i.e. [code]#a != b#) must
     be true if neither instance is a copy of the other, in accordance with
@@ -395,7 +395,7 @@ must obey the following statements, where [code]#T# is the runtime class type:
     implies [code]#b != a#) and transitive (i.e. [code]#a == b && b == c#
     implies [code]#c == a#).
   * A specialization of [code]#std::hash# for [code]#T# must exist
-    on the host application that returns a unique value such that if two
+    in the host application that returns a unique value such that if two
     instances of T are equal, in accordance with the above definition, then
     their resulting hash values are also equal and subsequently if two hash
     values are not equal, then their corresponding instances are also not
@@ -516,16 +516,16 @@ Each of the following <<sycl-runtime>> classes: [code]#id#,
 [code]#nd_range# must follow the following statements, where
 [code]#T# is the runtime class type:
 
-  * [code]#T# must be default copy constructible and copy assignable on
+  * [code]#T# must be default copy constructible and copy assignable in
     the host application (in the case where T is available on the host) and
     within SYCL kernel functions.
-  * [code]#T# must be default destructible on the host application (in
+  * [code]#T# must be default destructible in the host application (in
     the case where T is available on the host) and within SYCL kernel
     functions.
   * [code]#T# must be default move constructible and default move
-    assignable on the host application (in the case where T is available on
+    assignable in the host application (in the case where T is available on
     the host) and within SYCL kernel functions.
-  * [code]#T# must be equality comparable on the host application (in
+  * [code]#T# must be equality comparable in the host application (in
     the case where T is available on the host) and within SYCL kernel
     functions. Equality between two instances of [code]#T# (i.e.
     [code]#a == b#) must be true if the value of all members are equal
@@ -1030,8 +1030,9 @@ The SYCL [code]#platform# class encapsulates a single SYCL platform on
 which SYCL kernel functions may be executed. A SYCL platform must be
 associated with a single <<backend>>.
 
-A SYCL [code]#platform# is also associated with one or more SYCL
-[code]#devices# associated with the same <<backend>>.
+A SYCL [code]#platform# is also associated with any number of SYCL
+[code]#devices# associated with the same <<backend>>. A platform may
+contain no devices.
 
 All member functions of the [code]#platform# class are synchronous and
 errors are handled by throwing synchronous SYCL exceptions.
@@ -1139,7 +1140,8 @@ a@
 bool has(aspect asp) const
 ----
    a@ Returns true if all of the SYCL [code]#devices# associated with this
-      SYCL [code]#platform# have the given <<aspect>>.
+      SYCL [code]#platform# have the given <<aspect>>. Returns [code]#false# if this SYCL [code]#platform# does not
+      contain any devices.
 
 a@
 [source]
@@ -1148,7 +1150,7 @@ bool has_extension(const std::string& extension) const
 ----
    a@ Deprecated, use [code]#has()# instead.
 
-Returns true if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension.
+Returns [code]#true# if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension. Returns [code]#false# if this SYCL [code]#platform# does not contain any devices.
 
 a@
 [source]
@@ -1236,7 +1238,7 @@ info::platform::extensions
    a@ Deprecated, use [code]#device::get_info()# with
       [code]#info::device::aspects# instead.
 
-Returns the extensions supported by the <<platform>>.
+Returns the extensions supported by this [code]#platform#. Returns an empty list if this [code]#platform# does not contain any devices.
 
 |====
 
@@ -2612,7 +2614,7 @@ info::device::partition_max_sub_devices
 ----
 
     @ [.code]#uint32_t#
-   a@ Returns the maximum number of sub-devices that can be created when this SYCL [code]#device# is partitioned. The value returned cannot exceed the value returned by [code]#info::device::device_max_compute_units#.
+   a@ Returns the maximum number of sub-devices that can be created when this SYCL [code]#device# is partitioned. The value returned cannot exceed the value returned by [code]#info::device::max_compute_units#.
 
 a@
 [source]
@@ -3184,7 +3186,6 @@ a@
 context get_context() const
 ----
 a@ Returns the SYCL queue's context.
-Reports errors using SYCL exception classes.
 The value returned must be equal to that returned by [code]#get_info<info::queue::context>()#.
 
 a@
@@ -3193,7 +3194,6 @@ a@
 device get_device() const
 ----
 a@ Returns the SYCL device the queue is associated with.
-Reports errors using SYCL exception classes.
 The value returned must be equal to that returned by [code]#get_info<info::queue::device>()#.
 
 a@
@@ -10357,7 +10357,7 @@ leak.  If there are not enough resources to allocate the requested memory,
 these functions return [code]#nullptr#.
 
 When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
-zero), these functions behave in a manor consistent with {cpp}
+zero), these functions behave in a manner consistent with {cpp}
 [code]#std::malloc#.  The value returned is unspecified in this case, and the
 returned pointer may not be used to access storage.  If this pointer is not
 null, it must be passed to [code]#sycl::free# to avoid a memory leak.
@@ -10488,6 +10488,12 @@ eventually be deallocated with [code]#sycl::free# in order to avoid a memory
 leak.  If there are not enough resources to allocate the requested memory,
 these functions return [code]#nullptr#.
 
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.  The value returned is unspecified in this case, and the
+returned pointer may not be used to access storage.  If this pointer is not
+null, it must be passed to [code]#sycl::free# to avoid a memory leak.
+
 [[table.usm.host.allocs]]
 .Host USM Allocation Functions
 [width="100%",options="header",separator="@",cols="65%,35%"]
@@ -10573,7 +10579,7 @@ a@
 [source]
 ----
 template <typename T>
-void* sycl::aligned_alloc_host(size_t alignment, size_t count,
+T* sycl::aligned_alloc_host(size_t alignment, size_t count,
                                const queue& syclQueue,
                                const property_list& propList = {})
 ----
@@ -10588,6 +10594,12 @@ these functions return a pointer to the newly allocated memory, which must
 eventually be deallocated with [code]#sycl::free# in order to avoid a memory
 leak.  If there are not enough resources to allocate the requested memory,
 these functions return [code]#nullptr#.
+
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.  The value returned is unspecified in this case, and the
+returned pointer may not be used to access storage.  If this pointer is not
+null, it must be passed to [code]#sycl::free# to avoid a memory leak.
 
 [[table.usm.shared.allocs]]
 .Shared USM Allocation Functions
@@ -10724,6 +10736,12 @@ On success, these functions return a pointer to the newly allocated memory,
 which must eventually be deallocated with [code]#sycl::free# in order to avoid
 a memory leak.  If there are not enough resources to allocate the requested
 memory, these functions return [code]#nullptr#.
+
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.  The value returned is unspecified in this case, and the
+returned pointer may not be used to access storage.  If this pointer is not
+null, it must be passed to [code]#sycl::free# to avoid a memory leak.
 
 [[table.usm.param.allocs]]
 .Parameterized USM Allocation Functions
@@ -14346,7 +14364,7 @@ overhead associated with recompilation of the kernel's bundle.
 Specialization constants must be declared using the [code]#specialization_id#
 class with the following restrictions:
 
-* the template parameter [code]#T# must be a <<device copyable>> type;
+* the template parameter [code]#T# must be a <<device-copyable>> type;
 * the [code]#specialization_id# variable must be declared as [code]#constexpr#;
 * the [code]#specialization_id# variable must be declared in either namespace
   scope or in class scope;
@@ -14549,7 +14567,7 @@ invoked directly by the SYCL runtime, regardless of which <<device>> the
 
 A <<host-task>> is enqueued on a <<queue>> via the [code]#host_task#
 member function of the [code]#handler# class.
-The <<event>> returned by the submission of the associated <<command group>>
+The <<event>> returned by the submission of the associated <<command-group>>
 enters the completed state (corresponding to a status of
 [code]#info::event_command_status::complete#) once the invocation of the
 provided {cpp} callable has returned.
@@ -16362,7 +16380,7 @@ object passed to the <<async-handler>> is constructed by the <<sycl-runtime>>.
 
 
 [[subsubsec:exception.nohandler]]
-==== Behavior without an <<async-handler>>
+==== Behavior without an async handler
 
 If an asynchronous error occurs in a queue or context that has no user-supplied
 asynchronous error handler object <<async-handler>>, then an implementation-defined
@@ -16372,7 +16390,7 @@ a user-supplied <<async-handler>> would be, as defined in
 report all errors passed to it, when possible, and must then invoke
 [code]#std::terminate# or equivalent.
 
-==== Priorities of <<async-handler,async handlers>>
+==== Priorities of async handlers
 
 If the SYCL runtime can associate an <<async-error>> with a specific queue,
 then:
@@ -19802,7 +19820,7 @@ T operator()(const T& x, const T& y) const
 SYCL provides a number of functions that expose functionality tied to groups of
 work-items (such as <<group-barrier,group barriers>> and collective operations).
 These group functions act as _synchronization points_ and must be encountered in
-converged <<control flow>> by all work-items in the group.  If one work-item in
+converged <<control-flow>> by all work-items in the group.  If one work-item in
 a group calls a group function, then all work-items in that group must call
 exactly the same function under the same set of conditions --- calling the same
 function under different conditions (e.g. in different iterations of a loop, or

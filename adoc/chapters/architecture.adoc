@@ -174,9 +174,9 @@ text within the specification, the normative text must be taken to be correct.
 [[sec:platformmodel]]
 == The SYCL platform model
 
-The SYCL platform model is based on the OpenCL platform model.
-The model consists of a host connected to one or more heterogeneous devices,
-called <<device,devices>>.
+The SYCL platform model consists of a host connected to one or more heterogeneous devices,
+called <<device,devices>>. <<device,Devices>> are grouped together into one or multiple <<platform, platforms>>.
+An implementation may also expose empty <<platform, platforms>> that do not contain any <<device,devices>>.
 
 A SYCL <<context>> is constructed, either directly by the user or implicitly
 when creating a <<queue>>, to hold all the runtime information required by
@@ -295,7 +295,7 @@ implementation that supports the required features for the application.
 === Platform mixed version support
 
 The SYCL generic programming model exposes a number of <<platform,platforms>>, each of
-them exposing a number of <<device,devices>>. Each <<platform>> is bound
+them either empty or exposing a number of <<device,devices>>. Each <<platform>> is bound
 to a certain <<backend>>. SYCL <<device,devices>> associated with said <<platform>>
 are associated with that <<backend>>.
 
@@ -338,7 +338,7 @@ different queues.  When a <<command-group>> is submitted to a SYCL <<queue>>,
 the requirements of the kernel execution are captured.  The implementation can
 start executing a kernel as soon as its requirements have been satisfied.
 
-==== <<backend, SYCL backend>> resources managed by the SYCL application
+==== Backend resources managed by the SYCL application
 
 The SYCL runtime integrated with the SYCL application will manage
 the resources required by the <<backend-api>>
@@ -371,9 +371,12 @@ The resources managed by SYCL are:
   . <<platform,Platforms>>: all features of <<backend-api>>s are implemented by
     platforms. A platform can be viewed as a given vendor's runtime and the
     devices accessible through it. Some devices will only be accessible to
-    one vendor's runtime and hence multiple platforms may be present. SYCL
-    manages the different platforms for the user which are accessible through a
-    [code]#sycl::platform# object.
+    one vendor's runtime and hence multiple platforms may be present. SYCL manages
+    the different platforms for the user which are accessible through a
+    [code]#sycl::platform# object. In some cases, an implementation might also
+    choose to expose empty [code]#sycl::platform# objects, for example if 
+    a vendor's runtime is available, but no devices supported by that runtime are
+    available in the system.
   . <<context,Contexts>>: any <<backend>> resource that is acquired by the user is
     attached to a context. A context contains a collection of devices that
     the host can use and manages memory objects that can be shared between
@@ -382,7 +385,7 @@ The resources managed by SYCL are:
     mechanism. A given context can only wrap devices owned by a single
     platform. A context is exposed to the user with a
     [code]#sycl::context# object.
-  . <<device,Devices>>: platforms provide one or more devices for executing SYCL
+  . <<device,Devices>>: platforms may provide devices for executing SYCL
     kernels. In SYCL, a device is accessible through a
     [code]#sycl::device# object.
   . <<kernel,Kernels>>: the SYCL functions that run on SYCL devices are defined
