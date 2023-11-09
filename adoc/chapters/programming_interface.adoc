@@ -4949,8 +4949,9 @@ property::buffer::use_mutex
       [code]#buffer# can be shared with the application via a
       [code]#std::mutex# provided to the property. The mutex
       [code]#m# is locked by the runtime whenever the data is in
-      use and unlocked otherwise. Data is copied back to
-      [code]#hostData# when the mutex is unlocked by the runtime.
+      use and unlocked otherwise. The contents of [code]#hostData# are
+      guaranteed to reflect the contents of the buffer when the
+      [code]#std::mutex# is unlocked by the runtime.
 
 a@
 [source]
@@ -5962,8 +5963,9 @@ property::image::use_mutex
       application via a [code]#std::mutex# provided to the
       property. The [code]#std::mutex# is locked by
       the runtime whenever the data is in use and unlocked
-      otherwise. Data is copied back to [code]#hostData# when
-      the [code]#std::mutex# is unlocked by the runtime.
+      otherwise. The contents of [code]#hostData# are
+      guaranteed to reflect the contents of the image when the
+      [code]#std::mutex# is unlocked by the runtime.
 
 a@
 [source]
