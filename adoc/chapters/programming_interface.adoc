@@ -361,7 +361,7 @@ Each of the following <<sycl-runtime>> classes:
 [code]#unsampled_image_accessor#
 must obey the following statements, where [code]#T# is the runtime class type:
 
-  * [code]#T# must be copy constructible and copy assignable on the
+  * [code]#T# must be copy constructible and copy assignable in the
     host application and within SYCL kernel functions in the case that
     [code]#T# is a valid kernel argument. Any instance of
     [code]#T# that is constructed as a copy of another instance, via
@@ -370,21 +370,21 @@ must obey the following statements, where [code]#T# is the runtime class type:
     were also performed on the original instance and must represent the same
     underlying <<native-backend-object>> as the original instance where
     applicable.
-  * [code]#T# must be destructible on the host application and within
+  * [code]#T# must be destructible in the host application and within
     SYCL kernel functions in the case that [code]#T# is a valid kernel
     argument. When any instance of [code]#T# is destroyed, including as
     a result of the copy assignment operator, any behavior specific to
     [code]#T# that is specified as performed on destruction is only
     performed if this instance is the last remaining host copy, in
     accordance with the above definition of a copy.
-  * [code]#T# must be move constructible and move assignable on the
+  * [code]#T# must be move constructible and move assignable in the
     host application and within SYCL kernel functions in the case that T is
     a valid kernel argument. Any instance of T that is constructed as a move
     of another instance, via either the move constructor or move assignment
     operator, must replace the original instance rendering said instance
     invalid and must represent the same underlying <<native-backend-object>> as
     the original instance where applicable.
-  * [code]#T# must be equality comparable on the host application.
+  * [code]#T# must be equality comparable in the host application.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be true if one instance is a copy of the other and non-equality
     between two instances of [code]#T# (i.e. [code]#a != b#) must
     be true if neither instance is a copy of the other, in accordance with
@@ -395,7 +395,7 @@ must obey the following statements, where [code]#T# is the runtime class type:
     implies [code]#b != a#) and transitive (i.e. [code]#a == b && b == c#
     implies [code]#c == a#).
   * A specialization of [code]#std::hash# for [code]#T# must exist
-    on the host application that returns a unique value such that if two
+    in the host application that returns a unique value such that if two
     instances of T are equal, in accordance with the above definition, then
     their resulting hash values are also equal and subsequently if two hash
     values are not equal, then their corresponding instances are also not
@@ -516,16 +516,16 @@ Each of the following <<sycl-runtime>> classes: [code]#id#,
 [code]#nd_range# must follow the following statements, where
 [code]#T# is the runtime class type:
 
-  * [code]#T# must be default copy constructible and copy assignable on
+  * [code]#T# must be default copy constructible and copy assignable in
     the host application (in the case where T is available on the host) and
     within SYCL kernel functions.
-  * [code]#T# must be default destructible on the host application (in
+  * [code]#T# must be default destructible in the host application (in
     the case where T is available on the host) and within SYCL kernel
     functions.
   * [code]#T# must be default move constructible and default move
-    assignable on the host application (in the case where T is available on
+    assignable in the host application (in the case where T is available on
     the host) and within SYCL kernel functions.
-  * [code]#T# must be equality comparable on the host application (in
+  * [code]#T# must be equality comparable in the host application (in
     the case where T is available on the host) and within SYCL kernel
     functions. Equality between two instances of [code]#T# (i.e.
     [code]#a == b#) must be true if the value of all members are equal
