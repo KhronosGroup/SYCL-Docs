@@ -761,8 +761,11 @@ device kernel or code called by the device kernel.
   ** Static data members are treated the same way as for variable in namespace
      scope
 
-If a prvalue-to-xvalue conversion happens in a block scope or function parameter
-scope, the result is assigned to the local address space if it happens a
+If a prvalue-to-xvalue conversion happens as part of the an initialization
+expression, then the result is assigned to the same address space as the entity
+being initialized.
+Otherwise, if the conversion happens in a block scope or function parameter
+scope, the result is assigned to the local address space if it happens in a
 hierarchical context otherwise it is assigned to the private address space.
 It the prvalue-to-xvalue conversion happens in another scope, the result is
 assigned in the same way as declaration in namespace scope.
