@@ -17,8 +17,8 @@ inline constexpr bool is_property_of_v =
 class T {
   ...
 
-      template <typename Property>
-      bool has_property() const noexcept;
+  template <typename Property>
+  bool has_property() const noexcept;
 
   template <typename Property> Property get_property() const;
 
