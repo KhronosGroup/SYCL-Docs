@@ -3823,7 +3823,7 @@ of the execution, or want to retrieve properties of a command that is running.
 
 Note that, although an event represents the status of a particular operation,
 the dependencies of a certain event can be used to keep track of multiple steps
-required to synchronize said operation.
+required to block on the results of said operation.
 
 A SYCL event is returned by the submission of a <<command-group>>.
 The dependencies of the event returned via the submission of the command group
@@ -4199,9 +4199,9 @@ new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the
 type (therefore, the default allocator for a buffer of type [code]#const int#
 will be an [code]#Allocator<int>)#.
-This implies that host <<accessor,accessors>> will not synchronize with the pointer given
-by the user in the buffer/image constructor, but will use the memory
-returned by the [code]#Allocator# itself for that purpose.
+This implies that host <<accessor,accessors>> will not share memory with the
+pointer given by the user in the buffer/image constructor, but will use the
+memory returned by the [code]#Allocator# itself for that purpose.
 The user can implement an allocator that returns the same address as the
 one passed in the buffer constructor, but it is the responsibility of the
 user to handle the potential race conditions.
@@ -4233,7 +4233,8 @@ image_allocator
 |====
 
 
-See <<subsec:mutex>> for details on manual host-device synchronization.
+See <<subsec:mutex>> for details of using manual synchronization to avoid
+data races between host and device.
 
 
 [[subsec:buffers]]
@@ -4948,8 +4949,9 @@ property::buffer::use_mutex
       [code]#buffer# can be shared with the application via a
       [code]#std::mutex# provided to the property. The mutex
       [code]#m# is locked by the runtime whenever the data is in
-      use and unlocked otherwise. Data is synchronized with
-      [code]#hostData#, when the mutex is unlocked by the runtime.
+      use and unlocked otherwise. The contents of [code]#hostData# are
+      guaranteed to reflect the contents of the buffer when the
+      [code]#std::mutex# is unlocked by the runtime.
 
 a@
 [source]
@@ -5023,7 +5025,7 @@ context property::buffer::context_bound::get_context() const
 
 
 [[sec:buf-sync-rules]]
-==== Buffer synchronization rules
+==== Buffer destruction rules
 
 Buffers are reference-counted. When a buffer value is constructed
 from another buffer, the two values reference the same buffer and a
@@ -5961,8 +5963,9 @@ property::image::use_mutex
       application via a [code]#std::mutex# provided to the
       property. The [code]#std::mutex# is locked by
       the runtime whenever the data is in use and unlocked
-      otherwise. Data is synchronized with [code]#hostData#, when
-      the [code]#std::mutex# is unlocked by the runtime.
+      otherwise. The contents of [code]#hostData# are
+      guaranteed to reflect the contents of the image when the
+      [code]#std::mutex# is unlocked by the runtime.
 
 a@
 [source]
@@ -6035,7 +6038,7 @@ context property::image::context_bound::get_context() const
 
 
 [[sec:image-sync-rules]]
-==== Image synchronization rules
+==== Image destruction rules
 
 The rules are similar to those described in <<sec:buf-sync-rules>>.
 
@@ -6054,7 +6057,7 @@ will be copied back, if necessary, to the associated host memory.
 Any errors occurring during destruction are reported to any associated
 context's asynchronous error handler. If an image object is constructed
 with a storage object, then the storage object defines what
-synchronization or copying behavior occurs on image object destruction.
+blocking or copying behavior occurs on image object destruction.
 
 
 [[sec:sharing-host-memory-with-dm]]
@@ -6078,8 +6081,8 @@ of the class is, by default, passed to <<sycl-runtime>>, and that pointer cannot
 on the host side until the buffer or image is destroyed.
 A SYCL application can access the contents of the memory managed by a SYCL buffer
 by using a [code]#host_accessor# as defined in <<subsec:accessors>>.
-However, there is no guarantee that the host accessor synchronizes with the
-original host address used in its constructor.
+However, there is no guarantee that the host accessor will copy data back to
+the original host address used in its constructor.
 
 The pointer passed in is the one used to copy data back to the host, if needed,
 before buffer destruction.  The memory pointed by <<host-pointer>>
@@ -6253,7 +6256,7 @@ There are several different {cpp} classes that implement accessors:
 
 Accessor objects must always be constructed in host code, either in
 <<command-group-scope>> or in <<application-scope>>.  Whether the constructor
-blocks waiting for data to synchronize depends on the type of accessor.  Those
+blocks until data is available depends on the type of accessor.  Those
 accessors which provide access to data within a <<command>> do not block.
 Instead, these accessors define a requirement which influences the scheduling
 of the <<command>>.  Those accessors which provide access to data from host
@@ -13836,7 +13839,7 @@ include::{code_dir}/parallelfor.cpp[lines=4..-1]
 
 The last case of a [code]#parallel_for# invocation enables low-level functionality
 of work-items and work-groups. This becomes valuable when an execution
-requires groups of work-items that communicate and synchronize. These are
+requires groups of work-items to coordinate with one another. These are
 exposed in SYCL through [code]#+parallel_for (nd_range,...)+# and the
 [code]#nd_item# class. In this case, the developer needs to define the
 [code]#nd_range# that the kernel will execute on in order to have fine
@@ -13852,8 +13855,7 @@ from SYCL [code]#nd_item#, representing the currently executing work-item
 within the range specified by the [code]#nd_range# parameter. The
 [code]#nd_item# parameter makes all information about the work-item and
 its position in the range available, and provides access to functions
-enabling the use of a <<work-group-barrier>> to synchronize between the
-<<work-item,work-items>> in the <<work-group>>.
+enabling the use of a <<work-group-barrier>>.
 
 [NOTE]
 ====
@@ -13863,8 +13865,8 @@ Case 3) above includes user-defined types that can be constructed from
 
 The following example shows how sixty-four work-items may be launched
 in a three-dimensional grid with four in each dimension, and divided
-into eight work-groups. Each group of work-items synchronizes with a
-<<work-group-barrier>>.
+into eight work-groups. Each group of work-items uses a
+<<work-group-barrier>> for coordination.
 
 [source,,linenums]
 ----
@@ -13988,11 +13990,12 @@ understanding of which instances of a
 underlying variable.
 
 Also within the lambda body can be a sequence of calls to
-[code]#parallel_for_work_item#. At the edges of these inner parallel
-executions the work-group synchronizes. As a result the pair of
-[code]#parallel_for_work_item# calls in the code below is equivalent to
-the parallel execution with a <<work-group-barrier>> in the earlier
-example.
+[code]#parallel_for_work_item#. No work-item can begin executing a
+[code]#parallel_for_work_item# until all work-items in the group have
+completed executing the previous [code]#parallel_for_work_item#.
+As a result the pair of [code]#parallel_for_work_item# calls in the code below
+is equivalent to the parallel execution with a <<work-group-barrier>> in the
+earlier example.
 
 [source,,linenums]
 ----
@@ -14080,8 +14083,8 @@ of 10 elements of [code]#int# type, the host pointer must at least have
 A special case is the [code]#update_host# member function.
 This member function only requires an accessor, and instructs the runtime to update
 the internal copy of the data in the host, if any. This is particularly
-useful when users use manual synchronization with host pointers, e.g.
-via mutex objects on the [code]#buffer# constructors.
+useful when used in conjunction with the [code]#buffer# constructor overloads
+which accept mutex objects.
 
 <<table.members.handler.copy>> describes the interface for the
 explicit copy operations.
@@ -18227,22 +18230,21 @@ stored in [code]#std::array<DataT, NumElements>#.
 The available features are:
 
   * Accessor classes: Accessor classes specify acquisition and release of
-    buffer and image data structures to provide points at which underlying
-    queue synchronization primitives must be generated.
+    buffer and image data structures to provide points at which a SYCL runtime
+    must guarantee memory consistency.
   * Atomic operations: SYCL devices support a restricted subset of {cpp}
     atomics and SYCL uses the library syntax from the next {cpp} specification
     to make this available.
   * Fences: Fence primitives are made available to order loads and stores.
     They are exposed through the [code]#atomic_fence# function. Fences
     can have acquire semantics, release semantics or both.
-  * Barriers: Barrier primitives are made available to synchronize sets of
-    work-items within individual <<group,groups>>. They are exposed through the
-    [code]#group_barrier# function.
+  * Barriers: Barrier primitives are made available as a coordination mechanism
+    for work-items within individual <<group,groups>>. They are exposed through
+    the [code]#group_barrier# function.
   * Hierarchical parallel dispatch: In the hierarchical parallelism model of
-    describing computations, synchronization within the work-group is made
-    explicit through multiple instances of the
-    [code]#parallel_for_work_item# function call, rather than through
-    the use of explicit <<work-group-barrier>> operations.
+    describing computations, work-items within a work-group may coordinate
+    via multiple instances of the [code]#parallel_for_work_item# function call,
+    rather than through the use of explicit <<work-group-barrier>> operations.
   * Device event: they are used inside SYCL kernel functions to wait for
     asynchronous operations within a SYCL kernel function to complete.
 
@@ -18273,7 +18275,7 @@ the [code]#order# parameter:
     and release fence
 
 A <<group-barrier>> acts as both an acquire fence and a release fence: all
-work-items in the group execute a release fence prior to synchronizing at
+work-items in the group execute a release fence prior to signaling arrival at
 the barrier, and all work-items in the group execute an acquire fence
 afterwards.  A <<group-barrier>> provides implicit atomic synchronization
 as if through an internal atomic object, such that the acquire and release fences
@@ -19433,9 +19435,9 @@ a@
 ----
 flush
 ----
-   a@ Triggers a flush operation, which synchronizes the work-item stream buffer
-      with the global stream buffer, and then empties the work-item stream
-      buffer. After a flush, the full [code]#workItemBufferSize# is
+   a@ Triggers a flush operation, which copies the contents of the work-item
+      stream buffer to the global stream buffer, and then empties the work-item
+      stream buffer. After a flush, the full [code]#workItemBufferSize# is
       available again for subsequent streaming within the work-item.
 
 a@
@@ -19614,15 +19616,15 @@ template <typename T> const stream& operator<<(const stream& os, const T& rhs)
 
 
 
-=== Synchronization
+=== Output
 
-An instance of the SYCL [code]#stream# class is required to synchronize with the host, and must output
-everything that is streamed to it via the [code]#operator<<()# operator before a flush operation (that
-doesn't exceed the [code]#workItemBufferSize# or [code]#totalBufferSize# limits) within a SYCL
-kernel function by the time that the event associated with a command group submission enters the completed
-state. The point at which this synchronization occurs and the member function by which this synchronization is
-performed are implementation-defined. For example it is valid for an implementation to use
-[code]#printf()#.
+An instance of the SYCL [code]#stream# class is required to output everything
+that is streamed to it via the [code]#operator<<()# operator before a flush
+operation (that doesn't exceed the [code]#workItemBufferSize# or
+[code]#totalBufferSize# limits) within a SYCL kernel function by the time that
+the event associated with a command group submission enters the completed
+state. The point at which the flush operation is performed is
+implementation-defined.
 
 The SYCL [code]#stream# class is required to output the content of each stream, between flushes (up to
 [code]#workItemBufferSize)#, without mixing with content from the same stream in other work-items.
@@ -19817,7 +19819,7 @@ T operator()(const T& x, const T& y) const
 
 SYCL provides a number of functions that expose functionality tied to groups of
 work-items (such as <<group-barrier,group barriers>> and collective operations).
-These group functions act as synchronization points and must be encountered in
+These group functions act as _synchronization points_ and must be encountered in
 converged <<control-flow>> by all work-items in the group.  If one work-item in
 a group calls a group function, then all work-items in that group must call
 exactly the same function under the same set of conditions --- calling the same
@@ -19910,8 +19912,8 @@ within group [code]#g#.
 
 ==== [code]#group_barrier#
 
-The [code]#group_barrier# function synchronizes all work-items in a group,
-using a <<group-barrier>>.
+The [code]#group_barrier# function is a coordination mechanism for all
+work-items in a group.
 
 [source,,linenums]
 ----
@@ -19922,15 +19924,14 @@ include::{header_dir}/groups/barrier.h[lines=4..-1]
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Effects:_ Synchronizes all work-items in group [code]#g#. The current
-work-item will wait at the barrier until all work-items in group [code]#g# have
-reached the barrier. In addition, the barrier performs <<mem-fence>> operations ensuring that
-memory accesses issued before the barrier are not re-ordered with those issued
-after the barrier: all work-items in group [code]#g# execute a release fence
-prior to synchronizing at the barrier, all work-items in group [code]#g#
-execute an acquire fence afterwards, and there is an implicit synchronization
-of these fences as if provided by an explicit atomic operation on an atomic
-object.
+_Effects:_ The current work-item will wait at the barrier until all work-items
+in group [code]#g# have reached the barrier. In addition, the barrier performs
+<<mem-fence>> operations ensuring that memory accesses issued before the
+barrier are not re-ordered with those issued after the barrier: all work-items
+in group [code]#g# execute a release fence prior to arriving at the
+barrier, all work-items in group [code]#g# execute an acquire fence afterwards,
+and there is an implicit synchronization of these fences as if provided by an
+explicit atomic operation on an atomic object.
 
 By default, the scope of these fences is set to the narrowest
 scope including all work-items in group [code]#g# (as reported by
