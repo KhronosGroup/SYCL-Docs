@@ -297,7 +297,7 @@ Each of the following <<sycl-runtime>> classes: [code]#accessor#,
 [code]#unsampled_image# and [code]#unsampled_image_accessor# must obey the
 following statements, where [code]#T# is the runtime class type:
 
-  * [code]#T# must be copy constructible and copy assignable on the host
+  * [code]#T# must be copy constructible and copy assignable in the host
     application and within SYCL kernel functions in the case that [code]#T# is a
     valid kernel argument.
     Any instance of [code]#T# that is constructed as a copy of another instance,
@@ -306,14 +306,14 @@ following statements, where [code]#T# is the runtime class type:
     were also performed on the original instance and must represent the same
     underlying <<native-backend-object>> as the original instance where
     applicable.
-  * [code]#T# must be destructible on the host application and within SYCL
+  * [code]#T# must be destructible in the host application and within SYCL
     kernel functions in the case that [code]#T# is a valid kernel argument.
     When any instance of [code]#T# is destroyed, including as a result of the
     copy assignment operator, any behavior specific to [code]#T# that is
     specified as performed on destruction is only performed if this instance is
     the last remaining host copy, in accordance with the above definition of a
     copy.
-  * [code]#T# must be move constructible and move assignable on the host
+  * [code]#T# must be move constructible and move assignable in the host
     application and within SYCL kernel functions in the case that T is a valid
     kernel argument.
     Any instance of T that is constructed as a move of another instance, via
@@ -321,7 +321,7 @@ following statements, where [code]#T# is the runtime class type:
     original instance rendering said instance invalid and must represent the
     same underlying <<native-backend-object>> as the original instance where
     applicable.
-  * [code]#T# must be equality comparable on the host application.
+  * [code]#T# must be equality comparable in the host application.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
     true if one instance is a copy of the other and non-equality between two
     instances of [code]#T# (i.e. [code]#a != b#) must be true if neither
@@ -331,7 +331,7 @@ following statements, where [code]#T# is the runtime class type:
     to be reflexive (i.e. [code]#a == a#), symmetric (i.e. [code]#a == b#
     implies [code]#b == a# and [code]#a != b# implies [code]#b != a#) and
     transitive (i.e. [code]#a == b && b == c# implies [code]#c == a#).
-  * A specialization of [code]#std::hash# for [code]#T# must exist on the host
+  * A specialization of [code]#std::hash# for [code]#T# must exist in the host
     application that returns a unique value such that if two instances of T are
     equal, in accordance with the above definition, then their resulting hash
     values are also equal and subsequently if two hash values are not equal,
@@ -452,15 +452,15 @@ Each of the following <<sycl-runtime>> classes: [code]#id#, [code]#range#,
 and [code]#nd_range# must follow the following statements, where [code]#T# is
 the runtime class type:
 
-  * [code]#T# must be default copy constructible and copy assignable on the host
+  * [code]#T# must be default copy constructible and copy assignable in the host
     application (in the case where T is available on the host) and within SYCL
     kernel functions.
-  * [code]#T# must be default destructible on the host application (in the case
+  * [code]#T# must be default destructible in the host application (in the case
     where T is available on the host) and within SYCL kernel functions.
-  * [code]#T# must be default move constructible and default move assignable on
+  * [code]#T# must be default move constructible and default move assignable in
     the host application (in the case where T is available on the host) and
     within SYCL kernel functions.
-  * [code]#T# must be equality comparable on the host application (in the case
+  * [code]#T# must be equality comparable in the host application (in the case
     where T is available on the host) and within SYCL kernel functions.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
     true if the value of all members are equal and non-equality between two
@@ -953,8 +953,9 @@ The SYCL [code]#platform# class encapsulates a single SYCL platform on which
 SYCL kernel functions may be executed.
 A SYCL platform must be associated with a single <<backend>>.
 
-A SYCL [code]#platform# is also associated with one or more SYCL [code]#devices#
-associated with the same <<backend>>.
+A SYCL [code]#platform# is also associated with any number of SYCL
+[code]#devices# associated with the same <<backend>>.
+A platform may contain no devices.
 
 All member functions of the [code]#platform# class are synchronous and errors
 are handled by throwing synchronous SYCL exceptions.
@@ -1061,7 +1062,8 @@ a@
 bool has(aspect asp) const
 ----
    a@ Returns true if all of the SYCL [code]#devices# associated with this
-      SYCL [code]#platform# have the given <<aspect>>.
+      SYCL [code]#platform# have the given <<aspect>>. Returns [code]#false# if this SYCL [code]#platform# does not
+      contain any devices.
 
 a@
 [source]
@@ -1070,7 +1072,7 @@ bool has_extension(const std::string& extension) const
 ----
    a@ Deprecated, use [code]#has()# instead.
 
-Returns true if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension.
+Returns [code]#true# if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension. Returns [code]#false# if this SYCL [code]#platform# does not contain any devices.
 
 a@
 [source]
@@ -1158,7 +1160,7 @@ info::platform::extensions
    a@ Deprecated, use [code]#device::get_info()# with
       [code]#info::device::aspects# instead.
 
-Returns the extensions supported by the <<platform>>.
+Returns the extensions supported by this [code]#platform#. Returns an empty list if this [code]#platform# does not contain any devices.
 
 |====
 
@@ -2524,7 +2526,7 @@ info::device::partition_max_sub_devices
 ----
 
     @ [.code]#uint32_t#
-   a@ Returns the maximum number of sub-devices that can be created when this SYCL [code]#device# is partitioned. The value returned cannot exceed the value returned by [code]#info::device::device_max_compute_units#.
+   a@ Returns the maximum number of sub-devices that can be created when this SYCL [code]#device# is partitioned. The value returned cannot exceed the value returned by [code]#info::device::max_compute_units#.
 
 a@
 [source]
@@ -3109,7 +3111,6 @@ a@
 context get_context() const
 ----
 a@ Returns the SYCL queue's context.
-Reports errors using SYCL exception classes.
 The value returned must be equal to that returned by [code]#get_info<info::queue::context>()#.
 
 a@
@@ -3118,7 +3119,6 @@ a@
 device get_device() const
 ----
 a@ Returns the SYCL device the queue is associated with.
-Reports errors using SYCL exception classes.
 The value returned must be equal to that returned by [code]#get_info<info::queue::device>()#.
 
 a@
@@ -3749,7 +3749,7 @@ execution, or want to retrieve properties of a command that is running.
 
 Note that, although an event represents the status of a particular operation,
 the dependencies of a certain event can be used to keep track of multiple steps
-required to synchronize said operation.
+required to block on the results of said operation.
 
 A SYCL event is returned by the submission of a <<command-group>>.
 The dependencies of the event returned via the submission of the command group
@@ -4124,7 +4124,7 @@ non-[code]#nullptr# and new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the type
 (therefore, the default allocator for a buffer of type [code]#const int# will be
 an [code]#Allocator<int>)#.
-This implies that host <<accessor,accessors>> will not synchronize with the
+This implies that host <<accessor,accessors>> will not share memory with the
 pointer given by the user in the buffer/image constructor, but will use the
 memory returned by the [code]#Allocator# itself for that purpose.
 The user can implement an allocator that returns the same address as the one
@@ -4158,7 +4158,8 @@ image_allocator
 |====
 
 
-See <<subsec:mutex>> for details on manual host-device synchronization.
+See <<subsec:mutex>> for details of using manual synchronization to avoid data
+races between host and device.
 
 
 [[subsec:buffers]]
@@ -4875,8 +4876,9 @@ property::buffer::use_mutex
       [code]#buffer# can be shared with the application via a
       [code]#std::mutex# provided to the property. The mutex
       [code]#m# is locked by the runtime whenever the data is in
-      use and unlocked otherwise. Data is synchronized with
-      [code]#hostData#, when the mutex is unlocked by the runtime.
+      use and unlocked otherwise. The contents of [code]#hostData# are
+      guaranteed to reflect the contents of the buffer when the
+      [code]#std::mutex# is unlocked by the runtime.
 
 a@
 [source]
@@ -4949,7 +4951,7 @@ context property::buffer::context_bound::get_context() const
 
 
 [[sec:buf-sync-rules]]
-==== Buffer synchronization rules
+==== Buffer destruction rules
 
 Buffers are reference-counted.
 When a buffer value is constructed from another buffer, the two values reference
@@ -5887,8 +5889,9 @@ property::image::use_mutex
       application via a [code]#std::mutex# provided to the
       property. The [code]#std::mutex# is locked by
       the runtime whenever the data is in use and unlocked
-      otherwise. Data is synchronized with [code]#hostData#, when
-      the [code]#std::mutex# is unlocked by the runtime.
+      otherwise. The contents of [code]#hostData# are
+      guaranteed to reflect the contents of the image when the
+      [code]#std::mutex# is unlocked by the runtime.
 
 a@
 [source]
@@ -5961,7 +5964,7 @@ context property::image::context_bound::get_context() const
 
 
 [[sec:image-sync-rules]]
-==== Image synchronization rules
+==== Image destruction rules
 
 The rules are similar to those described in <<sec:buf-sync-rules>>.
 
@@ -5982,8 +5985,7 @@ associated host memory.
 Any errors occurring during destruction are reported to any associated context's
 asynchronous error handler.
 If an image object is constructed with a storage object, then the storage object
-defines what synchronization or copying behavior occurs on image object
-destruction.
+defines what blocking or copying behavior occurs on image object destruction.
 
 
 [[sec:sharing-host-memory-with-dm]]
@@ -6008,7 +6010,7 @@ of the class is, by default, passed to <<sycl-runtime>>, and that pointer cannot
 be used on the host side until the buffer or image is destroyed.
 A SYCL application can access the contents of the memory managed by a SYCL
 buffer by using a [code]#host_accessor# as defined in <<subsec:accessors>>.
-However, there is no guarantee that the host accessor synchronizes with the
+However, there is no guarantee that the host accessor will copy data back to the
 original host address used in its constructor.
 
 The pointer passed in is the one used to copy data back to the host, if needed,
@@ -6182,8 +6184,8 @@ There are several different {cpp} classes that implement accessors:
 
 Accessor objects must always be constructed in host code, either in
 <<command-group-scope>> or in <<application-scope>>.
-Whether the constructor blocks waiting for data to synchronize depends on the
-type of accessor.
+Whether the constructor blocks until data is available depends on the type of
+accessor.
 Those accessors which provide access to data within a <<command>> do not block.
 Instead, these accessors define a requirement which influences the scheduling of
 the <<command>>.
@@ -10344,7 +10346,7 @@ If there are not enough resources to allocate the requested memory, these
 functions return [code]#nullptr#.
 
 When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
-zero), these functions behave in a manor consistent with {cpp}
+zero), these functions behave in a manner consistent with {cpp}
 [code]#std::malloc#.
 The value returned is unspecified in this case, and the returned pointer may not
 be used to access storage.
@@ -10478,6 +10480,14 @@ memory leak.
 If there are not enough resources to allocate the requested memory, these
 functions return [code]#nullptr#.
 
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.
+The value returned is unspecified in this case, and the returned pointer may not
+be used to access storage.
+If this pointer is not null, it must be passed to [code]#sycl::free# to avoid a
+memory leak.
+
 [[table.usm.host.allocs]]
 .Host USM Allocation Functions
 [width="100%",options="header",separator="@",cols="65%,35%"]
@@ -10563,7 +10573,7 @@ a@
 [source]
 ----
 template <typename T>
-void* sycl::aligned_alloc_host(size_t alignment, size_t count,
+T* sycl::aligned_alloc_host(size_t alignment, size_t count,
                                const queue& syclQueue,
                                const property_list& propList = {})
 ----
@@ -10579,6 +10589,14 @@ which must eventually be deallocated with [code]#sycl::free# in order to avoid a
 memory leak.
 If there are not enough resources to allocate the requested memory, these
 functions return [code]#nullptr#.
+
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.
+The value returned is unspecified in this case, and the returned pointer may not
+be used to access storage.
+If this pointer is not null, it must be passed to [code]#sycl::free# to avoid a
+memory leak.
 
 [[table.usm.shared.allocs]]
 .Shared USM Allocation Functions
@@ -10716,6 +10734,14 @@ which must eventually be deallocated with [code]#sycl::free# in order to avoid a
 memory leak.
 If there are not enough resources to allocate the requested memory, these
 functions return [code]#nullptr#.
+
+When the allocation size is zero bytes ([code]#numBytes# or [code]#count# is
+zero), these functions behave in a manner consistent with {cpp}
+[code]#std::malloc#.
+The value returned is unspecified in this case, and the returned pointer may not
+be used to access storage.
+If this pointer is not null, it must be passed to [code]#sycl::free# to avoid a
+memory leak.
 
 [[table.usm.param.allocs]]
 .Parameterized USM Allocation Functions
@@ -13814,8 +13840,8 @@ include::{code_dir}/parallelfor.cpp[lines=4..-1]
 
 The last case of a [code]#parallel_for# invocation enables low-level
 functionality of work-items and work-groups.
-This becomes valuable when an execution requires groups of work-items that
-communicate and synchronize.
+This becomes valuable when an execution requires groups of work-items to
+coordinate with one another.
 These are exposed in SYCL through [code]#+parallel_for (nd_range,...)+# and the
 [code]#nd_item# class.
 In this case, the developer needs to define the [code]#nd_range# that the kernel
@@ -13832,8 +13858,7 @@ The function object that represents the SYCL kernel function must take one of:
 specified by the [code]#nd_range# parameter.
 The [code]#nd_item# parameter makes all information about the work-item and its
 position in the range available, and provides access to functions enabling the
-use of a <<work-group-barrier>> to synchronize between the
-<<work-item,work-items>> in the <<work-group>>.
+use of a <<work-group-barrier>>.
 
 [NOTE]
 ====
@@ -13844,7 +13869,7 @@ Case 3) above includes user-defined types that can be constructed from
 The following example shows how sixty-four work-items may be launched in a
 three-dimensional grid with four in each dimension, and divided into eight
 work-groups.
-Each group of work-items synchronizes with a <<work-group-barrier>>.
+Each group of work-items uses a <<work-group-barrier>> for coordination.
 
 [source,,linenums]
 ----
@@ -13972,7 +13997,9 @@ will share the same underlying variable.
 
 Also within the lambda body can be a sequence of calls to
 [code]#parallel_for_work_item#.
-At the edges of these inner parallel executions the work-group synchronizes.
+No work-item can begin executing a [code]#parallel_for_work_item# until all
+work-items in the group have completed executing the previous
+[code]#parallel_for_work_item#.
 As a result the pair of [code]#parallel_for_work_item# calls in the code below
 is equivalent to the parallel execution with a <<work-group-barrier>> in the
 earlier example.
@@ -14065,8 +14092,8 @@ memory allocated.
 A special case is the [code]#update_host# member function.
 This member function only requires an accessor, and instructs the runtime to
 update the internal copy of the data in the host, if any.
-This is particularly useful when users use manual synchronization with host
-pointers, e.g. via mutex objects on the [code]#buffer# constructors.
+This is particularly useful when used in conjunction with the [code]#buffer#
+constructor overloads which accept mutex objects.
 
 <<table.members.handler.copy>> describes the interface for the explicit copy
 operations.
@@ -16415,7 +16442,7 @@ by the <<sycl-runtime>>.
 
 
 [[subsubsec:exception.nohandler]]
-==== Behavior without an <<async-handler>>
+==== Behavior without an async handler
 
 If an asynchronous error occurs in a queue or context that has no user-supplied
 asynchronous error handler object <<async-handler>>, then an
@@ -16425,7 +16452,7 @@ defined in <<subsubsec:exception.async>>.
 The default <<async-handler>> must in some way report all errors passed to it,
 when possible, and must then invoke [code]#std::terminate# or equivalent.
 
-==== Priorities of <<async-handler,async handlers>>
+==== Priorities of async handlers
 
 If the SYCL runtime can associate an <<async-error>> with a specific queue,
 then:
@@ -18264,22 +18291,21 @@ The elements of an instance of the [code]#marray# class template as if stored in
 The available features are:
 
   * Accessor classes: Accessor classes specify acquisition and release of buffer
-    and image data structures to provide points at which underlying queue
-    synchronization primitives must be generated.
+    and image data structures to provide points at which a SYCL runtime must
+    guarantee memory consistency.
   * Atomic operations: SYCL devices support a restricted subset of {cpp} atomics
     and SYCL uses the library syntax from the next {cpp} specification to make
     this available.
   * Fences: Fence primitives are made available to order loads and stores.
     They are exposed through the [code]#atomic_fence# function.
     Fences can have acquire semantics, release semantics or both.
-  * Barriers: Barrier primitives are made available to synchronize sets of
-    work-items within individual <<group,groups>>.
+  * Barriers: Barrier primitives are made available as a coordination mechanism
+    for work-items within individual <<group,groups>>.
     They are exposed through the [code]#group_barrier# function.
   * Hierarchical parallel dispatch: In the hierarchical parallelism model of
-    describing computations, synchronization within the work-group is made
-    explicit through multiple instances of the [code]#parallel_for_work_item#
-    function call, rather than through the use of explicit
-    <<work-group-barrier>> operations.
+    describing computations, work-items within a work-group may coordinate via
+    multiple instances of the [code]#parallel_for_work_item# function call,
+    rather than through the use of explicit <<work-group-barrier>> operations.
   * Device event: they are used inside SYCL kernel functions to wait for
     asynchronous operations within a SYCL kernel function to complete.
 
@@ -18309,8 +18335,9 @@ The effects of a call to [code]#atomic_fence# depend on the value of the
     fence
 
 A <<group-barrier>> acts as both an acquire fence and a release fence: all
-work-items in the group execute a release fence prior to synchronizing at the
-barrier, and all work-items in the group execute an acquire fence afterwards.
+work-items in the group execute a release fence prior to signaling arrival at
+the barrier, and all work-items in the group execute an acquire fence
+afterwards.
 A <<group-barrier>> provides implicit atomic synchronization as if through an
 internal atomic object, such that the acquire and release fences associated with
 the barrier synchronize with each other, without an explicit atomic operation
@@ -19472,9 +19499,9 @@ a@
 ----
 flush
 ----
-   a@ Triggers a flush operation, which synchronizes the work-item stream buffer
-      with the global stream buffer, and then empties the work-item stream
-      buffer. After a flush, the full [code]#workItemBufferSize# is
+   a@ Triggers a flush operation, which copies the contents of the work-item
+      stream buffer to the global stream buffer, and then empties the work-item
+      stream buffer. After a flush, the full [code]#workItemBufferSize# is
       available again for subsequent streaming within the work-item.
 
 a@
@@ -19653,17 +19680,14 @@ template <typename T> const stream& operator<<(const stream& os, const T& rhs)
 
 
 
-=== Synchronization
+=== Output
 
-An instance of the SYCL [code]#stream# class is required to synchronize with the
-host, and must output everything that is streamed to it via the
-[code]#operator<<()# operator before a flush operation (that doesn't exceed the
-[code]#workItemBufferSize# or [code]#totalBufferSize# limits) within a SYCL
-kernel function by the time that the event associated with a command group
-submission enters the completed state.
-The point at which this synchronization occurs and the member function by which
-this synchronization is performed are implementation-defined.
-For example it is valid for an implementation to use [code]#printf()#.
+An instance of the SYCL [code]#stream# class is required to output everything
+that is streamed to it via the [code]#operator<<()# operator before a flush
+operation (that doesn't exceed the [code]#workItemBufferSize# or
+[code]#totalBufferSize# limits) within a SYCL kernel function by the time that
+the event associated with a command group submission enters the completed state.
+The point at which the flush operation is performed is implementation-defined.
 
 The SYCL [code]#stream# class is required to output the content of each stream,
 between flushes (up to [code]#workItemBufferSize)#, without mixing with content
@@ -19863,7 +19887,7 @@ T operator()(const T& x, const T& y) const
 
 SYCL provides a number of functions that expose functionality tied to groups of
 work-items (such as <<group-barrier,group barriers>> and collective operations).
-These group functions act as synchronization points and must be encountered in
+These group functions act as _synchronization points_ and must be encountered in
 converged <<control-flow>> by all work-items in the group.
 If one work-item in a group calls a group function, then all work-items in that
 group must call exactly the same function under the same set of conditions ---
@@ -19956,8 +19980,8 @@ within group [code]#g#.
 
 ==== [code]#group_barrier#
 
-The [code]#group_barrier# function synchronizes all work-items in a group, using
-a <<group-barrier>>.
+The [code]#group_barrier# function is a coordination mechanism for all
+work-items in a group.
 
 [source,,linenums]
 ----
@@ -19968,15 +19992,14 @@ include::{header_dir}/groups/barrier.h[lines=4..-1]
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Effects:_ Synchronizes all work-items in group [code]#g#.
-The current work-item will wait at the barrier until all work-items in group
-[code]#g# have reached the barrier.
+_Effects:_ The current work-item will wait at the barrier until all work-items
+in group [code]#g# have reached the barrier.
 In addition, the barrier performs <<mem-fence>> operations ensuring that memory
 accesses issued before the barrier are not re-ordered with those issued after
 the barrier: all work-items in group [code]#g# execute a release fence prior to
-synchronizing at the barrier, all work-items in group [code]#g# execute an
-acquire fence afterwards, and there is an implicit synchronization of these
-fences as if provided by an explicit atomic operation on an atomic object.
+arriving at the barrier, all work-items in group [code]#g# execute an acquire
+fence afterwards, and there is an implicit synchronization of these fences as if
+provided by an explicit atomic operation on an atomic object.
 
 By default, the scope of these fences is set to the narrowest scope including
 all work-items in group [code]#g# (as reported by [code]#Group::fence_scope#).

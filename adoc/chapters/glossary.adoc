@@ -51,9 +51,9 @@
     For the full description please refer to <<subsec:exception.class>>.
 
 [[barrier]]barrier::
-    A barrier is either a <<queue-barrier>>, or a kernel execution
-    <<group-barrier>> depending on whether it is a synchronization point on the
-    command queue or on a group of work-items in a kernel execution.
+    A barrier may refer to either a <<queue-barrier>> used for host-device
+    coordination, or a <<group-barrier>> used to coordinate work-items in a
+    kernel.
 
 [[blocking-accessor]]blocking accessor::
     A blocking accessor is an <<accessor>> which provides immediate access and
@@ -117,11 +117,9 @@ For the full description please refer to <<subsec:buffers>>.
     For more details see <<sec:command.group.scope>>.
 
 [[queue-barrier]]command queue barrier::
-    The SYCL API provides two variants for functions that force synchronization
-    on a SYCL command queue.
     The [code]#sycl::queue::wait()# and [code]#sycl::queue::wait_and_throw()#
-    functions force the SYCL command queue to wait for the execution of the
-    <<command-group-function-object>> before it is able to continue executing.
+    functions block the calling thread until the execution of a
+    <<command-group-function-object>> completes.
 
 [[constant-memory]]constant memory::
     A region of memory that remains constant during the execution of a kernel.
@@ -218,15 +216,8 @@ For the full description please refer to <<subsec:buffers>>.
     such as a <<work-group>> or <<sub-group>>.
 
 [[group-barrier]]group barrier::
-    A synchronization function within a group of <<work-item,work-items>>.
-    All the <<work-item,work-items>> of a group must execute the barrier
-    construct before any <<work-item>> continues execution beyond the barrier.
-    Additionally all work-items in the group execute a release <<mem-fence>>
-    prior to synchronizing at the barrier, all work-items in the group execute
-    an acquire <<mem-fence>> after synchronizing at the barrier, and there is an
-    implicit synchronization between these acquire and release fences as if
-    through an atomic operation on an atomic object internal to the barrier
-    implementation.
+    A coordination mechanism for all <<work-item,work-items>> of a group.
+    See the definition of the [code]#group_barrier# function.
 
 [[h-item]]h-item::
     A unique identifier representing a single <<work-item>> within the index
@@ -381,12 +372,8 @@ For the full description please refer to <<subsec:buffers>>.
 
 [[mem-fence]]mem-fence::
     A memory fence provides control over re-ordering of memory load and store
-    operations when coupled with an atomic operation that synchronizes two
-    fences with each other (or when the fences are part of a <<group-barrier>>
-    in which case there is implicit synchronization as if an atomic operation
-    has synchronized the fences).
-    The [code]#sycl::atomic_fence# function acts as a fence across all
-    work-items and devices specified by a [code]#memory_scope# argument.
+    operations when coupled with an atomic operation.
+    See the definition of the [code]#sycl::atomic_fence# function.
 
 [[object]]object::
     A state which a <<kernel-bundle>> can be in, representing
