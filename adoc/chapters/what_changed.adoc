@@ -7,66 +7,70 @@
 [[sec:what-changed-between]]
 == What has changed from SYCL 1.2.1 to SYCL 2020
 
-The SYCL runtime moved from namespace [code]#cl::sycl# provided
-by [code]#{hash}include <CL/sycl.hpp># to namespace [code]#sycl#
-provided by [code]#{hash}include <sycl/sycl.hpp># as explained in
-<<sec:headers-and-namespaces>>. The old header file is still
-available for compatibility with SYCL 1.2.1 applications.
+The SYCL runtime moved from namespace [code]#cl::sycl# provided by
+[code]#{hash}include <CL/sycl.hpp># to namespace [code]#sycl# provided by
+[code]#{hash}include <sycl/sycl.hpp># as explained in
+<<sec:headers-and-namespaces>>.
+The old header file is still available for compatibility with SYCL 1.2.1
+applications.
 
 The SYCL specification is now based on the core language of {cpp17}, as
-described in <<sec:progmodel.minimumcppversion>>.  Features of
-{cpp17} are now enabled within the specification, such as deduction guides
-for class template argument deduction.
+described in <<sec:progmodel.minimumcppversion>>.
+Features of {cpp17} are now enabled within the specification, such as deduction
+guides for class template argument deduction.
 
 Naming of lambda functions passed to kernel invocations is now optional.
 
 Changes to buffers, images and accessors:
 
-  * The [code]#image# class has been removed.  There are now new classes
-    [code]#unsampled_image# and [code]#sampled_image# which represent sampled
-    and unsampled images.  The [code]#sampler# class has been removed and
-    replaced with the new [code]#image_sampler# structure.
+  * The [code]#image# class has been removed.
+    There are now new classes [code]#unsampled_image# and [code]#sampled_image#
+    which represent sampled and unsampled images.
+    The [code]#sampler# class has been removed and replaced with the new
+    [code]#image_sampler# structure.
 
   * Support for image arrays has been removed.
 
   * The type name [code]#access::target# has been deprecated and replaced with
     the type [code]#target#.
 
-  * The type name [code]#access::mode# has been deprecated and replaced with
-    the type [code]#access_mode#.
+  * The type name [code]#access::mode# has been deprecated and replaced with the
+    type [code]#access_mode#.
 
-  * The name of the [code]#accessor# target [code]#target::global_buffer#
-    has been deprecated and replaced with [code]#target::device#.
+  * The name of the [code]#accessor# target [code]#target::global_buffer# has
+    been deprecated and replaced with [code]#target::device#.
 
-  * Support for the [code]#accessor# target [code]#target::host_buffer# has
-    been deprecated.  There is now a new accessor class [code]#host_accessor#
-    which provides equivalent functionality.
+  * Support for the [code]#accessor# target [code]#target::host_buffer# has been
+    deprecated.
+    There is now a new accessor class [code]#host_accessor# which provides
+    equivalent functionality.
 
-  * The [code]#buffer# member functions which return an [code]#accessor# of
-    type [code]#target::host_buffer# have been deprecated.  A new member
-    function [code]#get_host_access()# has been added which returns a
-    [code]#host_accessor#.
+  * The [code]#buffer# member functions which return an [code]#accessor# of type
+    [code]#target::host_buffer# have been deprecated.
+    A new member function [code]#get_host_access()# has been added which returns
+    a [code]#host_accessor#.
 
   * The [code]#buffer# class has a new variadic overload of the
     [code]#get_access()# member function which allows construction of an
     [code]#accessor# with various parameters.
 
   * Support for the [code]#accessor# target [code]#target::local# has been
-    deprecated.  There is now a new accessor class [code]#local_accessor# which
-    provides equivalent functionality.
+    deprecated.
+    There is now a new accessor class [code]#local_accessor# which provides
+    equivalent functionality.
 
   * Support for the [code]#accessor# targets [code]#target::image# and
-    [code]#target::host_image# have been removed.  There are now new accessor
-    classes for sampled and unsampled images: [code]#sampled_image_accessor#,
-    [code]#host_sampled_image_accessor#, [code]#unsampled_image_accessor# and
-    [code]#host_unsampled_image_accessor#.
+    [code]#target::host_image# have been removed.
+    There are now new accessor classes for sampled and unsampled images:
+    [code]#sampled_image_accessor#, [code]#host_sampled_image_accessor#,
+    [code]#unsampled_image_accessor# and [code]#host_unsampled_image_accessor#.
 
   * A new [code]#accessor# target [code]#target::host_task# has been added,
     which allows access to a [code]#buffer# from a <<host-task>>.
 
   * Support for the [code]#accessor# modes [code]#access_mode::discard_write#
-    and [code]#access_mode::discard_read_write# has been deprecated.  Accessors
-    can now be constructed with a property list, and the new property
+    and [code]#access_mode::discard_read_write# has been deprecated.
+    Accessors can now be constructed with a property list, and the new property
     [code]#property::no_init# provides equivalent functionality.
 
   * Support for the [code]#accessor# mode [code]#access_mode::atomic# and the
@@ -75,18 +79,18 @@ Changes to buffers, images and accessors:
 
   * Support for the [code]#accessor# template parameter [code]#isPlaceholder#
     has been deprecated, and the value of this parameter no longer has any
-    bearing on whether the accessor is a placeholder.  The enumerated type
-    [code]#access::placeholder# is also deprecated.  A placeholder
-    accessor can now be constructed by calling the appropriate constructor,
-    without regard to the template parameter.
+    bearing on whether the accessor is a placeholder.
+    The enumerated type [code]#access::placeholder# is also deprecated.
+    A placeholder accessor can now be constructed by calling the appropriate
+    constructor, without regard to the template parameter.
 
   * The return type of [code]#accessor::is_placeholder()# is no longer
     [code]#constexpr#.
 
   * The member function [code]#handler::require()# may now be called on any
     [code]#accessor# with target [code]#target::device#,
-    [code]#target::constant_buffer# or [code]#target::host_task#, regardless
-    of whether it is a placeholder.
+    [code]#target::constant_buffer# or [code]#target::host_task#, regardless of
+    whether it is a placeholder.
 
   * New [code]#accessor# constructors have been added which take a type tag
     parameter, which allows the class template parameters to be inferred via
@@ -99,44 +103,50 @@ Changes to buffers, images and accessors:
 
   * The [code]#accessor# template parameters [code]#Dimensions# and
     [code]#AccessMode# now have default values, so the only required template
-    parameter is [code]#DataT#.  Moreover, the default access mode is either
-    [code]#access_mode::read_write# or [code]#access_mode::read#,
-    depending on the constness of the [code]#DataT# type.  This makes it
-    possible to declare a read-only accessor by simply using a [code]#const#
-    qualified type.
+    parameter is [code]#DataT#.
+    Moreover, the default access mode is either [code]#access_mode::read_write#
+    or [code]#access_mode::read#, depending on the constness of the
+    [code]#DataT# type.
+    This makes it possible to declare a read-only accessor by simply using a
+    [code]#const# qualified type.
 
   * Implicit conversions have been added between the two forms of read-only
     [code]#accessor# (one form has [code]#const DataT# and
     [code]#access_mode::read# and the other has non-const [code]#DataT# and
-    [code]#access_mode::read#).  There is also an implicit conversion from
-    a read-write [code]#accessor# to either of the read-only forms.
+    [code]#access_mode::read#).
+    There is also an implicit conversion from a read-write [code]#accessor# to
+    either of the read-only forms.
 
-  * Member functions of [code]#accessor# which return a reference to an
-    element have been changed to return a [code]#const# reference for
-    read-only accessors.  The [code]#get_pointer()# member function has also
-    been changed to return a [code]#const# pointer for read-only accessors.
+  * Member functions of [code]#accessor# which return a reference to an element
+    have been changed to return a [code]#const# reference for read-only
+    accessors.
+    The [code]#get_pointer()# member function has also been changed to return a
+    [code]#const# pointer for read-only accessors.
     The [code]#value_type# and [code]#reference# member types of
     [code]#accessor# have been changed to be [code]#const# types for read-only
     accessors.
 
   * The [code]#accessor# class now meets the {cpp} requirement of
-    [code]#ReversibleContainer#.  This includes (but is not limited to)
-    returning [code]#begin# and [code]#end# iterators, specifying a default
-    constructible accessor that can be passed to a kernel but not dereferenced,
-    and making them equality comparable.
+    [code]#ReversibleContainer#.
+    This includes (but is not limited to) returning [code]#begin# and
+    [code]#end# iterators, specifying a default constructible accessor that can
+    be passed to a kernel but not dereferenced, and making them equality
+    comparable.
 
   * Many of the [code]#accessor# member functions have been marked
     [code]#noexcept#.
 
-  * A <<ranged-accessor>> is no longer allowed to read elements that are
-    outside of its range; attempting to do so produces undefined behavior.
+  * A <<ranged-accessor>> is no longer allowed to read elements that are outside
+    of its range; attempting to do so produces undefined behavior.
 
   * The semantics of the subscript operator have been changed for a
-    <<ranged-accessor>> which has an offset.  Calling [code]#operator[](0)# now
-    returns a reference to the first element in the range, rather than a
-    reference to the first element in the underlying buffer.
+    <<ranged-accessor>> which has an offset.
+    Calling [code]#operator[](0)# now returns a reference to the first element
+    in the range, rather than a reference to the first element in the underlying
+    buffer.
 
-  * The behavior of buffers and accessors with a zero-sized range has been clarified.
+  * The behavior of buffers and accessors with a zero-sized range has been
+    clarified.
 
 Constant memory no longer appears in the SYCL device memory model in SYCL 2020.
 
@@ -144,7 +154,7 @@ The {cpp} attributes that decorate kernels are now better described, and their
 position has changed so that they are applied directly to the kernel function.
 (Previously, they were applied to a device function that the kernel calls, and
 the implementation needed to propagate the information up to the enclosing
-kernel.)  The old {cpp} attribute form is no longer included in the SYCL
+kernel.) The old {cpp} attribute form is no longer included in the SYCL
 specification.
 
 Changes to the built-in functions specified in <<sycl:builtins>>:
@@ -153,188 +163,198 @@ Changes to the built-in functions specified in <<sycl:builtins>>:
     these functions, and it now lists the exact synopsis for each function.
 
   * The return type of the integer [code]#abs# and [code]#abs_diff# functions
-    has changed.  The return type is now the same as the input type, matching
-    the {cpp} [code]#std::abs# function.
+    has changed.
+    The return type is now the same as the input type, matching the {cpp}
+    [code]#std::abs# function.
 
-  * The geometric functions specified in <<sec:geometric-functions>> now
-    support the [code]#half# data type.
+  * The geometric functions specified in <<sec:geometric-functions>> now support
+    the [code]#half# data type.
 
   * The [code]#ctz# function was added to <<sec:integer-functions>>.
 
   * The specification of [code]#clz# was clarified for the case when the input
     is zero.
 
-The classes [code]#vector_class#, [code]#string_class#,
-[code]#function_class#, [code]#mutex_class#,
-[code]#shared_ptr_class#, [code]#weak_ptr_class#,
-[code]#hash_class# and [code]#exception_ptr_class# have been
-removed from the API and the standard classes
-[code]#std::vector#, [code]#std::string#,
-[code]#std::function#, [code]#std::mutex#,
-[code]#std::shared_ptr#, [code]#std::weak_ptr#,
-[code]#std::hash# and [code]#std::exception_ptr# are used
+The classes [code]#vector_class#, [code]#string_class#, [code]#function_class#,
+[code]#mutex_class#, [code]#shared_ptr_class#, [code]#weak_ptr_class#,
+[code]#hash_class# and [code]#exception_ptr_class# have been removed from the
+API and the standard classes [code]#std::vector#, [code]#std::string#,
+[code]#std::function#, [code]#std::mutex#, [code]#std::shared_ptr#,
+[code]#std::weak_ptr#, [code]#std::hash# and [code]#std::exception_ptr# are used
 instead.
 
-The specific [code]#sycl::buffer# API taking
-[code]#std::unique_ptr# has been removed.  The behavior is the
-same as in SYCL 1.2.1 but with a simplified API.  Since there is still
-the API taking [code]#std::shared_ptr# and there is an implicit
-conversion from a [code]#std::unique_ptr# prvalue to a
-[code]#std::shared_ptr#, the API can still be used as before with
-a [code]#std::unique_ptr# to give away memory ownership.
+The specific [code]#sycl::buffer# API taking [code]#std::unique_ptr# has been
+removed.
+The behavior is the same as in SYCL 1.2.1 but with a simplified API.
+Since there is still the API taking [code]#std::shared_ptr# and there is an
+implicit conversion from a [code]#std::unique_ptr# prvalue to a
+[code]#std::shared_ptr#, the API can still be used as before with a
+[code]#std::unique_ptr# to give away memory ownership.
 
-Offsets to [code]#parallel_for#, [code]#nd_range#, [code]#nd_item# and [code]#item# classes have been deprecated.
-As such, the parallel iteration spaces all begin at [code]#(0,0,0)# and developers are now required to handle any offset arithmetic themselves.
-The behavior of [code]#nd_item.get_global_linear_id()# and [code]#nd_item.get_local_linear_id()# has been clarified accordingly.
+Offsets to [code]#parallel_for#, [code]#nd_range#, [code]#nd_item# and
+[code]#item# classes have been deprecated.
+As such, the parallel iteration spaces all begin at [code]#(0,0,0)# and
+developers are now required to handle any offset arithmetic themselves.
+The behavior of [code]#nd_item.get_global_linear_id()# and
+[code]#nd_item.get_local_linear_id()# has been clarified accordingly.
 
-Unified Shared Memory (USM), in <<sec:usm>>, has been added as a pointer-based strategy
-for data management.  It defines several types of allocations with various
-accessibility rules for host and devices.  USM is meant to complement
-buffers, not replace them.
+Unified Shared Memory (USM), in <<sec:usm>>, has been added as a pointer-based
+strategy for data management.
+It defines several types of allocations with various accessibility rules for
+host and devices.
+USM is meant to complement buffers, not replace them.
 
-The [code]#queue# class received a new [code]#property#
-that requires in-order semantics for a queue where operations are
-executed in the order in which they are submitted.
+The [code]#queue# class received a new [code]#property# that requires in-order
+semantics for a queue where operations are executed in the order in which they
+are submitted.
 
-The [code]#queue# class received several new member functions to
-invoke kernels directly on a queue objects instead of inside a
-command group handler in the [code]#submit# member function.
+The [code]#queue# class received several new member functions to invoke kernels
+directly on a queue objects instead of inside a command group handler in the
+[code]#submit# member function.
 
-The [code]#queue# constructor overloads that accept both a [code]#context# and
-a [code]#device# parameter have been broadened to allow the device to be either
-a device that is in the context or a <<descendent-device>> of a device that is
-in the context.
+The [code]#queue# constructor overloads that accept both a [code]#context# and a
+[code]#device# parameter have been broadened to allow the device to be either a
+device that is in the context or a <<descendent-device>> of a device that is in
+the context.
 
 The [code]#program# class has been removed and replaced with a new class
 [code]#kernel_bundle#, which provides similar functionality in a type-safe and
-thread-safe way.  The [code]#kernel# class has changed, and some member
-functions have been removed.
+thread-safe way.
+The [code]#kernel# class has changed, and some member functions have been
+removed.
 
 Support has been added for <<specialization-constant,specialization-constants>>,
 which allow a <<sycl-kernel-function>> to use constant variables whose values
-aren't known until the kernel is invoked.  A <<sycl-kernel-function>> can now
-take an optional parameter of type [code]#kernel_handler#, which allows the
-kernel to read the values of
+aren't known until the kernel is invoked.
+A <<sycl-kernel-function>> can now take an optional parameter of type
+[code]#kernel_handler#, which allows the kernel to read the values of
 <<specialization-constant,specialization-constants>>.
 
-The constructors for SYCL [code]#context# and [code]#queue#
-are made [code]#explicit# to prevent ambiguities in the selected
-constructor resulting from implicit type conversion.
+The constructors for SYCL [code]#context# and [code]#queue# are made
+[code]#explicit# to prevent ambiguities in the selected constructor resulting
+from implicit type conversion.
 
-The requirement for {cpp} standard layout for data shared between host
-and devices has been relaxed.  SYCL now requires data shared between
-host and devices to be <<device-copyable>> as defined <<sec::device.copyable>>.
+The requirement for {cpp} standard layout for data shared between host and
+devices has been relaxed.
+SYCL now requires data shared between host and devices to be <<device-copyable>>
+as defined <<sec::device.copyable>>.
 
-The concept of a <<group>> of <<work-item,work-items>> was generalized to include
-<<work-group,work-groups>> and <<sub-group,sub-groups>>.  A <<work-group>> is represented
-by the [code]#sycl::group# class as in SYCL 1.2.1, and a <<sub-group>>
-is represented by the new [code]#sycl::sub_group# class.
+The concept of a <<group>> of <<work-item,work-items>> was generalized to
+include <<work-group,work-groups>> and <<sub-group,sub-groups>>.
+A <<work-group>> is represented by the [code]#sycl::group# class as in SYCL
+1.2.1, and a <<sub-group>> is represented by the new [code]#sycl::sub_group#
+class.
 
-The [code]#host_task# member function for the [code]#queue# has been
-introduced for en-queueing <<host-task,host tasks>> on a <<queue>> to schedule the
+The [code]#host_task# member function for the [code]#queue# has been introduced
+for en-queueing <<host-task,host tasks>> on a <<queue>> to schedule the
 <<sycl-runtime>> to invoke native {cpp} functions, conforming to the SYCL memory
-model. <<host-task,Host-tasks>> also support interoperability with the native
-<<backend>> objects associated at that point in the DAG using
-the optional [code]#interop_handle# class.
+model.
+<<host-task,Host-tasks>> also support interoperability with the native
+<<backend>> objects associated at that point in the DAG using the optional
+[code]#interop_handle# class.
 
-A library of algorithms based on the {cpp17} algorithms library
-was introduced in <<sec:algorithms>>.  These algorithms
-provide a simple way for developers to apply common parallel algorithms
-using the work-items of a group.
+A library of algorithms based on the {cpp17} algorithms library was introduced
+in <<sec:algorithms>>.
+These algorithms provide a simple way for developers to apply common parallel
+algorithms using the work-items of a group.
 
-The definition of the [code]#sycl::group# class was modified to
-support the new group functions in <<sec:group-functions>>.
+The definition of the [code]#sycl::group# class was modified to support the new
+group functions in <<sec:group-functions>>.
 New member types and variables were added to enable generic programming, and
 member functions were updated to encapsulate all functionality tied to
-<<work-group,work-groups>> in the [code]#sycl::group# class.  See
-<<table.members.group>> for details.
+<<work-group,work-groups>> in the [code]#sycl::group# class.
+See <<table.members.group>> for details.
 
 The [code]#barrier# and [code]#mem_fence# member functions of the
-[code]#nd_item# class have been removed.  The [code]#barrier# member
-function has been replaced by the [code]#group_barrier()# function, which
-can be used to synchronize either <<work-group, work-groups>> or <<sub-group, sub-groups>>.  The
-[code]#mem_fence# member function has been replaced by the
+[code]#nd_item# class have been removed.
+The [code]#barrier# member function has been replaced by the
+[code]#group_barrier()# function, which can be used to block work-items in
+either <<work-group, work-groups>> or <<sub-group, sub-groups>> until all
+work-items in the group arrive at the barrier.
+The [code]#mem_fence# member function has been replaced by the
 [code]#atomic_fence# function, which is more closely aligned with
-[code]#std::atomic_thread_fence# and offers control over memory ordering
-and scope.
+[code]#std::atomic_thread_fence# and offers control over memory ordering and
+scope.
 
-Changes in the SYCL [code]#vec# class described in
-<<sec:vector.type>>:
+Changes in the SYCL [code]#vec# class described in <<sec:vector.type>>:
 
   * [code]#operator[]# was added;
   * unary [code]#pass:[operator+()]# and [code]#operator-()# were added;
 
-The device selection now relies on a simpler API based on ranking
-functions used as <<device-selector,device selectors>> described in
-<<sec:device-selector>>.
+The device selection now relies on a simpler API based on ranking functions used
+as <<device-selector,device selectors>> described in <<sec:device-selector>>.
 
-A new device selector utility has been added to <<sec:device-selector>>,
-the [code]#aspect_selector#, which returns a selector object
-that only selects devices that have all the requested aspects.
+A new device selector utility has been added to <<sec:device-selector>>, the
+[code]#aspect_selector#, which returns a selector object that only selects
+devices that have all the requested aspects.
 
-The device query [code]#info::fp_config::correctly_rounded_divide_sqrt# has
-been deprecated.
+The device query [code]#info::fp_config::correctly_rounded_divide_sqrt# has been
+deprecated.
 
 A new reduction library consisting of the [code]#reduction# function and
 [code]#reducer# class was introduced to simplify the expression of variables
-with <<reduction>> semantics in SYCL kernels. See <<sec:reduction>>.
+with <<reduction>> semantics in SYCL kernels.
+See <<sec:reduction>>.
 
 The [code]#atomic# class from SYCL 1.2.1 was deprecated in favor of a new
 [code]#atomic_ref# interface.
 
 The SYCL exception class hierarchy has been condensed into a single exception
 type: [code]#exception#.
-[code]#exception# now derives from
-[code]#std::exception#. The variety of errors are now provided via error
-codes, which aligns with the {cpp} error code mechanism.
+[code]#exception# now derives from [code]#std::exception#.
+The variety of errors are now provided via error codes, which aligns with the
+{cpp} error code mechanism.
 
 The new error code mechanism now also generalizes the previous
-[code]#get_cl_code# interface to provide a generic interface way for
-querying backend-specific error codes.
+[code]#get_cl_code# interface to provide a generic interface way for querying
+backend-specific error codes.
 
-Default asynchronous error handling behavior is now defined, so that asynchronous
-errors will cause abnormal program termination even if a user-defined
-asynchronous handler function is not defined.  This prevents asynchronous errors
-from being silently lost during early stages of application development.
+Default asynchronous error handling behavior is now defined, so that
+asynchronous errors will cause abnormal program termination even if a
+user-defined asynchronous handler function is not defined.
+This prevents asynchronous errors from being silently lost during early stages
+of application development.
 
-Kernel invocation functions, such as [code]#parallel_for#, now take
-kernel functions by [code]#const# reference.  Kernel functions must now have
-a [code]#const#-qualified [code]#operator()#, and are allowed to be copied zero
-or more times by an implementation.  These clarifications allow implementations
-to have flexibility for specific devices, and define what users should expect
-with kernel functors.  Specifically, kernel functors can not be marked as
-[code]#mutable#, and sharing of data between work-items should not be
-attempted through state stored within a kernel functor.
+Kernel invocation functions, such as [code]#parallel_for#, now take kernel
+functions by [code]#const# reference.
+Kernel functions must now have a [code]#const#-qualified [code]#operator()#, and
+are allowed to be copied zero or more times by an implementation.
+These clarifications allow implementations to have flexibility for specific
+devices, and define what users should expect with kernel functors.
+Specifically, kernel functors can not be marked as [code]#mutable#, and sharing
+of data between work-items should not be attempted through state stored within a
+kernel functor.
 
-A new concept called device <<aspect,aspects>> has been added, which tells the set
-of optional features a device supports.  This new mechanism replaces the
-[code]#has_extension()# function and some uses of [code]#get_info()#.
+A new concept called device <<aspect,aspects>> has been added, which tells the
+set of optional features a device supports.
+This new mechanism replaces the [code]#has_extension()# function and some uses
+of [code]#get_info()#.
 
-There is a new <<chapter.extensions>> which describes how extensions
-to the SYCL language can be added by vendors and by the Khronos Group.
+There is a new <<chapter.extensions>> which describes how extensions to the SYCL
+language can be added by vendors and by the Khronos Group.
 
-A [code]#queue# constructor has been added that takes both a
-[code]#device# and [code]#context#, to simplify interfacing
-with libraries.
+A [code]#queue# constructor has been added that takes both a [code]#device# and
+[code]#context#, to simplify interfacing with libraries.
 
-The [code]#parallel_for# interface has been simplified in some forms
-to accept a braced initializer list in place of a [code]#range#, and
-to always take [code]#item# arguments.  Kernel invocation functions have
-also been modified to accept generic lambda expressions. Implicit conversions
-from one-dimensional [code]#item# and one-dimensional [code]#id# to scalar types
-have been defined. All of these modifications lead to simpler SYCL code in common
-use cases.
+The [code]#parallel_for# interface has been simplified in some forms to accept a
+braced initializer list in place of a [code]#range#, and to always take
+[code]#item# arguments.
+Kernel invocation functions have also been modified to accept generic lambda
+expressions.
+Implicit conversions from one-dimensional [code]#item# and one-dimensional
+[code]#id# to scalar types have been defined.
+All of these modifications lead to simpler SYCL code in common use cases.
 
 The behaviour of executing a kernel over a [code]#range# or [code]#nd_range#
 with index space of zero has been clarified.
 
-Some device-specific queries have been renamed to more clearly be "`device-specific
-kernel`" [code]#get_info# queries ([code]#info::kernel_device_specific#)
-instead of "`work-group`" ([code]#get_workgroup_info#) and sub-group
-([code]#get_sub_group_info#) queries.
+Some device-specific queries have been renamed to more clearly be
+"`device-specific kernel`" [code]#get_info# queries
+([code]#info::kernel_device_specific#) instead of "`work-group`"
+([code]#get_workgroup_info#) and sub-group ([code]#get_sub_group_info#) queries.
 
-A new math array type [code]#marray# has been defined to begin disambiguation
-of the multiple possible interpretations of how [code]#sycl::vec# should be
+A new math array type [code]#marray# has been defined to begin disambiguation of
+the multiple possible interpretations of how [code]#sycl::vec# should be
 interpreted and implemented.
 
 Changes in SYCL address spaces:
@@ -343,40 +363,40 @@ Changes in SYCL address spaces:
   * the generic address space was introduced;
   * the constant address space was deprecated;
   * behavior of unannotated pointer/reference (raw pointer/reference) is now
-    dependent on the compilation mode. The compiler can either interpret
-    unannotated pointer/reference has addressing the generic address space
-    or to be deduced;
-  * some ambiguities in the address space deduction were clarified. Notably
-    that deduced type does not affect the user-provided type.
+    dependent on the compilation mode.
+    The compiler can either interpret unannotated pointer/reference has
+    addressing the generic address space or to be deduced;
+  * some ambiguities in the address space deduction were clarified.
+    Notably that deduced type does not affect the user-provided type.
 
 Changes in [code]#multi_ptr# interface:
 
-  * addition of [code]#access::address_space::generic_space# to represent
-    the generic address space;
+  * addition of [code]#access::address_space::generic_space# to represent the
+    generic address space;
   * deprecation of [code]#access::address_space::constant_space#;
   * an extra template parameter to allow to select a flavor of the
-    [code]#multi_ptr# interface. There are now 3 different interfaces:
-  ** interface exposing undecorated types. Returned pointer and reference
-     are not annotated by an address space;
-  ** interface exposing decorated types. Returned pointer and reference are
-     annotated by an address space;
+    [code]#multi_ptr# interface.
+    There are now 3 different interfaces:
+  ** interface exposing undecorated types.
+     Returned pointer and reference are not annotated by an address space;
+  ** interface exposing decorated types.
+     Returned pointer and reference are annotated by an address space;
   ** legacy 1.2.1 interface (deprecated).
   * deprecation of the 1.2.1 interface;
   * deprecation of [code]#constant_ptr#;
-  * [code]#global_ptr#, [code]#local_ptr# and
-    [code]#private_ptr# alias take the new extra parameter;
-  * addition of the [code]#address_space_cast# free function to cast
-    undecorated pointer to [code]#multi_pointer#;
-  * addition of construction/conversion operator for the generic address
-    space;
+  * [code]#global_ptr#, [code]#local_ptr# and [code]#private_ptr# alias take the
+    new extra parameter;
+  * addition of the [code]#address_space_cast# free function to cast undecorated
+    pointer to [code]#multi_pointer#;
+  * addition of construction/conversion operator for the generic address space;
   * removal of the constructor and assignment operator taking an unannotated
     pointer;
-  * implicit conversion to a pointer is now deprecated. [code]#get# should
-    be used instead;
+  * implicit conversion to a pointer is now deprecated.
+    [code]#get# should be used instead;
   * the return type of the member function [code]#get# now depends on the
     selected interface.
-  * addition of the member function [code]#get_raw# which returns the
-    underlying pointer as an unannotated pointer;
+  * addition of the member function [code]#get_raw# which returns the underlying
+    pointer as an unannotated pointer;
   * addition of the member function [code]#get_decorated# which returns the
     underlying pointer as an annotated pointer;
   * addition of the subscript operator providing random access.
@@ -385,64 +405,63 @@ The [code]#cl::sycl::byte# has been deprecated and now the {cpp17}
 [code]#std::byte# should be used instead.
 
 A SYCL implementation is no longer required to provide a host device.
-Instead, an implementation is only required to provide at least one
-device.  Implementations are still allowed to provide devices that are
-implemented on the host, but it is no longer required.  The specification
-no longer defines any special semantics for a "host device" and APIs
-specific to the host device have been removed.
+Instead, an implementation is only required to provide at least one device.
+Implementations are still allowed to provide devices that are implemented on the
+host, but it is no longer required.
+The specification no longer defines any special semantics for a "host device"
+and APIs specific to the host device have been removed.
 
 The default constructors for the [code]#device# and [code]#platform# classes
 have been changed to construct a copy of the default device and a copy of the
-platform containing the default device.  Previously, they returned a copy of
-the host device and a copy of the platform containing the host device.  The
-default constructor for the [code]#event# class has also been changed to
+platform containing the default device.
+Previously, they returned a copy of the host device and a copy of the platform
+containing the host device.
+The default constructor for the [code]#event# class has also been changed to
 construct an event that comes from a default-constructed [code]#queue#.
 Previously, it constructed an event that used the host backend.
 
-Explicit copy functions of the handler class
-have also been introduced to the queue class as shortcuts for the handler ones.
-This is enabled by the improved placeholder accessors
-to help reduce code verbosity in certain cases
-because the shortcut functions implicitly create a command group
-and call [code]#handler::require#.
+Explicit copy functions of the handler class have also been introduced to the
+queue class as shortcuts for the handler ones.
+This is enabled by the improved placeholder accessors to help reduce code
+verbosity in certain cases because the shortcut functions implicitly create a
+command group and call [code]#handler::require#.
 
 Information query descriptors have been changed to structures under namespaces
-named accordingly. [code]#param_traits# has been removed and the return type of
-an information query is now contained in the descriptor.
-The [code]#sycl::info::device::max_work_item_sizes# is now a
-template that takes a dimension parameter corresponding to the number of
-dimensions of the work-item size maxima.
+named accordingly.
+[code]#param_traits# has been removed and the return type of an information
+query is now contained in the descriptor.
+The [code]#sycl::info::device::max_work_item_sizes# is now a template that takes
+a dimension parameter corresponding to the number of dimensions of the work-item
+size maxima.
 
 Changes to retrieving size information:
 
-  * all [code]#get_size()# member functions have been deprecated
-    and replaced with [code]#byte_size()#, which is marked [code]#noexcept#;
-  * all [code]#get_count()# member functions have been deprecated
-    and replaced with [code]#size()#, which is marked [code]#noexcept#;
-  * in the [code]#vec# class the functions [code]#byte_size()# and [code]#size()#
-    are now static member functions;
-  * in the [code]#stream# class [code]#get_size()# has been deprecated
-    in favor of [code]#size()#,
-    whereas [code]#stream::byte_size()# is not available;
-  * accessors for sampled and unsampled images only define [code]#size()#
-    and not [code]#byte_size()#.
+  * all [code]#get_size()# member functions have been deprecated and replaced
+    with [code]#byte_size()#, which is marked [code]#noexcept#;
+  * all [code]#get_count()# member functions have been deprecated and replaced
+    with [code]#size()#, which is marked [code]#noexcept#;
+  * in the [code]#vec# class the functions [code]#byte_size()# and
+    [code]#size()# are now static member functions;
+  * in the [code]#stream# class [code]#get_size()# has been deprecated in favor
+    of [code]#size()#, whereas [code]#stream::byte_size()# is not available;
+  * accessors for sampled and unsampled images only define [code]#size()# and
+    not [code]#byte_size()#.
 
 The device descriptors [code]#info::device::max_constant_buffer_size# and
 [code]#info::device::max_constant_args# are deprecated in SYCL 2020.
 
-The [code]#buffer_allocator# is now templated on the data type
-and follows the C++ named requirement [code]#Allocator#.
+The [code]#buffer_allocator# is now templated on the data type and follows the
+C++ named requirement [code]#Allocator#.
 
 // Expose various workarounds showing how to typeset +, ++ and -- The
-The SYCL [code]#id# and [code]#range# have now unary
-pass:quotes[[code\]#+#] and [code]#-# operations, prefix
-[code]#&#x2b;&#x2b;# and [code]#&#x2d;&#x2d;# operations, postfix
-pass:quotes[[code\]#++#] and pass:quotes[[code\]#--#] operations which
-were forgotten in SYCL 1.2.1.
+The SYCL [code]#id# and [code]#range# have now unary pass:quotes[[code\]#+#] and
+[code]#-# operations, prefix [code]#&#x2b;&#x2b;# and [code]#&#x2d;&#x2d;#
+operations, postfix pass:quotes[[code\]#++#] and pass:quotes[[code\]#--#]
+operations which were forgotten in SYCL 1.2.1.
 
 In SYCL 1.2.1, the [code]#handler::copy()# overload with two [code]#accessor#
 parameters did not clearly specify which accessor's size determines the amount
-of memory that is copied.  The spec now clarifies that the [code]#src#
-accessor's size is used.
+of memory that is copied.
+The spec now clarifies that the [code]#src# accessor's size is used.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end what_changed %%%%%%%%%%%%%%%%%%%%%%%%%%%%
