@@ -118,6 +118,9 @@ template <typename DataT, int NumElements> class vec {
   DataT& operator[](int index);
   const DataT& operator[](int index) const;
 
+  vec& operator=(const vec<DataT, NumElements>& rhs);
+  vec& operator=(const DataT& rhs);
+
   // OP is: +, -, *, /, %
   /* If OP is %, available only when: DataT != float && DataT != double
   && DataT != half. */
@@ -174,11 +177,9 @@ template <typename DataT, int NumElements> class vec {
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
   friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
 
-  vec& operator=(const vec<DataT, NumElements>& rhs);
-  vec& operator=(const DataT& rhs);
-
   /* Available only when: DataT != float && DataT != double && DataT != half. */
   friend vec operator~(const vec& v);
+
   friend vec<RET, NumElements> operator!(const vec& v);
 };
 
