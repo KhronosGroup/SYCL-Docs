@@ -19992,19 +19992,15 @@ include::{header_dir}/groups/barrier.h[lines=4..-1]
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Effects:_ The current work-item will wait at the barrier until all work-items
-in group [code]#g# have reached the barrier.
-In addition, the barrier performs <<mem-fence>> operations ensuring that memory
-accesses issued before the barrier are not re-ordered with those issued after
-the barrier: all work-items in group [code]#g# execute a release fence prior to
-arriving at the barrier, all work-items in group [code]#g# execute an acquire
-fence afterwards, and there is an implicit synchronization of these fences as if
-provided by an explicit atomic operation on an atomic object.
+_Effects:_ Blocks this work-item until all work-items in group [code]#g# have
+reached this synchronization point.
 
-By default, the scope of these fences is set to the narrowest scope including
-all work-items in group [code]#g# (as reported by [code]#Group::fence_scope#).
-This scope may be optionally overridden with a wider scope, specified by the
-[code]#fence_scope# argument.
+_Synchronization:_ The call to [code]#group_barrier# in each work-item happens
+before any work-item blocking on the same synchronization point is unblocked.
+Synchronization operations used in an implementation of [code]#group_barrier#
+must respect the memory scope specified by the [code]#scope# parameter, which
+defaults to the narrowest scope including all work-items in group [code]#g# (as
+reported by [code]#Group::fence_scope#).
 --
 
 [[sec:algorithms]]
