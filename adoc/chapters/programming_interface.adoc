@@ -6114,15 +6114,15 @@ if set final data is [code]#nullptr)#.
 [[subsec:mutex]]
 === Synchronization primitives
 
-To prevent race conditions between accesses to the host allocation owned by a [code]#buffer# in the
-<<sycl-runtime>> (e.g., by accessors) and in host code, it is necesssary
-to use manual synchronization though a [code]#host_accessor#, or by 
-passing a [code]#std::mutex# to the [code]#buffer# constructor through a
+To prevent race conditions between accesses to the host allocation owned by a
+[code]#buffer# in the <<sycl-runtime>> (e.g., by accessors) and in host code, it
+is necesssary to use manual synchronization though a [code]#host_accessor#, or
+by passing a [code]#std::mutex# to the [code]#buffer# constructor through a
 [code]#property#.
 
-When a [code]#buffer# was constructed with a [code]#std::mutex# property, the SYCL runtime is
-required to lock the mutex whenever the data is in use by the runtime, and unlock
-the mutex when the data is not in use by the SYCL runtime.
+When a [code]#buffer# was constructed with a [code]#std::mutex# property, the
+SYCL runtime is required to lock the mutex whenever the data is in use by the
+runtime, and unlock the mutex when the data is not in use by the SYCL runtime.
 
 [source,,linenums]
 ----
@@ -6142,9 +6142,9 @@ the mutex when the data is not in use by the SYCL runtime.
 }
 ----
 
-When the runtime releases the mutex, the user is guaranteed that the data has been
-copied back through the shared pointer --- unless the final data destination has been
-changed using the member function [code]#set_final_data()#.
+When the runtime releases the mutex, the user is guaranteed that the data has
+been copied back through the shared pointer --- unless the final data
+destination has been changed using the member function [code]#set_final_data()#.
 
 
 [[subsec:accessors]]
