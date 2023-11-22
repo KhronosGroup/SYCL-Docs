@@ -6120,7 +6120,8 @@ to use manual synchronization though a [code]#host_accessor#, or by
 passing a [code]#std::mutex# to the [code]#buffer# constructor through a
 [code]#property#.
 
-The SYCL runtime is required to lock the mutex whenever the data is in use by the runtime, and unlock
+When a [code]#buffer# was constructed with a [code]#std::mutex# property, the SYCL runtime is
+required to lock the mutex whenever the data is in use by the runtime, and unlock
 the mutex when the data is not in use by the SYCL runtime.
 
 [source,,linenums]
