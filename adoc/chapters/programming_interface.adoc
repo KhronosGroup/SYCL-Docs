@@ -6114,8 +6114,8 @@ if set final data is [code]#nullptr)#.
 [[subsec:mutex]]
 === Synchronization primitives
 
-When the user wants to use a [code]#buffer# simultaneously in the
-<<sycl-runtime>> (e.g. in a command running on a device) and their own code (e.g. a multi-threaded mechanism) and wants
+To prevent race conditions between accesses to the host allocation owned by a [code]#buffer# in the
+<<sycl-runtime>> (e.g., by accessors) and in host code, it is necesssary
 to use manual synchronization without using a [code]#host_accessor#, a
 [code]#std::mutex# can be passed to the [code]#buffer# constructor through a
 [code]#property#.
