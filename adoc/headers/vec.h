@@ -118,7 +118,7 @@ template <typename DataT, int NumElements> class vec {
   DataT& operator[](int index);
   const DataT& operator[](int index) const;
 
-  vec& operator=(const vec<DataT, NumElements>& rhs);
+  vec& operator=(const vec& rhs);
   vec& operator=(const DataT& rhs);
 
   // OP is: +, -, *, /, %
