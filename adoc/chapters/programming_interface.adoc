@@ -19977,6 +19977,14 @@ include::{header_dir}/groups/broadcast.h[lines=4..-1]
     trivially copyable type.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
+
 _Returns:_ The value of [code]#x# from the work-item with the smallest linear id
 within group [code]#g#.
 --
@@ -19988,6 +19996,14 @@ within group [code]#g#.
 --
 _Preconditions:_ [code]#local_linear_id# must be the same for all work-items in
 the group and must be in the range [code]#[0, get_local_linear_range())#.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified linear
 id within group [code]#g#.
@@ -20002,6 +20018,14 @@ _Preconditions:_ [code]#local_id# must be the same for all work-items in the
 group, and its dimensionality must match the dimensionality of the group.
 The value of [code]#local_id# in each dimension must be greater than or equal to
 0 and less than the value of [code]#get_local_range()# in the same dimension.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified id
 within group [code]#g#.
