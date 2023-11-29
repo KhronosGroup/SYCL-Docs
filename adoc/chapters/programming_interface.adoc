@@ -19890,6 +19890,23 @@ work-items (such as <<group-barrier,group barriers>> and collective operations).
 These group functions act as _synchronization points_ and must be encountered in
 converged <<control-flow>> by all work-items in the group.
 
+The behavior of every group function is as follows:
+
+  * Each work-item in the group arrives at the synchronization point associated
+    with the group function, then blocks until any operation(s) specified by the
+    group function have completed.
+
+  * Once all work-items in the group have arrived, an implementation-defined
+    subset of those work-items cooperate to execute any operation(s) specified
+    by the group function.
+
+  * When the set of cooperating work-items have completed execution of all
+    operation(s) specified by the group function, all work-items blocked on the
+    synchronization point associated with the group function are unblocked.
+
+The completion of the operation(s) specified by the group function happens
+before the returns from all calls that were unblocked.
+
 [NOTE]
 ====
 The behavior of group functions is analogous to the behavior of the C++20
