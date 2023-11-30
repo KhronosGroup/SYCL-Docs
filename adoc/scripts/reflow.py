@@ -53,7 +53,7 @@ codePat = re.compile(r'code:(?P<param>\w+)')
 # A single letter followed by a period, typically a middle initial.
 endInitial = re.compile(r'^[A-Z]\.$')
 # An abbreviation, which does not (usually) end a line.
-endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|vs|co|ltd)\.$', re.IGNORECASE)
+endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b)\.$', re.IGNORECASE)
 
 # Explicit Valid Usage list item with one or more leading asterisks
 # The re.DOTALL is needed to prevent vuPat.search() from stripping
