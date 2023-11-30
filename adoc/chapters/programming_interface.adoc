@@ -17290,6 +17290,23 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%
 a@
 [source]
 ----
+vec operatorOP(const DataT& lhs, const vec& rhs)
+----
+   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
+
+Construct a new instance of the SYCL [code]#vec# class template with
+the same template parameters as the [code]#rhs# SYCL [code]#vec#
+with each element of the new SYCL [code]#vec# instance the result of
+an element-wise [code]#OP# arithmetic operation between the
+[code]#lhs# scalar and each element of the [code]#rhs# SYCL
+[code]#vec#.
+
+Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
+[code]#/#, [code]#%#.
+
+a@
+[source]
+----
 vec& operatorOP(vec& lhs, const vec& rhs)
 ----
    a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
@@ -17365,6 +17382,20 @@ Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
 a@
 [source]
 ----
+vec operatorOP(const DataT& lhs, const vec& rhs)
+----
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+
+Construct a new instance of the SYCL [code]#vec# class template with
+the same template parameters as the [code]#rhs# SYCL [code]#vec#
+with each element of the new SYCL [code]#vec# instance the result of
+an element-wise [code]#OP# bitwise operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
+
+Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
+
+a@
+[source]
+----
 vec& operatorOP(vec& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
@@ -17387,28 +17418,6 @@ Where [code]#OP# is: [code]#&=#, [code]#|=#, [code]#^=#.
 a@
 [source]
 ----
-vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
-----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
-
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
-
-Where [code]#OP# is: [code]#&&#, [code]#||#.
-
-a@
-[source]
-----
-vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
-----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
-
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
-
-Where [code]#OP# is: [code]#&&#, [code]#||#.
-
-a@
-[source]
-----
 vec operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
@@ -17425,6 +17434,23 @@ vec operatorOP(const vec& lhs, const DataT& rhs)
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
+
+Where [code]#OP# is: [code]#<<#, [code]#>>#.
+
+a@
+[source]
+----
+vec operatorOP(const DataT& lhs, const vec& rhs)
+----
+   a@ Construct a new instance of the SYCL [code]#vec# class template with
+      the same template parameters as the [code]#rhs# SYCL [code]#vec#
+      with each element of the new SYCL [code]#vec# instance the result of
+      an element-wise [code]#OP# bitshift operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
+      If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type
+      and this SYCL [code]#vec# has a negative value any vacated bits viewed
+      as an unsigned integer must be assigned the value [code]#1#, otherwise
+      any vacated bits viewed as an unsigned integer must be assigned the value
+      [code]#0#.
 
 Where [code]#OP# is: [code]#<<#, [code]#>>#.
 
@@ -17455,53 +17481,22 @@ a@
 ----
 vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.
+   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
-Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
+Where [code]#OP# is: [code]#&&#, [code]#||#.
 
 a@
 [source]
 ----
 vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# is a NaN.
+   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
 The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
 
-Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
-
-a@
-[source]
-----
-vec operatorOP(const DataT& lhs, const vec& rhs)
-----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
-
-Construct a new instance of the SYCL [code]#vec# class template with
-the same template parameters as the [code]#rhs# SYCL [code]#vec#
-with each element of the new SYCL [code]#vec# instance the result of
-an element-wise [code]#OP# arithmetic operation between the
-[code]#lhs# scalar and each element of the [code]#rhs# SYCL
-[code]#vec#.
-
-Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
-[code]#/#, [code]#%#.
-
-a@
-[source]
-----
-vec operatorOP(const DataT& lhs, const vec& rhs)
-----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
-
-Construct a new instance of the SYCL [code]#vec# class template with
-the same template parameters as the [code]#rhs# SYCL [code]#vec#
-with each element of the new SYCL [code]#vec# instance the result of
-an element-wise [code]#OP# bitwise operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
-
-Where [code]#OP# is: [code]#&#, [code]#|#, [code]#^#.
+Where [code]#OP# is: [code]#&&#, [code]#||#.
 
 a@
 [source]
@@ -17522,19 +17517,24 @@ Where [code]#OP# is: [code]#&&#, [code]#||#.
 a@
 [source]
 ----
-vec operatorOP(const DataT& lhs, const vec& rhs)
+vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with
-      the same template parameters as the [code]#rhs# SYCL [code]#vec#
-      with each element of the new SYCL [code]#vec# instance the result of
-      an element-wise [code]#OP# bitshift operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
-      If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type
-      and this SYCL [code]#vec# has a negative value any vacated bits viewed
-      as an unsigned integer must be assigned the value [code]#1#, otherwise
-      any vacated bits viewed as an unsigned integer must be assigned the value
-      [code]#0#.
+   a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.
 
-Where [code]#OP# is: [code]#<<#, [code]#>>#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+
+Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
+
+a@
+[source]
+----
+vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
+----
+   a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# is a NaN.
+
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+
+Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
 a@
 [source]
