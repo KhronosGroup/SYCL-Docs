@@ -17625,11 +17625,6 @@ instance.
 Since the swizzle operation may result in a different number of elements, the
 [code]#+__swizzled_vec__+# instance may represent a different number of elements
 than the original [code]#vec#.
-Both kinds of swizzle member functions must not perform the swizzle operation
-themselves, instead the swizzle operation must be performed by the returned
-instance of [code]#+__swizzled_vec__+# when used within an expression, meaning
-if the returned [code]#+__swizzled_vec__+# is never used in an expression no
-swizzle operation is performed.
 
 Both the [code]#swizzle# member function template and the simple swizzle member
 functions allow swizzle indexes to be repeated.
@@ -17640,40 +17635,500 @@ member function template.
 
 
 [[swizzled-vec-class]]
-==== Swizzled [code]#vec# class
+==== The [code]#+__swizzled_vec__+# class
 
-The [code]#+__swizzled_vec__+# class must define an unspecified temporary which
-provides the entire interface of the SYCL [code]#vec# class template, including
-swizzled member functions, with the additions and alterations described below.
-The member functions of the [code]#+__swizzled_vec__+# class behave as though
-they operate on a [code]#vec# that is the result of the swizzle operation.
+The [code]#+__swizzled_vec__+# class is a view over a [code]#vec# object which
+reflects a swizzle operation.
+The tables below define the interface to this class, but in general it supports
+the same interface as [code]#vec#.
+Member functions and operators that read elements from the
+[code]#+__swizzled_vec__+# return the values of elements from the underlying
+[code]#vec# as if it had been modified by the swizzle operation.
+Member functions and operators that modify elements of the
+[code]#+__swizzled_vec__+# modify corresponding elements of the underlying
+[code]#vec# as translated by the swizzle operation.
+The following example illustrates this behavior:
 
-  * The [code]#+__swizzled_vec__+# class template must be readable as an r-value
-    reference on the RHS of an expression.
-    In this case the swizzle operation is performed on the RHS of the expression
-    and then the result is applied to the LHS of the expression.
-  * The [code]#+__swizzled_vec__+# class template must be assignable as an
-    l-value reference on the LHS of an expression.
-    In this case the RHS of the expression is applied to the original SYCL
-    [code]#vec# which the [code]#+__swizzled_vec__+# represents via the swizzle
-    operation.
-    Note that a [code]#+__swizzled_vec__+# that is used in an l-value expression
-    may not contain any repeated element indexes.
-+
-For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
-  * The [code]#+__swizzled_vec__+# class template must be convertible to an
-    instance of SYCL [code]#vec# with the type [code]#DataT# and number of
-    elements specified by the swizzle member function, if [code]#NumElements >
-    1#, and must be convertible to an instance of type [code]#DataT#, if
-    [code]#NumElements == 1#.
-  * The [code]#+__swizzled_vec__+# class template must be non-copyable,
-    non-moveable, non-user constructible and may not be bound to a l-value or
-    escape the expression it was constructed in.
-    For example [code]#auto x = f4.x()# would not be valid.
-  * The [code]#+__swizzled_vec__+# class template should return
-    [code]#+__swizzled_vec__&+# for each operator inherited from the [code]#vec#
-    class template interface which would return [code]#vec<DataT,
-    NumElements>&#.
+[source,,linenums]
+----
+include::{code_dir}/swizzle-example.cpp[lines=4..-1]
+----
+
+A synopsis of the [code]#+__swizzled_vec__+# class is shown below.
+The member type aliases are described in <<table.types.swizzled-vec>>, the
+constructors are described in <<table.constructors.swizzled-vec>>, the member
+functions are described in <<table.members.swizzled-vec>>, and the hidden friend
+functions are described in <<table.functions.swizzled-vec>>.
+
+The [code]#+__swizzled_vec__+# type is a class template, but the template
+parameters are unspecified.
+The description below describes the member functions and hidden friend functions
+using two exposition-only private members named [code]#DataT# and
+[code]#NumElements#.
+[code]#DataT# represents the element type of the underlying [code]#vec#.
+[code]#NumElements# represents the number of elements in the result of the
+swizzle operation, which could be different from the number of elements in the
+underlying [code]#vec#.
+
+The [code]#+__swizzled_vec__+# class is not user constructible.
+
+// Interface for class: __swizzled_vec__
+[source,,linenums]
+----
+include::{header_dir}/swizzled-vec.h[lines=4..-1]
+----
+
+[[table.types.swizzled-vec]]
+.Member type aliases for the [code]#+__swizzled_vec__+# class template
+[separator="@"]
+|====
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+using element_type = DataT
+using value_type = DataT
+----
+!====
+Each of these type aliases tells the type of an element in the underlying
+[code]#vec#.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+#ifdef __SYCL_DEVICE_ONLY__
+using vector_t = /*unspecified*/
+#endif
+----
+!====
+This type alias is available only in device code.
+The [code]#vector_t# type represents a native vector type of
+[code]#NumElements# elements where each element's type is [code]#DataT#.
+|====
+
+[[table.constructors.swizzled-vec]]
+.Constructors for the [code]#+__swizzled_vec__+# class template
+[separator="@"]
+|====
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+__swizzled_vec__() = delete
+__swizzled_vec__(const __swizzled_vec__&) = delete
+----
+!====
+The default constructor and copy constructor are deleted.
+|====
+
+[[table.members.swizzled-vec]]
+.Member functions for the [code]#+__swizzled_vec__+# class template
+[separator="@"]
+|====
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+#ifdef __SYCL_DEVICE_ONLY__
+operator vector_t() const
+#endif
+
+operator DataT() const
+static constexpr size_t byte_size() noexcept
+static constexpr size_t size() noexcept
+
+size_t get_size() const   // Deprecated
+size_t get_count() const  // Deprecated
+
+template <typename ConvertT,
+          rounding_mode RoundingMode = rounding_mode::automatic>
+vec<ConvertT, NumElements> convert() const
+
+template <typename asT> asT as() const
+
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+----
+!====
+_Constraints:_ These functions have the same constraints as the equivalent
+member functions of the [code]#vec# class.
+
+_Effects:_ The effect of these functions is the same as if they were applied to
+a temporary [code]#vec# object that contains the result of the swizzle
+operation.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+operator vec<DataT, NumElements>() const
+----
+!====
+_Constraints:_ Available only when [code]#NumElements > 1#.
+
+_Returns:_ A new [code]#vec# object that represents the elements of the
+[code]#vec# object that underlies the [code]#+__swizzled_vec__+# view with the
+swizzle operation applied.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+template <int... swizzleIndexes> __swizzled_vec__</*unspecified*/> swizzle() const
+
+__swizzled_vec__</*unspecified*/> XYZW_ACCESS() const
+__swizzled_vec__</*unspecified*/> RGBA_ACCESS() const
+__swizzled_vec__</*unspecified*/> INDEX_ACCESS() const
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__swizzled_vec__</*unspecified*/> XYZW_SWIZZLE() const
+__swizzled_vec__</*unspecified*/> RGBA_SWIZZLE() const
+#endif
+
+__swizzled_vec__</*unspecified*/> lo() const
+__swizzled_vec__</*unspecified*/> hi() const
+__swizzled_vec__</*unspecified*/> odd() const
+__swizzled_vec__</*unspecified*/> even() const
+----
+!====
+_Constraints:_ These functions have the same constraints as the equivalent
+member functions of the [code]#vec# class.
+
+_Returns:_ A new [code]#+__swizzled_vec__+# view of the underlying [code]#vec#
+object, where the view represents the combination of two swizzle operations.
+The first is the swizzle operation represented by the "this" view.
+The second is the swizzle operation defined by the member function.
+The indices used by the second swizzle are the indices produced by the first
+swizzle.
+For example, if the second swizzle references the first element, this means the
+element of the underlying [code]#vec# that corresponds to the first element
+produced by the first swizzle.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
+----
+!====
+_Effects:_ Loads values from memory into elements of the underlying [code]#vec#
+object.
+A total of [code]#NumElements# values are loaded from memory, starting at the
+the address [code]#ptr + offset*sizeof(DataT)#.
+The first value from memory is written to the element in [code]#vec# that
+corresponds to the first element of the swizzle operation.
+The second value from memory is written to the element in [code]#vec# that
+corresponds to the second element of the swizzle operation, etc.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+DataT& operator[](int index)
+const DataT& operator[](int index) const
+----
+!====
+_Returns:_ A reference to the element of the underlying [code]#vec# object that
+corresponds to the position [code]#index# of the swizzle operation.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+template</*unspecified*/>
+__swizzled_vec__& operator=(const __swizzled_vec__</*unspecified*/>& rhs)
+----
+!====
+_Constraints:_ Available only when the element data type of [code]#rhs# is the
+same as [code]#DataT# and when the number of elements in the [code]#rhs# view
+is equal to [code]#NumElements#.
+
+_Effects:_ Assigns elements from the [code]#rhs# [code]#+__swizzled_vec__+#
+view to elements of "this" [code]#+__swizzled_vec__+# view.
+The value from the [code]#rhs# corresponding to the first element of the
+[code]#rhs# swizzle operation is assigned to the element of the underlying
+[code]#vec# object that corresponds to the first element of the "this" swizzle
+operation, etc.
+
+The order in which the elements are assigned is unspecified.
+Therefore, if the "this" view has any repeated elements in the swizzle, those
+elements may receive unspecified values.
+
+_Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+__swizzled_vec__& operator=(const DataT& rhs)
+----
+!====
+_Effects:_ Assigns the value [code]#rhs# to those elements of the underlying
+[code]#vec# object that have corresponding elements in the
+[code]#+__swizzled_vec__+# view.
+Elements in the underlying [code]#vec# object that do not have elements in the
+[code]#+__swizzled_vec__+# view are not assigned.
+
+_Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+__swizzled_vec__& operator=(const vec<DataT, NumElements>& rhs)
+----
+!====
+_Effects:_ Assigns elements from [code]#rhs# to elements of the [code]#vec#
+object that underlies this [code]#+__swizzled_vec__+# view.
+The first element of [code]#rhs# is assigned to the element of the underlying
+[code]#vec# object that corresponds to the first element of the swizzle
+operation, etc.
+
+The order in which the elements are assigned is unspecified.
+Therefore, if the [code]#+__swizzled_vec__+# view has any repeated elements in
+the swizzle, those elements may receive unspecified values.
+
+_Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
+|====
+
+[[table.functions.swizzled-vec]]
+.Hidden friend functions of the [code]#+__swizzled_vec__+# class template
+[separator="@"]
+|====
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+template</*unspecified*/>                                                                 (1)
+friend vec<DataT, NumElements> operatorOP(const __swizzled_vec__& lhs,
+                                          const __swizzled_vec__</*unspecified*/>& rhs)
+
+friend vec<DataT, NumElements> operatorOP(const vec<DataT, NumElements>& lhs,             (2)
+                                          const __swizzled_vec__& rhs);
+
+friend vec<DataT, NumElements> operatorOP(const __swizzled_vec__& lhs,                    (3)
+                                          const vec<DataT, NumElements>& rhs)
+
+friend vec<DataT, NumElements> operatorOP(const __swizzled_vec__& lhs, const DataT& rhs)  (4)
+friend vec<DataT, NumElements> operatorOP(const DataT& lhs, const __swizzled_vec__& rhs)  (5)
+----
+!====
+Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#,
+[code]#%#, [code]#&#, [code]#|#, [code]#^#, [code]#<<#, [code]#>>#.
+
+_Constraints:_ If [code]#OP# is one of the following: [code]#%#, [code]#&#,
+[code]#|#, [code]#^#, [code]#<<#, [code]#>>#; available only when: [code]#DataT
+!= float && DataT != double && DataT != half#.
+
+In addition, overload (1) is available only when the element data type of
+[code]#rhs# is the same as [code]#DataT# and when the number of elements in the
+[code]#rhs# view is equal to [code]#NumElements#.
+
+_Effects:_ These functions behave as though the swizzle operation represented
+by each [code]#+__swizzled_vec__+# parameter was first evaluated into a
+temporary [code]#vec# object, and then [code]#operatorOP# was called with the
+temporary [code]#vec# object.
+
+_Returns:_ A new [code]#vec# object that represents the result of the
+operation.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+template</*unspecified*/>                                                          (1)
+friend __swizzled_vec__& operatorOP(__swizzled_vec__& lhs,
+                                    const __swizzled_vec__</*unspecified*/>& rhs)
+
+friend __swizzled_vec__& operatorOP(__swizzled_vec__& lhs,                         (2)
+                                    const vec<DataT, NumElements>& rhs)
+
+friend __swizzled_vec__& operatorOP(__swizzled_vec__& lhs, const DataT& rhs)       (3)
+
+friend vec<DataT, NumElements>& operatorOP(vec<DataT, NumElements>& lhs,           (4)
+                                           const __swizzled_vec__& rhs)
+----
+!====
+Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#,
+[code]#%=#, [code]#&=#, [code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#.
+
+_Constraints:_ If [code]#OP# is one of the following: [code]#%=#, [code]#&=#,
+[code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when:
+[code]#DataT != float && DataT != double && DataT != half#.
+
+In addition, overload (1) is available only when the element data type of
+[code]#rhs# is the same as [code]#DataT# and when the number of elements in the
+[code]#rhs# view is equal to [code]#NumElements#.
+
+_Effects:_ These functions operate as follow.
+
+A left hand side value is computed from [code]#lhs#.
+If [code]#lhs# is a [code]#+__swizzled_vec__+# view, the swizzle operation is
+computed using the underlying [code]#vec# object and the results are used as
+the left hand side value.
+Otherwise, [code]#lhs# is a [code]#vec# object, and that object is used as the
+left hand side value.
+
+A right hand side value is computed from [code]#rhs# in the same way.
+
+The non-assignment part of the operation is performed on these two values,
+producing a result.
+This result is assigned to [code]#lhs# as follows.
+
+If [code]#lhs# is a [code]#vec# object, each element of the result is assigned
+to the corresponding element of [code]#lhs#.
+If [code]#lhs# is a [code]#+__swizzled_vec__+# view, the first element of the
+result is assigned to the element of the underlying [code]#vec# object that
+corresponds to the first element of the swizzle operation, etc.
+
+_Returns:_ A reference to the [code]#lhs#.
+For overloads (1) - (3), this is the [code]#+__swizzled_vec__+# view.
+For overload (4), this is the [code]#vec# object.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+friend __swizzled_vec__& operatorOP(__swizzled_vec__& sv)
+----
+!====
+Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
+
+_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+
+_Effects:_ Perform an in-place element-wise [code]#OP# prefix arithmetic
+operation on those elements of the [code]#vec# object that have corresponding
+elements in the [code]#sv# view.
+Elements in the underlying [code]#vec# object that do not have elements in the
+[code]#sv# view are not modified.
+
+_Returns:_ A reference to the [code]#sv# view.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+friend vec<DataT, NumElements> operatorOP(__swizzled_vec__& sv, int)
+----
+!====
+Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
+
+_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+
+_Effects:_ Perform an in-place element-wise [code]#OP# postfix arithmetic
+operation on those elements of the [code]#vec# object that have corresponding
+elements in the [code]#sv# view.
+Elements in the underlying [code]#vec# object that do not have elements in the
+[code]#sv# view are not modified.
+
+_Returns:_ A new [code]#vec# object that represents the elements of [code]#sv#
+after the swizzle operation is applied and before the postfix arithmetic
+operation is applied.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+friend vec<DataT, NumElements> operatorOP(const __swizzled_vec__& sv)
+----
+!====
+Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
+
+_Effects:_ These functions behave as though the swizzle operation represented
+by the [code]#+__swizzled_vec__+# parameter was first evaluated into a
+temporary [code]#vec# object, and then [code]#operatorOP# was applied to the
+temporary [code]#vec# object.
+
+_Returns:_ A [code]#vec# object that represents the result of the operation.
+
+a@
+[frame=all,grid=none]
+!====
+a!
+[source]
+----
+template</*unspecified*/>                                                               (1)
+friend vec<RET, NumElements> operatorOP(const __swizzled_vec__& lhs,
+                                        const __swizzled_vec__</*unspecified*/>& rhs)
+
+friend vec<RET, NumElements> operatorOP(const vec<DataT, NumElements>& lhs,             (2)
+                                        const __swizzled_vec__& rhs)
+
+friend vec<RET, NumElements> operatorOP(const __swizzled_vec__& lhs,                    (3)
+                                        const vec<DataT, NumElements>& rhs)
+
+friend vec<RET, NumElements> operatorOP(const __swizzled_vec__& lhs, const DataT& rhs)  (4)
+friend vec<RET, NumElements> operatorOP(const DataT& lhs, const __swizzled_vec__& rhs)  (5)
+----
+!====
+Where [code]#OP# is: [code]#&&#, [code]#||#, [code]#==#, [code]#!=#, [code]#<#,
+[code]#>#, [code]#+<=+#, [code]#>=#.
+
+_Constraints (1):_ Available only when the element data type of [code]#rhs# is
+the same as [code]#DataT# and when the number of elements in the [code]#rhs#
+view is equal to [code]#NumElements#.
+
+_Effects:_ These functions behave as though the swizzle operation represented
+by each [code]#+__swizzled_vec__+# parameter was first evaluated into a
+temporary [code]#vec# object, and then [code]#operatorOP# was called with the
+temporary [code]#vec# object.
+
+_Returns:_ A [code]#vec# object that represents the result of the operation.
+
+a@
+[frame=all,grid=none,separator="#"]
+!====
+a#
+[source]
+----
+friend vec<DataT, NumElements> operator~(const __swizzled_vec__& sv)  (1)
+friend vec<RET, NumElements> operator!(const __swizzled_vec__& sv)    (2)
+----
+!====
+_Constraints (1):_ Available only when: [code]#DataT != float && DataT !=
+double && DataT != half#.
+
+_Effects:_ These functions behave as though the swizzle operation represented
+by the [code]#+__swizzled_vec__+# parameter was first evaluated into a
+temporary [code]#vec# object, and then the bitwise or logical NOT operation was
+applied to the temporary [code]#vec# object.
+
+_Returns:_ A [code]#vec# object that represents the result of the operation.
+|====
 
 
 ==== Rounding modes
