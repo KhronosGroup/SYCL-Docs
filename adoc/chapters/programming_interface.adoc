@@ -14622,6 +14622,15 @@ interoperability member functions provided by the [code]#interop_handle# class.
 
 Local <<accessor,accessors>> cannot be used within a <<host-task>>.
 
+[NOTE]
+====
+If a C++ lambda is passed to a <<host-task>>, the lambda may capture by
+reference or by value.
+Since the <<host-task>> callable executes asynchronously, care must be taken to
+ensure that lifetimes of objects captured by reference by a <<host-task>> lambda
+last at least until the <<host-task>> completes.
+====
+
 // TODO: access mode/target resolution rules
 
 [source,,linenums]
