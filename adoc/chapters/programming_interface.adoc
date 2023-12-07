@@ -19887,6 +19887,35 @@ SYCL provides a number of functions that expose functionality tied to groups of
 work-items (such as <<group-barrier,group barriers>> and collective operations).
 These group functions act as _synchronization points_ and must be encountered in
 converged <<control-flow>> by all work-items in the group.
+
+The behavior of every group function is as follows:
+
+  * Each work-item in the group arrives at the synchronization point associated
+    with the group function, then blocks until any operation(s) specified by the
+    group function have completed.
+
+  * Once all work-items in the group have arrived, an unspecified subset of
+    those work-items cooperate to execute any operation(s) specified by the
+    group function.
+
+  * When the set of cooperating work-items have completed execution of all
+    operation(s) specified by the group function, all work-items blocked on the
+    synchronization point associated with the group function are unblocked.
+
+The completion of the operation(s) specified by the group function happens
+before the returns from all calls that were unblocked.
+
+[NOTE]
+====
+The behavior of group functions is analogous to the behavior of the C++20
+[code]#std::barrier::arrive_and_wait# function, for an implementation-defined
+barrier object with an expected count equal to the number of work-items in the
+group.
+Any operation(s) performed by the group function behave as if they were defined
+in the barrier's completion function and were invoked as part of the barrier's
+phase completion step.
+====
+
 If one work-item in a group calls a group function, then all work-items in that
 group must call exactly the same function under the same set of conditions ---
 calling the same function under different conditions (e.g. in different
@@ -19946,6 +19975,14 @@ include::{header_dir}/groups/broadcast.h[lines=4..-1]
     trivially copyable type.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
+
 _Returns:_ The value of [code]#x# from the work-item with the smallest linear id
 within group [code]#g#.
 --
@@ -19957,6 +19994,14 @@ within group [code]#g#.
 --
 _Preconditions:_ [code]#local_linear_id# must be the same for all work-items in
 the group and must be in the range [code]#[0, get_local_linear_range())#.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified linear
 id within group [code]#g#.
@@ -19971,6 +20016,14 @@ _Preconditions:_ [code]#local_id# must be the same for all work-items in the
 group, and its dimensionality must match the dimensionality of the group.
 The value of [code]#local_id# in each dimension must be greater than or equal to
 0 and less than the value of [code]#get_local_range()# in the same dimension.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified id
 within group [code]#g#.
@@ -19990,19 +20043,15 @@ include::{header_dir}/groups/barrier.h[lines=4..-1]
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Effects:_ The current work-item will wait at the barrier until all work-items
-in group [code]#g# have reached the barrier.
-In addition, the barrier performs <<mem-fence>> operations ensuring that memory
-accesses issued before the barrier are not re-ordered with those issued after
-the barrier: all work-items in group [code]#g# execute a release fence prior to
-arriving at the barrier, all work-items in group [code]#g# execute an acquire
-fence afterwards, and there is an implicit synchronization of these fences as if
-provided by an explicit atomic operation on an atomic object.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point.
 
-By default, the scope of these fences is set to the narrowest scope including
-all work-items in group [code]#g# (as reported by [code]#Group::fence_scope#).
-This scope may be optionally overridden with a wider scope, specified by the
-[code]#fence_scope# argument.
+_Synchronization:_ The call to [code]#group_barrier# in each work-item happens
+before any work-item blocking on the same synchronization point is unblocked.
+Synchronization operations used in an implementation of [code]#group_barrier#
+must respect the memory scope specified by the [code]#scope# parameter, which
+defaults to the narrowest scope including all work-items in group [code]#g# (as
+reported by [code]#Group::fence_scope#).
 --
 
 [[sec:algorithms]]
@@ -20071,6 +20120,14 @@ _Preconditions:_ [code]#first# and [code]#last# must be the same for all
 work-items in group [code]#g#, and [code]#pred# must be an immutable callable
 with the same type and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# returns true when applied to the result of
 dereferencing any iterator in the range [code]#[first, last)#.
 --
@@ -20082,6 +20139,14 @@ dereferencing any iterator in the range [code]#[first, last)#.
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
 and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred(x)# returns true for any work-item in group
 [code]#g#.
 --
@@ -20090,6 +20155,14 @@ _Returns:_ true if [code]#pred(x)# returns true for any work-item in group
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# is true for any work-item in group [code]#g#.
 --
 
@@ -20107,6 +20180,14 @@ _Preconditions:_ [code]#first# and [code]#last# must be the same for all
 work-items in group [code]#g#, and [code]#pred# must be an immutable callable
 with the same type and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# returns true when applied to the result of
 dereferencing all iterators in the range [code]#[first, last)#.
 --
@@ -20118,6 +20199,14 @@ dereferencing all iterators in the range [code]#[first, last)#.
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
 and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred(x)# returns true for all work-items in group
 [code]#g#.
 --
@@ -20126,6 +20215,14 @@ _Returns:_ true if [code]#pred(x)# returns true for all work-items in group
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# is true for all work-items in group [code]#g#.
 --
 
@@ -20143,6 +20240,14 @@ _Preconditions:_ [code]#first# and [code]#last# must be the same for all
 work-items in group [code]#g#, and [code]#pred# must be an immutable callable
 with the same type and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# returns false when applied to the result of
 dereferencing all iterators in the range [code]#[first, last)#.
 --
@@ -20154,6 +20259,14 @@ dereferencing all iterators in the range [code]#[first, last)#.
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
 and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred(x)# returns false for all work-items in group
 [code]#g#.
 --
@@ -20162,6 +20275,14 @@ _Returns:_ true if [code]#pred(x)# returns false for all work-items in group
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# is false for all work-items in group [code]#g#.
 --
 
@@ -20187,6 +20308,14 @@ include::{header_dir}/algorithms/shift.h[lines=4..-1]
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the group.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 ([code]#id#) is [code]#delta# larger than that of the calling work-item.
 [code]#pass:[id + delta]# may be greater than or equal to the group's linear
@@ -20198,6 +20327,14 @@ size, but the value returned in this case is unspecified.
 +
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the group.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 ([code]#id#) is [code]#delta# smaller than that of the calling work-item.
@@ -20225,6 +20362,14 @@ include::{header_dir}/algorithms/permute.h[lines=4..-1]
 --
 _Preconditions:_ [code]#mask# must be the same for all work-items in the group.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ the value of [code]#x# from the work-item whose group local id is
 equal to the bitwise exclusive OR of the calling work-item's group local id and
 [code]#mask#.
@@ -20249,6 +20394,14 @@ include::{header_dir}/algorithms/select.h[lines=4..-1]
     sub_group># is true and [code]#T# is a trivially copyable type.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ the value of [code]#x# from the work-item with the group local id
 specified by [code]#remote_local_id#.
 The value of [code]#remote_local_id# may be outside of the group, but the value
@@ -20293,6 +20446,14 @@ _Preconditions:_ [code]#first#, [code]#last# and the type of [code]#binary_op#
 must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The result of combining the values resulting from dereferencing all
 iterators in the range [code]#[first, last)# using the operator
 [code]#binary_op#, where the values are combined according to the generalized
@@ -20312,6 +20473,14 @@ _Preconditions:_ [code]#first#, [code]#last#, [code]#init# and the type of
 [code]#binary_op# must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The result of combining the values resulting from dereferencing all
 iterators in the range [code]#[first, last)# and the initial value [code]#init#
 using the operator [code]#binary_op#, where the values are combined according to
@@ -20328,6 +20497,14 @@ _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The result of combining all the values of [code]#x# specified by each
 work-item in group [code]#g# using the operator [code]#binary_op#, where the
 values are combined according to the generalized sum defined in standard {cpp}.
@@ -20343,6 +20520,14 @@ _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The result of combining all the values of [code]#x# specified by each
 work-item in group [code]#g# and the initial value [code]#init# using the
@@ -20400,12 +20585,20 @@ _Preconditions:_ [code]#first#, [code]#last#, [code]#result# and the type of
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the exclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and the identity value of [code]#binary_op# (as identified
-by [code]#sycl::known_identity#), using the operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the exclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)# and the identity value of [code]#binary_op# (as identified by
+[code]#sycl::known_identity#), using the operator [code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20429,12 +20622,20 @@ the type of [code]#binary_op# must be the same for all work-items in group
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the exclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and an initial value specified by [code]#init#, using the
-operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the exclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)# and an initial value specified by [code]#init#, using the operator
+[code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20449,6 +20650,14 @@ _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of the
 first _i_ values in group [code]#g# and the identity value of [code]#binary_op#
@@ -20470,6 +20679,14 @@ _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of the
 first _i_ values in group [code]#g# and an initial value specified by
@@ -20503,11 +20720,19 @@ _Preconditions:_ [code]#first#, [code]#last#, [code]#result# and the type of
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the inclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)#, using the operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the inclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)#, using the operator [code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20531,12 +20756,20 @@ the type of [code]#binary_op# must be the same for all work-items in group
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the inclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and an initial value specified by [code]#init#, using the
-operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the inclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)# and an initial value specified by [code]#init#, using the operator
+[code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20551,6 +20784,14 @@ _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of the
 first _i_ values in group [code]#g#, using the operator [code]#binary_op#.
@@ -20570,6 +20811,14 @@ _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of the
 first _i_ values in group [code]#g# and an initial value specified by
