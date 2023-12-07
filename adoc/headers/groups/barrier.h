@@ -3,4 +3,4 @@
 
 template <typename Group>
 void group_barrier(Group g,
-                   memory_scope fence_scope = Group::fence_scope); // (1)
+                   memory_scope scope = Group::fence_scope); // (1)
