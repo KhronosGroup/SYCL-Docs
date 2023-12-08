@@ -19928,6 +19928,19 @@ Any such restrictions on the arguments passed to a function are defined within
 the descriptions of those functions.
 Violating these restrictions results in undefined behavior.
 
+[NOTE]
+====
+One important restriction is that all inputs to group functions must be
+initialized on all work-items, even if it is known that some values will be
+discarded.
+For example, all work-items must initialize the value they pass to
+[code]#group_broadcast#, even though all but one value will be discarded.
+
+This is necessary for compatibility with standard C++ rules and ensures that
+compilers cannot perform optimizations that break the collective semantics of
+group functions.
+====
+
 All group functions are supported for the fundamental scalar types supported by
 SYCL (see <<table.types.fundamental>>) and instances of the SYCL [code]#vec# and
 [code]#marray# classes.
