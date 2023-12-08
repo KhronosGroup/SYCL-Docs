@@ -11,4 +11,6 @@ int main() {
   int i = v.swizzle<2,1>()[1];           // i has the value 6
   v.swizzle<2>() = 0;                    // v is now {5,6,0,8}
   v.swizzle<1>()++;                      // v is now {5,7,0,8}
+  v.swizzle<2,3>();                      // Has no effect because result of swizzle is
+                                         // neither read nor modified
 }
