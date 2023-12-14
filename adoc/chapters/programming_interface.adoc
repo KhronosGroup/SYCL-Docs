@@ -6114,14 +6114,15 @@ if set final data is [code]#nullptr)#.
 [[subsec:mutex]]
 === Synchronization primitives
 
-When the user wants to use the [code]#buffer# simultaneously in the
-<<sycl-runtime>> and their own code (e.g. a multi-threaded mechanism) and wants
-to use manual synchronization without using a [code]#host_accessor#, a
-[code]#std::mutex# can be passed to the [code]#buffer# constructor via the right
+To prevent race conditions between accesses to the host memory owned by a
+[code]#buffer# in the <<sycl-runtime>> (e.g., by accessors) and in host code, it
+is necessary to use manual synchronization through a [code]#host_accessor#, or
+by passing a [code]#std::mutex# to the [code]#buffer# constructor through a
 [code]#property#.
 
-The runtime promises to lock the mutex whenever the data is in use and unlock it
-when it no longer needs it.
+When a [code]#buffer# was constructed with a [code]#std::mutex# property, the
+SYCL runtime is required to lock the mutex whenever the data is in use by the
+runtime, and unlock the mutex when the data is not in use by the SYCL runtime.
 
 [source,,linenums]
 ----
@@ -6131,17 +6132,19 @@ when it no longer needs it.
   sycl::buffer b { shD, { sycl::property::buffer::use_mutex { m } } };
   {
     std::lock_guard lck { m };
+
     // User accesses the data
     do_something(shD);
-    /* m is unlocked when lck goes out of scope, by normal end of this
-       block but also if an exception is thrown for example */
+
+    /* m is unlocked when lck goes out of scope, either at normal ending of this
+       block or if an exception is thrown */
   }
 }
 ----
 
-When the runtime releases the mutex the user is guaranteed that the data was
-copied back on the shared pointer --- unless the final data destination has been
-changed using the member function [code]#set_final_data()#.
+When the runtime releases the mutex, the user is guaranteed that the data has
+been copied back through the shared pointer --- unless the final data
+destination has been changed using the member function [code]#set_final_data()#.
 
 
 [[subsec:accessors]]
