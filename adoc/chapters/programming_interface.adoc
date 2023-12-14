@@ -22692,9 +22692,9 @@ a@
 a!
 [source]
 ----
-float nan(unsigned int nancode)         (1)
-double nan(unsigned long nancode)       (2)
-half nan(unsigned short nancode)        (3)
+float nan(uint32_t nancode)             (1)
+double nan(uint64_t nancode)            (2)
+half nan(uint16_t nancode)              (3)
 
 template<typename NonScalar>            (4)
 /*return-type*/ nan(NonScalar nancode)
@@ -22708,12 +22708,11 @@ in the significand of the resulting NaN.
 
 *Overload (4):*
 
-_Constraints:_ Available only if one of the following conditions is met:
+_Constraints:_ Available only if all of the following conditions are met:
 
-* [code]#NonScalar# is [code]#marray# and the element type is
-  [code]#unsigned int#, [code]#unsigned long#, or [code]#unsigned short#; or
-* [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type and
-  the element type is [code]#uint32_t#, [code]#uint64_t#, or [code]#uint16_t#.
+* [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
+  [code]#+__swizzled_vec__+# type; and
+* The element type is [code]#uint32_t#, [code]#uint64_t#, or [code]#uint16_t#.
 
 _Returns:_ A quiet NaN for each element of [code]#nancode#.  Each
 [code]#nancode[i]# may be placed in the significand of the resulting NaN.
@@ -22722,9 +22721,9 @@ The return type depends on [code]#NonScalar#:
 [options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
-![code]#marray<unsigned int, N># ![code]#marray<float, N>#
-![code]#marray<unsigned long, N># ![code]#marray<double, N>#
-![code]#marray<unsigned short, N># ![code]#marray<half, N>#
+![code]#marray<uint32_t, N># ![code]#marray<float, N>#
+![code]#marray<uint64_t, N># ![code]#marray<double, N>#
+![code]#marray<uint16_t, N># ![code]#marray<half, N>#
 
 ![code]#vec<uint32_t, N># +
  [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
