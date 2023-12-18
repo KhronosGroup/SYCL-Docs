@@ -17860,9 +17860,13 @@ template</*unspecified*/>
 __swizzled_vec__& operator=(const __swizzled_vec__</*unspecified*/>& rhs)
 ----
 !====
-_Constraints:_ Available only when the element data type of [code]#rhs# is the
-same as [code]#DataT# and when the number of elements in the [code]#rhs# view
-is equal to [code]#NumElements#.
+_Constraints:_ Available only when all of the following conditions are met:
+
+* The element data type of [code]#rhs# is the same as [code]#DataT#;
+* The number of elements in the [code]#rhs# view is equal to
+  [code]#NumElements#; and
+* The "this" [code]#+__swizzled_vec__+# view does not contain any repeated
+  elements.
 
 _Effects:_ Assigns elements from the [code]#rhs# [code]#+__swizzled_vec__+#
 view to elements of "this" [code]#+__swizzled_vec__+# view.
@@ -17870,10 +17874,6 @@ The value from the [code]#rhs# corresponding to the first element of the
 [code]#rhs# swizzle operation is assigned to the element of the underlying
 [code]#vec# object that corresponds to the first element of the "this" swizzle
 operation, etc.
-
-The order in which the elements are assigned is unspecified.
-Therefore, if the "this" view has any repeated elements in the swizzle, those
-elements may receive unspecified values.
 
 _Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
 
@@ -17886,6 +17886,9 @@ a!
 __swizzled_vec__& operator=(const DataT& rhs)
 ----
 !====
+_Constraints:_ Available only when the "this" [code]#+__swizzled_vec__+# view
+does not contain any repeated elements.
+
 _Effects:_ Assigns the value [code]#rhs# to those elements of the underlying
 [code]#vec# object that have corresponding elements in the
 [code]#+__swizzled_vec__+# view.
@@ -17903,15 +17906,14 @@ a!
 __swizzled_vec__& operator=(const vec<DataT, NumElements>& rhs)
 ----
 !====
+_Constraints:_ Available only when the "this" [code]#+__swizzled_vec__+# view
+does not contain any repeated elements.
+
 _Effects:_ Assigns elements from [code]#rhs# to elements of the [code]#vec#
 object that underlies this [code]#+__swizzled_vec__+# view.
 The first element of [code]#rhs# is assigned to the element of the underlying
 [code]#vec# object that corresponds to the first element of the swizzle
 operation, etc.
-
-The order in which the elements are assigned is unspecified.
-Therefore, if the [code]#+__swizzled_vec__+# view has any repeated elements in
-the swizzle, those elements may receive unspecified values.
 
 _Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
 |====
