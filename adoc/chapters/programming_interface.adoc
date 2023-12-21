@@ -23271,8 +23271,11 @@ corresponding [code]#vec#.
 that are available in the [code]#sycl::native# namespace in both host and device
 code.
 
-The range of valid input values and the maximum error for these functions is
-implementation defined.
+The precision requirements and the set of legal input values for these functions
+are defined in the backend specification.
+The intent is that these functions might make use of native device functionality
+which has better performance than their counterparts in <<sec:math-functions>>,
+but they may sacrifice accuracy or limit the set of legal input values.
 
 [[table.native.math.functions]]
 .Native precision math functions
@@ -23734,8 +23737,9 @@ are available in the [code]#sycl::half_precision# namespace in both host and
 device code.
 
 The precision requirements for these functions are defined in the backend
-specification, but the intent is that these functions have a lower precision
-than their counterparts in <<sec:math-functions>>.
+specification.
+The intent is that these functions have higher performance than their
+counterparts in <<sec:math-functions>>, but they have lower accuracy.
 
 [[table.half.math.functions]]
 .Half precision math functions
