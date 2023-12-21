@@ -17818,7 +17818,8 @@ member functions of the [code]#vec# class.
 
 _Returns:_ A new [code]#+__swizzled_vec__+# view of the underlying [code]#vec#
 object, where the view represents the combination of two swizzle operations.
-The first is the swizzle operation represented by the "this" view.
+The first is the swizzle operation represented by the [code]#+__swizzled_vec__+#
+view.
 The second is the swizzle operation defined by the member function.
 The indices used by the second swizzle are the indices produced by the first
 swizzle.
@@ -17873,17 +17874,16 @@ _Constraints:_ Available only when all of the following conditions are met:
 * The element data type of [code]#rhs# is the same as [code]#DataT#;
 * The number of elements in the [code]#rhs# view is equal to
   [code]#NumElements#; and
-* The "this" [code]#+__swizzled_vec__+# view does not contain any repeated
-  elements.
+* The [code]#+__swizzled_vec__+# view (i.e. the left hand side of the
+  assignment) does not contain any repeated elements.
 
 _Effects:_ Assigns elements from the [code]#rhs# [code]#+__swizzled_vec__+#
-view to elements of "this" [code]#+__swizzled_vec__+# view.
-The value from the [code]#rhs# corresponding to the first element of the
-[code]#rhs# swizzle operation is assigned to the element of the underlying
-[code]#vec# object that corresponds to the first element of the "this" swizzle
-operation, etc.
+view to elements of the left hand side [code]#+__swizzled_vec__+# view.
+The value corresponding to the first element of the [code]#rhs# swizzle
+operation is assigned to the element of the underlying [code]#vec# object that
+corresponds to the first element of the left hand side swizzle operation, etc.
 
-_Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
+_Returns:_ A reference to the left hand side [code]#+__swizzled_vec__+# view.
 
 a@
 [frame=all,grid=none]
@@ -17894,8 +17894,8 @@ a!
 __swizzled_vec__& operator=(const DataT& rhs)
 ----
 !====
-_Constraints:_ Available only when the "this" [code]#+__swizzled_vec__+# view
-does not contain any repeated elements.
+_Constraints:_ Available only when the [code]#+__swizzled_vec__+# view does not
+contain any repeated elements.
 
 _Effects:_ Assigns the value [code]#rhs# to those elements of the underlying
 [code]#vec# object that have corresponding elements in the
@@ -17903,7 +17903,7 @@ _Effects:_ Assigns the value [code]#rhs# to those elements of the underlying
 Elements in the underlying [code]#vec# object that do not have elements in the
 [code]#+__swizzled_vec__+# view are not assigned.
 
-_Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
+_Returns:_ A reference to the [code]#+__swizzled_vec__+# view.
 
 a@
 [frame=all,grid=none]
@@ -17914,8 +17914,8 @@ a!
 __swizzled_vec__& operator=(const vec<DataT, NumElements>& rhs)
 ----
 !====
-_Constraints:_ Available only when the "this" [code]#+__swizzled_vec__+# view
-does not contain any repeated elements.
+_Constraints:_ Available only when the [code]#+__swizzled_vec__+# view does not
+contain any repeated elements.
 
 _Effects:_ Assigns elements from [code]#rhs# to elements of the [code]#vec#
 object that underlies this [code]#+__swizzled_vec__+# view.
@@ -17923,7 +17923,7 @@ The first element of [code]#rhs# is assigned to the element of the underlying
 [code]#vec# object that corresponds to the first element of the swizzle
 operation, etc.
 
-_Returns:_ A reference to the "this" [code]#+__swizzled_vec__+# view.
+_Returns:_ A reference to the [code]#+__swizzled_vec__+# view.
 |====
 
 [[table.functions.swizzled-vec]]
