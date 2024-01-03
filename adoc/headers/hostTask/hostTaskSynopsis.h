@@ -41,12 +41,10 @@ class interop_handle {
 class handler {
   ...
 
-      public
-      :
+      public:
 
       template <typename T>
-      void
-      host_task(T&& hostTaskCallable);
+      void host_task(T&& hostTaskCallable);
 
   ...
 };
