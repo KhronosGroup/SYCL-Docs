@@ -39,7 +39,7 @@ class interop_handle {
 };
 
 class handler {
-  ...
+  // ...
 
       public:
 
