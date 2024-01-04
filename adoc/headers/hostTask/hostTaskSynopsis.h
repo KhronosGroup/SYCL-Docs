@@ -46,7 +46,7 @@ class handler {
       template <typename T>
       void host_task(T&& hostTaskCallable);
 
-  ...
+  // ...
 };
 
 } // namespace sycl
