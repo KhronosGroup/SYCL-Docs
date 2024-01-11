@@ -17227,7 +17227,7 @@ a@
 template <access::address_space AddressSpace, access::decorated IsDecorated>
 void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
 ----
-   a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#, into the components of this SYCL [code]#vec#.
+   a@ Loads [code]#NumElements# elements into the components of this SYCL [code]#vec#. These elements are loaded from consecutive addresses, where the starting address is computed by adding [code]#offset * NumElements * sizeof(DataT)# bytes to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
 a@
 [source]
@@ -17235,7 +17235,7 @@ a@
 template <access::address_space AddressSpace, access::decorated IsDecorated>
 void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 ----
-   a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#.
+   a@ Stores [code]#NumElements# components of this SYCL [code]#vec# into consecutive addresses, with the starting address determined by adding [code]#offset * NumElements * sizeof(DataT)# to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
 a@
 [source]
