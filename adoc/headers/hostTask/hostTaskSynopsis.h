@@ -39,16 +39,13 @@ class interop_handle {
 };
 
 class handler {
-  ...
+ public:
+  // ...
 
-      public
-      :
+  template <typename T>
+  void host_task(T&& hostTaskCallable);
 
-      template <typename T>
-      void
-      host_task(T&& hostTaskCallable);
-
-  ...
+  // ...
 };
 
 } // namespace sycl
