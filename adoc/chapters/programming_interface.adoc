@@ -20839,17 +20839,11 @@ determined by their linear id.
 --
 
 
+[[sec:math-functions]]
 === Math functions
 
-In SYCL the OpenCL math functions are available in the namespace [code]#sycl# on
-host and device with the same precision guarantees as defined in the OpenCL 1.2
-specification document <<opencl12, ch. 7>> for host and device.
-For a SYCL platform the numerical requirements for host need to match the
-numerical requirements of the OpenCL math built-in functions.
-
-The built-in functions available for SYCL host and device, with the same
-precision requirements for both host and device, are described in
-<<table.math.functions>>.
+<<table.math.functions>> describes the math functions that are available in the
+[code]#sycl# namespace in both host and device code.
 
 The function descriptions in this section use the term _writeable address space_
 to represent the following address spaces:
@@ -23528,13 +23522,15 @@ corresponding [code]#vec#.
 
 === Native precision math functions
 
-In SYCL the implementation-defined precision math functions are defined in the
-namespace [code]#sycl::native#.
-The functions that are available within this namespace are specified in
-<<table.native.math.functions>>.
+<<table.native.math.functions>> describes the native precision math functions
+that are available in the [code]#sycl::native# namespace in both host and device
+code.
 
-The range of valid input values and the maximum error for these functions is
-implementation defined.
+The precision requirements and the set of legal input values for these functions
+are defined in the backend specification.
+The intent is that these functions might make use of native device functionality
+which has better performance than their counterparts in <<sec:math-functions>>,
+but they may sacrifice accuracy or limit the set of legal input values.
 
 [[table.native.math.functions]]
 .Native precision math functions
@@ -23991,12 +23987,14 @@ corresponding [code]#vec#.
 
 === Half precision math functions
 
-In SYCL the half precision math functions are defined in the namespace
-[code]#sycl::half_precision#.
-The functions that are available within this namespace are specified in
-<<table.half.math.functions>>.
-These functions are implemented with a minimum of 10-bits of accuracy i.e. the
-maximum error is less than or equal to 8192 ulp.
+<<table.half.math.functions>> describes the half precision math functions that
+are available in the [code]#sycl::half_precision# namespace in both host and
+device code.
+
+The precision requirements for these functions are defined in the backend
+specification.
+The intent is that these functions have higher performance than their
+counterparts in <<sec:math-functions>>, but they have lower accuracy.
 
 [[table.half.math.functions]]
 .Half precision math functions
@@ -25320,11 +25318,8 @@ corresponding [code]#vec#.
 
 === Common functions
 
-In SYCL the OpenCL [keyword]#common functions# are available in the namespace
-[code]#sycl# on host and device as defined in the OpenCL 1.2 specification
-document <<opencl12, par.
-6.12.4>>.
-They are described here in <<table.common.functions>>.
+<<table.common.functions>> describes the common functions that are available in
+the [code]#sycl# namespace in both host and device code.
 
 The function descriptions in this section use the term _generic floating point
 type_ to represent the following types:
@@ -25784,15 +25779,8 @@ corresponding [code]#vec#.
 [[sec:geometric-functions]]
 === Geometric functions
 
-In SYCL the OpenCL [keyword]#geometric functions# are available in the namespace
-[code]#sycl# on host and device as defined in the OpenCL 1.2 specification
-document <<opencl12, par.
-6.12.5>>.
-On the host the vector types use the [code]#vec# class and on an SYCL device use
-the corresponding native <<backend>> vector types.
-All of the geometric functions use round-to-nearest-even rounding mode.
-<<table.geometric.functions>> contains the definitions of supported geometric
-functions.
+<<table.geometric.functions>> describes the geometric functions that are
+available in the [code]#sycl# namespace in both host and device code.
 
 The function descriptions in this section use two terms that refer to a specific
 list of types.
@@ -26055,10 +26043,11 @@ corresponding [code]#vec#.
 |====
 
 
+[[sec:relational-functions]]
 === Relational functions
 
-The functions in <<table.relational.functions>> are defined in the [code]#sycl#
-namespace and are available on both host and device.
+<<table.relational.functions>> describes the relational functions that are
+available in the [code]#sycl# namespace in both host and device code.
 These functions perform various relational comparisons on [code]#vec#,
 [code]#marray#, and scalar types.
 
