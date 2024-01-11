@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 class handler {
-  ...
+ public:
+  // ...
 
-      public
-      : template <typename T>
-        void
-        host_task(T&& hostTaskCallable); // (1)
+  template <typename T>
+  void host_task(T&& hostTaskCallable); // (1)
 
-  ...
+  // ...
 };
