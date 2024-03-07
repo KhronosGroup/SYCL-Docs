@@ -5,9 +5,6 @@ namespace cl {
 namespace sycl {
 
 /* Deprecated in SYCL 2020 */
-enum class memory_order : /* unspecified */ { relaxed };
-
-/* Deprecated in SYCL 2020 */
 template <typename T, access::address_space AddressSpace =
                           access::address_space::global_space>
 class atomic {
