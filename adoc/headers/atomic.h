@@ -1,7 +1,6 @@
 // Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-namespace cl {
 namespace sycl {
 
 /* Deprecated in SYCL 2020 */
@@ -47,4 +46,3 @@ class atomic {
 };
 
 } // namespace sycl
-} // namespace cl
