@@ -4119,8 +4119,8 @@ STL-based libraries (e.g, Intel's TBB provides an allocator).
 ==== Default allocators
 
 A default allocator is always defined by the implementation.
-For allocations greater than size zero, it is guaranteed to return
-non-[code]#nullptr# and new memory positions every call.
+For allocations greater than size zero, when successful it is guaranteed to
+return non-[code]#nullptr# and new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the type
 (therefore, the default allocator for a buffer of type [code]#const int# will be
 an [code]#Allocator<int>)#.
@@ -6044,7 +6044,7 @@ For example, the following could be used:
 
 However, optionally the [code]#buffer::set_final_data()# can be set to a
 [code]#std::weak_ptr# to enable copying data back, to another host memory
-address that is going to be valid after buffer construction.
+address that will be valid when the buffer is destroyed.
 
 [source,,linenums]
 ----
@@ -6114,14 +6114,15 @@ if set final data is [code]#nullptr)#.
 [[subsec:mutex]]
 === Synchronization primitives
 
-When the user wants to use the [code]#buffer# simultaneously in the
-<<sycl-runtime>> and their own code (e.g. a multi-threaded mechanism) and wants
-to use manual synchronization without using a [code]#host_accessor#, a
-[code]#std::mutex# can be passed to the [code]#buffer# constructor via the right
+To prevent race conditions between accesses to the host memory owned by a
+[code]#buffer# in the <<sycl-runtime>> (e.g., by accessors) and in host code, it
+is necessary to use manual synchronization through a [code]#host_accessor#, or
+by passing a [code]#std::mutex# to the [code]#buffer# constructor through a
 [code]#property#.
 
-The runtime promises to lock the mutex whenever the data is in use and unlock it
-when it no longer needs it.
+When a [code]#buffer# was constructed with a [code]#std::mutex# property, the
+SYCL runtime is required to lock the mutex whenever the data is in use by the
+runtime, and unlock the mutex when the data is not in use by the SYCL runtime.
 
 [source,,linenums]
 ----
@@ -6131,17 +6132,19 @@ when it no longer needs it.
   sycl::buffer b { shD, { sycl::property::buffer::use_mutex { m } } };
   {
     std::lock_guard lck { m };
+
     // User accesses the data
     do_something(shD);
-    /* m is unlocked when lck goes out of scope, by normal end of this
-       block but also if an exception is thrown for example */
+
+    /* m is unlocked when lck goes out of scope, either at normal ending of this
+       block or if an exception is thrown */
   }
 }
 ----
 
-When the runtime releases the mutex the user is guaranteed that the data was
-copied back on the shared pointer --- unless the final data destination has been
-changed using the member function [code]#set_final_data()#.
+When the runtime releases the mutex, the user is guaranteed that the data has
+been copied back through the shared pointer --- unless the final data
+destination has been changed using the member function [code]#set_final_data()#.
 
 
 [[subsec:accessors]]
@@ -11735,7 +11738,7 @@ The additional common special member functions and common member functions are
 listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
 <<table.hiddenfriends.common.byval>> respectively.
 
-% interface for nd_item class
+// interface for nd_item class
 [source,,linenums]
 ----
 include::{header_dir}/nditem.h[lines=4..-1]
@@ -11907,7 +11910,7 @@ device_event async_work_group_copy(local_ptr<DataT> dest,
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -11920,7 +11923,7 @@ device_event async_work_group_copy(global_ptr<DataT> dest,
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -11933,7 +11936,7 @@ device_event async_work_group_copy(local_ptr<DataT> dest,
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -11946,7 +11949,7 @@ device_event async_work_group_copy(global_ptr<DataT> dest,
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -12448,7 +12451,7 @@ device_event async_work_group_copy(local_ptr<DataT> dest,
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -12461,7 +12464,7 @@ device_event async_work_group_copy(global_ptr<DataT> dest,
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -12474,7 +12477,7 @@ device_event async_work_group_copy(local_ptr<DataT> dest,
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -12487,7 +12490,7 @@ device_event async_work_group_copy(global_ptr<DataT> dest,
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
       and [code]#decorated_global_ptr# except that the dest and src parameters
-      are [code]#multi_ptr#s with [code]#access::decorated::legacy#.
+      are [code]#multi_ptr# with [code]#access::decorated::legacy#.
 
 a@
 [source]
@@ -14621,6 +14624,15 @@ the queue used to submit the <<host-task>>, so that it can be accessed via
 interoperability member functions provided by the [code]#interop_handle# class.
 
 Local <<accessor,accessors>> cannot be used within a <<host-task>>.
+
+[NOTE]
+====
+If a C++ lambda is passed to a <<host-task>>, the lambda may capture by
+reference or by value.
+Since the <<host-task>> callable executes asynchronously, care must be taken to
+ensure that lifetimes of objects captured by reference by a <<host-task>> lambda
+last at least until the <<host-task>> completes.
+====
 
 // TODO: access mode/target resolution rules
 
@@ -16924,9 +16936,6 @@ This type allows sharing of vectors between the host and its SYCL devices.
 The vector supports member functions that allow construction of a new vector
 from a swizzled set of component elements.
 
-[code]#vec<typename _DataT_, int _NumElements_># is a vector type that compiles
-down to a <<backend>> built-in vector types on SYCL devices, where possible, and
-provides compatible support on the host or when it is not possible.
 The [code]#vec# class is templated on its number of elements and its element
 type.
 The number of elements parameter, _NumElements_, can be one of: 1, 2, 3, 4, 8 or 16.
@@ -17218,7 +17227,7 @@ a@
 template <access::address_space AddressSpace, access::decorated IsDecorated>
 void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
 ----
-   a@ Loads the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#, into the components of this SYCL [code]#vec#.
+   a@ Loads [code]#NumElements# elements into the components of this SYCL [code]#vec#. These elements are loaded from consecutive addresses, where the starting address is computed by adding [code]#offset * NumElements * sizeof(DataT)# bytes to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
 a@
 [source]
@@ -17226,7 +17235,7 @@ a@
 template <access::address_space AddressSpace, access::decorated IsDecorated>
 void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 ----
-   a@ Stores the components of this SYCL [code]#vec# into the values at the address of [code]#ptr# offset in elements of type [code]#DataT# by [code]#NumElements * offset#.
+   a@ Stores [code]#NumElements# components of this SYCL [code]#vec# into consecutive addresses, with the starting address determined by adding [code]#offset * NumElements * sizeof(DataT)# to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
 a@
 [source]
@@ -17503,8 +17512,6 @@ a@
 ----
 vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
-
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
 with each element of the new SYCL [code]#vec# instance the result of
@@ -17570,7 +17577,7 @@ Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#,
 a@
 [source]
 ----
-vec& operator~(const vec& v)
+vec operator~(const vec& v)
 ----
    a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
 
@@ -18384,21 +18391,21 @@ a@
 ----
 iterator begin()
 ----
-   a@ Returns an iterator referring to the first element stored within the [code]#v# [code]#marray#.
+   a@ Returns an iterator referring to the first element stored within the [code]#marray#.
 
 a@
 [source]
 ----
 const_iterator begin() const
 ----
-   a@ Returns a const iterator referring to the first element stored within the [code]#v# [code]#marray#.
+   a@ Returns a const iterator referring to the first element stored within the [code]#marray#.
 
 a@
 [source]
 ----
 iterator end()
 ----
-   a@ Returns an iterator referring to the one past the last element stored within the [code]#v# [code]#marray#.
+   a@ Returns an iterator referring to the one past the last element stored within the [code]#marray#.
 
 a@
 [source]
@@ -18406,7 +18413,7 @@ a@
 const_iterator end() const
 ----
    a@ Returns a const iterator referring to the one past the last
-      element stored within the [code]#v# [code]#marray#.
+      element stored within the [code]#marray#.
 
 |====
 
@@ -19027,7 +19034,7 @@ T operator=(T desired) const
 a@
 [source]
 ----
-T load(memory_order order = default_read_order memory_scope scope =
+T load(memory_order order = default_read_order, memory_scope scope =
            default_scope) const
 ----
    a@ Atomically loads the value of the object referenced by this
@@ -20355,6 +20362,35 @@ SYCL provides a number of functions that expose functionality tied to groups of
 work-items (such as <<group-barrier,group barriers>> and collective operations).
 These group functions act as _synchronization points_ and must be encountered in
 converged <<control-flow>> by all work-items in the group.
+
+The behavior of every group function is as follows:
+
+  * Each work-item in the group arrives at the synchronization point associated
+    with the group function, then blocks until any operation(s) specified by the
+    group function have completed.
+
+  * Once all work-items in the group have arrived, an unspecified subset of
+    those work-items cooperate to execute any operation(s) specified by the
+    group function.
+
+  * When the set of cooperating work-items have completed execution of all
+    operation(s) specified by the group function, all work-items blocked on the
+    synchronization point associated with the group function are unblocked.
+
+The completion of the operation(s) specified by the group function happens
+before the returns from all calls that were unblocked.
+
+[NOTE]
+====
+The behavior of group functions is analogous to the behavior of the C++20
+[code]#std::barrier::arrive_and_wait# function, for an implementation-defined
+barrier object with an expected count equal to the number of work-items in the
+group.
+Any operation(s) performed by the group function behave as if they were defined
+in the barrier's completion function and were invoked as part of the barrier's
+phase completion step.
+====
+
 If one work-item in a group calls a group function, then all work-items in that
 group must call exactly the same function under the same set of conditions ---
 calling the same function under different conditions (e.g. in different
@@ -20414,6 +20450,14 @@ include::{header_dir}/groups/broadcast.h[lines=4..-1]
     trivially copyable type.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
+
 _Returns:_ The value of [code]#x# from the work-item with the smallest linear id
 within group [code]#g#.
 --
@@ -20425,6 +20469,14 @@ within group [code]#g#.
 --
 _Preconditions:_ [code]#local_linear_id# must be the same for all work-items in
 the group and must be in the range [code]#[0, get_local_linear_range())#.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified linear
 id within group [code]#g#.
@@ -20439,6 +20491,14 @@ _Preconditions:_ [code]#local_id# must be the same for all work-items in the
 group, and its dimensionality must match the dimensionality of the group.
 The value of [code]#local_id# in each dimension must be greater than or equal to
 0 and less than the value of [code]#get_local_range()# in the same dimension.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the broadcast operation.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the broadcast operation begins execution.
+The completion of the broadcast operation happens before any work-item blocking
+on the same synchronization point is unblocked.
 
 _Returns:_ The value of [code]#x# from the work-item with the specified id
 within group [code]#g#.
@@ -20458,19 +20518,15 @@ include::{header_dir}/groups/barrier.h[lines=4..-1]
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
-_Effects:_ The current work-item will wait at the barrier until all work-items
-in group [code]#g# have reached the barrier.
-In addition, the barrier performs <<mem-fence>> operations ensuring that memory
-accesses issued before the barrier are not re-ordered with those issued after
-the barrier: all work-items in group [code]#g# execute a release fence prior to
-arriving at the barrier, all work-items in group [code]#g# execute an acquire
-fence afterwards, and there is an implicit synchronization of these fences as if
-provided by an explicit atomic operation on an atomic object.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point.
 
-By default, the scope of these fences is set to the narrowest scope including
-all work-items in group [code]#g# (as reported by [code]#Group::fence_scope#).
-This scope may be optionally overridden with a wider scope, specified by the
-[code]#fence_scope# argument.
+_Synchronization:_ The call to [code]#group_barrier# in each work-item happens
+before any work-item blocking on the same synchronization point is unblocked.
+Synchronization operations used in an implementation of [code]#group_barrier#
+must respect the memory scope specified by the [code]#scope# parameter, which
+defaults to the narrowest scope including all work-items in group [code]#g# (as
+reported by [code]#Group::fence_scope#).
 --
 
 [[sec:algorithms]]
@@ -20539,6 +20595,14 @@ _Preconditions:_ [code]#first# and [code]#last# must be the same for all
 work-items in group [code]#g#, and [code]#pred# must be an immutable callable
 with the same type and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# returns true when applied to the result of
 dereferencing any iterator in the range [code]#[first, last)#.
 --
@@ -20550,6 +20614,14 @@ dereferencing any iterator in the range [code]#[first, last)#.
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
 and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred(x)# returns true for any work-item in group
 [code]#g#.
 --
@@ -20558,6 +20630,14 @@ _Returns:_ true if [code]#pred(x)# returns true for any work-item in group
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# is true for any work-item in group [code]#g#.
 --
 
@@ -20575,6 +20655,14 @@ _Preconditions:_ [code]#first# and [code]#last# must be the same for all
 work-items in group [code]#g#, and [code]#pred# must be an immutable callable
 with the same type and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# returns true when applied to the result of
 dereferencing all iterators in the range [code]#[first, last)#.
 --
@@ -20586,6 +20674,14 @@ dereferencing all iterators in the range [code]#[first, last)#.
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
 and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred(x)# returns true for all work-items in group
 [code]#g#.
 --
@@ -20594,6 +20690,14 @@ _Returns:_ true if [code]#pred(x)# returns true for all work-items in group
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# is true for all work-items in group [code]#g#.
 --
 
@@ -20611,6 +20715,14 @@ _Preconditions:_ [code]#first# and [code]#last# must be the same for all
 work-items in group [code]#g#, and [code]#pred# must be an immutable callable
 with the same type and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# returns false when applied to the result of
 dereferencing all iterators in the range [code]#[first, last)#.
 --
@@ -20622,6 +20734,14 @@ dereferencing all iterators in the range [code]#[first, last)#.
 _Preconditions:_ [code]#pred# must be an immutable callable with the same type
 and state for all work-items in group [code]#g#.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred(x)# returns false for all work-items in group
 [code]#g#.
 --
@@ -20630,6 +20750,14 @@ _Returns:_ true if [code]#pred(x)# returns false for all work-items in group
     [code]#sycl::is_group_v<std::decay_t<Group>># is true.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ true if [code]#pred# is false for all work-items in group [code]#g#.
 --
 
@@ -20655,6 +20783,14 @@ include::{header_dir}/algorithms/shift.h[lines=4..-1]
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the group.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 ([code]#id#) is [code]#delta# larger than that of the calling work-item.
 [code]#pass:[id + delta]# may be greater than or equal to the group's linear
@@ -20666,6 +20802,14 @@ size, but the value returned in this case is unspecified.
 +
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the group.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ the value of [code]#x# from the work-item whose group local id
 ([code]#id#) is [code]#delta# smaller than that of the calling work-item.
@@ -20693,6 +20837,14 @@ include::{header_dir}/algorithms/permute.h[lines=4..-1]
 --
 _Preconditions:_ [code]#mask# must be the same for all work-items in the group.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ the value of [code]#x# from the work-item whose group local id is
 equal to the bitwise exclusive OR of the calling work-item's group local id and
 [code]#mask#.
@@ -20717,6 +20869,14 @@ include::{header_dir}/algorithms/select.h[lines=4..-1]
     sub_group># is true and [code]#T# is a trivially copyable type.
 +
 --
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ the value of [code]#x# from the work-item with the group local id
 specified by [code]#remote_local_id#.
 The value of [code]#remote_local_id# may be outside of the group, but the value
@@ -20761,6 +20921,14 @@ _Preconditions:_ [code]#first#, [code]#last# and the type of [code]#binary_op#
 must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The result of combining the values resulting from dereferencing all
 iterators in the range [code]#[first, last)# using the operator
 [code]#binary_op#, where the values are combined according to the generalized
@@ -20780,6 +20948,14 @@ _Preconditions:_ [code]#first#, [code]#last#, [code]#init# and the type of
 [code]#binary_op# must be the same for all work-items in group [code]#g#.
 [code]#binary_op# must be an instance of a SYCL function object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The result of combining the values resulting from dereferencing all
 iterators in the range [code]#[first, last)# and the initial value [code]#init#
 using the operator [code]#binary_op#, where the values are combined according to
@@ -20796,6 +20972,14 @@ _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The result of combining all the values of [code]#x# specified by each
 work-item in group [code]#g# using the operator [code]#binary_op#, where the
 values are combined according to the generalized sum defined in standard {cpp}.
@@ -20811,6 +20995,14 @@ _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The result of combining all the values of [code]#x# specified by each
 work-item in group [code]#g# and the initial value [code]#init# using the
@@ -20868,12 +21060,20 @@ _Preconditions:_ [code]#first#, [code]#last#, [code]#result# and the type of
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the exclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and the identity value of [code]#binary_op# (as identified
-by [code]#sycl::known_identity#), using the operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the exclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)# and the identity value of [code]#binary_op# (as identified by
+[code]#sycl::known_identity#), using the operator [code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20897,12 +21097,20 @@ the type of [code]#binary_op# must be the same for all work-items in group
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the exclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and an initial value specified by [code]#init#, using the
-operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the exclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)# and an initial value specified by [code]#init#, using the operator
+[code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20917,6 +21125,14 @@ _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of the
 first _i_ values in group [code]#g# and the identity value of [code]#binary_op#
@@ -20938,6 +21154,14 @@ _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the exclusive scan of the
 first _i_ values in group [code]#g# and an initial value specified by
@@ -20971,11 +21195,19 @@ _Preconditions:_ [code]#first#, [code]#last#, [code]#result# and the type of
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the inclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)#, using the operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the inclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)#, using the operator [code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -20999,12 +21231,20 @@ the type of [code]#binary_op# must be the same for all work-items in group
 Note that [code]#first# may be equal to [code]#result#.
 ====
 
-_Effects:_ The value written to [code]#result# + _i_ is the inclusive scan of
-the values resulting from dereferencing the first _i_ values in the range
-[code]#[first, last)# and an initial value specified by [code]#init#, using the
-operator [code]#binary_op#.
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+The value written to [code]#result# + _i_ is the inclusive scan of the values
+resulting from dereferencing the first _i_ values in the range [code]#[first,
+last)# and an initial value specified by [code]#init#, using the operator
+[code]#binary_op#.
 The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
 --
@@ -21019,6 +21259,14 @@ _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
 
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
+
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
 
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of the
 first _i_ values in group [code]#g#, using the operator [code]#binary_op#.
@@ -21039,6 +21287,14 @@ _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
 _Preconditions:_ [code]#binary_op# must be an instance of a SYCL function
 object.
 
+_Effects:_ Blocks until all work-items in group [code]#g# have reached this
+synchronization point, then executes the algorithm.
+
+_Synchronization:_ The call to this function in each work-item happens before
+the algorithm begins execution.
+The completion of the algorithm happens before any work-item blocking on the
+same synchronization point is unblocked.
+
 _Returns:_ The value returned on work-item _i_ is the inclusive scan of the
 first _i_ values in group [code]#g# and an initial value specified by
 [code]#init#, using the operator [code]#binary_op#.
@@ -21049,17 +21305,11 @@ determined by their linear id.
 --
 
 
+[[sec:math-functions]]
 === Math functions
 
-In SYCL the OpenCL math functions are available in the namespace [code]#sycl# on
-host and device with the same precision guarantees as defined in the OpenCL 1.2
-specification document <<opencl12, ch. 7>> for host and device.
-For a SYCL platform the numerical requirements for host need to match the
-numerical requirements of the OpenCL math built-in functions.
-
-The built-in functions available for SYCL host and device, with the same
-precision requirements for both host and device, are described in
-<<table.math.functions>>.
+<<table.math.functions>> describes the math functions that are available in the
+[code]#sycl# namespace in both host and device code.
 
 The function descriptions in this section use the term _writeable address space_
 to represent the following address spaces:
@@ -22721,7 +22971,7 @@ template<typename NonScalar1, typename NonScalar2, typename NonScalar3>  (4)
 
 *Overloads (1) - (3):*
 
-_Effects_: Computes the approximate value of [code]#a * b + c#.  Whether or how
+_Effects:_ Computes the approximate value of [code]#a * b + c#.  Whether or how
 the product of [code]#a * b# is rounded and how supernormal or subnormal
 intermediate products are handled is not defined.  The [code]#mad# function is
 intended to be used where speed is preferred over accuracy.
@@ -22899,9 +23149,9 @@ a@
 a!
 [source]
 ----
-float nan(unsigned int nancode)         (1)
-double nan(unsigned long nancode)       (2)
-half nan(unsigned short nancode)        (3)
+float nan(uint32_t nancode)             (1)
+double nan(uint64_t nancode)            (2)
+half nan(uint16_t nancode)              (3)
 
 template<typename NonScalar>            (4)
 /*return-type*/ nan(NonScalar nancode)
@@ -22915,12 +23165,11 @@ in the significand of the resulting NaN.
 
 *Overload (4):*
 
-_Constraints:_ Available only if one of the following conditions is met:
+_Constraints:_ Available only if all of the following conditions are met:
 
-* [code]#NonScalar# is [code]#marray# and the element type is
-  [code]#unsigned int#, [code]#unsigned long#, or [code]#unsigned short#; or
-* [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type and
-  the element type is [code]#uint32_t#, [code]#uint64_t#, or [code]#uint16_t#.
+* [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
+  [code]#+__swizzled_vec__+# type; and
+* The element type is [code]#uint32_t#, [code]#uint64_t#, or [code]#uint16_t#.
 
 _Returns:_ A quiet NaN for each element of [code]#nancode#.  Each
 [code]#nancode[i]# may be placed in the significand of the resulting NaN.
@@ -22929,9 +23178,9 @@ The return type depends on [code]#NonScalar#:
 [options="header",cols="70%,30%"]
 !====
 !NonScalar ! Return Type
-![code]#marray<unsigned int, N># ![code]#marray<float, N>#
-![code]#marray<unsigned long, N># ![code]#marray<double, N>#
-![code]#marray<unsigned short, N># ![code]#marray<half, N>#
+![code]#marray<uint32_t, N># ![code]#marray<float, N>#
+![code]#marray<uint64_t, N># ![code]#marray<double, N>#
+![code]#marray<uint16_t, N># ![code]#marray<half, N>#
 
 ![code]#vec<uint32_t, N># +
  [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
@@ -23739,13 +23988,15 @@ corresponding [code]#vec#.
 
 === Native precision math functions
 
-In SYCL the implementation-defined precision math functions are defined in the
-namespace [code]#sycl::native#.
-The functions that are available within this namespace are specified in
-<<table.native.math.functions>>.
+<<table.native.math.functions>> describes the native precision math functions
+that are available in the [code]#sycl::native# namespace in both host and device
+code.
 
-The range of valid input values and the maximum error for these functions is
-implementation defined.
+The precision requirements and the set of legal input values for these functions
+are defined in the backend specification.
+The intent is that these functions might make use of native device functionality
+which has better performance than their counterparts in <<sec:math-functions>>,
+but they may sacrifice accuracy or limit the set of legal input values.
 
 [[table.native.math.functions]]
 .Native precision math functions
@@ -24202,12 +24453,14 @@ corresponding [code]#vec#.
 
 === Half precision math functions
 
-In SYCL the half precision math functions are defined in the namespace
-[code]#sycl::half_precision#.
-The functions that are available within this namespace are specified in
-<<table.half.math.functions>>.
-These functions are implemented with a minimum of 10-bits of accuracy i.e. the
-maximum error is less than or equal to 8192 ulp.
+<<table.half.math.functions>> describes the half precision math functions that
+are available in the [code]#sycl::half_precision# namespace in both host and
+device code.
+
+The precision requirements for these functions are defined in the backend
+specification.
+The intent is that these functions have higher performance than their
+counterparts in <<sec:math-functions>>, but they have lower accuracy.
 
 [[table.half.math.functions]]
 .Half precision math functions
@@ -25531,11 +25784,8 @@ corresponding [code]#vec#.
 
 === Common functions
 
-In SYCL the OpenCL [keyword]#common functions# are available in the namespace
-[code]#sycl# on host and device as defined in the OpenCL 1.2 specification
-document <<opencl12, par.
-6.12.4>>.
-They are described here in <<table.common.functions>>.
+<<table.common.functions>> describes the common functions that are available in
+the [code]#sycl# namespace in both host and device code.
 
 The function descriptions in this section use the term _generic floating point
 type_ to represent the following types:
@@ -25995,15 +26245,8 @@ corresponding [code]#vec#.
 [[sec:geometric-functions]]
 === Geometric functions
 
-In SYCL the OpenCL [keyword]#geometric functions# are available in the namespace
-[code]#sycl# on host and device as defined in the OpenCL 1.2 specification
-document <<opencl12, par.
-6.12.5>>.
-On the host the vector types use the [code]#vec# class and on an SYCL device use
-the corresponding native <<backend>> vector types.
-All of the geometric functions use round-to-nearest-even rounding mode.
-<<table.geometric.functions>> contains the definitions of supported geometric
-functions.
+<<table.geometric.functions>> describes the geometric functions that are
+available in the [code]#sycl# namespace in both host and device code.
 
 The function descriptions in this section use two terms that refer to a specific
 list of types.
@@ -26266,10 +26509,11 @@ corresponding [code]#vec#.
 |====
 
 
+[[sec:relational-functions]]
 === Relational functions
 
-The functions in <<table.relational.functions>> are defined in the [code]#sycl#
-namespace and are available on both host and device.
+<<table.relational.functions>> describes the relational functions that are
+available in the [code]#sycl# namespace in both host and device code.
 These functions perform various relational comparisons on [code]#vec#,
 [code]#marray#, and scalar types.
 

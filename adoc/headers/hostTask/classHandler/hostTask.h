@@ -1,13 +1,12 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: MIT
 
 class handler {
-  ...
+ public:
+  // ...
 
-      public
-      : template <typename T>
-        void
-        host_task(T&& hostTaskCallable); // (1)
+  template <typename T>
+  void host_task(T&& hostTaskCallable); // (1)
 
-  ...
+  // ...
 };
