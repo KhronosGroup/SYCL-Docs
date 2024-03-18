@@ -17712,10 +17712,10 @@ include::{code_dir}/swizzle-example.cpp[lines=4..-1]
 
 Synopses of the [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#
 classes are shown below.
-The member type aliases are described in <<table.types.swizzled-vec>>, the
-constructors are described in <<table.constructors.swizzled-vec>>, the member
-functions are described in <<table.members.swizzled-vec>>, and the hidden friend
-functions are described in <<table.functions.swizzled-vec>>.
+The member type aliases are described in <<sec:types.swizzled-vec>>, the
+constructors are described in <<sec:constructors.swizzled-vec>>, the member
+functions are described in <<sec:members.swizzled-vec>>, and the hidden friend
+functions are described in <<sec:functions.swizzled-vec>>.
 
 The [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes are
 not user constructible.
@@ -17750,46 +17750,43 @@ additional constraints on the member functions.
 include::{header_dir}/swizzled-vec.h[lines=4..-1]
 ----
 
-[[table.types.swizzled-vec]]
-.Member type aliases for the swizzled vector class templates
-[separator="@"]
+[[sec:types.swizzled-vec]]
+===== Member type aliases for the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
 |====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 using element_type = DataT
 using value_type = DataT
 ----
-!====
+|====
 Each of these type aliases tells the type of an element in the underlying
 [code]#vec#.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 #ifdef __SYCL_DEVICE_ONLY__
 using vector_t = /*unspecified*/
 #endif
 ----
-!====
+|====
 This type alias is available only in device code.
 The [code]#vector_t# type represents a native vector type of [code]#NumElements#
 elements where each element's type is [code]#DataT#.
 
-[[table.constructors.swizzled-vec]]
-.Constructors for the swizzled vector class templates
-[separator="@"]
+[[sec:constructors.swizzled-vec]]
+===== Constructors for the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
 |====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 __writeable_swizzle__() = delete
@@ -17800,20 +17797,17 @@ __const_swizzle__(const __const_swizzle__&) = delete
 
 __const_swizzle__& operator=(const __const_swizzle__&) = delete
 ----
-!====
+|====
 The default constructor and copy constructor are deleted.
 
 The copy assignment operator for [code]#+__const_swizzle__+# is deleted.
-|====
 
-[[table.members.swizzled-vec]]
-.Member functions for the swizzled vector class templates
-[separator="@"]
+[[sec:members.swizzled-vec]]
+===== Member functions for the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
 |====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 #ifdef __SYCL_DEVICE_ONLY__
@@ -17836,7 +17830,7 @@ template <typename asT> asT as() const
 template <access::address_space AddressSpace, access::decorated IsDecorated>
 void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 ----
-!====
+|====
 _Availability:_ These functions are available in both
 [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#.
 
@@ -17847,15 +17841,16 @@ _Effects:_ The effect of these functions is the same as if they were applied to
 a temporary [code]#vec# object that contains the result of the swizzle
 operation.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 operator vec<DataT, NumElements>() const
 ----
-!====
+|====
 _Availability:_ These functions are available in both
 [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#.
 
@@ -17864,10 +17859,11 @@ _Constraints:_ Available only when [code]#NumElements > 1#.
 _Returns:_ A new [code]#vec# object that represents the elements of the
 [code]#vec# object that underlies the view with the swizzle operation applied.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 template <int... swizzleIndexes> __writeable_swizzle__</*unspecified*/> swizzle() const  (1)
@@ -17903,7 +17899,7 @@ __const_swizzle__</*unspecified*/> hi() const                                   
 __const_swizzle__</*unspecified*/> odd() const                                           (19)
 __const_swizzle__</*unspecified*/> even() const                                          (20)
 ----
-!====
+|====
 _Availability:_ Functions (1) - (10) are available only in
 [code]#+__writeable_swizzle__+#.
 Functions (11) - (20) are available only in [code]#+__const_swizzle__+#.
@@ -17922,16 +17918,17 @@ For example, if the second swizzle references the first element, this means the
 element of the underlying [code]#vec# that corresponds to the first element
 produced by the first swizzle.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 template <access::address_space AddressSpace, access::decorated IsDecorated>
 void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) const
 ----
-!====
+|====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
 
 _Effects:_ Loads values from memory into elements of the underlying [code]#vec#
@@ -17943,16 +17940,17 @@ corresponds to the first element of the swizzle operation.
 The second value from memory is written to the element in [code]#vec# that
 corresponds to the second element of the swizzle operation, etc.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 DataT& operator[](int index) const        (1)
 const DataT& operator[](int index) const  (2)
 ----
-!====
+|====
 _Availability:_ Functions (1) is available only in
 [code]#+__writeable_swizzle__+#.
 Functions (2) is available only in [code]#+__const_swizzle__+#.
@@ -17960,10 +17958,11 @@ Functions (2) is available only in [code]#+__const_swizzle__+#.
 _Returns:_ A reference to the element of the underlying [code]#vec# object that
 corresponds to the position [code]#index# of the swizzle operation.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 template</*unspecified*/>
@@ -17972,7 +17971,7 @@ const __writeable_swizzle__& operator=(const __writeable_swizzle__</*unspecified
 template</*unspecified*/>
 const __writeable_swizzle__& operator=(const __const_swizzle__</*unspecified*/>& rhs) const
 ----
-!====
+|====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
 
 _Constraints:_ Available only when all of the following conditions are met:
@@ -17993,15 +17992,16 @@ corresponds to the first element of the left hand side swizzle operation, etc.
 _Returns:_ A reference to the left hand side [code]#+__writeable_swizzle__+#
 view.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 const __writeable_swizzle__& operator=(const DataT& rhs) const
 ----
-!====
+|====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
 
 _Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
@@ -18015,15 +18015,16 @@ Elements in the underlying [code]#vec# object that do not have elements in the
 
 _Returns:_ A reference to the [code]#+__writeable_swizzle__+# view.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 const __writeable_swizzle__& operator=(const vec<DataT, NumElements>& rhs) const
 ----
-!====
+|====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
 
 _Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
@@ -18036,16 +18037,13 @@ The first element of [code]#rhs# is assigned to the element of the underlying
 operation, etc.
 
 _Returns:_ A reference to the [code]#+__writeable_swizzle__+# view.
-|====
 
-[[table.functions.swizzled-vec]]
-.Hidden friend functions of the swizzled vector class templates
-[separator="@"]
+[[sec:functions.swizzled-vec]]
+===== Hidden friend functions of the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
 |====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 template</*unspecified*/>                                                               (1)
@@ -18091,7 +18089,7 @@ operatorOP(const DataT& lhs, const __writeable_swizzle__& rhs)
 friend vec<DataT, NumElements>                                                          (12)
 operatorOP(const DataT& lhs, const __const_swizzle__& rhs)
 ----
-!====
+|====
 Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#,
 [code]#%#, [code]#&#, [code]#|#, [code]#^#, [code]#<<#, [code]#>>#.
 
@@ -18116,10 +18114,11 @@ was first evaluated into a temporary [code]#vec# object, and then
 
 _Returns:_ A new [code]#vec# object that represents the result of the operation.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 template</*unspecified*/>                                                        (1)
@@ -18138,7 +18137,7 @@ operatorOP(const __writeable_swizzle__& lhs, const vec<DataT, NumElements>& rhs)
 friend const __writeable_swizzle__&                                              (4)
 operatorOP(const __writeable_swizzle__& lhs, const DataT& rhs)
 ----
-!====
+|====
 Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#,
 [code]#%=#, [code]#&=#, [code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#.
 
@@ -18173,15 +18172,16 @@ corresponds to the second element of the left-hand-side swizzle, etc.
 
 _Returns:_ A reference to the [code]#lhs#.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 friend const __writeable_swizzle__& operatorOP(const __writeable_swizzle__& sv)
 ----
-!====
+|====
 Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 
 _Availability:_ These are hidden friend functions only in
@@ -18197,15 +18197,16 @@ Elements in the underlying [code]#vec# object that do not have elements in the
 
 _Returns:_ A reference to the [code]#sv# view.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 friend vec<DataT, NumElements> operatorOP(const __writeable_swizzle__& sv, int)
 ----
-!====
+|====
 Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 
 _Availability:_ These are hidden friend functions only in
@@ -18223,16 +18224,17 @@ _Returns:_ A new [code]#vec# object that represents the elements of [code]#sv#
 after the swizzle operation is applied and before the postfix arithmetic
 operation is applied.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 friend vec<DataT, NumElements> operatorOP(const __writeable_swizzle__& sv)  (1)
 friend vec<DataT, NumElements> operatorOP(const __const_swizzle__& sv)      (2)
 ----
-!====
+|====
 Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
 
 _Availability:_ Functions (1) are hidden friends in
@@ -18246,10 +18248,11 @@ object.
 
 _Returns:_ A [code]#vec# object that represents the result of the operation.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none]
-!====
-a!
 [source]
 ----
 template</*unspecified*/>                                                               (1)
@@ -18295,7 +18298,7 @@ operatorOP(const DataT& lhs, const __writeable_swizzle__& rhs)
 friend vec<RET, NumElements>                                                            (12)
 operatorOP(const DataT& lhs, const __const_swizzle__& rhs)
 ----
-!====
+|====
 Where [code]#OP# is: [code]#&&#, [code]#||#, [code]#==#, [code]#!=#, [code]#<#,
 [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18316,10 +18319,11 @@ was first evaluated into a temporary [code]#vec# object, and then
 
 _Returns:_ A [code]#vec# object that represents the result of the operation.
 
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
 a@
-[frame=all,grid=none,separator="#"]
-!====
-a#
 [source]
 ----
 friend vec<DataT, NumElements> operator~(const __writeable_swizzle__& sv)  (1)
@@ -18328,7 +18332,7 @@ friend vec<DataT, NumElements> operator~(const __const_swizzle__& sv)      (2)
 friend vec<RET, NumElements> operator!(const __writeable_swizzle__& sv)    (3)
 friend vec<RET, NumElements> operator!(const __const_swizzle__& sv)        (4)
 ----
-!====
+|====
 _Availability:_ Overloads (1) and (3) are hidden friends of
 [code]#+__writeable_swizzle__+#.
 Overloads (2) and (4) are hidden friends of [code]#+__const_swizzle__+#.
@@ -18342,7 +18346,6 @@ first evaluated into a temporary [code]#vec# object, and then the bitwise or
 logical NOT operation was applied to the temporary [code]#vec# object.
 
 _Returns:_ A [code]#vec# object that represents the result of the operation.
-|====
 
 
 ==== Rounding modes
