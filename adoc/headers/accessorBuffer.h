@@ -177,11 +177,11 @@ class accessor {
   /* Deprecated
   Available only when: (AccessMode == access_mode::atomic && Dimensions ==  0)
 */
-  operator cl::sycl::atomic<DataT, access::address_space::global_space>() const;
+  operator sycl::atomic<DataT, access::address_space::global_space>() const;
 
   /* Deprecated
   Available only when: (AccessMode == access_mode::atomic && Dimensions == 1) */
-  cl::sycl::atomic<DataT, access::address_space::global_space>
+  sycl::atomic<DataT, access::address_space::global_space>
   operator[](id<Dimensions> index) const;
 
   /* Deprecated in SYCL 2020
