@@ -17101,18 +17101,27 @@ template <typename asT> asT as() const
 a@
 [source]
 ----
-template <int... swizzleIndexes> __swizzled_vec__ swizzle() const
+template <int... swizzleIndexes> __writeable_swizzle__ swizzle()
+template <int... swizzleIndexes> __const_swizzle__ swizzle() const
 ----
-   a@ Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
+   a@ Return an instance of the implementation-defined
+      [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# class
+      representing a swizzled view of the vector as described in
+      <<swizzled-vec-class>>.
+      The [code]#swizzleIndexes# argument pack specifies the elements in the
+      swizzle.
 
 a@
 [source]
 ----
-__swizzled_vec__ XYZW_ACCESS() const
+__writeable_swizzle__ XYZW_ACCESS()
+__const_swizzle__ XYZW_ACCESS() const
 ----
    a@ Available only when: [code]#+NumElements <= 4+#.
 
-Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
 
 Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 [code]#x, y# for
@@ -17125,20 +17134,27 @@ Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 a@
 [source]
 ----
-__swizzled_vec__ RGBA_ACCESS() const
+__writeable_swizzle__ RGBA_ACCESS()
+__const_swizzle__ RGBA_ACCESS() const
 ----
    a@ Available only when: [code]#NumElements == 4#.
 
-Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
 
 Where [code]#RGBA_ACCESS# is: [code]#r, g, b, a#.
 
 a@
 [source]
 ----
-__swizzled_vec__ INDEX_ACCESS() const
+__writeable_swizzle__ INDEX_ACCESS()
+__const_swizzle__ INDEX_ACCESS() const
 ----
-   a@ Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
+  a@ Return an instance of the implementation-defined
+     [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# class
+     representing a swizzled view of the vector as described in
+     <<swizzled-vec-class>>.
 
 Where [code]#INDEX_ACCESS# is: [code]#s0# for [code]#NumElements == 1#,
 [code]#s0, s1# for
@@ -17155,11 +17171,14 @@ Where [code]#INDEX_ACCESS# is: [code]#s0# for [code]#NumElements == 1#,
 a@
 [source]
 ----
-__swizzled_vec__ XYZW_SWIZZLE() const
+__writeable_swizzle__ XYZW_SWIZZLE()
+__const_swizzle__ XYZW_SWIZZLE() const
 ----
    a@ Available only when: [code]#+NumElements <= 4+#, and when the macro [code]#SYCL_SIMPLE_SWIZZLES# is defined before including [code]#<sycl/sycl.hpp>#.
 
-Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
 
 Where XYZW_SWIZZLE is all permutations with repetition, of any subset with length greater than [code]#1#, of [code]#x, y# for
 [code]#NumElements == 2#,
@@ -17171,11 +17190,14 @@ Where XYZW_SWIZZLE is all permutations with repetition, of any subset with lengt
 a@
 [source]
 ----
-__swizzled_vec__ RGBA_SWIZZLE() const
+__writeable_swizzle__ RGBA_SWIZZLE()
+__const_swizzle__ RGBA_SWIZZLE() const
 ----
    a@ Available only when: [code]#NumElements == 4#, and when the macro [code]#SYCL_SIMPLE_SWIZZLES# is defined before including [code]#<sycl/sycl.hpp>#.
 
-Returns an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>.
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
 
 Where RGBA_SWIZZLE is all permutations with repetition, of any subset with length greater than [code]#1#, of [code]#r, g, b, a#.
 For example a four element [code]#vec# provides permutations including [code]#rbga#, [code]#rggg# and [code]#rb#.
@@ -17183,42 +17205,62 @@ For example a four element [code]#vec# provides permutations including [code]#rb
 a@
 [source]
 ----
-__swizzled_vec__ lo() const
+__writeable_swizzle__ lo()
+__const_swizzle__ lo() const
 ----
    a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the lower half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
+The swizzle consists of the lower half of the elements in the vector.
+When [code]#NumElements == 3#, the vector is treated as though
 [code]#NumElements == 4# with the fourth element undefined.
 
 a@
 [source]
 ----
-__swizzled_vec__ hi() const
+__writeable_swizzle__ hi()
+__const_swizzle__ hi() const
 ----
    a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the upper half of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
+The swizzle consists of the upper half of the elements in the vector.
+When [code]#NumElements == 3#, the vector is treated as though
 [code]#NumElements == 4# with the fourth element undefined.
 
 a@
 [source]
 ----
-__swizzled_vec__ odd() const
+__writeable_swizzle__ odd()
+__const_swizzle__ odd() const
 ----
    a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the odd indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
+The swizzle consists of the elements in the vector with an odd numbered index.
+When [code]#NumElements == 3#, the vector is treated as though
 [code]#NumElements == 4# with the fourth element undefined.
 
 
 a@
 [source]
 ----
-__swizzled_vec__ even() const
+__writeable_swizzle__ even()
+__const_swizzle__ even() const
 ----
    a@ Available only when: [code]#NumElements > 1#.
 
-Return an instance of the implementation-defined intermediate class template [code]#+__swizzled_vec__+# representing an index sequence made up of the even indexes of this SYCL vec which can be used to apply the swizzle in a valid expression as described in <<swizzled-vec-class>>. When [code]#NumElements == 3#, this SYCL [code]#vec# is treated as though
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
+The swizzle consists of the elements in the vector with an even numbered index.
+When [code]#NumElements == 3#, the vector is treated as though
 [code]#NumElements == 4# with the fourth element undefined.
 
 a@
@@ -17625,18 +17667,17 @@ Note that the simple swizzle functions are only available for up to 4 element
 vectors and are only available when the macro [code]#SYCL_SIMPLE_SWIZZLES# is
 defined before including [code]#<sycl/sycl.hpp>#.
 
-In both cases the return type is always an instance of
-[code]#+__swizzled_vec__+#, an implementation-defined temporary class
-representing the result of the swizzle operation on the original [code]#vec#
-instance.
-Since the swizzle operation may result in a different number of elements, the
-[code]#+__swizzled_vec__+# instance may represent a different number of elements
-than the original [code]#vec#.
-Both kinds of swizzle member functions must not perform the swizzle operation
-themselves, instead the swizzle operation must be performed by the returned
-instance of [code]#+__swizzled_vec__+# when used within an expression, meaning
-if the returned [code]#+__swizzled_vec__+# is never used in an expression no
-swizzle operation is performed.
+In both cases the return value is an instance of either the
+[code]#+__writeable_swizzle__+# or the [code]#+__const_swizzle__+# class
+template.
+These classes have an implementation-defined name, and they represent a view of
+the original [code]#vec# object with the swizzle operation applied.
+The [code]#+__writeable_swizzle__+# class represents a writeable view of the
+[code]#vec# object, while the [code]#+__const_swizzle__+# class represents a
+read-only view.
+Since the swizzle operation may result in a different number of elements, these
+views may represent a different number of elements than the original [code]#vec#
+object.
 
 Both the [code]#swizzle# member function template and the simple swizzle member
 functions allow swizzle indexes to be repeated.
@@ -17647,40 +17688,664 @@ member function template.
 
 
 [[swizzled-vec-class]]
-==== Swizzled [code]#vec# class
+==== The swizzled vector classes
 
-The [code]#+__swizzled_vec__+# class must define an unspecified temporary which
-provides the entire interface of the SYCL [code]#vec# class template, including
-swizzled member functions, with the additions and alterations described below.
-The member functions of the [code]#+__swizzled_vec__+# class behave as though
-they operate on a [code]#vec# that is the result of the swizzle operation.
+The [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes are
+each views over a [code]#vec# object which captures the effects of a swizzle
+operation without actually performing that operation.
+The tables below define the interfaces to these classes, but in general
+[code]#+__writeable_swizzle__+# supports the same interface as [code]#vec#,
+while [code]#+__const_swizzle__+# supports only the non-mutating operations of
+[code]#vec#.
+Member functions and operators that read elements from these views return
+elements from the underlying [code]#vec# as translated by the captured swizzle
+operation.
+Member functions and operators that modify elements of these views modify
+corresponding elements of the underlying [code]#vec# as translated by the
+captured swizzle operation.
+The following example illustrates this behavior:
 
-  * The [code]#+__swizzled_vec__+# class template must be readable as an r-value
-    reference on the RHS of an expression.
-    In this case the swizzle operation is performed on the RHS of the expression
-    and then the result is applied to the LHS of the expression.
-  * The [code]#+__swizzled_vec__+# class template must be assignable as an
-    l-value reference on the LHS of an expression.
-    In this case the RHS of the expression is applied to the original SYCL
-    [code]#vec# which the [code]#+__swizzled_vec__+# represents via the swizzle
-    operation.
-    Note that a [code]#+__swizzled_vec__+# that is used in an l-value expression
-    may not contain any repeated element indexes.
-+
-For example: [code]#f4.xxxx() = fx.wzyx()# would not be valid.
-  * The [code]#+__swizzled_vec__+# class template must be convertible to an
-    instance of SYCL [code]#vec# with the type [code]#DataT# and number of
-    elements specified by the swizzle member function, if [code]#NumElements >
-    1#, and must be convertible to an instance of type [code]#DataT#, if
-    [code]#NumElements == 1#.
-  * The [code]#+__swizzled_vec__+# class template must be non-copyable,
-    non-moveable, non-user constructible and may not be bound to a l-value or
-    escape the expression it was constructed in.
-    For example [code]#auto x = f4.x()# would not be valid.
-  * The [code]#+__swizzled_vec__+# class template should return
-    [code]#+__swizzled_vec__&+# for each operator inherited from the [code]#vec#
-    class template interface which would return [code]#vec<DataT,
-    NumElements>&#.
+[source,,linenums]
+----
+include::{code_dir}/swizzle-example.cpp[lines=4..-1]
+----
+
+Synopses of the [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#
+classes are shown below.
+The member type aliases are described in <<sec:types.swizzled-vec>>, the
+constructors are described in <<sec:constructors.swizzled-vec>>, the member
+functions are described in <<sec:members.swizzled-vec>>, and the hidden friend
+functions are described in <<sec:functions.swizzled-vec>>.
+
+The [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes are
+not user constructible.
+
+The [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# types are
+class templates, but the template parameters are unspecified.
+The description below describes the member functions and hidden friend functions
+using two exposition-only private members named [code]#DataT# and
+[code]#NumElements#.
+The type alias [code]#DataT# represents the element type of the underlying
+[code]#vec#.
+The constant [code]#NumElements# represents the number of elements in the result
+of the swizzle operation, which could be different from the number of elements
+in the underlying [code]#vec#.
+
+When the string [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+#
+is used inside the class definition in the synopses below, it refers to the
+instantiation with the same set of template parameters as the enclosing class.
+This is consistent with {cpp} syntax.
+When the string [code]#+__writeable_swizzle__</*unspecified*/>+# or
+[code]#+__const_swizzle__</*unspecified*/>+# is used inside the class
+definition, it refers to a possibly different instantiation of the
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# class.
+
+Although the synopses below illustrate [code]#+__writeable_swizzle__+# and
+[code]#+__const_swizzle__+# as two separate classes, this is exposition only.
+An implementation could instead implement a single combined class with
+additional constraints on the member functions.
+
+[source,,linenums]
+----
+include::{header_dir}/swizzled-vec.h[lines=4..-1]
+----
+
+[[sec:types.swizzled-vec]]
+===== Member type aliases for the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+using element_type = DataT
+using value_type = DataT
+----
+|====
+Each of these type aliases tells the type of an element in the underlying
+[code]#vec#.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+#ifdef __SYCL_DEVICE_ONLY__
+using vector_t = /*unspecified*/
+#endif
+----
+|====
+This type alias is available only in device code.
+The [code]#vector_t# type represents a native vector type of [code]#NumElements#
+elements where each element's type is [code]#DataT#.
+
+[[sec:constructors.swizzled-vec]]
+===== Constructors for the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+__writeable_swizzle__() = delete
+__writeable_swizzle__(const __writeable_swizzle__&) = delete
+
+__const_swizzle__() = delete
+__const_swizzle__(const __const_swizzle__&) = delete
+
+__const_swizzle__& operator=(const __const_swizzle__&) = delete
+----
+|====
+The default constructor and copy constructor are deleted.
+
+The copy assignment operator for [code]#+__const_swizzle__+# is deleted.
+
+[[sec:members.swizzled-vec]]
+===== Member functions for the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+#ifdef __SYCL_DEVICE_ONLY__
+operator vector_t() const
+#endif
+
+operator DataT() const
+static constexpr size_t byte_size() noexcept
+static constexpr size_t size() noexcept
+
+size_t get_size() const   // Deprecated
+size_t get_count() const  // Deprecated
+
+template <typename ConvertT,
+          rounding_mode RoundingMode = rounding_mode::automatic>
+vec<ConvertT, NumElements> convert() const
+
+template <typename asT> asT as() const
+
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+----
+|====
+_Availability:_ These functions are available in both
+[code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#.
+
+_Constraints:_ These functions have the same constraints as the equivalent
+member functions of the [code]#vec# class.
+
+_Effects:_ The effect of these functions is the same as if they were applied to
+a temporary [code]#vec# object that contains the result of the swizzle
+operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+operator vec<DataT, NumElements>() const
+----
+|====
+_Availability:_ These functions are available in both
+[code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#.
+
+_Constraints:_ Available only when [code]#NumElements > 1#.
+
+_Returns:_ A new [code]#vec# object that represents the elements of the
+[code]#vec# object that underlies the view with the swizzle operation applied.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template <int... swizzleIndexes> __writeable_swizzle__</*unspecified*/> swizzle() const  (1)
+
+__writeable_swizzle__</*unspecified*/> XYZW_ACCESS() const                               (2)
+__writeable_swizzle__</*unspecified*/> RGBA_ACCESS() const                               (3)
+__writeable_swizzle__</*unspecified*/> INDEX_ACCESS() const                              (4)
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__writeable_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                              (5)
+__writeable_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                              (6)
+#endif
+
+__writeable_swizzle__</*unspecified*/> lo() const                                        (7)
+__writeable_swizzle__</*unspecified*/> hi() const                                        (8)
+__writeable_swizzle__</*unspecified*/> odd() const                                       (9)
+__writeable_swizzle__</*unspecified*/> even() const                                      (10)
+
+
+template <int... swizzleIndexes> __const_swizzle__</*unspecified*/> swizzle() const      (11)
+
+__const_swizzle__</*unspecified*/> XYZW_ACCESS() const                                   (12)
+__const_swizzle__</*unspecified*/> RGBA_ACCESS() const                                   (13)
+__const_swizzle__</*unspecified*/> INDEX_ACCESS() const                                  (14)
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__const_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                                  (15)
+__const_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                                  (16)
+#endif
+
+__const_swizzle__</*unspecified*/> lo() const                                            (17)
+__const_swizzle__</*unspecified*/> hi() const                                            (18)
+__const_swizzle__</*unspecified*/> odd() const                                           (19)
+__const_swizzle__</*unspecified*/> even() const                                          (20)
+----
+|====
+_Availability:_ Functions (1) - (10) are available only in
+[code]#+__writeable_swizzle__+#.
+Functions (11) - (20) are available only in [code]#+__const_swizzle__+#.
+
+_Constraints:_ These functions have the same constraints as the equivalent
+member functions of the [code]#vec# class.
+
+_Returns:_ A new view of the underlying [code]#vec# object, where the view
+represents the combination of two swizzle operations.
+The first is the swizzle operation represented by the
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# view.
+The second is the swizzle operation defined by the member function.
+The indices used by the second swizzle are the indices produced by the first
+swizzle.
+For example, if the second swizzle references the first element, this means the
+element of the underlying [code]#vec# that corresponds to the first element
+produced by the first swizzle.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) const
+----
+|====
+_Availability:_ Available only in [code]#+__writeable_swizzle__+#.
+
+_Effects:_ Loads values from memory into elements of the underlying [code]#vec#
+object.
+A total of [code]#NumElements# values are loaded from memory, starting at the
+the address [code]#ptr + offset*sizeof(DataT)#.
+The first value from memory is written to the element in [code]#vec# that
+corresponds to the first element of the swizzle operation.
+The second value from memory is written to the element in [code]#vec# that
+corresponds to the second element of the swizzle operation, etc.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+DataT& operator[](int index) const        (1)
+const DataT& operator[](int index) const  (2)
+----
+|====
+_Availability:_ Functions (1) is available only in
+[code]#+__writeable_swizzle__+#.
+Functions (2) is available only in [code]#+__const_swizzle__+#.
+
+_Returns:_ A reference to the element of the underlying [code]#vec# object that
+corresponds to the position [code]#index# of the swizzle operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template</*unspecified*/>
+const __writeable_swizzle__& operator=(const __writeable_swizzle__</*unspecified*/>& rhs) const
+
+template</*unspecified*/>
+const __writeable_swizzle__& operator=(const __const_swizzle__</*unspecified*/>& rhs) const
+----
+|====
+_Availability:_ Available only in [code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when all of the following conditions are met:
+
+* The element data type of [code]#rhs# is the same as [code]#DataT#;
+* The number of elements in the [code]#rhs# view is equal to
+  [code]#NumElements#; and
+* The [code]#+__writeable_swizzle__+# view (i.e. the left hand side of the
+  assignment) does not contain any repeated elements.
+
+_Effects:_ Assigns elements from the right hand side
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# view to elements
+of the left hand side [code]#+__writeable_swizzle__+# view.
+The value corresponding to the first element of the [code]#rhs# swizzle
+operation is assigned to the element of the underlying [code]#vec# object that
+corresponds to the first element of the left hand side swizzle operation, etc.
+
+_Returns:_ A reference to the left hand side [code]#+__writeable_swizzle__+#
+view.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+const __writeable_swizzle__& operator=(const DataT& rhs) const
+----
+|====
+_Availability:_ Available only in [code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+
+_Effects:_ Assigns the value [code]#rhs# to those elements of the underlying
+[code]#vec# object that have corresponding elements in the
+[code]#+__writeable_swizzle__+# view.
+Elements in the underlying [code]#vec# object that do not have elements in the
+[code]#+__writeable_swizzle__+# view are not assigned.
+
+_Returns:_ A reference to the [code]#+__writeable_swizzle__+# view.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+const __writeable_swizzle__& operator=(const vec<DataT, NumElements>& rhs) const
+----
+|====
+_Availability:_ Available only in [code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+
+_Effects:_ Assigns elements from [code]#rhs# to elements of the [code]#vec#
+object that underlies this [code]#+__writeable_swizzle__+# view.
+The first element of [code]#rhs# is assigned to the element of the underlying
+[code]#vec# object that corresponds to the first element of the swizzle
+operation, etc.
+
+_Returns:_ A reference to the [code]#+__writeable_swizzle__+# view.
+
+[[sec:functions.swizzled-vec]]
+===== Hidden friend functions of the swizzled vector class templates
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template</*unspecified*/>                                                               (1)
+friend vec<DataT, NumElements>
+operatorOP(const __writeable_swizzle__& lhs,
+           const __writeable_swizzle__</*unspecified*/>& rhs)
+
+template</*unspecified*/>                                                               (2)
+friend vec<DataT, NumElements>
+operatorOP(const __writeable_swizzle__& lhs,
+           const __const_swizzle__</*unspecified*/>& rhs)
+
+template</*unspecified*/>                                                               (3)
+friend vec<DataT, NumElements>
+operatorOP(const __const_swizzle__</*unspecified*/>& lhs,
+           const __writeable_swizzle__& rhs)
+
+template</*unspecified*/>                                                               (4)
+friend vec<DataT, NumElements>
+operatorOP(const __const_swizzle__& lhs, const __const_swizzle__</*unspecified*/>& rhs)
+
+friend vec<DataT, NumElements>                                                          (5)
+operatorOP(const vec<DataT, NumElements>& lhs, const __writeable_swizzle__& rhs)
+
+friend vec<DataT, NumElements>                                                          (6)
+operatorOP(const vec<DataT, NumElements>& lhs, const __const_swizzle__& rhs)
+
+friend vec<DataT, NumElements>                                                          (7)
+operatorOP(const __writeable_swizzle__& lhs, const vec<DataT, NumElements>& rhs)
+
+friend vec<DataT, NumElements>                                                          (8)
+operatorOP(const __const_swizzle__& lhs, const vec<DataT, NumElements>& rhs)
+
+friend vec<DataT, NumElements>                                                          (9)
+operatorOP(const __writeable_swizzle__& lhs, const DataT& rhs)
+
+friend vec<DataT, NumElements>                                                          (10)
+operatorOP(const __const_swizzle__& lhs, const DataT& rhs)
+
+friend vec<DataT, NumElements>                                                          (11)
+operatorOP(const DataT& lhs, const __writeable_swizzle__& rhs)
+
+friend vec<DataT, NumElements>                                                          (12)
+operatorOP(const DataT& lhs, const __const_swizzle__& rhs)
+----
+|====
+Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#,
+[code]#%#, [code]#&#, [code]#|#, [code]#^#, [code]#<<#, [code]#>>#.
+
+_Availability:_ Overloads (1), (2), (3), (5), (7), (9), and (11) are hidden
+friends of [code]#+__writeable_swizzle__+#.
+Overloads (4), (6), (8), (10), and (12) are hidden friends of
+[code]#+__const_swizzle__+#.
+
+_Constraints:_ If [code]#OP# is one of the following: [code]#%#, [code]#&#,
+[code]#|#, [code]#^#, [code]#<<#, [code]#>>#; available only when: [code]#DataT
+!= float && DataT != double && DataT != half#.
+
+In addition, overloads (1) - (4) are available only when the element data type
+of [code]#lhs# is the same as the element data type of [code]#rhs# and when the
+number of elements in the [code]#lhs# view is equal to the number of elements in
+the [code]#rhs# view.
+
+_Effects:_ These functions behave as though the swizzle operation represented by
+each [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# parameter
+was first evaluated into a temporary [code]#vec# object, and then
+[code]#operatorOP# was called with the temporary [code]#vec# object.
+
+_Returns:_ A new [code]#vec# object that represents the result of the operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template</*unspecified*/>                                                        (1)
+friend const __writeable_swizzle__&
+operatorOP(const __writeable_swizzle__& lhs,
+           const __writeable_swizzle__</*unspecified*/>& rhs)
+
+template</*unspecified*/>                                                        (2)
+friend const __writeable_swizzle__&
+operatorOP(const __writeable_swizzle__& lhs,
+           const __const_swizzle__</*unspecified*/>& rhs)
+
+friend const __writeable_swizzle__&                                              (3)
+operatorOP(const __writeable_swizzle__& lhs, const vec<DataT, NumElements>& rhs)
+
+friend const __writeable_swizzle__&                                              (4)
+operatorOP(const __writeable_swizzle__& lhs, const DataT& rhs)
+----
+|====
+Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#,
+[code]#%=#, [code]#&=#, [code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#.
+
+_Availability:_ These are hidden friend functions only in
+[code]#+__writeable_swizzle__+#.
+
+_Constraints:_ If [code]#OP# is one of the following: [code]#%=#, [code]#&=#,
+[code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when:
+[code]#DataT != float && DataT != double && DataT != half#.
+
+In addition, overloads (1) and (2) are available only when the element data type
+of [code]#lhs# is the same as the element data type of [code]#rhs# and when the
+number of elements in the [code]#lhs# view is equal to the number of elements in
+the [code]#rhs# view.
+
+_Effects:_ These functions operate as follow.
+
+A left hand side value is computed from [code]#lhs# by applying the swizzle
+operation on the underlying [code]#vec# object.
+If the [code]#rhs# is a [code]#+__writeable_swizzle__+# view, the right hand
+side value is computed the same way.
+Otherwise, the right hand side value is the same as [code]#rhs#.
+
+The non-assignment part of the operation is performed on these two values,
+producing a result.
+This result is assigned to [code]#lhs# as follows.
+
+The first element of the result is assigned to the [code]#vec# element that
+corresponds to the first element of the left-hand-side swizzle.
+The second element of the result is assigned to the [code]#vec# element that
+corresponds to the second element of the left-hand-side swizzle, etc.
+
+_Returns:_ A reference to the [code]#lhs#.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+friend const __writeable_swizzle__& operatorOP(const __writeable_swizzle__& sv)
+----
+|====
+Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
+
+_Availability:_ These are hidden friend functions only in
+[code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+
+_Effects:_ Perform an in-place element-wise [code]#OP# prefix arithmetic
+operation on those elements of the [code]#vec# object that have corresponding
+elements in the [code]#sv# view.
+Elements in the underlying [code]#vec# object that do not have elements in the
+[code]#sv# view are not modified.
+
+_Returns:_ A reference to the [code]#sv# view.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+friend vec<DataT, NumElements> operatorOP(const __writeable_swizzle__& sv, int)
+----
+|====
+Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
+
+_Availability:_ These are hidden friend functions only in
+[code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+
+_Effects:_ Perform an in-place element-wise [code]#OP# postfix arithmetic
+operation on those elements of the [code]#vec# object that have corresponding
+elements in the [code]#sv# view.
+Elements in the underlying [code]#vec# object that do not have elements in the
+[code]#sv# view are not modified.
+
+_Returns:_ A new [code]#vec# object that represents the elements of [code]#sv#
+after the swizzle operation is applied and before the postfix arithmetic
+operation is applied.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+friend vec<DataT, NumElements> operatorOP(const __writeable_swizzle__& sv)  (1)
+friend vec<DataT, NumElements> operatorOP(const __const_swizzle__& sv)      (2)
+----
+|====
+Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
+
+_Availability:_ Functions (1) are hidden friends in
+[code]#+__writeable_swizzle__+#.
+Functions (2) are hidden friends in [code]#+__const_swizzle__+#.
+
+_Effects:_ These functions behave as though the swizzle operation represented by
+the [code]#sv# parameter was first evaluated into a temporary [code]#vec#
+object, and then [code]#operatorOP# was applied to the temporary [code]#vec#
+object.
+
+_Returns:_ A [code]#vec# object that represents the result of the operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template</*unspecified*/>                                                               (1)
+friend vec<RET, NumElements>
+operatorOP(const __writeable_swizzle__& lhs,
+           const __writeable_swizzle__</*unspecified*/>& rhs)
+
+template</*unspecified*/>                                                               (2)
+friend vec<RET, NumElements>
+operatorOP(const __writeable_swizzle__& lhs,
+           const __const_swizzle__</*unspecified*/>& rhs)
+
+template</*unspecified*/>                                                               (3)
+friend vec<RET, NumElements>
+operatorOP(const __const_swizzle__</*unspecified*/>& lhs,
+           const __writeable_swizzle__& rhs)
+
+template</*unspecified*/>                                                               (4)
+friend vec<RET, NumElements>
+operatorOP(const __const_swizzle__& lhs, const __const_swizzle__</*unspecified*/>& rhs)
+
+friend vec<RET, NumElements>                                                            (5)
+operatorOP(const vec<DataT, NumElements>& lhs, const __writeable_swizzle__& rhs)
+
+friend vec<RET, NumElements>                                                            (6)
+operatorOP(const vec<DataT, NumElements>& lhs, const __const_swizzle__& rhs)
+
+friend vec<RET, NumElements>                                                            (7)
+operatorOP(const __writeable_swizzle__& lhs, const vec<DataT, NumElements>& rhs)
+
+friend vec<RET, NumElements>                                                            (8)
+operatorOP(const __const_swizzle__& lhs, const vec<DataT, NumElements>& rhs)
+
+friend vec<RET, NumElements>                                                            (9)
+operatorOP(const __writeable_swizzle__& lhs, const DataT& rhs)
+
+friend vec<RET, NumElements>                                                            (10)
+operatorOP(const __const_swizzle__& lhs, const DataT& rhs)
+
+friend vec<RET, NumElements>                                                            (11)
+operatorOP(const DataT& lhs, const __writeable_swizzle__& rhs)
+
+friend vec<RET, NumElements>                                                            (12)
+operatorOP(const DataT& lhs, const __const_swizzle__& rhs)
+----
+|====
+Where [code]#OP# is: [code]#&&#, [code]#||#, [code]#==#, [code]#!=#, [code]#<#,
+[code]#>#, [code]#+<=+#, [code]#>=#.
+
+_Availability:_ Overloads (1), (2), (3), (5), (7), (9), and (11) are hidden
+friends of [code]#+__writeable_swizzle__+#.
+Overloads (4), (6), (8), (10), and (12) are hidden friends of
+[code]#+__const_swizzle__+#.
+
+_Constraints:_ Overloads (1) - (4) are available only when the element data type
+of [code]#lhs# is the same as the element data type of [code]#rhs# and when the
+number of elements in the [code]#lhs# view is equal to the number of elements in
+the [code]#rhs# view.
+
+_Effects:_ These functions behave as though the swizzle operation represented by
+each [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# parameter
+was first evaluated into a temporary [code]#vec# object, and then
+[code]#operatorOP# was called with the temporary [code]#vec# object.
+
+_Returns:_ A [code]#vec# object that represents the result of the operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+friend vec<DataT, NumElements> operator~(const __writeable_swizzle__& sv)  (1)
+friend vec<DataT, NumElements> operator~(const __const_swizzle__& sv)      (2)
+
+friend vec<RET, NumElements> operator!(const __writeable_swizzle__& sv)    (3)
+friend vec<RET, NumElements> operator!(const __const_swizzle__& sv)        (4)
+----
+|====
+_Availability:_ Overloads (1) and (3) are hidden friends of
+[code]#+__writeable_swizzle__+#.
+Overloads (2) and (4) are hidden friends of [code]#+__const_swizzle__+#.
+
+_Constraints:_ Overloads (1) - (2) are available only when: [code]#DataT !=
+float && DataT != double && DataT != half#.
+
+_Effects:_ These functions behave as though the swizzle operation represented by
+the [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# parameter was
+first evaluated into a temporary [code]#vec# object, and then the bitwise or
+logical NOT operation was applied to the temporary [code]#vec# object.
+
+_Returns:_ A [code]#vec# object that represents the result of the operation.
 
 
 ==== Rounding modes
@@ -20853,6 +21518,13 @@ to represent the following address spaces:
 * [code]#access::address_space::private_space#
 * [code]#access::address_space::generic_space#
 
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
+
 [[table.math.functions]]
 .Math functions
 [separator="@"]
@@ -20881,13 +21553,13 @@ _Returns:_ The inverse cosine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the inverse cosine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -20914,14 +21586,14 @@ _Returns:_ The inverse hyperbolic cosine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the inverse hyperbolic cosine of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -20948,14 +21620,14 @@ _Returns:_ The value [code]#acos(x) / {pi}#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value
 [code]#acos(x[i]) / {pi}#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -20982,13 +21654,13 @@ _Returns:_ The inverse sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the inverse sine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21015,14 +21687,14 @@ _Returns:_ The inverse hyperbolic sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the inverse hyperbolic sine of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21049,13 +21721,13 @@ _Returns:_ The value [code]#asin(x) / {pi}#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#asin(x[i]) / {pi}#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21082,13 +21754,13 @@ _Returns:_ The inverse tangent of the input.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of the input, the inverse tangent of the element.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21118,7 +21790,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21128,7 +21800,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the arc tangent of
 [code]#y[i] / x[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21155,14 +21827,14 @@ _Returns:_ The hyperbolic inverse tangent of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the hyperbolic inverse tangent of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21189,13 +21861,13 @@ _Returns:_ The value [code]#atan(x) / {pi}#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#atan(x[i]) / {pi}#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21225,7 +21897,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21235,7 +21907,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value
 [code]#atan2(y[i], x[i]) / {pi}#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21262,13 +21934,13 @@ _Returns:_ The cube-root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the cube-root of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21296,14 +21968,14 @@ positive infinity rounding mode.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#x[i]# rounded to an
 integral value using the round to positive infinity rounding mode.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21334,7 +22006,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21344,7 +22016,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# with its sign changed to match the sign of [code]#y[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21371,13 +22043,13 @@ _Returns:_ The cosine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the cosine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21404,14 +22076,14 @@ _Returns:_ The hyperbolic cosine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the hyperbolic cosine of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21438,13 +22110,13 @@ _Returns:_ The value [code]#cos({pi} * x)#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#cos({pi} * x[i])#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21471,14 +22143,14 @@ _Returns:_ The complementary error function of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the complementary error function of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21506,13 +22178,13 @@ normal distribution).
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the error function of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21539,14 +22211,14 @@ _Returns:_ The base-_e_ exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the base-_e_ exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21573,14 +22245,14 @@ _Returns:_ The base-2 exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the base-2 exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21607,14 +22279,14 @@ _Returns:_ The base-10 exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the base-10 exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21641,13 +22313,13 @@ _Returns:_ The value [code]#e^x^-1.0#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#e^x[i]^-1.0#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21674,13 +22346,13 @@ _Returns:_ The absolute value of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the absolute value of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21710,7 +22382,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21720,7 +22392,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value
 [code]#x[i] - y[i]# if [code]#x[i] > y[i]#, otherwise +0.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21748,14 +22420,14 @@ negative infinity rounding mode.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#x[i]# rounded to an
 integral value using the round to negative infinity rounding mode.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21789,7 +22461,7 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# are each
    [code]#marray#; or
 ** [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# are any
-   combination of [code]#vec# and the [code]#+__swizzled_vec__+# type;
+   combination of [code]#vec# and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# have the same
   number of elements;
 * [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# have the same
@@ -21804,7 +22476,7 @@ intermediate products shall not occur. Edge case behavior is per the IEEE
 754-2008 standard.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21838,7 +22510,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21849,7 +22521,7 @@ if [code]#x[i] < y[i]#, otherwise [code]#x[i]#. If one element is a NaN, the
 result is the other element. If both elements are NaNs, the result is NaN.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (5):*
@@ -21857,7 +22529,7 @@ corresponding [code]#vec#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#y# if
@@ -21865,7 +22537,7 @@ _Returns:_ For each element of [code]#x#, the value [code]#y# if
 the other value. If both value are NaNs, the result is a NaN.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21899,7 +22571,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21910,7 +22582,7 @@ if [code]#y[i] < x[i]#, otherwise [code]#x[i]#. If one element is a NaN, the
 result is the other element. If both elements are NaNs, the result is NaN.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (5):*
@@ -21918,7 +22590,7 @@ corresponding [code]#vec#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#y# if
@@ -21926,7 +22598,7 @@ _Returns:_ For each element of [code]#x#, the value [code]#y# if
 the other value. If both value are NaNs, the result is a NaN.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -21956,7 +22628,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -21966,7 +22638,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value
 [code]#x[i] - y[i] * trunc(x[i]/y[i])#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22005,10 +22677,10 @@ where [code]#T# is the type of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type with element type [code]#float#,
+  [code]#+__swizzle__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
 * [code]#Ptr# is [code]#multi_ptr# with [code]#ElementType# equal to
-  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzled_vec__+#
+  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzle__+#
   type, in which case the [code]#ElementType# is the corresponding
   [code]#vec#; and
 * [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
@@ -22021,7 +22693,7 @@ _Returns:_ For each element of [code]#x#, the value
 [code]#T# is the element type of [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22062,13 +22734,13 @@ _Returns:_ The mantissa of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type with element type [code]#float#,
+  [code]#+__swizzle__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
 * [code]#Ptr# is [code]#multi_ptr# with the following [code]#ElementType#:
 ** If [code]#NonScalar# is [code]#marray#, [code]#ElementType# is
    [code]#marray# of [code]#int# with the same number of elements as
    [code]#NonScalar#;
-** If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+** If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
    [code]#ElementType# is [code]#vec# of [code]#int32_t# with the same number
    of elements as [code]#NonScalar#;
 * [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
@@ -22083,7 +22755,7 @@ mantissa * 2^exp^ equals [code]#x[i]#.  The exponent of each element of
 _Returns:_ For each element of [code]#x#, the mantissa of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22114,7 +22786,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22124,7 +22796,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value of the square
 root of +x[i]+^2^ + +y[i]+^2^ without undue overflow or underflow.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22153,7 +22825,7 @@ integer, where r is the value returned by
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, compute the integral part of
@@ -22163,7 +22835,7 @@ by [code]#std::numeric_limits<NonScalar::value_type)>::radix#.
 The return type depends on [code]#NonScalar#.  If [code]#NonScalar# is
 [code]#marray#, the return type is [code]#marray# of [code]#int# with the same
 number of element as [code]#NonScalar#.  If [code]#NonScalar# is [code]#vec# or
-the [code]#+__swizzled_vec__+# type, the return type is [code]#vec# of
+the [code]#+__swizzle__+# type, the return type is [code]#vec# of
 [code]#int32_t# with the same number of elements as [code]#NonScalar#.
 
 a@
@@ -22193,20 +22865,20 @@ _Returns:_ The value [code]#x# multiplied by 2^k^.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar1# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type;
+  [code]#+__swizzle__+# type;
 * The element type of [code]#NonScalar1# is [code]#float#, [code]#double#, or
   [code]#half#;
 * If [code]#NonScalar1# is [code]#marray#, [code]#NonScalar2# is [code]#marray#
   of [code]#int# with the same number of elements as [code]#NonScalar1#; and
-* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
-  [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzled_vec__+# type of
+* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
+  [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzle__+# type of
   [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
 
 _Returns:_ For each element of [code]#x# and [code]#k#, the value
 [code]#x[i]# multiplied by 2^k[i]^.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (5):*
@@ -22214,7 +22886,7 @@ corresponding [code]#vec#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type of [code]#NonScalar# is [code]#float#, [code]#double#, or
   [code]#half#.
 
@@ -22222,7 +22894,7 @@ _Returns:_ For each element of [code]#x#, the value [code]#x[i]# multiplied by
 2^k^.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22250,14 +22922,14 @@ _Returns:_ The natural logarithm of the absolute value of the gamma function of
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the natural logarithm of the absolute
 value of the gamma function of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22296,13 +22968,13 @@ _Returns:_ The natural logarithm of the absolute value of the gamma function of
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type with element type [code]#float#,
+  [code]#+__swizzle__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
 * [code]#Ptr# is [code]#multi_ptr# with the following [code]#ElementType#:
 ** If [code]#NonScalar# is [code]#marray#, [code]#ElementType# is
    [code]#marray# of [code]#int# with the same number of elements as
    [code]#NonScalar#;
-** If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+** If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
    [code]#ElementType# is [code]#vec# of [code]#int32_t# with the same number
    of elements as [code]#NonScalar#;
 * [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
@@ -22315,7 +22987,7 @@ _Returns:_ For each element of [code]#x#, the natural logarithm of the absolute
 value of the gamma function of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22342,14 +23014,14 @@ _Returns:_ The natural logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the natural logarithm of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22376,13 +23048,13 @@ _Returns:_ The base 2 logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the base 2 logarithm of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22409,14 +23081,14 @@ _Returns:_ The base 10 logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the base 10 logarithm of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22443,13 +23115,13 @@ _Returns:_ The value [code]#log(1.0 + x)#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#log(1.0 + x[i])#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22477,7 +23149,7 @@ _Returns:_ The integral part of log~r~|x|, where r is the value returned by
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the integral part of log~r~|x[i]|,
@@ -22485,7 +23157,7 @@ where r is the value returned by
 [code]#std::numeric_limits<NonScalar::value_type>::radix#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22521,7 +23193,7 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# are each
    [code]#marray#; or
 ** [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# are any
-   combination of [code]#vec# and the [code]#+__swizzled_vec__+# type;
+   combination of [code]#vec# and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# have the same
   number of elements;
 * [code]#NonScalar1#, [code]#NonScalar2#, and [code]#NonScalar3# have the same
@@ -22533,7 +23205,7 @@ _Returns:_ For each element of [code]#a#, [code]#b#, and [ode]#c#; the
 The approximate value of [code]#a[i] * b[i] + c[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22564,7 +23236,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22575,7 +23247,7 @@ if |x[i]| > |y[i]|, [code]#y[i]# if |y[i]| > |x[i]|, otherwise
 [code]#fmax(x[i], y[i])#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22606,7 +23278,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22617,7 +23289,7 @@ if |x[i]| < |y[i]|, [code]#y[i]# if |y[i]| < |x[i]|, otherwise
 [code]#fmin(x[i], y[i])#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22657,10 +23329,10 @@ _Returns:_ The fractional part of the argument [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type with element type [code]#float#,
+  [code]#+__swizzle__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
 * [code]#Ptr# is [code]#multi_ptr# with [code]#ElementType# equal to
-  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzled_vec__+#
+  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzle__+#
   type, in which case the [code]#ElementType# is the corresponding
   [code]#vec#; and
 * [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
@@ -22674,7 +23346,7 @@ pointed to by [code]#iptr#.
 _Returns:_ The fractional parts of each element of the argument [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22702,7 +23374,7 @@ in the significand of the resulting NaN.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#uint32_t#, [code]#uint64_t#, or [code]#uint16_t#.
 
 _Returns:_ A quiet NaN for each element of [code]#nancode#.  Each
@@ -22717,15 +23389,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<uint16_t, N># ![code]#marray<half, N>#
 
 ![code]#vec<uint32_t, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
 ![code]#vec<float, N>#
 
 ![code]#vec<uint64_t, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint64_t, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<uint64_t, N>#
 ![code]#vec<double, N>#
 
 ![code]#vec<uint16_t, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint16_t, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<uint16_t, N>#
 ![code]#vec<half, N>#
 !====
 
@@ -22759,7 +23431,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22770,7 +23442,7 @@ next representable floating-point value following [code]#x[i]# in the direction
 of [code]#y[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22800,7 +23472,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22810,7 +23482,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#y[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22837,20 +23509,20 @@ _Returns:_ The value of [code]#x# raised to the power [code]#y#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar1# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type;
+  [code]#+__swizzle__+# type;
 * The element type of [code]#NonScalar1# is [code]#float#, [code]#double#, or
   [code]#half#;
 * If [code]#NonScalar1# is [code]#marray#, [code]#NonScalar2# is [code]#marray#
   of [code]#int# with the same number of elements as [code]#NonScalar1#; and
-* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
-  [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzled_vec__+# type of
+* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
+  [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzle__+# type of
   [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
 
 _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#y[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22882,7 +23554,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22895,7 +23567,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#y[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22928,7 +23600,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same element type; and
 * The element type of [code]#NonScalar1# and [code]#NonScalar2# is
@@ -22941,7 +23613,7 @@ exact value of [code]#x[i]/y[i]#.  If there are two integers closest to
 is given the same sign as [code]#x[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -22989,12 +23661,12 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#Ptr# is [code]#multi_ptr# with the following [code]#ElementType#:
 ** If [code]#NonScalar1# is [code]#marray#, [code]#ElementType# is
    [code]#marray# of [code]#int# with the same number of elements as
    [code]#NonScalar1#;
-** If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+** If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
    [code]#ElementType# is [code]#vec# of [code]#int32_t# with the same number
    of elements as [code]#NonScalar1#;
 * [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
@@ -23013,7 +23685,7 @@ It stores these signed values to the object pointed to by [code]#quo#.
 _Returns:_ The values of [code]#r# defined above.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23043,7 +23715,7 @@ rounding modes.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#x[i]# rounded to an
@@ -23051,7 +23723,7 @@ integral value (using round to nearest even rounding mode) in floating-point
 format.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23078,20 +23750,20 @@ _Returns:_ The value of [code]#x# raised to the power [code]#1/y#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar1# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type;
+  [code]#+__swizzle__+# type;
 * The element type of [code]#NonScalar1# is [code]#float#, [code]#double#, or
   [code]#half#;
 * If [code]#NonScalar1# is [code]#marray#, [code]#NonScalar2# is [code]#marray#
   of [code]#int# with the same number of elements as [code]#NonScalar1#; and
-* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
-  [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzled_vec__+# type of
+* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
+  [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzle__+# type of
   [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
 
 _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#1/y[i]#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23119,7 +23791,7 @@ from zero, regardless of the current rounding direction.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the integral value nearest to
@@ -23127,7 +23799,7 @@ _Returns:_ For each element of [code]#x#, the integral value nearest to
 rounding direction.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23154,14 +23826,14 @@ _Returns:_ The inverse square root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the inverse square root of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23188,13 +23860,13 @@ _Returns:_ The sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the sine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23233,10 +23905,10 @@ _Returns:_ The sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type with element type [code]#float#,
+  [code]#+__swizzle__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
 * [code]#Ptr# is [code]#multi_ptr# with [code]#ElementType# equal to
-  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzled_vec__+#
+  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzle__+#
   type, in which case the [code]#ElementType# is the corresponding
   [code]#vec#; and
 * [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
@@ -23248,7 +23920,7 @@ computed cosine values are written to [code]#cosval#.
 _Returns:_ The sine of each element of [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23275,13 +23947,13 @@ _Returns:_ The hyperbolic sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the hyperbolic sine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23308,13 +23980,13 @@ _Returns:_ The value [code]#sin({pi} * x)#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#sin({pi} * x[i])#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23341,13 +24013,13 @@ _Returns:_ The square root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the square root of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23374,13 +24046,13 @@ _Returns:_ The tangent of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the tangent of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23407,14 +24079,14 @@ _Returns:_ The hyperbolic tangent of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the hyperbolic tangent of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23441,13 +24113,13 @@ _Returns:_ The value [code]#tan({pi} * x)#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#tan({pi} * x[i])#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23474,13 +24146,13 @@ _Returns:_ The gamma function of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the gamma function of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23508,14 +24180,14 @@ zero rounding mode.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ For each element of [code]#x#, the value [code]#x[i]# rounded to an
 integral value using the round to zero rounding mode.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
@@ -23531,6 +24203,13 @@ are defined in the backend specification.
 The intent is that these functions might make use of native device functionality
 which has better performance than their counterparts in <<sec:math-functions>>,
 but they may sacrifice accuracy or limit the set of legal input values.
+
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
 
 [[table.native.math.functions]]
 .Native precision math functions
@@ -23558,13 +24237,13 @@ _Returns:_ The cosine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the cosine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23589,14 +24268,14 @@ _Returns:_ The value [code]#x / y#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x# and [code]#y#, the value
 [code]#x[i] / y[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23621,14 +24300,14 @@ _Returns:_ The base-_e_ exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base-_e_ exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23653,14 +24332,14 @@ _Returns:_ The base-2 exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base-2 exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23685,14 +24364,14 @@ _Returns:_ The base-10 exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base-10 exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23717,14 +24396,14 @@ _Returns:_ The natural logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the natural logarithm of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23749,13 +24428,13 @@ _Returns:_ The base 2 logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base 2 logarithm of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23780,14 +24459,14 @@ _Returns:_ The base 10 logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base 10 logarithm of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23814,7 +24493,7 @@ _Returns:_ The value of [code]#x# raised to the power [code]#y#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Preconditions:_ Each element of [code]#x# must be greater than or equal to
@@ -23824,7 +24503,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#y[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23849,13 +24528,13 @@ _Returns:_ The reciprocal of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the reciprocal of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23880,14 +24559,14 @@ _Returns:_ The inverse square root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the inverse square root of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23912,13 +24591,13 @@ _Returns:_ The sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the sine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23943,13 +24622,13 @@ _Returns:_ The square root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the square root of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -23974,13 +24653,13 @@ _Returns:_ The tangent of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the tangent of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
@@ -23995,6 +24674,13 @@ The precision requirements for these functions are defined in the backend
 specification.
 The intent is that these functions have higher performance than their
 counterparts in <<sec:math-functions>>, but they have lower accuracy.
+
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
 
 [[table.half.math.functions]]
 .Half precision math functions
@@ -24024,7 +24710,7 @@ _Returns:_ The cosine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Preconditions:_ The value of each element of [code]#x# must be in the range
@@ -24033,7 +24719,7 @@ _Preconditions:_ The value of each element of [code]#x# must be in the range
 _Returns:_ For each element of [code]#x#, the cosine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24058,14 +24744,14 @@ _Returns:_ The value [code]#x / y#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x# and [code]#y#, the value
 [code]#x[i] / y[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24090,14 +24776,14 @@ _Returns:_ The base-_e_ exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base-_e_ exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24122,14 +24808,14 @@ _Returns:_ The base-2 exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base-2 exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24154,14 +24840,14 @@ _Returns:_ The base-10 exponential of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base-10 exponential of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24186,14 +24872,14 @@ _Returns:_ The natural logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the natural logarithm of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24218,13 +24904,13 @@ _Returns:_ The base 2 logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base 2 logarithm of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24249,14 +24935,14 @@ _Returns:_ The base 10 logarithm of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the base 10 logarithm of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24283,7 +24969,7 @@ _Returns:_ The value of [code]#x# raised to the power [code]#y#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Preconditions:_ Each element of [code]#x# must be greater than or equal to
@@ -24293,7 +24979,7 @@ _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#y[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24318,13 +25004,13 @@ _Returns:_ The reciprocal of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the reciprocal of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24349,14 +25035,14 @@ _Returns:_ The inverse square root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the inverse square root of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24383,7 +25069,7 @@ _Returns:_ The sine of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Preconditions:_ The value of each element of [code]#x# must be in the range
@@ -24392,7 +25078,7 @@ _Preconditions:_ The value of each element of [code]#x# must be in the range
 _Returns:_ For each element of [code]#x#, the sine of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24417,13 +25103,13 @@ _Returns:_ The square root of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Returns:_ For each element of [code]#x#, the square root of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24450,7 +25136,7 @@ _Returns:_ The tangent of [code]#x#.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#.
 
 _Preconditions:_ The value of each element of [code]#x# must be in the range
@@ -24459,7 +25145,7 @@ _Preconditions:_ The value of each element of [code]#x# must be in the range
 _Returns:_ For each element of [code]#x#, the tangent of [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
@@ -24470,8 +25156,15 @@ corresponding [code]#vec#.
 <<table.integer.functions>> describes the integer math functions that are
 available in the [code]#sycl# namespace in both host and device code.
 
-The function descriptions in this section use the term _generic integer type_ to
-represent the following types:
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
+
+The function descriptions in this section also use the term _generic integer
+type_ to represent the following types:
 
 * [code]#char#
 * [code]#signed char#
@@ -24503,14 +25196,14 @@ represent the following types:
 * [code]#vec<uint16_t, N>#
 * [code]#vec<uint32_t, N>#
 * [code]#vec<uint64_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int8_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int16_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint8_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint16_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<uint8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<uint16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<uint64_t, N>#
 
 [[table.integer.functions]]
 .Integer functions
@@ -24535,7 +25228,7 @@ for each element of [code]#x#.  The behavior is undefined if the result cannot
 be represented by the return type.
 
 The return type is [code]#GenInt# unless [code]#GenInt# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24552,11 +25245,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns |x - y|.  Otherwise, returns
@@ -24565,7 +25258,7 @@ done without modulo overflow.  The behavior is undefined if the result cannot
 be represented by the return type.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24582,11 +25275,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#x + y#.  Otherwise,
@@ -24594,7 +25287,7 @@ returns [code]#x[i] + y[i]# for each element of [code]#x# and [code]#y#.  The
 addition operation saturates the result.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24611,11 +25304,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#(x + y) >> 1#.
@@ -24623,7 +25316,7 @@ Otherwise, returns [code]#(x[i] + y[i]) >> 1# for each element of [code]#x# and
 [code]#y#.  The intermediate sum does not modulo overflow.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24640,11 +25333,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#(x + y + 1) >> 1#.
@@ -24652,7 +25345,7 @@ Otherwise, returns [code]#(x[i] + y[i] + 1) >> 1# for each element of [code]#x#
 and [code]#y#.  The intermediate sum does not modulo overflow.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24675,12 +25368,12 @@ template<typename NonScalar>                                      (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# and [code]#GenInt3# must be the same as [code]#GenInt1#;
   and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# and [code]#GenInt3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Preconditions:_ If the inputs are scalars, the value of [code]#minval# must be
@@ -24694,13 +25387,13 @@ _Returns:_ When the inputs are scalars, returns
 [code]#minval#, and [code]#maxval#.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic integer
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic integer
 type_ as defined above.
 
 _Preconditions:_ The value of [code]#minval# must be less than or equal to the
@@ -24710,7 +25403,7 @@ _Returns:_ [code]#min(max(x[i], minval), maxval)# for each element of
 [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24733,7 +25426,7 @@ the number of leading 0-bits in each element of [code]#x#.  When a value is 0,
 the computed count is the size in bits of that value.
 
 The return type is [code]#GenInt# unless [code]#GenInt# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24756,7 +25449,7 @@ _Returns:_ When the input is a scalar, returns the number of trailing 0-bits in
 value.
 
 The return type is [code]#GenInt# unless [code]#GenInt# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24773,12 +25466,12 @@ template<typename GenInt1, typename GenInt2, typename GenInt3>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# and [code]#GenInt3# must be the same as [code]#GenInt1#;
   and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# and [code]#GenInt3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#mul_hi(a, b)+c#.
@@ -24786,7 +25479,7 @@ Otherwise, returns [code]#mul_hi(a[i], b[i])+c[i]# for each element of
 [code]#a#, [code]#b#, and [code]#c#.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24803,12 +25496,12 @@ template<typename GenInt1, typename GenInt2, typename GenInt3>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# and [code]#GenInt3# must be the same as [code]#GenInt1#;
   and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# and [code]#GenInt3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#a * b + c#.  Otherwise,
@@ -24816,7 +25509,7 @@ returns [code]#a[i] * b[i] + c[i]# for each element of [code]#a#, [code]#b#,
 and [code]#c#.  The operation saturates the result.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24838,11 +25531,11 @@ template<typename NonScalar>                               (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#y# if [code]#x < y#
@@ -24851,20 +25544,20 @@ otherwise [code]#x#.  When the inputs are not scalars, returns [code]#y[i]# if
 [code]#y#.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic integer
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic integer
 type_ as defined above.
 
 _Returns:_ [code]#y# if [code]#x[i] < y# otherwise [code]#x[i]# for each
 element of [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24886,11 +25579,11 @@ template<typename NonScalar>                               (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#y# if [code]#y < x#
@@ -24899,20 +25592,20 @@ otherwise [code]#x#.  When the inputs are not scalars, returns [code]#y[i]# if
 [code]#y#.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic integer
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic integer
 type_ as defined above.
 
 _Returns:_ [code]#y# if [code]#y < x[i]# otherwise [code]#x[i]# for each
 element of [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24929,11 +25622,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Effects:_ Computes [code]#x * y# and returns the high half of the product of
@@ -24944,7 +25637,7 @@ _Returns:_ When the inputs are scalars, returns the high half of the product of
 [code]#x[i] * y[i]# for each element of [code]#x# and [code]#y#.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24961,11 +25654,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Effects:_ For each element in [code]#v#, the bits are shifted left by the
@@ -24980,7 +25673,7 @@ _Returns:_ When the inputs are scalars, the result of rotating [code]#v# by
 [code]#count#.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -24997,11 +25690,11 @@ template<typename GenInt1, typename GenInt2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenInt1# is a _generic integer type_ as defined above;
-* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must be the same as [code]#GenInt1#; and
-* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenInt1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenInt2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns [code]#x - y#.  Otherwise, returns
@@ -25009,7 +25702,7 @@ _Returns:_ When the inputs are scalars, returns [code]#x - y#.  Otherwise, retur
 operation saturates the result.
 
 The return type is [code]#GenInt1# unless [code]#GenInt1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25029,7 +25722,7 @@ _Constraints:_ Available only if one of the following conditions is met:
 * [code]#UInt8Bit1# and [code]#UInt8Bit2# are both [code]#marray# with element
   type [code]#uint8_t# and the same number of elements; or
 * [code]#UInt8Bit1# and [code]#UInt8Bit2# are any combination of [code]#vec# or
-  the [code]#+__swizzled_vec__+# type with element type [code]#uint8_t# and the
+  the [code]#+__swizzle__+# type with element type [code]#uint8_t# and the
   same number of elements.
 
 _Returns:_ When the inputs are scalars, returns
@@ -25060,9 +25753,9 @@ _Constraints:_ Available only if one of the following conditions is met:
 * [code]#Int8Bit# is [code]#marray# with element type [code]#int8_t# and
   [code]#UInt8Bit# is [code]#marray# with element type [code]#uint8_t# and
   both have the same number of elements; or
-* [code]#Int8Bit# is [code]#vec# or the [code]#+__swizzled_vec__+# type with
+* [code]#Int8Bit# is [code]#vec# or the [code]#+__swizzle__+# type with
   element type [code]#int8_t# and [code]#UInt8Bit# is [code]#vec# or the
-  [code]#+__swizzled_vec__+# type with element type [code]#uint8_t# and both
+  [code]#+__swizzle__+# type with element type [code]#uint8_t# and both
   have the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns
@@ -25093,7 +25786,7 @@ _Constraints:_ Available only if one of the following conditions is met:
 * [code]#UInt16Bit1# and [code]#UInt16Bit2# are both [code]#marray# with
   element type [code]#uint16_t# and the same number of elements; or
 * [code]#UInt16Bit1# and [code]#UInt16Bit2# are any combination of [code]#vec#
-  or the [code]#+__swizzled_vec__+# type with element type [code]#uint16_t# and
+  or the [code]#+__swizzle__+# type with element type [code]#uint16_t# and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns
@@ -25125,9 +25818,9 @@ _Constraints:_ Available only if one of the following conditions is met:
 * [code]#Int16Bit# is [code]#marray# with element type [code]#int16_t# and
   [code]#UInt16Bit# is [code]#marray# with element type [code]#uint16_t# and
   both have the same number of elements; or
-* [code]#Int16Bit# is [code]#vec# or the [code]#+__swizzled_vec__+# type with
+* [code]#Int16Bit# is [code]#vec# or the [code]#+__swizzle__+# type with
   element type [code]#int16_t# and [code]#UInt16Bit# is [code]#vec# or the
-  [code]#+__swizzled_vec__+# type with element type [code]#uint16_t# and both
+  [code]#+__swizzle__+# type with element type [code]#uint16_t# and both
   have the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns
@@ -25158,7 +25851,7 @@ _Constraints:_ Available only if one of the following conditions is met:
 * [code]#UInt32Bit1# and [code]#UInt32Bit2# are both [code]#marray# with
   element type [code]#uint32_t# and the same number of elements; or
 * [code]#UInt32Bit1# and [code]#UInt32Bit2# are any combination of [code]#vec#
-  or the [code]#+__swizzled_vec__+# type with element type [code]#uint32_t# and
+  or the [code]#+__swizzle__+# type with element type [code]#uint32_t# and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns
@@ -25190,9 +25883,9 @@ _Constraints:_ Available only if one of the following conditions is met:
 * [code]#Int32Bit# is [code]#marray# with element type [code]#int32_t# and
   [code]#UInt32Bit# is [code]#marray# with element type [code]#uint32_t# and
   both have the same number of elements; or
-* [code]#Int32Bit# is [code]#vec# or the [code]#+__swizzled_vec__+# type with
+* [code]#Int32Bit# is [code]#vec# or the [code]#+__swizzle__+# type with
   element type [code]#int32_t# and [code]#UInt32Bit# is [code]#vec# or the
-  [code]#+__swizzled_vec__+# type with element type [code]#uint32_t# and both
+  [code]#+__swizzle__+# type with element type [code]#uint32_t# and both
   have the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns
@@ -25225,7 +25918,7 @@ _Returns:_ When the input is a scalar, returns the number of non-zero bits in
 each element of [code]#x#.
 
 The return type is [code]#GenInt# unless [code]#GenInt# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25248,14 +25941,14 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#marray<uint32_t, N>#
 ** [code]#vec<int32_t, N>#
 ** [code]#vec<uint32_t, N>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
-* If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
+* If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#Int32Bit2# and [code]#Int32Bit# must be the same as
   [code]#Int32Bit1#; and
-* If [code]#Int32Bit1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#Int32Bit1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#Int32Bit2# and [code]#Int32Bit3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Preconditions:_  If the inputs are signed scalars, the values of [code]#x# and
@@ -25269,7 +25962,7 @@ returns [code]#x[i] * y[i] + z[i]# for each element of [code]#x#, [code]#y#,
 and [code]#z#.
 
 The return type is [code]#Int32Bit1# unless [code]#Int32Bit1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25292,13 +25985,13 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#marray<uint32_t, N>#
 ** [code]#vec<int32_t, N>#
 ** [code]#vec<uint32_t, N>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<uint32_t, N>#
-* If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
+* If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#Int32Bit2# must be the same as [code]#Int32Bit1#; and
-* If [code]#Int32Bit1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#Int32Bit1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#Int32Bit2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Preconditions:_  If the inputs are signed scalars, the values of [code]#x# and
@@ -25311,7 +26004,7 @@ _Returns:_ When the inputs are scalars, returns [code]#x * y#.  Otherwise,
 returns [code]#x[i] * y[i]# for each element of [code]#x# and [code]#y#.
 
 The return type is [code]#Int32Bit1# unless [code]#Int32Bit1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
@@ -25321,8 +26014,15 @@ corresponding [code]#vec#.
 <<table.common.functions>> describes the common functions that are available in
 the [code]#sycl# namespace in both host and device code.
 
-The function descriptions in this section use the term _generic floating point
-type_ to represent the following types:
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
+
+The function descriptions in this section also use the term _generic floating
+point type_ to represent the following types:
 
 * [code]#float#
 * [code]#double#
@@ -25333,9 +26033,9 @@ type_ to represent the following types:
 * [code]#vec<float, N>#
 * [code]#vec<double, N>#
 * [code]#vec<half, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 
 [[table.common.functions]]
 .Common functions
@@ -25361,12 +26061,12 @@ template<typename NonScalar>                                            (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenFloat1# is a _generic floating point type_ as defined above;
-* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenFloat2# and [code]#GenFloat3# must be the same as
   [code]#GenFloat1#; and
-* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenFloat2# and [code]#GenFloat3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Preconditions:_ If the inputs are scalars, the value of [code]#minval# must be
@@ -25380,13 +26080,13 @@ _Returns:_ When the inputs are scalars, returns
 [code]#minval#, and [code]#maxval#.
 
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic floating
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic floating
 point type_ as defined above.
 
 _Preconditions:_ The value of [code]#minval# must be less than or equal to the
@@ -25396,7 +26096,7 @@ _Returns:_ [code]#fmin(fmax(x[i], minval), maxval)# for each element of
 [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25420,7 +26120,7 @@ Otherwise, returns [code]#(180 / {pi}) * radians[i]# for each element of
 [code]#radians#.
 
 The return type is [code]#GenFloat# unless [code]#GenFloat# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25442,11 +26142,11 @@ template<typename NonScalar>                               (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenFloat1# is a _generic floating point type_ as defined above;
-* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenFloat2# must be the same as [code]#GenFloat1#; and
-* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenFloat2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Preconditions:_ When the inputs are scalars, [code]#x# and [code]#y# must not
@@ -25459,13 +26159,13 @@ otherwise [code]#x#.  When the inputs are not scalars, returns [code]#y[i]# if
 [code]#y#.
 
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic floating
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic floating
 point type_ as defined above.
 
 _Preconditions:_ No element of [code]#x# may be infinite or NaN.  The value of
@@ -25475,7 +26175,7 @@ _Returns:_ [code]#y# if [code]#x[i] < y# otherwise [code]#x[i]# for each
 element of [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25497,11 +26197,11 @@ template<typename NonScalar>                               (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenFloat1# is a _generic floating point type_ as defined above;
-* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenFloat2# must be the same as [code]#GenFloat1#; and
-* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenFloat2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Preconditions:_ When the inputs are scalars, [code]#x# and [code]#y# must not
@@ -25514,13 +26214,13 @@ otherwise [code]#x#.  When the inputs are not scalars, returns [code]#y[i]# if
 [code]#y#.
 
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic floating
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic floating
 point type_ as defined above.
 
 _Preconditions:_ No element of [code]#x# may be infinite or NaN.  The value of
@@ -25530,7 +26230,7 @@ _Returns:_ [code]#y# if [code]#y < x[i]# otherwise [code]#x[i]# for each
 element of [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25552,12 +26252,12 @@ template<typename NonScalar1, typename NonScalar2>                         (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenFloat1# is a _generic floating point type_ as defined above;
-* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenFloat2# and [code]#GenFloat3# must be the same as
   [code]#GenFloat1#; and
-* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenFloat2# and [code]#GenFloat3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Preconditions:_ If the inputs are scalars, the value of [code]#a# must be
@@ -25570,13 +26270,13 @@ scalars, returns [code]#x + (y - x) * a#.  Otherwise, returns
 and [code]#a#.
 
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic floating
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic floating
 point type_ as defined above.
 
 _Preconditions:_ The value of [code]#a# must be in the range [0.0, 1.0].
@@ -25585,7 +26285,7 @@ _Returns:_ The linear blend of [code]#x# and [code]#y#, computed as
 [code]#x[i] + (y[i] - x[i]) * a# for each element of [code]#x# and [code]#y#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25609,7 +26309,7 @@ Otherwise, returns [code]#({pi} / 180) * degrees[i]# for each element of
 [code]#degrees#.
 
 The return type is [code]#GenFloat# unless [code]#GenFloat# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25631,11 +26331,11 @@ template<typename NonScalar>                                   (2)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenFloat1# is a _generic floating point type_ as defined above;
-* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenFloat2# must be the same as [code]#GenFloat1#; and
-* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenFloat2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ When the inputs are scalars, returns the value
@@ -25644,20 +26344,20 @@ the value [code]#(x[i] < edge[i]) ? 0.0 : 1.0# for each element of [code]#x#
 and [code]#edge#.
 
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic floating
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic floating
 point type_ as defined above.
 
 _Returns:_ The value [code]#(x[i] < edge) ? 0.0 : 1.0# for each element of
 [code]#x#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25676,12 +26376,12 @@ template<typename GenFloat1, typename GenFloat2, typename GenFloat3>       (1)
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GenFloat1# is a _generic floating point type_ as defined above;
-* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenFloat2# and [code]#GenFloat3# must be the same as
   [code]#GenFloat1#; and
-* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenFloat1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenFloat2# and [code]#GenFloat3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Preconditions:_ If the inputs are scalar, [code]#edge0# must be less than
@@ -25713,7 +26413,7 @@ return t * t * (3 - 2 * t);
 ----
 
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25731,7 +26431,7 @@ template<typename NonScalar>                                                    
 *Overload (2):*
 
 _Constraints:_ Available only if [code]#NonScalar# is [code]#marray#,
-[code]#vec#, or the [code]#+__swizzled_vec__+# type and is a _generic floating
+[code]#vec#, or the [code]#+__swizzle__+# type and is a _generic floating
 point type_ as defined above.
 
 _Preconditions:_ The value of [code]#edge0# must be less than [code]#edge1# and
@@ -25748,7 +26448,7 @@ return t * t * (3 - 2 * t);
 ----
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25771,7 +26471,7 @@ _Returns:_ When the input is scalar, returns 1.0 if [code]#x > 0#, -0.0 if
 each element of [code]#x#.
 
 The return type is [code]#GenFloat# unless [code]#GenFloat# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
@@ -25782,8 +26482,15 @@ corresponding [code]#vec#.
 <<table.geometric.functions>> describes the geometric functions that are
 available in the [code]#sycl# namespace in both host and device code.
 
-The function descriptions in this section use two terms that refer to a specific
-list of types.
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
+
+The function descriptions in this section also use two terms that refer to a
+specific list of types.
 The term _generic geometric type_ represents the following types:
 
 * [code]#float#
@@ -25795,11 +26502,11 @@ The term _generic geometric type_ represents the following types:
 * [code]#vec<float, N>#, where [code]#N# is 2, 3, or 4
 * [code]#vec<double, N>#, where [code]#N# is 2, 3, or 4
 * [code]#vec<half, N>#, where [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#, where
+* [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#, where
   [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#,
-  where [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#, where
+* [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#, where
+  [code]#N# is 2, 3, or 4
+* [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#, where
   [code]#N# is 2, 3, or 4
 
 The term _float geometric type_ represents these types:
@@ -25807,7 +26514,7 @@ The term _float geometric type_ represents these types:
 * [code]#float#
 * [code]#marray<float, N>#, where [code]#N# is 2, 3, or 4
 * [code]#vec<float, N>#, where [code]#N# is 2, 3, or 4
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#, where
+* [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#, where
   [code]#N# is 2, 3, or 4
 
 [[table.geometric.functions]]
@@ -25840,24 +26547,24 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#vec<float, 4>#
 ** [code]#vec<double, 4>#
 ** [code]#vec<half, 4>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, 3>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, 3>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, 3>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, 4>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, 4>#
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, 4>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<float, 3>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<double, 3>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<half, 3>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<float, 4>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<double, 4>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<half, 4>#
 * If [code]#Geo3or4Float1# is [code]#marray#, then [code]#Geo3or4Float2# must
   be the same as [code]#Geo3or4Float1#; and
-* If [code]#Geo3or4Float1# is [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#Geo3or4Float1# is [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#Geo3or4Float2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ The cross product of first 3 components of [code]#p0# and [code]#p1#.
 When the inputs have 4 components, the 4th component of the result is 0.0.
 
 The return type is [code]#Geo3or4Float1# unless [code]#Geo3or4Float1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25874,11 +26581,11 @@ template<typename GeoFloat1, typename GeoFloat2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GeoFloat1# is a _generic geometric type_ as defined above;
-* If [code]#GeoFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GeoFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GeoFloat2# must be the same as [code]#GeoFloat1#; and
-* If [code]#GeoFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GeoFloat1# is [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GeoFloat2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ The dot product of [code]#p0# and [code]#p1#.
@@ -25900,11 +26607,11 @@ template<typename GeoFloat1, typename GeoFloat2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GeoFloat1# is a _generic geometric type_ as defined above;
-* If [code]#GeoFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GeoFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GeoFloat2# must be the same as [code]#GeoFloat1#; and
-* If [code]#GeoFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GeoFloat1# is [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GeoFloat2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same element type and
+  [code]#+__swizzle__+# type, and both must have the same element type and
   the same number of elements.
 
 _Returns:_ The distance between [code]#p0# and [code]#p1#. This is calculated
@@ -25950,7 +26657,7 @@ as defined above.
 _Returns:_ A vector in the same direction as [code]#p# but with a length of 1.
 
 The return type is [code]#GeoFloat# unless [code]#GeoFloat# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -25967,11 +26674,11 @@ template<typename GeoFloat1, typename GeoFloat2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#GeoFloat1# is a _float geometric type_ as defined above;
-* If [code]#GeoFloat1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GeoFloat1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GeoFloat2# must be the same as [code]#GeoFloat1#; and
-* If [code]#GeoFloat1# is [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GeoFloat1# is [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GeoFloat2# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and both must have the same number of
+  [code]#+__swizzle__+# type, and both must have the same number of
   elements.
 
 _Returns:_ The value [code]#fast_length(p0 - p1)#.
@@ -26038,7 +26745,7 @@ with the following exceptions:
 --
 
 The return type is [code]#GeoFloat# unless [code]#GeoFloat# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
@@ -26057,8 +26764,15 @@ The comparisons performed by [code]#isequal#, [code]#isgreater#,
 The comparison performed by [code]#isnotequal# is true when one or both operands
 are NaN.
 
-The function descriptions in this section use two terms that refer to a specific
-list of types.
+The descriptions in this section use the type name [code]#+__swizzle__+# to
+refer to the classes defined in <<swizzled-vec-class>>.
+This type can be any instantiation of the class templates named
+[code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# in that section,
+so long as the instantiation satisfies the constraints listed in the function's
+description.
+
+The function descriptions in this section also use two terms that refer to a
+specific list of types.
 The term _generic scalar type_ represents the following types:
 
 * [code]#char#
@@ -26121,14 +26835,14 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#(x[i] == y[i])# for each element of [code]#x# and [code]#y#.  If
-[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((x[i] == y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
@@ -26142,15 +26856,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26181,14 +26895,14 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#(x[i] != y[i])# for each element of [code]#x# and [code]#y#.
-If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((x[i] != y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
@@ -26202,15 +26916,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26241,14 +26955,14 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#(x[i] > y[i])# for each element of [code]#x# and [code]#y#.  If
-[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((x[i] > y[i]) ? -1 : 0)# for each element
 of [code]#x# and [code]#y#.
 
@@ -26262,15 +26976,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26301,14 +27015,14 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#(x[i] >= y[i])# for each element of [code]#x# and [code]#y#.  If
-[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((x[i] >= y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
@@ -26322,15 +27036,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26361,14 +27075,14 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#(x[i] < y[i])# for each element of [code]#x# and [code]#y#.  If
-[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((x[i] < y[i]) ? -1 : 0)# for each element of
 [code]#x# and [code]#y#.
 
@@ -26382,15 +27096,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26421,14 +27135,14 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#+(x[i] <= y[i])+# for each element of [code]#x# and [code]#y#.  If
-[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#+((x[i] <= y[i]) ? -1 : 0)+# for each element of
 [code]#x# and [code]#y#.
 
@@ -26442,15 +27156,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26481,7 +27195,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
@@ -26489,7 +27203,7 @@ _Constraints:_ Available only if all of the following conditions are met:
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#(x[i] < y[i] || x[i] > y[i])# for each element of [code]#x# and
 [code]#y#.  If [code]#NonScalar1# is [code]#vec# or the
-[code]#+__swizzled_vec__+# type, returns the value
+[code]#+__swizzle__+# type, returns the value
 [code]#((x[i] < y[i] || x[i] > y[i]) ? -1 : 0)# for each element of [code]#x#
 and [code]#y#.
 
@@ -26503,15 +27217,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26539,12 +27253,12 @@ _Returns:_ The value [code]#true# only if [code]#x# has finite value.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar# is [code]#marray#, returns true for each
 element of [code]#x# only if [code]#x[i]# is a finite value.  If
-[code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns -1 for each element of [code]#x# if [code]#x[i]# is a finite value and
 returns 0 otherwise.
 
@@ -26558,15 +27272,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26595,12 +27309,12 @@ _Returns:_ The value [code]#true# only if [code]#x# has an infinity value
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar# is [code]#marray#, returns true for each
 element of [code]#x# only if [code]#x[i]# has an infinity value.  If
-[code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns -1 for each element of [code]#x# if [code]#x[i]# has an infinity
 value and returns 0 otherwise.
 
@@ -26614,15 +27328,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26650,12 +27364,12 @@ _Returns:_ The value [code]#true# only if [code]#x# has a NaN value.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar# is [code]#marray#, returns true for each
 element of [code]#x# only if [code]#x[i]# has a NaN value.  If
-[code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns -1 for each element of [code]#x# if [code]#x[i]# has a NaN value and
 returns 0 otherwise.
 
@@ -26669,15 +27383,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26705,12 +27419,12 @@ _Returns:_ The value [code]#true# only if [code]#x# has a normal value.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar# is [code]#marray#, returns true for each
 element of [code]#x# only if [code]#x[i]# has a normal value.  If
-[code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns -1 for each element of [code]#x# if [code]#x[i]# has a normal value and
 returns 0 otherwise.
 
@@ -26724,15 +27438,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26765,7 +27479,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
@@ -26775,7 +27489,7 @@ _Effects:_ Tests if each element of [code]#x# and [code]#y# are ordered.
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#isequal(x[i], x[i]) && isequal(y[i], y[i])# for each element of
 [code]#x# and [code]#y#.  If [code]#NonScalar1# is [code]#vec# or the
-[code]#+__swizzled_vec__+# type, returns the value
+[code]#+__swizzle__+# type, returns the value
 [code]#((isequal(x[i], x[i]) && isequal(y[i], y[i]) ? -1 : 0)# for each element
 of [code]#x# and [code]#y#.
 
@@ -26789,15 +27503,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26830,7 +27544,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   [code]#NonScalar2#:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
-   and the [code]#+__swizzled_vec__+# type;
+   and the [code]#+__swizzle__+# type;
 * [code]#NonScalar1# and [code]#NonScalar2# have the same number of elements
   and the same element type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
@@ -26839,7 +27553,7 @@ _Effects:_ Tests if each element of [code]#x# and [code]#y# are unordered.
 
 _Returns:_ If [code]#NonScalar1# is [code]#marray#, the value
 [code]#isnan(x[i]) || isnan(y[i])# for each element of [code]#x# and [code]#y#.
-If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((isnan(x[i]) || isnan(y[i]) ? -1 : 0)# for each
 element of [code]#x# and [code]#y#.
 
@@ -26853,15 +27567,15 @@ The return type depends on [code]#NonScalar1#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26889,12 +27603,12 @@ _Returns:_ The value [code]#true# only if the sign bit of [code]#x# is set.
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
-  [code]#+__swizzled_vec__+# type; and
+  [code]#+__swizzle__+# type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
 _Returns:_ If [code]#NonScalar# is [code]#marray#, returns true for each
 element of [code]#x# only if the sign bit of [code]#x[i]# is set.  If
-[code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+[code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns -1 for each element of [code]#x# if the sign bit of [code]#x[i]# is set
 and returns 0 otherwise.
 
@@ -26908,15 +27622,15 @@ The return type depends on [code]#NonScalar#:
 ![code]#marray<bool, N>#
 
 ![code]#vec<float, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<float, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
 ![code]#vec<int32_t, N>#
 
 ![code]#vec<double, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<double, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
 ![code]#vec<int64_t, N>#
 
 ![code]#vec<half, N># +
- [code]#+__swizzled_vec__+# that is convertible to [code]#vec<half, N>#
+ [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
 ![code]#vec<int16_t, N>#
 !====
 
@@ -26943,14 +27657,14 @@ _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 * [code]#vec<int16_t, N>#
 * [code]#vec<int32_t, N>#
 * [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int8_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int16_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int64_t, N>#
 
 _Returns:_ When [code]#x# is [code]#marray#, returns a Boolean telling whether
 any element of [code]#x# is true.  When [code]#x# is [code]#vec# or the
-[code]#+__swizzled_vec__+# type, returns the value 1 if any element in
+[code]#+__swizzle__+# type, returns the value 1 if any element in
 [code]#x# has its most significant bit set, otherwise returns the value 0.
 
 The return type is [code]#bool# if [code]#GenInt# is [code]#marray#.
@@ -27001,14 +27715,14 @@ _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 * [code]#vec<int16_t, N>#
 * [code]#vec<int32_t, N>#
 * [code]#vec<int64_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int8_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int16_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int32_t, N>#
-* [code]#+__swizzled_vec__+# that is convertible to [code]#vec<int64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<int64_t, N>#
 
 _Returns:_ When [code]#x# is [code]#marray#, returns a Boolean telling whether
 all elements of [code]#x# are true.  When [code]#x# is [code]#vec# or the
-[code]#+__swizzled_vec__+# type, returns the value 1 if all elements in
+[code]#+__swizzle__+# type, returns the value 1 if all elements in
 [code]#x# have their most significant bit set, otherwise returns the value 0.
 
 The return type is [code]#bool# if [code]#GenInt# is [code]#marray#.
@@ -27054,14 +27768,14 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** [code]#marray<T, N>#, where [code]#T# is one of the _generic scalar types_;
 ** [code]#vec<T, N>#, where [code]#T# is one of the _vector element types_ as
    defined above; or
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<T, N>#, where
+** [code]#+__swizzle__+# that is convertible to [code]#vec<T, N>#, where
    [code]#T# is one of the _vector element types_;
-* If [code]#GenType1# is not [code]#vec# or the [code]#+__swizzled_vec__+#
+* If [code]#GenType1# is not [code]#vec# or the [code]#+__swizzle__+#
   type, then [code]#GenType2# and [code]#GenType3# must be the same as
   [code]#GenType1#; and
-* If [code]#GenType1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#GenType1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#GenType2# and [code]#GenType3# must also be [code]#vec# or the
-  [code]#+__swizzled_vec__+# type, and all three must have the same element
+  [code]#+__swizzle__+# type, and all three must have the same element
   type and the same number of elements.
 
 _Returns:_ When the input parameters are scalars, returns a result where each
@@ -27074,7 +27788,7 @@ where each bit of the result for element [code]#i# is the corresponding bit of
 the corresponding bit of [code]#b[i]#.
 
 The return type is [code]#GenType1# unless [code]#GenType1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 
 a@
@@ -27107,18 +27821,18 @@ _Constraints:_ Available only if all of the following conditions are met:
    as defined above;
 ** [code]#vec<T, N>#, where [code]#T# is one of the _vector element types_
    as defined above; or
-** [code]#+__swizzled_vec__+# that is convertible to [code]#vec<T, N>#, where
+** [code]#+__swizzle__+# that is convertible to [code]#vec<T, N>#, where
    [code]#T# is one of the _vector element types_;
 * If [code]#NonScalar1# is [code]#marray#, then:
 ** [code]#NonScalar2# must be the same as [code]#NonScalar1#; and
 ** [code]#NonScalar3# must be [code]#marray# with element type [code]#bool#
    and the same number of elements as [code]#NonScalar1#;
-* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+* If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
   then:
 ** [code]#NonScalar2# must also be [code]#vec# or the
-   [code]#+__swizzled_vec__+# type, and both must have the same element type
+   [code]#+__swizzle__+# type, and both must have the same element type
    and the same number of elements; and
-** [code]#NonScalar3# must be [code]#vec# or the [code]#+__swizzled_vec__+#
+** [code]#NonScalar3# must be [code]#vec# or the [code]#+__swizzle__+#
    type with the same number of elements as [code]#NonScalar1#.  The element
    type of [code]#NonScalar3# must be a signed or unsigned integer with the
    same number of bits as the element type of [code]#NonScalar1#.
@@ -27127,12 +27841,12 @@ _Returns:_ If [code]#NonScalar1# is [code]#marray#, return the value
 [code]#(c[i] ? b[i] : a[i])# for each element of [code]#a#, [code]#b#, and
 [code]#c#.
 
-If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
+If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
 returns the value [code]#((MSB of c[i] is set) ? b[i] : a[i])# for each element
 of [code]#a#, [code]#b#, and [code]#c#.
 
 The return type is [code]#NonScalar1# unless [code]#NonScalar1# is the
-[code]#+__swizzled_vec__+# type, in which case the return type is the
+[code]#+__swizzle__+# type, in which case the return type is the
 corresponding [code]#vec#.
 |====
 
