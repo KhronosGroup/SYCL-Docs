@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: MIT
 
 namespace sycl {
@@ -39,16 +39,13 @@ class interop_handle {
 };
 
 class handler {
-  ...
+ public:
+  // ...
 
-      public
-      :
+  template <typename T>
+  void host_task(T&& hostTaskCallable);
 
-      template <typename T>
-      void
-      host_task(T&& hostTaskCallable);
-
-  ...
+  // ...
 };
 
 } // namespace sycl

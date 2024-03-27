@@ -124,6 +124,10 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
                 && inputs.launch_tmate_terminal_for_debug
 
+      - name: Verify reflow conformance
+        run: |
+          ./adoc/scripts/verify_reflow_conformance.sh
+
       - name: Archive generated files
         uses: actions/upload-artifact@v4
         with:

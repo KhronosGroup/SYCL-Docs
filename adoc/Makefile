@@ -1,4 +1,4 @@
-# Copyright 2011-2022 The Khronos Group, Inc.
+# Copyright 2011-2024 The Khronos Group, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -136,7 +136,7 @@ ATTRIBOPTS   = --attribute revdate="$(SPECDATE)" \
   --attribute generated=$(GENERATED) \
   --attribute refprefix \
   $(VERSIONATTRIBS)
-ADOCMISCOPTS = --require asciidoctor-diagram --failure-level ERROR
+ADOCMISCOPTS = --require asciidoctor-diagram --failure-level INFO
 ADOCEXTS     = --require $(CURDIR)/config/spec-macros.rb \
 	--require $(CURDIR)/config/rouge_sycl.rb
 ADOCOPTS     = --doctype book $(ADOCMISCOPTS) $(ATTRIBOPTS) \
