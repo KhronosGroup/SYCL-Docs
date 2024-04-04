@@ -6511,15 +6511,15 @@ access an element produces undefined behaviour.
 
 ==== Buffer accessor for commands
 
-The [code]#accessor# class provides access to data in a [code]#buffer# from
-within a <<sycl-kernel-function>> or from within a <<host-task>>.
-When used in a <<sycl-kernel-function>>, it accesses the contents of the buffer
-via the device's <<global-memory>>.
-These two forms of the accessor are distinguished by the [code]#AccessTarget#
-template parameter as shown in <<table.accessors.command.buffer.capabilities>>.
-Both forms support the following values for the [code]#AccessMode# template
-parameter: [code]#access_mode::read#, [code]#access_mode::write# and
-[code]#access_mode::read_write#.
+The [code]#accessor# class provides access to data in a [code]#buffer# in three
+different ways.
+It can be used to access the buffer's data from within a
+<<sycl-kernel-function>> via the device's <<global-memory>>.
+It can also be used to access the buffer's data on host from within a host task.
+Finally, it can be used to get a native backend handle to the buffer from within
+a host task.
+The AccessTarget template parameter helps distinguish these three cases as shown
+in <<table.accessors.command.buffer.capabilities>>.
 
 [[table.accessors.command.buffer.capabilities]]
 .Description of access targets for buffer accessors
@@ -6528,18 +6528,27 @@ parameter: [code]#access_mode::read#, [code]#access_mode::write# and
 | Access target | Meaning
 | [code]#target::device#
     | Access a buffer from a <<sycl-kernel-function>> via device global memory.
+      Also used to get a native backend handle to the buffer from within a host
+      task.
 | [code]#target::host_task#
-    | Access a buffer from a <<host-task>>.
+    | Access a buffer's data on host from within a <<host-task>>.
 |====
 
-Programs which specify the access target as [code]#target::device# and then
-capture the [code]#accessor# in a <<host-task>> can only use the accessor for
-interoperability through the [code]#interop_handle#, any other uses result in
-undefined behavior.
+When an [code]#accessor# is used from within a <<sycl-kernel-function>>, the
+access target must be [code]#target::device#, [code]#target::constant_buffer#,
+or [code]#target::local#; otherwise the behavior is undefined.
+See <<sec:accessor.deprecated.target.constant.buffer>> and
+<<sec:accessor.deprecated.target.local>> for a description of the deprecated
+[code]#target::constant_buffer# and [code]#target::local# targets.
 
-Programs which specify the access target as [code]#target::host_task# and then
-use the [code]#accessor# from a <<sycl-kernel-function>> result in undefined
-behavior.
+When an [code]#accessor# is used from within a host task, the use of the
+accessor must correspond to the access target, otherwise the behavior is
+undefined.
+If the access target is [code]#target::host_task#, the accessor may only be used
+to access the buffer's data on host, from within the host task function.
+If the access target is [code]#target::device#, the accessor may only be used to
+get a native backend handle for the buffer as described in
+<<subsec:interfaces.hosttasks.interophandle>>.
 
 The dimensionality of the accessor must match the underlying buffer, however,
 there is a special case if the buffer is one-dimensional.
@@ -7119,6 +7128,7 @@ size_t get_count() const
 |====
 
 
+[[sec:accessor.deprecated.target.constant.buffer]]
 ====== Accessor specialization with [code]#target::constant_buffer#
 
 The [code]#accessor# class may be specialized with target
@@ -7489,6 +7499,7 @@ std::add_pointer_t<value_type> get_pointer() const noexcept
 |====
 
 
+[[sec:accessor.deprecated.target.local]]
 ====== Accessor specialization with [code]#target::local#
 
 The [code]#accessor# class may be specialized with target [code]#target::local#,
