@@ -406,6 +406,7 @@ supported by both the primary queue's device and the secondary queue's device.
 If an application fails to do this, the implementation must throw a synchronous
 exception with the [code]#errc::kernel_not_supported# error code from the
 <<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
+The secondary queue feature is deprecated in SYCL NEXT.
 
 It is legal for a SYCL application to define several kernels in the same
 translation unit even if they use different optional features, as shown in the
@@ -605,7 +606,8 @@ Specifying this attribute on a kernel has two effects.  First, it causes the
 [code]#errc::kernel_not_supported# error code if the kernel is submitted to a
 device that does not have one of the listed aspects.  (This includes the device
 associated with the secondary queue if the kernel is submitted from a
-<<command-group>> that has a secondary queue.)  Second, it causes the compiler
+<<command-group>> that has a secondary queue, which is deprecated in SYCL NEXT.)
+Second, it causes the compiler
 to issue a diagnostic if the kernel (or any of the functions it calls) uses an
 optional feature that is associated with an aspect that is not listed in the
 attribute.
