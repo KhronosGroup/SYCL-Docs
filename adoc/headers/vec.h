@@ -74,6 +74,10 @@ template <typename DataT, int NumElements> class vec {
 
   template <typename AsT> AsT as() const;
 
+  // Available on when the number of swizzleIndexes template parameters is
+  // 1, 2, 3, 4, 8, or 16.
+  // Available only when each of the swizzleIndexes template parameters is
+  // greater or equal to 0 and less than NumElements.
   template <int... swizzleIndexes> __writeable_swizzle__ swizzle();
   template <int... swizzleIndexes> __const_swizzle__ swizzle() const;
 

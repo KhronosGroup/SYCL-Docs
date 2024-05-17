@@ -17104,12 +17104,15 @@ a@
 template <int... swizzleIndexes> __writeable_swizzle__ swizzle()
 template <int... swizzleIndexes> __const_swizzle__ swizzle() const
 ----
-   a@ Return an instance of the implementation-defined
-      [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# class
-      representing a swizzled view of the vector as described in
-      <<swizzled-vec-class>>.
-      The [code]#swizzleIndexes# argument pack specifies the elements in the
-      swizzle.
+   a@ Available only when: The number of [code]#swizzleIndexes# template
+      parameters is 1, 2, 3, 4, 8, or 16.
+      Available only when: Each of the [code]#swizzleIndexes# template
+      parameters is greater or equal to 0 and less than [code]#NumElements#.
+
+Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
+or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
+as described in <<swizzled-vec-class>>.
+The [code]#swizzleIndexes# argument pack specifies the elements in the swizzle.
 
 a@
 [source]
