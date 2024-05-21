@@ -17237,16 +17237,26 @@ Return an instance of the implementation-defined intermediate class template [co
 a@
 [source]
 ----
-template <access::address_space AddressSpace, access::decorated IsDecorated>
-void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
+template <access::address_space AddressSpace,
+          access::decorated IsDecorated>
+void load(
+  size_t offset,
+  multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
+
+void load(size_t offset, const DataT* ptr)
 ----
    a@ Loads [code]#NumElements# elements into the components of this SYCL [code]#vec#. These elements are loaded from consecutive addresses, where the starting address is computed by adding [code]#offset * NumElements * sizeof(DataT)# bytes to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
 a@
 [source]
 ----
-template <access::address_space AddressSpace, access::decorated IsDecorated>
-void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+template <access::address_space AddressSpace,
+          access::decorated IsDecorated>
+void store(
+  size_t offset,
+  multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+
+void store(size_t offset, DataT* ptr) const
 ----
    a@ Stores [code]#NumElements# components of this SYCL [code]#vec# into consecutive addresses, with the starting address determined by adding [code]#offset * NumElements * sizeof(DataT)# to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
@@ -22002,9 +22012,12 @@ template<typename NonScalar, typename Ptr>    (4)
 
 *Overloads (1) - (3):*
 
-_Constraints:_ Available only if [code]#Ptr# is [code]#multi_ptr# with
-[code]#ElementType# equal to the same type as [code]#x# and with [code]#Space#
-equal to one of the _writeable address spaces_ as defined above.
+_Constraints:_ Available only if [code]#Ptr# is one of the following:
+
+* A {cpp} cv-unqualified pointer to the same type as [code]#x#; or
+* A [code]#multi_ptr# with [code]#ElementType# equal to the same type as
+  [code]#x# and with [code]#Space# equal to one of the _writeable address
+  spaces_ as defined above.
 
 _Effects:_ Writes the value [code]#floor(x)# to [code]#iptr#.
 
@@ -22018,12 +22031,16 @@ _Constraints:_ Available only if all of the following conditions are met:
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
   [code]#+__swizzled_vec__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
-* [code]#Ptr# is [code]#multi_ptr# with [code]#ElementType# equal to
-  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzled_vec__+#
-  type, in which case the [code]#ElementType# is the corresponding
-  [code]#vec#; and
-* [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
-  _writeable address spaces_ as defined above.
+* [code]#Ptr# is one of the following:
+** A {cpp} cv-unqualified pointer to [code]#NonScalar#, unless [code]#NonScalar#
+   is the [code]#+__swizzled_vec__+# type, in which case it is a cv-unqualified
+   pointer to the corresponding [code]#vec#; or
+** A [code]#multi_ptr# where:
+*** The [code]#ElementType# is equal to [code]#NonScalar#, unless
+    [code]#NonScalar# is the [code]#+__swizzled_vec__+# type, in which case the
+    [code]#ElementType# is the corresponding [code]#vec#; and
+*** The [code]#Space# is equal to one of the _writeable address spaces_ as
+    defined above.
 
 _Effects:_ Writes the value [code]#floor(x)# to [code]#iptr#.
 
@@ -22057,9 +22074,11 @@ template<typename NonScalar, typename Ptr>    (4)
 
 *Overloads (1) - (3):*
 
-_Constraints:_ Available only if [code]#Ptr# is [code]#multi_ptr# with
-[code]#ElementType# of [code]#int# and with [code]#Space# equal to one of the
-_writeable address spaces_ as defined above.
+_Constraints:_ Available only if [code]#Ptr# is one of the following:
+
+* A {cpp} cv-unqualified pointer to [code]#int#; or
+* A [code]#multi_ptr# with [code]#ElementType# of [code]#int# and with
+  [code]#Space# equal to one of the _writeable address spaces_ as defined above.
 
 _Effects:_ Extracts the mantissa and exponent from [code]#x#.  The mantissa is
 a floating point number whose magnitude is in the interval +[0.5, 1)+ or 0.  The
@@ -22075,15 +22094,21 @@ _Constraints:_ Available only if all of the following conditions are met:
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
   [code]#+__swizzled_vec__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
-* [code]#Ptr# is [code]#multi_ptr# with the following [code]#ElementType#:
-** If [code]#NonScalar# is [code]#marray#, [code]#ElementType# is
+* [code]#Ptr# is one of the following:
+** (If [code]#NonScalar# is [code]#marray#): A {cpp} cv-unqualified pointer to
    [code]#marray# of [code]#int# with the same number of elements as
-   [code]#NonScalar#;
-** If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
-   [code]#ElementType# is [code]#vec# of [code]#int32_t# with the same number
-   of elements as [code]#NonScalar#;
-* [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
-  _writeable address spaces_ as defined above.
+   [code]#NonScalar#; or
+** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type):
+   A {cpp} cv-unqualified pointer to [code]#vec# of [code]#int32_t# with the
+   same number of elements as [code]#NonScalar#; or
+** (If [code]#NonScalar# is [code]#marray#): A [code]#multi_ptr# whose
+   [code]#Space# is equal to one of the _writeable address spaces_ as defined
+   above and whose [code]#ElementType# is [code]#marray# of [code]#int# with the
+   same number of elements as [code]#NonScalar#; or
+** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type):
+   A [code]#multi_ptr# whose [code]#Space# is equal to one of the _writeable
+   address spaces_ as defined above and whose [code]#ElementType# is [code]#vec#
+   of [code]#int32_t# with the same number of elements as [code]#NonScalar#.
 
 _Effects:_ Extracts the mantissa and exponent from each element of [code]#x#.
 Each mantissa is a floating point number whose magnitude is in the interval
@@ -22293,9 +22318,11 @@ template<typename NonScalar, typename Ptr>    (4)
 
 *Overloads (1) - (3):*
 
-_Constraints:_ Available only if [code]#Ptr# is [code]#multi_ptr# with
-[code]#ElementType# of [code]#int# and with [code]#Space# equal to one of the
-_writeable address spaces_ as defined above.
+_Constraints:_ Available only if [code]#Ptr# is one of the following:
+
+* A {cpp} cv-unqualified pointer to [code]#int#; or
+* A [code]#multi_ptr# with [code]#ElementType# of [code]#int# and with
+  [code]#Space# equal to one of the _writeable address spaces_ as defined above.
 
 _Effects:_ Writes the sign of the gamma function of [code]#x# to [code]#signp#.
 
@@ -22309,15 +22336,21 @@ _Constraints:_ Available only if all of the following conditions are met:
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
   [code]#+__swizzled_vec__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
-* [code]#Ptr# is [code]#multi_ptr# with the following [code]#ElementType#:
-** If [code]#NonScalar# is [code]#marray#, [code]#ElementType# is
+* [code]#Ptr# is one of the following:
+** (If [code]#NonScalar# is [code]#marray#): A {cpp} cv-unqualified pointer to
    [code]#marray# of [code]#int# with the same number of elements as
-   [code]#NonScalar#;
-** If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
-   [code]#ElementType# is [code]#vec# of [code]#int32_t# with the same number
-   of elements as [code]#NonScalar#;
-* [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
-  _writeable address spaces_ as defined above.
+   [code]#NonScalar#; or
+** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type):
+   A {cpp} cv-unqualified pointer to [code]#vec# of [code]#int32_t# with the
+   same number of elements as [code]#NonScalar#; or
+** (If [code]#NonScalar# is [code]#marray#): A [code]#multi_ptr# whose
+   [code]#Space# is equal to one of the _writeable address spaces_ as defined
+   above and whose [code]#ElementType# is [code]#marray# of [code]#int# with the
+   same number of elements as [code]#NonScalar#; or
+** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzled_vec__+# type):
+   A [code]#multi_ptr# whose [code]#Space# is equal to one of the _writeable
+   address spaces_ as defined above and whose [code]#ElementType# is [code]#vec#
+   of [code]#int32_t# with the same number of elements as [code]#NonScalar#.
 
 _Effects:_ Computes the gamma function for each element of [code]#x# and writes
 the sign for each of these values to [code]#signp#.
@@ -22653,9 +22686,12 @@ template<typename NonScalar, typename Ptr>    (4)
 
 *Overloads (1) - (3):*
 
-_Constraints:_ Available only if [code]#Ptr# is [code]#multi_ptr# with
-[code]#ElementType# equal to the same type as [code]#x# and with [code]#Space#
-equal to one of the _writeable address spaces_ as defined above.
+_Constraints:_ Available only if [code]#Ptr# is one of the following:
+
+* A {cpp} cv-unqualified pointer to the same type as [code]#x#; or
+* A [code]#multi_ptr# with [code]#ElementType# equal to the same type as
+  [code]#x# and with [code]#Space# equal to one of the _writeable address
+  spaces_ as defined above.
 
 _Effects:_ The [code]#modf# function breaks the argument [code]#x# into
 integral and fractional parts, each of which has the same sign as the argument.
@@ -22670,12 +22706,16 @@ _Constraints:_ Available only if all of the following conditions are met:
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
   [code]#+__swizzled_vec__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
-* [code]#Ptr# is [code]#multi_ptr# with [code]#ElementType# equal to
-  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzled_vec__+#
-  type, in which case the [code]#ElementType# is the corresponding
-  [code]#vec#; and
-* [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
-  _writeable address spaces_ as defined above.
+* [code]#Ptr# is one of the following:
+** A {cpp} cv-unqualified pointer to [code]#NonScalar#, unless [code]#NonScalar#
+   is the [code]#+__swizzled_vec__+# type, in which case it is a cv-unqualified
+   pointer to the corresponding [code]#vec#; or
+** A [code]#multi_ptr# where:
+*** The [code]#ElementType# is equal to [code]#NonScalar#, unless
+    [code]#NonScalar# is the [code]#+__swizzled_vec__+# type, in which case the
+    [code]#ElementType# is the corresponding [code]#vec#; and
+*** The [code]#Space# is equal to one of the _writeable address spaces_ as
+    defined above.
 
 _Effects:_ The [code]#modf# function breaks each element of the argument
 [code]#x# into integral and fractional parts, each of which has the same sign
@@ -22977,9 +23017,11 @@ template<typename NonScalar1, typename NonScalar2, typename Ptr>  (4)
 
 *Overloads (1) - (3):*
 
-_Constraints:_ Available only if [code]#Ptr# is [code]#multi_ptr# with
-[code]#ElementType# of [code]#int# and with [code]#Space# equal to one of the
-_writeable address spaces_ as defined above.
+_Constraints:_ Available only if [code]#Ptr# is one of the following:
+
+* A {cpp} cv-unqualified pointer to [code]#int#; or
+* A [code]#multi_ptr# with [code]#ElementType# of [code]#int# and with
+  [code]#Space# equal to one of the _writeable address spaces_ as defined above.
 
 _Effects:_ Computes the value [code]#r# such that [code]#r = x - k*y#, where
 [code]#k# is the integer nearest the exact value of [code]#x/y#.  If there are
@@ -23001,15 +23043,22 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** Both [code]#NonScalar1# and [code]#NonScalar2# are [code]#marray#; or
 ** [code]#NonScalar1# and [code]#NonScalar2# are any combination of [code]#vec#
    and the [code]#+__swizzled_vec__+# type;
-* [code]#Ptr# is [code]#multi_ptr# with the following [code]#ElementType#:
-** If [code]#NonScalar1# is [code]#marray#, [code]#ElementType# is
+* [code]#Ptr# is one of the following:
+** (If [code]#NonScalar1# is [code]#marray#): A {cpp} cv-unqualified pointer to
    [code]#marray# of [code]#int# with the same number of elements as
-   [code]#NonScalar1#;
-** If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+# type,
-   [code]#ElementType# is [code]#vec# of [code]#int32_t# with the same number
-   of elements as [code]#NonScalar1#;
-* [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
-  _writeable address spaces_ as defined above.
+   [code]#NonScalar1#; or
+** (If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+#
+   type): A {cpp} cv-unqualified pointer to [code]#vec# of [code]#int32_t# with
+   the same number of elements as [code]#NonScalar1#; or
+** (If [code]#NonScalar1# is [code]#marray#): A [code]#multi_ptr# whose
+   [code]#Space# is equal to one of the _writeable address spaces_ as defined
+   above and whose [code]#ElementType# is [code]#marray# of [code]#int# with the
+   same number of elements as [code]#NonScalar1#; or
+** (If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzled_vec__+#
+   type): A [code]#multi_ptr# whose [code]#Space# is equal to one of the
+   _writeable address spaces_ as defined above and whose [code]#ElementType# is
+   [code]#vec# of [code]#int32_t# with the same number of elements as
+   [code]#NonScalar1#.
 
 _Effects:_ Computes the value [code]#r# for each element of [code]#x# and
 [code]#y# such that [code]#r = x[i] - k*y[i]#, where [code]#k# is the integer
@@ -23230,9 +23279,12 @@ template<typename NonScalar, typename Ptr>       (4)
 
 *Overloads (1) - (3):*
 
-_Constraints:_ Available only if [code]#Ptr# is [code]#multi_ptr# with
-[code]#ElementType# equal to the same type as [code]#x# and with [code]#Space#
-equal to one of the _writeable address spaces_ as defined above.
+_Constraints:_ Available only if [code]#Ptr# is one of the following:
+
+* A {cpp} cv-unqualified pointer to the same type as [code]#x#; or
+* A [code]#multi_ptr# with [code]#ElementType# equal to the same type as
+  [code]#x# and with [code]#Space# equal to one of the _writeable address
+  spaces_ as defined above.
 
 _Effects:_ Compute the sine and cosine of [code]#x#.  The computed cosine is
 written to [code]#cosval#.
@@ -23246,12 +23298,16 @@ _Constraints:_ Available only if all of the following conditions are met:
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the
   [code]#+__swizzled_vec__+# type with element type [code]#float#,
   [code]#double#, or [code]#half#;
-* [code]#Ptr# is [code]#multi_ptr# with [code]#ElementType# equal to
-  [code]#NonScalar#, unless [code]#NonScalar# is the [code]#+__swizzled_vec__+#
-  type, in which case the [code]#ElementType# is the corresponding
-  [code]#vec#; and
-* [code]#Ptr# is [code]#multi_ptr# with [code]#Space# equal to one of the
-  _writeable address spaces_ as defined above.
+* [code]#Ptr# is one of the following:
+** A {cpp} cv-unqualified pointer to [code]#NonScalar#, unless [code]#NonScalar#
+   is the [code]#+__swizzled_vec__+# type, in which case it is a cv-unqualified
+   pointer to the corresponding [code]#vec#; or
+** A [code]#multi_ptr# where:
+*** The [code]#ElementType# is equal to [code]#NonScalar#, unless
+    [code]#NonScalar# is the [code]#+__swizzled_vec__+# type, in which case the
+    [code]#ElementType# is the corresponding [code]#vec#; and
+*** The [code]#Space# is equal to one of the _writeable address spaces_ as
+    defined above.
 
 _Effects:_ Compute the sine and cosine of each element of [code]#x#.  The
 computed cosine values are written to [code]#cosval#.
