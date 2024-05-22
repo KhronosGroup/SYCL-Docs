@@ -4631,8 +4631,7 @@ the implementation to throw an [code]#exception# with the [code]#errc::invalid#
 error code from the [code]#accessor# constructor (if the accessor is not a
 placeholder) or from [code]#handler::require()# (if the accessor is a
 placeholder).  If the accessor is bound to a <<command-group>> with a secondary
-queue (deprecated in SYCL NEXT), the sub-buffer's alignment must be
-compatible with both the primary
+queue, the sub-buffer's alignment must be compatible with both the primary
 queue's device and the secondary queue's device, otherwise this exception is
 thrown.
 
@@ -13690,8 +13689,7 @@ implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
 code if the [code]#kernelObject# is not compatible with either the device
 associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified - this feature is deprecated
-in SYCL NEXT).
+associated with the secondary queue (if specified).
 
 a@
 [source]
@@ -13713,8 +13711,7 @@ implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
 code if the [code]#kernelObject# is not compatible with either the device
 associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified - this feature is deprecated
-in SYCL NEXT).
+associated with the secondary queue (if specified).
 
 a@
 [source]
@@ -13741,8 +13738,7 @@ implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
 code if the [code]#kernelObject# is not compatible with either the device
 associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified - this feature is deprecated
-in SYCL NEXT).
+associated with the secondary queue (if specified).
 
 |====
 
@@ -14370,10 +14366,10 @@ If the <<command-group>> attempts to invoke a kernel that is not contained by a
 compatible device image in [code]#execBundle#, the <<kernel-invocation-command>>
 throws a synchronous [code]#exception# with the
 [code]#errc::kernel_not_supported# error code.
-If the <<command-group>> has a secondary queue (feature deprecated in SYCL
-NEXT), then the [code]#execBundle# must contain a kernel that is compatible with
-both the primary queue's device and the secondary queue's device, otherwise the
-<<kernel-invocation-command>> throws this exception.
+If the <<command-group>> has a secondary queue, then the [code]#execBundle# must
+contain a kernel that is compatible with both the primary queue's device and the
+secondary queue's device, otherwise the <<kernel-invocation-command>> throws
+this exception.
 
 Since the handler method for setting specialization constants is incompatible
 with the kernel bundle method, applications should not call this function if
@@ -14385,9 +14381,8 @@ _Throws:_
   * An [code]#exception# with the [code]#errc::invalid# error code if the
     <<context>> associated with the <<handler>> via its associated primary
     <<queue>> or the <<context>> associated with the secondary <<queue>> (if
-    provided - this feature is deprecated in SYCL NEXT) is different from the
-    <<context>> associated with the <<kernel-bundle>> specified by
-    [code]#execBundle#.
+    provided) is different from the <<context>> associated with the
+    <<kernel-bundle>> specified by [code]#execBundle#.
 
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#handler::set_specialization_constant()# has been called for this
@@ -14818,9 +14813,9 @@ code if [code]#Backend != get_backend()#.
 --
 _Returns:_ The <<native-backend-object>> associated with the <<queue>> that the
 <<host-task>> was submitted to.
-If the <<command-group>> was submitted with a secondary <<queue>> (feature
-deprecated in SYCL NEXT) and the fall-back was triggered, the <<queue>> that is
-associated with the [code]#interop_handle# must be the fall-back <<queue>>.
+If the <<command-group>> was submitted with a secondary <<queue>> and the
+fall-back was triggered, the <<queue>> that is associated with the
+[code]#interop_handle# must be the fall-back <<queue>>.
 The <<native-backend-object>> returned must be in a state where it is capable of
 being used in a way appropriate for the associated <<backend>>.
 It is undefined behavior to use the <<native-backend-object>> outside of the
