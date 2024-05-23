@@ -25280,8 +25280,12 @@ corresponding [code]#vec#.
 
 [source,role=codebox]
 ----
-template<typename GenFloat1, typename GenFloat2, typename GenFloat3>       (1)
+template<typename GenFloat1, typename GenFloat2, typename GenFloat3>                  (1)
 /*return-type*/ smoothstep(GenFloat1 edge0, GenFloat2 edge1, GenFloat3 x)
+
+template<typename NonScalar>                                                          (2)
+/*return-type*/ smoothstep(NonScalar::value_type edge0, NonScalar::value_type edge1,
+                           NonScalar x)
 ----
 
 *Overload (1):*
@@ -25328,15 +25332,6 @@ return t * t * (3 - 2 * t);
 The return type is [code]#GenFloat1# unless [code]#GenFloat1# is the
 [code]#+__swizzled_vec__+# type, in which case the return type is the
 corresponding [code]#vec#.
-
-'''
-
-[source,role=codebox]
-----
-template<typename NonScalar>                                                          (2)
-/*return-type*/ smoothstep(NonScalar::value_type edge0, NonScalar::value_type edge1,
-                           NonScalar x)
-----
 
 *Overload (2):*
 
