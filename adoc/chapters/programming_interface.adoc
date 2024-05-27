@@ -838,7 +838,7 @@ i.e. for the specific device [code]#dev#
 and each aspect [code]#devAspect# from [code]#aspectList#
 [code]#dev.has(devAspect)# equals [code]#true#.
 If no aspects are passed in,
-the generated selector behaves like [code]#default_selector#.
+the generated selector behaves like [code]#default_selector_v#.
 
 Required aspects can be passed in as a vector, as function arguments,
 or as template parameters, depending on the function overload.
@@ -903,7 +903,7 @@ Examples of using [code]#aspect_selector#:
 ----
 using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
 
-// Unrestrained selection, equivalent to default_selector
+// Unrestrained selection, equivalent to default_selector_v
 auto dev0 = device{aspect_selector()};
 
 // Pass aspects in a vector
@@ -933,7 +933,7 @@ In SYCL 1.2.1 the predefined device selectors were actually types that had to be
 instantiated to be used.
 Now they are just instances.
 To simplify porting code using the old type instantiations, a
-backward-compatible API is still provided, such as
+backward-compatible API is still provided, though deprecated, such as
 [code]#sycl::default_selector#.
 The new predefined device selectors have their new names appended with "_v" to
 avoid conflicts, thus following the naming style used by traits in the {cpp}
