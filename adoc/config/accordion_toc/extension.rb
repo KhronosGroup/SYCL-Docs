@@ -139,11 +139,11 @@ class MakeAccordionToc < Extensions::Postprocessor
 
         # Keep track of the TOC level by counting the nesting of the <ul> and
         # </ul> elements that are in the TOC.
-        if TocStart.match(line) then is_in_toc = true end
-        if is_in_toc and Ul.match(line) then toc_level+=1 end
+        is_in_toc = true if TocStart.match(line)
+        toc_level+=1 if is_in_toc and Ul.match(line)
         if is_in_toc and EndUl.match(line)
           toc_level -= 1
-          if toc_level == 0 then is_in_toc = false end
+          is_in_toc = false if toc_level == 0
         end
 
         # Add a <span id="toc-top"> to the TOC title.
