@@ -60,13 +60,10 @@ class AddApiXrefs < Extensions::Postprocessor
       # where the <a> element above may or may not be present, depending on
       # whether the listing block also uses the "synopsis" extension.
       #
-      lines = output.lines
-      num_lines = lines.length-1
       api_to_id = {}
       match_id_last = nil
       match_id_last2 = nil
-      for i in 0..num_lines
-        line = lines[i]
+      output.lines.each do |line|
         match_def = ApiDefSpan.match(line)
         match_id = ApiIdDiv.match(line)
 
