@@ -131,12 +131,7 @@ class MakeAccordionToc < Extensions::Postprocessor
       is_in_toc = false
       hide_next_ul = false
       toc_level = 0
-      lines = output.lines
-      num_lines = lines.length-1
-      for i in 0..num_lines
-        line = lines[i]
-        next_line = (i < num_lines) ? lines[i+1] : ''
-
+      output.lines.map.each_cons(2) do |line, next_line|
         # Keep track of the TOC level by counting the nesting of the <ul> and
         # </ul> elements that are in the TOC.
         is_in_toc = true if TocStart.match(line)
