@@ -60,40 +60,37 @@ class AddApiXrefs < Extensions::Postprocessor
       # where the <a> element above may or may not be present, depending on
       # whether the listing block also uses the "synopsis" extension.
       #
-      api_to_id = {}
-      match_id_last = nil
-      match_id_last2 = nil
-      output.lines.each do |line|
-        match_def = ApiDefSpan.match(line)
-        match_id = ApiIdDiv.match(line)
+      api_id_array = output.lines.each_cons(3).filter_map do |prev2, prev1, cur|
+        match_def = ApiDefSpan.match(cur)
+        match_id_prev1 = ApiIdDiv.match(prev1)
+        match_id_prev2 = ApiIdDiv.match(prev2)
 
-        # If this line matches the "apidef", see if the previous line (or the
-        # line previous to that) matches the "id=".
-        api = nil
-        api_id = nil
-        if match_def and match_id_last
+        if match_def and match_id_prev1
           api = match_def[1]
-          api_id = match_id_last[1]
-        elsif match_def and match_id_last2
+          api_id = match_id_prev1[1]
+        elsif match_def and match_id_prev2
           api = match_def[1]
-          api_id = match_id_last2[1]
+          api_id = match_id_prev2[1]
+        else
+          next
         end
 
-        if api and api_id
-          if api_to_id.key?(api)
-            old_id = api_to_id[api]
-            logger.error "[api]##{api}# multiply defined (id=#{old_id} and id=#{api_id})"
-          else
-            api_to_id[api] = api_id
-          end
-        end
-
-        match_id_last2 = match_id_last
-        match_id_last = match_id
+        [api, api_id]
       end
 
-      # Now that we have a hash mapping each API name to its id, do another
-      # scan through the HTML, looking for each occurrence of
+      # Diagnose duplicate id definitions, and create a hash mapping each API
+      # name to its ID.
+      api_to_id = {}
+      api_id_array.map do |api, api_id|
+        if api_to_id.key?(api)
+          old_id = api_to_id[api]
+          logger.error "[api]##{api}# multiply defined (id=#{old_id} and id=#{api_id})"
+        else
+          api_to_id[api] = api_id
+        end
+      end
+
+      # Do another scan through the HTML, looking for each occurrence of
       #
       #   <span class="api">NAME</span>.
       i = 0
