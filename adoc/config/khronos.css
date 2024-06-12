@@ -363,6 +363,50 @@ b.button:after { content: "]"; padding: 0 2px 0 3px; }
 #content #toc > :first-child { margin-top: 0; }
 #content #toc > :last-child { margin-bottom: 0; }
 
+/*
+ * Add a triangle icon to the left of TOC entries that have sub-headings.
+ * The triangle points down if the heading is expanded in the TOC, and it
+ * points right if the TOC heading is unexpanded.  This is paired with a
+ * click handler that allows the user to change the expansion of each TOC
+ * entry.
+ */
+span.toc-parent:before {
+  content: "\25B6";
+  font-size: 0.6em;
+  display: block;
+  padding-top: 0.1em;
+  position: absolute;
+  z-index: 1001;
+  width: 1.5ex;
+  margin-left: -1.9ex;
+  display: block;
+}
+span.toc-parent.toc-expanded:before {
+  content: "\25BC";
+}
+
+/*
+ * Add a double-chevron icon to the left of the TOC title.  The chevrons point
+ * down when all TOC levels are expanded and they point up when all TOC levels
+ * are collapsed.  This is also paired with a click handler to expand /
+ * collapse all TOC levels.
+ */
+#toc-top:before {
+  content: "\AB";
+  transform: rotate(90deg);
+  font-size: 0.9em;
+  display: block;
+  padding-left: 0.2em;
+  position: absolute;
+  z-index: 1001;
+  width: 1.5ex;
+  margin-left: -1.5ex;
+  display: block;
+}
+#toc-top.toc-expanded:before {
+  content: "\BB";
+}
+
 #footer { max-width: 100%; background-color: none; padding: 1.25em; }
 
 #footer-text { color: black; line-height: 1.44; }

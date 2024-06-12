@@ -144,7 +144,8 @@ ADOCOPTS     = --doctype book $(ADOCMISCOPTS) $(ATTRIBOPTS) \
 
 ADOCHTMLEXTS = --require $(CURDIR)/config/katex_replace.rb \
   --require $(CURDIR)/config/loadable_html.rb \
-  --require $(CURDIR)/config/synopsis.rb
+  --require $(CURDIR)/config/synopsis.rb \
+  --require $(CURDIR)/config/accordion_toc.rb
 
 # ADOCHTMLOPTS relies on the relative runtime path from the output HTML
 # file to the katex scripts being set with KATEXDIR. This is overridden
