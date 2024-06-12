@@ -482,14 +482,41 @@ pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 
 .listingblock.terminal pre .command:not([data-prompt]):before { content: "$"; }
 
-/* Format "[source,role=codebox]" blocks.  This format overrides "listingblock" above. */
-.codebox > .content {
+/* Format "[source,role=synopsis]" blocks.  This format overrides "listingblock" above. */
+.synopsis > .content {
   position: relative;
   display: inline-block;
   border: 1px solid #ddd;
 }
-.codebox pre, .codebox pre[class] {
+.synopsis pre, .synopsis pre[class] {
   padding: 7px 7px 7px 7px;
+}
+
+/* Any "[source,role=synopsis]" blocks with an "id" have an anchor tag inside the
+   block's <div>.  (See the "synopsis" Ruby extension script.)  Style this as a
+   pound sign in the left column that is visible when hovering over the listing
+   block.  This is similar to the way section headers are styled, but with a
+   pound sign instead of a section sign.
+*/
+.synopsis > a {
+  position: absolute;
+  z-index: 1001;
+  width: 1.5ex;
+  margin-left: -1.5ex;
+  display: block;
+  text-decoration: none !important;
+  visibility: hidden;
+  text-align: center;
+  font-weight: normal;
+}
+.synopsis > a:before {
+  content: "#";
+  font-size: 0.85em;
+  display: block;
+  padding-top: 0.1em;
+}
+.synopsis:hover > a {
+  visibility: visible;
 }
 
 table.pyhltable { border-collapse: separate; border: 0; margin-bottom: 0; background: none; }
