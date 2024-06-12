@@ -61,21 +61,9 @@ class AddApiXrefs < Extensions::Postprocessor
       # whether the listing block also uses the "synopsis" extension.
       #
       api_id_array = output.lines.each_cons(3).filter_map do |prev2, prev1, cur|
-        match_def = ApiDefSpan.match(cur)
-        match_id_prev1 = ApiIdDiv.match(prev1)
-        match_id_prev2 = ApiIdDiv.match(prev2)
-
-        if match_def and match_id_prev1
-          api = match_def[1]
-          api_id = match_id_prev1[1]
-        elsif match_def and match_id_prev2
-          api = match_def[1]
-          api_id = match_id_prev2[1]
-        else
-          next
-        end
-
-        [api, api_id]
+        api = cur.scan(ApiDefSpan).first
+        api_id = prev1.scan(ApiIdDiv).first || prev2.scan(ApiIdDiv).first
+        [api.first, api_id.first] if api && api_id
       end
 
       # Diagnose duplicate id definitions, and create a hash mapping each API
