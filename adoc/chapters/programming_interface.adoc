@@ -3824,46 +3824,43 @@ a@
 ----
 void wait()
 ----
-   a@ Wait for the event and the command associated with
-      it to complete.
+   a@ Blocks until all commands associated with this event and any dependent
+      events have completed.
 
 a@
 [source]
 ----
 void wait_and_throw()
 ----
-   a@ Wait for the event and the command associated with
-      it to complete.
+   a@ Blocks until all commands associated with this event and any dependent
+      events have completed.
 
-Any unconsumed <<async-error,asynchronous errors>> from any context that the event
-was waiting on executions from will be passed to the
-<<async-handler>> associated with the context.
-If no user defined [code]#async_handler# is associated with
-the context, then an implementation-defined
-default <<async-handler>> is called to handle any errors, as
-described in <<subsubsec:exception.nohandler>>.
+At least all uncomsumed <<async-error,asynchronous errors>> held by queues (or
+their associated contexts) which were used to enqueue commands associated with
+this event and any dependent events, are passed to the approriate
+<<async-handler>> as described in <<subsubsec:async.handler.priorities>>.
+
+[NOTE]
+====
+This behaviour is equivalent to calling [code]#queue::throw_asynchronous()# on
+the queue associated with this event and any dependent events.
+====
 
 a@
 [source]
 ----
 static void wait(const std::vector<event>& eventList)
 ----
-   a@ Synchronously wait on a list of events.
+   a@ Behaves as if calling [code]#event::wait()# on each event in
+      [code]#eventList#.
 
 a@
 [source]
 ----
 static void wait_and_throw(const std::vector<event>& eventList)
 ----
-   a@ Synchronously wait on a list of events.
-
-Any unconsumed <<async-error,asynchronous errors>> from any context that the event
-was waiting on executions from will be passed to the
-<<async-handler>> associated with the context.
-If no user defined [code]#async_handler# is associated with
-the context, then an implementation-defined
-default <<async-handler>> is called to handle any errors, as
-described in <<subsubsec:exception.nohandler>>.
+   a@ Behaves as if calling [code]#event::wait_and_throw()# on each event in
+      [code]#eventList#.
 
 a@
 [source]
@@ -16476,6 +16473,7 @@ defined in <<subsubsec:exception.async>>.
 The default <<async-handler>> must in some way report all errors passed to it,
 when possible, and must then invoke [code]#std::terminate# or equivalent.
 
+[[subsubsec:async.handler.priorities]]
 ==== Priorities of async handlers
 
 If the SYCL runtime can associate an <<async-error>> with a specific queue,
