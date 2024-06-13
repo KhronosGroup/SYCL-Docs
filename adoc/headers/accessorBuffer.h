@@ -186,7 +186,7 @@ class accessor {
 
   /* Deprecated in SYCL 2020
   Available only when: (AccessTarget == target::device) */
-  global_ptr<DataT> get_pointer() const noexcept;
+  global_ptr<value_type> get_pointer() const noexcept;
 
   /* Available only when: (AccessTarget == target::host_task) */
   std::add_pointer_t<value_type> get_pointer() const noexcept;
