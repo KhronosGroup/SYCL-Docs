@@ -153,6 +153,95 @@ build on top of SYCL as an open platform for system-wide heterogeneous
 processing innovation.
 
 
+[[sec:normativerefs]]
+== Normative references
+
+Normative references are references to external documents or resources to which
+implementers of SYCL must comply with all, or specified portions of, as
+described in this specification.
+
+International Organization for Standardization (ISO). +
+ISO/IEC 14882:2017 - Programming languages - {cpp},
+https://www.iso.org/standard/68564.html +
+(Referred to as {cpp17} in this document.)
+
+International Organization for Standardization (ISO). +
+ISO/IEC 14882:2020 - Programming languages - {cpp},
+https://www.iso.org/standard/79358.html +
+(Referred to as {cpp20} in this document.)
+
+International Organization for Standardization (ISO). +
+ISO/IEC 14882:2024 - Programming languages - {cpp},
+https://www.iso.org/standard/83626.html +
+(Referred to as {cpp23} in this document.)
+
+// Jon: are any of the OpenCL specifications normative? They are also
+// referred to from the SYCL spec, and some of the definitions appear to be
+// required.
+
+
+[[sec:nonnormativerefs]]
+== Non-normative notes and examples
+
+Unless stated otherwise, text within this SYCL specification is normative and
+defines the required behavior of a SYCL implementation.
+Non-normative / informational notes are included within this specification using
+either of two formats.
+One format for non-normative notes is the "`note`" callout of this form:
+
+[NOTE]
+====
+Information within a note callout, such as this text, is for informational
+purposes and does not impose requirements on or specify behavior of a SYCL
+implementation.
+====
+
+The other format for a non-normative note is like this:
+
+{note}This is also a non-normative note.
+{endnote}
+
+Source code examples within the specification are provided to aid with
+understanding, and are non-normative.
+
+In case of any conflict between a non-normative note or source example, and
+normative text within the specification, the normative text must be taken to be
+correct.
+
+
+[[sec:progmodel.minimumcppversion]]
+== Minimum version of {cpp}
+
+A SYCL implementation must conform to {cpp17} or to one of the more recent {cpp}
+versions listed in <<sec:normativerefs>>.
+This version of {cpp} is subsequently referred to as the {cpp} core language in
+this document.
+All APIs in this specification are available regardless of the version of the
+{cpp} core language unless the description specifically states otherwise.
+If an API is documented with the phrase "Minimum C++ Version: __Version__", then
+that API is available only if the version of the implementation's {cpp} core
+language is at least _Version_.
+
+{note}Not all {cpp} features are supported in SYCL <<device-function, device
+functions>>.
+See <<sec:language.restrictions.kernels>>.
+{endnote}
+
+{note}Applications should take care when using SYCL APIs or {cpp} features that
+are not available in {cpp17}.
+The use of such APIs or features may prevent an application from being portable
+across all implementations of SYCL.
+{endnote}
+
+{note}Implementations may choose to make APIs documented as "Minimum C++
+Version: __Version__" available even when the {cpp} version is less than
+_Version_.
+The recommended practice in this case is to use [code]#+__has_include+# and the
+appropriate {cpp} feature-test macros to improve the portability of SYCL
+applications across implementations.
+{endnote}
+
+
 [[sec::unified-spec]]
 == Unified specification
 
