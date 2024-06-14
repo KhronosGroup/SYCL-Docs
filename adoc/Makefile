@@ -164,7 +164,7 @@ HEADER_DIR = $(CURDIR)/headers
 # Top-level spec source file
 SPECSRC = syclbase.adoc
 # Static files making up sections of the API spec.
-SPECFILES = $(wildcard *.adoc) $(wildcard chapters/*.adoc)
+SPECFILES = $(wildcard *.adoc) $(wildcard chapters/*.adoc) $(wildcard extensions/*.adoc)
 
 # Shorthand for where different types of generated files go.
 # All can be relocated by overriding GENERATED in the make invocation.

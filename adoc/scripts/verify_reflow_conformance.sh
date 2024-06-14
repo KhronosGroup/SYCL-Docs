@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
 error=0
-for file in adoc/chapters/*.adoc;
+for file in adoc/chapters/*.adoc adoc/extensions/*.adoc;
 do
   echo "$file"
-  ./adoc/scripts/reflow.py -out tmp_ci/ -- "$file"
-  diff "$file" "${file/adoc\/chapters/tmp_ci}"
+  dir=`dirname $file`
+  dir=`basename $dir`
+  ./adoc/scripts/reflow.py -out "tmp_ci/$dir" -- "$file"
+  diff "$file" "${file/adoc/tmp_ci}"
   error=$((error+$?))
 done
 

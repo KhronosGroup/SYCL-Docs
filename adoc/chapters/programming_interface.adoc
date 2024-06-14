@@ -2981,7 +2981,7 @@ Some queue member functions are shortcuts to member functions of the
 These are listed in <<sec:queue-shortcuts>>.
 
 // Interface for class: queue
-[source,,linenums]
+[source,,linenums,subs="attributes+"]
 ----
 include::{header_dir}/queue.h[lines=4..-1]
 ----
@@ -3230,7 +3230,7 @@ a@
 ----
 template <typename T> event submit(T cgf, queue& secondaryQueue)
 ----
-a@ Deprecated in SYCL NEXT.
+a@ Deprecated in SYCL {SYCL_VERSION}.
 Submit a <<command-group-function-object>> to the queue, in order to be scheduled
 for execution on the device. On a kernel error, this <<command-group-function-object>>
 is then scheduled for execution on the secondary queue. Returns an
@@ -13383,7 +13383,7 @@ fall-back from primary to secondary queue are unspecified in the specification.
 Even if a command group is run on the secondary queue, the requirement that host
 code within the command group is executed exactly once remains, regardless of
 whether the fallback queue is used for execution.
-The fallback queue feature is deprecated in SYCL NEXT.
+The fallback queue feature is deprecated in SYCL {SYCL_VERSION}.
 
 The command group [code]#handler# class provides the interface for all of the
 member functions that are able to be executed inside the command group scope,
@@ -16579,7 +16579,7 @@ context will be used and if the context was also constructed without an
 The <<command-group-function-object>> event returned by that function will be
 relevant to the queue where the kernel has been enqueued.
 
-The secondary queue feature is deprecated in SYCL NEXT.
+The secondary queue feature is deprecated in SYCL {SYCL_VERSION}.
 
 Below is an example of catching a SYCL [code]#exception# and printing out the
 error message.
@@ -21194,9 +21194,9 @@ a group.
 
 The result of a call to these functions is non-deterministic if the binary
 operator is not commutative and associative.
-Only the binary operators defined in <<sec:function-objects>> are supported by
-the [code]#reduce# functions in SYCL 2020, but the standard {cpp} syntax is used
-for forward compatibility with future SYCL versions.
+Only the binary operators defined in <<sec:function-objects>> are currently
+supported by the SYCL [code]#reduce# functions, but the standard {cpp} syntax is
+used for forward compatibility with future SYCL versions.
 
 [source,,linenums]
 ----
@@ -21328,8 +21328,8 @@ result returned to each work-item represents a partial prefix sum.
 
 The result of a call to a scan is non-deterministic if the binary operator is
 not associative.
-Only the binary operators defined in <<sec:function-objects>> are supported by
-the scan functions in SYCL 2020, but the standard {cpp} syntax is used for
+Only the binary operators defined in <<sec:function-objects>> are currently
+supported by the SYCL scan functions, but the standard {cpp} syntax is used for
 forward compatibility with future SYCL versions.
 
 [source,,linenums]
