@@ -363,6 +363,50 @@ b.button:after { content: "]"; padding: 0 2px 0 3px; }
 #content #toc > :first-child { margin-top: 0; }
 #content #toc > :last-child { margin-bottom: 0; }
 
+/*
+ * Add a triangle icon to the left of TOC entries that have sub-headings.
+ * The triangle points down if the heading is expanded in the TOC, and it
+ * points right if the TOC heading is unexpanded.  This is paired with a
+ * click handler that allows the user to change the expansion of each TOC
+ * entry.
+ */
+span.toc-parent:before {
+  content: "\25B6";
+  font-size: 0.6em;
+  display: block;
+  padding-top: 0.1em;
+  position: absolute;
+  z-index: 1001;
+  width: 1.5ex;
+  margin-left: -1.9ex;
+  display: block;
+}
+span.toc-parent.toc-expanded:before {
+  content: "\25BC";
+}
+
+/*
+ * Add a double-chevron icon to the left of the TOC title.  The chevrons point
+ * down when all TOC levels are expanded and they point up when all TOC levels
+ * are collapsed.  This is also paired with a click handler to expand /
+ * collapse all TOC levels.
+ */
+#toc-top:before {
+  content: "\AB";
+  transform: rotate(90deg);
+  font-size: 0.9em;
+  display: block;
+  padding-left: 0.2em;
+  position: absolute;
+  z-index: 1001;
+  width: 1.5ex;
+  margin-left: -1.5ex;
+  display: block;
+}
+#toc-top.toc-expanded:before {
+  content: "\BB";
+}
+
 #footer { max-width: 100%; background-color: none; padding: 1.25em; }
 
 #footer-text { color: black; line-height: 1.44; }
@@ -437,6 +481,47 @@ pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 .listingblock.terminal pre .command:before { content: attr(data-prompt); padding-right: 0.5em; color: #999; }
 
 .listingblock.terminal pre .command:not([data-prompt]):before { content: "$"; }
+
+/* Format "[source,role=synopsis]" blocks.  This format overrides "listingblock" above. */
+.synopsis > .content {
+  position: relative;
+  display: inline-block;
+  border: 1px solid #ddd;
+}
+.synopsis pre, .synopsis pre[class] {
+  padding: 7px 7px 7px 7px;
+}
+
+/* Any "[source,role=synopsis]" blocks with an "id" have an anchor tag inside the
+   block's <div>.  (See the "synopsis" Ruby extension script.)  Style this as a
+   pound sign in the left column that is visible when hovering over the listing
+   block.  This is similar to the way section headers are styled, but with a
+   pound sign instead of a section sign.
+*/
+.synopsis > a {
+  position: absolute;
+  z-index: 1001;
+  width: 1.5ex;
+  margin-left: -1.5ex;
+  display: block;
+  text-decoration: none !important;
+  visibility: hidden;
+  text-align: center;
+  font-weight: normal;
+}
+.synopsis > a:before {
+  content: "#";
+  font-size: 0.85em;
+  display: block;
+  padding-top: 0.1em;
+}
+.synopsis:hover > a {
+  visibility: visible;
+}
+
+.apidef { font-family: Consolas, "Liberation Mono", Courier, monospace; font-weight: bold; color: black; }
+.apititle { font-family: Consolas, "Liberation Mono", Courier, monospace; font-weight: bold; color: black; }
+.api { font-family: Consolas, "Liberation Mono", Courier, monospace; font-weight: normal; color: #ff0000; }
 
 table.pyhltable { border-collapse: separate; border: 0; margin-bottom: 0; background: none; }
 

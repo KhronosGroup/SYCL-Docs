@@ -127,9 +127,14 @@ template <typename DataT, int NumElements> class vec {
   template <access::address_space AddressSpace, access::decorated IsDecorated>
   void load(size_t offset,
             multi_ptr<const DataT, AddressSpace, IsDecorated> ptr);
+
+  void load(size_t offset, const DataT* ptr);
+
   template <access::address_space AddressSpace, access::decorated IsDecorated>
   void store(size_t offset,
              multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const;
+
+  void store(size_t offset, DataT* ptr) const;
 
   // subscript operator
   DataT& operator[](int index);
