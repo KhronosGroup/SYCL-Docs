@@ -1800,8 +1800,15 @@ info::device::max_work_group_size
 ----
 
     @ [.code]#size_t#
-   a@ Returns the maximum number of work-items that are permitted in a work-group executing a kernel on a single compute unit.
+   a@ Returns the maximum number of work-items that this device is capable of
+      executing in a work-group.
       The minimum value is 1.
+      This value is an upper limit and will not necessarily maximize
+      performance.
+      The maximum number of work-items in a work-group depends on the kernel and
+      the implementation.
+      Use [code]#info::kernel_device_specific::work_group_size# to query this
+      limit.
 
 a@
 [source]
@@ -16071,7 +16078,9 @@ info::kernel_device_specific::work_group_size
 
     @ [code]#size_t#
    a@ Returns the maximum number of work-items in a work-group that can be used
-      to execute a kernel on a specific device.
+      to execute this kernel on the given device.
+      This value will always be less than or equal to the value returned from
+      [code]#info::device::max_work_group_size#.
 
 a@
 [source]
