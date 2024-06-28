@@ -63,9 +63,8 @@ PDFMATHDIR = $(OUTDIR)/equations_temp
 # Set VERBOSE to -v to --verbose to see what asciidoc is doing.
 VERBOSE = --verbose
 
-# Some AsciiDoctor attributes (such as OPENCL_VERSION,
-# SYCL_LANGUAGE_VERSION, SYCL_NAME, SYCL_VERSION & SYCL_REVISION) are
-# based on this external configuration file:
+# Some AsciiDoctor attributes (such as SYCL_LANGUAGE_VERSION, SYCL_NAME,
+# SYCL_VERSION & SYCL_REVISION) are based on this external configuration file:
 include $(SYCL_DIR)/sycl_version.txt
 
 # In particular, SYCL_LANGUAGE_VERSION is derived from other values
@@ -114,7 +113,6 @@ COMMIT_SHA = $(shell echo `git log -1 --format="%H" 2> /dev/null \
 #   'refprefix.' for refpages (see ADOCREFOPTS below).
 ATTRIBOPTS   = --attribute revdate="$(SPECDATE)" \
   --attribute revremark="$(SPECREMARK)" \
-  --attribute OPENCL_VERSION="$(OPENCLVERSION)" \
   --attribute SYCL_LANGUAGE_VERSION="$(SYCLLANGVERSION)" \
   --attribute SYCL_NAME="$(SYCLNAME)" \
   --attribute SYCL_VERSION="$(SYCLVERSION)" \
