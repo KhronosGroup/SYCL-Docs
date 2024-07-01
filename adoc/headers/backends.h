@@ -3,6 +3,7 @@
 
 namespace sycl {
 enum class backend : /* unspecified */ {
+  none,
   /* see below */
 };
 } // namespace sycl

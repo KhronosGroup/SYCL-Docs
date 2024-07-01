@@ -24,24 +24,24 @@ indicates a values for the enumerator.
 [[sec:backends]]
 == Backends
 
-The <<backend, SYCL backends>> that can be supported by a SYCL implementation
-are identified using the [code]#enum class backend#.
+The [code]#backend# enumerator defines the <<backend, SYCL backends>> (if any)
+that an application may interoperate with.
 
 [source,,linenums]
 ----
 include::{header_dir}/backends.h[lines=4..-1]
 ----
 
-The [code]#enum class backend# is implementation-defined and must be populated
-with a unique identifier for each <<backend>> that the SYCL implementation can
-support.
-Note that the <<backend, SYCL backends>> listed in the [code]#enum class
-backend# are not guaranteed to be available in a given installation.
+The enumerator value [code]#backend::none# is used to identify a SYCL object
+that does not correspond to any backend.
+If the implementation provides interoperation with any backends, it must define
+one additional enumerator for each of these backends, and these enumerators must
+each have an associated backend interoperation specification.
 
-Each named <<backend>> enumerated in the [code]#enum class backend# must be
-associated with a <<backend>> specification.
-Many sections of this specification will refer to the associated <<backend>>
-specification.
+Even if an implementation defines a backend enumerator, this is not a guarantee
+that the backend is available when the application runs.
+A backend is only guaranteed to be available if some SYCL object returns the
+associated enumerator from its [code]#get_backend# member function.
 
 
 [[sec:backend-macros]]
@@ -745,9 +745,8 @@ and returning a value that is implicitly convertible to [code]#int#.
 
 At any point where the <<sycl-runtime>> needs to select a SYCL [code]#device#
 using a <<device-selector>>, the system queries all <<root-device, root
-devices>> from all <<backend, SYCL backends>> in the system, calls the
-<<device-selector>> on each device and selects the one which returns the highest
-score.
+devices>> from all platforms in the system, calls the <<device-selector>> on
+each device and selects the one which returns the highest score.
 If the highest value is strictly negative no device is selected.
 
 In places where only one device has to be picked and the high score is obtained
@@ -770,7 +769,7 @@ a@
 ----
 default_selector_v
 ----
-   a@ Select a SYCL [code]#device# from any supported <<backend>>
+   a@ Select a SYCL [code]#device# from one of the platforms
       based on an implementation-defined heuristic. Since all
       implementations must support at least one device, this selector
       must always return a device.
@@ -787,7 +786,7 @@ a@
 ----
 gpu_selector_v
 ----
-   a@ Select a SYCL [code]#device# from any supported <<backend>>
+   a@ Select a SYCL [code]#device# from one of the platforms
       for which the device type is
       [code]#info::device_type::gpu#. The SYCL class
       constructor using it must throw an [code]#exception#
@@ -799,7 +798,7 @@ a@
 ----
 accelerator_selector_v
 ----
-   a@ Select a SYCL [code]#device# from any supported <<backend>>
+   a@ Select a SYCL [code]#device# from one of the platforms
       for which the device type is
       [code]#info::device_type::accelerator#. The SYCL
       class constructor using it must throw an [code]#exception#
@@ -811,7 +810,7 @@ a@
 ----
 cpu_selector_v
 ----
-   a@ Select a SYCL [code]#device# from any supported <<backend>>
+   a@ Select a SYCL [code]#device# from one of the platforms
       for which the device type is
       [code]#info::device_type::cpu#. The SYCL class
       constructor using it must throw an [code]#exception#
@@ -832,7 +831,7 @@ template <aspect... AspectList> __unspecified_callable__ aspect_selector();
 ----
 a@ The free function [code]#aspect_selector# has several overloads,
 each of which returns a selector object that selects a
-SYCL [code]#device# from any supported <<backend>>
+SYCL [code]#device# from one of the platforms
 which contains all the requested aspects,
 i.e. for the specific device [code]#dev#
 and each aspect [code]#devAspect# from [code]#aspectList#
@@ -951,10 +950,11 @@ to resolve some ambiguity in constructors with default parameters.
 
 The SYCL [code]#platform# class encapsulates a single SYCL platform on which
 SYCL kernel functions may be executed.
-A SYCL platform must be associated with a single <<backend>>.
+A SYCL platform must be associated with no more than one <<backend>>.
 
-A SYCL [code]#platform# is also associated with any number of SYCL
-[code]#devices# associated with the same <<backend>>.
+A platform is also associated with any number of SYCL devices.
+If the platform is associated with a backend, each of these devices must be
+associated with that same backend.
 A platform may contain no devices.
 
 All member functions of the [code]#platform# class are synchronous and errors
@@ -1028,8 +1028,10 @@ a@
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#platform#.
+   a@ Returns the backend (if any) that underlies this object.
+      When the backend is not [code]#backend::none#, backend interoperation is
+      available for this object as defined by the corresponding SYCL backend
+      specification.
 
 a@
 [source]
@@ -1099,7 +1101,7 @@ a@
 static std::vector<platform> get_platforms()
 ----
    a@ Returns a [code]#std::vector# containing all SYCL
-      [code]#platforms# from all <<backend, SYCL backends>> available in the system.
+      [code]#platforms# available in the system.
 
 |====
 
@@ -1170,8 +1172,8 @@ Returns the extensions supported by this [code]#platform#. Returns an empty list
 === Context class
 
 The <<context>> class represents a SYCL <<context>>.
-A <<context>> represents the runtime data structures and state required by a
-<<backend>> API to interact with a group of devices associated with a platform.
+A <<context>> represents the runtime data structures and state required to
+interact with a group of devices associated with a platform.
 
 The SYCL [code]#context# class provides the common reference semantics (see
 <<sec:reference-semantics>>).
@@ -1191,9 +1193,9 @@ All member functions of the <<context>> class are synchronous and errors are
 handled by throwing synchronous SYCL exceptions.
 
 All constructors of the SYCL <<context>> class will construct an instance
-associated with a particular <<backend>>, determined by the constructor
-parameters or, in the case of the default constructor, the SYCL [code]#device#
-produced by the [code]#default_selector_v#.
+associated with a particular platform, determined by the constructor parameters
+or, in the case of the default constructor, the SYCL [code]#device# produced by
+the [code]#default_selector_v#.
 
 A SYCL [code]#context# can optionally be constructed with an
 [code]#async_handler# parameter.
@@ -1257,8 +1259,10 @@ a@
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#context#.
+   a@ Returns the backend (if any) that underlies this object.
+      When the backend is not [code]#backend::none#, backend interoperation is
+      available for this object as defined by the corresponding SYCL backend
+      specification.
 
 a@
 [source]
@@ -1448,8 +1452,8 @@ A SYCL [code]#device# can be partitioned into multiple SYCL devices, by calling
 the [code]#create_sub_devices()# member function template.
 The resulting SYCL [code]#devices# are considered sub devices, and it is valid
 to partition these sub devices further.
-The range of support for this feature is <<backend>> and device specific and can
-be queried for through [code]#get_info()#.
+The range of support for this feature can be queried for through
+[code]#device::get_info()#.
 
 The SYCL [code]#device# class provides the common reference semantics (see
 <<sec:reference-semantics>>).
@@ -1507,8 +1511,10 @@ a@
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#device#.
+   a@ Returns the backend (if any) that underlies this object.
+      When the backend is not [code]#backend::none#, backend interoperation is
+      available for this object as defined by the corresponding SYCL backend
+      specification.
 
 a@
 [source]
@@ -1692,7 +1698,7 @@ static std::vector<device>
 get_devices(info::device_type deviceType = info::device_type::all)
 ----
    a@ Returns a [code]#std::vector# containing all the
-      <<root-device, root devices>> from all <<backend, SYCL backends>>
+      <<root-device, root devices>> from all platforms
       available in the system which have the device type encapsulated by
       [code]#deviceType#.
 
@@ -3109,8 +3115,10 @@ a@
 ----
 backend get_backend() const noexcept
 ----
-a@ Returns a [code]#backend# identifying the <<backend>> associated
-with this [code]#queue#.
+a@ Returns the backend (if any) that underlies this object.
+When the backend is not [code]#backend::none#, backend interoperation is
+available for this object as defined by the corresponding SYCL backend
+specification.
 
 a@
 [source]
@@ -3794,9 +3802,8 @@ event()
       Waiting on this [code]#event# will return immediately and querying
       its status will return [code]#info::event_command_status::complete#.
 
-The event is constructed as though it was created from a default-constructed
-[code]#queue#.  Therefore, its backend is the same as the backend from the
-default device.
+The backend (if any) that is associated with this event is implementation
+defined.
 
 |====
 
@@ -3812,8 +3819,10 @@ a@
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#event#.
+   a@ Returns the backend (if any) that underlies this object.
+      When the backend is not [code]#backend::none#, backend interoperation is
+      available for this object as defined by the corresponding SYCL backend
+      specification.
 
 a@
 [source]
@@ -14705,8 +14714,10 @@ include::{header_dir}/hostTask/classInteropHandle/constructors.h[lines=4..-1]
 include::{header_dir}/hostTask/classInteropHandle/getbackend.h[lines=4..-1]
 ----
 
-  . _Returns:_ Returns a [code]#backend# identifying the <<backend>> associated
-      with the <<queue>> associated with this [code]#interop_handle#.
+  . _Returns:_ The backend (if any) that underlies the queue that is associated
+      with this [code]#interop_handle#.
+      When the backend is not [code]#backend::none#, backend interoperation is
+      available as defined by the corresponding SYCL backend specification.
 
 [[subsec:interfaces.hosttask.interophandle.getnative]]
 ==== Template member functions [code]#get_native_*#
@@ -15692,7 +15703,10 @@ _Returns:_ [code]#true# only if the kernel bundle contains no device images.
 backend get_backend() const noexcept;
 ----
 
-_Returns:_ The backend that is associated with the kernel bundle.
+_Returns:_ The backend (if any) that underlies this object.
+When the backend is not [code]#backend::none#, backend interoperation is
+available for this object as defined by the corresponding SYCL backend
+specification.
 
 [source]
 ----
@@ -15935,7 +15949,10 @@ The following member functions provide various queries for a <<kernel>>.
 backend get_backend() const noexcept;
 ----
 
-_Returns:_ The backend associated with this kernel.
+_Returns:_ The backend (if any) that underlies this object.
+When the backend is not [code]#backend::none#, backend interoperation is
+available for this object as defined by the corresponding SYCL backend
+specification.
 
 [source]
 ----

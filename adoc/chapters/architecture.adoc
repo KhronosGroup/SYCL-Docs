@@ -3,36 +3,25 @@
 [[architecture]]
 = SYCL architecture
 
-This chapter describes the structure of a SYCL application, and how the SYCL
-generic programming model lays out on top of a number of <<backend>>s.
+This chapter describes the structure of a SYCL application and its programming
+model.
 
 
 == Overview
 
 SYCL is an open industry standard for programming a heterogeneous system.
 The design of SYCL allows standard {cpp} source code to be written such that it
-can run on either an heterogeneous device or on the <<host>>.
+can run on either an heterogeneous device such as a GPU or on a general purpose
+CPU.
 
-The terminology used for SYCL inherits historically from OpenCL with some
-SYCL-specific additions.
-However SYCL is a generic {cpp} programming model that can be laid out on top of
-other heterogeneous APIs apart from OpenCL.
-SYCL implementations can provide <<backend>>s for various heterogeneous APIs,
-implementing the SYCL general specification on top of them.
-We refer to this heterogeneous API as the <<backend-api>>.
-The SYCL general specification defines the behavior that all SYCL
-implementations must expose to SYCL users for a SYCL application to behave as
-expected.
+Some terminology from SYCL derives from OpenCL.
+However, OpenCL is not a prerequisite for implementing SYCL.
+A SYCL implementation may layer on top of a heterogeneous programming API such
+as OpenCL, but this is not necessary.
+It is also possible to implement SYCL directly on hardware.
 
-A function object that can execute on a <<device>> exposed by a <<backend-api>>
-is called a <<sycl-kernel-function>>.
-
-To ensure maximum interoperability with different <<backend-api>>s, software
-developers can access the <<backend-api>> alongside the SYCL general API
-whenever they include the <<backend>> interoperability headers.
-However, interoperability is a <<backend>>-specific feature.
-An application that uses interoperability does not conform to the SYCL general
-application model, since it is not portable across backends.
+A function object that can execute on a <<device>> is called a
+<<sycl-kernel-function>>.
 
 // Note below I leave the reference to OpenCL intentionally
 
@@ -194,8 +183,8 @@ An implementation may also expose empty <<platform, platforms>> that do not
 contain any <<device,devices>>.
 
 A SYCL <<context>> is constructed, either directly by the user or implicitly
-when creating a <<queue>>, to hold all the runtime information required by the
-SYCL runtime and the <<backend>> to operate on a device, or group of devices.
+when creating a <<queue>>, to hold all the runtime information required to
+operate on a device, or group of devices.
 When a group of devices can be grouped together on the same context, they have
 some visibility of each other's memory objects.
 The SYCL runtime can assume that memory is visible across all devices in the
@@ -204,26 +193,23 @@ Not all devices exposed from the same <<platform>> can be grouped together in
 the same <<context>>.
 
 A SYCL application executes on the host as a standard {cpp} program.
-<<device,Devices>> are exposed through different <<backend, SYCL backends>> to
-the SYCL application.
+The <<sycl-runtime>> exposes <<device,devices>> to the application.
 The SYCL application submits <<command-group-function-object,command group
-function objects>> to <<queue,queues>>.
-Each <<queue>> enables execution on a given device.
+function objects>> to <<queue,queues>>, and each <<queue>> enables execution on
+a given device.
 
 The <<sycl-runtime>> then extracts operations from the
 <<command-group-function-object>>, e.g. an explicit copy operation or a
 <<sycl-kernel-function>>.
-When the operation is a <<sycl-kernel-function>>, the <<sycl-runtime>> uses a
-<<backend>>-specific mechanism to extract the device binary from the SYCL
+When the operation is a <<sycl-kernel-function>>, the <<sycl-runtime>> uses an
+implementation-specific mechanism to extract the device binary from the SYCL
 application and pass it to the heterogeneous API for execution on the
 <<device>>.
 
 A SYCL <<device>> is divided into one or more compute units (CUs) which are each
 divided into one or more processing elements (PEs).
 Computations on a device occur within the processing elements.
-How computation is mapped to PEs is <<backend>> and <<device>> specific.
-Two devices exposed via two different backends can map computations differently
-to the same device.
+How computation is mapped to PEs is specific to the implementation.
 
 When a SYCL application contains <<sycl-kernel-function>> objects, the SYCL
 implementation must provide an offline compilation mechanism that enables the
@@ -233,29 +219,37 @@ as SPIR-V, that will be finalized during execution or a final device ISA.
 
 A device may expose special purpose functionality as a _built-in_ function.
 The SYCL API exposes functions to query and dispatch said _built-in_ functions.
-Some <<backend, SYCL backends>> and <<device,devices>> may not support
-programmable kernels, and only support _built-in_ functions.
+Some <<device,devices>> may not support programmable kernels, and only support
+_built-in_ functions.
 // TODO: Conformance of these custom-devices?
 
 
 == The SYCL backend model
 
-SYCL is a generic programming model for the {cpp} language that can target
-multiple heterogeneous APIs, such as OpenCL.
+A SYCL implementation may expose devices by layering on top of a heterogeneous
+API such as OpenCL or it may expose devices in some other way.
+An implementation may even combine these methods, exposing devices through
+several different heterogeneous APIs or through other mechanisms.
+Regardless of how the devices are exposed, they must implement the semantics of
+the SYCL APIs defined in this document.
 
-SYCL implementations enable these target APIs by implementing <<backend, SYCL
-backends>>.
-For a SYCL implementation to be conformant on said <<backend>>, it must execute
-the SYCL generic programming model on the backend.
-All SYCL implementations must provide at least one backend.
+When a SYCL implementation layers on top of a heterogeneous API such as OpenCL,
+we refer to this as a <<backend>>.
+In this case, the implementation may choose to document how the backend APIs
+correlate to SYCL and provide interoperation APIs that allow a SYCL application
+to make calls to both the SYCL APIs and the backend APIs.
+However, applications that make use of this ability are no longer conformant to
+the core SYCL specification and may not be portable to other implementations of
+SYCL.
 
-The present document covers the SYCL generic interface available to all
-<<backend, SYCL backends>>.
-How the SYCL generic interface maps to a particular <<backend>> is defined
-either by a separate <<backend>> specification document, provided by the Khronos
-SYCL group, or by the SYCL implementation documentation.
-Whenever there is a <<backend>> specification document, this takes precedence
-over SYCL implementation documentation.
+In order to aid with this sort of backend interoperation, SYCL provides the
+[code]#backend# enumeration, and most SYCL objects provide a member function
+[code]#get_backend#.
+If a SYCL implementation wants to expose backend interoperation, it must define
+one or more enumerators in the [code]#backend# enumeration, and each of those
+enumerators must have a corresponding backend interoperation specification.
+These enumerators and specifications may be defined either by the Khronos SYCL
+group or by the vendor of the SYCL implementation.
 
 When a SYCL user builds their SYCL application, she decides which of the
 <<backend, SYCL backends>> will be used to build the SYCL application.
@@ -316,9 +310,9 @@ implementation that supports the required features for the application.
 
 The SYCL generic programming model exposes a number of <<platform,platforms>>,
 each of them either empty or exposing a number of <<device,devices>>.
-Each <<platform>> is bound to a certain <<backend>>.
-SYCL <<device,devices>> associated with said <<platform>> are associated with
-that <<backend>>.
+Each platform is bound to no more than one <<backend>>.
+If the platform is bound to a backend, the devices associated with that platform
+are associated with that backend.
 
 Although the APIs in the SYCL generic programming model are defined according to
 this specification and their version is indicated by the macro
@@ -1608,7 +1602,7 @@ queue constructor.
 Device topology may be cached by the <<sycl-runtime>>, but this is not required.
 
 Device discovery will return all <<device,devices>> from all
-<<platform,platforms>> exposed by all the supported <<backend, SYCL backends>>.
+<<platform,platforms>>.
 
 === Interfacing with the SYCL backend API
 
