@@ -25,8 +25,11 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Use Khronos container with asciidoctor toolchain preinstalled
-    container: khronosgroup/docker-images:asciidoctor-spec
+    # Use the Khronos container with the asciidoctor toolchain preinstalled.  We
+    # reference the image its SHA rather than its tag because they sometimes
+    # overwrite a tag with a different image (which has a different SHA).  This
+    # SHA corresponds to tag "asciidoctor-spec.20240701".
+    container: khronosgroup/docker-images@sha256:1175e55feeaca36d8c53b3628372cd371078473a162a558c3e89ffafdde40676
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
