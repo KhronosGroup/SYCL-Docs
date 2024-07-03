@@ -268,16 +268,20 @@ clean_pdf:
 #   make docker-clean docker-html docker-pdf
 # Also useful to have a shell inside docker:
 #   make docker-bash
+#
+# Set the user and group inside the container to match the user and group
+# outside of the container.  This causes the generated files to be owned by the
+# current user when accessed from outside the container.  However, this user
+# probably doesn't have write access to the default HOME directory, so set HOME
+# to some directory that does have write access.  This is important because
+# some tools (e.g. asciidoctor-pdf) write temporary files into HOME.  It does
+# not matter that we are polluting /tmp here because the entire container will
+# be discarded when the build is complete.
 docker-%:
-	# Run with current user and group id the published AsciiDoctor
-	# capable Khronos docker image with current SYCL specification
-	# directory mounted in /sycl
-	# Re-set MAKEFLAGS to pass variables to the inner make since
-	# variables are dropped by docker.
-	sudo docker run --user `id --user`:`id --group` \
+	sudo docker run --user `id --user`:`id --group` --env HOME=/tmp \
 	  --interactive --tty --rm \
-          --volume $(SYCL_DIR):/sycl \
-          khronosgroup/docker-images:asciidoctor-spec \
+	  --volume $(SYCL_DIR):/sycl \
+	  khronosgroup/docker-images:asciidoctor-spec \
 	  $(MAKE) MAKEFLAGS="$(MAKEFLAGS)" --directory=/sycl/adoc $*
 
 dock:
