@@ -300,22 +300,21 @@ across <<backend, SYCL backends>>.
 
 USM allocations are subject to the limitations described in <<sec:usm>>.
 
-When a SYCL application runs on any number of <<backend, SYCL backends>> without
-relying on any <<backend>>-specific behavior or interoperability, it is said to
-be a SYCL general application, and it is expected to run in any SYCL-conformant
+When a SYCL application runs without relying on any <<backend>>-specific
+behavior or interoperability, it is expected to run on any SYCL-conformant
 implementation that supports the required features for the application.
 
 
 === Platform mixed version support
 
-The SYCL generic programming model exposes a number of <<platform,platforms>>,
-each of them either empty or exposing a number of <<device,devices>>.
+The SYCL programming model exposes a number of <<platform,platforms>>, each of
+them either empty or exposing a number of <<device,devices>>.
 Each platform is bound to no more than one <<backend>>.
 If the platform is bound to a backend, the devices associated with that platform
 are associated with that backend.
 
-Although the APIs in the SYCL generic programming model are defined according to
-this specification and their version is indicated by the macro
+Although most APIs in the SYCL programming model are defined according to this
+specification and their version is indicated by the macro
 [code]#SYCL_LANGUAGE_VERSION#, this does not apply to APIs exposed by the
 <<backend, SYCL backends>>.
 Each <<backend>> provides its own document that defines its APIs, and that
@@ -1608,7 +1607,7 @@ Device discovery will return all <<device,devices>> from all
 
 There are two styles of developing a SYCL application:
 
-. writing a pure SYCL generic application;
+. writing a SYCL application that works with any <<backend>>;
 . writing a SYCL application that relies on some <<backend>> specific behavior.
 
 When users follow 1., there is no assumption about what <<backend>> will be used
@@ -1616,8 +1615,8 @@ during compilation or execution of the SYCL application.
 Therefore, the <<backend-api>> is not assumed to be available to the developer.
 Only standard {cpp} types and interfaces are assumed to be available, as
 described in <<sec:progmodel.cpp>>.
-Users only need to include the [code]#<sycl/sycl.hpp># header to write a SYCL
-generic application.
+Users only need to include the [code]#<sycl/sycl.hpp># header to write such an
+application.
 
 On the other hand, when users follow 2., they must know what <<backend-api>>s
 they are using.
