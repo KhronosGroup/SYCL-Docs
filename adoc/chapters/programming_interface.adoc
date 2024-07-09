@@ -60,21 +60,9 @@ See <<chapter.extensions>> for the name of the macro if the vendor defines the
 If a backend listed in the [code]#enum class backend# is not available, the
 associated macro must be left undefined.
 
-[[sec:generic-vs-non-generic]]
-== Generic vs non-generic SYCL
-
-The SYCL programming API is split into two categories; generic SYCL and
-non-generic SYCL.
-Almost everything in the SYCL programming API is considered generic SYCL.
-However any usage of the [code]#enum class backend# is considered non-generic
-SYCL and should only be used for <<backend>> specialized code paths, as the
-identifiers defined in [code]#backend# are implementation-defined.
-
-In any non-generic SYCL application code where the [code]#backend# enum class is
-used, the expression must be guarded with a preprocessor [code]#{hash}ifdef#
-guard using the associated preprocessor macro to ensure that the SYCL
-application will compile even if the SYCL implementation does not support that
-<<backend>> being specialized for.
+Any usage of the [code]#enum class backend# should appear only in code paths
+specialized for a specific <<backend>> that are guarded by a preprocessor
+directive using the macro associated with that backend.
 
 
 [[sec:headers-and-namespaces]]
@@ -186,8 +174,6 @@ available outside of that scope.
 
 Support for <<backend>> interoperability is optional and therefore not required
 to be provided by a SYCL implementation.
-A SYCL application using <<backend>> interoperability is considered to be
-non-generic SYCL.
 
 Details on the interoperability for a given <<backend>> are available on the
 <<backend>> specification document for that <<backend>>.
