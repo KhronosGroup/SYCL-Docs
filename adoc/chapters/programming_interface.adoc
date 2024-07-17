@@ -17979,6 +17979,9 @@ void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) 
 |====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
 
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+
 _Effects:_ Loads values from memory into elements of the underlying [code]#vec#
 object.
 A total of [code]#NumElements# values are loaded from memory, starting at the
@@ -18194,9 +18197,12 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#,
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ If [code]#OP# is one of the following: [code]#%=#, [code]#&=#,
-[code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when:
-[code]#DataT != float && DataT != double && DataT != half#.
+_Constraints:_ Available only when the left hand side
+[code]#+__writeable_swizzle__+# view does not contain any repeated elements.
+
+If [code]#OP# is one of the following: [code]#%=#, [code]#&=#, [code]#|=#,
+[code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when: [code]#DataT !=
+float && DataT != double && DataT != half#.
 
 In addition, overloads (1) and (2) are available only when the element data type
 of [code]#lhs# is the same as the element data type of [code]#rhs# and when the
@@ -18237,7 +18243,9 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+Available only when [code]#DataT# is not [code]#bool#.
 
 _Effects:_ Perform an in-place element-wise [code]#OP# prefix arithmetic
 operation on those elements of the [code]#vec# object that have corresponding
@@ -18262,7 +18270,9 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+Available only when [code]#DataT# is not [code]#bool#.
 
 _Effects:_ Perform an in-place element-wise [code]#OP# postfix arithmetic
 operation on those elements of the [code]#vec# object that have corresponding
