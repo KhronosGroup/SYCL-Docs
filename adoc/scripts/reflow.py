@@ -53,7 +53,7 @@ codePat = re.compile(r'code:(?P<param>\w+)')
 # A single letter followed by a period, typically a middle initial.
 endInitial = re.compile(r'^[A-Z]\.$')
 # An abbreviation, which does not (usually) end a line.
-endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b)\.$', re.IGNORECASE)
+endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b|\betc)\.$', re.IGNORECASE)
 
 # Explicit Valid Usage list item with one or more leading asterisks
 # The re.DOTALL is needed to prevent vuPat.search() from stripping
@@ -132,7 +132,7 @@ class ReflowCallbacks:
 
          - A single letter (if breakInitial is True)
          - Abbreviations: 'c.f.', 'e.g.', 'i.e.' (or mixed-case versions)"""
-        if (word[-1:] != '.' or
+        if ((word[-1:] != '.' and word[-2:] != '.)') or
             endAbbrev.search(word) or
                 (self.breakInitial and endInitial.match(word))):
             return False
