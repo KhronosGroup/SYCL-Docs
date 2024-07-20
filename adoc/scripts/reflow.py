@@ -132,7 +132,7 @@ class ReflowCallbacks:
 
          - A single letter (if breakInitial is True)
          - Abbreviations: 'c.f.', 'e.g.', 'i.e.' (or mixed-case versions)"""
-        if (word[-1:] != '.' or
+        if ((word[-1:] != '.' and word[-2:] != '.)') or
             endAbbrev.search(word) or
                 (self.breakInitial and endInitial.match(word))):
             return False
