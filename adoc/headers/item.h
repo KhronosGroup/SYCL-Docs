@@ -24,6 +24,7 @@ template <int Dimensions = 1, bool WithOffset = true> class item {
   // only available if WithOffset is true
   id<Dimensions> get_offset() const;
 
+  // Deprecated in SYCL 2020.
   // only available if WithOffset is false
   operator item<Dimensions, true>() const;
 
