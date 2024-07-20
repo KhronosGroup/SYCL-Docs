@@ -1165,262 +1165,312 @@ Returns the extensions supported by this [code]#platform#. Returns an empty list
 |====
 
 
-
-[[sec:interface.context.class]]
+[[sec:context-class]]
 === Context class
 
-The <<context>> class represents a SYCL <<context>>.
-A <<context>> represents the runtime data structures and state required by a
+The [code]#context# class represents a SYCL context.
+A context represents the runtime data structures and state required by a
 <<backend>> API to interact with a group of devices associated with a platform.
 
-The SYCL [code]#context# class provides the common reference semantics (see
-<<sec:reference-semantics>>).
-
-
-==== Context interface
-
-The constructors and member functions of the SYCL [code]#context# class are
-listed in <<table.constructors.context>> and <<table.members.context>>,
-respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-All member functions of the <<context>> class are synchronous and errors are
+All member functions of the [code]#context# class are synchronous and errors are
 handled by throwing synchronous SYCL exceptions.
 
-All constructors of the SYCL <<context>> class will construct an instance
+All constructors of the [code]#context# class construct an object that is
 associated with a particular <<backend>>, determined by the constructor
 parameters or, in the case of the default constructor, the SYCL [code]#device#
 produced by the [code]#default_selector_v#.
 
-A SYCL [code]#context# can optionally be constructed with an
-[code]#async_handler# parameter.
-In this case the [code]#async_handler# is used to report asynchronous SYCL
+A context can optionally be constructed with an [code]#async_handler# parameter.
+In this case the [code]#async_handler# is used to report asynchronous
 exceptions, as described in <<error-handling>>.
 
-Information about a SYCL <<context>> may be queried through the
-[code]#get_info()# member function.
+The [code]#context# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
-// Interface for class: context
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/context.h[lines=4..-1]
 ----
 
+[[sec:context-ctors]]
+==== Constructors
 
-[[table.constructors.context]]
-.Constructors of the SYCL [code]#context# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:context-ctor]
 ----
 explicit context(async_handler asyncHandler = {})
 ----
-   a@ Constructs a SYCL [code]#context# instance using an instance of
-      [code]#default_selector_v# to select the associated SYCL
-      [code]#platform# and [code]#device(s)#. The <<device,devices>> that
-      are associated with the constructed <<context>> are implementation-defined
-      but must contain the <<device>> chosen by the device selector. The
-      constructed SYCL [code]#context# will use the [code]#asyncHandler#
-      parameter to handle exceptions.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#context# object using the
+[code]#default_selector_v# to determine the associated platform and devices.
+The associated platform is the platform which contains the device selected by
+[code]#default_selector_v#.
+The <<device,devices>> that are associated with the constructed context are
+implementation-defined but must contain the device that is selected by
+[code]#default_selector_v#.
+The constructed context uses the [code]#asyncHandler# parameter to handle
+exceptions.
+
+'''
+
+.[apititle]#Construct from device#
+[source,role=synopsis,id=api:context-ctor-dev]
 ----
 explicit context(const device& dev, async_handler asyncHandler = {})
 ----
-   a@ Constructs a SYCL [code]#context# instance using the [code]#dev# parameter as the associated SYCL [code]#device# and the SYCL [code]#platform# associated with the [code]#dev# parameter as the associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#context# object using the [code]#dev# parameter
+to determine the associated platform and device.
+The associated platform is the platform that contains [code]#dev#, and the
+associated device is [code]#dev#.
+The constructed context uses the [code]#asyncHandler# parameter to handle
+exceptions.
+
+'''
+
+.[apititle]#Construct from device list#
+[source,role=synopsis,id=api:context-ctor-dev-list]
 ----
 explicit context(const std::vector<device>& deviceList,
                  async_handler asyncHandler = {})
 ----
-   a@ Constructs a SYCL [code]#context# instance using the SYCL [code]#device(s)# in the [code]#deviceList# parameter as the associated SYCL [code]#device(s)# and the SYCL [code]#platform# associated with each SYCL [code]#device# in the [code]#deviceList# parameter as the associated SYCL [code]#platform#. This requires that all SYCL [code]#devices# in the [code]#deviceList# parameter have the same associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
 
-|====
+_Preconditions:_ All devices in [code]#deviceList# must be associated with the
+same platform.
 
+_Effects:_ Constructs a [code]#context# object using the [code]#deviceList#
+parameter to determine the associated platform and device.
+The associated platform is the platform that contains all of the devices in
+[code]#deviceList#.
+The associated devices are those devices in [code]#deviceList#.
+The constructed context uses the [code]#asyncHandler# parameter to handle
+exceptions.
 
+'''
 
-[[table.members.context]]
-.Member functions of the [code]#context# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:context-member-funcs]]
+==== Member functions
+
+.[apidef]#context::get_backend#
+[source,role=synopsis,id=api:context-get-backend]
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#context#.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#context# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.context.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Returns:_ The <<backend>> that is associated with this context.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-   a@ Queries this SYCL [code]#context# for <<backend>>-specific information
-      requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#context#.
+'''
 
-a@
-[source]
+.[apidef]#context::get_platform#
+[source,role=synopsis,id=api:context-get-platform]
 ----
 platform get_platform() const
 ----
-   a@ Returns the SYCL [code]#platform# that is associated with this SYCL [code]#context#. The value returned must be equal to that returned by [code]#get_info<info::context::platform>()#.
 
-a@
-[source]
+_Returns:_ The <<platform>> that is associated with this context.
+
+'''
+
+.[apidef]#context::get_devices#
+[source,role=synopsis,id=api:context-get-devices]
 ----
 std::vector<device> get_devices() const
 ----
-   a@ Returns a [code]#std::vector# containing all SYCL [code]#devices# that are associated with this SYCL [code]#context#. The value returned must be equal to that returned by [code]#get_info<info::context::devices>()#.
 
-|====
+_Returns:_ A [code]#std::vector# containing all the <<device,devices>> that are
+associated with this context.
 
+'''
 
-
-==== Context information descriptors
-
-A <<context>> can be queried for information using the [code]#get_info# member
-function of the [code]#context# class, specifying one of the info parameters in
-[code]#info::context#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<context>>.
-All info parameters in [code]#info::context# are specified in
-<<table.context.info>> and the synopsis for [code]#info::context# is described
-in <<appendix.context.descriptors>>.
-
-
-[[table.context.info]]
-.Context information descriptors
-// Jon: Dims{5cm}{4.4cm}{5cm}
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Context Descriptors @ Return type @ Description
-a@
-[source]
+.[apidef]#context::get_info#
+[source,role=synopsis,id=api:context-get-info]
 ----
-info::context::platform
+template <typename Param>
+typename Param::return_type get_info() const
 ----
 
-    @ [.code]#platform#
-   a@ Returns the <<platform>> associated with the <<context>>.
+_Constraints:_ The [code]#Param# must be an information descriptor for the
+context class.
 
-a@
-[source]
-----
-info::context::devices
-----
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
 
-    @ [.code]#std::vector<device>#
-   a@ Returns all of the <<device,devices>> associated with the <<context>>.
+'''
 
-a@
-[source]
+.[apidef]#context::get_backend_info#
+[source,role=synopsis,id=api:context-get-backend-info]
 ----
-info::context::atomic_memory_order_capabilities
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
 
-    @ [.code]#std::vector<memory_order>#
-   a@ This query applies only to the capabilities of atomic operations that are
-      applied to memory that can be concurrently accessed by multiple devices
-      in the context.  If these capabilities are not uniform across all devices
-      in the context, the query reports only the capabilities that are common
-      for all devices.
+_Constraints:_ The [code]#Param# must be a backend information descriptor for
+the context class.
 
-Returns the set of memory orders supported by these atomic operations.  When a
-context returns a "stronger" memory order in this set, it must also return all
-"weaker" memory orders.  (See <<sec:memory-ordering>> for a definition of
-"stronger" and "weaker" memory orders.) The memory orders
-[code]#memory_order::acquire#, [code]#memory_order::release#, and
-[code]#memory_order::acq_rel# are all the same strength.  If a context returns
-one of these, it must return them all.
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this context.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+[[sec:context-info-descriptors]]
+==== Information descriptors
+
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#context::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#context::get_info#
+function.
+
+'''
+
+.[apidef]#info::context::platform#
+[source,role=synopsis,id=api:info-context-platform]
+----
+namespace sycl::info::context {
+struct platform {
+  using return_type = platform;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ The <<platform>> that is associated with this context.
+
+'''
+
+.[apidef]#info::context::devices#
+[source,role=synopsis,id=api:info-context-devices]
+----
+namespace sycl::info::context {
+struct devices {
+  using return_type = std::vector<device>;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ A [code]#std::vector# containing all the <<device,devices>> that are
+associated with this context.
+
+'''
+
+.[apidef]#info::context::atomic_memory_order_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-memory-order-capabilities]
+----
+namespace sycl::info::context {
+struct atomic_memory_order_capabilities {
+  using return_type = std::vector<memory_order>;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ This query applies only to the capabilities of atomic operations that
+are applied to memory that can be concurrently accessed by multiple devices in
+the context.
+If these capabilities are not uniform across all devices in the context, the
+query reports only the capabilities that are common for all devices.
+
+Returns the set of memory orders supported by these atomic operations.
+When a context returns a "stronger" memory order in this set, it must also
+return all "weaker" memory orders.
+(See <<sec:memory-ordering>> for a definition of "stronger" and "weaker" memory
+orders.)
+The memory orders [code]#memory_order::acquire#, [code]#memory_order::release#,
+and [code]#memory_order::acq_rel# are all the same strength.
+If a context returns one of these, it must return them all.
 
 At a minimum, each context must support [code]#memory_order::relaxed#.
 
-a@
-[source]
+'''
+
+.[apidef]#info::context::atomic_fence_order_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-fence-order-capabilities]
 ----
-info::context::atomic_fence_order_capabilities
+namespace sycl::info::context {
+struct atomic_fence_order_capabilities {
+  using return_type = std::vector<memory_order>;
+};
+} // namespace sycl::info::context
 ----
 
-    @ [.code]#std::vector<memory_order>#
-   a@ This query applies only to the capabilities of [code]#atomic_fence# when
-      applied to memory that can be concurrently accessed by multiple devices
-      in the context.  If these capabilities are not uniform across all devices
-      in the context, the query reports only the capabilities that are common
-      for all devices.
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ This query applies only to the capabilities of [code]#atomic_fence#
+when applied to memory that can be concurrently accessed by multiple devices in
+the context.
+If these capabilities are not uniform across all devices in the context, the
+query reports only the capabilities that are common for all devices.
 
 Returns the set of memory orders supported by these [code]#atomic_fence#
-operations.  When a context returns a "stronger" memory order in this set, it
-must also return all "weaker" memory orders.  (See <<sec:memory-ordering>> for
-a definition of "stronger" and "weaker" memory orders.)
+operations.
+When a context returns a "stronger" memory order in this set, it must also
+return all "weaker" memory orders.
+(See <<sec:memory-ordering>> for a definition of "stronger" and "weaker" memory
+orders.)
 
 At a minimum, each context must support [code]#memory_order::relaxed#,
 [code]#memory_order::acquire#, [code]#memory_order::release#, and
 [code]#memory_order::acq_rel#.
 
-a@
-[source]
-----
-info::context::atomic_memory_scope_capabilities
-----
+'''
 
-    @ [.code]#std::vector<memory_scope>#
-   a@ Returns the set of memory scopes supported by atomic operations on all
-      devices in the context.  When a context returns a "wider" memory scope
-      in this set, it must also return all "narrower" memory scopes.  (See
-      <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
-      At a minimum, each context must support [code]#memory_scope::work_item#,
-      [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
-
-a@
-[source]
+.[apidef]#info::context::atomic_memory_scope_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-memory-scope-capabilities]
 ----
-info::context::atomic_fence_scope_capabilities
+namespace sycl::info::context {
+struct atomic_memory_scope_capabilities {
+  using return_type = std::vector<memory_scope>;
+};
+} // namespace sycl::info::context
 ----
 
-    @ [.code]#std::vector<memory_scope>#
-   a@ Returns the set of memory orderings supported by [code]#atomic_fence# on
-      all devices in the context.  When a context returns a "wider" memory
-      scope in this set, it must also return all "narrower" memory scopes.
-      (See <<sec:memory-scope>> for a definition of "wider" and "narrower"
-      scopes.) At a minimum, each context must support
-      [code]#memory_scope::work_item#, [code]#memory_scope::sub_group#, and
-      [code]#memory_scope::work_group#.
+_Remarks:_ Template parameter to [api]#context::get_info#.
 
-|====
+_Returns:_ The set of memory scopes supported by atomic operations on all
+devices in the context.
+When a context returns a "wider" memory scope in this set, it must also return
+all "narrower" memory scopes.
+(See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+At a minimum, each context must support [code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
 
+'''
 
+.[apidef]#info::context::atomic_fence_scope_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-fence-scope-capabilities]
+----
+namespace sycl::info::context {
+struct atomic_fence_scope_capabilities {
+  using return_type = std::vector<memory_scope>;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ The set of memory orderings supported by [code]#atomic_fence# on all
+devices in the context.
+When a context returns a "wider" memory scope in this set, it must also return
+all "narrower" memory scopes.
+(See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+At a minimum, each context must support [code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+
+'''
 
 [[sec:context-properties]]
-==== Context properties
+==== Properties
 
 The [code]#property_list# constructor parameters are present for extensibility.
+
 
 // \input{device_class}
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin device_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
