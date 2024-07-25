@@ -53,7 +53,9 @@ codePat = re.compile(r'code:(?P<param>\w+)')
 # A single letter followed by a period, typically a middle initial.
 endInitial = re.compile(r'^[A-Z]\.$')
 # An abbreviation, which does not (usually) end a line.
-endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b|\betc)\.$', re.IGNORECASE)
+endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b)\.$', re.IGNORECASE)
+# A lower case word.  When "etc." is followed by this, it does not end a line.
+startsLowerCase = re.compile(r'\(?[a-z]')
 
 # Explicit Valid Usage list item with one or more leading asterisks
 # The re.DOTALL is needed to prevent vuPat.search() from stripping
@@ -125,15 +127,17 @@ class ReflowCallbacks:
         self.warnCount = 0
         """Count of markup check warnings encountered."""
 
-    def endSentence(self, word):
+    def endSentence(self, word, nextWord):
         """Return True if word ends with a sentence-period, False otherwise.
 
         Allows for contraction cases which will not end a line:
 
          - A single letter (if breakInitial is True)
-         - Abbreviations: 'c.f.', 'e.g.', 'i.e.' (or mixed-case versions)"""
+         - Abbreviations: 'c.f.', 'e.g.', 'i.e.' (or mixed-case versions)
+         - The word "etc." when it is followed by a lower case word"""
         if ((word[-1:] != '.' and word[-2:] != '.)') or
             endAbbrev.search(word) or
+            word == "etc." and startsLowerCase.match(nextWord) or
                 (self.breakInitial and endInitial.match(word))):
             return False
 
@@ -405,7 +409,7 @@ class ReflowCallbacks:
                             (addWord, closeLine, startLine) = (False, True, True)
                     elif (self.breakPeriod and
                           (wordCount > 2 or not firstBullet) and
-                          self.endSentence(prevWord)):
+                          self.endSentence(prevWord, word)):
                         # If the previous word ends a sentence and
                         # breakPeriod is set, start a new line.
                         # The complicated logic allows for leading bullet
