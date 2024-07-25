@@ -10887,12 +10887,16 @@ a@
 ----
 void sycl::free(void* ptr, const context& syclContext)
 ----
-a@ Frees an allocation.  The memory pointed to by [code]#ptr# must have been
-allocated using one of the USM allocation routines.  [code]#syclContext# must
-be the same [code]#context# that was used to allocate the memory.  The memory
-is freed without waiting for <<command, commands>> operating on it to be
-completed.  If <<command, commands>> that use this memory are in-progress or
-are enqueued the behavior is undefined.
+a@ Frees an allocation.
+The memory pointed to by [code]#ptr# must have been allocated using one of the
+USM allocation routines or it must be a null pointer.
+If [code]#ptr# is not null, the [code]#syclContext# must be the same
+[code]#context# that was used to allocate the memory.
+If [code]#ptr# is null, this function has no effect.
+Otherwise, the memory is freed without waiting for <<command, commands>>
+operating on it to be completed.
+If <<command, commands>> that use this memory are in-progress or are enqueued,
+the behavior is undefined.
 
 a@
 [source]
