@@ -18,7 +18,7 @@ The underlying types for all enumerations defined in this specification are
 implementation-defined.
 In addition, all enumerators within an enumeration have some
 implementation-defined unique value unless the specification specifically
-indicates a values for the enumerator.
+indicates a value for the enumerator.
 
 
 [[sec:backends]]
@@ -48,7 +48,7 @@ specification.
 === Backend macros
 
 As the identifiers defined in [code]#enum class backend# are
-implementation-defined, and the associated backends not guaranteed to be
+implementation-defined, and the associated backends are not guaranteed to be
 available, a SYCL implementation must also define a preprocessor macro for each
 of these identifiers.
 If the <<backend>> is defined by the Khronos SYCL group, the name of the macro
@@ -249,7 +249,7 @@ interoperability, a specialization of [code]#get_native# must be defined, which
 takes an instance of [code]#T# and returns a <<sycl-application>>
 interoperability <<native-backend-object>> associated with [code]#syclObject#
 which can be used for <<sycl-application>> interoperability.
-The lifetime of the object returned are backend-defined and specified in the
+The lifetime of the object returned is backend-defined and specified in the
 backend specification.
 
 For each <<sycl-runtime>> class [code]#T# which supports kernel function
@@ -257,7 +257,7 @@ interoperability, a specialization of [code]#get_native# must be defined, which
 takes an instance of [code]#T# and returns the kernel function interoperability
 <<native-backend-object>> associated with [code]#syclObject# which can be used
 for kernel function interoperability.
-The availability and behavior of these template functions is defined by the
+The availability and behavior of these template functions are defined by the
 <<backend>> specification document.
 
 The [code]#get_native# function must throw an [code]#exception# with the
@@ -277,7 +277,7 @@ interoperability, a specialization of the appropriate template function
 [code]#make_{sycl_class}# where [code]#{sycl_class}# is the class name of
 [code]#T#, must be defined, which takes a <<sycl-application>> interoperability
 <<native-backend-object>> and constructs and returns an instance of [code]#T#.
-The availability and behavior of these template functions is defined by the
+The availability and behavior of these template functions are defined by the
 <<backend>> specification document.
 
 Overloads of the [code]#make_{sycl_class}# function which take a SYCL
@@ -3874,14 +3874,14 @@ void wait_and_throw()
    a@ Blocks until all commands associated with this event and any dependent
       events have completed.
 
-At least all uncomsumed <<async-error,asynchronous errors>> held by queues (or
+At least all unconsumed <<async-error,asynchronous errors>> held by queues (or
 their associated contexts) which were used to enqueue commands associated with
-this event and any dependent events, are passed to the approriate
+this event and any dependent events, are passed to the appropriate
 <<async-handler>> as described in <<subsubsec:async.handler.priorities>>.
 
 [NOTE]
 ====
-This behaviour is equivalent to calling [code]#queue::throw_asynchronous()# on
+This behavior is equivalent to calling [code]#queue::throw_asynchronous()# on
 the queue associated with this event and any dependent events.
 ====
 
@@ -6544,7 +6544,7 @@ the accessor's range results in undefined behavior.
 ====
 There is no change in behavior for ranged accessors with a range of zero.
 It still creates a requisite for the entire underlying buffer, and an attempt to
-access an element produces undefined behaviour.
+access an element produces undefined behavior.
 ====
 
 ==== Buffer accessor for commands
@@ -10919,12 +10919,16 @@ a@
 ----
 void sycl::free(void* ptr, const context& syclContext)
 ----
-a@ Frees an allocation.  The memory pointed to by [code]#ptr# must have been
-allocated using one of the USM allocation routines.  [code]#syclContext# must
-be the same [code]#context# that was used to allocate the memory.  The memory
-is freed without waiting for <<command, commands>> operating on it to be
-completed.  If <<command, commands>> that use this memory are in-progress or
-are enqueued the behavior is undefined.
+a@ Frees an allocation.
+The memory pointed to by [code]#ptr# must have been allocated using one of the
+USM allocation routines or it must be a null pointer.
+If [code]#ptr# is not null, the [code]#syclContext# must be the same
+[code]#context# that was used to allocate the memory.
+If [code]#ptr# is null, this function has no effect.
+Otherwise, the memory is freed without waiting for <<command, commands>>
+operating on it to be completed.
+If <<command, commands>> that use this memory are in-progress or are enqueued,
+the behavior is undefined.
 
 a@
 [source]
@@ -18011,6 +18015,9 @@ void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) 
 |====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
 
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+
 _Effects:_ Loads values from memory into elements of the underlying [code]#vec#
 object.
 A total of [code]#NumElements# values are loaded from memory, starting at the
@@ -18226,9 +18233,12 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#,
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ If [code]#OP# is one of the following: [code]#%=#, [code]#&=#,
-[code]#|=#, [code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when:
-[code]#DataT != float && DataT != double && DataT != half#.
+_Constraints:_ Available only when the left hand side
+[code]#+__writeable_swizzle__+# view does not contain any repeated elements.
+
+If [code]#OP# is one of the following: [code]#%=#, [code]#&=#, [code]#|=#,
+[code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when: [code]#DataT !=
+float && DataT != double && DataT != half#.
 
 In addition, overloads (1) and (2) are available only when the element data type
 of [code]#lhs# is the same as the element data type of [code]#rhs# and when the
@@ -18269,7 +18279,9 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+Available only when [code]#DataT# is not [code]#bool#.
 
 _Effects:_ Perform an in-place element-wise [code]#OP# prefix arithmetic
 operation on those elements of the [code]#vec# object that have corresponding
@@ -18294,7 +18306,9 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when [code]#DataT# is not [code]#bool#.
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+Available only when [code]#DataT# is not [code]#bool#.
 
 _Effects:_ Perform an in-place element-wise [code]#OP# postfix arithmetic
 operation on those elements of the [code]#vec# object that have corresponding
