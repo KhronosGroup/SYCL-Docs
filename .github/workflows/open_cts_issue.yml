@@ -1,6 +1,12 @@
 name: Open CTS issue for spec changes
 on:
-  pull_request:
+  # We use the pull_request_target trigger to always run the workflow in the context of the base branch,
+  # since this allows us to access repository secrets even if the PR originates from a fork.
+  #
+  # Importantly, the workflow must not checkout any code from the PR branch, as this could allow an attacker
+  # to gain write access to the repository.
+  # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for more information.
+  pull_request_target:
     types: opened
 jobs:
   create-issue:
