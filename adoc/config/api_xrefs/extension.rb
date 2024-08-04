@@ -37,12 +37,23 @@ include ::Asciidoctor
 # Note that an "API" can be anything.  This extension only cares that the text
 # in the "[apidef]" role matches the text in the "[api]" role.
 #
+# Sometimes you want an API name to link to something that is not an [apidef]
+# title.  In this case, you can define the Asciidoc attribute "api-xrefs", which
+# has a syntax like:
+#
+#   :api-xrefs: API1=ID1 API2=ID2 ...
+#
+# The IDs (ID1, ID2, etc.) must be defined someplace in the Asciidoc document.
+# Each of these IDs is used as the target for the associated API (API1, API2,
+# etc.)
+#
 # Typically, projects using this extension also provide some custom CSS styling
 # for the "apidef" and "api" HTML classes.
 
 class AddApiXrefs < Extensions::Postprocessor
   include Asciidoctor::Logging
 
+  Id = /<\w+ id="([\w:-]*)"/
   ApiSpan = /<span class="api">([\w:]*)<\/span>/
   ApiDefSpan = /<span class="apidef">([\w:]*)<\/span>/
   ApiIdDiv = /<div id="([\w:-]*)"/
@@ -50,6 +61,23 @@ class AddApiXrefs < Extensions::Postprocessor
   def process document, output
 
     if document.basebackend? 'html'
+      # Get all of the IDs in the HTML document, so we can do error checking
+      # below.
+      all_ids = output.scan(Id).to_h{|m| [m.first, true]}
+
+      # Parse the api-xrefs attribute.  Make sure each ID is defined someplace
+      # in the document.  Populate "api_id_array" with this information.
+      api_id_array = []
+      if document.attr? 'api-xrefs'
+        (document.attr 'api-xrefs').scan(/([\w:-]*)=([\w:-]*)/) do |api, id|
+          if not all_ids.key?(id)
+            logger.error "Id '#{id}' from api-xrefs is not defined"
+          else
+            api_id_array.push([api, id])
+          end
+        end
+      end
+
       # Scan through all the HTML lines looking for the "[apidef]" definitions.
       # A typical definition looks like this:
       #
@@ -58,16 +86,19 @@ class AddApiXrefs < Extensions::Postprocessor
       # <div class="title"><span class="apidef">NAME</span></div>
       #
       # where the <a> element above may or may not be present, depending on
-      # whether the listing block also uses the "synopsis" extension.
+      # whether the listing block also uses the "synopsis" extension.  Add
+      # these also to "api_id_array".
       #
-      api_id_array = output.lines.each_cons(3).filter_map do |prev2, prev1, cur|
+      output.lines.each_cons(3) do |prev2, prev1, cur|
         api = cur.scan(ApiDefSpan).first
         api_id = prev1.scan(ApiIdDiv).first || prev2.scan(ApiIdDiv).first
-        [api.first, api_id.first] if api && api_id
+        if api && api_id
+          api_id_array.push([api.first, api_id.first])
+        end
       end
 
-      # Diagnose duplicate id definitions, and create a hash mapping each API
-      # name to its ID.
+      # Diagnose duplicate apidef definitions, and create a hash mapping each
+      # API name to its ID.
       api_to_id = {}
       api_id_array.map do |api, api_id|
         if api_to_id.key?(api)
