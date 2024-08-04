@@ -5,30 +5,21 @@ require 'asciidoctor/extensions' unless RUBY_ENGINE == 'opal'
 
 include ::Asciidoctor
 
-# Add HTML anchors for "[source,role=synopsis,id=X]" blocks, changing the HTML
-# from this:
+# Add HTML anchors for "[role=synopsis,id=X]" blocks, changing the HTML from
+# this:
 #
-# <div id="X" class="listingblock synopsis">
+# <div id="X" class="XX synopsis">
 #
 # to this:
 #
-# <div id="X" class="listingblock synopsis">
+# <div id="X" class="XX synopsis">
 # <a href="#X"></a>
 #
 # Note that this happens only if the block has an "id" attribute.
 #
 # This extension also relies on some custom CSS styling to turn the anchor into
-# into a section marker that you can click on to get the URL of the synopsis
-# block.  See the CSS entries for the class name "synopsis".
-#
-# TODO: It would be nice to create a custom Asciidoc block instead of using the
-# "role=" syntax.  This would allow the Asciidoc source to look like:
-#
-# [synopsis,id=X]
-#
-# However, doing this disables the source code highlighting feature.  I think
-# this is because the rouge highlighter looks only at [source] blocks, and I
-# cannot find a way to tell it to look at a custom block named [synopsis].
+# into a marker that you can click on to get the URL of the synopsis block.  See
+# the CSS entries for the class name "synopsis".
 
 class AddSynopsisAnchors < Extensions::Postprocessor
 
