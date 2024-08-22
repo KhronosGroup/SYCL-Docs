@@ -47,6 +47,6 @@ class device {
   create_sub_devices(info::partition_affinity_domain affinityDomain) const;
 
   static std::vector<device>
-  get_devices(info::device_type deviceType = info::device_type::all);
+  get_devices(info::device_type type = info::device_type::all);
 };
 } // namespace sycl
