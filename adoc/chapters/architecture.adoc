@@ -16,10 +16,10 @@ can run on either an heterogeneous device or on the <<host>>.
 The terminology used for SYCL inherits historically from OpenCL with some
 SYCL-specific additions.
 However SYCL is a generic {cpp} programming model that can be laid out on top of
-other heterogeneous APIs apart from OpenCL.
-SYCL implementations can provide <<backend>>s for various heterogeneous APIs,
-implementing the SYCL general specification on top of them.
-We refer to this heterogeneous API as the <<backend-api>>.
+other APIs apart from OpenCL.
+SYCL implementations can provide <<backend>>s for various APIs, implementing the
+SYCL general specification on top of them.
+We refer to this API as the <<backend-api>>.
 The SYCL general specification defines the behavior that all SYCL
 implementations must expose to SYCL users for a SYCL application to behave as
 expected.
@@ -62,7 +62,7 @@ developers in other fields.
 == Anatomy of a SYCL application
 
 Below is an example of a typical <<sycl-application>> which schedules a job to
-run in parallel on any heterogeneous device available.
+run in parallel on any device available.
 
 // An AsciiDoctor "feature", the language is specified as the second
 // parameter of this attribute, even if we do not want it. So add a
@@ -186,8 +186,8 @@ correct.
 [[sec:platformmodel]]
 == The SYCL platform model
 
-The SYCL platform model consists of a host connected to one or more
-heterogeneous devices, called <<device,devices>>.
+The SYCL platform model consists of a host connected to one or more devices,
+called <<device,devices>>.
 <<device,Devices>> are grouped together into one or multiple <<platform,
 platforms>>.
 An implementation may also expose empty <<platform, platforms>> that do not
@@ -215,8 +215,7 @@ The <<sycl-runtime>> then extracts operations from the
 <<sycl-kernel-function>>.
 When the operation is a <<sycl-kernel-function>>, the <<sycl-runtime>> uses a
 <<backend>>-specific mechanism to extract the device binary from the SYCL
-application and pass it to the heterogeneous API for execution on the
-<<device>>.
+application and pass it to the <<backend-api>> for execution on the <<device>>.
 
 A SYCL <<device>> is divided into one or more compute units (CUs) which are each
 divided into one or more processing elements (PEs).
@@ -241,7 +240,7 @@ programmable kernels, and only support _built-in_ functions.
 == The SYCL backend model
 
 SYCL is a generic programming model for the {cpp} language that can target
-multiple heterogeneous APIs, such as OpenCL.
+multiple APIs, such as OpenCL.
 
 SYCL implementations enable these target APIs by implementing <<backend, SYCL
 backends>>.
@@ -270,8 +269,8 @@ guarantee that said backends can be executed at runtime.
 The subset of active backends available at runtime is called _available
 backends_.
 A backend is said to be _available_ if the host platform where the SYCL
-application is executed exposes support for the heterogeneous API required for
-the <<backend>>.
+application is executed exposes support for the API required for the
+<<backend>>.
 
 It is implementation dependent whether certain backends require third-party
 libraries to be available in the system.
@@ -366,8 +365,7 @@ been satisfied.
 ==== Backend resources managed by the SYCL application
 
 The SYCL runtime integrated with the SYCL application will manage the resources
-required by the <<backend-api>> to manage the heterogeneous devices it is
-providing access to.
+required by the <<backend-api>> to manage the devices it is providing access to.
 This includes, but is not limited to, resource handlers, memory pools, dispatch
 queues and other temporary handler objects.
 
