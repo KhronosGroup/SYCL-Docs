@@ -67,14 +67,8 @@ VERBOSE = --verbose
 # SYCL_VERSION & SYCL_REVISION) are based on this external configuration file:
 include $(SYCL_DIR)/sycl_version.txt
 
-# In particular, SYCL_LANGUAGE_VERSION is derived from other values
-SYCL_LANGUAGE_VERSION=$(shell printf "%04d%02d" $(SYCLLANGVERSION) \
-  $(SYCLREVISION))
-SYCL_NAME=$(SYCLNAME)
-SYCL_VERSION=$(SYCLVERSION)
-SYCL_REVISION=$(SYCLREVISION)
 # Name the generated spec from the revision
-SPEC_BASE_NAME=$(shell echo $(SYCL_NAME)-$(SYCL_VERSION) \
+SPEC_BASE_NAME=$(shell echo $(SYCLNAME)-$(SYCLVERSION) \
   | tr [:upper:] [:lower:])
 
 # asciidoc build attributes to set (defaults are usually OK)
