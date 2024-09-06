@@ -9,8 +9,7 @@ int main() {
   // Create a default queue to enqueue work to the default device
   queue myQueue;
 
-  // Allocate device global memory bound to the device and context associated
-  // with the queue
+  // Allocate device USM, using the device and context associated with the queue
   int* data = sycl::malloc_device<int>(1024, myQueue);
 
   myQueue.parallel_for(1024, [=](id<1> idx) {
