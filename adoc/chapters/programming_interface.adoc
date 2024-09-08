@@ -3230,7 +3230,8 @@ a@
 ----
 template <typename T> event submit(T cgf, queue& secondaryQueue)
 ----
-a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
+a@ Deprecated in SYCL NEXT.
+Submit a <<command-group-function-object>> to the queue, in order to be scheduled
 for execution on the device. On a kernel error, this <<command-group-function-object>>
 is then scheduled for execution on the secondary queue. Returns an
 event, which corresponds to the queue the <<command-group-function-object>>
@@ -13382,6 +13383,7 @@ fall-back from primary to secondary queue are unspecified in the specification.
 Even if a command group is run on the secondary queue, the requirement that host
 code within the command group is executed exactly once remains, regardless of
 whether the fallback queue is used for execution.
+The fallback queue feature is deprecated in SYCL NEXT.
 
 The command group [code]#handler# class provides the interface for all of the
 member functions that are able to be executed inside the command group scope,
@@ -16576,6 +16578,8 @@ context will be used and if the context was also constructed without an
 <<async-handler>>, then the default handler will be used.
 The <<command-group-function-object>> event returned by that function will be
 relevant to the queue where the kernel has been enqueued.
+
+The secondary queue feature is deprecated in SYCL NEXT.
 
 Below is an example of catching a SYCL [code]#exception# and printing out the
 error message.

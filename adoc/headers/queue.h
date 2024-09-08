@@ -60,6 +60,7 @@ class queue {
 
   template <typename T> event submit(T cgf);
 
+  // Deprecated in SYCL NEXT.
   template <typename T> event submit(T cgf, const queue& secondaryQueue);
 
   void wait();
