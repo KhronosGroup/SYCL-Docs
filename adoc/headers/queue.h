@@ -60,7 +60,7 @@ class queue {
 
   template <typename T> event submit(T cgf);
 
-  // Deprecated in SYCL NEXT.
+  // Deprecated in SYCL {SYCL_VERSION}.
   template <typename T> event submit(T cgf, const queue& secondaryQueue);
 
   void wait();
