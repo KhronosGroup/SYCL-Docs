@@ -189,6 +189,6 @@ class queue {
 
   template <typename T, int Dims, access_mode Mode, target Tgt,
             access::placeholder IsPlaceholder>
-  event update_host(accessor<T, Dim, Mode, Tgt, IsPlaceholder> acc);
+  event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
 };
 } // namespace sycl
