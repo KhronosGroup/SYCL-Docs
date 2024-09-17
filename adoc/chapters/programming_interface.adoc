@@ -2936,9 +2936,15 @@ passing <<async-error,asynchronous errors>> at specific times to an
 The application can wait for all <<command-group,command groups>> submitted to a
 queue calling [api]#queue::wait# or [api]#queue::wait_and_throw#.
 
-All constructors of the [code]#queue# class implicitly construct a
-[code]#platform#, [code]#device#, and [code]#context# in order to facilitate the
-construction of the queue.
+All [code]#queue# objects have an associated device, platform, and context which
+are determined by the constructor.
+The description of each constructor below tells how the device is chosen, and
+the platform is always the platform that contains this device.
+The description of each constructor also tells how the context is chosen.
+When the constructor does not take a context object as a parameter, the queue
+uses the platform's default context.
+Each platform has a single context object which is used as its default context,
+and that context object contains all of the devices in the platform.
 
 A queue may be destroyed even when there are uncompleted <<command, commands>>
 that have been submitted to the queue.
@@ -2979,6 +2985,7 @@ explicit queue(const property_list& propList = {})
 
 _Effects:_ Constructs a [code]#queue# object using the device selected by
 [code]#default_selector_v#.
+The queue has the default context of the platform that contains this device.
 
 '''
 
@@ -2991,6 +2998,7 @@ explicit queue(const async_handler& asyncHandler,
 
 _Effects:_ Constructs a [code]#queue# object using the device selected by
 [code]#default_selector_v#.
+The queue has the default context of the platform that contains this device.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3010,6 +3018,7 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
+The queue has the default context of the platform that contains this device.
 
 '''
 
@@ -3029,6 +3038,7 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
+The queue has the default context of the platform that contains this device.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3041,6 +3051,7 @@ explicit queue(const device& syclDevice, const property_list& propList = {})
 
 _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
+The queue has the default context of the platform that contains this device.
 
 '''
 
@@ -3053,6 +3064,7 @@ explicit queue(const device& syclDevice, const async_handler& asyncHandler,
 
 _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
+The queue has the default context of the platform that contains this device.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
