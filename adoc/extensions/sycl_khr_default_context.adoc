@@ -1,0 +1,57 @@
+[[sec:khr-default-context]]
+= SYCL_KHR_DEFAULT_CONTEXT
+
+When a [code]#queue# object is constructed without passing an explicit
+[code]#context# object, the queue uses the platform's default context.
+This extension adds a new query function to retrieve this default context
+from a [code]#platform# object.
+
+[[sec:khr-default-context-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-default-context-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_DEFAULT_CONTEXT# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-default-context-platform]]
+== Extensions to the platform class
+
+This extension adds the following new member functions to the [code]#platform#
+class.
+
+[source,role=synopsis,id=api:khr-default-context-platform]
+----
+namespace sycl {
+class platform {
+  context khr_get_default_context() const;
+  // ...
+};
+}
+----
+
+[[sec:khr-default-context-platform-member-funcs]]
+=== Member functions
+
+.[apidef]#platform::khr_get_default_context#
+[source,role=synopsis,id=api:platform-khr-get-default-context]
+----
+context khr_get_default_context() const
+----
+
+_Returns:_ A copy of the default context object for this platform.
+The default context contains all of the <<root-device, root devices>> that are
+associated with this platform.
