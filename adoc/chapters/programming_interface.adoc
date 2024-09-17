@@ -3225,11 +3225,12 @@ template <typename T>
 event submit(T cgf)
 ----
 
-_Effects:_ Submit a <<command-group-function-object>> to the queue, in order to
-be scheduled for execution on the device.
+_Effects:_ Immediately calls the <<command-group-function-object>> [code]#cgf#,
+which may submit no more than one <<command>> to the queue for execution on the
+device.
 
-_Returns:_ An event which the application can use to determine when the
-<<command>> associated with the <<command-group-function-object>> has completed.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3240,14 +3241,15 @@ template <typename T>
 event submit(T cgf, queue& secondaryQueue)
 ----
 
-_Effects:_ Submit a <<command-group-function-object>> to the queue, in order to
-be scheduled for execution on the device.
+_Effects:_ Immediately calls the <<command-group-function-object>> [code]#cgf#,
+which may submit no more than one <<command>> to the queue for execution on the
+device.
 On a kernel error, this <<command-group-function-object>> may be scheduled for
 execution on the secondary queue [code]#secondaryQueue# as described in
 <<sec::fallback-mechanism>>.
 
-_Returns:_ An event which the application can use to determine when the
-<<command>> associated with the <<command-group-function-object>> has completed.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 If the command is scheduled on [code]#secondaryQueue#, the event is associated
 with that queue.
 
@@ -3360,7 +3362,8 @@ _Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::depends_on(depEvents)# and
 [code]#handler::single_task(kernelFunc)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3412,7 +3415,8 @@ _Effects (6):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::depends_on(depEvents)# and
 [code]#handler::parallel_for(executionRange, rest)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3438,7 +3442,8 @@ _Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::depends_on(depEvents)# and
 [code]#handler::memcpy(dest, src, numBytes)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3515,7 +3520,8 @@ _Effects (8):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::require(src)#,
 [code]#handler::require(dest)#, and [code]#handler::copy(src, dest)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3541,7 +3547,8 @@ _Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::depends_on(depEvents)# and
 [code]#handler::memcpy(ptr, value, numBytes)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3578,7 +3585,8 @@ _Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::require(dest)# and
 [code]#handler::fill(dest, src)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3603,7 +3611,8 @@ _Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::depends_on(depEvents)# and
 [code]#handler::prefetch(ptr, numBytes)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3629,7 +3638,8 @@ _Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::depends_on(depEvents)# and
 [code]#handler::mem_advise(ptr, numBytes, advice)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
@@ -3645,7 +3655,8 @@ _Effects:_ Equivalent to calling [api]#queue::submit# with a command group
 function that calls [code]#handler::require(acc)# and
 [code]#handler::update_host(acc)#.
 
-_Returns:_ An event which represents the command that is submitted to the queue.
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
 '''
 
