@@ -412,7 +412,7 @@ a@
       required for the underlying <<native-backend-object>> specified in
       the <<backend>> specification document, if this SYCL [code]#T# instance
       was originally constructed using one of the backend interoperability
-      [code]#make_*# functions specified in 
+      [code]#make_*# functions specified in
       <<sec:backend-interoperability-make>>.
       See the relevant backend specification for details.
 
@@ -949,12 +949,12 @@ to resolve some ambiguity in constructors with default parameters.
 [[sec:platform-class]]
 === Platform class
 
-The SYCL [code]#platform# class encapsulates a single SYCL platform on which
-SYCL kernel functions may be executed.
-A SYCL platform must be associated with a single <<backend>>.
+The [code]#platform# class encapsulates a single SYCL platform on which kernel
+functions may be executed.
+A platform must be associated with a single <<backend>>.
 
-A SYCL [code]#platform# is also associated with any number of SYCL
-[code]#devices# associated with the same <<backend>>.
+A [code]#platform# also contains a set of devices that are associated with the
+same <<backend>>.
 A platform may contain no devices.
 
 All member functions of the [code]#platform# class are synchronous and errors
@@ -963,207 +963,239 @@ are handled by throwing synchronous SYCL exceptions.
 The execution environment for a SYCL application has a fixed number of platforms
 which does not vary as the application executes.
 The application can get a list of all these platforms via
-[code]#platform::get_platforms()#, and the order of the platform objects is the
+[api]#platform::get_platforms#, and the order of the platform objects is the
 same each time the application calls that function.
 The [code]#platform# class also provides constructors, but constructing a new
 [code]#platform# instance merely creates a new object that is a copy of one of
-the objects returned by [code]#platform::get_platforms()#.
+the objects returned by [api]#platform::get_platforms#.
 
-The SYCL [code]#platform# class provides the common reference semantics (see
-<<sec:reference-semantics>>).
+The [code]#platform# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
-==== Platform interface
-
-A synopsis of the SYCL [code]#platform# class is provided below.
-The constructors, member functions and static member functions of the SYCL
-[code]#platform# class are listed in <<table.constructors.platform>>,
-<<table.members.platform>> and <<table.staticmembers.platform>> respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>> respectively.
-
-// Interface of platform class
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/platform.h[lines=4..-1]
 ----
 
+[[sec:platform-ctors]]
+==== Constructors
 
-[[table.constructors.platform]]
-.Constructors of the SYCL [code]#platform# class
-// Jon: Dims{6.7cm}{8.3cm}
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:platform-ctor]
 ----
 platform()
 ----
-   a@ Constructs a SYCL [code]#platform# instance that is a copy of the
-      [code]#platform# which contains the device returned by
-      [code]#default_selector_v#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#platform# object that is a copy of the platform
+which contains the device returned by [code]#default_selector_v#.
+
+'''
+
+.[apititle]#Selector constructor#
+[source,role=synopsis,id=api:platform-ctor-selector]
 ----
-template <typename DeviceSelector> explicit platform(const DeviceSelector&)
+template <typename DeviceSelector>
+explicit platform(const DeviceSelector& selector)
 ----
-   a@ Constructs a SYCL [code]#platform# instance that is a copy of the
-      [code]#platform# which contains the device returned by the
-      <<device-selector>> parameter.
 
-|====
+_Constraints:_ The [code]#DeviceSelector# must be a type that satisfies the
+requirements of a <<device-selector>> as defined in <<sec:device-selector>>.
 
+_Effects:_ The [code]#selector# is called for every <<root-device>> as described
+in <<sec:device-selector>>.
+Constructs a [code]#platform# object that is a copy of the platform which
+contains the device that is selected by [code]#selector#.
 
+'''
 
-[[table.members.platform]]
-.Member functions of the SYCL [code]#platform# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:platform-member-funcs]]
+==== Member functions
+
+.[apidef]#platform::get_backend#
+[source,role=synopsis,id=api:platform-get-backend]
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#platform#.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#platform# for information requested by
-      the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.platform.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Returns:_ The <<backend>> that is associated with this platform.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-   a@ Queries this SYCL [code]#platform# for <<backend>>-specific
-      information requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#platform#.
+'''
 
-a@
-[source]
+.[apidef]#platform::get_info#
+[source,role=synopsis,id=api:platform-get-info]
+----
+template <typename Param>
+typename Param::return_type get_info() const
+----
+
+_Constraints:_ The [code]#Param# must be an information descriptor for the
+platform class.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:platform-info-descriptors>> for the platform information descriptors
+that are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#platform::get_backend_info#
+[source,role=synopsis,id=api:platform-get-backend-info]
+----
+template <typename Param>
+typename Param::return_type get_backend_info() const
+----
+
+_Constraints:_ The [code]#Param# must be a backend information descriptor for
+the platform class.
+
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this platform.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+.[apidef]#platform::has#
+[source,role=synopsis,id=api:platform-has]
 ----
 bool has(aspect asp) const
 ----
-   a@ Returns true if all of the SYCL [code]#devices# associated with this
-      SYCL [code]#platform# have the given <<aspect>>. Returns [code]#false# if this SYCL [code]#platform# does not
-      contain any devices.
 
-a@
-[source]
+_Returns:_ The value [code]#true# if all of the devices associated with this
+platform have the given <<aspect>>.
+Returns the value [code]#false# if this platform does not contain any devices.
+
+'''
+
+.[apidef]#platform::has_extension#
+[source,role=synopsis,id=api:platform-has-extension]
 ----
 bool has_extension(const std::string& extension) const
 ----
-   a@ Deprecated, use [code]#has()# instead.
 
-Returns [code]#true# if this SYCL [code]#platform# supports the extension queried by the [code]#extension# parameter. A SYCL [code]#platform# can only support an extension if all associated SYCL [code]#devices# support that extension. Returns [code]#false# if this SYCL [code]#platform# does not contain any devices.
+Deprecated by SYCL 2020.
 
-a@
-[source]
+{note}Use [api]#platform::has# instead.
+{endnote}
+
+_Returns:_ The value [code]#true# if this platform supports the extension
+queried by the [code]#extension# parameter.
+A platform only supports an extension if all associated devices support that
+extension.
+Returns [code]#false# if this platform does not contain any devices.
+
+'''
+
+.[apidef]#platform::get_devices#
+[source,role=synopsis,id=api:platform-get-devices]
 ----
 std::vector<device>
-get_devices(info::device_type deviceType = info::device_type::all) const
+get_devices(info::device_type type = info::device_type::all) const
 ----
-   a@ Returns a [code]#std::vector# containing all the
-      <<root-device, root devices>> associated with this SYCL [code]#platform#
-      which have the device type encapsulated by [code]#deviceType#.
 
-|====
+_Returns:_ A [code]#std::vector# containing all of the <<root-device,root
+devices>> associated with this platform which have the device type specified by
+[code]#type#.
 
+'''
 
+[[sec:platform-static-member-funcs]]
+==== Static member functions
 
-[[table.staticmembers.platform]]
-.Static member functions of the SYCL [code]#platform# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Static member function @ Description
-a@
-[source]
+.[apidef]#platform::get_platforms#
+[source,role=synopsis,id=api:platform-get-platforms]
 ----
 static std::vector<platform> get_platforms()
 ----
-   a@ Returns a [code]#std::vector# containing all SYCL
-      [code]#platforms# from all <<backend, SYCL backends>> available in the system.
 
-|====
+_Returns:_ A [code]#std::vector# containing all of the platforms from all
+<<backend, backends>> that are available in the system.
 
+'''
 
+[[sec:platform-info-descriptors]]
+==== Information descriptors
 
-==== Platform information descriptors
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#platform::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#platform::get_info#
+function.
 
-A <<platform>> can be queried for information using the [code]#get_info# member
-function of the [code]#platform# class, specifying one of the info parameters in
-[code]#info::platform#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<platform>>.
-All info parameters in [code]#info::platform# are specified in
-<<table.platform.info>> and the synopsis for [code]#info::platform# is described
-in <<appendix.platform.descriptors>>.
+'''
 
-
-[[table.platform.info]]
-.Platform information descriptors
-// Jon: Dims{5cm}{2cm}{7cm}
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Platform descriptors @ Return type @ Description
-a@
-[source]
+.[apidef]#info::platform::version#
+[source,role=synopsis,id=api:info-platform-version]
 ----
-info::platform::version
+namespace sycl::info::platform {
+struct version {
+  using return_type = std::string;
+};
+} // namespace sycl::info::platform
 ----
 
-    @ [.code]#std::string#
-   a@ Returns a backend-defined <<platform>> version.
+_Remarks:_ Template parameter to [api]#platform::get_info#.
 
-a@
-[source]
-----
-info::platform::name
-----
+_Returns:_ An implementation-defined platform version string.
 
-    @ [.code]#std::string#
-   a@ Returns the name of the <<platform>>.
+'''
 
-a@
-[source]
+.[apidef]#info::platform::name#
+[source,role=synopsis,id=api:info-platform-name]
 ----
-info::platform::vendor
+namespace sycl::info::platform {
+struct name {
+  using return_type = std::string;
+};
+} // namespace sycl::info::platform
 ----
 
-    @ [.code]#std::string#
-   a@ Returns the name of the vendor providing the <<platform>>.
+_Remarks:_ Template parameter to [api]#platform::get_info#.
 
-a@
-[source]
+_Returns:_ An implementation-defined name for this platform.
+
+'''
+
+.[apidef]#info::platform::vendor#
+[source,role=synopsis,id=api:info-platform-vendor]
 ----
-info::platform::extensions
+namespace sycl::info::platform {
+struct vendor {
+  using return_type = std::string;
+};
+} // namespace sycl::info::platform
 ----
 
-    @ [.code]#std::vector<std::string>#
-   a@ Deprecated, use [code]#device::get_info()# with
-      [code]#info::device::aspects# instead.
+_Remarks:_ Template parameter to [api]#platform::get_info#.
 
-Returns the extensions supported by this [code]#platform#. Returns an empty list if this [code]#platform# does not contain any devices.
+_Returns:_ An implementation-defined name for the vendor providing this
+platform.
 
-|====
+'''
 
+.[apidef]#info::platform::extensions#
+[source,role=synopsis,id=api:info-platform-extensions]
+----
+namespace sycl::info::platform {
+struct extensions {
+  using return_type = std::vector<std::string>;
+};
+} // namespace sycl::info::platform
+----
+
+Deprecated by SYCL 2020.
+
+{note}Use [code]#device::get_info()# with [code]#info::device::aspects# instead.
+{endnote}
+
+_Remarks:_ Template parameter to [api]#platform::get_info#.
+
+_Returns:_ The extensions supported by this platform.
+Returns an empty list if this platform does not contain any devices.
+
+'''
 
 
 [[sec:interface.context.class]]
@@ -3706,7 +3738,7 @@ Some queue member functions are shortcuts to member functions of the
 These are listed in <<sec:queue-shortcuts>>.
 
 // Interface for class: queue
-[source,,linenums]
+[source,,linenums,subs="attributes+"]
 ----
 include::{header_dir}/queue.h[lines=4..-1]
 ----
@@ -3955,7 +3987,8 @@ a@
 ----
 template <typename T> event submit(T cgf, queue& secondaryQueue)
 ----
-a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
+a@ Deprecated in SYCL {SYCL_VERSION}.
+Submit a <<command-group-function-object>> to the queue, in order to be scheduled
 for execution on the device. On a kernel error, this <<command-group-function-object>>
 is then scheduled for execution on the secondary queue. Returns an
 event, which corresponds to the queue the <<command-group-function-object>>
@@ -10932,7 +10965,7 @@ modification of shared allocations through the aspect
 See <<sec:device-aspects>> for more details.
 
 Performance hints for shared allocations may be specified by the user by
-enqueueing [code]#prefetch# operations on a device.
+enqueuing [code]#prefetch# operations on a device.
 These operations inform the SYCL runtime that the specified shared allocation is
 likely to be accessed on the device in the future, and that it is free to
 migrate the allocation to the device.
@@ -14107,6 +14140,7 @@ fall-back from primary to secondary queue are unspecified in the specification.
 Even if a command group is run on the secondary queue, the requirement that host
 code within the command group is executed exactly once remains, regardless of
 whether the fallback queue is used for execution.
+The fallback queue feature is deprecated in SYCL {SYCL_VERSION}.
 
 The command group [code]#handler# class provides the interface for all of the
 member functions that are able to be executed inside the command group scope,
@@ -17203,7 +17237,7 @@ executions are decoupled from one another except at specific points.
 For example, device code executions often begin when dependencies in the SYCL
 task graph are satisfied, which occurs asynchronously from host code execution.
 As a result of this the errors that occur on a device cannot be thrown directly
-from a host API call, because the call enqueueing a device action has typically
+from a host API call, because the call enqueuing a device action has typically
 already returned by the time that the error occurs.
 Such errors are not detected until the error-causing task executes or tries to
 execute, and we refer to these as <<async-error,asynchronous errors>>.
@@ -17301,6 +17335,8 @@ context will be used and if the context was also constructed without an
 <<async-handler>>, then the default handler will be used.
 The <<command-group-function-object>> event returned by that function will be
 relevant to the queue where the kernel has been enqueued.
+
+The secondary queue feature is deprecated in SYCL {SYCL_VERSION}.
 
 Below is an example of catching a SYCL [code]#exception# and printing out the
 error message.
@@ -21915,9 +21951,9 @@ a group.
 
 The result of a call to these functions is non-deterministic if the binary
 operator is not commutative and associative.
-Only the binary operators defined in <<sec:function-objects>> are supported by
-the [code]#reduce# functions in SYCL 2020, but the standard {cpp} syntax is used
-for forward compatibility with future SYCL versions.
+Only the binary operators defined in <<sec:function-objects>> are currently
+supported by the SYCL [code]#reduce# functions, but the standard {cpp} syntax is
+used for forward compatibility with future SYCL versions.
 
 [source,,linenums]
 ----
@@ -22049,8 +22085,8 @@ result returned to each work-item represents a partial prefix sum.
 
 The result of a call to a scan is non-deterministic if the binary operator is
 not associative.
-Only the binary operators defined in <<sec:function-objects>> are supported by
-the scan functions in SYCL 2020, but the standard {cpp} syntax is used for
+Only the binary operators defined in <<sec:function-objects>> are currently
+supported by the SYCL scan functions, but the standard {cpp} syntax is used for
 forward compatibility with future SYCL versions.
 
 [source,,linenums]
