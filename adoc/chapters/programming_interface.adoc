@@ -2748,12 +2748,19 @@ struct execution_capabilities {
 } // namespace sycl::info::device
 ----
 
+Deprecated by SYCL {SYCL_VERSION}.
+
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ A [code]#std::vector# of the [api]#info::execution_capability# values
+_Returns:_ Only supported when the backend of this device is OpenCL (see
+<<chapter:opencl-backend>>).
+Returns a [code]#std::vector# of the [api]#info::execution_capability# values
 describing the supported execution capabilities.
-Note that this information is intended for OpenCL interoperability only as SYCL
-only supports [api]#info::execution_capability::exec_kernel#.
+Unless the device type is [api]#info::device_type::custom#, the returned vector
+will always include [api]#info::execution_capability::exec_kernel#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+backend of this device is not OpenCL.
 
 '''
 
@@ -3658,6 +3665,11 @@ enum class global_mem_cache_type : /* unspecified */ {
 [[sec:device-enum-execution-capability]]
 ===== Execution capability
 
+Deprecated by SYCL {SYCL_VERSION}.
+
+The [code]#info::execution_capability# enumeration tells the type of kernels
+that can be submitted to a device from the OpenCL backend.
+
 [source,role=synopsis]
 ----
 namespace sycl::info {
@@ -3667,6 +3679,24 @@ enum class execution_capability : /* unspecified */ {
 };
 } // namespace sycl::info
 ----
+
+'''
+
+.[apidef]#info::execution_capability::exec_kernel#
+[role=synopsis,id=api:info-execution-capability-exec-kernel]
+--
+Device can execute SYCL kernels.
+--
+
+'''
+
+.[apidef]#info::execution_capability::exec_native_kernel#
+[role=synopsis,id=api:info-execution-capability-exec-native-kernel]
+--
+Device can execute native OpenCL kernels.
+--
+
+'''
 
 
 [[sec:interface.queue.class]]
