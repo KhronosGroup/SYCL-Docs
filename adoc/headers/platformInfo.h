@@ -5,7 +5,6 @@ namespace sycl {
 namespace info {
 namespace platform {
 
-struct profile;
 struct version;
 struct name;
 struct vendor;
