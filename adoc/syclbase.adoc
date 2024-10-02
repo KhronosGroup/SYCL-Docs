@@ -1,12 +1,11 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 //
 // SPDX-License-Identifier: CC-BY-4.0
 
 // This should be set by the Makefile based on values in
 // ../sycl_version.txt, passed into the asciidoctor command line.
-:OPENCL_VERSION: [red]#Unknown OPENCL_VERSION!#
 :SYCL_LANGUAGE_VERSION: [red]#Unknown SYCL_LANGUAGE_VERSION!#
-:SYCL_NAMEA: [red]#Unknown SYCL_NAME!#
+:SYCL_NAME: [red]#Unknown SYCL_NAME!#
 :SYCL_VERSION: [red]#Unknown SYCL_VERSION!#
 :SYCL_REVISION: [red]#Unknown SYCL_REVISION!#
 
@@ -15,12 +14,28 @@
 // http://discuss.asciidoctor.org/How-to-add-markup-to-author-information-in-document-title-td6488.html
 :regtitle: pass:q,r[^®^]
 
+// Disable the footer for the HTML render.  The footer for HTML is not well
+// documented in Asciidoc, but it appears to insert a line "Last updated <date>"
+// at the very bottom of the HTML where the <date> is the timestamp of the
+// "syclbase.adoc" file.  This date is confusing because it might be quite a bit
+// older than the last modification to the specification.  We already have the
+// specification date in the HTML header, which shows the timestamp when the
+// specification was built from Asciidoc sources.
+//
+// Note that we *do* want a footer in the PDF render, which contains completely
+// different content.  The PDF footer shows the page number and the current
+// chapter.
+ifdef::backend-html5[]
+:nofooter:
+endif::[]
+
 = {SYCL_NAME}{tmtitle} {SYCL_VERSION} Specification (revision {SYCL_REVISION})
 The Khronos{regtitle} {SYCL_NAME}{tmtitle} Working Group
 :data-uri:
 :icons: font
 :toc2:
 :toclevels: 10
+:toclevels-expanded: 0
 :sectnumlevels: 10
 :max-width: 100%
 :numbered:
@@ -64,16 +79,25 @@ include::config/attribs.adoc[]
 :cpp20: pass:[C++20]
 // Fortunately, the cpp macro for C++ is defined by default in AsciiDoctor
 
+// Use these to format a non-normative note.  The Asciidoc source:
+//
+//  {note}Caveat emptor.
+//  {endnote}
+//
+// is formatted like:
+//
+//  [Note: Caveat emptor. -- end note]
+:note: pass:q[[_Note:_ ]
+:endnote: pass:q,a[_&#8212;{nbsp}end{nbsp}note_]]
+
 // SYCL Algebraic definitions
 :SYCLeval: Satisfied
 :SYCLperform: Perform
 
 // This causes cross references to chapters, sections, and tables to be
 // rendered as "Section A.B" (for example) rather than rendering the reference
-// as the text of the section title.  It also enables cross references to
-// [source] blocks as "Listing N", but only if the [source] block has a title.
+// as the text of the section title.
 :xrefstyle: short
-:listing-caption: Listing
 
 // Original SYCL title page has:
 //  image:logos/Khronos_Tagline_500px_June18.png (upper right)
@@ -88,7 +112,7 @@ include::config/attribs.adoc[]
 //      Khronos^{reg}^ SYCL^TM^ Working Group
 //      Editors: Ronan Keryell, Maria Rovatsou & Lee Howes
 //
-//      Copyright (c) 2011-2023 The Khronos Group, Inc. All Rights Reserved
+//      Copyright (c) 2011-2024 The Khronos Group, Inc. All Rights Reserved
 
 <<<<
 
@@ -101,7 +125,7 @@ toc::[]
 
 :leveloffset: 1
 
-include::chapters/acknowledgements.adoc[][]
+include::chapters/acknowledgements.adoc[]
 
 // \include{introduction}
 include::chapters/introduction.adoc[]
@@ -133,6 +157,8 @@ include::chapters/opencl_backend.adoc[]
 include::chapters/what_changed.adoc[]
 
 include::chapters/references.adoc[]
+
+include::extensions/index.adoc[]
 
 include::chapters/glossary.adoc[]
 //endif::[]

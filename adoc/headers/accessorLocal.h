@@ -1,11 +1,10 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 template <typename DataT, int Dimensions = 1> class local_accessor {
  public:
-  using value_type = // const DataT for read-only accessors, DataT otherwise
-      __value_type__;
+  using value_type = DataT;
   using reference = value_type&;
   using const_reference = const DataT&;
   template <access::decorated IsDecorated>
@@ -62,7 +61,8 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   /* Available only when: (Dimensions == 1) */
   reference operator[](size_t index) const;
 
-  std::add_pointer_t<value_type> get_pointer() const noexcept;
+  /* Deprecated in SYCL 2020 */
+  local_ptr<value_type> get_pointer() const noexcept;
 
   template <access::decorated IsDecorated>
   accessor_ptr<IsDecorated> get_multi_ptr() const noexcept;

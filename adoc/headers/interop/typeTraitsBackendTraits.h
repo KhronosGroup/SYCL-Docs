@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: MIT
 
 namespace sycl {
@@ -8,8 +8,6 @@ template <backend Backend> class backend_traits {
   template <class T> using input_type = /* see below */;
 
   template <class T> using return_type = /* see below */;
-
-  using errc = /* see below */;
 };
 
 template <backend Backend, typename SyclType>

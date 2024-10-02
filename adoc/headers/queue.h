@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -60,6 +60,7 @@ class queue {
 
   template <typename T> event submit(T cgf);
 
+  // Deprecated in SYCL {SYCL_VERSION}.
   template <typename T> event submit(T cgf, const queue& secondaryQueue);
 
   void wait();

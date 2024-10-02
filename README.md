@@ -2,8 +2,8 @@
 
 <!-- to update to newer CI when going public ![Build Status](https://api.travis-ci.com/KhronosGroup/SYCL-Docs.svg?branch=master) -->
 <!-- to update to newer CI when going public [![SPEC master](https://img.shields.io/badge/SPEC-master-red.svg?logo=adobe-acrobat-reader)](https://khronosgroup.github.io/SYCL-Docs/sycl/sycl.pdf) -->
-[![SPEC 2020-5](https://img.shields.io/badge/SPEC-2020--5-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/pdf/sycl-2020.pdf)
-[![SPEC 2020-5](https://img.shields.io/badge/SPEC-2020--5-orange.svg?logo=HTML5)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html)
+[![SPEC 2020-9](https://img.shields.io/badge/SPEC-2020--9-orange.svg?logo=adobe-acrobat-reader)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/pdf/sycl-2020.pdf)
+[![SPEC 2020-9](https://img.shields.io/badge/SPEC-2020--9-orange.svg?logo=HTML5)](https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html)
 [![SPEC latest](https://img.shields.io/badge/SPEC-latest-red.svg?logo=adobe-acrobat-reader)](https://github.com/KhronosGroup/SYCL-Docs/actions?query=branch%3ASYCL-2020%2Fmaster+is%3Asuccess)
 [![Join the Slack group](https://img.shields.io/badge/chat-on%20slack-blue.svg?logo=slack)](https://khr.io/slack)
 
@@ -113,7 +113,7 @@ environment. However, if you are using Debian/Ubuntu Linux, either native or
 via WSL2, you should be able to install the required tools by looking at the
 Dockerfile at
 
-https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.dockerfile
+https://github.com/KhronosGroup/DockerContainers/blob/master/asciidoctor-spec.Dockerfile
 
 Note that the Khronos Docker image layers on the official Ruby 3.1 Docker
 image, so you must install Ruby first.

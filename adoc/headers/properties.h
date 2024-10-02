@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -17,8 +17,8 @@ inline constexpr bool is_property_of_v =
 class T {
   ...
 
-      template <typename Property>
-      bool has_property() const noexcept;
+  template <typename Property>
+  bool has_property() const noexcept;
 
   template <typename Property> Property get_property() const;
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -20,7 +20,7 @@ enum class coordinate_normalization_mode : /* unspecified */ {
 
 struct image_sampler {
   addressing_mode addressing;
-  coordinate_mode coordinate;
+  coordinate_normalization_mode coordinate;
   filtering_mode filtering;
 };
 

@@ -1,9 +1,11 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 template <int Dimensions> class h_item {
  public:
+  static constexpr int dimensions = Dimensions;
+
   h_item() = delete;
 
   /* -- common interface members -- */

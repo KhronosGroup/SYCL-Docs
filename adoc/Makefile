@@ -1,4 +1,4 @@
-# Copyright 2011-2022 The Khronos Group, Inc.
+# Copyright 2011-2024 The Khronos Group, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -63,19 +63,12 @@ PDFMATHDIR = $(OUTDIR)/equations_temp
 # Set VERBOSE to -v to --verbose to see what asciidoc is doing.
 VERBOSE = --verbose
 
-# Some AsciiDoctor attributes (such as OPENCL_VERSION,
-# SYCL_LANGUAGE_VERSION, SYCL_NAME, SYCL_VERSION & SYCL_REVISION) are
-# based on this external configuration file:
+# Some AsciiDoctor attributes (such as SYCL_LANGUAGE_VERSION, SYCL_NAME,
+# SYCL_VERSION & SYCL_REVISION) are based on this external configuration file:
 include $(SYCL_DIR)/sycl_version.txt
 
-# In particular, SYCL_LANGUAGE_VERSION is derived from other values
-SYCL_LANGUAGE_VERSION=$(shell printf "%04d%02d" $(SYCLLANGVERSION) \
-  $(SYCLREVISION))
-SYCL_NAME=$(SYCLNAME)
-SYCL_VERSION=$(SYCLVERSION)
-SYCL_REVISION=$(SYCLREVISION)
 # Name the generated spec from the revision
-SPEC_BASE_NAME=$(shell echo $(SYCL_NAME)-$(SYCL_VERSION) \
+SPEC_BASE_NAME=$(shell echo $(SYCLNAME)-$(SYCLVERSION) \
   | tr [:upper:] [:lower:])
 
 # asciidoc build attributes to set (defaults are usually OK)
@@ -93,22 +86,14 @@ NOTEOPTS     = --attribute showtodos
 # Spell out ISO 8601 format as not all date commands support --rfc-3339
 SPECDATE     = $(shell echo `date -u "+%Y-%m-%d %TZ"`)
 
-# Generate Asciidoc attributes for spec remark
-# Could use `git log -1 --format="%cd"` to get branch commit date
-# This used to be a dependency in the spec html/pdf targets,
-# but that's likely to lead to merge conflicts. Just regenerate
-# when pushing a new spec for review to the sandbox.
-# The dependency on HEAD is per the suggestion in
-# http://neugierig.org/software/blog/2014/11/binary-revisions.html
-# Get back something clearer from the old LaTeX-based specification by
-# name the exact annotated tag. If not, list a path to the closest tag.
-SPECREMARK = from git $(shell \
-  echo `git describe --exact-match 2> /dev/null \
-        || ( git describe 2> /dev/null; echo "on branch:" ; \
-             git symbolic-ref --short HEAD 2> /dev/null \
-             || echo Git branch not available )`) \
-        commit: $(shell echo `git log -1 --format="%H" 2> /dev/null \
-                              || echo Git commit not available`)
+# Deterine the commit ID that is printed at the top of the spec.
+# In some CI systems, the build may happen outside of a git repo, so
+# "git log" may not be available.  These CI systems set the commit id via
+# "make COMMIT_SHA=...", so the build process doesn't need the "git log"
+# command.
+SPECREMARK = commit $(COMMIT_SHA)
+COMMIT_SHA = $(shell echo `git log -1 --format="%H" 2> /dev/null \
+               || echo "(not available)"`)
 
 # Some of the attributes used in building all spec documents:
 #   chapters - absolute path to chapter sources
@@ -122,7 +107,6 @@ SPECREMARK = from git $(shell \
 #   'refprefix.' for refpages (see ADOCREFOPTS below).
 ATTRIBOPTS   = --attribute revdate="$(SPECDATE)" \
   --attribute revremark="$(SPECREMARK)" \
-  --attribute OPENCL_VERSION="$(OPENCLVERSION)" \
   --attribute SYCL_LANGUAGE_VERSION="$(SYCLLANGVERSION)" \
   --attribute SYCL_NAME="$(SYCLNAME)" \
   --attribute SYCL_VERSION="$(SYCLVERSION)" \
@@ -136,14 +120,17 @@ ATTRIBOPTS   = --attribute revdate="$(SPECDATE)" \
   --attribute generated=$(GENERATED) \
   --attribute refprefix \
   $(VERSIONATTRIBS)
-ADOCMISCOPTS = --require asciidoctor-diagram --failure-level ERROR
+ADOCMISCOPTS = --require asciidoctor-diagram --failure-level INFO
 ADOCEXTS     = --require $(CURDIR)/config/spec-macros.rb \
 	--require $(CURDIR)/config/rouge_sycl.rb
 ADOCOPTS     = --doctype book $(ADOCMISCOPTS) $(ATTRIBOPTS) \
   $(NOTEOPTS) $(VERBOSE) $(ADOCEXTS)
 
 ADOCHTMLEXTS = --require $(CURDIR)/config/katex_replace.rb \
-  --require $(CURDIR)/config/loadable_html.rb
+  --require $(CURDIR)/config/loadable_html.rb \
+  --require $(CURDIR)/config/synopsis.rb \
+  --require $(CURDIR)/config/accordion_toc.rb \
+  --require $(CURDIR)/config/api_xrefs.rb
 
 # ADOCHTMLOPTS relies on the relative runtime path from the output HTML
 # file to the katex scripts being set with KATEXDIR. This is overridden
@@ -177,7 +164,7 @@ HEADER_DIR = $(CURDIR)/headers
 # Top-level spec source file
 SPECSRC = syclbase.adoc
 # Static files making up sections of the API spec.
-SPECFILES = $(wildcard *.adoc) $(wildcard chapters/*.adoc)
+SPECFILES = $(wildcard *.adoc) $(wildcard chapters/*.adoc) $(wildcard extensions/*.adoc)
 
 # Shorthand for where different types of generated files go.
 # All can be relocated by overriding GENERATED in the make invocation.
@@ -275,16 +262,20 @@ clean_pdf:
 #   make docker-clean docker-html docker-pdf
 # Also useful to have a shell inside docker:
 #   make docker-bash
+#
+# Set the user and group inside the container to match the user and group
+# outside of the container.  This causes the generated files to be owned by the
+# current user when accessed from outside the container.  However, this user
+# probably doesn't have write access to the default HOME directory, so set HOME
+# to some directory that does have write access.  This is important because
+# some tools (e.g. asciidoctor-pdf) write temporary files into HOME.  It does
+# not matter that we are polluting /tmp here because the entire container will
+# be discarded when the build is complete.
 docker-%:
-	# Run with current user and group id the published AsciiDoctor
-	# capable Khronos docker image with current SYCL specification
-	# directory mounted in /sycl
-	# Re-set MAKEFLAGS to pass variables to the inner make since
-	# variables are dropped by docker.
-	sudo docker run --user `id --user`:`id --group` \
+	sudo docker run --user `id --user`:`id --group` --env HOME=/tmp \
 	  --interactive --tty --rm \
-          --volume $(SYCL_DIR):/sycl \
-          khronosgroup/docker-images:asciidoctor-spec \
+	  --volume $(SYCL_DIR):/sycl \
+	  khronosgroup/docker-images:asciidoctor-spec \
 	  $(MAKE) MAKEFLAGS="$(MAKEFLAGS)" --directory=/sycl/adoc $*
 
 dock:

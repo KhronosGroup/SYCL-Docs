@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -10,6 +10,7 @@ __unspecified__ gpu_selector_v;
 __unspecified__ accelerator_selector_v;
 
 // Predefined types for compatibility with old SYCL 1.2.1 device selectors
+// Deprecated in SYCL 2020
 using default_selector = __unspecified__;
 using cpu_selector = __unspecified__;
 using gpu_selector = __unspecified__;

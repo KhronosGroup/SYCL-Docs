@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -177,15 +177,21 @@ class accessor {
   /* Deprecated
   Available only when: (AccessMode == access_mode::atomic && Dimensions ==  0)
 */
-  operator cl::sycl::atomic<DataT, access::address_space::global_space>() const;
+  operator sycl::atomic<DataT, access::address_space::global_space>() const;
 
   /* Deprecated
   Available only when: (AccessMode == access_mode::atomic && Dimensions == 1) */
-  cl::sycl::atomic<DataT, access::address_space::global_space>
+  sycl::atomic<DataT, access::address_space::global_space>
   operator[](id<Dimensions> index) const;
 
+  /* Deprecated in SYCL 2020
+  Available only when: (AccessTarget == target::device) */
+  global_ptr<value_type> get_pointer() const noexcept;
+
+  /* Available only when: (AccessTarget == target::host_task) */
   std::add_pointer_t<value_type> get_pointer() const noexcept;
 
+  /* Available only when: (AccessTarget == target::device) */
   template <access::decorated IsDecorated>
   accessor_ptr<IsDecorated> get_multi_ptr() const noexcept;
 

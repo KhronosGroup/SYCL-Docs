@@ -51,7 +51,6 @@ module Rouge
         create_bundle
         create_sub_devices
         depends_on
-        error_category_for
         exchange
         exclusive_scan
         exclusive_scan_over_group
@@ -179,82 +178,6 @@ module Rouge
         use_kernel_bundle
         wait
         wait_and_throw
-      )
-
-      # Generic types used in SYCL pseudo code descriptions like Gen,
-      # SGen, GenVec...
-      sycl_generic_types = %w(
-        charn
-        doublen
-        floatn
-        genchar
-        genfloat
-        genfloatd
-        genfloatf
-        genfloath
-        genfloatptr
-        gengeodouble
-        gengeofloat
-        genhalf
-        genint
-        geninteger
-        geninteger16bit
-        geninteger32bit
-        geninteger64bit
-        geninteger8bit
-        genintegerNbit
-        genintptr
-        genlong
-        genlonglong
-        genshort
-        gentype
-        genvector
-        halfn
-        igenchar
-        igeninteger
-        igeninteger16bit
-        igeninteger32bit
-        igeninteger64bit
-        igeninteger8bit
-        igenintegerNbit
-        igenlonginteger
-        intn
-        longlongn
-        longn
-        mgenfloat
-        mgeninteger
-        mgentype
-        migeninteger
-        mugeninteger
-        scharn
-        sgenfloat
-        sgeninteger
-        sgentype
-        shortn
-        sigeninteger
-        sugeninteger
-        ucharn
-        ugenchar
-        ugenint
-        ugeninteger
-        ugeninteger16bit
-        ugeninteger32bit
-        ugeninteger64bit
-        ugeninteger8bit
-        ugenintegerNbit
-        ugenlong
-        ugenlonginteger
-        ugenlonglong
-        ugenshort
-        uintn
-        ulonglongn
-        ulongn
-        ushortn
-        vgenfloat
-        vgeninteger
-        vgentype
-        vigeninteger
-        vugeninteger
       )
 
       sycl_macros = %w(
@@ -399,7 +322,6 @@ module Rouge
         device_image_iterator
         device_type
         elem
-        errc_for
         event
         event_command_status
         exception
@@ -500,7 +422,17 @@ module Rouge
         memory_scope_work_item
         no_init
         read_only
+        read_only_host_task
+        read_write
+        read_write_host_task
         write_only
+        write_only_host_task
+      )
+
+      # This could be used in the future for syntax coloring of new
+      # keywords that we might add to SYCL.
+      sycl_future_keywords = %w(
+        replace_me  # Replace with list of actual keywords
       )
 
       # Here are some interesting tokens
@@ -537,8 +469,6 @@ module Rouge
              Keyword::Pseudo
         rule %r/(?:#{sycl_functions.join('|')})\b/,
              Name::Function::Magic
-        rule %r/(?:#{sycl_generic_types.join('|')})\b/,
-             Name::Builtin::Pseudo
         rule %r/(?:#{sycl_macros.join('|')})\b/,
              Generic::Output
         rule %r/(?:#{sycl_namespaces.join('|')})\b/,
@@ -549,6 +479,8 @@ module Rouge
              Keyword::Reserved
         rule %r/(?:#{sycl_variables.join('|')})\b/,
              Name::Variable::Magic
+        rule %r/(?:#{sycl_future_keywords.join('|')})\b/,
+             Name::Builtin::Pseudo
       end
 
     end

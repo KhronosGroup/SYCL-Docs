@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -49,13 +49,17 @@ class sampled_image {
   /* Available only when: Dimensions > 1 */
   range<Dimensions - 1> get_pitch() const;
 
-  size_t byte_size() const;
+  size_t byte_size() const noexcept;
 
-  size_t size() const;
+  size_t size() const noexcept;
 
-  template <typename... Ts> auto get_access(Ts... args);
+  template <typename DataT, image_target Targ = image_target::device>
+  sampled_image_accessor<DataT, Dimensions, Targ>
+  get_access(handler& commandGroupHandler, const property_list& propList = {});
 
-  template <typename... Ts> auto get_host_access(Ts... args);
+  template <typename DataT>
+  host_sampled_image_accessor<DataT, Dimensions>
+  get_host_access(const property_list& propList = {});
 };
 
 } // namespace sycl

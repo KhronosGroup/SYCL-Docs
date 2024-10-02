@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -47,6 +47,6 @@ class device {
   create_sub_devices(info::partition_affinity_domain affinityDomain) const;
 
   static std::vector<device>
-  get_devices(info::device_type deviceType = info::device_type::all);
+  get_devices(info::device_type type = info::device_type::all);
 };
 } // namespace sycl

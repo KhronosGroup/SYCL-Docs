@@ -1,9 +1,11 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 template <int Dimensions = 1> class id {
  public:
+  static constexpr int dimensions = Dimensions;
+
   id();
 
   /* The following constructor is only available in the id class

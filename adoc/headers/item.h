@@ -1,9 +1,11 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 template <int Dimensions = 1, bool WithOffset = true> class item {
  public:
+  static constexpr int dimensions = Dimensions;
+
   item() = delete;
 
   /* -- common interface members -- */
@@ -22,6 +24,7 @@ template <int Dimensions = 1, bool WithOffset = true> class item {
   // only available if WithOffset is true
   id<Dimensions> get_offset() const;
 
+  // Deprecated in SYCL 2020.
   // only available if WithOffset is false
   operator item<Dimensions, true>() const;
 

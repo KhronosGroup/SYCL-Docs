@@ -1,9 +1,11 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 template <int Dimensions = 1> class nd_range {
  public:
+  static constexpr int dimensions = Dimensions;
+
   /* -- common interface members -- */
 
   // The offset is deprecated in SYCL 2020.

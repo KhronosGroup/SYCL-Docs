@@ -1,9 +1,13 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 template <int Dimensions = 1> class range {
  public:
+  static constexpr int dimensions = Dimensions;
+
+  range();
+
   /* The following constructor is only available in the range class
    * specialization where: Dimensions==1 */
   range(size_t dim0);

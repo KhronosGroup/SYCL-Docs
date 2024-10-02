@@ -1,11 +1,7 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-namespace cl {
 namespace sycl {
-
-/* Deprecated in SYCL 2020 */
-enum class memory_order : /* unspecified */ { relaxed };
 
 /* Deprecated in SYCL 2020 */
 template <typename T, access::address_space AddressSpace =
@@ -50,4 +46,3 @@ class atomic {
 };
 
 } // namespace sycl
-} // namespace cl

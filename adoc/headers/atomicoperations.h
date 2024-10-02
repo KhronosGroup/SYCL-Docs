@@ -1,7 +1,6 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-namespace cl {
 namespace sycl {
 /* Deprecated in SYCL 2020 */
 template <typename T, access::address_space AddressSpace>
@@ -60,4 +59,3 @@ template <typename T, access::address_space AddressSpace>
 T atomic_fetch_max(atomic<T, AddressSpace> object, T operand,
                    memory_order memoryOrder = memory_order::relaxed);
 } // namespace sycl
-} // namespace cl

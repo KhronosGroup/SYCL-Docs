@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2023 The Khronos Group, Inc.
+// Copyright (c) 2011-2024 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -17,11 +17,6 @@ class unsampled_image_accessor {
   template <typename AllocatorT>
   unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
                            handler& commandGroupHandlerRef,
-                           const property_list& propList = {});
-
-  template <typename AllocatorT, typename TagT>
-  unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
-                           handler& commandGroupHandlerRef, TagT tag,
                            const property_list& propList = {});
 
   /* -- common interface members -- */
@@ -58,11 +53,6 @@ class host_unsampled_image_accessor {
   template <typename AllocatorT>
   host_unsampled_image_accessor(
       unsampled_image<Dimensions, AllocatorT>& imageRef,
-      const property_list& propList = {});
-
-  template <typename AllocatorT, typename TagT>
-  host_unsampled_image_accessor(
-      unsampled_image<Dimensions, AllocatorT>& imageRef, TagT tag,
       const property_list& propList = {});
 
   /* -- common interface members -- */
