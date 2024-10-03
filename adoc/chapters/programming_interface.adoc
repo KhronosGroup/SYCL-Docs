@@ -727,8 +727,8 @@ Construct a SYCL [code]#property_list# with zero or more properties.
 Since a system can have several SYCL-compatible devices attached, it is useful
 to have a way to select a specific device or a set of devices to construct a
 specific object such as a [code]#device# (see <<sec:device-class>>) or a
-[code]#queue# (see <<sec:interface.queue.class>>), or perform some operations on
-a device subset.
+[code]#queue# (see <<sec:queue-class>>), or perform some operations on a device
+subset.
 
 Device selection is done either by already having a specific instance of a
 [code]#device# (see <<sec:device-class>>) or by providing a <<device-selector>>
@@ -3669,21 +3669,18 @@ enum class execution_capability : /* unspecified */ {
 ----
 
 
-[[sec:interface.queue.class]]
+[[sec:queue-class]]
 === Queue class
 
-// \input{queue_class}
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin queue_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The [code]#queue# class encapsulates a single SYCL queue which schedules kernels
+on a device.
 
-The SYCL [code]#queue# class encapsulates a single SYCL queue which schedules
-kernels on a SYCL device.
-
-A SYCL [code]#queue# can be used to submit <<command-group,command groups>> to
-be executed by the <<sycl-runtime>> using the [code]#submit# member function.
+A [code]#queue# can be used to submit <<command-group,command groups>> to be
+executed by the <<sycl-runtime>> using the [api]#queue::submit# member function.
 
 All member functions of the [code]#queue# class are synchronous and errors are
 handled by throwing synchronous SYCL exceptions.
-The [code]#submit# member function synchronously invokes the provided
+The [api]#queue::submit# member function synchronously invokes the provided
 <<command-group-function-object>> (as described in
 <<sec:command-groups-exec-order>>) in the calling thread, thereby scheduling a
 <<command-group>> for asynchronous execution.
@@ -3693,844 +3690,851 @@ Any errors from the <<command-group>> after it has been submitted are handled by
 passing <<async-error,asynchronous errors>> at specific times to an
 <<async-handler>>, as described in <<error-handling>>.
 
-A SYCL [code]#queue# can wait for all <<command-group,command groups>> that it
-has submitted by calling [code]#wait# or [code]#wait_and_throw#.
+The application can wait for all <<command-group,command groups>> submitted to a
+queue calling [api]#queue::wait# or [api]#queue::wait_and_throw#.
 
-The default constructor of the SYCL [code]#queue# class will construct a queue
-based on the SYCL [code]#device# returned from the [code]#default_selector_v#
-(see <<sec:device-selector>>).
-All other constructors construct a queue as determined by the parameters
-provided.
-All constructors will implicitly construct a SYCL [code]#platform#,
-[code]#device# and [code]#context# in order to facilitate the construction of
-the queue.
+All constructors of the [code]#queue# class implicitly construct a
+[code]#platform#, [code]#device#, and [code]#context# in order to facilitate the
+construction of the queue.
 
-Each constructor takes as the last parameter an optional SYCL
-[code]#property_list# to provide properties to the SYCL [code]#queue#.
-
-A SYCL [code]#queue# may be destroyed even when there are uncompleted <<command,
-commands>> that have been submitted to the queue.
+A queue may be destroyed even when there are uncompleted <<command, commands>>
+that have been submitted to the queue.
 Doing so does not block.
 Instead, any commands that have been submitted to the queue begin execution when
 their requisites are satisfied, just as they would had the queue not been
 destroyed.
 Any event objects for those commands are signaled in the normal manner when the
 command completes.
-Resources associated with the queue will be freed by the time the last command
+Resources associated with the queue are freed by the time the last command
 completes.
 
-The SYCL [code]#queue# class provides the common reference semantics (see
-<<sec:reference-semantics>>).
+The [code]#queue# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
-
-==== Queue interface
-
-A synopsis of the SYCL [code]#queue# class is provided below.
-The constructors and member functions of the SYCL [code]#queue# class are listed
-in <<table.constructors.queue>> and <<table.members.queue>> respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-Some queue member functions are shortcuts to member functions of the
-[code]#handler# class.
-These are listed in <<sec:queue-shortcuts>>.
-
-// Interface for class: queue
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/queue.h[lines=4..-1]
 ----
 
+[[sec:queue-ctors]]
+==== Constructors
 
-[[table.constructors.queue]]
-.Constructors of the [code]#queue# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+All queue constructors take a parameter named [code]#propList# which allows the
+application to pass zero or more properties.
+These properties may specify additional effects of the constructor and may also
+specify exceptions that the constructor throws.
+See <<sec:queue-properties>> for the queue properties that are defined by the
+<<core-spec>>.
+
+'''
+
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:queue-ctor]
 ----
 explicit queue(const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the device
-constructed from the [code]#default_selector_v#.
-Zero or more properties can
-be provided to the constructed SYCL [code]#queue# via an instance of
-[code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device selected by
+[code]#default_selector_v#.
+
+'''
+
+.[apititle]#Constructor with async handler#
+[source,role=synopsis,id=api:queue-ctor-async-handler]
 ----
 explicit queue(const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an
-[code]#async_handler# using the device constructed from the
-[code]#default_selector_v#.
-Zero or more properties can be provided to the
-constructed SYCL [code]#queue# via an instance of
-[code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device selected by
+[code]#default_selector_v#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with device selector#
+[source,role=synopsis,id=api:queue-ctor-selector]
 ----
 template <typename DeviceSelector>
 explicit queue(const DeviceSelector& deviceSelector,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the device
-returned by the <<device-selector>> provided. Zero or
-more properties can be provided to the constructed SYCL
-[code]#queue# via an instance of
-[code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+
+'''
+
+.[apititle]#Constructor with device selector and async handler#
+[source,role=synopsis,id=api:queue-ctor-selector-async-handler]
 ----
 template <typename DeviceSelector>
 explicit queue(const DeviceSelector& deviceSelector,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an
-[code]#async_handler# using the device returned by the
-<<device-selector>> provided. Zero or more properties
-can be provided to the constructed SYCL [code]#queue# via
-an instance of [code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+The queue has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with device#
+[source,role=synopsis,id=api:queue-ctor-device]
 ----
 explicit queue(const device& syclDevice, const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice# provided. Zero or more properties can be provided to the
-constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+
+'''
+
+.[apititle]#Constructor with device and async handler#
+[source,role=synopsis,id=api:queue-ctor-device-async-handler]
 ----
 explicit queue(const device& syclDevice, const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using the [code]#syclDevice# provided. Zero or more
-properties can be provided to the constructed SYCL [code]#queue#
-via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with context and device selector#
+[source,role=synopsis,id=api:queue-ctor-context-selector]
 ----
 template <typename DeviceSelector>
 explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance that is associated
-with the [code]#syclContext# provided, using the device
-returned by the <<device-selector>> provided. Must
-throw an [code]#exception# with the
-[code]#errc::invalid# error code if
-[code]#syclContext# does not encapsulate the SYCL
-[code]#device# returned by
-[code]#deviceSelector#. Zero or more properties can be
-provided to the constructed SYCL [code]#queue# via an
-instance of [code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+The queue has the context [code]#syclContext#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
+[code]#syclContext# does not contain the device selected by
+[code]#deviceSelector#.
+
+'''
+
+.[apititle]#Constructor with context, device selector, and async handler#
+[source,role=synopsis,id=api:queue-ctor-context-selector-async-handler]
 ----
 template <typename DeviceSelector>
 explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an
-[code]#async_handler# that is associated with the
-[code]#syclContext# provided, using the device returned by
-the <<device-selector>> provided. Must throw an
-[code]#exception# with the
-[code]#errc::invalid# error code if
-[code]#syclContext# does not encapsulate the SYCL
-[code]#device# returned by
-[code]#deviceSelector#. Zero or more properties can be
-provided to the constructed SYCL [code]#queue# via an
-instance of [code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+The queue has the context [code]#syclContext# and the asynchronous error handler
+[code]#asyncHandler#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
+[code]#syclContext# does not contain the device selected by
+[code]#deviceSelector#.
+
+'''
+
+.[apititle]#Constructor with context and device#
+[source,role=synopsis,id=api:queue-ctor-context-device]
 ----
 explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice#
-provided.  This device must either be contained by [code]#syclContext# or it
-must be a <<descendent-device>> of some device that is contained by that
-context, otherwise this function throws a synchronous exception with the
-[code]#errc::invalid# error code.  Zero or more properties can be provided to
-the constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
+and the context [code]#syclContext#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
+[code]#syclDevice# is contained by [code]#syclContext# or is a
+<<descendent-device>> of some device that is contained by [code]#syclContext#.
+
+'''
+
+.[apititle]#Constructor with context, device, and async handler#
+[source,role=synopsis,id=api:queue-ctor-context-device-async-handler]
 ----
 explicit queue(const context& syclContext, const device& syclDevice,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using
-the [code]#syclDevice# provided.  This device must either be contained by
-[code]#syclContext# or it must be a <<descendent-device>> of some device that
-is contained by that context, otherwise this function throws a synchronous
-exception with the [code]#errc::invalid# error code.  Zero or more properties
-can be provided to the constructed SYCL [code]#queue# via an instance of
-[code]#property_list#.
 
-|====
+_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
+and the context [code]#syclContext#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
 
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
+[code]#syclDevice# is contained by [code]#syclContext# or is a
+<<descendent-device>> of some device that is contained by [code]#syclContext#.
 
+'''
 
-[[table.members.queue]]
-.Member functions for [code]#queue# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:queue-member-funcs]]
+==== Member functions
+
+.[apidef]#queue::get_backend#
+[source,role=synopsis,id=api:queue-get-backend]
 ----
 backend get_backend() const noexcept
 ----
-a@ Returns a [code]#backend# identifying the <<backend>> associated
-with this [code]#queue#.
 
-a@
-[source]
+_Returns:_ The <<backend>> that is associated with this queue.
+
+'''
+
+.[apidef]#queue::get_context#
+[source,role=synopsis,id=api:queue-get-context]
 ----
 context get_context() const
 ----
-a@ Returns the SYCL queue's context.
-The value returned must be equal to that returned by [code]#get_info<info::queue::context>()#.
 
-a@
-[source]
+_Returns:_ The context that is associated with this queue.
+
+'''
+
+.[apidef]#queue::get_device#
+[source,role=synopsis,id=api:queue-get-device]
 ----
 device get_device() const
 ----
-a@ Returns the SYCL device the queue is associated with.
-The value returned must be equal to that returned by [code]#get_info<info::queue::device>()#.
 
-a@
-[source]
+_Returns:_ The device that is associated with this queue.
+
+'''
+
+.[apidef]#queue::is_in_order#
+[source,role=synopsis,id=api:queue-is-in-order]
 ----
 bool is_in_order() const
 ----
-a@ Returns true if the SYCL [code]#queue# was created with the
-[code]#in_order# property.
-Equivalent to [code]#has_property<property::queue::in_order>()#.
 
-a@
-[source]
+_Returns:_ The same value as [code]#has_property<property::queue::in_order>()#.
+
+'''
+
+.[apidef]#queue::get_info#
+[source,role=synopsis,id=api:queue-get-info]
+----
+template <typename Param>
+typename Param::return_type get_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is an information descriptor
+for the queue class.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:queue-info-descriptors>> for the queue information descriptors that
+are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#queue::get_backend_info#
+[source,role=synopsis,id=api:queue-get-backend-info]
+----
+template <typename Param>
+typename Param::return_type get_backend_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is a backend information
+descriptor for the queue class.
+
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this queue.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+.[apidef]#queue::submit#
+[source,role=synopsis,id=api:queue-submit]
+----
+template <typename T>
+event submit(T cgf)
+----
+
+_Effects:_ Immediately calls the <<command-group-function-object>> [code]#cgf#,
+which may submit no more than one <<command>> to the queue for execution on the
+device.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apititle]#queue::submit (with secondary queue)#
+[source,role=synopsis,id=api:queue-submit-secondary-queue]
+----
+template <typename T>
+event submit(T cgf, queue& secondaryQueue)
+----
+
+_Effects:_ Immediately calls the <<command-group-function-object>> [code]#cgf#,
+which may submit no more than one <<command>> to the queue for execution on the
+device.
+On a kernel error, this <<command-group-function-object>> may be scheduled for
+execution on the secondary queue [code]#secondaryQueue# as described in
+<<sec::fallback-mechanism>>.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+If the command is scheduled on [code]#secondaryQueue#, the event is associated
+with that queue.
+
+'''
+
+.[apidef]#queue::wait#
+[source,role=synopsis,id=api:queue-wait]
 ----
 void wait()
 ----
-a@ Performs a blocking wait for the completion of all enqueued tasks
-in the queue.  Synchronous errors will be reported through SYCL
-exceptions.
 
-a@
-[source]
+_Effects:_ Blocks the calling thread until all commands previously submitted to
+this queue have completed.
+Synchronous errors are reported through SYCL exceptions.
+
+'''
+
+.[apidef]#queue::wait_and_throw#
+[source,role=synopsis,id=api:queue-wait-and-throw]
 ----
 void wait_and_throw()
 ----
-a@ Performs a blocking wait for the completion of all enqueued tasks
-in the queue.  Synchronous errors will be reported through SYCL
-exceptions. Any unconsumed <<async-error,asynchronous errors>> will be passed to the
-<<async-handler>> associated with the queue or enclosing context.
-If no user defined [code]#async_handler# is associated with
-the queue or enclosing context, then an implementation-defined
-default <<async-handler>> is called to handle any errors, as
-described in <<subsubsec:exception.nohandler>>.
 
-a@
-[source]
+_Effects:_ Blocks the calling thread until all commands previously submitted to
+this queue have completed.
+Synchronous errors are reported through SYCL exceptions.
+Any unconsumed <<async-error,asynchronous errors>> are passed to the
+<<async-handler>> associated with the queue or to the <<async-handler>>
+associated with the queue's context.
+If no user defined asynchronous error handler is associated with the queue or
+its context, then an implementation-defined default <<async-handler>> is called
+to handle any errors, as described in <<subsubsec:exception.nohandler>>.
+
+'''
+
+.[apidef]#queue::throw_asynchronous#
+[source,role=synopsis,id=api:queue-throw-asynchronous]
 ----
 void throw_asynchronous()
 ----
-a@ Checks to see if any unconsumed <<async-error,asynchronous errors>> have been produced by
-the queue and if so reports them by passing them to the
-<<async-handler>> associated with the queue or enclosing context.
-If no user defined [code]#async_handler# is associated with
-the queue or enclosing context, then an implementation-defined
-default <<async-handler>> is called to handle any errors, as
-described in <<subsubsec:exception.nohandler>>.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#queue# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.queue.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Effects:_ Checks to see if any unconsumed <<async-error,asynchronous errors>>
+have been produced by the queue and if so reports them by passing them to the
+<<async-handler>> associated with the queue or to the <<async-handler>>
+associated with the queue's context.
+If no user defined asynchronous error handler is associated with the queue or
+its context, then an implementation-defined default <<async-handler>> is called
+to handle any errors, as described in <<subsubsec:exception.nohandler>>.
 
-a@
-[source]
-----
-template <typename T> event submit(T cgf)
-----
-a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
-for execution on the device.
-
-a@
-[source]
-----
-template <typename T> event submit(T cgf, queue& secondaryQueue)
-----
-a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
-for execution on the device. On a kernel error, this <<command-group-function-object>>
-is then scheduled for execution on the secondary queue. Returns an
-event, which corresponds to the queue the <<command-group-function-object>>
-is being enqueued on.
-
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-a@ Queries this SYCL [code]#queue# for <<backend>>-specific information
-requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#queue#.
-
-|====
-
+'''
 
 [[sec:queue-shortcuts]]
-==== Queue shortcut functions
+==== Shortcut member functions
 
-Queue shortcut functions are member functions of the [code]#queue# class that
-implicitly create a command group with an implicit command group [code]#handler#
-consisting of a single command, a call to the member function of the handler
-object with the same signature (e.g. [code]#queue::single_task# will call
-[code]#handler::single_task# with the same arguments), and submit the command
-group.
-The main signature difference comes from the return type: member functions of
-the [code]#handler# return [code]#void#, whereas corresponding queue shortcut
-functions return an [code]#event# object that represents the submitted command
-group.
-Queue shortcuts can additionally take a list of events to wait on, as if passing
-the event list to [code]#handler::depends_on# for the implicit command group.
+The functions described in this section are shortcuts for [api]#queue::submit#
+that allow an application to submit a command to the queue without defining a
+<<command-group-function-object>>.
+Each of these functions implicitly creates a command group that acts as though
+it calls one of the [code]#handler# member functions to submit a single command.
+For example, [api]#queue::single_task# creates a command group that acts as
+though it calls [code]#handler::single_task#.
+These shortcut functions return an [code]#event# object that represents the
+command that is submitted to the queue.
+In addition, some forms of the shortcut functions allow the application to pass
+input events, and these forms act as though the command group calls
+[code]#handler::depends_on# with these same events.
 
-The full list of queue shortcuts is defined in <<table.queue.shortcuts>>.
-The list of handler member functions is defined in
-<<table.members.handler.kernel>>.
+Because there is no explicit command group function when using these shortcuts,
+it is not possible to create accessors for the command that is submitted.
+Therefore, kernels that are submitted using these shortcuts must not use
+accessors.
+Typically, applications use USM pointers instead.
+However, there is a special exception for non-kernel commands (e.g. shortcuts
+for the explicit memory copy commands).
+These non-kernel commands may use placeholder accessors, and the implicit
+command group function acts as though it calls [code]#handler::require# on each
+of the placeholder accessors that the shortcut function uses.
 
-It is not allowed to capture accessors into the implicitly created command
-group.
-If a queue shortcut function launches a kernel (via [code]#single_task# or
-[code]#parallel_for#), only USM pointers are allowed inside such kernels.
-However, queue shortcuts that perform non-kernel operations can be provided with
-a valid placeholder accessor as an argument.
-In that case there is an additional step performed: the implicit command group
-[code]#handler# calls [code]#handler::require# on each accessor passed in as a
-function argument.
+The following example demonstrates the use of these shortcut functions.
 
-An example of using queue shortcuts is shown below.
-
-[[example.queue.shortcuts]]
 [source,,linenums]
 ----
 include::{code_dir}/queueShortcuts.cpp[lines=4..-1]
 ----
 
-[[table.queue.shortcuts]]
-.Queue shortcut functions
-[width="100%",options="header",separator="@",cols="60%,10%,20%"]
-|====
-@ Function Definition @ Function Type @ Description
-a@
-[source]
+'''
+
+.[apidef]#queue::single_task#
+[source,role=synopsis,id=api:queue-single-task]
 ----
-template <typename KernelName, typename KernelType>
+template <typename KernelName, typename KernelType>             (1)
 event single_task(const KernelType& kernelFunc)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::single_task(kernelFunc)#.
-a@
-[source]
-----
-template <typename KernelName, typename KernelType>
+
+template <typename KernelName, typename KernelType>             (2)
 event single_task(event depEvent, const KernelType& kernelFunc)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::single_task(kernelFunc)#.
-a@
-[source]
-----
-template <typename KernelName, typename KernelType>
+
+template <typename KernelName, typename KernelType>             (3)
 event single_task(const std::vector<event>& depEvents,
                   const KernelType& kernelFunc)
 ----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::single_task(kernelFunc)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
 [code]#handler::single_task(kernelFunc)#.
-a@
-[source]
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::single_task(kernelFunc)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::parallel_for#
+[source,role=synopsis,id=api:queue-parallel-for]
 ----
-template <typename KernelName, int Dimensions, typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>        (1)
 event parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::parallel_for(numWorkItems, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (2)
 event parallel_for(range<Dimensions> numWorkItems, event depEvent,
                    Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::parallel_for(numWorkItems, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (3)
 event parallel_for(range<Dimensions> numWorkItems,
                    const std::vector<event>& depEvents, Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::parallel_for(numWorkItems, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (4)
 event parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::parallel_for(executionRange, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (5)
 event parallel_for(nd_range<Dimensions> executionRange, event depEvent,
                    Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::parallel_for(executionRange, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (6)
 event parallel_for(nd_range<Dimensions> executionRange,
                    const std::vector<event>& depEvents, Rest&&... rest)
 ----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::parallel_for(numWorkItems, rest)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::parallel_for(numWorkItems, rest)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::parallel_for(numWorkItems, rest)#.
+
+_Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::parallel_for(executionRange, rest)#.
+
+_Effects (5):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
 [code]#handler::parallel_for(executionRange, rest)#.
-a@
-[source]
+
+_Effects (6):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::parallel_for(executionRange, rest)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::memcpy#
+[source,role=synopsis,id=api:queue-memcpy]
 ----
-event memcpy(void* dest, const void* src, size_t numBytes)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::memcpy(dest, src, numBytes)#.
-a@
-[source]
-----
-event memcpy(void* dest, const void* src, size_t numBytes, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::memcpy(dest, src, numBytes)#.
-a@
-[source]
-----
-event memcpy(void* dest, const void* src, size_t numBytes,
+event memcpy(void* dest, const void* src, size_t numBytes)                 (1)
+
+event memcpy(void* dest, const void* src, size_t numBytes, event depEvent) (2)
+
+event memcpy(void* dest, const void* src, size_t numBytes,                 (3)
              const std::vector<event>& depEvents)
 ----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::memcpy(dest, src, numBytes)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
 [code]#handler::memcpy(dest, src, numBytes)#.
-a@
-[source]
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::memcpy(dest, src, numBytes)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::copy#
+[source,role=synopsis,id=api:queue-copy]
 ----
-template <typename T> event copy(const T* src, T* dest, size_t count)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::copy(src, dest, count)#.
-a@
-[source]
-----
-template <typename T>
+template <typename T>                                                         (1)
+event copy(const T* src, T* dest, size_t count)
+
+template <typename T>                                                         (2)
 event copy(const T* src, T* dest, size_t count, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::copy(src, dest, count)#.
-a@
-[source]
-----
-template <typename T>
+
+template <typename T>                                                         (3)
 event copy(const T* srct, T* dest, size_t count,
            const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::copy(src, dest, count)#.
-a@
-[source]
-----
-event memset(void* ptr, int value, size_t numBytes)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::memset(ptr, value, numBytes)#.
-a@
-[source]
-----
-event memset(void* ptr, int value, size_t numBytes, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::memset(ptr, value, numBytes)#.
-a@
-[source]
-----
-event memset(void* ptr, int value, size_t numBytes,
-             const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::memset(ptr, value, numBytes)#.
-a@
-[source]
-----
-template <typename T> event fill(void* ptr, const T& pattern, size_t count)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::fill(ptr, pattern, count)#.
-a@
-[source]
-----
-template <typename T>
-event fill(void* ptr, const T& pattern, size_t count, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::fill(ptr, pattern, count)#.
-a@
-[source]
-----
-template <typename T>
-event fill(void* ptr, const T& pattern, size_t count,
-           const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::fill(ptr, pattern, count)#.
-a@
-[source]
-----
-event prefetch(void* ptr, size_t numBytes)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::prefetch(ptr, numBytes)#.
-a@
-[source]
-----
-event prefetch(void* ptr, size_t numBytes, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::prefetch(ptr, numBytes)#.
-a@
-[source]
-----
-event prefetch(void* ptr, size_t numBytes, const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::prefetch(ptr, numBytes)#.
-a@
-[source]
-----
-event mem_advise(void* ptr, size_t numBytes, int advice)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::mem_advise(ptr, numBytes, advice)#.
-a@
-[source]
-----
-event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::mem_advise(ptr, numBytes, advice)#.
-a@
-[source]
-----
-event mem_advise(void* ptr, size_t numBytes, int advice,
-                 const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::mem_advise(ptr, numBytes, advice)#.
-a@
-[source]
-----
-template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (4)
           access::placeholder IsPlaceholder, typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
-           std::shared_ptr<DestT> dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(src)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+           std::shared_ptr<DestT> dest)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,  (5)
           target DestTgt, access::placeholder IsPlaceholder>
 event copy(std::shared_ptr<SrcT> src,
-           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(dest)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (6)
           access::placeholder IsPlaceholder, typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
-           DestT* dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(src)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+           DestT* dest)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,  (7)
           target DestTgt, access::placeholder IsPlaceholder>
 event copy(const SrcT* src,
-           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(dest)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (8)
           access::placeholder IsSrcPlaceholder, typename DestT, int DestDims,
           access_mode DestMode, target DestTgt,
           access::placeholder IsDestPlaceholder>
 event copy(
     accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
-    accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
+    accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest)
 ----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(src)#, [code]#handler::require(dest)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::copy(src, dest, count)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::copy(src, dest, count)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::copy(src, dest, count)#.
+
+_Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(src)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (5):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(dest)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (6):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(src)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (7):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(dest)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (8):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(src)#,
+[code]#handler::require(dest)#, and [code]#handler::copy(src, dest)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::memset#
+[source,role=synopsis,id=api:queue-memset]
 ----
-template <typename T, int Dims, access_mode Mode, target Tgt,
+event memset(void* ptr, int value, size_t numBytes)                 (1)
+
+event memset(void* ptr, int value, size_t numBytes, event depEvent) (2)
+
+event memset(void* ptr, int value, size_t numBytes,                 (3)
+             const std::vector<event>& depEvents)
+----
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::memset(ptr, value, numBytes)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::memset(ptr, value, numBytes)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::memcpy(ptr, value, numBytes)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::fill#
+[source,role=synopsis,id=api:queue-fill]
+----
+template <typename T>                                                      (1)
+event fill(void* ptr, const T& pattern, size_t count)
+
+template <typename T>                                                      (2)
+event fill(void* ptr, const T& pattern, size_t count, event depEvent)
+
+template <typename T>                                                      (3)
+event fill(void* ptr, const T& pattern, size_t count,
+           const std::vector<event>& depEvents)
+
+template <typename T, int Dims, access_mode Mode, target Tgt,              (4)
           access::placeholder IsPlaceholder>
-event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
+event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src)
 ----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(acc)# and
-[code]#handler::update_host(acc)#.
-a@
-[source]
-----
-template <typename T, int Dims, access_mode Mode, target Tgt,
-          access::placeholder IsPlaceholder>
-event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(dest)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::fill(ptr, pattern, count)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::fill(ptr, pattern, count)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::fill(ptr, pattern, count)#.
+
+_Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(dest)# and
 [code]#handler::fill(dest, src)#.
 
-|====
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
+'''
 
-==== Queue information descriptors
-
-A <<queue>> can be queried for information using the [code]#get_info# member
-function of the [code]#queue# class, specifying one of the info parameters in
-[code]#info::queue#.
-The possible values for each info parameter and any restriction are defined in
-the specification of the <<backend>> associated with the <<queue>>.
-All info parameters in [code]#info::queue# are specified in <<table.queue.info>>
-and the synopsis for [code]#info::queue# is described in
-<<appendix.queue.descriptors>>.
-
-[[table.queue.info]]
-.Queue information descriptors
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Queue Descriptors @ Return type @ Description
-a@
-[source]
+.[apidef]#queue::prefetch#
+[source,role=synopsis,id=api:queue-prefetch]
 ----
-info::queue::context
+event prefetch(void* ptr, size_t numBytes)                                      (1)
+
+event prefetch(void* ptr, size_t numBytes, event depEvent)                      (2)
+
+event prefetch(void* ptr, size_t numBytes, const std::vector<event>& depEvents) (3)
 ----
 
-    @ [.code]#context#
-   a@ Returns the SYCL [code]#context# associated with this SYCL [code]#queue#.
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::prefetch(ptr, numBytes)#.
 
-a@
-[source]
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::prefetch(ptr, numBytes)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::prefetch(ptr, numBytes)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::mem_advise#
+[source,role=synopsis,id=api:queue-mem-advise]
 ----
-info::queue::device
+event mem_advise(void* ptr, size_t numBytes, int advice)                 (1)
+
+event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent) (2)
+
+event mem_advise(void* ptr, size_t numBytes, int advice,                 (3)
+                 const std::vector<event>& depEvents)
 ----
 
-    @ [.code]#device#
-   a@ Returns the SYCL <<device>> associated with this SYCL [code]#queue#.
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::mem_advise(ptr, numBytes, advice)#.
 
-|====
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
 
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::update_host#
+[source,role=synopsis,id=api:queue-update-host]
+----
+template <typename T, int Dims, access_mode Mode, target Tgt,
+          access::placeholder IsPlaceholder>
+event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc)
+----
+
+_Effects:_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(acc)# and
+[code]#handler::update_host(acc)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+[[sec:queue-info-descriptors]]
+==== Information descriptors
+
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#queue::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#queue::get_info#
+function.
+
+'''
+
+.[apidef]#info::queue::context#
+[source,role=synopsis,id=api:info-queue-context]
+----
+namespace sycl::info::queue {
+struct context {
+  using return_type = context;
+};
+} // namespace sycl::info::queue
+----
+
+_Remarks:_ Template parameter to [api]#queue::get_info#.
+
+_Returns:_ The <<context>> that is associated with this queue.
+
+'''
+
+.[apidef]#info::queue::device#
+[source,role=synopsis,id=api:info-queue-device]
+----
+namespace sycl::info::queue {
+struct device {
+  using return_type = device;
+};
+} // namespace sycl::info::queue
+----
+
+_Remarks:_ Template parameter to [api]#queue::get_info#.
+
+_Returns:_ The <<device>> that is associated with this queue.
+
+'''
 
 [[sec:queue-properties]]
-==== Queue properties
+==== Properties
 
-The properties that can be provided when constructing the SYCL [code]#queue#
-class are described in <<table.properties.queue>>.
+This section describes the properties that can be passed in the [code]#propList#
+parameter of the <<sec:queue-ctors, queue constructors>>.
 
+'''
 
-[[table.properties.queue]]
-.Properties supported by the SYCL [code]#queue# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Property @ Description
-a@
-[source]
+.[apidef]#property::queue::enable_profiling#
+[source,role=synopsis,id=api:property-queue-enable-profiling]
 ----
-property::queue::enable_profiling
+namespace sycl::property::queue {
+struct enable_profiling {
+  enable_profiling();  (1)
+};
+} // namespace sycl::property::queue
 ----
-   a@ The [code]#enable_profiling# property adds the requirement
-      that the <<sycl-runtime>> must capture profiling information for
-      the <<command-group,command groups>> that are submitted from this SYCL
-      [code]#queue# and provide said information via the SYCL
-      [code]#event# class [code]#get_profiling_info# member
-      function.  If the queue's associated device does not have
-      [code]#aspect::queue_profiling#, passing this property to the queue's
-      constructor causes the constructor to throw a synchronous
-      [code]#exception# with the [code]#errc::feature_not_supported# error
-      code.
 
-a@
-[source]
+When a queue is constructed with this property, the implementation captures
+profiling information for the <<command-group,command groups>> that are
+submitted to this queue.
+Applications can retrieve this profiling information by calling
+[code]#event::get_profiling_info# on the event that is returned when submitting
+the command group.
+If the queue's associated device does not have [code]#aspect::queue_profiling#,
+passing this property to the queue's constructor causes the constructor to throw
+a synchronous [code]#exception# with the [code]#errc::feature_not_supported#
+error code.
+
+_Effects (1):_ Constructs an [code]#enable_profiling# property object.
+
+'''
+
+.[apidef]#property::queue::in_order#
+[source,role=synopsis,id=api:property-queue-in-order]
 ----
-property::queue::in_order
+namespace sycl::property::queue {
+struct in_order {
+  in_order();  (1)
+};
+} // namespace sycl::property::queue
 ----
-   a@ The [code]#in_order# property adds the requirement that
-      a SYCL [code]#queue# provides in-order semantics whereby
-      commands submitted to said [code]#queue# are executed in
-      the order in which they are submitted.
-      Commands submitted in this fashion can be viewed as-if
-      having an implicit dependence on the previous command
-      submitted to that [code]#queue#. Using the [code]#in_order#
-      property makes no guarantees about the ordering of commands
-      submitted to different queues with respect to each other.
 
-|====
+When a queue is constructed with this property, commands that are submitted to
+the queue are guaranteed to execute in the order in which they are submitted, as
+if there is an implicit dependency on the previous command that was submitted to
+the same queue.
+The [code]#in_order# property does not provide any guarantee about the order of
+commands submitted to other queues with respect to commands submitted to this
+queue.
 
+_Effects (1):_ Constructs an [code]#in_order# property object.
 
-The constructors of the [code]#queue# [code]#property# classes are listed in
-<<table.constructors.properties.queue>>.
+'''
 
-
-[[table.constructors.properties.queue]]
-.Constructors of the [code]#queue# [code]#property# classes
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
-----
-property::queue::enable_profiling::enable_profiling()
-----
-   a@ Constructs a SYCL [code]#enable_profiling# property instance.
-
-a@
-[source]
-----
-property::queue::in_order::in_order()
-----
-   a@ Constructs a SYCL [code]#in_order# property instance.
-
-|====
-
-
-
-[[sec:interface.queue.errors]]
-==== Queue error handling
+[[sec:queue-error-handling]]
+==== Error handling
 
 Queue errors come in two forms:
 
-  * *Synchronous Errors* are those that we would expect to be reported directly
-    at the point of waiting on an event, and hence waiting for a queue to
-    complete, as well as any immediate errors reported by enqueuing work onto a
-    queue.
-    Such errors are reported through {cpp} exceptions.
-  * <<async-error,Asynchronous errors>> are those that are produced or detected
-    after associated host API calls have returned (so can't be thrown as
-    exceptions by the API call), and that are handled by an <<async-handler>>
-    through which the errors are reported.
-    Handling of asynchronous errors from a queue occurs at specific times, as
-    described by <<error-handling>>.
+* Synchronous errors are those that we would expect to be reported directly at
+  the point of waiting on an event, and hence waiting for a queue to complete,
+  as well as any immediate errors reported by enqueuing work onto a queue.
+  Such errors are reported through {cpp} exceptions.
+* <<async-error,Asynchronous errors>> are those that are produced or detected
+  after associated host API calls have returned (so can't be thrown as
+  exceptions by the API call), and that are handled by an <<async-handler>>
+  through which the errors are reported.
+  Handling of asynchronous errors from a queue occurs at specific times, as
+  described by <<error-handling>>.
 
 Note that if there are <<async-error,asynchronous errors>> to be processed when
-a queue is destructed, the handler is called and this might delay or block the
+a queue is destroyed, the handler is called and this might delay or block the
 destruction, according to the behavior of the handler.
 
-
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%% end queue_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [[sec:interface.event]]
 === Event class
@@ -10909,7 +10913,7 @@ Support for device allocations on a specific device can be queried through
 
 Device allocations must be explicitly copied between the host and a device.
 The member functions to copy and initialize data are found in
-<<table.members.queue>> and <<table.members.handler.copy>>, and these functions
+<<sec:queue-shortcuts>> and <<table.members.handler.copy>>, and these functions
 may be used on device allocations if a device supports
 [code]#aspect::usm_device_allocations#.
 
@@ -10968,7 +10972,7 @@ enqueuing [code]#prefetch# operations on a device.
 These operations inform the SYCL runtime that the specified shared allocation is
 likely to be accessed on the device in the future, and that it is free to
 migrate the allocation to the device.
-More about [code]#prefetch# is found in <<table.queue.shortcuts>> and
+More about [code]#prefetch# is found in <<sec:queue-shortcuts>> and
 <<table.members.handler.copy>>.
 If a device supports concurrent access to shared allocations, then
 [code]#prefetch# operations may be overlapped with kernel execution.
@@ -10976,7 +10980,7 @@ If a device supports concurrent access to shared allocations, then
 Additionally, users may use the [code]#mem_advise# member function to annotate
 shared allocations with [code]#advice#.
 Valid [code]#advice# is defined by the device and its associated backend.
-See <<table.queue.shortcuts>> and <<table.members.handler.copy>> for more
+See <<sec:queue-shortcuts>> and <<table.members.handler.copy>> for more
 information.
 
 In the most capable systems, users do not need to use SYCL USM allocation
