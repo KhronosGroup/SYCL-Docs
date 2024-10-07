@@ -969,8 +969,12 @@ The [code]#platform# class also provides constructors, but constructing a new
 [code]#platform# instance merely creates a new object that is a copy of one of
 the objects returned by [api]#platform::get_platforms#.
 
-Each platform has a single context object which is used as its default context.
-That context object contains all of the devices in the platform.
+Each platform has a default context which contains all of the devices in the
+platform and has no associated asynchronous error handler.
+Applications can retrieve a copy of this default `context` object, for example,
+by constructing a `queue`.
+These copies follow the common reference semantics, as though they are all copies
+of a single internal `context` object that is held by each platform.
 
 The [code]#platform# class provides the common reference semantics as defined in
 <<sec:reference-semantics>>.
