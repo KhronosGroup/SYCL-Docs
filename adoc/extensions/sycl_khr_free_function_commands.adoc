@@ -1,0 +1,928 @@
+= SYCL_KHR_FREE_FUNCTION_COMMANDS
+
+This extension provides an alternative mechanism for submitting commands to a
+device via free-functions that require developers to opt-in to the creation of
+[code]#event# objects.
+
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_FREE_FUNCTION_COMMANDS# to one of the values defined in the
+table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+== Usage example
+
+The example below rewrites the application from
+<<subsec:example.sycl.application>> to demonstrate the usage of this extension.
+
+[source,role=synopsis]
+----
+#include <iostream>
+#include <sycl/sycl.hpp>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
+
+// Size of the matrices
+constexpr size_t N = 2000;
+constexpr size_t M = 3000;
+
+int main() {
+  // Create a queue to work on
+  queue myQueue;
+
+  // Create some 2D arrays of float for our matrices
+  float* a = malloc_shared<float>(N * M, myQueue);
+  float* b = malloc_shared<float>(N * M, myQueue);
+  float* c = malloc_shared<float>(N * M, myQueue);
+
+  // Launch an asynchronous kernel to initialize a
+  // Use khr::submit to get a handler, even though not required here
+  khr::submit(myQueue, [&](handler& cgh) {
+
+    // Enqueue a kernel iterating on a N*M 2D iteration space
+    khr::launch(cgh, range<2> { N, M }, [=](id<2> index) {
+      size_t i = index[0];
+      size_t j = index[1];
+      a[i * M + j] = i * 2 + j;
+    });
+
+  });
+
+  // Launch an asynchronous kernel to initialize b
+  // Use khr::launch to enqueue a kernel without a handler
+  khr::launch(myQueue, range<2> { N, M }, [=](id<2> index) {
+    size_t i = index[0];
+    size_t j = index[1];
+    b[i * M + j] = i * 2014 + j * 42;
+  });
+
+  // Ensure that the two previous kernels complete before enqueueing more work
+  // This does not block the host, but enforces dependencies on the device
+  khr::command_barrier(myQueue);
+
+  // Launch an asynchronous kernel to compute matrix addition c = a + b
+  // Use khr::launch_grouped to enqueue a kernel using groups without a handler
+  range<2> local = { 2, 2 };
+  range<2> global = { N, M };
+  khr::launch_grouped(myQueue, global, local, [=](khr::invocation<2> ivc) {
+    size_t i = ivc.id(0);
+    size_t j = ivc.id(1);
+    size_t index = i * M + j;
+    c[index] = a[index] + b[index];
+  });
+
+  // Wait for all three kernels to complete before accessing the results
+  // This blocks the host until all previous kernels have completed
+  myQueue.wait();
+
+  std::cout << std::endl << "Result:" << std::endl;
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < M; j++) {
+      size_t index = i * M + j;
+      // Compare the result to the analytic value
+      if (c[index] != i * (2 + 2014) + j * (1 + 42)) {
+        std::cout << "Wrong value " << c[index] << " on element " << i << " "
+                  << j << std::endl;
+        exit(-1);
+      }
+    }
+  }
+
+  std::cout << "Good computation!" << std::endl;
+  return 0;
+}
+----
+
+== New free functions
+
+=== Command-groups
+
+.[apititle]#submit#
+[source,role=synopsis,id=api:submit]
+----
+namespace sycl::khr {
+
+template <typename CommandGroupFunc>
+void submit(sycl::queue q, CommandGroupFunc&& cgf);
+
+}
+----
+_Effects_: Equivalent to [code]#q.submit(cgf)#.
+
+'''
+
+.[apititle]#submit_tracked#
+[source,role=synopsis,id=api:submit_tracked]
+----
+namespace sycl::khr {
+
+template <typename CommandGroupFunc>
+sycl::event submit_tracked(sycl::queue q, CommandGroupFunc&& cgf);
+
+}
+----
+_Effects_: Equivalent to [code]#q.submit(cgf)#.
+
+_Returns_: A [code]#sycl::event# associated with the submitted command.
+
+'''
+
+=== Kernel launch
+
+.[apititle]#launch# (kernel function)
+[source,role=synopsis,id=api:launch]
+----
+namespace sycl::khr {
+
+template <typename KernelType>
+void launch(sycl::handler& h, sycl::range<1> r, const KernelType& k); (1)
+
+template <typename KernelType>
+void launch(sycl::handler& h, sycl::range<2> r, const KernelType& k); (2)
+
+template <typename KernelType>
+void launch(sycl::handler& h, sycl::range<3> r, const KernelType& k); (3)
+
+template <typename KernelType>
+void launch(sycl::queue q, sycl::range<1> r, const KernelType& k);    (4)
+
+template <typename KernelType>
+void launch(sycl::queue q, sycl::range<2> r, const KernelType& k);    (5)
+
+template <typename KernelType>
+void launch(sycl::queue q, sycl::range<3> r, const KernelType& k);    (6)
+
+}
+----
+_Effects (1-3)_: Equivalent to [code]#h.parallel_for(r, k)#.
+
+_Effects (4-6)_: Equivalent to [code]#q.submit([&](handler& h) { launch(h, r,
+k); })#.
+
+'''
+
+.[apititle]#launch# (kernel object)
+[source,role=synopsis,id=api:launch-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args>
+void launch(sycl::handler& h, sycl::range<1> r,
+            const sycl::kernel& k, Args&&... args); (1)
+
+template <typename... Args>
+void launch(sycl::handler& h, sycl::range<2> r,
+            const sycl::kernel& k, Args&&... args); (2)
+
+template <typename... Args>
+void launch(sycl::handler& h, sycl::range<3> r,
+            const sycl::kernel& k, Args&&... args); (3)
+
+template <typename... Args>
+void launch(sycl::queue q, sycl::range<1> r,
+            const sycl::kernel& k, Args&&... args); (4)
+
+template <typename... Args>
+void launch(sycl::queue q, sycl::range<2> r,
+            const sycl::kernel& k, Args&&... args); (5)
+
+template <typename... Args>
+void launch(sycl::queue q, sycl::range<3> r,
+            const sycl::kernel& k, Args&&... args); (6)
+
+}
+----
+_Effects_: Enqueues a kernel object that is invoked for every work-item in the
+specified [code]#sycl::range#.
+The arguments in [code]#args# are passed to the kernel in the same order.
+
+'''
+
+.[apititle]#launch_reduce# (kernel function)
+[source,role=synopsis,id=api:launch_reduce]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(sycl::handler& h, sycl::range<1> r,
+                   const KernelType& k, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(sycl::handler& h, sycl::range<2> r,
+                   const KernelType& k, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(sycl::handler& h, sycl::range<3> r,
+                   const KernelType& k, Reductions&&... reductions); (3)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(sycl::queue q, sycl::range<1> r,
+                   const KernelType& k, Reductions&&... reductions); (4)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(sycl::queue q, sycl::range<2> r,
+                   const KernelType& k, Reductions&&... reductions); (5)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(sycl::queue q, sycl::range<3> r,
+                   const KernelType& k, Reductions&&... reductions); (6)
+
+}
+----
+_Constraints_: The parameter pack consists of 0 or more objects created by the
+[code]#sycl::reduction# function.
+
+_Effects (1-3)_: Equivalent to [code]#h.parallel_for(r, reductions..., k)#.
+
+_Effects (4-6)_: Equivalent to [code]#q.submit([&](handler& h) {
+launch_reduce(h, r, k, reductions...); })#.
+
+
+'''
+
+.[apititle]#launch_reduce# (kernel object)
+[source,role=synopsis,id=api:launch_reduce-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args>
+void launch_reduce(sycl::handler& h, sycl::range<1> r,
+                   const sycl::kernel& k, Args&&... args); (1)
+
+template <typename... Args>
+void launch_reduce(sycl::handler& h, sycl::range<2> r,
+                   const sycl::kernel& k, Args&&... args); (2)
+
+template <typename... Args>
+void launch_reduce(sycl::handler& h, sycl::range<3> r,
+                   const sycl::kernel& k, Args&&... args); (3)
+
+template <typename... Args>
+void launch_reduce(sycl::queue q, sycl::range<1> r,
+                   const sycl::kernel& k, Args&&... args); (4)
+
+template <typename... Args>
+void launch_reduce(sycl::queue q, sycl::range<2> r,
+                   const sycl::kernel& k, Args&&... args); (5)
+
+template <typename... Args>
+void launch_reduce(sycl::queue q, sycl::range<3> r,
+                   const sycl::kernel& k, Args&&... args); (6)
+
+}
+----
+_Effects_: Enqueues a kernel object that is invoked for every work-item in the
+specified [code]#sycl::range#, where each work-item contributes to one or more
+reductions.
+The arguments in [code]#args# are passed to the kernel in the same order.
+
+'''
+
+.[apititle]#launch_grouped# (kernel function)
+[source,role=synopsis,id=api:launch_grouped]
+----
+namespace sycl::khr {
+
+template <typename KernelType>
+void launch_grouped(sycl::handler& h, sycl::range<1> r, sycl::range<1> size,
+                    const KernelType& k); (1)
+
+template <typename KernelType>
+void launch_grouped(sycl::handler& h, sycl::range<2> r, sycl::range<2> size,
+                    const KernelType& k); (2)
+
+template <typename KernelType>
+void launch_grouped(sycl::handler& h, sycl::range<3> r, sycl::range<3> size,
+                    const KernelType& k); (3)
+
+template <typename KernelType>
+void launch_grouped(sycl::queue q, sycl::range<1> r, sycl::range<1> size,
+                    const KernelType& k); (4)
+
+template <typename KernelType>
+void launch_grouped(sycl::queue q, sycl::range<2> r, sycl::range<2> size,
+                    const KernelType& k); (5)
+
+template <typename KernelType>
+void launch_grouped(sycl::queue q, sycl::range<3> r, sycl::range<3> size,
+                    const KernelType& k); (6)
+
+}
+----
+_Effects (1-3)_: Equivalent to [code]#h.parallel_for(nd_range(r, size), k)#.
+
+_Effects (4-6)_: Equivalent to [code]#q.submit([&](handler& h) {
+launch_grouped(h, r, size, k); })#.
+
+'''
+
+.[apititle]#launch_grouped# (kernel object)
+[source,role=synopsis,id=api:launch_grouped-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args>
+void launch_grouped(sycl::handler& h, sycl::range<1> r, sycl::range<1> size,
+                    const sycl::kernel& k, Args&&... args); (1)
+
+template <typename... Args>
+void launch_grouped(sycl::handler& h, sycl::range<2> r, sycl::range<2> size,
+                    const sycl::kernel& k, Args&&... args); (2)
+
+template <typename... Args>
+void launch_grouped(sycl::handler& h, sycl::range<3> r, sycl::range<3> size,
+                    const sycl::kernel& k, Args&&... args); (3)
+
+template <typename... Args>
+void launch_grouped(sycl::queue q, sycl::range<1> r, sycl::range<1> size,
+                    const sycl::kernel& k, Args&&... args); (4)
+
+template <typename... Args>
+void launch_grouped(sycl::queue q, sycl::range<2> r, sycl::range<2> size,
+                    const sycl::kernel& k, Args&&... args); (5)
+
+template <typename... Args>
+void launch_grouped(sycl::queue q, sycl::range<3> r, sycl::range<3> size,
+                    const sycl::kernel& k, Args&&... args); (6)
+
+}
+----
+_Effects_: Enqueues a kernel object that is invoked for every work-item in the
+specified [code]#sycl::range#.
+Work-items are grouped into work-groups of size [code]#size#.
+The arguments in [code]#args# are passed to the kernel in the same order.
+
+'''
+
+.[apititle]#launch_grouped_reduce# (kernel function)
+[source,role=synopsis,id=api:launch_grouped_reduce]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(sycl::handler& h, sycl::range<1> r,
+                           sycl::range<1> size, const KernelType& k,
+                           Reductions&&... reductions); (1)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(sycl::handler& h, sycl::range<2> r,
+                           sycl::range<2> size, const KernelType& k,
+                           Reductions&&... reductions); (2)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(sycl::handler& h, sycl::range<3> r,
+                           sycl::range<3> size, const KernelType& k,
+                           Reductions&&... reductions); (3)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(sycl::queue q, sycl::range<1> r,
+                           sycl::range<1> size, const KernelType& k,
+                           Reductions&&... reductions); (4)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(sycl::queue q, sycl::range<2> r,
+                           sycl::range<2> size, const KernelType& k,
+                           Reductions&&... reductions); (5)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(sycl::queue q, sycl::range<3> r,
+                           sycl::range<3> size, const KernelType& k,
+                           Reductions&&... reductions); (6)
+
+}
+----
+_Constraints_: The parameter pack consists of 0 or more objects created by the
+[code]#sycl::reduction# function.
+
+_Effects (1-3)_: Equivalent to [code]#h.parallel_for(nd_range(r, size),
+reductions..., k)#.
+
+_Effects (4-6)_: Equivalent to [code]#q.submit([&](handler& h) {
+launch_grouped_reduce(h, r, size, k, reductions...); })#.
+
+'''
+
+.[apititle]#launch_grouped_reduce# (kernel object)
+[source,role=synopsis,id=api:launch_grouped_reduce-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args>
+void launch_grouped_reduce(sycl::handler& h, sycl::range<1> r,
+                           sycl::range<1> size, const sycl::kernel& k,
+                           Args&&... args); (1)
+
+template <typename... Args>
+void launch_grouped_reduce(sycl::handler& h, sycl::range<2> r,
+                           sycl::range<2> size, const sycl::kernel& k,
+                           Args&&... args); (2)
+
+template <typename... Args>
+void launch_grouped_reduce(sycl::handler& h, sycl::range<3> r,
+                           sycl::range<3> size, const sycl::kernel& k,
+                           Args&&... args); (3)
+
+template <typename... Args>
+void launch_grouped_reduce(sycl::queue q, sycl::range<1> r,
+                           sycl::range<1> size, const sycl::kernel& k,
+                           Args&&... args); (4)
+
+template <typename... Args>
+void launch_grouped_reduce(sycl::queue q, sycl::range<2> r,
+                           sycl::range<2> size, const sycl::kernel& k,
+                           Args&&... args); (5)
+
+template <typename... Args>
+void launch_grouped_reduce(sycl::queue q, sycl::range<3> r,
+                           sycl::range<3> size, const sycl::kernel& k,
+                           Args&&... args); (6)
+
+}
+----
+_Effects_: Enqueues a kernel object that is invoked for every work-item in the
+specified [code]#sycl::range#, where each work-item contributes to one or more
+reductions.
+Work-items are grouped into work-groups of size [code]#size#.
+The arguments in [code]#args# are passed to the kernel in the same order.
+
+'''
+
+.[apititle]#launch_task# (kernel function)
+[source,role=synopsis,id=api:launch_task]
+----
+namespace sycl::khr {
+
+template <typename KernelType>
+void launch_task(sycl::handler& h, const KernelType& k); (1)
+
+template <typename KernelType>
+void launch_task(sycl::queue q, const KernelType& k);    (2)
+
+}
+----
+_Effects (1)_: Equivalent to [code]#h.single_task(k)#.
+
+_Effects (2)_: Equivalent to [code]#h.submit([&](handler& h) { launch_task(h,
+k); })#.
+
+'''
+
+.[apititle]#launch_task# (kernel object)
+[source,role=synopsis,id=api:launch_task-kernel]
+----
+namespace sycl::khr {
+
+template <typename Args...>
+void launch_task(sycl::queue q, const sycl::kernel& k, Args&&... args);    (1)
+
+template <typename Args...>
+void launch_task(sycl::handler& h, const sycl::kernel& k, Args&&... args); (2)
+
+}
+----
+_Effects_: Enqueues a kernel object as a device task.
+The arguments in [code]#args# are passed to the kernel in the same order.
+
+'''
+
+=== Memory operations
+
+.[apititle]#memcpy#
+[source,role=synopsis,id=api:memcpy]
+----
+namespace sycl::khr {
+
+void memcpy(sycl::handler& h, void* dest, const void* src, size_t numBytes); (1)
+
+void memcpy(sycl::queue q, void* dest, const void* src, size_t numBytes);    (2)
+
+}
+----
+_Effects (1)_: Equivalent to [code]#h.memcpy(dest, src, numBytes)#.
+
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { memcpy(h, dest,
+src, numBytes); })#.
+
+'''
+
+.[apititle]#copy# (USM pointers)
+[source,role=synopsis,id=api:copy-pointer]
+----
+namespace sycl::khr {
+
+template <typename T>
+void copy(sycl::handler& h, const T* src, T* dest, size_t count); (1)
+
+template <typename T>
+void copy(sycl::queue q, const T* src, T* dest, size_t count);    (2)
+
+}
+----
+
+Copies between two USM pointers.
+
+_Constraints_: [code]#T# must be <<device-copyable>>.
+
+_Preconditions_: [code]#src# and [code]#dest# must be host pointers or USM
+pointers accessible on the device.
+[code]#src# and [code]#dest# must point to allocations of at least [code]#count#
+elements of type [code]#T#.
+
+_Effects (1)_: Equivalent to [code]#h.copy(src, dest, count)#.
+
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+dest, count); })#
+
+'''
+
+.[apititle]#copy# (accessors, host to device)
+[source,role=synopsis,id=api:copy-accessor-h2d]
+----
+namespace sycl::khr {
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
+void copy(sycl::handler& h,
+          const SrcT* src,
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (3)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
+void copy(sycl::handler& h,
+          std::shared_ptr<SrcT> src,
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (4)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
+void copy(sycl::queue q,
+          const SrcT* src,
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (5)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
+void copy(sycl::queue q,
+          std::shared_ptr<SrcT> src,
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (6)
+
+}
+----
+
+Copies from host to device.
+
+_Constraints_: [code]#SrcT# and [code]#DestT# must be <<device-copyable>>.
+[code]#DestMode# must be [code]#access_mode::write# or
+[code]#access_mode::read_write#.
+
+_Preconditions_: [code]#src# must be a host pointer, pointing to an allocation
+of at least as many bytes as the range represented by [code]#dest#.
+
+_Effects (3-4)_: Equivalent to [code]#h.copy(src, dest)#.
+
+_Effects (5-6)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+dest) })#
+
+'''
+
+.[apititle]#copy# (accessors, device to host)
+[source,role=synopsis,id=api:copy-accessor-d2h]
+----
+namespace sycl::khr {
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
+void copy(sycl::handler& h,
+          sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
+          DestT* dest);                 (7)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
+void copy(sycl::handler& h,
+          sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
+          std::shared_ptr<DestT> dest); (8)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
+void copy(sycl::queue q,
+          sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
+          DestT* dest);                 (9)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
+void copy(sycl::queue q,
+          sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
+          std::shared_ptr<DestT> dest); (10)
+
+}
+----
+
+Copies from device to host.
+
+_Constraints_: [code]#SrcT# and [code]#DestT# must be <<device-copyable>>.
+[code]#DestMode# must be [code]#access_mode::read# or
+[code]#access_mode::read_write#.
+
+_Preconditions_: [code]#dest# must be a host pointer, pointing to an allocation
+of at least as many bytes as the range represented by [code]#src#.
+
+_Effects (7-8)_: Equivalent to [code]#h.copy(src, dest)#.
+
+_Effects (9-10)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+dest); })#.
+
+'''
+
+.[apititle]#copy# (accessors, device to device)
+[source,role=synopsis,id=api:copy-accessor-d2d]
+----
+namespace sycl::khr {
+
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+          typename DestT, int DestDims, access_mode DestMode>
+void copy(sycl::queue q,
+          sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (11)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode,
+          typename DestT, int DestDims, access_mode DestMode>
+void copy(sycl::queue q,
+          sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (12)
+
+}
+----
+
+Copies between two device accessors.
+
+_Constraints_: [code]#SrcT# and [code]#DestT# must be <<device-copyable>>.
+[code]#SrcMode# must be [code]#access_mode::read# or
+[code]#access_mode::read_write#.
+[code]#DestMode# must be [code]#access_mode::write# or
+[code]#access_mode::read_write#.
+
+_Effects (11)_: Equivalent to [code]#h.copy(src, dest)#.
+
+_Effects (12)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+dest); })#.
+
+_Throws_: A synchronous [code]#exception# with the [code]#errc::invalid# error
+code if [code]#dest.get_count() < src.get_count()#.
+
+'''
+
+.[apititle]#memset#
+[source,role=synopsis,id=api:memset]
+----
+namespace sycl::khr {
+
+void memset(sycl::handler& h, void* ptr, int value, size_t numBytes); (1)
+
+void memset(sycl::queue q, void* ptr, int value, size_t numBytes);    (2)
+
+}
+----
+_Effects (1)_: Equivalent to [code]#h.memset(ptr, value, numBytes)#.
+
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { memset(h, value,
+numBytes); })#.
+
+'''
+
+.[apititle]#fill#
+[source,role=synopsis,id=api:fill]
+----
+namespace sycl::khr {
+
+template <typename T>
+void fill(sycl::handler& h, T* ptr, const T& pattern, size_t count); (1)
+
+template <typename T, int Dims, access_mode Mode>
+void fill(sycl::handler& h,
+          sycl::accessor<T, Dims, Mode, target::device> dest,
+          const T& src);                                             (2)
+
+template <typename T>
+void fill(sycl::queue q, T* ptr, const T& pattern, size_t count);    (3)
+
+template <typename T, int Dims, access_mode Mode>
+void fill(sycl::queue q,
+          sycl::accessor<T, Dims, Mode, target::device> dest,
+          const T& src);                                             (4)
+
+}
+----
+_Effects (1)_: Equivalent to [code]#h.fill(ptr, pattern, count)#.
+
+_Effects (2)_: Equivalent to [code]#h.fill(dest, src)#.
+
+_Effects (3)_: Equivalent to [code]#q.submit([&](handler& h) { fill(h, ptr,
+pattern, count); })#.
+
+_Effects (4)_: Equivalent to [code]#q.submit([&](handler& h) { fill(h, dest,
+src); })#.
+
+'''
+
+.[apititle]#update_host#
+[source,role=synopsis,id=api:update_host]
+----
+namespace sycl::khr {
+
+template <typename T, int Dims, access_mode Mode>
+void update_host(sycl::handler& h, accessor<T, Dims, Mode, target::device> acc); (1)
+
+template <typename T, int Dims, access_mode Mode>
+void update_host(sycl::queue q, accessor<T, Dims, Mode, target::device> acc);    (2)
+
+}
+----
+_Constraints_: [code]#T# must be <<device-copyable>>.
+
+_Effects (1)_: Equivalent to [code]#h.update_host(acc)#.
+
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { update_host(h,
+acc); })#.
+
+'''
+
+.[apititle]#prefetch#
+[source,role=synopsis,id=api:prefetch]
+----
+namespace sycl::khr {
+
+void prefetch(sycl::handler& h, void* ptr, size_t numBytes); (1)
+
+void prefetch(sycl::queue q, void* ptr, size_t numBytes);    (2)
+
+}
+----
+_Effects (1)_: Equivalent to [code]#h.prefetch(ptr, numBytes)#.
+
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { prefetch(h, ptr,
+numBytes); })#.
+
+'''
+
+.[apititle]#mem_advise#
+[source,role=synopsis,id=api:mem_advise]
+----
+namespace sycl::khr {
+
+void mem_advise(sycl::handler& h, void* ptr, size_t numBytes, int advice); (1)
+
+void mem_advise(sycl::queue q, void* ptr, size_t numBytes, int advice);    (2)
+
+}
+----
+_Effects (1)_: Equivalent to [code]#h.mem_advise(ptr, numBytes, advice)#.
+
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { mem_advise(h,
+ptr, numBytes, advice); })#.
+
+'''
+
+=== Command and event barriers
+
+.[apititle]#command_barrier#
+[source,role=synopsis,id=api:command_barrier]
+----
+namespace sycl::khr {
+
+void command_barrier(sycl::handler& h); (1)
+
+void command_barrier(sycl::queue q);    (2)
+
+}
+----
+_Effects_: Enqueues a command barrier.
+Any commands submitted after this barrier cannot begin execution until all
+previously submitted commands (and any commands associated with dependendent
+events) have completed.
+
+'''
+
+.[apititle]#event_barrier#
+[source,role=synopsis,id=api:event_barrier]
+----
+namespace sycl::khr {
+
+void event_barrier(sycl::handler& h, const std::vector<sycl::event>& events); (1)
+
+void event_barrier(sycl::queue q, const std::vector<sycl::event>& events);    (2)
+
+}
+----
+_Effects_: Enqueues an event barrier.
+Any commands submitted after this barrier cannot begin execution until all
+commands associated with [code]#events# (and any commands associated with other
+dependent events) have completed.
+
+{note}For both overloads, if [code]#events# is empty and an event barrier has no
+other dependencies (e.g., specified by [code]#handler::depends_on#), it is ot
+required to wait for any commands unless the [code]#queue# is in-order.{endnote}
+
+'''
+
+== [code]#invocation# class template
+
+The [code]#invocation# class template identifies an invocation of a kernel
+function.
+
+Instances of the [code]#invocation# class template are not user-constructible
+and are passed as an argument to each invocation of a kernel function.
+
+[source,role=synopsis]
+----
+namespace sycl::khr {
+
+template <int Dimensions>
+class invocation
+{
+ public:
+  static constexpr int dimensions = Dimensions;
+
+  id<Dimensions> id() const noexcept;
+  size_t linear_id() const noexcept;
+
+  range<Dimensions> range() const noexcept;
+
+  group<Dimensions> get_work_group() const noexcept;
+
+  sub_group<Dimensions> get_sub_group() const noexcept;
+
+  // Available for backwards compatibility only
+  operator nd_item<Dimensions>() const noexcept;
+};
+
+}
+----
+
+.[apidef]#id#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-id]
+----
+id<Dimensions> id() const noexcept;
+----
+_Returns_: The index of this invocation within the kernel dispatch.
+
+'''
+
+.[apidef]#linear_id#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-linear_id]
+----
+size_t linear_id() const noexcept;
+----
+_Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
+invocation within the kernel dispatch.
+
+'''
+
+.[apidef]#range#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-range]
+----
+range<Dimensions> range() const noexcept;
+----
+
+_Returns_: An index space representing all invocations of this kernel.
+
+'''
+
+.[apidef]#get_work_group#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-get_work_group]
+----
+group<Dimensions> get_work_group() const noexcept;
+----
+
+_Returns_: A [code]#group# representing the <<work-group>> to which this
+invocation belongs.
+
+'''
+
+.[apidef]#get_sub_group#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-get_sub_group]
+----
+sub_group get_sub_group() const noexcept;
+----
+
+_Returns_: A [code]#sub_group# representing the sub-group to which this
+invocation belongs.
+
+'''
+
+.[apidef]#nd_item conversion operator#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-nd_item-conversion-operator]
+----
+operator nd_item<Dimensions>() const noexcept;
+----
+
+_Returns_: An [code]#nd_item# representing this invocation.
+
+{note}This function exists only to provide backwards compatibility with SYCL
+2020 code in order to facilitate experimentation with the new interface proposed
+by this extension.{endnote}
+
+== Issues
+
+None.
