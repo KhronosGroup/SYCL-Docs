@@ -53,7 +53,7 @@ codePat = re.compile(r'code:(?P<param>\w+)')
 # A single letter followed by a period, typically a middle initial.
 endInitial = re.compile(r'^[A-Z]\.$')
 # An abbreviation, which does not (usually) end a line.
-endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b|\bcf\b)\.$', re.IGNORECASE)
+endAbbrev = re.compile(r'(e\.g|i\.e|\bvs\b|\bco\b|\bltd\b|\bch\b|\bcf\b)\.$', re.IGNORECASE)
 # A lower case word.  When "etc." is followed by this, it does not end a line.
 startsLowerCase = re.compile(r'\(?[a-z]')
 
