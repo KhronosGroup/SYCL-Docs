@@ -21,10 +21,11 @@ enum class decorated : /* unspecified */ {
 } // namespace access
 
 // Shorthand aliases for address spaces
-constexpr inline access::address_space global_space = access::address_space::global_space;
-constexpr inline access::address_space local_space = access::address_space::local_space;
-constexpr inline access::address_space private_space = access::address_space::private_space;
-constexpr inline access::address_space generic_space = access::address_space::generic_space;
+using addrspace = access::address_space;
+constexpr inline addrspace addrspace_global = addrspace::global_space;
+constexpr inline addrspace addrspace_local = addrspace::local_space;
+constexpr inline addrspace addrspace_private = addrspace::private_space;
+constexpr inline addrspace addrspace_generic = addrspace::generic_space;
 
 template <typename T> struct remove_decoration {
   using type = /* ... */;
