@@ -21491,7 +21491,10 @@ include::{header_dir}/functional/minimum.h[lines=4..-1]
 T operator()(const T& x, const T& y) const;
 ----
 
-_Returns_: The smaller value, or [code]#x# if the arguments are equivalent.
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The smaller value.
+Returns the first value when the arguments are equivalent.
 
 '''
 
@@ -21502,8 +21505,10 @@ template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
 -> decltype(std::forward<U>(u) < std::forward<T>(t) ? std::forward<U>(u) : std::forward<T>(t));
 ----
 
-_Returns_: The smaller value, or [code]#t# if the arguments are equivalent.
-The return type is deduced.
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The smaller value.
+Returns the first value when the arguments are equivalent.
 
 ==== [code]#maximum# class template
 
@@ -21520,7 +21525,10 @@ include::{header_dir}/functional/maximum.h[lines=4..-1]
 T operator()(const T& x, const T& y) const;
 ----
 
-_Returns_: The larger value, or [code]#x# if the arguments are equivalent.
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The larger value.
+Returns the first value when the arguments are equivalent.
 
 '''
 
@@ -21531,8 +21539,10 @@ template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
 -> decltype(std::forward<T>(t) < std::forward<U>(u) ? std::forward<U>(u) : std::forward<T>(t));
 ----
 
-_Returns_: The larger value, or [code]#t# if the arguments are equivalent.
-The return type is deduced.
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The larger value.
+Returns the first value when the arguments are equivalent.
 
 
 [[sec:group-functions]]
