@@ -9,7 +9,7 @@ template <typename T = void> struct minimum {
 
 template <> struct minimum<void> {
   template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
-  -> /* see below */;
+  -> decltype(std::forward<U>(u) < std::forward<T>(t) ? std::forward<U>(u) : std::forward<T>(t));
 
   using is_transparent = /* unspecified */;
 };
