@@ -15,7 +15,7 @@ enum class address_space : /* unspecified */ {
 enum class decorated : /* unspecified */ {
   no,
   yes,
-  legacy // Deprecated in SYCL 2020
+  legacy
 };
 
 } // namespace access
