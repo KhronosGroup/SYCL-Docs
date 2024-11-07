@@ -30,6 +30,11 @@ template <typename ElementType,
 using private_ptr =
     multi_ptr<ElementType, access::address_space::private_space, IsDecorated>;
 
+template <typename ElementType,
+          access::decorated IsDecorated = access::decorated::legacy>
+using generic_ptr =
+    multi_ptr<ElementType, access::address_space::generic_space, IsDecorated>;
+
 // Template specialization aliases for different pointer address spaces.
 // The interface exposes non-decorated pointer while keeping the
 // address space information internally.
@@ -48,6 +53,11 @@ using raw_private_ptr =
     multi_ptr<ElementType, access::address_space::private_space,
               access::decorated::no>;
 
+template <typename ElementType>
+using raw_generic_ptr =
+    multi_ptr<ElementType, access::address_space::generic_space,
+              access::decorated::no>;
+
 // Template specialization aliases for different pointer address spaces.
 // The interface exposes decorated pointer.
 
@@ -64,6 +74,11 @@ using decorated_local_ptr =
 template <typename ElementType>
 using decorated_private_ptr =
     multi_ptr<ElementType, access::address_space::private_space,
+              access::decorated::yes>;
+
+template <typename ElementType>
+using decorated_generic_ptr =
+    multi_ptr<ElementType, access::address_space::generic_space,
               access::decorated::yes>;
 
 } // namespace sycl
