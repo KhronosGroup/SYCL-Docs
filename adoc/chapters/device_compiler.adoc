@@ -205,14 +205,14 @@ Amongst other things, this restriction makes it illegal for a
     implementation defines the [code]#SYCL_EXTERNAL# macro as described in
     <<subsec:syclexternal>>.
 
-Inside discarded statements or in the case of manifestly constant-evaluated
-expression or conversion, any code accepted by the C++ standard in this case is
-also accepted in a SYCL <<device-function>>.
+Inside a <<discarded-statement>> or in the case of a
+<<manifestly-constant-evaluated>>, any code accepted by the C++ standard in this
+case is also accepted in a SYCL <<device-function>>.
 
 [NOTE]
 ====
-The restriction waiver in manifestly constant-evaluated expressions and
-discarded statements allows any kind of meta-programming in a
+The restriction waiver in <<discarded-statement>> or
+<<manifestly-constant-evaluated>> allows any kind of meta-programming in a
 <<device-function>>.
 ====
 
@@ -389,11 +389,11 @@ A number of kernel features defined by this SYCL specification are optional;
 they may be supported on some devices but not on other devices.
 
 As stated in <<sec:language.restrictions.kernels>>, the restrictions for
-optional kernel features do not apply to manifestly constant-evaluated
-expressions or conversions in device code.
-Device code may use optional features in manifestly constant-evaluated
-expressions or conversions even if the device does not support the optional
-feature.
+optional kernel features do not apply to discarded statements or to manifestly
+constant-evaluated expressions or conversions in device code.  Device code may
+use optional features in <<discarded-statement>> or
+<<manifestly-constant-evaluated>> even if the device does not support the
+optional feature.
 
 As described in <<sec:device-aspects>>, an application can test whether a device
 supports an optional feature by testing whether the device has an associated
