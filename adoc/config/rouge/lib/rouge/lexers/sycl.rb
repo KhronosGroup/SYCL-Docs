@@ -312,6 +312,7 @@ module Rouge
         context_bound
         cpu_selector
         decorated_constant_ptr
+        decorated_generic_ptr
         decorated_global_ptr
         decorated_local_ptr
         decorated_private_ptr
