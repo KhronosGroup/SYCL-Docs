@@ -79,12 +79,12 @@ template <typename T>
 void update(T* ptr, int x)
 {
   // If cast to global returns non-null, call the global version.
-  if (khr::dynamic_addrspace_cast<access::address_space::global_space>(ptr)) {
+  if (khr::dynamic_addrspace_cast<access::address_space::global_space>(ptr).get() != nullptr) {
     update_global(ptr, x);
   }
 
   // If cast to local returns non-null, call the local version.
-  else if (khr::dynamic_addrspace_cast<access::address_space::local_space>(ptr)) {
+  else if (khr::dynamic_addrspace_cast<access::address_space::local_space>(ptr).get() != nullptr) {
     update_local(ptr, x);
   }
 }
