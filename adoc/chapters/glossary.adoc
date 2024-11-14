@@ -345,6 +345,14 @@ For the full description please refer to <<subsec:buffers>>.
     Local memory is a memory region associated with a <<work-group>> and
     accessible only by <<work-item,work-items>> in that <<work-group>>.
 
+[[manifestly-constant-evaluated]]manifestly constant-evaluated expression or conversion::
+    ISO C++ +[expr.const]+ describes manifestly constant-evaluated expression or
+    conversion like constant expressions, condition of an +if constexpr+, an
+    immediate invocation, used in template parameters, in constant
+    initialization, etc.
+    This is evaluated at compile-time by the compiler.
+    For more context, see <<sec:language.restrictions.kernels>>.
+
 [[mem-fence]]mem-fence::
     A memory fence provides control over re-ordering of memory load and store
     operations when coupled with an atomic operation.
@@ -358,7 +366,6 @@ For the full description please refer to <<subsec:buffers>>.
 [[native-specialization-constant]]native-specialization constant::
     A <<specialization-constant>> in a device image whose value can be used by
     an online compiler as an immediate value during the compilation.
-
 
 [[nd-item]]nd-item::
     A unique identifier representing a single <<work-item>> and <<work-group>>
@@ -380,14 +387,6 @@ For the full description please refer to <<subsec:buffers>>.
     be zero.
     In the SYCL interface an <<nd-range>> is represented by the [code]#nd_range#
     class (see <<subsubsec:nd-range-class>>).
-
-[[manifestly-constant-evaluated]]manifestly constant-evaluated expression or conversion::
-    ISO C++ +[expr.const]+ describes manifestly constant-evaluated expression or
-    conversion like constant expressions, condition of an +if constexpr+, an
-    immediate invocation, used in template parameters, in constant
-    initialization, etc.
-    This is evaluated at compile-time by the compiler.
-    For more context, see <<sec:language.restrictions.kernels>>.
 
 [[object]]object::
     A state which a <<kernel-bundle>> can be in, representing
