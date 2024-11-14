@@ -35,11 +35,11 @@ table below.
 ----
 namespace sycl::khr {
 
-template <addrspace Space, typename ElementType>
+template <access::address_space Space, typename ElementType>
 multi_ptr<ElementType, Space, access::decorated::no>
 dynamic_addrspace_cast(ElementType* ptr);
 
-template <addrspace Space, typename ElementType, access::decorated DecorateAddress>
+template <access::address_space Space, typename ElementType, access::decorated DecorateAddress>
 multi_ptr<ElementType, Space, DecorateAddress>
 dynamic_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
 
@@ -78,12 +78,12 @@ template <typename T>
 void update(T* ptr, int x)
 {
   // If cast to global returns non-null, call the global version.
-  if (khr::dynamic_addrspace_cast<addrspace_global>(ptr)) {
+  if (khr::dynamic_addrspace_cast<access::address_space::global_space>(ptr)) {
     update_global(ptr, x);
   }
 
   // If cast to local returns non-null, call the local version.
-  else if (khr::dynamic_addrspace_cast<addrspace_local>(ptr)) {
+  else if (khr::dynamic_addrspace_cast<access::address_space::local_space>(ptr)) {
     update_local(ptr, x);
   }
 }

@@ -40,11 +40,11 @@ below.
 ----
 namespace sycl::khr {
 
-template <addrspace Space, typename ElementType>
+template <access::address_space Space, typename ElementType>
 multi_ptr<ElementType, Space, access::decorated::no>
 static_addrspace_cast(ElementType* ptr);
 
-template <addrspace Space, typename ElementType, access::decorated DecorateAddress>
+template <access::address_space Space, typename ElementType, access::decorated DecorateAddress>
 multi_ptr<ElementType, Space, DecorateAddress>
 static_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
 
@@ -78,7 +78,7 @@ template <typename T>
 void update_global(T* ptr, int x)
 {
   // Assert that implementation can treat ptr as pointing to global.
-  auto mptr = khr::static_addrspace_cast<addrspace_global>(ptr);
+  auto mptr = khr::static_addrspace_cast<access::address_space::global_space>(ptr);
 
   *mptr += x;
 }
