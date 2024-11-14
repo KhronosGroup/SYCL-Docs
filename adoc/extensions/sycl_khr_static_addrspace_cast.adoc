@@ -35,9 +35,9 @@ below.
 [[sec:khr-static-addrspace-cast-functions]]
 == Static address space cast functions
 
-[source,role=synopsis]
+.[apidef]#static_addrspace_cast#
+[source,role=synopsis,id=api:khr-static-addrspace-cast-static_addrspace_cast]
 ----
-
 namespace sycl::khr {
 
 template <addrspace Space, typename ElementType>
@@ -49,18 +49,6 @@ multi_ptr<ElementType, Space, DecorateAddress>
 static_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
 
 } // namespace khr::sycl
-----
-
-.[apidef]#static_addrspace_cast#
-[source,role=synopsis,id=api:khr-static-addrspace-cast-static_addrspace_cast]
-----
-template <addrspace Space, typename ElementType>
-multi_ptr<ElementType, Space, access::decorated::no>
-static_addrspace_cast(ElementType* ptr);
-
-template <addrspace Space, typename ElementType, access::decorated DecorateAddress>
-multi_ptr<ElementType, Space, DecorateAddress>
-static_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
 ----
 
 _Preconditions_: [code]#ptr# points to an object allocated in the address space

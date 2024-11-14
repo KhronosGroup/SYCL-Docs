@@ -30,9 +30,9 @@ table below.
 [[sec:khr-dynamic-addrspace-cast-functions]]
 == Dynamic address space cast functions
 
-[source,role=synopsis]
+.[apidef]#dynamic_addrspace_cast#
+[source,role=synopsis,id=api:khr-dynamic-addrspace-cast-dynamic_addrspace_cast]
 ----
-
 namespace sycl::khr {
 
 template <addrspace Space, typename ElementType>
@@ -44,18 +44,6 @@ multi_ptr<ElementType, Space, DecorateAddress>
 dynamic_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
 
 } // namespace khr::sycl
-----
-
-.[apidef]#dynamic_addrspace_cast#
-[source,role=synopsis,id=api:khr-dynamic-addrspace-cast-dynamic_addrspace_cast]
-----
-template <addrspace Space, typename ElementType>
-multi_ptr<ElementType, Space, access::decorated::no>
-dynamic_addrspace_cast(ElementType* ptr);
-
-template <addrspace Space, typename ElementType, access::decorated DecorateAddress>
-multi_ptr<ElementType, Space, DecorateAddress>
-dynamic_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
 ----
 
 _Preconditions_: The memory at [code]#ptr# can be accessed by the calling
