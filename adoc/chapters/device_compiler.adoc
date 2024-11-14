@@ -205,6 +205,16 @@ Amongst other things, this restriction makes it illegal for a
     implementation defines the [code]#SYCL_EXTERNAL# macro as described in
     <<subsec:syclexternal>>.
 
+Inside a <<discarded-statement>> or in the case of a
+<<manifestly-constant-evaluated>>, any code accepted by the C++ standard in this
+case is also accepted in a SYCL <<device-function>>.
+
+[NOTE]
+====
+The restriction waiver in <<discarded-statement>> or
+<<manifestly-constant-evaluated>> allows any kind of meta-programming in a
+<<device-function>>.
+====
 
 [[subsec:scalartypes]]
 == Built-in scalar data types
@@ -377,8 +387,17 @@ in <<sec:backends>> must be defined by all conformant implementations.
 
 A number of kernel features defined by this SYCL specification are optional;
 they may be supported on some devices but not on other devices.
+
+As stated in <<sec:language.restrictions.kernels>>, the restrictions for
+optional kernel features do not apply to discarded statements or to manifestly
+constant-evaluated expressions or conversions in device code.
+Device code may use optional features in <<discarded-statement>> or
+<<manifestly-constant-evaluated>> even if the device does not support the
+optional feature.
+
 As described in <<sec:device-aspects>>, an application can test whether a device
-supports these features by testing whether the device has an associated aspect.
+supports an optional feature by testing whether the device has an associated
+aspect.
 The following aspects are those that correspond to optional kernel features:
 
   * [code]#fp16#
