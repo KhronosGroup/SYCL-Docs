@@ -58,6 +58,10 @@ template <typename DataT, int NumElements> class vec {
   // Available only when: NumElements == 1
   operator DataT() const;
 
+  // Available only when: NumElements == 1 and T is explicitly convertible to DataT
+  template<typename T>
+  explicit operator T() const;
+
   static constexpr size_t byte_size() noexcept;
 
   static constexpr size_t size() noexcept;
