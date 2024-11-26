@@ -18326,15 +18326,17 @@ a@
 ----
 vec operatorOP(const DataT& lhs, const vec& rhs)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with
-      the same template parameters as the [code]#rhs# SYCL [code]#vec#
-      with each element of the new SYCL [code]#vec# instance the result of
-      an element-wise [code]#OP# bitshift operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
-      If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type
-      and this SYCL [code]#vec# has a negative value any vacated bits viewed
-      as an unsigned integer must be assigned the value [code]#1#, otherwise
-      any vacated bits viewed as an unsigned integer must be assigned the value
-      [code]#0#.
+   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+
+Construct a new instance of the SYCL [code]#vec# class template with
+the same template parameters as the [code]#rhs# SYCL [code]#vec#
+with each element of the new SYCL [code]#vec# instance the result of
+an element-wise [code]#OP# bitshift operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
+If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type
+and this SYCL [code]#vec# has a negative value any vacated bits viewed
+as an unsigned integer must be assigned the value [code]#1#, otherwise
+any vacated bits viewed as an unsigned integer must be assigned the value
+[code]#0#.
 
 Where [code]#OP# is: [code]#<<#, [code]#>>#.
 
