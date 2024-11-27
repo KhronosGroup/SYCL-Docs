@@ -4889,11 +4889,9 @@ can supply their own allocator class.
 }
 ----
 
-When an allocator returns a [code]#nullptr#, the runtime cannot allocate data on
-the host.
-Note that in this case the runtime will raise an error if it requires host
-memory but it is not available (e.g when moving data across <<backend>>
-contexts).
+Note that if the runtime requires host memory (e.g., when moving data across
+<<backend>> contexts), but the allocator fails to allocate the memory, then the
+runtime will raise an error.
 
 In some cases, the implementation may retain a copy of the allocator object even
 after the buffer is destroyed.
@@ -4918,10 +4916,6 @@ STL-based libraries (e.g, Intel's TBB provides an allocator).
 ==== Default allocators
 
 A default allocator is always defined by the implementation.
-For successful allocations of size greater than zero, the default allocator must
-return a pointer to a contiguous, exclusive region of memory of at least the
-requested size.
-For unsuccessful allocations, the default allocator must return [code]#nullptr#.
 The default allocator for const buffers will remove the const-ness of the type
 (therefore, the default allocator for a buffer of type [code]#const int# will be
 an [code]#Allocator<int>)#.
