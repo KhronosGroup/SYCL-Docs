@@ -18367,7 +18367,14 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18378,7 +18385,14 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18392,7 +18406,14 @@ the same template parameters as the [code]#rhs# SYCL [code]#vec#
 with each element of the new SYCL [code]#vec# instance the result of
 an element-wise [code]#OP# logical operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18403,7 +18424,14 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18414,7 +18442,14 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18436,16 +18471,14 @@ vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs)
       operation results in [code]#true# if either the [code]#lhs# or the
       [code]#rhs# element is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL
-[code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL
-[code]#vec# with [code]#DataT# of type [code]#int8_t# or
-[code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a
-SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET#
-must be [code]#int16_t#. For a SYCL [code]#vec# with
-[code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or
-[code]#float# [code]#RET# must be [code]#int32_t#. For a
-SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET#
-must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18465,7 +18498,14 @@ vec<RET, NumElements> operator!(const vec& v)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise logical NOT operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 |====
 
