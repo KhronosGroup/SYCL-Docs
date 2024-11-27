@@ -144,52 +144,66 @@ template <typename DataT, int NumElements> class vec {
   vec& operator=(const DataT& rhs);
 
   // OP is: +, -, *, /, %
-  /* If OP is %, available only when: DataT != float && DataT != double
-  && DataT != half. */
+  //
+  // If OP is not %, available only when DataT is an arithmetic type or half.
+  // If OP is %, available only when DataT is an integral type.
   friend vec operatorOP(const vec& lhs, const vec& rhs);
   friend vec operatorOP(const vec& lhs, const DataT& rhs);
   friend vec operatorOP(const DataT& lhs, const vec& rhs);
 
   // OP is: +=, -=, *=, /=, %=
-  /* If OP is %=, available only when: DataT != float && DataT != double
-  && DataT != half. */
+  //
+  // If OP is not %=, available only when DataT is an arithmetic type or half.
+  // If OP is %=, available only when DataT is an integral type.
   friend vec& operatorOP(vec& lhs, const vec& rhs);
   friend vec& operatorOP(vec& lhs, const DataT& rhs);
 
   // OP is prefix ++, --
-  // Available only when: DataT != bool
+  //
+  // Available only when DataT is an arithmetic type or half but not when DataT
+  // is bool.
   friend vec& operatorOP(vec& rhs);
 
   // OP is postfix ++, --
-  // Available only when: DataT != bool
+  //
+  // Available only when DataT is an arithmetic type or half but not when DataT
+  // is bool.
   friend vec operatorOP(vec& lhs, int);
 
   // OP is unary +, -
+  //
+  // Available only when DataT is an arithmetic type or half.
   friend vec operatorOP(const vec& rhs);
 
   // OP is: &, |, ^
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when DataT is an integral type or std::byte.
   friend vec operatorOP(const vec& lhs, const vec& rhs);
   friend vec operatorOP(const vec& lhs, const DataT& rhs);
   friend vec operatorOP(const DataT& lhs, const vec& rhs);
 
   // OP is: &=, |=, ^=
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when DataT is an integral type or std::byte.
   friend vec& operatorOP(vec& lhs, const vec& rhs);
   friend vec& operatorOP(vec& lhs, const DataT& rhs);
 
   // OP is: <<, >>
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when DataT is an integral type.
   friend vec operatorOP(const vec& lhs, const vec& rhs);
   friend vec operatorOP(const vec& lhs, const DataT& rhs);
   friend vec operatorOP(const DataT& lhs, const vec& rhs);
 
   // OP is: <<=, >>=
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when DataT is an integral type.
   friend vec& operatorOP(vec& lhs, const vec& rhs);
   friend vec& operatorOP(vec& lhs, const DataT& rhs);
 
   // OP is: &&, ||
+  //
+  // Available only when DataT is an arithmetic type or half.
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
   friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
@@ -199,9 +213,10 @@ template <typename DataT, int NumElements> class vec {
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
   friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
 
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  // Available only when DataT is an integral type or std::byte.
   friend vec operator~(const vec& v);
 
+  // Available only when DataT is an arithmetic type or half.
   friend vec<RET, NumElements> operator!(const vec& v);
 };
 
