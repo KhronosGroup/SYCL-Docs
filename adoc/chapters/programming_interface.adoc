@@ -9933,7 +9933,6 @@ For interoperability with the <<backend>>, users should rely on types exposed by
 the decorated version.
 If the value of [code]#access::decorated# is [code]#access::decorated::legacy#,
 the 1.2.1 interface is exposed.
-This interface is deprecated.
 
 The template traits [code]#remove_decoration# and type alias
 [code]#remove_decoration_t# retrieve the non-decorated pointer or reference from
@@ -10136,7 +10135,7 @@ operator=(const multi_ptr<value_type, AS, IsDecorated>&)
 ----
    a@ Available only when: [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
-Assigns the value of the left hand side [code]#multi_ptr# into the [code]#generic_ptr#.
+Assigns the value of the right hand side [code]#multi_ptr# into the [code]#generic_ptr#.
 
 a@
 [source]
@@ -10149,7 +10148,7 @@ operator=(multi_ptr<value_type, AS, IsDecorated>&&)
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
-Move the value of the left hand side [code]#multi_ptr# into the [code]#generic_ptr#.
+Move the value of the right hand side [code]#multi_ptr# into the [code]#generic_ptr#.
 
 a@
 [source]
@@ -10641,10 +10640,6 @@ below.
 ----
 include::{header_dir}/pointer.h[lines=4..-1]
 ----
-
-Note that using [code]#global_ptr#, [code]#local_ptr#, [code]#constant_ptr# or
-[code]#private_ptr# without specifying the decoration is deprecated.
-The default argument is provided for compatibility with 1.2.1.
 
 
 [[subsec:samplers]]
@@ -13892,9 +13887,10 @@ property::reduction::initialize_to_identity
       identity value passed to the reduction interface, or to the identity
       value determined by the [code]#known_identity# trait if no identity value
       was specified. If no identity value was specified and an identity value
-      cannot be determined by the [code]#known_identity# trait, the compiler
-      must raise a diagnostic. When this property is set, the original value of
-      the reduction variable is not included in the reduction.
+      cannot be determined by the [code]#known_identity# trait, the
+      implementation must throw an [code]#exception# with the
+      [code]#errc::invalid# error code. When this property is set, the original
+      value of the reduction variable is not included in the reduction.
 
 |====
 
