@@ -727,8 +727,8 @@ Construct a SYCL [code]#property_list# with zero or more properties.
 Since a system can have several SYCL-compatible devices attached, it is useful
 to have a way to select a specific device or a set of devices to construct a
 specific object such as a [code]#device# (see <<sec:device-class>>) or a
-[code]#queue# (see <<sec:interface.queue.class>>), or perform some operations on
-a device subset.
+[code]#queue# (see <<sec:queue-class>>), or perform some operations on a device
+subset.
 
 Device selection is done either by already having a specific instance of a
 [code]#device# (see <<sec:device-class>>) or by providing a <<device-selector>>
@@ -1506,14 +1506,11 @@ At a minimum, each context must support [code]#memory_scope::work_item#,
 The [code]#property_list# constructor parameters are present for extensibility.
 
 
-// \input{device_class}
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin device_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 [[sec:device-class]]
 === Device class
 
-The SYCL [code]#device# class encapsulates a single SYCL device on which
-<<kernel,kernels>> can be executed.
+The [code]#device# class represents a single SYCL device on which <<kernel,
+kernels>> can be executed.
 
 All member functions of the [code]#device# class are synchronous and errors are
 handled by throwing synchronous SYCL exceptions.
@@ -1521,1375 +1518,1956 @@ handled by throwing synchronous SYCL exceptions.
 The execution environment for a SYCL application has a fixed number of
 <<root-device, root devices>> which does not vary as the application executes.
 The application can get a list of all these devices via
-[code]#device::get_devices()#, and the order of the device objects is the same
-each time the application calls that function (assuming the parameter to that
+[api]#device::get_devices#, and the order of the device objects is the same each
+time the application calls that function (assuming the parameter to that
 function is the same for each call).
 The [code]#device# class also provides constructors, but constructing a new
 [code]#device# instance merely creates a new object that is a copy of one of the
-objects returned by [code]#device::get_devices()#.
+objects returned by [api]#device::get_devices#.
 
-A SYCL [code]#device# can be partitioned into multiple SYCL devices, by calling
-the [code]#create_sub_devices()# member function template.
-The resulting SYCL [code]#devices# are considered sub devices, and it is valid
+A device can be partitioned into multiple devices, by calling the
+[code]#device::create_sub_devices# member function template.
+The resulting [code]#device# objects are considered sub devices, and it is valid
 to partition these sub devices further.
 The range of support for this feature is <<backend>> and device specific and can
-be queried for through [code]#get_info()#.
+be queried for through [api]#device::get_info#.
 
-The SYCL [code]#device# class provides the common reference semantics (see
-<<sec:reference-semantics>>).
+The [code]#device# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
-==== Device interface
-
-A synopsis of the SYCL [code]#device# class is provided below.
-The constructors, member functions and static member functions of the SYCL
-[code]#device# class are listed in <<table.constructors.device>>,
-<<table.members.device>> and <<table.staticmembers.device>> respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-// Interface of the device class
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/device.h[lines=4..-1]
 ----
 
+[[sec:device-ctors]]
+==== Constructors
 
-[[table.constructors.device]]
-.Constructors of the SYCL [code]#device# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:device-ctor]
 ----
 device()
 ----
-   a@ Constructs a SYCL [code]#device# instance that is a copy of the device
-      returned by [code]#default_selector_v#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#device# object that is a copy of the device
+returned by [code]#default_selector_v#.
+
+'''
+
+.[apititle]#Selector constructor#
+[source,role=synopsis,id=api:device-ctor-selector]
 ----
-template <typename DeviceSelector> explicit device(const DeviceSelector&)
+template <typename DeviceSelector>
+explicit device(const DeviceSelector& selector)
 ----
-   a@ Constructs a SYCL [code]#device# instance that is a copy of the device
-      returned by the <<device-selector>> parameter.
 
-|====
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
 
+_Effects:_ The [code]#selector# is called for every <<root-device>> as described
+in <<sec:device-selector>>.
+Constructs a [code]#device# object that is a copy of the device selected by
+[code]#selector#.
 
+'''
 
-[[table.members.device]]
-.Member functions of the SYCL [code]#device# class
-[width="100%",options="header",separator="@",cols="58%,42%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:device-member-funcs]]
+==== Member functions
+
+.[apidef]#device::get_backend#
+[source,role=synopsis,id=api:device-get-backend]
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#device#.
 
-a@
-[source]
+_Returns:_ The <<backend>> that is associated with this device.
+
+'''
+
+.[apidef]#device::get_platform#
+[source,role=synopsis,id=api:device-get-platform]
 ----
 platform get_platform() const
 ----
-   a@ Returns the associated SYCL [code]#platform#.
-      The value returned must be equal to that returned by [code]#get_info<info::device::platform>()#.
 
-a@
-[source]
+_Returns:_ The <<platform>> that is associated with this device.
+
+'''
+
+.[apidef]#device::is_cpu#
+[source,role=synopsis,id=api:device-is-cpu]
 ----
 bool is_cpu() const
 ----
-   a@ Returns the same value as [code]#has(aspect::cpu)#.  See <<table.device.aspect>>.
 
-a@
-[source]
+_Returns:_ The same value as [code]#has(aspect::cpu)#.
+See <<sec:device-aspects>>.
+
+'''
+
+.[apidef]#device::is_gpu#
+[source,role=synopsis,id=api:device-is-gpu]
 ----
 bool is_gpu() const
 ----
-   a@ Returns the same value as [code]#has(aspect::gpu)#.  See <<table.device.aspect>>.
 
-a@
-[source]
+_Returns:_ The same value as [code]#has(aspect::gpu)#.
+See <<sec:device-aspects>>.
+
+'''
+
+.[apidef]#device::is_accelerator#
+[source,role=synopsis,id=api:device-is-accelerator]
 ----
 bool is_accelerator() const
 ----
-   a@ Returns the same value as [code]#has(aspect::accelerator)#.  See <<table.device.aspect>>.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#device# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.device.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Returns:_ The same value as [code]#has(aspect::accelerator)#.
+See <<sec:device-aspects>>.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-   a@ Queries this SYCL [code]#device# for <<backend>>-specific information
-      requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#device#.
+'''
 
-a@
-[source]
+.[apidef]#device::get_info#
+[source,role=synopsis,id=api:device-get-info]
+----
+template <typename Param>
+typename Param::return_type get_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is an information descriptor
+for the device class.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:device-info-descriptors>> for the device information descriptors that
+are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#device::get_backend_info#
+[source,role=synopsis,id=api:device-get-backend-info]
+----
+template <typename Param>
+typename Param::return_type get_backend_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is a backend information
+descriptor for the device class.
+
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this device.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+.[apidef]#device::has#
+[source,role=synopsis,id=api:device-has]
 ----
 bool has(aspect asp) const
 ----
-   a@ Returns true if this SYCL [code]#device# has the given <<aspect>>.
-      SYCL applications can use this member function to determine which
-      optional features this device supports (if any).
 
-a@
-[source]
+_Returns:_ The value [code]#true# if this device has the given <<aspect>>.
+Applications can use this member function to determine which optional features
+this device supports (if any).
+
+'''
+
+.[apidef]#device::has_extension#
+[source,role=synopsis,id=api:device-has-extension]
 ----
 bool has_extension(const std::string& extension) const
 ----
-   a@ Deprecated, use [code]#has()# instead.
 
-Returns true if this SYCL [code]#device# supports the extension queried by the [code]#extension# parameter.
+Deprecated by SYCL 2020.
 
-a@
-[source]
+{note}Use [api]#device::has# instead.
+{endnote}
+
+_Returns:_ The value [code]#true# if this device supports the extension queried
+by the [code]#extension# parameter.
+
+'''
+
+.[apititle]#device::create_sub_devices (partition equally)#
+[source,role=synopsis,id=api:device-create-sub-devices-partition-equally]
 ----
 template <info::partition_property Prop>
 std::vector<device> create_sub_devices(size_t count) const
 ----
-   a@ Available only when [code]#Prop# is
-      [code]#info::partition_property::partition_equally#.  Returns a
-      [code]#std::vector# of sub devices partitioned from this SYCL
-      [code]#device# based on the [code]#count# parameter.  The returned vector
-      contains as many sub devices as can be created such that each sub device
-      contains [code]#count# compute units.  If the device's total number of
-      compute units (as returned by [code]#info::device::max_compute_units#) is
-      not evenly divided by [code]#count#, then the remaining compute units are
-      not included in any of the sub devices.
 
-If this SYCL [code]#device# does not support
-[code]#info::partition_property::partition_equally# an [code]#exception# with
-the [code]#errc::feature_not_supported# error code must be thrown.  If
-[code]#count# exceeds the total number of compute units in the device, an
-[code]#exception# with the [code]#errc::invalid# error code must be thrown.
+_Constraints:_ Available only when [code]#Prop# is
+[api]#info::partition_property::partition_equally#.
 
-a@
-[source]
+_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+[code]#device# object based on the [code]#count# parameter.
+The returned vector contains as many sub devices as can be created such that
+each sub device contains [code]#count# compute units.
+If the device's total number of compute units (as returned by
+[api]#info::device::max_compute_units#) is not evenly divided by [code]#count#,
+then the remaining compute units are not included in any of the sub devices.
+
+_Throws:_
+
+* An [code]#exception# with the [code]#errc::feature_not_supported# error code
+  if this device does not support
+  [api]#info::partition_property::partition_equally#.
+
+* An [code]#exception# with the [code]#errc::invalid# error code if
+  [code]#count# exceeds the total number of compute units in the device.
+
+'''
+
+.[apititle]#device::create_sub_devices (partition by counts)#
+[source,role=synopsis,id=api:device-create-sub-devices-partition-by-counts]
 ----
 template <info::partition_property Prop>
 std::vector<device> create_sub_devices(const std::vector<size_t>& counts) const
 ----
-   a@ Available only when [code]#Prop# is
-      [code]#info::partition_property::partition_by_counts#.  Returns a
-      [code]#std::vector# of sub devices partitioned from this SYCL
-      [code]#device# based on the [code]#counts# parameter.  For each non-zero
-      value _M_ in the [code]#counts# vector, a sub device with _M_ compute
-      units is created.
 
-If the SYCL [code]#device# does not support
-[code]#info::partition_property::partition_by_counts# an [code]#exception# with
-the [code]#errc::feature_not_supported# error code must be thrown.  If the
-number of non-zero values in [code]#counts# exceeds the device's maximum
-number of sub devices (as returned by
-[code]#info::device::partition_max_sub_devices#) or if the total of all the
-values in the [code]#counts# vector exceeds the total number of compute units
-in the device (as returned by [code]#info::device::max_compute_units#), an
-[code]#exception# with the [code]#errc::invalid# error code must be thrown.
+_Constraints:_ Available only when [code]#Prop# is
+[api]#info::partition_property::partition_by_counts#.
 
-a@
-[source]
+_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+[code]#device# object based on the [code]#counts# parameter.
+For each non-zero value _M_ in the [code]#counts# vector, a sub device with _M_
+compute units is created.
+
+_Throws:_
+
+* An [code]#exception# with the [code]#errc::feature_not_supported# error code
+  if this device does not support
+  [api]#info::partition_property::partition_by_counts#.
+
+* An [code]#exception# with the [code]#errc::invalid# error code if the number
+  of non-zero values in [code]#counts# exceeds the device's maximum number of
+  sub devices (as returned by [api]#info::device::partition_max_sub_devices#) or
+  if the total of all the values in the [code]#counts# vector exceeds the total
+  number of compute units in the device (as returned by
+  [api]#info::device::max_compute_units#).
+
+'''
+
+.[apititle]#device::create_sub_devices (partition by affinity domain)#
+[source,role=synopsis,id=api:device-create-sub-devices-partition-by-affinity-domain]
 ----
 template <info::partition_property Prop>
 std::vector<device>
 create_sub_devices(info::partition_affinity_domain domain) const
 ----
-// WARNING: The Asciidoctor PDF renderer seems to be unable to generate a table
-// where any single row is taller than a page.  This row is already close to
-// the page limit.  If you add any more text in this cell, check the PDF render
-// to see if any of the text is cut off at the bottom of the page.  If so, try
-// making this column wider so that this row still fits on a page.
 
-   a@ Available only when [code]#Prop# is
-      [code]#info::partition_property::partition_by_affinity_domain#.  Returns
-      a [code]#std::vector# of sub devices partitioned from this SYCL
-      [code]#device# by affinity domain based on the [code]#domain# parameter,
-      which must be one of the following values:
+_Constraints:_ Available only when [code]#Prop# is
+[api]#info::partition_property::partition_by_affinity_domain#.
 
-* [code]#info::partition_affinity_domain::numa#: Split the device into
-  sub devices comprised of compute units that share a NUMA node.
+_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+[code]#device# object based on the [code]#domain# parameter, which must be one
+of the following values:
 
-* [code]#info::partition_affinity_domain::L4_cache#: Split the device into
-  sub devices comprised of compute units that share a level 4 data cache.
+* [api]#info::partition_affinity_domain::numa#: Split the device into sub
+  devices comprised of compute units that share a NUMA node.
 
-* [code]#info::partition_affinity_domain::L3_cache#: Split the device into
-  sub devices comprised of compute units that share a level 3 data cache.
+* [api]#info::partition_affinity_domain::L4_cache#: Split the device into sub
+  devices comprised of compute units that share a level 4 data cache.
 
-* [code]#info::partition_affinity_domain::L2_cache#: Split the device into
-  sub devices comprised of compute units that share a level 2 data cache.
+* [api]#info::partition_affinity_domain::L3_cache#: Split the device into sub
+  devices comprised of compute units that share a level 3 data cache.
 
-* [code]#info::partition_affinity_domain::L1_cache#: Split the device into
-  sub devices comprised of compute units that share a level 1 data cache.
+* [api]#info::partition_affinity_domain::L2_cache#: Split the device into sub
+  devices comprised of compute units that share a level 2 data cache.
 
-* [code]#info::partition_affinity_domain::next_partitionable#: Split the device
-  along the next partitionable affinity domain.  The implementation shall find
-  the first level along which the device or sub device may be further
-  subdivided in the order [code]#numa#, [code]#L4_cache#, [code]#L3_cache#,
-  [code]#L2_cache#, [code]#L1_cache#, and partition the device into sub devices
-  comprised of compute units that share memory subsystems at this level.  The
-  user may determine what happened via
-  [code]#info::device::partition_type_affinity_domain#.
+* [api]#info::partition_affinity_domain::L1_cache#: Split the device into sub
+  devices comprised of compute units that share a level 1 data cache.
 
-If the SYCL [code]#device# does not support
-[code]#info::partition_property::partition_by_affinity_domain# or the
-SYCL [code]#device# does not support the
-[code]#info::partition_affinity_domain# provided, an [code]#exception#
-with the [code]#errc::feature_not_supported# error code must be thrown.
+* [api]#info::partition_affinity_domain::next_partitionable#: Split the device
+  along the next partitionable affinity domain.
+  The implementation shall find the first level along which the device or sub
+  device may be further subdivided in the order [code]#numa#, [code]#L4_cache#,
+  [code]#L3_cache#, [code]#L2_cache#, [code]#L1_cache#, and partition the device
+  into sub devices comprised of compute units that share memory subsystems at
+  this level.
+  The user may determine what happened via
+  [api]#info::device::partition_type_affinity_domain#.
 
-|====
+_Throws:_
 
+* An [code]#exception# with the [code]#errc::feature_not_supported# error code
+  if this device does not support
+  [api]#info::partition_property::partition_by_affinity_domain# or if this
+  device does not support the [api]#info::partition_affinity_domain# provided.
 
+'''
 
-[[table.staticmembers.device]]
-.Static member functions of the SYCL [code]#device# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Static member function @ Description
-a@
-[source]
+[[sec:device-static-member-funcs]]
+==== Static member functions
+
+.[apidef]#device::get_devices#
+[source,role=synopsis,id=api:device-get-devices]
 ----
 static std::vector<device>
 get_devices(info::device_type type = info::device_type::all)
 ----
-   a@ Returns a [code]#std::vector# containing all the
-      <<root-device, root devices>> from all <<backend, SYCL backends>>
-      available in the system which have the device type encapsulated by
-      [code]#type#.
 
-|====
+_Returns:_ A [code]#std::vector# containing all the <<root-device, root
+devices>> from all <<backend, SYCL backends>> available in the system which have
+the device type [code]#type#.
 
+'''
 
+[[sec:device-info-descriptors]]
+==== Information descriptors
 
-==== Device information descriptors
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#device::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#device::get_info#
+function.
 
-A <<device>> can be queried for information using the [code]#get_info# member
-function of the [code]#device# class, specifying one of the info parameters in
-[code]#info::device#.
-The possible values for each info parameter and any restriction are defined in
-the specification of the <<backend>> associated with the <<device>>.
-All info parameters in [code]#info::device# are specified in
-<<table.device.info>> and the synopsis for [code]#info::device# is described in
-<<appendix.device.descriptors>>.
+'''
 
-
-[[table.device.info]]
-.Device information descriptors
-// Jon: Dims{5cm}{2.5cm}{6.5cm}
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Device descriptors @ Return type @ Description
-a@
-[source]
+.[apidef]#info::device::device_type#
+[source,role=synopsis,id=api:info-device-device-type]
 ----
-info::device::device_type
+namespace sycl::info::device {
+struct device_type {
+  using return_type = info::device_type;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#info::device_type#
-   a@ Returns the device type associated with the <<device>>. May not return
-      [code]#info::device_type::all#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::vendor_id
-----
+_Returns:_ The device type associated with the device.
+May not return [api]#info::device_type::all#.
 
-    @ [.code]#uint32_t#
-   a@ Returns a unique vendor device identifier.
+'''
 
-a@
-[source]
+.[apidef]#info::device::vendor_id#
+[source,role=synopsis,id=api:info-device-vendor-id]
 ----
-info::device::max_compute_units
+namespace sycl::info::device {
+struct vendor_id {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Returns the number of parallel compute units available to the
-      <<device>>. The minimum value is 1.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::max_work_item_dimensions
-----
+_Returns:_ A unique vendor device identifier.
 
-    @ [.code]#uint32_t#
-   a@ Returns the maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model.
-      The minimum value is 3 if this SYCL [code]#device# is not of device type [code]#info::device_type::custom#.
+'''
 
-a@
-[source]
+.[apidef]#info::device::max_compute_units#
+[source,role=synopsis,id=api:info-device-max-compute-units]
 ----
-info::device::max_work_item_sizes\<1>
+namespace sycl::info::device {
+struct max_compute_units {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#range<1>#
-   a@ Returns the maximum number of work-items that are permitted in a
-      work-group for a kernel running in a one-dimensional index space. The
-      minimum value is latexmath:[(1)] for [code]#devices# that are not of
-      device type [code]#info::device_type::custom#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::max_work_item_sizes\<2>
-----
+_Returns:_ The number of parallel compute units available to the device.
+The minimum value is 1.
 
-    @ [.code]#range<2>#
-   a@ Returns the maximum number of work-items that are permitted in each
-      dimension of a work-group for a kernel running in a two-dimensional index
-      space. The minimum value is latexmath:[(1,1)] for [code]#devices# that
-      are not of device type [code]#info::device_type::custom#.
+'''
 
-a@
-[source]
+.[apidef]#info::device::max_work_item_dimensions#
+[source,role=synopsis,id=api:info-device-max-work-item-dimensions]
 ----
-info::device::max_work_item_sizes\<3>
+namespace sycl::info::device {
+struct max_work_item_dimensions {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#range<3>#
-   a@ Returns the maximum number of work-items that are permitted in each
-      dimension of a work-group for a kernel running in a three-dimensional
-      index space. The minimum value is latexmath:[(1,1,1)] for [code]#devices#
-      that are not of device type [code]#info::device_type::custom#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::max_work_group_size
-----
+_Returns:_ The maximum dimensions that specify the global and local work-item
+IDs used by the data parallel execution model.
+The minimum value is 3 if this device is not of device type
+[api]#info::device_type::custom#.
 
-    @ [.code]#size_t#
-   a@ Returns the maximum number of work-items that this device is capable of
-      executing in a work-group.
-      The minimum value is 1.
-      This value is an upper limit and will not necessarily maximize
-      performance.
-      The maximum number of work-items in a work-group depends on the kernel and
-      the implementation.
-      Use [code]#info::kernel_device_specific::work_group_size# to query this
-      limit.
+'''
 
-a@
-[source]
+.[apidef]#info::device::max_work_item_sizes#
+[source,role=synopsis,id=api:info-device-max-work-item-sizes]
 ----
-info::device::max_num_sub_groups
+namespace sycl::info::device {
+template<int Dimensions = 3>
+struct max_work_item_sizes<Dimensions> {
+  using return_type = range<Dimensions>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Returns the maximum number of sub-groups in a work-group for any kernel executed on the device.  The minimum value is 1.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::sub_group_sizes
-----
+_Constraints_: Available only when [code]#Dimensions# is 1, 2, or 3.
 
-    @ [.code]#std::vector<size_t>#
-   a@ Returns a [code]#std::vector# of [code]#size_t# containing the set of sub-group sizes supported by the device.
+_Returns:_ The maximum number of work-items that are permitted in a work-group
+for a kernel running in an index space of [code]#Dimensions# dimensions.
+When the device type is not [api]#info::device_type::custom#, the minimum value
+returned from this query is: (1) when [code]#Dimensions# is 1, (1, 1) when
+[code]#Dimensions# is 2, and (1, 1, 1) when [code]#Dimensions# is 3.
 
-a@
-[source]
+'''
+
+.[apidef]#info::device::max_work_group_size#
+[source,role=synopsis,id=api:info-device-max-work-group-size]
 ----
-info::device::preferred_vector_width_char
-info::device::preferred_vector_width_short
-info::device::preferred_vector_width_int
-info::device::preferred_vector_width_long
-info::device::preferred_vector_width_float
-info::device::preferred_vector_width_double
-info::device::preferred_vector_width_half
+namespace sycl::info::device {
+struct max_work_group_size {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Returns the preferred native vector width size for built-in scalar types that can be put into vectors. The vector width is defined as the number of scalar elements that can be stored in the vector. Must return 0 for [code]#info::device::preferred_vector_width_double# if the [code]#device# does not have [code]#aspect::fp64# and must return 0 for [code]#info::device::preferred_vector_width_half# if the [code]#device# does not have [code]#aspect::fp16#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::native_vector_width_char
-info::device::native_vector_width_short
-info::device::native_vector_width_int
-info::device::native_vector_width_long
-info::device::native_vector_width_float
-info::device::native_vector_width_double
-info::device::native_vector_width_half
-----
+_Returns:_ The maximum number of work-items that this device is capable of
+executing in a work-group.
+The minimum value is 1.
+This value is an upper limit and will not necessarily maximize performance.
+The maximum number of work-items in a work-group depends on the kernel and the
+implementation.
+Use [code]#info::kernel_device_specific::work_group_size# to query this limit.
 
-    @ [.code]#uint32_t#
-   a@ Returns the native ISA vector width. The vector width is defined as the number of scalar elements that can be stored in the vector. Must return 0 for [code]#info::device::native_vector_width_double# if the [code]#device# does not have [code]#aspect::fp64# and must return 0 for  [code]#info::device::native_vector_width_half# if the [code]#device# does not have [code]#aspect::fp16#.
+'''
 
-a@
-[source]
+.[apidef]#info::device::max_num_sub_groups#
+[source,role=synopsis,id=api:info-device-max-num-sub-groups]
 ----
-info::device::max_clock_frequency
+namespace sycl::info::device {
+struct max_num_sub_groups {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Returns the maximum configured clock frequency of this SYCL [code]#device# in MHz.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::address_bits
-----
+_Returns:_ The maximum number of sub-groups in a work-group for any kernel
+executed on the device.
+The minimum value is 1.
 
-    @ [.code]#uint32_t#
-   a@ Returns the default compute device address space size specified as an unsigned integer value in bits. Must return either 32 or 64.
+'''
 
-a@
-[source]
+.[apidef]#info::device::sub_group_sizes#
+[source,role=synopsis,id=api:info-device-sub-group-sizes]
 ----
-info::device::max_mem_alloc_size
-----
-
-    @ [.code]#uint64_t#
-   a@ Returns the maximum size of memory object allocation in  bytes. The minimum value is max (1/4th of [code]#info::device::global_mem_size#,128*1024*1024) if this SYCL [code]#device# is not of device type [code]#info::device_type::custom#.
-
-a@
-[source]
-----
-info::device::image_support
+namespace sycl::info::device {
+struct sub_group_sizes {
+  using return_type = std::vector<size_t>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#bool#
-   a@ Deprecated.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-Returns the same value as [code]#device::has(aspect::image)#.
+_Returns:_ A [code]#std::vector# of [code]#size_t# containing the set of
+sub-group sizes supported by the device.
 
-a@
-[source]
+'''
+
+.[apititle]#info::device::preferred_vector_width#
+[source,role=synopsis,id=api:info-device-preferred-vector-width]
 ----
-info::device::max_read_image_args
-----
-
-    @ [.code]#uint32_t#
-   a@ Returns the maximum number of simultaneous image objects that can be read from by a kernel. The minimum value is 128 if the SYCL [code]#device# has [code]#aspect::image#.
-
-a@
-[source]
-----
-info::device::max_write_image_args
-----
-
-    @ [.code]#uint32_t#
-   a@ Returns the maximum number of simultaneous image objects that can be written to by a kernel. The minimum value is 8 if the SYCL [code]#device# has [code]#aspect::image#.
-
-a@
-[source]
-----
-info::device::image2d_max_width
-----
-
-    @ [.code]#size_t#
-   a@ Returns the maximum width of a 2D image or 1D image in pixels. The minimum value is 8192 if the SYCL [code]#device# has [code]#aspect::image#.
-
-a@
-[source]
-----
-info::device::image2d_max_height
+namespace sycl::info::device {
+struct preferred_vector_width_char {
+  using return_type = uint32_t;
+};
+struct preferred_vector_width_short {
+  using return_type = uint32_t;
+};
+struct preferred_vector_width_int {
+  using return_type = uint32_t;
+};
+struct preferred_vector_width_long {
+  using return_type = uint32_t;
+};
+struct preferred_vector_width_float {
+  using return_type = uint32_t;
+};
+struct preferred_vector_width_double {
+  using return_type = uint32_t;
+};
+struct preferred_vector_width_half {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#size_t#
-   a@ Returns the maximum height of a 2D image in pixels. The minimum value is 8192 if the SYCL [code]#device# has [code]#aspect::image#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::image3d_max_width
-----
+_Returns:_ The preferred native vector width size for built-in scalar types that
+can be put into vectors.
+The vector width is defined as the number of scalar elements that can be stored
+in the vector.
+Must return 0 for [code]#info::device::preferred_vector_width_double# if the
+device does not have [api]#aspect::fp64# and must return 0 for
+[code]#info::device::preferred_vector_width_half# if the device does not have
+[api]#aspect::fp16#.
 
-    @ [.code]#size_t#
-   a@ Returns the maximum width of a 3D image in pixels. The minimum value is 2048 if the SYCL [code]#device# has [code]#aspect::image#.
+'''
 
-a@
-[source]
+.[apititle]#info::device::native_vector_width#
+[source,role=synopsis,id=api:info-device-native-vector-width]
 ----
-info::device::image3d_max_height
-----
-
-    @ [.code]#size_t#
-   a@ Returns the maximum height of a 3D image in pixels. The minimum value is 2048 if the SYCL [code]#device# has [code]#aspect::image#.
-
-a@
-[source]
-----
-info::device::image3d_max_depth
-----
-
-    @ [.code]#size_t#
-   a@ Returns the maximum depth of a 3D image in pixels. The minimum value is 2048 if the SYCL [code]#device# has [code]#aspect::image#.
-
-a@
-[source]
-----
-info::device::image_max_buffer_size
-----
-
-    @ [.code]#size_t#
-   a@ Returns the number of pixels for a 1D image created from a buffer object. The minimum value is 65536 if the SYCL [code]#device# has [code]#aspect::image#. Note that this information is intended for OpenCL interoperability only as this feature is not supported in SYCL.
-
-a@
-[source]
-----
-info::device::max_samplers
+namespace sycl::info::device {
+struct native_vector_width_char {
+  using return_type = uint32_t;
+};
+struct native_vector_width_short {
+  using return_type = uint32_t;
+};
+struct native_vector_width_int {
+  using return_type = uint32_t;
+};
+struct native_vector_width_long {
+  using return_type = uint32_t;
+};
+struct native_vector_width_float {
+  using return_type = uint32_t;
+};
+struct native_vector_width_double {
+  using return_type = uint32_t;
+};
+struct native_vector_width_half {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Returns the maximum number of samplers that can be used in a kernel.  The minimum value is 16 if the SYCL [code]#device# has [code]#aspect::image#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::max_parameter_size
-----
+_Returns:_ The native ISA vector width.
+The vector width is defined as the number of scalar elements that can be stored
+in the vector.
+Must return 0 for [code]#info::device::native_vector_width_double# if the device
+does not have [api]#aspect::fp64# and must return 0 for
+[code]#info::device::native_vector_width_half# if the device does not have
+[api]#aspect::fp16#.
 
-    @ [.code]#size_t#
-   a@ Returns the maximum size in bytes of the arguments that can be passed to a kernel. The minimum value is 1024 if this SYCL [code]#device# is not of device type [code]#info::device_type::custom#. For this minimum value, only a maximum of 128 arguments can be passed to a kernel.
+'''
 
-a@
-[source]
+.[apidef]#info::device::max_clock_frequency#
+[source,role=synopsis,id=api:info-device-max-clock-frequency]
 ----
-info::device::mem_base_addr_align
-----
-
-    @ [.code]#uint32_t#
-   a@ Returns the minimum value in bits of the largest supported SYCL built-in
-      data type if this SYCL [code]#device# is not of device type [code]#info::device_type::custom#.
-
-a@
-[source]
-----
-info::device::half_fp_config
+namespace sycl::info::device {
+struct max_clock_frequency {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<info::fp_config>#
-   a@ Returns a [code]#std::vector# of [code]#info::fp_config#
-      describing the half precision floating-point capability of this SYCL
-      [code]#device#. The [code]#std::vector# may contain zero or
-      more of the following values:
---
-  * [code]#info::fp_config::denorm:# denorms are supported.
-  * [code]#info::fp_config::inf_nan:# INF and quiet NaNs are supported.
-  * [code]#info::fp_config::round_to_nearest:# round to nearest even rounding
-    mode is supported.
-  * [code]#info::fp_config::round_to_zero:# round to zero rounding mode is
-    supported.
-  * [code]#info::fp_config::round_to_inf:# round to positive and negative
-    infinity rounding modes are supported.
-  * [code]#info::fp_config::fma:# IEEE754-2008 fused multiply add is supported.
-  * [code]#info::fp_config::correctly_rounded_divide_sqrt:# divide and sqrt are
-    correctly rounded as defined by the IEEE754 specification.
-    This property is deprecated.
-  * [code]#info::fp_config::soft_float:# basic floating-point operations (such
-    as addition, subtraction, multiplication) are implemented in software.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-If half precision is supported by this SYCL [code]#device# (i.e. the
-[code]#device# has [code]#aspect::fp16#) there is no minimum floating-point
-capability.
+_Returns:_ The maximum configured clock frequency of this device in MHz.
+
+'''
+
+.[apidef]#info::device::address_bits#
+[source,role=synopsis,id=api:info-device-address-bits]
+----
+namespace sycl::info::device {
+struct address_bits {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The default compute device address space size in bits.
+Must return either 32 or 64.
+
+'''
+
+.[apidef]#info::device::max_mem_alloc_size#
+[source,role=synopsis,id=api:info-device-max-mem-alloc-size]
+----
+namespace sycl::info::device {
+struct max_mem_alloc_size {
+  using return_type = uint64_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum size of memory object allocation in bytes.
+The minimum value is max (1/4th of
+[code]#info::device::global_mem_size#,128*1024*1024) if this device is not of
+device type [api]#info::device_type::custom#.
+
+'''
+
+.[apidef]#info::device::image_support#
+[source,role=synopsis,id=api:info-device-image-support]
+----
+namespace sycl::info::device {
+struct image_support {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The same value as [code]#device::has(aspect::image)#.
+
+'''
+
+.[apidef]#info::device::max_read_image_args#
+[source,role=synopsis,id=api:info-device-max-read-image-args]
+----
+namespace sycl::info::device {
+struct max_read_image_args {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum number of simultaneous image objects that can be read
+from by a kernel.
+The minimum value is 128 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::max_write_image_args#
+[source,role=synopsis,id=api:info-device-max-write-image-args]
+----
+namespace sycl::info::device {
+struct max_write_image_args {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum number of simultaneous image objects that can be written
+to by a kernel.
+The minimum value is 8 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::image2d_max_width#
+[source,role=synopsis,id=api:info-device-image2d-max-width]
+----
+namespace sycl::info::device {
+struct image2d_max_width {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum width of a 2D image or 1D image in pixels.
+The minimum value is 8192 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::image2d_max_height#
+[source,role=synopsis,id=api:info-device-image2d-max-height]
+----
+namespace sycl::info::device {
+struct image2d_max_height {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum height of a 2D image in pixels.
+The minimum value is 8192 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::image3d_max_width#
+[source,role=synopsis,id=api:info-device-image3d-max-width]
+----
+namespace sycl::info::device {
+struct image3d_max_width {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum width of a 3D image in pixels.
+The minimum value is 2048 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::image3d_max_height#
+[source,role=synopsis,id=api:info-device-image3d-max-height]
+----
+namespace sycl::info::device {
+struct image3d_max_height {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum height of a 3D image in pixels.
+The minimum value is 2048 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::image3d_max_depth#
+[source,role=synopsis,id=api:info-device-image3d-max-depth]
+----
+namespace sycl::info::device {
+struct image3d_max_depth {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum depth of a 3D image in pixels.
+The minimum value is 2048 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::image_max_buffer_size#
+[source,role=synopsis,id=api:info-device-image-max-buffer-size]
+----
+namespace sycl::info::device {
+struct image_max_buffer_size {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The number of pixels for a 1D image created from a buffer object.
+The minimum value is 65536 if the device has [api]#aspect::image#.
+Note that this information is intended for OpenCL interoperability only as this
+feature is not supported in SYCL.
+
+'''
+
+.[apidef]#info::device::max_samplers#
+[source,role=synopsis,id=api:info-device-max-samplers]
+----
+namespace sycl::info::device {
+struct max_samplers {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum number of samplers that can be used in a kernel.
+The minimum value is 16 if the device has [api]#aspect::image#.
+
+'''
+
+.[apidef]#info::device::max_parameter_size#
+[source,role=synopsis,id=api:info-device-max-parameter-size]
+----
+namespace sycl::info::device {
+struct max_parameter_size {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum size in bytes of the arguments that can be passed to a
+kernel.
+The minimum value is 1024 if this device is not of device type
+[api]#info::device_type::custom#.
+For this minimum value, only a maximum of 128 arguments can be passed to a
+kernel.
+
+'''
+
+.[apidef]#info::device::mem_base_addr_align#
+[source,role=synopsis,id=api:info-device-mem-base-addr-align]
+----
+namespace sycl::info::device {
+struct mem_base_addr_align {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The minimum value in bits of the largest supported SYCL built-in data
+type if this device is not of device type [api]#info::device_type::custom#.
+
+'''
+
+.[apidef]#info::device::half_fp_config#
+[source,role=synopsis,id=api:info-device-half-fp-config]
+----
+namespace sycl::info::device {
+struct half_fp_config {
+  using return_type = std::vector<info::fp_config>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of [api]#info::fp_config# values describing the
+half precision floating-point capability of this device.
+The [code]#std::vector# may contain zero or more of the following values:
+
+* [api]#info::fp_config::denorm#
+* [api]#info::fp_config::inf_nan#
+* [api]#info::fp_config::round_to_nearest#
+* [api]#info::fp_config::round_to_zero#
+* [api]#info::fp_config::round_to_inf#
+* [api]#info::fp_config::fma#
+* [api]#info::fp_config::correctly_rounded_divide_sqrt#
+* [api]#info::fp_config::soft_float#
+
+If half precision is supported by this device (i.e. the device has
+[api]#aspect::fp16#) there is no minimum floating-point capability.
 If half support is not supported the returned [code]#std::vector# must be empty.
---
 
-a@
-[source]
+'''
+
+.[apidef]#info::device::single_fp_config#
+[source,role=synopsis,id=api:info-device-single-fp-config]
 ----
-info::device::single_fp_config
-----
-
-    @ [.code]#std::vector<info::fp_config>#
-   a@ Returns a [code]#std::vector# of [code]#info::fp_config#
-      describing the single precision floating-point capability of this
-      SYCL [code]#device#. The [code]#std::vector# must
-      contain one or more of the following values:
---
-  * [code]#info::fp_config::denorm:# denorms are supported.
-  * [code]#info::fp_config::inf_nan:# INF and quiet NaNs are supported.
-  * [code]#info::fp_config::round_to_nearest:# round to nearest even rounding
-    mode is supported.
-  * [code]#info::fp_config::round_to_zero:# round to zero rounding mode is
-    supported.
-  * [code]#info::fp_config::round_to_inf:# round to positive and negative
-    infinity rounding modes are supported.
-  * [code]#info::fp_config::fma:# IEEE754-2008 fused multiply add is supported.
-  * [code]#info::fp_config::correctly_rounded_divide_sqrt:# divide and sqrt are
-    correctly rounded as defined by the IEEE754 specification.
-    This property is deprecated.
-  * [code]#info::fp_config::soft_float:# basic floating-point operations (such
-    as addition, subtraction, multiplication) are implemented in software.
-
-If this SYCL [code]#device# is not of type [code]#info::device_type::custom#
-then the minimum floating-point capability must be:
-[code]#info::fp_config::round_to_nearest# and [code]#info::fp_config::inf_nan#.
---
-
-a@
-[source]
-----
-info::device::double_fp_config
+namespace sycl::info::device {
+struct single_fp_config {
+  using return_type = std::vector<info::fp_config>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<info::fp_config>#
-   a@ Returns a [code]#std::vector# of [code]#info::fp_config#
-      describing the double precision floating-point capability of this
-      SYCL [code]#device#. The [code]#std::vector# may contain
-      zero or more of the following values:
---
-  * [code]#info::fp_config::denorm:# denorms are supported.
-  * [code]#info::fp_config::inf_nan:# INF and NaNs are supported.
-  * [code]#info::fp_config::round_to_nearest:# round to nearest even rounding
-    mode is supported.
-  * [code]#info::fp_config::round_to_zero:# round to zero rounding mode is
-    supported.
-  * [code]#info::fp_config::round_to_inf:# round to positive and negative
-    infinity rounding modes are supported.
-  * [code]#info::fp_config::fma:# IEEE754-2008 fused multiply-add is supported.
-  * [code]#info::fp_config::soft_float:# basic floating-point operations (such
-    as addition, subtraction, multiplication) are implemented in software.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-If double precision is supported by this SYCL [code]#device# (i.e. the
-[code]#device# has [code]#aspect::fp64# and this SYCL [code]#device# is not of
-type [code]#info::device_type::custom# then the minimum floating-point
-capability must be: [code]#info::fp_config::fma#,
-[code]#info::fp_config::round_to_nearest#,
-[code]#info::fp_config::round_to_zero#, [code]#info::fp_config::round_to_inf#,
-[code]#info::fp_config::inf_nan# and [code]#info::fp_config::denorm#.
+_Returns:_ A [code]#std::vector# of [api]#info::fp_config# values describing the
+single precision floating-point capability of this device.
+The [code]#std::vector# must contain one or more of the following values:
+
+* [api]#info::fp_config::denorm#
+* [api]#info::fp_config::inf_nan#
+* [api]#info::fp_config::round_to_nearest#
+* [api]#info::fp_config::round_to_zero#
+* [api]#info::fp_config::round_to_inf#
+* [api]#info::fp_config::fma#
+* [api]#info::fp_config::correctly_rounded_divide_sqrt#
+* [api]#info::fp_config::soft_float#
+
+If this device is not of type [api]#info::device_type::custom# then the minimum
+floating-point capability must be: [api]#info::fp_config::round_to_nearest# and
+[api]#info::fp_config::inf_nan#.
+
+'''
+
+.[apidef]#info::device::double_fp_config#
+[source,role=synopsis,id=api:info-device-double-fp-config]
+----
+namespace sycl::info::device {
+struct double_fp_config {
+  using return_type = std::vector<info::fp_config>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of [api]#info::fp_config# values describing the
+double precision floating-point capability of this device.
+The [code]#std::vector# may contain zero or more of the following values:
+
+* [api]#info::fp_config::denorm#
+* [api]#info::fp_config::inf_nan#
+* [api]#info::fp_config::round_to_nearest#
+* [api]#info::fp_config::round_to_zero#
+* [api]#info::fp_config::round_to_inf#
+* [api]#info::fp_config::fma#
+* [api]#info::fp_config::soft_float#
+
+If double precision is supported by this device (i.e. the device has
+[api]#aspect::fp64#) and this device is not of type
+[api]#info::device_type::custom# then the minimum floating-point capability must
+be: [api]#info::fp_config::fma#, [api]#info::fp_config::round_to_nearest#,
+[api]#info::fp_config::round_to_zero#, [api]#info::fp_config::round_to_inf#,
+[api]#info::fp_config::inf_nan# and [api]#info::fp_config::denorm#.
 If double support is not supported the returned [code]#std::vector# must be
 empty.
---
 
-a@
-[source]
-----
-info::device::global_mem_cache_type
-----
+'''
 
-    @ [.code]#info::global_mem_cache_type#
-   a@ Returns the type of global memory cache supported.
-
-a@
-[source]
+.[apidef]#info::device::global_mem_cache_type#
+[source,role=synopsis,id=api:info-device-global-mem-cache-type]
 ----
-info::device::global_mem_cache_line_size
+namespace sycl::info::device {
+struct global_mem_cache_type {
+  using return_type = info::global_mem_cache_type;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Returns the size of global memory cache line in bytes.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::global_mem_cache_size
-----
+_Returns:_ The type of global memory cache supported.
 
-    @ [.code]#uint64_t#
-   a@ Returns the size of global memory cache in bytes.
+'''
 
-a@
-[source]
+.[apidef]#info::device::global_mem_cache_line_size#
+[source,role=synopsis,id=api:info-device-global-mem-cache-line-size]
 ----
-info::device::global_mem_size
+namespace sycl::info::device {
+struct global_mem_cache_line_size {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint64_t#
-   a@ Returns the size of global device memory in bytes.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::max_constant_buffer_size
-----
+_Returns:_ The size of global memory cache line in bytes.
 
-    @ [.code]#uint64_t#
-   a@ Deprecated in SYCL 2020. Returns the maximum size in bytes of a constant buffer allocation. The minimum value is 64 KB if this SYCL [code]#device# is not of type [code]#info::device_type::custom#.
+'''
 
-a@
-[source]
+.[apidef]#info::device::global_mem_cache_size#
+[source,role=synopsis,id=api:info-device-global-mem-cache-size]
 ----
-info::device::max_constant_args
+namespace sycl::info::device {
+struct global_mem_cache_size {
+  using return_type = uint64_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint32_t#
-   a@ Deprecated in SYCL 2020. Returns the maximum number of constant arguments that can be declared in a kernel. The minimum value is 8 if this SYCL [code]#device# is not of type [code]#info::device_type::custom#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::local_mem_type
-----
+_Returns:_ The size of global memory cache in bytes.
 
-    @ [.code]#info::local_mem_type#
-   a@ Returns the type of local memory supported. This can
-      be [code]#info::local_mem_type::local# implying dedicated
-      local memory storage such as SRAM, or [code]#info::local_mem_type::global#.
-      If this SYCL [code]#device# is of type [code]#info::device_type::custom# this can also be [code]#info::local_mem_type::none#, indicating local memory is not supported.
+'''
 
-a@
-[source]
+.[apidef]#info::device::global_mem_size#
+[source,role=synopsis,id=api:info-device-global-mem-size]
 ----
-info::device::local_mem_size
+namespace sycl::info::device {
+struct global_mem_size {
+  using return_type = uint64_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#uint64_t#
-   a@ Returns the size of local memory arena in bytes. The minimum value is 32 KB if this SYCL [code]#device# is not of type [code]#info::device_type::custom#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::error_correction_support
-----
+_Returns:_ The size of global device memory in bytes.
 
-    @ [.code]#bool#
-   a@ Returns true if the device implements error correction for all accesses to
-      compute device memory (global and constant). Returns false if the device does
-      not implement such error correction.
+'''
 
-a@
-[source]
+.[apidef]#info::device::max_constant_buffer_size#
+[source,role=synopsis,id=api:info-device-max-constant-buffer-size]
 ----
-info::device::host_unified_memory
+namespace sycl::info::device {
+struct max_constant_buffer_size {
+  using return_type = uint64_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#bool#
-   a@ Deprecated, use [code]#device::has()# with one of the [code]#aspect::usm_*# aspects instead.
+Deprecated by SYCL 2020.
 
-Returns true if the device and the host have a unified memory subsystem and
-returns false otherwise.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
+_Returns:_ The maximum size in bytes of a constant buffer allocation.
+The minimum value is 64 KB if this device is not of type
+[api]#info::device_type::custom#.
+
+'''
+
+.[apidef]#info::device::max_constant_args#
+[source,role=synopsis,id=api:info-device-max-constant-args]
 ----
-info::device::atomic_memory_order_capabilities
+namespace sycl::info::device {
+struct max_constant_args {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<memory_order>#
-   a@ Returns the set of memory orders supported by atomic operations on the
-      device.  When a device returns a "stronger" memory order in this set, it
-      must also return all "weaker" memory orders.  (See
-      <<sec:memory-ordering>> for a definition of "stronger" and "weaker"
-      memory orders.) The memory orders [code]#memory_order::acquire#,
-      [code]#memory_order::release#, and [code]#memory_order::acq_rel# are all
-      the same strength.  If a device returns one of these, it must return them
-      all.
+Deprecated by SYCL 2020.
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum number of constant arguments that can be declared in a
+kernel.
+The minimum value is 8 if this device is not of type
+[api]#info::device_type::custom#.
+
+'''
+
+.[apidef]#info::device::local_mem_type#
+[source,role=synopsis,id=api:info-device-local-mem-type]
+----
+namespace sycl::info::device {
+struct local_mem_type {
+  using return_type = info::local_mem_type;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The type of local memory supported.
+This can be [api]#info::local_mem_type::local# implying dedicated local memory
+storage such as SRAM, or [api]#info::local_mem_type::global#.
+If this device is of type [api]#info::device_type::custom# this can also be
+[api]#info::local_mem_type::none#, indicating local memory is not supported.
+
+'''
+
+.[apidef]#info::device::local_mem_size#
+[source,role=synopsis,id=api:info-device-local-mem-size]
+----
+namespace sycl::info::device {
+struct local_mem_size {
+  using return_type = uint64_t;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The size of local memory arena in bytes.
+The minimum value is 32 KB if this device is not of type
+[api]#info::device_type::custom#.
+
+'''
+
+.[apidef]#info::device::error_correction_support#
+[source,role=synopsis,id=api:info-device-error-correction-support]
+----
+namespace sycl::info::device {
+struct error_correction_support {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The value [code]#true# if the device implements error correction for
+all accesses to compute device memory (global and constant).
+Returns [coee]#false# if the device does not implement such error correction.
+
+'''
+
+.[apidef]#info::device::host_unified_memory#
+[source,role=synopsis,id=api:info-device-host-unified-memory]
+----
+namespace sycl::info::device {
+struct host_unified_memory {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+{note}Use [api]#device::has# with one of the [code]#aspect::usm_*# aspects
+instead.
+{endnote}
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The value [coee]#true# if the device and the host have a unified
+memory subsystem and returns [code]#false# otherwise.
+
+'''
+
+.[apidef]#info::device::atomic_memory_order_capabilities#
+[source,role=synopsis,id=api:info-device-atomic-memory-order-capabilities]
+----
+namespace sycl::info::device {
+struct atomic_memory_order_capabilities {
+  using return_type = std::vector<memory_order>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The set of memory orders supported by atomic operations on this
+device.
+When a device returns a "stronger" memory order in this set, it must also return
+all "weaker" memory orders.
+(See <<sec:memory-ordering>> for a definition of "stronger" and "weaker" memory
+orders.)
+The memory orders [code]#memory_order::acquire#, [code]#memory_order::release#,
+and [code]#memory_order::acq_rel# are all the same strength.
+If a device returns one of these, it must return them all.
 
 At a minimum, each device must support [code]#memory_order::relaxed#.
 
-a@
-[source]
-----
-info::device::atomic_fence_order_capabilities
-----
+'''
 
-    @ [.code]#std::vector<memory_order>#
-   a@ Returns the set of memory orders supported by [code]#atomic_fence# on
-      the device.  When a device returns a "stronger" memory order in this set,
-      it must also return all "weaker" memory orders.  (See
-      <<sec:memory-ordering>> for a definition of "stronger" and "weaker"
-      memory orders.) At a minimum, each device must support
-      [code]#memory_order::relaxed#, [code]#memory_order::acquire#,
-      [code]#memory_order::release#, and [code]#memory_order::acq_rel#.
-
-a@
-[source]
+.[apidef]#info::device::atomic_fence_order_capabilities#
+[source,role=synopsis,id=api:info-device-atomic-fence-order-capabilities]
 ----
-info::device::atomic_memory_scope_capabilities
+namespace sycl::info::device {
+struct atomic_fence_order_capabilities {
+  using return_type = std::vector<memory_order>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<memory_scope>#
-   a@ Returns the set of memory scopes supported by atomic operations on the
-      device.  When a device returns a "wider" memory scope in this set, it
-      must also return all "narrower" memory scopes.  (See <<sec:memory-scope>>
-      for a definition of "wider" and "narrower" scopes.) At a minimum, each
-      device must support [code]#memory_scope::work_item#,
-      [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::atomic_fence_scope_capabilities
-----
+_Returns:_ The set of memory orders supported by [code]#atomic_fence# on this
+device.
+When a device returns a "stronger" memory order in this set, it must also return
+all "weaker" memory orders.
+(See <<sec:memory-ordering>> for a definition of "stronger" and "weaker" memory
+orders.)
+At a minimum, each device must support [code]#memory_order::relaxed#,
+[code]#memory_order::acquire#, [code]#memory_order::release#, and
+[code]#memory_order::acq_rel#.
 
-    @ [.code]#std::vector<memory_scope>#
-   a@ Returns the set of memory scopes supported by [code]#atomic_fence# on the
-      device.  When a device returns a "wider" memory scope in this set, it
-      must also return all "narrower" memory scopes.  (See <<sec:memory-scope>>
-      for a definition of "wider" and "narrower" scopes.)  At a minimum, each
-      device must support [code]#memory_scope::work_item#,
-      [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+'''
 
-a@
-[source]
+.[apidef]#info::device::atomic_memory_scope_capabilities#
+[source,role=synopsis,id=api:info-device-atomic-memory-scope-capabilities]
 ----
-info::device::profiling_timer_resolution
+namespace sycl::info::device {
+struct atomic_memory_scope_capabilities {
+  using return_type = std::vector<memory_scope>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#size_t#
-   a@ Returns the resolution of device timer in nanoseconds.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
+_Returns:_ The set of memory scopes supported by atomic operations on this
+device.
+When a device returns a "wider" memory scope in this set, it must also return
+all "narrower" memory scopes.
+(See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+At a minimum, each device must support [code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+
+'''
+
+.[apidef]#info::device::atomic_fence_scope_capabilities#
+[source,role=synopsis,id=api:info-device-atomic-fence-scope-capabilities]
 ----
-info::device::is_endian_little
-----
-
-    @ [.code]#bool#
-   a@ Deprecated.  Check the byte order of the host system instead.  The host
-      and device are required to have the same byte order.
-
-Returns true if this SYCL [code]#device# is a little endian device and returns
-false otherwise.
-
-a@
-[source]
-----
-info::device::is_available
-----
-
-    @ [.code]#bool#
-   a@ Returns true if the SYCL [code]#device# is available and returns false if the device is not
-      available.
-
-a@
-[source]
-----
-info::device::is_compiler_available
+namespace sycl::info::device {
+struct atomic_fence_scope_capabilities {
+  using return_type = std::vector<memory_scope>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#bool#
-   a@ Deprecated.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-Returns the same value as [code]#device::has(aspect::online_compiler)#.
+_Returns:_ The set of memory scopes supported by [code]#atomic_fence# on this
+device.
+When a device returns a "wider" memory scope in this set, it must also return
+all "narrower" memory scopes.
+(See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+At a minimum, each device must support [code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
 
-a@
-[source]
+'''
+
+.[apidef]#info::device::profiling_timer_resolution#
+[source,role=synopsis,id=api:info-device-profiling-timer-resolution]
 ----
-info::device::is_linker_available
-----
-
-    @ [.code]#bool#
-   a@ Deprecated.
-
-Returns the same value as [code]#device::has(aspect::online_linker)#.
-
-a@
-[source]
-----
-info::device::execution_capabilities
-----
-
-    @ [.code]#std::vector<info::execution_capability>#
-   a@ Returns a [code]#std::vector# of the [code]#info::execution_capability# describing the supported execution capabilities.
-      Note that this information is intended for OpenCL interoperability only as  SYCL only supports [code]#info::execution_capability::exec_kernel#.
-
-a@
-[source]
-----
-info::device::queue_profiling
+namespace sycl::info::device {
+struct profiling_timer_resolution {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#bool#
-   a@ Deprecated.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-Returns the same value as [code]#device::has(aspect::queue_profiling)#.
+_Returns:_ The resolution of device timer in nanoseconds.
 
-a@
-[source]
+'''
+
+.[apidef]#info::device::is_endian_little#
+[source,role=synopsis,id=api:info-device-is-endian-little]
 ----
-info::device::built_in_kernel_ids
-----
-
-    @ [.code]#std::vector<kernel_id>#
-   a@ Returns a [code]#std::vector# of identifiers for the built-in kernels
-      supported by this SYCL [code]#device#.
-
-a@
-[source]
-----
-info::device::built_in_kernels
+namespace sycl::info::device {
+struct is_endian_little {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<std::string>#
-   a@ Deprecated.  Use [code]#info::device::built_in_kernel_ids# instead.
+Deprecated by SYCL 2020.
 
-Returns a [code]#std::vector# of built-in OpenCL kernels supported by this SYCL
-[code]#device#.
+{note}Check the byte order of the host system instead.
+The host and device are required to have the same byte order.
+{endnote}
 
-a@
-[source]
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The value [code]#true# if this device is a little endian device and
+returns [code]#false# otherwise.
+
+'''
+
+.[apidef]#info::device::is_available#
+[source,role=synopsis,id=api:info-device-is-available]
 ----
-info::device::platform
-----
-
-    @ [.code]#platform#
-   a@ Returns the SYCL [code]#platform# associated with this SYCL [code]#device#.
-
-a@
-[source]
-----
-info::device::name
-----
-
-    @ [.code]#std::string#
-   a@ Returns the device name of this SYCL [code]#device#.
-
-a@
-[source]
-----
-info::device::vendor
+namespace sycl::info::device {
+struct is_available {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::string#
-   a@ Returns the vendor of this SYCL [code]#device#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::driver_version
-----
+_Returns:_ The value [code]#true# if the device is available and [code]#false#
+if the device is not available.
 
-    @ [.code]#std::string#
-   a@ Returns a vendor-defined string describing the version of the underlying
-      backend software driver.
+'''
 
-a@
-[source]
+.[apidef]#info::device::is_compiler_available#
+[source,role=synopsis,id=api:info-device-is-compiler-available]
 ----
-info::device::profile
+namespace sycl::info::device {
+struct is_compiler_available {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::string#
-   a@ Deprecated in SYCL 2020.  Only supported when using the OpenCL backend
-      (see <<chapter:opencl-backend>>).  Throws an [code]#exception# with the
-      [code]#errc::invalid# error code if used with a device whose backend is
-      not OpenCL.
+Deprecated by SYCL 2020.
 
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The same value as [code]#device::has(aspect::online_compiler)#.
+
+'''
+
+.[apidef]#info::device::is_linker_available#
+[source,role=synopsis,id=api:info-device-is-linker-available]
+----
+namespace sycl::info::device {
+struct is_linker_available {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The same value as [code]#device::has(aspect::online_linker)#.
+
+'''
+
+.[apidef]#info::device::execution_capabilities#
+[source,role=synopsis,id=api:info-device-execution-capabilities]
+----
+namespace sycl::info::device {
+struct execution_capabilities {
+  using return_type = std::vector<info::execution_capability>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of the [api]#info::execution_capability# values
+describing the supported execution capabilities.
+Note that this information is intended for OpenCL interoperability only as SYCL
+only supports [api]#info::execution_capability::exec_kernel#.
+
+'''
+
+.[apidef]#info::device::queue_profiling#
+[source,role=synopsis,id=api:info-device-queue-profiling]
+----
+namespace sycl::info::device {
+struct queue_profiling {
+  using return_type =
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The same value as [code]#device::has(aspect::queue_profiling)#.
+
+'''
+
+.[apidef]#info::device::built_in_kernel_ids#
+[source,role=synopsis,id=api:info-device-built-in-kernel-ids]
+----
+namespace sycl::info::device {
+struct built_in_kernel_ids {
+  using return_type = std::vector<kernel_id>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of identifiers for the built-in kernels
+supported by this device.
+
+'''
+
+.[apidef]#info::device::built_in_kernels#
+[source,role=synopsis,id=api:info-device-built-in-kernels]
+----
+namespace sycl::info::device {
+struct built_in_kernels {
+  using return_type = std::vector<std::string>;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+{note}Use [api]#info::device::built_in_kernel_ids# instead.
+{endnote}
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of built-in OpenCL kernels supported by this
+device.
+
+'''
+
+.[apidef]#info::device::platform#
+[source,role=synopsis,id=api:info-device-platform]
+----
+namespace sycl::info::device {
+struct platform {
+  using return_type = platform;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The <<platform>> that is associated with this device.
+
+'''
+
+.[apidef]#info::device::name#
+[source,role=synopsis,id=api:info-device-name]
+----
+namespace sycl::info::device {
+struct name {
+  using return_type = std::string;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ An implementation-defined name for this device.
+
+'''
+
+.[apidef]#info::device::vendor#
+[source,role=synopsis,id=api:info-device-vendor]
+----
+namespace sycl::info::device {
+struct vendor {
+  using return_type = std::string;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ An implementation-defined name for the vendor providing this device.
+
+'''
+
+.[apidef]#info::device::driver_version#
+[source,role=synopsis,id=api:info-device-driver-version]
+----
+namespace sycl::info::device {
+struct driver_version {
+  using return_type = std::string;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ An implementation-defined name describing the version of the
+underlying software driver for this device.
+
+'''
+
+.[apidef]#info::device::profile#
+[source,role=synopsis,id=api:info-device-profile]
+----
+namespace sycl::info::device {
+struct profile {
+  using return_type = std::string;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ Only supported when the backend of this device is OpenCL (see
+<<chapter:opencl-backend>>).
 The value returned can be one of the following strings:
---
-  * FULL_PROFILE - if the device supports the OpenCL specification
-    (functionality defined as part of the core specification and does not
-    require any extensions to be supported).
-  * EMBEDDED_PROFILE - if the device supports the OpenCL embedded profile.
---
 
-a@
-[source]
-----
-info::device::version
-----
+* FULL_PROFILE - if the device supports the OpenCL specification (functionality
+  defined as part of the core specification and does not require any extensions
+  to be supported).
+* EMBEDDED_PROFILE - if the device supports the OpenCL embedded profile.
 
-    @ [.code]#std::string#
-   a@ Returns a backend-defined <<device>> version.
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+backend of this device is not OpenCL.
 
-a@
-[source]
-----
-info::device::backend_version
-----
+'''
 
-    @ [.code]#std::string#
-   a@ Returns a string describing the version of the <<backend>> associated with
-      the <<device>>. The possible values are specified in the <<backend>>
-      specification of the <<backend>> associated with the <<device>>.
-
-a@
-[source]
+.[apidef]#info::device::version#
+[source,role=synopsis,id=api:info-device-version]
 ----
-info::device::aspects
+namespace sycl::info::device {
+struct version {
+  using return_type = std::string;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<aspect>#
-   a@ Returns a [code]#std::vector# of <<aspect>> values supported by this
-      SYCL [code]#device#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
+_Returns:_ A backend-defined device version.
+
+'''
+
+.[apidef]#info::device::backend_version#
+[source,role=synopsis,id=api:info-device-backend-version]
 ----
-info::device::extensions
+namespace sycl::info::device {
+struct backend_version {
+  using return_type = std::string;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<std::string>#
-   a@ Deprecated, use [code]#info::device::aspects# instead.
---
-Returns a [code]#std::vector# of extension names (the extension names do not
-contain any spaces) supported by this SYCL [code]#device#.
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A string describing the version of the <<backend>> associated with
+this device.
+The value returned from this query is defined by the backend interoperation
+specification that corresponds to this device's backend.
+
+'''
+
+.[apidef]#info::device::aspects#
+[source,role=synopsis,id=api:info-device-aspects]
+----
+namespace sycl::info::device {
+struct aspects {
+  using return_type = std::vector<aspect>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of <<aspect>> values supported by this device.
+
+'''
+
+.[apidef]#info::device::extensions#
+[source,role=synopsis,id=api:info-device-extensions]
+----
+namespace sycl::info::device {
+struct extensions {
+  using return_type = std::vector<std::string>;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+{note}Use [api]#info::device::aspects# instead.
+{endnote}
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of extension names (the extension names do not
+contain any spaces) supported by this device.
 The extension names returned can be vendor supported extension names and one or
 more of the following Khronos approved extension names:
 
-  * [code]#cl_khr_int64_base_atomics#
-  * [code]#cl_khr_int64_extended_atomics#
-  * [code]#cl_khr_3d_image_writes#
-  * [code]#cl_khr_fp16#
-  * [code]#cl_khr_gl_sharing#
-  * [code]#cl_khr_gl_event#
-  * [code]#cl_khr_d3d10_sharing#
-  * [code]#cl_khr_dx9_media_sharing#
-  * [code]#cl_khr_d3d11_sharing#
-  * [code]#cl_khr_depth_images#
-  * [code]#cl_khr_gl_depth_images#
-  * [code]#cl_khr_gl_msaa_sharing#
-  * [code]#cl_khr_image2d_from_buffer#
-  * [code]#cl_khr_initialize_memory#
-  * [code]#cl_khr_context_abort#
-  * [code]#cl_khr_spir#
+* [code]#cl_khr_int64_base_atomics#
+* [code]#cl_khr_int64_extended_atomics#
+* [code]#cl_khr_3d_image_writes#
+* [code]#cl_khr_fp16#
+* [code]#cl_khr_gl_sharing#
+* [code]#cl_khr_gl_event#
+* [code]#cl_khr_d3d10_sharing#
+* [code]#cl_khr_dx9_media_sharing#
+* [code]#cl_khr_d3d11_sharing#
+* [code]#cl_khr_depth_images#
+* [code]#cl_khr_gl_depth_images#
+* [code]#cl_khr_gl_msaa_sharing#
+* [code]#cl_khr_image2d_from_buffer#
+* [code]#cl_khr_initialize_memory#
+* [code]#cl_khr_context_abort#
+* [code]#cl_khr_spir#
 
-If this SYCL [code]#device# is an OpenCL device then following approved Khronos
-extension names must be returned by all device that support OpenCL C 1.2:
+If the backend associated with this device is OpenCL, then following approved
+Khronos extension names must be returned by all device that support OpenCL C
+1.2:
 
-  * [code]#cl_khr_global_int32_base_atomics#
-  * [code]#cl_khr_global_int32_extended_atomics#
-  * [code]#cl_khr_local_int32_base_atomics#
-  * [code]#cl_khr_local_int32_extended_atomics#
-  * [code]#cl_khr_byte_addressable_store#
-  * [code]#cl_khr_fp64# (for backward compatibility if double precision is
-    supported)
+* [code]#cl_khr_global_int32_base_atomics#
+* [code]#cl_khr_global_int32_extended_atomics#
+* [code]#cl_khr_local_int32_base_atomics#
+* [code]#cl_khr_local_int32_extended_atomics#
+* [code]#cl_khr_byte_addressable_store#
+* [code]#cl_khr_fp64# (for backward compatibility if double precision is
+  supported)
 
 Please refer to the OpenCL 1.2 Extension Specification for a detailed
 description of these extensions.
---
 
-a@
-[source]
+'''
+
+.[apidef]#info::device::printf_buffer_size#
+[source,role=synopsis,id=api:info-device-printf-buffer-size]
 ----
-info::device::printf_buffer_size
-----
-
-    @ [.code]#size_t#
-   a@ Deprecated in SYCL 2020.
-
-Returns the maximum size of the internal buffer that holds the output of
-[code]#printf# calls from a kernel. The minimum value is 1 MB if
-[code]#info::device::profile# returns true for this SYCL [code]#device#.
-
-a@
-[source]
-----
-info::device::preferred_interop_user_sync
+namespace sycl::info::device {
+struct printf_buffer_size {
+  using return_type = size_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#bool#
-   a@ Deprecated in SYCL 2020.  Only supported when using the OpenCL backend
-      (see <<chapter:opencl-backend>>).  Throws an [code]#exception# with the
-      [code]#errc::invalid# error code if used with a device whose backend is
-      not OpenCL.
+Deprecated by SYCL 2020.
 
-Returns true if the preference for this SYCL [code]#device# is for the user to
-be responsible for synchronization, when sharing memory objects between OpenCL
-and other APIs  such as DirectX, false if the device/implementation has a
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The maximum size of the internal buffer that holds the output of
+[code]#printf# calls from a kernel.
+The minimum value is 1 MB if [api]#info::device::profile# returns true for this
+device.
+
+'''
+
+.[apidef]#info::device::preferred_interop_user_sync#
+[source,role=synopsis,id=api:info-device-preferred-interop-user-sync]
+----
+namespace sycl::info::device {
+struct preferred_interop_user_sync {
+  using return_type = bool;
+};
+} // namespace sycl::info::device
+----
+
+Deprecated by SYCL 2020.
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ Only supported when the backend of this device is OpenCL (see
+<<chapter:opencl-backend>>).
+Returns [code]#true# if the preference for this device is for the user to be
+responsible for synchronization, when sharing memory objects between OpenCL and
+other APIs such as DirectX, [code]#false# if the device/implementation has a
 performant path for performing synchronization of memory object shared between
 OpenCL and other APIs such as DirectX.
 
-a@
-[source]
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+backend of this device is not OpenCL.
+
+'''
+
+.[apidef]#info::device::parent_device#
+[source,role=synopsis,id=api:info-device-parent-device]
 ----
+namespace sycl::info::device {
 info::device::parent_device
+struct parent_device {
+  using return_type = device;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#device#
-   a@ Returns the parent SYCL [code]#device# to which this sub-device is a child if this is a sub-device.
-      Must throw an [code]#exception# with the [code]#errc::invalid# error code if this SYCL [code]#device# is not a sub device.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::partition_max_sub_devices
-----
+_Returns:_ The parent device to which this sub device is a child if this is a
+sub device.
 
-    @ [.code]#uint32_t#
-   a@ Returns the maximum number of sub-devices that can be created when this SYCL [code]#device# is partitioned. The value returned cannot exceed the value returned by [code]#info::device::max_compute_units#.
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if this
+device is not a sub device.
 
-a@
-[source]
-----
-info::device::partition_properties
-----
+'''
 
-    @ [.code]#std::vector<info::partition_property>#
-   a@ Returns the partition properties supported by this SYCL [code]#device;# a
-      vector of [code]#info::partition_property#.  An element is returned in
-      this vector only if the device can be partitioned into at least two sub
-      devices along that partition property.
-
-a@
-[source]
+.[apidef]#info::device::partition_max_sub_devices#
+[source,role=synopsis,id=api:info-device-partition-max-sub-devices]
 ----
-info::device::partition_affinity_domains
+namespace sycl::info::device {
+struct partition_max_sub_devices {
+  using return_type = uint32_t;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#std::vector<info::partition_affinity_domain>#
-   a@ Returns a [code]#std::vector# of the partition affinity domains
-      supported by this SYCL [code]#device# when partitioning with
-      [code]#info::partition_property::partition_by_affinity_domain#.
-      An element is returned in this vector only if the device can be
-      partitioned into at least two sub devices along that affinity domain.
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-a@
-[source]
-----
-info::device::partition_type_property
-----
+_Returns:_ The maximum number of sub devices that can be created when this
+device is partitioned.
+The value returned cannot exceed the value returned by
+[api]#info::device::max_compute_units#.
 
-    @ [.code]#info::partition_property#
-   a@ Returns the partition property of this SYCL [code]#device#. If this SYCL [code]#device# is not a sub device then the return value must be [code]#info::partition_property::no_partition#, otherwise it must be one of the following values:
---
-  * [code]#info::partition_property::partition_equally#
-  * [code]#info::partition_property::partition_by_counts#
-  * [code]#info::partition_property::partition_by_affinity_domain#
---
+'''
 
-a@
-[source]
+.[apidef]#info::device::partition_properties#
+[source,role=synopsis,id=api:info-device-partition-properties]
 ----
-info::device::partition_type_affinity_domain
+namespace sycl::info::device {
+struct partition_properties {
+  using return_type = std::vector<info::partition_property>;
+};
+} // namespace sycl::info::device
 ----
 
-    @ [.code]#info::partition_affinity_domain#
-   a@ Returns the partition affinity domain of this SYCL [code]#device#. If this SYCL [code]#device# is not a sub device or the sub device was not partitioned with [code]#info::partition_type::partition_by_affinity_domain# then the return value must be [code]#info::partition_affinity_domain::not_applicable#, otherwise it must be one of the following values:
---
-  * [code]#info::partition_affinity_domain::numa#
-  * [code]#info::partition_affinity_domain::L4_cache#
-  * [code]#info::partition_affinity_domain::L3_cache#
-  * [code]#info::partition_affinity_domain::L2_cache#
-  * [code]#info::partition_affinity_domain::L1_cache#
---
+_Remarks:_ Template parameter to [api]#device::get_info#.
 
-|====
+_Returns:_ A [code]#std::vector# of the partition properties supported by this
+device.
+An element is returned in this vector only if the device can be partitioned into
+at least two sub devices along that partition property.
 
+'''
 
+.[apidef]#info::device::partition_affinity_domains#
+[source,role=synopsis,id=api:info-device-partition-affinity-domains]
+----
+namespace sycl::info::device {
+struct partition_affinity_domains {
+  using return_type = std::vector<info::partition_affinity_domain>;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ A [code]#std::vector# of the partition affinity domains supported by
+this device when partitioning with
+[api]#info::partition_property::partition_by_affinity_domain#.
+An element is returned in this vector only if the device can be partitioned into
+at least two sub devices along that affinity domain.
+
+'''
+
+.[apidef]#info::device::partition_type_property#
+[source,role=synopsis,id=api:info-device-partition-type-property]
+----
+namespace sycl::info::device {
+struct partition_type_property {
+  using return_type = info::partition_property;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The partition property of this device.
+If this device is not a sub device then the return value is
+[api]#info::partition_property::no_partition#, otherwise it is one of the
+following values:
+
+* [api]#info::partition_property::partition_equally#
+* [api]#info::partition_property::partition_by_counts#
+* [api]#info::partition_property::partition_by_affinity_domain#
+
+'''
+
+.[apidef]#info::device::partition_type_affinity_domain#
+[source,role=synopsis,id=api:info-device-partition-type-affinity-domain]
+----
+namespace sycl::info::device {
+struct partition_type_affinity_domain {
+  using return_type = info::partition_affinity_domain;
+};
+} // namespace sycl::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The partition affinity domain of this device.
+If this device is not a sub device or the sub device was not partitioned with
+[api]#info::partition_property::partition_by_affinity_domain# then the return
+value is [api]#info::partition_affinity_domain::not_applicable#, otherwise it is
+one of the following values:
+
+* [api]#info::partition_affinity_domain::numa#
+* [api]#info::partition_affinity_domain::L4_cache#
+* [api]#info::partition_affinity_domain::L3_cache#
+* [api]#info::partition_affinity_domain::L2_cache#
+* [api]#info::partition_affinity_domain::L1_cache#
+
+'''
 
 [[sec:device-aspects]]
-==== Device aspects
+==== Aspects
 
-Every SYCL <<device>> has an associated set of <<aspect,aspects>> which identify
-characteristics of the [code]#device#.
-Aspects are defined via the [code]#enum class aspect# enumeration:
+Every device has an associated set of aspects which identify characteristics of
+the device.
+Aspects are defined via the [code]#aspect# enumeration:
 
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/deviceEnumClassAspect.h[lines=4..-1]
 ----
 
-SYCL applications can query the aspects for a [code]#device# via
-[code]#device::has()# in order to determine whether the [code]#device# supports
-any optional features.
-<<table.device.aspect>> lists the aspects that are defined in the <<core-spec>>
+Applications can query the aspects of a device via [api]#device::has# in order
+to determine whether the device supports any optional features.
+The following list describes the aspects that are defined in the <<core-spec>>
 and tells which optional features correspond to each.
 Backends and extensions may provide additional aspects and additional optional
 device features.
 If so, the <<backend>> specification document or the extension document
 describes them.
 
-[[table.device.aspect]]
-.Device aspects defined by the <<core-spec>>
-[width="100%",options="header",separator="@",cols="50%,50%"]
-|====
-@ Aspect @ Description
-a@
-[source]
-----
-aspect::cpu
-----
-   a@ A device that runs on a CPU.  Devices with this [code]#aspect# have
-      device type [code]#info::device_type::cpu#.
+'''
 
-a@
-[source]
-----
-aspect::gpu
-----
-   a@ A device that can also be used to accelerate a 3D graphics API.  Devices
-      with this [code]#aspect# have device type
-      [code]#info::device_type::gpu#.
+.[apidef]#aspect::cpu#
+[role=synopsis,id=api:aspect-cpu]
+--
+A device that runs on a CPU.
+Devices with this aspect have device type [api]#info::device_type::cpu#.
+--
 
-a@
-[source]
-----
-aspect::accelerator
-----
-   a@ A dedicated accelerator device, usually using a peripheral interconnect for
-      communication.  Devices with this [code]#aspect# have device type
-      [code]#info::device_type::accelerator#.
+'''
 
-a@
-[source]
-----
-aspect::custom
-----
-   a@ A dedicated accelerator that can use the SYCL API, but programmable kernels
-      cannot be dispatched to the device, only fixed functionality is available.
-      See <<sec:pre-defined-kernels>>.  Devices with this
-      [code]#aspect# have device type [code]#info::device_type::custom#.
+.[apidef]#aspect::gpu#
+[role=synopsis,id=api:aspect-gpu]
+--
+A device that can also be used to accelerate a 3D graphics API.
+Devices with this aspect have device type [api]#info::device_type::gpu#.
+--
 
-a@
-[source]
-----
-aspect::emulated
-----
-   a@ Indicates that the device is somehow emulated.  A device with this aspect
-   is not intended for performance, and instead will generally have another
-   purpose such as emulation or profiling.  The precise definition of this
-   aspect is left open to the SYCL implementation.
+'''
 
-[NOTE]
-====
-As an example, a vendor might support both a hardware FPGA device and a software
-emulated FPGA, where the emulated FPGA has all the same features as the hardware
-one but runs more slowly and can provide additional profiling or diagnostic
-information.
+.[apidef]#aspect::accelerator#
+[role=synopsis,id=api:aspect-accelerator]
+--
+A dedicated accelerator device, usually using a peripheral interconnect for
+communication.
+Devices with this aspect have device type [api]#info::device_type::accelerator#.
+--
+
+'''
+
+.[apidef]#aspect::custom#
+[role=synopsis,id=api:aspect-custom]
+--
+A dedicated accelerator that can use the SYCL API, but programmable kernels
+cannot be dispatched to the device, only fixed functionality is available.
+See <<sec:pre-defined-kernels>>.
+Devices with this aspect have device type [api]#info::device_type::custom#.
+--
+
+'''
+
+.[apidef]#aspect::emulated#
+[role=synopsis,id=api:aspect-emulated]
+--
+Indicates that the device is somehow emulated.
+A device with this aspect is not intended for performance, and instead will
+generally have another purpose such as emulation or profiling.
+The precise definition of this aspect is left open to the SYCL implementation.
+
+{note}As an example, a vendor might support both a hardware FPGA device and a
+software emulated FPGA, where the emulated FPGA has all the same features as the
+hardware one but runs more slowly and can provide additional profiling or
+diagnostic information.
 In such a case, an application's <<device-selector>> can use
-[code]#aspect::emulated# to distinguish the two.
-====
+[api]#aspect::emulated# to distinguish the two.
+{endnote}
+--
 
-a@
-[source]
-----
-aspect::host_debuggable
-----
-   a@ Indicates that <<kernel,kernels>> running on this device can be debugged
-      using standard debuggers that are normally available on the host system
-      where the SYCL implementation resides.  The precise definition of this
-      aspect is left open to the SYCL implementation.
+'''
 
-a@
-[source]
-----
-aspect::fp16
-----
-   a@ Indicates that kernels submitted to the device may use the
-      [code]#sycl::half# data type.
+.[apidef]#aspect::host_debuggable#
+[role=synopsis,id=api:aspect-host-debuggable]
+--
+Indicates that <<kernel,kernels>> running on this device can be debugged using
+standard debuggers that are normally available on the host system where the SYCL
+implementation resides.
+The precise definition of this aspect is left open to the SYCL implementation.
+--
 
-a@
-[source]
-----
-aspect::fp64
-----
-   a@ Indicates that kernels submitted to the device may use the [code]#double#
-      data type.
+'''
 
-a@
-[source]
-----
-aspect::atomic64
-----
-   a@ Indicates that kernels submitted to the device may perform 64-bit atomic
-      operations.
+.[apidef]#aspect::fp16#
+[role=synopsis,id=api:aspect-fp16]
+--
+Indicates that kernels submitted to the device may use the [code]#sycl::half#
+data type.
+--
 
-a@
-[source]
-----
-aspect::image
-----
-   a@ Indicates that the device supports <<subsec:images, images>>.
+'''
 
-a@
-[source]
-----
-aspect::online_compiler
-----
-   a@ Indicates that the device supports online compilation of device code.
-      <<device,Devices>> that have this aspect support the [code]#build()#
-      and [code]#compile()# functions defined in <<sec:bundles.compile-link>>.
+.[apidef]#aspect::fp64#
+[role=synopsis,id=api:aspect-fp64]
+--
+Indicates that kernels submitted to the device may use the [code]#double# data
+type.
+--
 
-a@
-[source]
-----
-aspect::online_linker
-----
-   a@ Indicates that the device supports online linking of device code.
-      <<device,Devices>> that have this aspect support the [code]#link()#
-      functions defined in <<sec:bundles.compile-link>>.  All
-      <<device,devices>> that have this aspect also have
-      [code]#aspect::online_compiler#.
+'''
 
-a@
-[source]
-----
-aspect::queue_profiling
-----
-   a@ Indicates that the device supports queue profiling via [code]#property::queue::enable_profiling#.
+.[apidef]#aspect::atomic64#
+[role=synopsis,id=api:aspect-atomic64]
+--
+Indicates that kernels submitted to the device may perform 64-bit atomic
+operations.
+--
 
-a@
-[source]
-----
-aspect::usm_device_allocations
-----
-   a@ Indicates that the device supports explicit USM allocations as described
-      in <<sec:usm>>.
+'''
 
-a@
-[source]
-----
-aspect::usm_host_allocations
-----
-   a@ Indicates that the device can access USM memory allocated via
-      [code]#usm::alloc::host#.  The device only
-      supports atomic modification of a host allocation if
-      [code]#aspect::usm_atomic_host_allocations# is also supported.
-      (See <<sec:usm>>.)
+.[apidef]#aspect::image#
+[role=synopsis,id=api:aspect-image]
+--
+Indicates that the device supports <<subsec:images, images>>.
+--
 
-a@
-[source]
-----
-aspect::usm_atomic_host_allocations
-----
-   a@ Indicates that the device supports USM memory allocated
-      via [code]#usm::alloc::host#. The host and this device may
-      concurrently access and atomically modify host allocations. (See <<sec:usm>>.)
+'''
 
+.[apidef]#aspect::online_compiler#
+[role=synopsis,id=api:aspect-online-compiler]
+--
+Indicates that the device supports online compilation of device code.
+Devices that have this aspect support the [code]#build# and [code]#compile#
+functions defined in <<sec:bundles.compile-link>>.
+--
 
-a@
-[source]
-----
-aspect::usm_shared_allocations
-----
-   a@ Indicates that the device supports USM memory allocated via
-      [code]#usm::alloc::shared# on the same device. Concurrent access
-      and atomic modification of a shared allocation is only supported
-      if [code]#aspect::usm_atomic_shared_allocations# is also supported.
-      (See <<sec:usm>>.)
+'''
 
-a@
-[source]
-----
-aspect::usm_atomic_shared_allocations
-----
-   a@ Indicates that the device supports USM memory allocated via
-      [code]#usm::alloc::shared#. The host and other devices in the same
-      context that also support this capability may concurrently access
-      and atomically modify shared allocations.  The allocation is free
-      to migrate between the host and the appropriate devices. (See <<sec:usm>>.)
+.[apidef]#aspect::online_linker#
+[role=synopsis,id=api:aspect-online-linker]
+--
+Indicates that the device supports online linking of device code.
+Devices that have this aspect support the [code]#link# functions defined in
+<<sec:bundles.compile-link>>.
+All devices that have this aspect also have [api]#aspect::online_compiler#.
+--
 
-a@
-[source]
-----
-aspect::usm_system_allocations
-----
-   a@ Indicates that the system allocator may be used instead of SYCL USM
-      allocation mechanisms for [code]#usm::alloc::shared# allocations on
-      this device.  (See <<sec:usm>>.)
+'''
 
-|====
+.[apidef]#aspect::queue_profiling#
+[role=synopsis,id=api:aspect-queue-profiling]
+--
+Indicates that the device supports queue profiling via
+[code]#property::queue::enable_profiling#.
+--
+
+'''
+
+.[apidef]#aspect::usm_device_allocations#
+[role=synopsis,id=api:aspect-usm-device-allocations]
+--
+Indicates that the device supports explicit USM allocations as described in
+<<sec:usm>>.
+--
+
+'''
+
+.[apidef]#aspect::usm_host_allocations#
+[role=synopsis,id=api:aspect-usm-host-allocations]
+--
+Indicates that the device can access USM memory allocated via
+[code]#usm::alloc::host#.
+The device only supports atomic modification of a host allocation if
+[api]#aspect::usm_atomic_host_allocations# is also supported.
+(See <<sec:usm>>.)
+--
+
+'''
+
+.[apidef]#aspect::usm_atomic_host_allocations#
+[role=synopsis,id=api:aspect-usm-atomic-host-allocations]
+--
+Indicates that the device supports USM memory allocated via
+[code]#usm::alloc::host#.
+The host and this device may concurrently access and atomically modify host
+allocations.
+(See <<sec:usm>>.)
+--
+
+'''
+
+.[apidef]#aspect::usm_shared_allocations#
+[role=synopsis,id=api:aspect-usm-shared-allocations]
+--
+Indicates that the device supports USM memory allocated via
+[code]#usm::alloc::shared# on the same device.
+Concurrent access and atomic modification of a shared allocation is only
+supported if [api]#aspect::usm_atomic_shared_allocations# is also supported.
+(See <<sec:usm>>.)
+--
+
+'''
+
+.[apidef]#aspect::usm_atomic_shared_allocations#
+[role=synopsis,id=api:aspect-usm-atomic-shared-allocations]
+--
+Indicates that the device supports USM memory allocated via
+[code]#usm::alloc::shared#.
+The host and other devices in the same context that also support this capability
+may concurrently access and atomically modify shared allocations.
+The allocation is free to migrate between the host and the appropriate devices.
+(See <<sec:usm>>.)
+--
+
+'''
+
+.[apidef]#aspect::usm_system_allocations#
+[role=synopsis,id=api:aspect-usm-system-allocations]
+--
+Indicates that the system allocator may be used instead of SYCL USM allocation
+mechanisms for [code]#usm::alloc::shared# allocations on this device.
+(See <<sec:usm>>.)
+--
+
+'''
+
+[[sec:device-aspect-traits]]
+==== Aspect traits
 
 The implementation also provides two traits that the application can use to
 query aspects at compilation time.
@@ -2901,7 +3479,7 @@ only if at least one device in _D_ has the specified aspect.
 The trait [code]#all_devices_have<aspect># inherits from [code]#std::true_type#
 only if all devices in _D_ have the specified aspect.
 
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/aspectTraits.h[lines=4..-1]
 ----
@@ -2917,68 +3495,243 @@ include::{code_dir}/aspectTraitExample.cpp[lines=4..-1]
 ----
 
 The kernel function [code]#MyKernel# is templated to use a different algorithm
-depending on whether the device has the aspect [code]#aspect::fp16#, and the
-call to [code]#dev.has()# chooses the kernel function instantiation that matches
-the device's capabilities.
+depending on whether the device has the aspect [api]#aspect::fp16#, and the call
+to [code]#dev.has()# chooses the kernel function instantiation that matches the
+device's capabilities.
 However, the use of [code]#any_device_has_v# and [code]#all_devices_have_v#
 entirely avoid useless instantiations of the kernel function.
 For example, when the compilation environment does not support any devices with
-[code]#aspect::fp16#, [code]#any_device_has_v<aspect::fp16># is [code]#false#,
+[api]#aspect::fp16#, [code]#any_device_has_v<aspect::fp16># is [code]#false#,
 and the kernel function is never instantiated with support for the
 [code]#sycl::half# type.
 
-[NOTE]
-====
-Like any trait, the definitions of [code]#any_device_has# and
+{note}Like any trait, the definitions of [code]#any_device_has# and
 [code]#all_devices_have# are uniform across all parts of a SYCL application.
 If an implementation uses <<smcp>>, all compiler passes define a particular
 aspect's specialization of the traits the same way, regardless of whether that
 compiler pass' device supports the aspect.
 Thus, [code]#any_device_has# and [code]#all_devices_have# cannot be used to
 determine whether any particular device supports an aspect.
-Instead, applications must use [code]#device::has()# or [code]#platform::has()#
-for this.
-====
+Instead, applications must use [api]#device::has# or [code]#platform::has# for
+this.
+{endnote}
 
-[NOTE]
-====
-An implementation could choose to provide command line options which affect the
-set of devices that it supports.
+{note}An implementation could choose to provide command line options which
+affect the set of devices that it supports.
 If so, those command line options would also affect these traits.
 For example, if an implementation provides a command line option that disables
-[code]#aspect::accelerator# devices, the trait
+[api]#aspect::accelerator# devices, the trait
 [code]#any_device_has<aspect::accelerator># would inherit from
 [code]#std::false_type# when that command line option was specified.
-====
+{endnote}
 
-[NOTE]
-====
-These traits only reflect the supported devices at the time the SYCL application
-is compiled.
+{note}These traits only reflect the supported devices at the time the SYCL
+application is compiled.
 It's possible that unsupported devices are still visible to the application when
 it runs.
 However, if a device _D_ is not supported when the application is compiled, the
 application will not be able to submit kernels to that device _D_.
-====
+{endnote}
 
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%% end device_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[[sec:device-other-enumerations]]
+==== Other enumerations
+
+[[sec:device-enum-device-type]]
+===== Device type
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class device_type : /* unspecified */ {
+  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
+  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
+  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
+  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
+  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
+  host,
+  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
+};
+} // namespace sycl::info
+----
+
+[[sec:device-enum-partition-property]]
+===== Partition property
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class partition_property : /* unspecified */ {
+  no_partition,
+  partition_equally,
+  partition_by_counts,
+  partition_by_affinity_domain
+};
+} // namespace sycl::info
+----
+
+[[sec:device-enum-partition-affinity-domain]]
+===== Partition affinity domain
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class partition_affinity_domain : /* unspecified */ {
+  not_applicable,
+  numa,
+  L4_cache,
+  L3_cache,
+  L2_cache,
+  L1_cache,
+  next_partitionable
+};
+} // namespace sycl::info
+----
+
+[[sec:device-enum-fp-config]]
+===== Floating point configuration
+
+The [code]#info::fp_config# enumeration tells the behavior of floating point
+operations on a device.
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class fp_config : /* unspecified */ {
+  denorm,
+  inf_nan,
+  round_to_nearest,
+  round_to_zero,
+  round_to_inf,
+  fma,
+  correctly_rounded_divide_sqrt,
+  soft_float
+};
+} // namespace sycl::info
+----
+
+'''
+
+.[apidef]#info::fp_config::denorm#
+[role=synopsis,id=api:info-fp-config-denorm]
+--
+Denormalized numbers are supported.
+--
+
+'''
+
+.[apidef]#info::fp_config::inf_nan#
+[role=synopsis,id=api:info-fp-config-inf-nan]
+--
+INF and NaNs are supported.
+--
+
+'''
+
+.[apidef]#info::fp_config::round_to_nearest#
+[role=synopsis,id=api:info-fp-config-round-to-nearest]
+--
+Round to nearest even rounding mode is supported.
+--
+
+'''
+
+.[apidef]#info::fp_config::round_to_zero#
+[role=synopsis,id=api:info-fp-config-round-to-zero]
+--
+Round to zero rounding mode is supported.
+--
+
+'''
+
+.[apidef]#info::fp_config::round_to_inf#
+[role=synopsis,id=api:info-fp-config-round-to-inf]
+--
+Round to positive and negative infinity rounding modes are supported.
+--
+
+'''
+
+.[apidef]#info::fp_config::fma#
+[role=synopsis,id=api:info-fp-config-fma]
+--
+IEEE754-2008 fused multiply-add is supported.
+--
+
+'''
+
+.[apidef]#info::fp_config::correctly_rounded_divide_sqrt#
+[role=synopsis,id=api:info-fp-config-correctly-rounded-divide-sqrt]
+--
+Deprecated by SYCL 2020.
+
+Divide and sqrt are correctly rounded as defined by the IEEE754 specification.
+--
+
+'''
+
+.[apidef]#info::fp_config::soft_float#
+[role=synopsis,id=api:info-fp-config-soft-float]
+--
+Basic floating-point operations (such as addition, subtraction, multiplication)
+are implemented in software.
+--
+
+'''
+
+[[sec:device-enum-local-mem-type]]
+===== Local memory type
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class local_mem_type : /* unspecified */ {
+  none,
+  local,
+  global
+};
+} // namespace sycl::info
+----
+
+[[sec:device-enum-global-mem-cache-type]]
+===== Global memory cache type
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class global_mem_cache_type : /* unspecified */ {
+  none,
+  read_only,
+  read_write
+};
+} // namespace sycl::info
+----
+
+[[sec:device-enum-execution-capability]]
+===== Execution capability
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class execution_capability : /* unspecified */ {
+  exec_kernel,
+  exec_native_kernel
+};
+} // namespace sycl::info
+----
 
 
-[[sec:interface.queue.class]]
+[[sec:queue-class]]
 === Queue class
 
-// \input{queue_class}
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin queue_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The [code]#queue# class encapsulates a single SYCL queue which schedules kernels
+on a device.
 
-The SYCL [code]#queue# class encapsulates a single SYCL queue which schedules
-kernels on a SYCL device.
-
-A SYCL [code]#queue# can be used to submit <<command-group,command groups>> to
-be executed by the <<sycl-runtime>> using the [code]#submit# member function.
+A [code]#queue# can be used to submit <<command-group,command groups>> to be
+executed by the <<sycl-runtime>> using the [api]#queue::submit# member function.
 
 All member functions of the [code]#queue# class are synchronous and errors are
 handled by throwing synchronous SYCL exceptions.
-The [code]#submit# member function synchronously invokes the provided
+The [api]#queue::submit# member function synchronously invokes the provided
 <<command-group-function-object>> (as described in
 <<sec:command-groups-exec-order>>) in the calling thread, thereby scheduling a
 <<command-group>> for asynchronous execution.
@@ -2988,845 +3741,853 @@ Any errors from the <<command-group>> after it has been submitted are handled by
 passing <<async-error,asynchronous errors>> at specific times to an
 <<async-handler>>, as described in <<error-handling>>.
 
-A SYCL [code]#queue# can wait for all <<command-group,command groups>> that it
-has submitted by calling [code]#wait# or [code]#wait_and_throw#.
+The application can wait for all <<command-group,command groups>> submitted to a
+queue calling [api]#queue::wait# or [api]#queue::wait_and_throw#.
 
-The default constructor of the SYCL [code]#queue# class will construct a queue
-based on the SYCL [code]#device# returned from the [code]#default_selector_v#
-(see <<sec:device-selector>>).
-All other constructors construct a queue as determined by the parameters
-provided.
-All constructors will implicitly construct a SYCL [code]#platform#,
-[code]#device# and [code]#context# in order to facilitate the construction of
-the queue.
+All constructors of the [code]#queue# class implicitly construct a
+[code]#platform#, [code]#device#, and [code]#context# in order to facilitate the
+construction of the queue.
 
-Each constructor takes as the last parameter an optional SYCL
-[code]#property_list# to provide properties to the SYCL [code]#queue#.
-
-A SYCL [code]#queue# may be destroyed even when there are uncompleted <<command,
-commands>> that have been submitted to the queue.
+A queue may be destroyed even when there are uncompleted <<command, commands>>
+that have been submitted to the queue.
 Doing so does not block.
 Instead, any commands that have been submitted to the queue begin execution when
 their requisites are satisfied, just as they would had the queue not been
 destroyed.
 Any event objects for those commands are signaled in the normal manner when the
 command completes.
-Resources associated with the queue will be freed by the time the last command
+Resources associated with the queue are freed by the time the last command
 completes.
 
-The SYCL [code]#queue# class provides the common reference semantics (see
-<<sec:reference-semantics>>).
+The [code]#queue# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
-
-==== Queue interface
-
-A synopsis of the SYCL [code]#queue# class is provided below.
-The constructors and member functions of the SYCL [code]#queue# class are listed
-in <<table.constructors.queue>> and <<table.members.queue>> respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-Some queue member functions are shortcuts to member functions of the
-[code]#handler# class.
-These are listed in <<sec:queue-shortcuts>>.
-
-// Interface for class: queue
-[source,,linenums,subs="attributes+"]
+[source,role=synopsis,subs="attributes+"]
 ----
 include::{header_dir}/queue.h[lines=4..-1]
 ----
 
+[[sec:queue-ctors]]
+==== Constructors
 
-[[table.constructors.queue]]
-.Constructors of the [code]#queue# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+All queue constructors take a parameter named [code]#propList# which allows the
+application to pass zero or more properties.
+These properties may specify additional effects of the constructor and may also
+specify exceptions that the constructor throws.
+See <<sec:queue-properties>> for the queue properties that are defined by the
+<<core-spec>>.
+
+'''
+
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:queue-ctor]
 ----
 explicit queue(const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the device
-constructed from the [code]#default_selector_v#.
-Zero or more properties can
-be provided to the constructed SYCL [code]#queue# via an instance of
-[code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device selected by
+[code]#default_selector_v#.
+
+'''
+
+.[apititle]#Constructor with async handler#
+[source,role=synopsis,id=api:queue-ctor-async-handler]
 ----
 explicit queue(const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an
-[code]#async_handler# using the device constructed from the
-[code]#default_selector_v#.
-Zero or more properties can be provided to the
-constructed SYCL [code]#queue# via an instance of
-[code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device selected by
+[code]#default_selector_v#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with device selector#
+[source,role=synopsis,id=api:queue-ctor-selector]
 ----
 template <typename DeviceSelector>
 explicit queue(const DeviceSelector& deviceSelector,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the device
-returned by the <<device-selector>> provided. Zero or
-more properties can be provided to the constructed SYCL
-[code]#queue# via an instance of
-[code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+
+'''
+
+.[apititle]#Constructor with device selector and async handler#
+[source,role=synopsis,id=api:queue-ctor-selector-async-handler]
 ----
 template <typename DeviceSelector>
 explicit queue(const DeviceSelector& deviceSelector,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an
-[code]#async_handler# using the device returned by the
-<<device-selector>> provided. Zero or more properties
-can be provided to the constructed SYCL [code]#queue# via
-an instance of [code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+The queue has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with device#
+[source,role=synopsis,id=api:queue-ctor-device]
 ----
 explicit queue(const device& syclDevice, const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice# provided. Zero or more properties can be provided to the
-constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+
+'''
+
+.[apititle]#Constructor with device and async handler#
+[source,role=synopsis,id=api:queue-ctor-device-async-handler]
 ----
 explicit queue(const device& syclDevice, const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using the [code]#syclDevice# provided. Zero or more
-properties can be provided to the constructed SYCL [code]#queue#
-via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with context and device selector#
+[source,role=synopsis,id=api:queue-ctor-context-selector]
 ----
 template <typename DeviceSelector>
 explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance that is associated
-with the [code]#syclContext# provided, using the device
-returned by the <<device-selector>> provided. Must
-throw an [code]#exception# with the
-[code]#errc::invalid# error code if
-[code]#syclContext# does not encapsulate the SYCL
-[code]#device# returned by
-[code]#deviceSelector#. Zero or more properties can be
-provided to the constructed SYCL [code]#queue# via an
-instance of [code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+The queue has the context [code]#syclContext#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
+[code]#syclContext# does not contain the device selected by
+[code]#deviceSelector#.
+
+'''
+
+.[apititle]#Constructor with context, device selector, and async handler#
+[source,role=synopsis,id=api:queue-ctor-context-selector-async-handler]
 ----
 template <typename DeviceSelector>
 explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an
-[code]#async_handler# that is associated with the
-[code]#syclContext# provided, using the device returned by
-the <<device-selector>> provided. Must throw an
-[code]#exception# with the
-[code]#errc::invalid# error code if
-[code]#syclContext# does not encapsulate the SYCL
-[code]#device# returned by
-[code]#deviceSelector#. Zero or more properties can be
-provided to the constructed SYCL [code]#queue# via an
-instance of [code]#property_list#.
 
-a@
-[source]
+_Constraints:_ Available only when the [code]#DeviceSelector# is a type that
+satisfies the requirements of a <<device-selector>> as defined in
+<<sec:device-selector>>.
+
+_Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
+described in <<sec:device-selector>>, and a [code]#queue# object is constructed
+using the device it selects.
+The queue has the context [code]#syclContext# and the asynchronous error handler
+[code]#asyncHandler#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
+[code]#syclContext# does not contain the device selected by
+[code]#deviceSelector#.
+
+'''
+
+.[apititle]#Constructor with context and device#
+[source,role=synopsis,id=api:queue-ctor-context-device]
 ----
 explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance using the [code]#syclDevice#
-provided.  This device must either be contained by [code]#syclContext# or it
-must be a <<descendent-device>> of some device that is contained by that
-context, otherwise this function throws a synchronous exception with the
-[code]#errc::invalid# error code.  Zero or more properties can be provided to
-the constructed SYCL [code]#queue# via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
+and the context [code]#syclContext#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
+[code]#syclDevice# is contained by [code]#syclContext# or is a
+<<descendent-device>> of some device that is contained by [code]#syclContext#.
+
+'''
+
+.[apititle]#Constructor with context, device, and async handler#
+[source,role=synopsis,id=api:queue-ctor-context-device-async-handler]
 ----
 explicit queue(const context& syclContext, const device& syclDevice,
                const async_handler& asyncHandler,
                const property_list& propList = {})
 ----
-a@ Constructs a SYCL [code]#queue# instance with an [code]#async_handler# using
-the [code]#syclDevice# provided.  This device must either be contained by
-[code]#syclContext# or it must be a <<descendent-device>> of some device that
-is contained by that context, otherwise this function throws a synchronous
-exception with the [code]#errc::invalid# error code.  Zero or more properties
-can be provided to the constructed SYCL [code]#queue# via an instance of
-[code]#property_list#.
 
-|====
+_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
+and the context [code]#syclContext#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
 
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
+[code]#syclDevice# is contained by [code]#syclContext# or is a
+<<descendent-device>> of some device that is contained by [code]#syclContext#.
 
+'''
 
-[[table.members.queue]]
-.Member functions for [code]#queue# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:queue-member-funcs]]
+==== Member functions
+
+.[apidef]#queue::get_backend#
+[source,role=synopsis,id=api:queue-get-backend]
 ----
 backend get_backend() const noexcept
 ----
-a@ Returns a [code]#backend# identifying the <<backend>> associated
-with this [code]#queue#.
 
-a@
-[source]
+_Returns:_ The <<backend>> that is associated with this queue.
+
+'''
+
+.[apidef]#queue::get_context#
+[source,role=synopsis,id=api:queue-get-context]
 ----
 context get_context() const
 ----
-a@ Returns the SYCL queue's context.
-The value returned must be equal to that returned by [code]#get_info<info::queue::context>()#.
 
-a@
-[source]
+_Returns:_ The context that is associated with this queue.
+
+'''
+
+.[apidef]#queue::get_device#
+[source,role=synopsis,id=api:queue-get-device]
 ----
 device get_device() const
 ----
-a@ Returns the SYCL device the queue is associated with.
-The value returned must be equal to that returned by [code]#get_info<info::queue::device>()#.
 
-a@
-[source]
+_Returns:_ The device that is associated with this queue.
+
+'''
+
+.[apidef]#queue::is_in_order#
+[source,role=synopsis,id=api:queue-is-in-order]
 ----
 bool is_in_order() const
 ----
-a@ Returns true if the SYCL [code]#queue# was created with the
-[code]#in_order# property.
-Equivalent to [code]#has_property<property::queue::in_order>()#.
 
-a@
-[source]
+_Returns:_ The same value as [code]#has_property<property::queue::in_order>()#.
+
+'''
+
+.[apidef]#queue::get_info#
+[source,role=synopsis,id=api:queue-get-info]
+----
+template <typename Param>
+typename Param::return_type get_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is an information descriptor
+for the queue class.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:queue-info-descriptors>> for the queue information descriptors that
+are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#queue::get_backend_info#
+[source,role=synopsis,id=api:queue-get-backend-info]
+----
+template <typename Param>
+typename Param::return_type get_backend_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is a backend information
+descriptor for the queue class.
+
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this queue.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+.[apidef]#queue::submit#
+[source,role=synopsis,id=api:queue-submit]
+----
+template <typename T>
+event submit(T cgf)
+----
+
+_Effects:_ Immediately calls the <<command-group-function-object>> [code]#cgf#,
+which may submit no more than one <<command>> to the queue for execution on the
+device.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apititle]#queue::submit (with secondary queue)#
+[source,role=synopsis,id=api:queue-submit-secondary-queue]
+----
+template <typename T>
+event submit(T cgf, queue& secondaryQueue)
+----
+
+Deprecated in SYCL {SYCL_VERSION}.
+
+_Effects:_ Immediately calls the <<command-group-function-object>> [code]#cgf#,
+which may submit no more than one <<command>> to the queue for execution on the
+device.
+On a kernel error, this <<command-group-function-object>> may be scheduled for
+execution on the secondary queue [code]#secondaryQueue# as described in
+<<sec::fallback-mechanism>>.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+If the command is scheduled on [code]#secondaryQueue#, the event is associated
+with that queue.
+
+'''
+
+.[apidef]#queue::wait#
+[source,role=synopsis,id=api:queue-wait]
 ----
 void wait()
 ----
-a@ Performs a blocking wait for the completion of all enqueued tasks
-in the queue.  Synchronous errors will be reported through SYCL
-exceptions.
 
-a@
-[source]
+_Effects:_ Blocks the calling thread until all commands previously submitted to
+this queue have completed.
+Synchronous errors are reported through SYCL exceptions.
+
+'''
+
+.[apidef]#queue::wait_and_throw#
+[source,role=synopsis,id=api:queue-wait-and-throw]
 ----
 void wait_and_throw()
 ----
-a@ Performs a blocking wait for the completion of all enqueued tasks
-in the queue.  Synchronous errors will be reported through SYCL
-exceptions. Any unconsumed <<async-error,asynchronous errors>> will be passed to the
-<<async-handler>> associated with the queue or enclosing context.
-If no user defined [code]#async_handler# is associated with
-the queue or enclosing context, then an implementation-defined
-default <<async-handler>> is called to handle any errors, as
-described in <<subsubsec:exception.nohandler>>.
 
-a@
-[source]
+_Effects:_ Blocks the calling thread until all commands previously submitted to
+this queue have completed.
+Synchronous errors are reported through SYCL exceptions.
+Any unconsumed <<async-error,asynchronous errors>> are passed to the
+<<async-handler>> associated with the queue or to the <<async-handler>>
+associated with the queue's context.
+If no user defined asynchronous error handler is associated with the queue or
+its context, then an implementation-defined default <<async-handler>> is called
+to handle any errors, as described in <<subsubsec:exception.nohandler>>.
+
+'''
+
+.[apidef]#queue::throw_asynchronous#
+[source,role=synopsis,id=api:queue-throw-asynchronous]
 ----
 void throw_asynchronous()
 ----
-a@ Checks to see if any unconsumed <<async-error,asynchronous errors>> have been produced by
-the queue and if so reports them by passing them to the
-<<async-handler>> associated with the queue or enclosing context.
-If no user defined [code]#async_handler# is associated with
-the queue or enclosing context, then an implementation-defined
-default <<async-handler>> is called to handle any errors, as
-described in <<subsubsec:exception.nohandler>>.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#queue# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.queue.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Effects:_ Checks to see if any unconsumed <<async-error,asynchronous errors>>
+have been produced by the queue and if so reports them by passing them to the
+<<async-handler>> associated with the queue or to the <<async-handler>>
+associated with the queue's context.
+If no user defined asynchronous error handler is associated with the queue or
+its context, then an implementation-defined default <<async-handler>> is called
+to handle any errors, as described in <<subsubsec:exception.nohandler>>.
 
-a@
-[source]
-----
-template <typename T> event submit(T cgf)
-----
-a@ Submit a <<command-group-function-object>> to the queue, in order to be scheduled
-for execution on the device.
-
-a@
-[source]
-----
-template <typename T> event submit(T cgf, queue& secondaryQueue)
-----
-a@ Deprecated in SYCL {SYCL_VERSION}.
-Submit a <<command-group-function-object>> to the queue, in order to be scheduled
-for execution on the device. On a kernel error, this <<command-group-function-object>>
-is then scheduled for execution on the secondary queue. Returns an
-event, which corresponds to the queue the <<command-group-function-object>>
-is being enqueued on.
-
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-a@ Queries this SYCL [code]#queue# for <<backend>>-specific information
-requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#queue#.
-
-|====
-
+'''
 
 [[sec:queue-shortcuts]]
-==== Queue shortcut functions
+==== Shortcut member functions
 
-Queue shortcut functions are member functions of the [code]#queue# class that
-implicitly create a command group with an implicit command group [code]#handler#
-consisting of a single command, a call to the member function of the handler
-object with the same signature (e.g. [code]#queue::single_task# will call
-[code]#handler::single_task# with the same arguments), and submit the command
-group.
-The main signature difference comes from the return type: member functions of
-the [code]#handler# return [code]#void#, whereas corresponding queue shortcut
-functions return an [code]#event# object that represents the submitted command
-group.
-Queue shortcuts can additionally take a list of events to wait on, as if passing
-the event list to [code]#handler::depends_on# for the implicit command group.
+The functions described in this section are shortcuts for [api]#queue::submit#
+that allow an application to submit a command to the queue without defining a
+<<command-group-function-object>>.
+Each of these functions implicitly creates a command group that acts as though
+it calls one of the [code]#handler# member functions to submit a single command.
+For example, [api]#queue::single_task# creates a command group that acts as
+though it calls [code]#handler::single_task#.
+These shortcut functions return an [code]#event# object that represents the
+command that is submitted to the queue.
+In addition, some forms of the shortcut functions allow the application to pass
+input events, and these forms act as though the command group calls
+[code]#handler::depends_on# with these same events.
 
-The full list of queue shortcuts is defined in <<table.queue.shortcuts>>.
-The list of handler member functions is defined in
-<<table.members.handler.kernel>>.
+Because there is no explicit command group function when using these shortcuts,
+it is not possible to create accessors for the command that is submitted.
+Therefore, kernels that are submitted using these shortcuts must not use
+accessors.
+Typically, applications use USM pointers instead.
+However, there is a special exception for non-kernel commands (e.g. shortcuts
+for the explicit memory copy commands).
+These non-kernel commands may use placeholder accessors, and the implicit
+command group function acts as though it calls [code]#handler::require# on each
+of the placeholder accessors that the shortcut function uses.
 
-It is not allowed to capture accessors into the implicitly created command
-group.
-If a queue shortcut function launches a kernel (via [code]#single_task# or
-[code]#parallel_for#), only USM pointers are allowed inside such kernels.
-However, queue shortcuts that perform non-kernel operations can be provided with
-a valid placeholder accessor as an argument.
-In that case there is an additional step performed: the implicit command group
-[code]#handler# calls [code]#handler::require# on each accessor passed in as a
-function argument.
+The following example demonstrates the use of these shortcut functions.
 
-An example of using queue shortcuts is shown below.
-
-[[example.queue.shortcuts]]
 [source,,linenums]
 ----
 include::{code_dir}/queueShortcuts.cpp[lines=4..-1]
 ----
 
-[[table.queue.shortcuts]]
-.Queue shortcut functions
-[width="100%",options="header",separator="@",cols="60%,10%,20%"]
-|====
-@ Function Definition @ Function Type @ Description
-a@
-[source]
+'''
+
+.[apidef]#queue::single_task#
+[source,role=synopsis,id=api:queue-single-task]
 ----
-template <typename KernelName, typename KernelType>
+template <typename KernelName, typename KernelType>             (1)
 event single_task(const KernelType& kernelFunc)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::single_task(kernelFunc)#.
-a@
-[source]
-----
-template <typename KernelName, typename KernelType>
+
+template <typename KernelName, typename KernelType>             (2)
 event single_task(event depEvent, const KernelType& kernelFunc)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::single_task(kernelFunc)#.
-a@
-[source]
-----
-template <typename KernelName, typename KernelType>
+
+template <typename KernelName, typename KernelType>             (3)
 event single_task(const std::vector<event>& depEvents,
                   const KernelType& kernelFunc)
 ----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::single_task(kernelFunc)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
 [code]#handler::single_task(kernelFunc)#.
-a@
-[source]
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::single_task(kernelFunc)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::parallel_for#
+[source,role=synopsis,id=api:queue-parallel-for]
 ----
-template <typename KernelName, int Dimensions, typename... Rest>
+template <typename KernelName, int Dimensions, typename... Rest>        (1)
 event parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::parallel_for(numWorkItems, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (2)
 event parallel_for(range<Dimensions> numWorkItems, event depEvent,
                    Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::parallel_for(numWorkItems, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (3)
 event parallel_for(range<Dimensions> numWorkItems,
                    const std::vector<event>& depEvents, Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::parallel_for(numWorkItems, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (4)
 event parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::parallel_for(executionRange, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (5)
 event parallel_for(nd_range<Dimensions> executionRange, event depEvent,
                    Rest&&... rest)
-----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::parallel_for(executionRange, rest)#.
-a@
-[source]
-----
-template <typename KernelName, int Dimensions, typename... Rest>
+
+template <typename KernelName, int Dimensions, typename... Rest>        (6)
 event parallel_for(nd_range<Dimensions> executionRange,
                    const std::vector<event>& depEvents, Rest&&... rest)
 ----
-a@ <<sycl-kernel-function, Kernel function>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::parallel_for(numWorkItems, rest)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::parallel_for(numWorkItems, rest)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::parallel_for(numWorkItems, rest)#.
+
+_Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::parallel_for(executionRange, rest)#.
+
+_Effects (5):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
 [code]#handler::parallel_for(executionRange, rest)#.
-a@
-[source]
+
+_Effects (6):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::parallel_for(executionRange, rest)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::memcpy#
+[source,role=synopsis,id=api:queue-memcpy]
 ----
-event memcpy(void* dest, const void* src, size_t numBytes)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::memcpy(dest, src, numBytes)#.
-a@
-[source]
-----
-event memcpy(void* dest, const void* src, size_t numBytes, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::memcpy(dest, src, numBytes)#.
-a@
-[source]
-----
-event memcpy(void* dest, const void* src, size_t numBytes,
+event memcpy(void* dest, const void* src, size_t numBytes)                 (1)
+
+event memcpy(void* dest, const void* src, size_t numBytes, event depEvent) (2)
+
+event memcpy(void* dest, const void* src, size_t numBytes,                 (3)
              const std::vector<event>& depEvents)
 ----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::memcpy(dest, src, numBytes)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
 [code]#handler::memcpy(dest, src, numBytes)#.
-a@
-[source]
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::memcpy(dest, src, numBytes)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::copy#
+[source,role=synopsis,id=api:queue-copy]
 ----
-template <typename T> event copy(const T* src, T* dest, size_t count)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::copy(src, dest, count)#.
-a@
-[source]
-----
-template <typename T>
+template <typename T>                                                         (1)
+event copy(const T* src, T* dest, size_t count)
+
+template <typename T>                                                         (2)
 event copy(const T* src, T* dest, size_t count, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::copy(src, dest, count)#.
-a@
-[source]
-----
-template <typename T>
+
+template <typename T>                                                         (3)
 event copy(const T* srct, T* dest, size_t count,
            const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::copy(src, dest, count)#.
-a@
-[source]
-----
-event memset(void* ptr, int value, size_t numBytes)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::memset(ptr, value, numBytes)#.
-a@
-[source]
-----
-event memset(void* ptr, int value, size_t numBytes, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::memset(ptr, value, numBytes)#.
-a@
-[source]
-----
-event memset(void* ptr, int value, size_t numBytes,
-             const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::memset(ptr, value, numBytes)#.
-a@
-[source]
-----
-template <typename T> event fill(void* ptr, const T& pattern, size_t count)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::fill(ptr, pattern, count)#.
-a@
-[source]
-----
-template <typename T>
-event fill(void* ptr, const T& pattern, size_t count, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::fill(ptr, pattern, count)#.
-a@
-[source]
-----
-template <typename T>
-event fill(void* ptr, const T& pattern, size_t count,
-           const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::fill(ptr, pattern, count)#.
-a@
-[source]
-----
-event prefetch(void* ptr, size_t numBytes)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::prefetch(ptr, numBytes)#.
-a@
-[source]
-----
-event prefetch(void* ptr, size_t numBytes, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::prefetch(ptr, numBytes)#.
-a@
-[source]
-----
-event prefetch(void* ptr, size_t numBytes, const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::prefetch(ptr, numBytes)#.
-a@
-[source]
-----
-event mem_advise(void* ptr, size_t numBytes, int advice)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::mem_advise(ptr, numBytes, advice)#.
-a@
-[source]
-----
-event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvent)# and
-[code]#handler::mem_advise(ptr, numBytes, advice)#.
-a@
-[source]
-----
-event mem_advise(void* ptr, size_t numBytes, int advice,
-                 const std::vector<event>& depEvents)
-----
-a@ <<sec:usm, USM>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::depends_on(depEvents)# and
-[code]#handler::mem_advise(ptr, numBytes, advice)#.
-a@
-[source]
-----
-template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (4)
           access::placeholder IsPlaceholder, typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
-           std::shared_ptr<DestT> dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(src)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+           std::shared_ptr<DestT> dest)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,  (5)
           target DestTgt, access::placeholder IsPlaceholder>
 event copy(std::shared_ptr<SrcT> src,
-           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(dest)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (6)
           access::placeholder IsPlaceholder, typename DestT>
 event copy(accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsPlaceholder> src,
-           DestT* dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(src)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,
+           DestT* dest)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode,  (7)
           target DestTgt, access::placeholder IsPlaceholder>
 event copy(const SrcT* src,
-           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(dest)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
-----
-template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
+           accessor<DestT, DestDims, DestMode, DestTgt, IsPlaceholder> dest)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (8)
           access::placeholder IsSrcPlaceholder, typename DestT, int DestDims,
           access_mode DestMode, target DestTgt,
           access::placeholder IsDestPlaceholder>
 event copy(
     accessor<SrcT, SrcDims, SrcMode, SrcTgt, IsSrcPlaceholder> src,
-    accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest);
+    accessor<DestT, DestDims, DestMode, DestTgt, IsDestPlaceholder> dest)
 ----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(src)#, [code]#handler::require(dest)# and
-[code]#handler::copy(src, dest)#.
-a@
-[source]
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::copy(src, dest, count)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::copy(src, dest, count)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::copy(src, dest, count)#.
+
+_Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(src)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (5):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(dest)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (6):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(src)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (7):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(dest)# and [code]#handler::copy(src,
+dest)#.
+
+_Effects (8):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(src)#,
+[code]#handler::require(dest)#, and [code]#handler::copy(src, dest)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::memset#
+[source,role=synopsis,id=api:queue-memset]
 ----
-template <typename T, int Dims, access_mode Mode, target Tgt,
+event memset(void* ptr, int value, size_t numBytes)                 (1)
+
+event memset(void* ptr, int value, size_t numBytes, event depEvent) (2)
+
+event memset(void* ptr, int value, size_t numBytes,                 (3)
+             const std::vector<event>& depEvents)
+----
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::memset(ptr, value, numBytes)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::memset(ptr, value, numBytes)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::memcpy(ptr, value, numBytes)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::fill#
+[source,role=synopsis,id=api:queue-fill]
+----
+template <typename T>                                                      (1)
+event fill(void* ptr, const T& pattern, size_t count)
+
+template <typename T>                                                      (2)
+event fill(void* ptr, const T& pattern, size_t count, event depEvent)
+
+template <typename T>                                                      (3)
+event fill(void* ptr, const T& pattern, size_t count,
+           const std::vector<event>& depEvents)
+
+template <typename T, int Dims, access_mode Mode, target Tgt,              (4)
           access::placeholder IsPlaceholder>
-event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc);
+event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src)
 ----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(acc)# and
-[code]#handler::update_host(acc)#.
-a@
-[source]
-----
-template <typename T, int Dims, access_mode Mode, target Tgt,
-          access::placeholder IsPlaceholder>
-event fill(accessor<T, Dims, Mode, Tgt, IsPlaceholder> dest, const T& src);
-----
-a@ <<subsec:explicitmemory,Explicit copy>>
-a@ Equivalent to submitting a command-group containing
-[code]#handler::require(dest)# and
+
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::fill(ptr, pattern, count)#.
+
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::fill(ptr, pattern, count)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::fill(ptr, pattern, count)#.
+
+_Effects (4):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(dest)# and
 [code]#handler::fill(dest, src)#.
 
-|====
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
 
+'''
 
-==== Queue information descriptors
-
-A <<queue>> can be queried for information using the [code]#get_info# member
-function of the [code]#queue# class, specifying one of the info parameters in
-[code]#info::queue#.
-The possible values for each info parameter and any restriction are defined in
-the specification of the <<backend>> associated with the <<queue>>.
-All info parameters in [code]#info::queue# are specified in <<table.queue.info>>
-and the synopsis for [code]#info::queue# is described in
-<<appendix.queue.descriptors>>.
-
-[[table.queue.info]]
-.Queue information descriptors
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Queue Descriptors @ Return type @ Description
-a@
-[source]
+.[apidef]#queue::prefetch#
+[source,role=synopsis,id=api:queue-prefetch]
 ----
-info::queue::context
+event prefetch(void* ptr, size_t numBytes)                                      (1)
+
+event prefetch(void* ptr, size_t numBytes, event depEvent)                      (2)
+
+event prefetch(void* ptr, size_t numBytes, const std::vector<event>& depEvents) (3)
 ----
 
-    @ [.code]#context#
-   a@ Returns the SYCL [code]#context# associated with this SYCL [code]#queue#.
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::prefetch(ptr, numBytes)#.
 
-a@
-[source]
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::prefetch(ptr, numBytes)#.
+
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::prefetch(ptr, numBytes)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::mem_advise#
+[source,role=synopsis,id=api:queue-mem-advise]
 ----
-info::queue::device
+event mem_advise(void* ptr, size_t numBytes, int advice)                 (1)
+
+event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent) (2)
+
+event mem_advise(void* ptr, size_t numBytes, int advice,                 (3)
+                 const std::vector<event>& depEvents)
 ----
 
-    @ [.code]#device#
-   a@ Returns the SYCL <<device>> associated with this SYCL [code]#queue#.
+_Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::mem_advise(ptr, numBytes, advice)#.
 
-|====
+_Effects (2):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
 
+_Effects (3):_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::mem_advise(ptr, numBytes, advice)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+.[apidef]#queue::update_host#
+[source,role=synopsis,id=api:queue-update-host]
+----
+template <typename T, int Dims, access_mode Mode, target Tgt,
+          access::placeholder IsPlaceholder>
+event update_host(accessor<T, Dims, Mode, Tgt, IsPlaceholder> acc)
+----
+
+_Effects:_ Equivalent to calling [api]#queue::submit# with a command group
+function that calls [code]#handler::require(acc)# and
+[code]#handler::update_host(acc)#.
+
+_Returns:_ An event which represents the <<command>> which is submitted to the
+queue.
+
+'''
+
+[[sec:queue-info-descriptors]]
+==== Information descriptors
+
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#queue::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#queue::get_info#
+function.
+
+'''
+
+.[apidef]#info::queue::context#
+[source,role=synopsis,id=api:info-queue-context]
+----
+namespace sycl::info::queue {
+struct context {
+  using return_type = context;
+};
+} // namespace sycl::info::queue
+----
+
+_Remarks:_ Template parameter to [api]#queue::get_info#.
+
+_Returns:_ The <<context>> that is associated with this queue.
+
+'''
+
+.[apidef]#info::queue::device#
+[source,role=synopsis,id=api:info-queue-device]
+----
+namespace sycl::info::queue {
+struct device {
+  using return_type = device;
+};
+} // namespace sycl::info::queue
+----
+
+_Remarks:_ Template parameter to [api]#queue::get_info#.
+
+_Returns:_ The <<device>> that is associated with this queue.
+
+'''
 
 [[sec:queue-properties]]
-==== Queue properties
+==== Properties
 
-The properties that can be provided when constructing the SYCL [code]#queue#
-class are describe in <<table.properties.queue>>.
+This section describes the properties that can be passed in the [code]#propList#
+parameter of the <<sec:queue-ctors, queue constructors>>.
 
+'''
 
-[[table.properties.queue]]
-.Properties supported by the SYCL [code]#queue# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Property @ Description
-a@
-[source]
+.[apidef]#property::queue::enable_profiling#
+[source,role=synopsis,id=api:property-queue-enable-profiling]
 ----
-property::queue::enable_profiling
+namespace sycl::property::queue {
+struct enable_profiling {
+  enable_profiling();  (1)
+};
+} // namespace sycl::property::queue
 ----
-   a@ The [code]#enable_profiling# property adds the requirement
-      that the <<sycl-runtime>> must capture profiling information for
-      the <<command-group,command groups>> that are submitted from this SYCL
-      [code]#queue# and provide said information via the SYCL
-      [code]#event# class [code]#get_profiling_info# member
-      function.  If the queue's associated device does not have
-      [code]#aspect::queue_profiling#, passing this property to the queue's
-      constructor causes the constructor to throw a synchronous
-      [code]#exception# with the [code]#errc::feature_not_supported# error
-      code.
 
-a@
-[source]
+When a queue is constructed with this property, the implementation captures
+profiling information for the <<command-group,command groups>> that are
+submitted to this queue.
+Applications can retrieve this profiling information by calling
+[code]#event::get_profiling_info# on the event that is returned when submitting
+the command group.
+If the queue's associated device does not have [code]#aspect::queue_profiling#,
+passing this property to the queue's constructor causes the constructor to throw
+a synchronous [code]#exception# with the [code]#errc::feature_not_supported#
+error code.
+
+_Effects (1):_ Constructs an [code]#enable_profiling# property object.
+
+'''
+
+.[apidef]#property::queue::in_order#
+[source,role=synopsis,id=api:property-queue-in-order]
 ----
-property::queue::in_order
+namespace sycl::property::queue {
+struct in_order {
+  in_order();  (1)
+};
+} // namespace sycl::property::queue
 ----
-   a@ The [code]#in_order# property adds the requirement that
-      a SYCL [code]#queue# provides in-order semantics whereby
-      commands submitted to said [code]#queue# are executed in
-      the order in which they are submitted.
-      Commands submitted in this fashion can be viewed as-if
-      having an implicit dependence on the previous command
-      submitted to that [code]#queue#. Using the [code]#in_order#
-      property makes no guarantees about the ordering of commands
-      submitted to different queues with respect to each other.
 
-|====
+When a queue is constructed with this property, commands that are submitted to
+the queue are guaranteed to execute in the order in which they are submitted, as
+if there is an implicit dependency on the previous command that was submitted to
+the same queue.
+The [code]#in_order# property does not provide any guarantee about the order of
+commands submitted to other queues with respect to commands submitted to this
+queue.
 
+_Effects (1):_ Constructs an [code]#in_order# property object.
 
-The constructors of the [code]#queue# [code]#property# classes are listed in
-<<table.constructors.properties.queue>>.
+'''
 
-
-[[table.constructors.properties.queue]]
-.Constructors of the [code]#queue# [code]#property# classes
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
-----
-property::queue::enable_profiling::enable_profiling()
-----
-   a@ Constructs a SYCL [code]#enable_profiling# property instance.
-
-a@
-[source]
-----
-property::queue::in_order::in_order()
-----
-   a@ Constructs a SYCL [code]#in_order# property instance.
-
-|====
-
-
-
-[[sec:interface.queue.errors]]
-==== Queue error handling
+[[sec:queue-error-handling]]
+==== Error handling
 
 Queue errors come in two forms:
 
-  * *Synchronous Errors* are those that we would expect to be reported directly
-    at the point of waiting on an event, and hence waiting for a queue to
-    complete, as well as any immediate errors reported by enqueuing work onto a
-    queue.
-    Such errors are reported through {cpp} exceptions.
-  * <<async-error,Asynchronous errors>> are those that are produced or detected
-    after associated host API calls have returned (so can't be thrown as
-    exceptions by the API call), and that are handled by an <<async-handler>>
-    through which the errors are reported.
-    Handling of asynchronous errors from a queue occurs at specific times, as
-    described by <<error-handling>>.
+* Synchronous errors are those that we would expect to be reported directly at
+  the point of waiting on an event, and hence waiting for a queue to complete,
+  as well as any immediate errors reported by enqueuing work onto a queue.
+  Such errors are reported through {cpp} exceptions.
+* <<async-error,Asynchronous errors>> are those that are produced or detected
+  after associated host API calls have returned (so can't be thrown as
+  exceptions by the API call), and that are handled by an <<async-handler>>
+  through which the errors are reported.
+  Handling of asynchronous errors from a queue occurs at specific times, as
+  described by <<error-handling>>.
 
 Note that if there are <<async-error,asynchronous errors>> to be processed when
-a queue is destructed, the handler is called and this might delay or block the
+a queue is destroyed, the handler is called and this might delay or block the
 destruction, according to the behavior of the handler.
 
-
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%% end queue_class %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [[sec:interface.event]]
 === Event class
@@ -4753,7 +5514,7 @@ accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler)
       access mode and target in the command group buffer.
       The value of target can be [code]#target::device#,
       [code]#target::constant_buffer# or
-      [code]#target::host_task.
+      [code]#target::host_task#.
 
 a@
 [source]
@@ -4780,7 +5541,7 @@ accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler,
       <<ranged-accessor>>, where the range starts at the given offset from the
       beginning of the buffer.  The value of target can be
       [code]#target::device#, [code]#target::constant_buffer# or
-      [code]#target::host_task.
+      [code]#target::host_task#.
 
 Throws an [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
@@ -4934,7 +5695,7 @@ reinterpret() const
 ==== Buffer properties
 
 The properties that can be provided when constructing the SYCL [code]#buffer#
-class are describe in <<table.properties.buffer>>.
+class are described in <<table.properties.buffer>>.
 
 
 [[table.properties.buffer]]
@@ -5948,7 +6709,7 @@ host_sampled_image_accessor<DataT, Dimensions> get_host_access()
 ==== Image properties
 
 The properties that can be provided when constructing the SYCL
-[code]#unsampled_image# and [code]#sampled_image# classes are describe in
+[code]#unsampled_image# and [code]#sampled_image# classes are described in
 <<table.properties.image>>.
 
 // Interface for image properties
@@ -9223,7 +9984,6 @@ For interoperability with the <<backend>>, users should rely on types exposed by
 the decorated version.
 If the value of [code]#access::decorated# is [code]#access::decorated::legacy#,
 the 1.2.1 interface is exposed.
-This interface is deprecated.
 
 The template traits [code]#remove_decoration# and type alias
 [code]#remove_decoration_t# retrieve the non-decorated pointer or reference from
@@ -9426,7 +10186,7 @@ operator=(const multi_ptr<value_type, AS, IsDecorated>&)
 ----
    a@ Available only when: [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
-Assigns the value of the left hand side [code]#multi_ptr# into the [code]#generic_ptr#.
+Assigns the value of the right hand side [code]#multi_ptr# into the [code]#generic_ptr#.
 
 a@
 [source]
@@ -9439,7 +10199,7 @@ operator=(multi_ptr<value_type, AS, IsDecorated>&&)
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
-Move the value of the left hand side [code]#multi_ptr# into the [code]#generic_ptr#.
+Move the value of the right hand side [code]#multi_ptr# into the [code]#generic_ptr#.
 
 a@
 [source]
@@ -9932,10 +10692,6 @@ below.
 include::{header_dir}/pointer.h[lines=4..-1]
 ----
 
-Note that using [code]#global_ptr#, [code]#local_ptr#, [code]#constant_ptr# or
-[code]#private_ptr# without specifying the decoration is deprecated.
-The default argument is provided for compatibility with 1.2.1.
-
 
 [[subsec:samplers]]
 === Image samplers
@@ -10142,7 +10898,7 @@ USM is an optional feature which may not be supported by all devices, and
 devices that support USM may not support all types of USM allocation.
 A SYCL application can use the [code]#device::has()# function to determine the
 level of USM support for a device.
-See <<table.device.aspect>> in <<sec:device-aspects>> for more details.
+See <<sec:device-aspects>> for more details.
 
 The characteristics of USM allocations are summarized in
 <<table.USM.allocation.characteristics>>.
@@ -10205,7 +10961,7 @@ Support for device allocations on a specific device can be queried through
 
 Device allocations must be explicitly copied between the host and a device.
 The member functions to copy and initialize data are found in
-<<table.members.queue>> and <<table.members.handler.copy>>, and these functions
+<<sec:queue-shortcuts>> and <<table.members.handler.copy>>, and these functions
 may be used on device allocations if a device supports
 [code]#aspect::usm_device_allocations#.
 
@@ -10257,14 +11013,14 @@ set of shared allocations larger than device memory.
 Users may query whether a device supports concurrent access with atomic
 modification of shared allocations through the aspect
 [code]#aspect::usm_atomic_shared_allocations#.
-See <<table.device.aspect>> in <<sec:device-aspects>> for more details.
+See <<sec:device-aspects>> for more details.
 
 Performance hints for shared allocations may be specified by the user by
 enqueuing [code]#prefetch# operations on a device.
 These operations inform the SYCL runtime that the specified shared allocation is
 likely to be accessed on the device in the future, and that it is free to
 migrate the allocation to the device.
-More about [code]#prefetch# is found in <<table.queue.shortcuts>> and
+More about [code]#prefetch# is found in <<sec:queue-shortcuts>> and
 <<table.members.handler.copy>>.
 If a device supports concurrent access to shared allocations, then
 [code]#prefetch# operations may be overlapped with kernel execution.
@@ -10272,7 +11028,7 @@ If a device supports concurrent access to shared allocations, then
 Additionally, users may use the [code]#mem_advise# member function to annotate
 shared allocations with [code]#advice#.
 Valid [code]#advice# is defined by the device and its associated backend.
-See <<table.queue.shortcuts>> and <<table.members.handler.copy>> for more
+See <<sec:queue-shortcuts>> and <<table.members.handler.copy>> for more
 information.
 
 In the most capable systems, users do not need to use SYCL USM allocation
@@ -13182,9 +13938,10 @@ property::reduction::initialize_to_identity
       identity value passed to the reduction interface, or to the identity
       value determined by the [code]#known_identity# trait if no identity value
       was specified. If no identity value was specified and an identity value
-      cannot be determined by the [code]#known_identity# trait, the compiler
-      must raise a diagnostic. When this property is set, the original value of
-      the reduction variable is not included in the reduction.
+      cannot be determined by the [code]#known_identity# trait, the
+      implementation must throw an [code]#exception# with the
+      [code]#errc::invalid# error code. When this property is set, the original
+      value of the reduction variable is not included in the reduction.
 
 |====
 
