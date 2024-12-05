@@ -90,7 +90,7 @@ bool leader_of(Group g) noexcept;
 .[apidef]#GroupT::id#
 [source,role=synopsis,id=api:khr-group-interface-common-group-id]
 ----
-id_type id() const noexcept
+id_type id() const noexcept;
 ----
 
 _Returns_: The index of this group within the index space returned by
@@ -101,7 +101,7 @@ _Returns_: The index of this group within the index space returned by
 .[apidef]#GroupT::linear_id#
 [source,role=synopsis,id=api:khr-group-interface-common-group-linear-id]
 ----
-linear_id_type linear_id() const noexcept
+linear_id_type linear_id() const noexcept;
 ----
 
 _Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
@@ -112,7 +112,7 @@ group within the index space returned by [code]#range()#.
 .[apidef]#GroupT::range#
 [source,role=synopsis,id=api:khr-group-interface-common-group-range]
 ----
-range_type range() const noexcept
+range_type range() const noexcept;
 ----
 
 _Returns_: An index space representing the collection of groups that includes
@@ -124,7 +124,7 @@ group.
 .[apidef]#GroupT::extents#
 [source,role=synopsis,id=api:khr-group-interface-common-group-extents]
 ----
-constexpr extents_type extents() const noexcept
+constexpr extents_type extents() const noexcept;
 ----
 
 _Returns_: The number of work-items in each dimension of the group.
@@ -134,7 +134,7 @@ _Returns_: The number of work-items in each dimension of the group.
 .[apidef]#GroupT::extent#
 [source,role=synopsis,id=api:khr-group-interface-common-group-extent]
 ----
-constexpr index_type extent(rank_type r) const noexcept
+constexpr index_type extent(rank_type r) const noexcept;
 ----
 
 _Preconditions_: [code]#r < dimensions# is [code]#true#.
@@ -176,7 +176,7 @@ _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 .[apidef]#GroupT::size#
 [source,role=synopsis,id=api:common-group-size]
 ----
-constexpr size_type size() const noexcept
+constexpr size_type size() const noexcept;
 ----
 
 _Returns_: The total number of work-items in the group, equal to the product of
@@ -191,7 +191,7 @@ the number of work-items in each dimension of the group.
 [source,role=synopsis,id=api:common-group-get-item]
 ----
 template <typename Group>
-work_item<Group> get_item(Group g) noexcept
+work_item<Group> get_item(Group g) noexcept;
 ----
 
 _Constraints_: Available only if `Group` is `work_group` or `sub_group`.
@@ -205,7 +205,7 @@ _Returns_: A [code]#work_item# representing the calling work-item within group
 [source,role=synopsis,id=api:common-group-leader_of]
 ----
 template <typename Group>
-bool leader_of(Group g) noexcept
+bool leader_of(Group g) noexcept;
 ----
 
 _Returns_: [code]#true# if the calling work-item is the leader of group
@@ -265,7 +265,7 @@ class work_group {
 .[apidef]#work_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-work-group-constructor]
 ----
-work_group(group<Dimensions> g) noexcept
+work_group(group<Dimensions> g) noexcept;
 ----
 
 _Effects_: Constructs a [code]#work_group# representing the same collection of
@@ -332,7 +332,7 @@ class sub_group {
 .[apidef]#sub_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-constructor]
 ----
-sub_group(sycl::sub_group sg) noexcept
+sub_group(sycl::sub_group sg) noexcept;
 ----
 
 _Effects_: Constructs a [code]#sub_group# representing the same collection of
