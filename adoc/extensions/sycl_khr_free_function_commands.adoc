@@ -48,7 +48,7 @@ int main() {
   float* c = malloc_shared<float>(N * M, myQueue);
 
   // Launch an asynchronous kernel to initialize a
-  // Use khr::submit to get a handler, even though not required here
+  // Use khr::submit to enqueue a kernel via a handler
   khr::submit(myQueue, [&](handler& cgh) {
 
     // Enqueue a kernel iterating on a N*M 2D iteration space
