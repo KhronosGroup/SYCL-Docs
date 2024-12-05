@@ -32,26 +32,26 @@ The example below rewrites the application from
 ----
 #include <iostream>
 #include <sycl/sycl.hpp>
-using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names.
 
-// Size of the matrices
+// Size of the matrices.
 constexpr size_t N = 2000;
 constexpr size_t M = 3000;
 
 int main() {
-  // Create a queue to work on
+  // Create a queue to work on.
   queue myQueue;
 
-  // Create some 2D arrays of float for our matrices
+  // Create some 2D arrays of float for our matrices.
   float* a = malloc_shared<float>(N * M, myQueue);
   float* b = malloc_shared<float>(N * M, myQueue);
   float* c = malloc_shared<float>(N * M, myQueue);
 
-  // Launch an asynchronous kernel to initialize a
-  // Use khr::submit to enqueue a kernel via a handler
+  // Launch an asynchronous kernel to initialize a.
+  // Use khr::submit to enqueue a kernel via a handler.
   khr::submit(myQueue, [&](handler& cgh) {
 
-    // Enqueue a kernel iterating on a N*M 2D iteration space
+    // Enqueue a kernel iterating on a N*M 2D iteration space.
     khr::launch(cgh, range<2> { N, M }, [=](id<2> index) {
       size_t i = index[0];
       size_t j = index[1];
@@ -60,20 +60,20 @@ int main() {
 
   });
 
-  // Launch an asynchronous kernel to initialize b
-  // Use khr::launch to enqueue a kernel without a handler
+  // Launch an asynchronous kernel to initialize b.
+  // Use khr::launch to enqueue a kernel without a handler.
   khr::launch(myQueue, range<2> { N, M }, [=](id<2> index) {
     size_t i = index[0];
     size_t j = index[1];
     b[i * M + j] = i * 2014 + j * 42;
   });
 
-  // Ensure that the two previous kernels complete before enqueueing more work
-  // This does not block the host, but enforces dependencies on the device
+  // Ensure that the two previous kernels complete before enqueueing more work.
+  // This does not block the host, but enforces dependencies on the device.
   khr::command_barrier(myQueue);
 
-  // Launch an asynchronous kernel to compute matrix addition c = a + b
-  // Use khr::launch_grouped to enqueue a kernel using groups without a handler
+  // Launch an asynchronous kernel to compute matrix addition c = a + b.
+  // Use khr::launch_grouped to enqueue a kernel using groups without a handler.
   range<2> local = { 2, 2 };
   range<2> global = { N, M };
   khr::launch_grouped(myQueue, global, local, [=](khr::invocation<2> ivc) {
@@ -83,15 +83,15 @@ int main() {
     c[index] = a[index] + b[index];
   });
 
-  // Wait for all three kernels to complete before accessing the results
-  // This blocks the host until all previous kernels have completed
+  // Wait for all three kernels to complete before accessing the results.
+  // This blocks the host until all previous kernels have completed.
   myQueue.wait();
 
   std::cout << std::endl << "Result:" << std::endl;
   for (size_t i = 0; i < N; i++) {
     for (size_t j = 0; j < M; j++) {
       size_t index = i * M + j;
-      // Compare the result to the analytic value
+      // Compare the result to the analytic value.
       if (c[index] != i * (2 + 2014) + j * (1 + 42)) {
         std::cout << "Wrong value " << c[index] << " on element " << i << " "
                   << j << std::endl;
@@ -853,7 +853,7 @@ class invocation
 
   sub_group<Dimensions> get_sub_group() const noexcept;
 
-  // Available for backwards compatibility only
+  // Available for backwards compatibility only.
   operator nd_item<Dimensions>() const noexcept;
 };
 
