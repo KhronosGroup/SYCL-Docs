@@ -65,6 +65,10 @@ class GroupT {
 #if defined (__cpp_lib_mdspan)
   constexpr extents_type extents() const noexcept;
   constexpr index_type extent(rank_type r) const noexcept;
+
+  static constexpr rank_type rank() noexcept;
+  static constexpr rank_type rank_dynamic() noexcept;
+  static constexpr size_t static_extent(rank_type r) noexcept;
 #endif
   constexpr size_type size() const noexcept;
 
@@ -136,6 +140,36 @@ constexpr index_type extent(rank_type r) const noexcept
 _Preconditions_: [code]#r < dimensions# is [code]#true#.
 
 _Returns_: The number of work-items in the specified dimension of the group.
+
+'''
+
+.[apidef]#GroupT::rank#
+[source,role=synopsis,id=api:khr-group-interface-common-group-rank]
+----
+static constexpr rank_type rank() noexcept;
+----
+
+_Effects_: Equivalent to [code]#return extents_type::rank();#.
+
+'''
+
+.[apidef]#GroupT::rank_dynamic#
+[source,role=synopsis,id=api:khr-group-interface-common-group-rank_dynamic]
+----
+static constexpr rank_type rank_dynamic() noexcept;
+----
+
+_Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
+
+'''
+
+.[apidef]#GroupT::static_extent#
+[source,role=synopsis,id=api:khr-group-interface-common-group-static_extent]
+----
+static constexpr size_t static_extent(rank_type r) noexcept;
+----
+
+_Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
 '''
 
