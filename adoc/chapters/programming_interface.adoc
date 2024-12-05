@@ -1227,56 +1227,141 @@ include::{header_dir}/context.h[lines=4..-1]
 [[sec:context-ctors]]
 ==== Constructors
 
+All context constructors take a parameter named [code]#propList# which allows
+the application to pass zero or more properties.
+These properties may specify additional effects of the constructor and may also
+specify exceptions that the constructor throws.
+See <<sec:context-properties>> for the context properties that are defined by
+the <<core-spec>>.
+
+'''
+
 .[apititle]#Default constructor#
 [source,role=synopsis,id=api:context-ctor]
 ----
-explicit context(async_handler asyncHandler = {})
+explicit context(const property_list& propList = {})
 ----
 
-_Effects:_ Constructs a [code]#context# object using the
-[code]#default_selector_v# to determine the associated platform and devices.
-The associated platform is the platform which contains the device selected by
+_Effects:_ Constructs a [code]#context# object using the device selected by
 [code]#default_selector_v#.
-The <<device,devices>> that are associated with the constructed context are
-implementation-defined but must contain the device that is selected by
-[code]#default_selector_v#.
-The constructed context uses the [code]#asyncHandler# parameter to handle
-exceptions.
+The context's platform is the platform that contains this device.
+The context contains the selected device.
+The context may also contain other devices from the same platform.
+Whether this happens is implementation defined.
 
 '''
 
-.[apititle]#Construct from device#
-[source,role=synopsis,id=api:context-ctor-dev]
+.[apititle]#Constructor with async handler#
+[source,role=synopsis,id=api:context-ctor-async-handler]
 ----
-explicit context(const device& dev, async_handler asyncHandler = {})
+explicit context(async_handler asyncHandler, const property_list& propList = {})
 ----
 
-_Effects:_ Constructs a [code]#context# object using the [code]#dev# parameter
-to determine the associated platform and device.
-The associated platform is the platform that contains [code]#dev#, and the
-associated device is [code]#dev#.
-The constructed context uses the [code]#asyncHandler# parameter to handle
-exceptions.
+_Effects:_ Constructs a [code]#context# object using the device selected by
+[code]#default_selector_v#.
+The context's platform is the platform that contains this device.
+The context contains the selected device.
+The context may also contain other devices from the same platform.
+Whether this happens is implementation defined.
+The context has the asynchronous error handler [code]#asyncHandler#.
 
 '''
 
-.[apititle]#Construct from device list#
-[source,role=synopsis,id=api:context-ctor-dev-list]
+.[apititle]#Constructor with device#
+[source,role=synopsis,id=api:context-ctor-device]
 ----
-explicit context(const std::vector<device>& deviceList,
-                 async_handler asyncHandler = {})
+explicit context(const device& dev, const property_list& propList = {})
+----
+
+_Effects:_ Constructs a [code]#context# object that contains the device
+[code]#dev#.
+The context's platform is the platform that contains [code]#dev#.
+
+'''
+
+.[apititle]#Constructor with device and async handler#
+[source,role=synopsis,id=api:context-ctor-device-async-handler]
+----
+explicit context(const device& dev, async_handler asyncHandler,
+                 const property_list& propList = {})
+----
+
+_Effects:_ Constructs a [code]#context# object that contains the device
+[code]#dev#.
+The context's platform is the platform that contains [code]#dev#.
+The context has the asynchronous error handler [code]#asyncHandler#.
+
+'''
+
+.[apititle]#Constructor with platform#
+[source,role=synopsis,id=api:context-ctor-platform]
+----
+explicit context(const platform &plt, const property_list &propList = {})
+----
+
+_Effects:_ Constructs a [code]#context# object that contains all of the devices
+in the platform [code]#plt#.
+The context's platform is [code]#plt#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+platform [code]#plt# contains no devices.
+
+'''
+
+.[apititle]#Constructor with platform and async handler#
+[source,role=synopsis,id=api:context-ctor-platform-async-handler]
+----
+explicit context(const platform &plt, async_handler asyncHandler,
+                 const property_list &propList = {})
+----
+
+_Effects:_ Constructs a [code]#context# object that contains all of the devices
+in the platform [code]#plt#.
+The context's platform is [code]#plt#.
+The context has the asynchronous error handler [code]#asyncHandler#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+platform [code]#plt# contains no devices.
+
+'''
+
+.[apititle]#Constructor with device list#
+[source,role=synopsis,id=api:context-ctor-device-list]
+----
+explicit context(const std::vector<device>& deviceList, const property_list& propList = {})
 ----
 
 _Preconditions:_ All devices in [code]#deviceList# must be associated with the
 same platform.
 
-_Effects:_ Constructs a [code]#context# object using the [code]#deviceList#
-parameter to determine the associated platform and device.
-The associated platform is the platform that contains all of the devices in
+_Effects:_ Constructs a [code]#context# object that contains all of the devices
+in [code]#deviceList#.
+The context's platform is the platform that contains the devices in
 [code]#deviceList#.
-The associated devices are those devices in [code]#deviceList#.
-The constructed context uses the [code]#asyncHandler# parameter to handle
-exceptions.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
+[code]#deviceList# is empty.
+
+'''
+
+.[apititle]#Constructor with device list and async handler#
+[source,role=synopsis,id=api:context-ctor-device-list-async-handler]
+----
+explicit context(const std::vector<device>& deviceList, async_handler asyncHandler,
+                 const property_list& propList = {})
+----
+
+_Preconditions:_ All devices in [code]#deviceList# must be associated with the
+same platform.
+
+_Effects:_ Constructs a [code]#context# object that contains all of the devices
+in [code]#deviceList#.
+The context's platform is the platform that contains the devices in
+[code]#deviceList#.
+The context has the asynchronous error handler [code]#asyncHandler#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
+[code]#deviceList# is empty.
 
 '''
 
@@ -1503,6 +1588,7 @@ At a minimum, each context must support [code]#memory_scope::work_item#,
 [[sec:context-properties]]
 ==== Properties
 
+The <<core-spec>> does not define any properties for the context constructors.
 The [code]#property_list# constructor parameters are present for extensibility.
 
 
