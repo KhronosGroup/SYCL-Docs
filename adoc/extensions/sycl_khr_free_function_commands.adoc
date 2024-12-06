@@ -589,22 +589,22 @@ namespace sycl::khr {
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
 void copy(sycl::handler& h,
           const SrcT* src,
-          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (3)
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (1)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
 void copy(sycl::handler& h,
           std::shared_ptr<SrcT> src,
-          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (4)
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (2)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
 void copy(sycl::queue q,
           const SrcT* src,
-          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (5)
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (3)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
 void copy(sycl::queue q,
           std::shared_ptr<SrcT> src,
-          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (6)
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (4)
 
 }
 ----
@@ -623,9 +623,9 @@ _Preconditions_:
 * [code]#src# points to an allocation of at least as many bytes as the range
   represented by [code]#dest#.
 
-_Effects (3-4)_: Equivalent to [code]#h.copy(src, dest)#.
+_Effects (1-2)_: Equivalent to [code]#h.copy(src, dest)#.
 
-_Effects (5-6)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+_Effects (3-4)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
 dest) })#
 
 '''
@@ -638,22 +638,22 @@ namespace sycl::khr {
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
 void copy(sycl::handler& h,
           sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          DestT* dest);                 (7)
+          DestT* dest);                 (1)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
 void copy(sycl::handler& h,
           sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          std::shared_ptr<DestT> dest); (8)
+          std::shared_ptr<DestT> dest); (2)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
 void copy(sycl::queue q,
           sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          DestT* dest);                 (9)
+          DestT* dest);                 (3)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
 void copy(sycl::queue q,
           sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          std::shared_ptr<DestT> dest); (10)
+          std::shared_ptr<DestT> dest); (4)
 
 }
 ----
@@ -672,9 +672,9 @@ _Preconditions_:
 * [code]#dest# points to an allocation of at least as many bytes as the range
   represented by [code]#src#.
 
-_Effects (7-8)_: Equivalent to [code]#h.copy(src, dest)#.
+_Effects (1-2)_: Equivalent to [code]#h.copy(src, dest)#.
 
-_Effects (9-10)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+_Effects (3-4)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
 dest); })#.
 
 '''
@@ -688,13 +688,13 @@ template <typename SrcT, int SrcDims, access_mode SrcMode,
           typename DestT, int DestDims, access_mode DestMode>
 void copy(sycl::queue q,
           sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (11)
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (1)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode,
           typename DestT, int DestDims, access_mode DestMode>
 void copy(sycl::queue q,
           sycl::accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (12)
+          sycl::accessor<DestT, DestDims, DestMode, target::device> dest); (1)
 
 }
 ----
@@ -709,9 +709,9 @@ _Constraints_:
 * [code]#DestMode# is [code]#access_mode::write# or
   [code]#access_mode::read_write#.
 
-_Effects (11)_: Equivalent to [code]#h.copy(src, dest)#.
+_Effects (1)_: Equivalent to [code]#h.copy(src, dest)#.
 
-_Effects (12)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
 dest); })#.
 
 _Throws_: A synchronous [code]#exception# with the [code]#errc::invalid# error
