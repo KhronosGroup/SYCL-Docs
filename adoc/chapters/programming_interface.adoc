@@ -18678,13 +18678,9 @@ __writeable_swizzle__(const __writeable_swizzle__&) = delete
 
 __const_swizzle__() = delete
 __const_swizzle__(const __const_swizzle__&) = delete
-
-__const_swizzle__& operator=(const __const_swizzle__&) = delete
 ----
 |====
 The default constructor and copy constructor are deleted.
-
-The copy assignment operator for [code]#+__const_swizzle__+# is deleted.
 
 ===== Destructors for the swizzled vector class templates
 
@@ -18857,6 +18853,46 @@ Functions (2) is available only in [code]#+__const_swizzle__+#.
 
 _Returns:_ A reference to the element of the underlying [code]#vec# object that
 corresponds to the position [code]#index# of the swizzle operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+const __writeable_swizzle__&
+operator=(const __writeable_swizzle__& rhs) const
+----
+|====
+_Availability:_ Available only in [code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+
+_Effects:_ Assigns elements from the right hand side
+[code]#+__writeable_swizzle__+# view to elements of the left hand side
+[code]#+__writeable_swizzle__+# view.
+The value corresponding to the first element of the [code]#rhs# swizzle
+operation is assigned to the element of the underlying [code]#vec# object that
+corresponds to the first element of the left hand side swizzle operation, etc.
+
+_Returns:_ A reference to the left hand side [code]#+__writeable_swizzle__+#
+view.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+const __const_swizzle__&
+operator=(const __const_swizzle__& rhs) const = delete;
+----
+|====
+The copy assignment operator is deleted for the [code]#+__const_swizzle__+#
+class.
 
 '''
 
