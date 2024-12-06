@@ -76,9 +76,9 @@ int main() {
   // Use khr::launch_grouped to enqueue a kernel using groups without a handler.
   range<2> local = { 2, 2 };
   range<2> global = { N, M };
-  khr::launch_grouped(myQueue, global, local, [=](khr::invocation<2> ivc) {
-    size_t i = ivc.id(0);
-    size_t j = ivc.id(1);
+  khr::launch_grouped(myQueue, global, local, [=](sycl::nd_item<2> it) {
+    size_t i = it.get_global_id(0);
+    size_t j = it.get_global_id(1);
     size_t index = i * M + j;
     c[index] = a[index] + b[index];
   });
@@ -873,119 +873,6 @@ other dependencies (e.g., specified by [code]#handler::depends_on#), then this
 operation is a no-op.{endnote}
 
 '''
-
-== [code]#invocation# class template
-
-The [code]#invocation# class template identifies an invocation of a kernel
-function.
-
-Instances of the [code]#invocation# class template are not user-constructible
-and are passed as an argument to each invocation of a kernel function.
-
-[source,role=synopsis]
-----
-namespace sycl::khr {
-
-template <int Dimensions>
-class invocation
-{
- public:
-  static constexpr int dimensions = Dimensions;
-
-  id<Dimensions> id() const noexcept;
-  size_t linear_id() const noexcept;
-
-  range<Dimensions> range() const noexcept;
-
-  group<Dimensions> get_work_group() const noexcept;
-
-  sub_group<Dimensions> get_sub_group() const noexcept;
-
-  // Available for backwards compatibility only.
-  invocation(nd_item<Dimensions> it) noexcept;
-  operator nd_item<Dimensions>() const noexcept;
-};
-
-}
-----
-
-.[apidef]#id#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-id]
-----
-id<Dimensions> id() const noexcept;
-----
-_Returns_: The index of this invocation within the kernel dispatch.
-
-'''
-
-.[apidef]#linear_id#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-linear_id]
-----
-size_t linear_id() const noexcept;
-----
-_Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
-invocation within the kernel dispatch.
-
-'''
-
-.[apidef]#range#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-range]
-----
-range<Dimensions> range() const noexcept;
-----
-
-_Returns_: An index space representing all invocations of this kernel.
-
-'''
-
-.[apidef]#get_work_group#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-get_work_group]
-----
-group<Dimensions> get_work_group() const noexcept;
-----
-
-_Returns_: A [code]#group# representing the <<work-group>> to which this
-invocation belongs.
-
-'''
-
-.[apidef]#get_sub_group#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-get_sub_group]
-----
-sub_group get_sub_group() const noexcept;
-----
-
-_Returns_: A [code]#sub_group# representing the sub-group to which this
-invocation belongs.
-
-'''
-
-.[apidef]#invocation constructor#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-invocation-constructor]
-----
-invocation(nd_item<Dimensions>() it) noexcept;
-----
-
-_Effects_: Constructs a [code]#invocation# representing the same work-item as
-[code]#it#.
-
-{note}This function exists only to provide backwards compatibility with SYCL
-2020 code in order to facilitate experimentation with the new interface proposed
-by this extension.{endnote}
-
-'''
-
-.[apidef]#nd_item conversion operator#
-[source,role=synopsis,id=api:khr-free-function-commands-invocation-nd_item-conversion-operator]
-----
-operator nd_item<Dimensions>() const noexcept;
-----
-
-_Returns_: An [code]#nd_item# representing this invocation.
-
-{note}This function exists only to provide backwards compatibility with SYCL
-2020 code in order to facilitate experimentation with the new interface proposed
-by this extension.{endnote}
 
 == Issues
 
