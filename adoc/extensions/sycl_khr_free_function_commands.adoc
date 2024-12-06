@@ -904,6 +904,7 @@ class invocation
   sub_group<Dimensions> get_sub_group() const noexcept;
 
   // Available for backwards compatibility only.
+  invocation(nd_item<Dimensions> it) noexcept;
   operator nd_item<Dimensions>() const noexcept;
 };
 
@@ -958,6 +959,21 @@ sub_group get_sub_group() const noexcept;
 
 _Returns_: A [code]#sub_group# representing the sub-group to which this
 invocation belongs.
+
+'''
+
+.[apidef]#invocation constructor#
+[source,role=synopsis,id=api:khr-free-function-commands-invocation-invocation-constructor]
+----
+invocation(nd_item<Dimensions>() it) noexcept;
+----
+
+_Effects_: Constructs a [code]#invocation# representing the same work-item as
+[code]#it#.
+
+{note}This function exists only to provide backwards compatibility with SYCL
+2020 code in order to facilitate experimentation with the new interface proposed
+by this extension.{endnote}
 
 '''
 
