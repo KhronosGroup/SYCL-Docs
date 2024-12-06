@@ -244,10 +244,10 @@ void launch_reduce(sycl::queue q, sycl::range<3> r,
 _Constraints_: The parameter pack consists of 0 or more objects created by the
 [code]#sycl::reduction# function.
 
-_Effects (1-3)_: Equivalent to [code]#h.parallel_for(r, reductions..., k)#.
+_Effects (1-3)_: Equivalent to [code]#+h.parallel_for(r, reductions..., k)+#.
 
-_Effects (4-6)_: Equivalent to [code]#q.submit([&](handler& h) {
-launch_reduce(h, r, k, reductions...); })#.
+_Effects (4-6)_: Equivalent to [code]#+q.submit([&](handler& h) {
+launch_reduce(h, r, k, reductions...); })+#.
 
 
 '''
@@ -406,11 +406,11 @@ void launch_grouped_reduce(sycl::queue q, sycl::range<3> r,
 _Constraints_: The parameter pack consists of 0 or more objects created by the
 [code]#sycl::reduction# function.
 
-_Effects (1-3)_: Equivalent to [code]#h.parallel_for(nd_range(r, size),
-reductions..., k)#.
+_Effects (1-3)_: Equivalent to [code]#+h.parallel_for(nd_range(r, size),
+reductions..., k)+#.
 
-_Effects (4-6)_: Equivalent to [code]#q.submit([&](handler& h) {
-launch_grouped_reduce(h, r, size, k, reductions...); })#.
+_Effects (4-6)_: Equivalent to [code]#+q.submit([&](handler& h) {
+launch_grouped_reduce(h, r, size, k, reductions...); })+#.
 
 '''
 
