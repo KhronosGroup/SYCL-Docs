@@ -535,10 +535,16 @@ Copies between two USM pointers.
 
 _Constraints_: [code]#T# is <<device-copyable>>.
 
-_Preconditions_: [code]#src# and [code]#dest# must be host pointers or USM
-pointers accessible on the device.
-[code]#src# and [code]#dest# must point to allocations of at least [code]#count#
-elements of type [code]#T#.
+_Preconditions_:
+
+* [code]#src# is a host pointer or a pointer within a USM allocation that is
+  accessible on the device.
+* [code]#dest# is a host pointer or a pointer within a USM allocation that is
+  accessible on the device.
+* [code]#src# and [code]#dest# both point to allocations of at least
+  [code]#count# elements of type [code]#T#.
+* If either [code]#src# or [code]#dest# is a pointer is to a USM allocation,
+  that allocation was created from the same context as the handler's queue.
 
 _Effects (1)_: Equivalent to [code]#h.copy(src, dest, count)#.
 
@@ -583,8 +589,11 @@ _Constraints_:
 * [code]#DestMode# is [code]#access_mode::write# or
   [code]#access_mode::read_write#.
 
-_Preconditions_: [code]#src# must be a host pointer, pointing to an allocation
-of at least as many bytes as the range represented by [code]#dest#.
+_Preconditions_:
+
+* [code]#src# is a host pointer.
+* [code]#src# points to an allocation of at least as many bytes as the range
+  represented by [code]#dest#.
 
 _Effects (3-4)_: Equivalent to [code]#h.copy(src, dest)#.
 
@@ -629,8 +638,11 @@ _Constraints_:
 * [code]#DestMode# is [code]#access_mode::read# or
   [code]#access_mode::read_write#.
 
-_Preconditions_: [code]#dest# must be a host pointer, pointing to an allocation
-of at least as many bytes as the range represented by [code]#src#.
+_Preconditions_:
+
+* [code]#dest# is a host pointer.
+* [code]#dest# points to an allocation of at least as many bytes as the range
+  represented by [code]#src#.
 
 _Effects (7-8)_: Equivalent to [code]#h.copy(src, dest)#.
 
