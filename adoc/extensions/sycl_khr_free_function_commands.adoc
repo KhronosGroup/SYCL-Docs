@@ -844,9 +844,11 @@ void command_barrier(sycl::queue q);    (2)
 }
 ----
 _Effects_: Enqueues a command barrier.
-Any commands submitted after this barrier cannot begin execution until all
-previously submitted commands (and any commands associated with dependendent
-events) have completed.
+Any commands submitted after this barrier cannot begin execution until:
+
+* All commands previously submitted to this queue have completed; and
+* All commands associated with this command's dependencies (e.g., via
+  `handler::depends_on`) have completed.
 
 '''
 
@@ -862,9 +864,11 @@ void event_barrier(sycl::queue q, const std::vector<sycl::event>& events);    (2
 }
 ----
 _Effects_: Enqueues an event barrier.
-Any commands submitted after this barrier cannot begin execution until all
-commands associated with [code]#events# (and any commands associated with other
-dependent events) have completed.
+Any commands submitted after this barrier cannot begin execution until:
+
+* All commands associated with [code]#events# have completed; and
+* All commands associated with this command's dependencies (e.g., via
+  `handler::depends_on`) have completed.
 
 {note}For both overloads, if [code]#events# is empty and an event barrier has no
 other dependencies (e.g., specified by [code]#handler::depends_on#), it is not
