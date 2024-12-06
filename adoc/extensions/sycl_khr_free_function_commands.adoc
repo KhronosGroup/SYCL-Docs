@@ -566,11 +566,11 @@ _Constraints_: [code]#T# is <<device-copyable>>.
 _Preconditions_:
 
 * [code]#src# is a host pointer or a pointer within a USM allocation that is
-  accessible on the device.
+  accessible on the device;
 * [code]#dest# is a host pointer or a pointer within a USM allocation that is
-  accessible on the device.
+  accessible on the device;
 * [code]#src# and [code]#dest# both point to allocations of at least
-  [code]#count# elements of type [code]#T#.
+  [code]#count# elements of type [code]#T#; and
 * If either [code]#src# or [code]#dest# is a pointer is to a USM allocation,
   that allocation was created from the same context as the handler's queue.
 
@@ -613,13 +613,13 @@ Copies from host to device.
 
 _Constraints_:
 
-* [code]#SrcT# and [code]#DestT# are <<device-copyable>>.
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>; and
 * [code]#DestMode# is [code]#access_mode::write# or
   [code]#access_mode::read_write#.
 
 _Preconditions_:
 
-* [code]#src# is a host pointer.
+* [code]#src# is a host pointer; and
 * [code]#src# points to an allocation of at least as many bytes as the range
   represented by [code]#dest#.
 
@@ -662,13 +662,13 @@ Copies from device to host.
 
 _Constraints_:
 
-* [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
+* [code]#SrcT# and [code]#DestT# is <<device-copyable>>; and
 * [code]#DestMode# is [code]#access_mode::read# or
   [code]#access_mode::read_write#.
 
 _Preconditions_:
 
-* [code]#dest# is a host pointer.
+* [code]#dest# is a host pointer; and
 * [code]#dest# points to an allocation of at least as many bytes as the range
   represented by [code]#src#.
 
@@ -703,9 +703,9 @@ Copies between two device accessors.
 
 _Constraints_:
 
-* [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
+* [code]#SrcT# and [code]#DestT# is <<device-copyable>>;
 * [code]#SrcMode# is [code]#access_mode::read# or
-  [code]#access_mode::read_write#.
+  [code]#access_mode::read_write#; and
 * [code]#DestMode# is [code]#access_mode::write# or
   [code]#access_mode::read_write#.
 
