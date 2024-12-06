@@ -577,9 +577,11 @@ void copy(sycl::queue q,
 
 Copies from host to device.
 
-_Constraints_: [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
-[code]#DestMode# is [code]#access_mode::write# or
-[code]#access_mode::read_write#.
+_Constraints_:
+
+* [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
+* [code]#DestMode# is [code]#access_mode::write# or
+  [code]#access_mode::read_write#.
 
 _Preconditions_: [code]#src# must be a host pointer, pointing to an allocation
 of at least as many bytes as the range represented by [code]#dest#.
@@ -621,9 +623,11 @@ void copy(sycl::queue q,
 
 Copies from device to host.
 
-_Constraints_: [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
-[code]#DestMode# is [code]#access_mode::read# or
-[code]#access_mode::read_write#.
+_Constraints_:
+
+* [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
+* [code]#DestMode# is [code]#access_mode::read# or
+  [code]#access_mode::read_write#.
 
 _Preconditions_: [code]#dest# must be a host pointer, pointing to an allocation
 of at least as many bytes as the range represented by [code]#src#.
@@ -657,10 +661,13 @@ void copy(sycl::queue q,
 
 Copies between two device accessors.
 
-_Constraints_: [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
-[code]#SrcMode# is [code]#access_mode::read# or [code]#access_mode::read_write#.
-[code]#DestMode# is [code]#access_mode::write# or
-[code]#access_mode::read_write#.
+_Constraints_:
+
+* [code]#SrcT# and [code]#DestT# is <<device-copyable>>.
+* [code]#SrcMode# is [code]#access_mode::read# or
+  [code]#access_mode::read_write#.
+* [code]#DestMode# is [code]#access_mode::write# or
+  [code]#access_mode::read_write#.
 
 _Effects (11)_: Equivalent to [code]#h.copy(src, dest)#.
 
