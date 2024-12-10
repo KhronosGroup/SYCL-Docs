@@ -36,7 +36,7 @@ below.
 The `khr::work_group`, `khr::sub_group` and `khr::work_item` objects defined by
 this extension all implement a common set of operations, which are shown in the
 synopsis below.
-The name [code]#__group__# in that synopsis is a placeholder for each of these
+The name [code]#+__group__+# in that synopsis is a placeholder for each of these
 three types.
 When the synopsis shows an ellipsis ([code]#+/*...*/+#), the subsequent sections
 clarify the definition for each type.
@@ -88,29 +88,29 @@ bool leader_of(Group g) noexcept;
 [[sec:khr-group-interface-common-member-funcs]]
 === Member functions
 
-.[apidef]#__group__::id#
+.[apidef]#+__group__::id+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-id]
 ----
 id_type id() const noexcept;
 ----
 
 _Returns_: The index of this group within the index space returned by
-[code]#range()#.
+[api]#+__group__::range+#.
 
 '''
 
-.[apidef]#__group__::linear_id#
+.[apidef]#+__group__::linear_id+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-linear-id]
 ----
 linear_id_type linear_id() const noexcept;
 ----
 
 _Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
-group within the index space returned by [code]#range()#.
+group within the index space returned by [api]#+__group__::range+#.
 
 '''
 
-.[apidef]#__group__::range#
+.[apidef]#+__group__::range+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-range]
 ----
 range_type range() const noexcept;
@@ -122,7 +122,7 @@ group.
 
 '''
 
-.[apidef]#__group__::extents#
+.[apidef]#+__group__::extents+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-extents]
 ----
 constexpr extents_type extents() const noexcept;
@@ -132,7 +132,7 @@ _Returns_: The number of work-items in each dimension of the group.
 
 '''
 
-.[apidef]#__group__::extent#
+.[apidef]#+__group__::extent+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-extent]
 ----
 constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept;
@@ -144,7 +144,7 @@ _Returns_: The number of work-items in the specified dimension of the group.
 
 '''
 
-.[apidef]#__group__::rank#
+.[apidef]#+__group__::rank+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-rank]
 ----
 static constexpr extents_type::rank_type rank() noexcept;
@@ -154,7 +154,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank();#.
 
 '''
 
-.[apidef]#__group__::rank_dynamic#
+.[apidef]#+__group__::rank_dynamic+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-rank_dynamic]
 ----
 static constexpr extents_type::rank_type rank_dynamic() noexcept;
@@ -164,7 +164,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 
 '''
 
-.[apidef]#__group__::static_extent#
+.[apidef]#+__group__::static_extent+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-static_extent]
 ----
 static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
@@ -174,7 +174,7 @@ _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
 '''
 
-.[apidef]#__group__::size#
+.[apidef]#+__group__::size+#
 [source,role=synopsis,id=api:common-group-size]
 ----
 constexpr size_type size() const noexcept;
@@ -188,7 +188,7 @@ the number of work-items in each dimension of the group.
 [[sec:khr-group-interface-common-non-member-funcs]]
 ==== Non-member functions
 
-.[apidef]#get_item#
+.[apidef]#khr::get_item#
 [source,role=synopsis,id=api:common-group-get-item]
 ----
 template <typename Group>
@@ -202,7 +202,7 @@ _Returns_: A [code]#work_item# representing the calling work-item within group
 
 '''
 
-.[apidef]#leader_of#
+.[apidef]#khr::leader_of#
 [source,role=synopsis,id=api:common-group-leader_of]
 ----
 template <typename Group>
@@ -261,7 +261,7 @@ class work_group {
 } // namespace sycl::khr
 ----
 
-.[apidef]#work_group constructor#
+.[apititle]#work_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-work-group-constructor]
 ----
 work_group(group<Dimensions> g) noexcept;
@@ -272,7 +272,7 @@ work-items as [code]#g#.
 
 '''
 
-.[apidef]#work_group conversion operator#
+.[apititle]#work_group conversion operator#
 [source,role=synopsis,id=api:khr-group-interface-work-group-conversion-operator]
 ----
 operator group<Dimensions>() const noexcept;
@@ -326,7 +326,7 @@ class sub_group {
 } // namespace sycl::khr
 ----
 
-.[apidef]#sub_group constructor#
+.[apititle]#sub_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-constructor]
 ----
 sub_group(sycl::sub_group sg) noexcept;
@@ -337,7 +337,7 @@ work-items as [code]#sg#.
 
 '''
 
-.[apidef]#sub_group conversion operator#
+.[apititle]#sub_group conversion operator#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-conversion-operator]
 ----
 operator sycl::sub_group() const noexcept;
@@ -348,7 +348,7 @@ work-items as this [code]#sub_group#.
 
 '''
 
-.[apidef]#max_size#
+.[apidef]#khr::sub_group::max_size#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-max-size]
 ----
 constexpr size_type max_size() const noexcept;
