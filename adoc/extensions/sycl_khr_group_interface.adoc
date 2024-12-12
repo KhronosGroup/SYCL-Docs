@@ -1,4 +1,4 @@
-[[sec:khr-group-interface]]
+[sec:khr-group-interface]]
 = SYCL_KHR_GROUP_INTERFACE
 
 This extension provides an alternative interface for groups of work-items
@@ -223,8 +223,15 @@ the group.
 == [code]#work_group# class
 
 The [code]#work_group# class template encapsulates all functionality required to
-represent a particular <<work-group>> within a kernel.
-It is not user-constructible.
+represent a specific <<work-group>> within a kernel.
+
+The set of work-items represented by an instance of the [code]#work_group# class
+template is determined by the implementation, and there is subsequently no way
+for a user to construct arbitrary instances of the [code]#work_group# class
+template.
+Instances of the [code]#work_group# class template can only be acquired from a
+call to a standard SYCL function, or by converting an instance of the
+[code]#sycl::group# class template.
 
 The SYCL [code]#work_group# class template provides common by-value semantics
 (see <<sec:byval-semantics>>) and the common group interface (see
@@ -287,8 +294,15 @@ this [code]#work_group#.
 == [code]#sub_group# class
 
 The [code]#sub_group# class template encapsulates all functionality required to
-represent a particular <<sub-group>> within a kernel.
-It is not user-constructible.
+represent a specific <<sub-group>> within a <<work-group>>.
+
+The set of work-items represented by an instance of the [code]#sub_group# class
+template is determined by the implementation, and there is subsequently no way
+for a user to construct arbitrary instances of the [code]#sub_group# class
+template.
+Instances of the [code]#sub_group# class template can only be acquired from a
+call to a standard SYCL function, or by converting an instance of the
+[code]#sycl::sub_group# class template.
 
 The SYCL [code]#sub_group# class template provides common by-value semantics
 (see <<sec:byval-semantics>>) and the common group interface (see
@@ -371,8 +385,14 @@ If no such attribute is present, the value returned is determined by the
 == [code]#work_item# class
 
 The [code]#work_item# class template encapsulates all functionality required to
-represent a single <<work-item>> within a kernel.
-It is not user-constructible.
+represent a single <<work-item>> within a specific <<group>> of work-items.
+
+The mechanism used to determine the calling work-item's position within a given
+group of work-items is implementation-defined, and there is subsequently no way
+for a user to construct arbitrary instances of the [code]#work_item# class
+template.
+Instances of the [code]#work_item# class template can only be acquired from a
+call to [api]#khr::get_item#.
 
 The SYCL [code]#work_item# class template provides common by-value semantics
 (see <<sec:byval-semantics>>) and the common group interface (see
