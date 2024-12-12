@@ -1,6 +1,14 @@
 #!/bin/bash
+# Copyright (c) 2024-2024 The Khronos Group, Inc.
+# SPDX-License-Identifier: Apache-2.0
 #
 # squash-commits.sh [--create] <branch>
+#
+#
+# NOTE: We don't use this script anymore, but keeping it around in case it
+# becomes useful again someday.  We originally wrote this script because
+# another team wanted a linear history of squashed commits to our repo, rather
+# than the merged commit history that we currently maintain.
 #
 # Script that maintains a branch of squashed commits, where each commit
 # represents one PR that was merged into <branch>.  To use this script, first
