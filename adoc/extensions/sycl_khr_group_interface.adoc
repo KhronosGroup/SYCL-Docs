@@ -11,8 +11,8 @@ and less verbose than the interface provided by `sycl::group` and
 
 This extension has no dependencies on other extensions.
 
-Some features of this extension are only available when an implementation
-provides `<mdspan>`, which is defined in C++23.
+Some features of this extension are only available when a SYCL implementation
+conforms to {cpp23} or later.
 
 [[sec:khr-group-interface-feature-test]]
 == Feature test macro
@@ -52,9 +52,7 @@ class __group__ {
   using id_type = /* ... */;
   using linear_id_type = /* ... */;
   using range_type = /* ... */;
-#if defined(__cpp_lib_mdspan)
-  using extents_type = /* ... */;
-#endif
+  using extents_type = /* ... */; // C++23
   using size_type = /* ... */;
   static constexpr int dimensions = /* ... */;
   static constexpr memory_scope fence_scope = /* ... */;
@@ -64,14 +62,13 @@ class __group__ {
 
   range_type range() const noexcept;
 
-#if defined (__cpp_lib_mdspan)
-  constexpr extents_type extents() const noexcept;
-  constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept;
+  constexpr extents_type extents() const noexcept; // C++23
+  constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept; // C++23
 
-  static constexpr extents_type::rank_type rank() noexcept;
-  static constexpr extents_type::rank_type rank_dynamic() noexcept;
-  static constexpr size_t static_extent(rank_type r) noexcept;
-#endif
+  static constexpr extents_type::rank_type rank() noexcept; // C++23
+  static constexpr extents_type::rank_type rank_dynamic() noexcept; // C++23
+  static constexpr size_t static_extent(rank_type r) noexcept; // C++23
+
   constexpr size_type size() const noexcept;
 
 };
@@ -128,6 +125,8 @@ group.
 constexpr extents_type extents() const noexcept;
 ----
 
+_Minimum C++ Version_: {cpp23}
+
 _Returns_: The number of work-items in each dimension of the group.
 
 '''
@@ -137,6 +136,8 @@ _Returns_: The number of work-items in each dimension of the group.
 ----
 constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept;
 ----
+
+_Minimum C++ Version_: {cpp23}
 
 _Preconditions_: [code]#r < dimensions# is [code]#true#.
 
@@ -150,6 +151,8 @@ _Returns_: The number of work-items in the specified dimension of the group.
 static constexpr extents_type::rank_type rank() noexcept;
 ----
 
+_Minimum C++ Version_: {cpp23}
+
 _Effects_: Equivalent to [code]#return extents_type::rank();#.
 
 '''
@@ -160,6 +163,8 @@ _Effects_: Equivalent to [code]#return extents_type::rank();#.
 static constexpr extents_type::rank_type rank_dynamic() noexcept;
 ----
 
+_Minimum C++ Version_: {cpp23}
+
 _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 
 '''
@@ -169,6 +174,8 @@ _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 ----
 static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
 ----
+
+_Minimum C++ Version_: {cpp23}
 
 _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
@@ -248,9 +255,7 @@ class work_group {
   using id_type = id<Dimensions>;
   using linear_id_type = size_t;
   using range_type = range<Dimensions>;
-#if defined(__cpp_lib_mdspan)
-  using extents_type = std::dextents<size_t, Dimensions>;
-#endif
+  using extents_type = std::dextents<size_t, Dimensions>; // C++23
   using size_type = size_t;
   static constexpr int dimensions = Dimensions;
   static constexpr memory_scope fence_scope = memory_scope::work_group;
@@ -318,9 +323,7 @@ class sub_group {
   using id_type = id<1>;
   using linear_id_type = uint32_t;
   using range_type = range<1>;
-#if defined(__cpp_lib_mdspan)
-  using extents_type = std::dextents<uint32_t, 1>;
-#endif
+  using extents_type = std::dextents<uint32_t, 1>; // C++23
   using size_type = uint32_t;
   static constexpr int dimensions = 1;
   static constexpr memory_scope fence_scope = memory_scope::sub_group;
@@ -409,9 +412,7 @@ class work_item {
   using id_type = typename ParentGroup::id_type;
   using linear_id_type = typename ParentGroup::linear_id_type;
   using range_type = typename ParentGroup::range_type;
-#if defined(__cpp_lib_mdspan)
-  using extents_type = /* extents of all 1s with ParentGroup's index type */
-#endif
+  using extents_type = /* extents of all 1s with ParentGroup's index type */; // C++23
   using size_type = typename ParentGroup::size_type;
   static constexpr int dimensions = ParentGroup::dimensions;
   static constexpr memory_scope fence_scope = memory_scope::work_item;
