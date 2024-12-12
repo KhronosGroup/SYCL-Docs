@@ -259,49 +259,6 @@ launch_reduce(h, r, k, reductions...); })+#.
 
 '''
 
-.[apititle]#launch_reduce# (kernel object)
-[source,role=synopsis,id=api:launch_reduce-kernel]
-----
-namespace sycl::khr {
-
-template <typename... Args>
-void launch_reduce(sycl::handler& h, sycl::range<1> r,
-                   const sycl::kernel& k, Args&&... args); (1)
-
-template <typename... Args>
-void launch_reduce(sycl::handler& h, sycl::range<2> r,
-                   const sycl::kernel& k, Args&&... args); (2)
-
-template <typename... Args>
-void launch_reduce(sycl::handler& h, sycl::range<3> r,
-                   const sycl::kernel& k, Args&&... args); (3)
-
-template <typename... Args>
-void launch_reduce(sycl::queue q, sycl::range<1> r,
-                   const sycl::kernel& k, Args&&... args); (4)
-
-template <typename... Args>
-void launch_reduce(sycl::queue q, sycl::range<2> r,
-                   const sycl::kernel& k, Args&&... args); (5)
-
-template <typename... Args>
-void launch_reduce(sycl::queue q, sycl::range<3> r,
-                   const sycl::kernel& k, Args&&... args); (6)
-
-}
-----
-_Effects (1-3)_: Equivalent to:
-[source,c++]
-----
-h.set_args(args...);
-h.parallel_for(r, k);
-----
-
-_Effects (4-6)_: Equivalent to [code]#+q.submit([&](handler& h) {
-launch_reduce(h, r, k, args...); })+#.
-
-'''
-
 .[apititle]#launch_grouped# (kernel function)
 [source,role=synopsis,id=api:launch_grouped]
 ----
@@ -428,55 +385,6 @@ reductions..., k)+#.
 
 _Effects (4-6)_: Equivalent to [code]#+q.submit([&](handler& h) {
 launch_grouped_reduce(h, r, size, k, reductions...); })+#.
-
-'''
-
-.[apititle]#launch_grouped_reduce# (kernel object)
-[source,role=synopsis,id=api:launch_grouped_reduce-kernel]
-----
-namespace sycl::khr {
-
-template <typename... Args>
-void launch_grouped_reduce(sycl::handler& h, sycl::range<1> r,
-                           sycl::range<1> size, const sycl::kernel& k,
-                           Args&&... args); (1)
-
-template <typename... Args>
-void launch_grouped_reduce(sycl::handler& h, sycl::range<2> r,
-                           sycl::range<2> size, const sycl::kernel& k,
-                           Args&&... args); (2)
-
-template <typename... Args>
-void launch_grouped_reduce(sycl::handler& h, sycl::range<3> r,
-                           sycl::range<3> size, const sycl::kernel& k,
-                           Args&&... args); (3)
-
-template <typename... Args>
-void launch_grouped_reduce(sycl::queue q, sycl::range<1> r,
-                           sycl::range<1> size, const sycl::kernel& k,
-                           Args&&... args); (4)
-
-template <typename... Args>
-void launch_grouped_reduce(sycl::queue q, sycl::range<2> r,
-                           sycl::range<2> size, const sycl::kernel& k,
-                           Args&&... args); (5)
-
-template <typename... Args>
-void launch_grouped_reduce(sycl::queue q, sycl::range<3> r,
-                           sycl::range<3> size, const sycl::kernel& k,
-                           Args&&... args); (6)
-
-}
-----
-_Effects (1-3)_: Equivalent to:
-[source,c++]
-----
-h.set_args(args...);
-h.parallel_for(nd_range(r, size), k);
-----
-
-_Effects (4-6)_: Equivalent to [code]#+q.submit([&](handler& h) {
-launch_grouped_reduce(h, r, size, k, args...); })+#.
 
 '''
 
