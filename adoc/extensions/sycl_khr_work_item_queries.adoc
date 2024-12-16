@@ -1,0 +1,169 @@
+[[sec:khr-work-item-queries]]
+= SYCL_KHR_WORK_ITEM_QUERIES
+
+This extension allows developers to access instances of the
+[code]#sycl::nd_item#, [code]#sycl::group# and [code]#sycl::sub_group# classes
+without having to explicitly pass them as arguments to each function used on the
+device.
+
+{note} Passing such instances as arguments can result in a clearer interface
+that is less error-prone to use.
+For example, if a function accepts a [code]#sycl::group#, the caller must assume
+that function may call a [code]#sycl::group_barrier# and ensure that associated
+control flow requirements are satisfied.
+It is recommended that this extension is used only when modifying existing
+interfaces is not feasible.
+{endnote}
+
+[[sec:khr-work-item-queries-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-work-item-queries-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_WORK_ITEM_QUERIES# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-work-item-queries-free-funcs]]
+== New free functions to access instances of special SYCL classes
+
+This extension adds the following free functions to the
+[code]#sycl::khr::this_work_item# namespace, which provide information about the
+currently executing work-item.
+
+It is the user's responsibility to ensure that these functions are called in a
+manner that is compatible with the kernel's launch parameters, as detailed in
+the definition of each function.
+Calling these functions from an incompatible kernel results in undefined
+behavior.
+
+'''
+
+.[apidef]#khr::this_work_item::get_nd_item#
+[source,role=synopsis,id=api:khr-this-work-item-get-nd-item]
+----
+namespace sycl::khr::this_work_item {
+
+template <int Dimensions>
+nd_item<Dimensions> get_nd_item();
+
+}
+----
+
+_Preconditions_: [code]#Dimensions# must match the dimensionality of the
+currently executing kernel.
+The currently executing kernel must have been launched with a
+[code]#sycl::nd_range# argument.
+
+_Returns_: A [code]#sycl::nd_item# instance representing the calling work-item
+in the [code]#sycl::nd_range#.
+
+'''
+
+.[apidef]#khr::this_work_item::get_work_group#
+[source,role=synopsis,id=api:khr-this-work-item-get-work-group]
+----
+namespace sycl::khr::this_work_item {
+
+template <int Dimensions>
+group<Dimensions> get_work_group();
+
+}
+----
+
+_Preconditions_: [code]#Dimensions# must match the dimensionality of the
+currently executing kernel.
+The currently executing kernel must have been launched with a
+[code]#sycl::nd_range# argument.
+
+_Returns_: A [code]#sycl::group# instance representing the <<work-group>> to
+which the calling work-item belongs.
+
+'''
+
+.[apidef]#khr::this_work_item::get_sub_group#
+[source,role=synopsis,id=api:khr-this-work-item-get-sub-group]
+----
+namespace sycl::khr::this_work_item {
+
+sub_group get_sub_group();
+
+}
+----
+
+_Preconditions_: The currently executing kernel must have been launched with a
+[code]#sycl::nd_range# argument.
+
+_Returns_: A [code]#sycl::sub_group# instance representing the <<sub-group>> to
+which the calling work-item belongs.
+
+'''
+
+[[sec:khr-work-item-queries-example]]
+== Example
+
+The example below demonstrates the usage of this extension with a simple kernel
+calling a device function.
+
+[source,,linenums]
+----
+#include <iostream>
+#include <numeric>
+#include <algorithm>
+#include <sycl/sycl.hpp>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
+
+void vector_add(float* a, float* b, float* c)
+{
+  // Access this work-item's nd_item class directly.
+  size_t i = khr::this_work_item::get_nd_item<1>().get_global_linear_id();
+
+  c[i] = a[i] + b[i];
+}
+
+constexpr size_t N = 1024;
+
+int main() {
+
+  queue q;
+
+  float* a = malloc_shared<float>(N, q);
+  float* b = malloc_shared<float>(N, q);
+  float* c = malloc_shared<float>(N, q);
+
+  std::iota(a, a + N, 0);
+  std::iota(b, b + N, 0);
+  std::fill(c, c + N, 0);
+
+  range<1> global{N};
+  range<1> local{32};
+  q.parallel_for(nd_range<1>{global, local}, [=](nd_item<1> it) {
+    // Function does not take nd_item as an argument.
+    vector_add(a, b, c);
+  });
+
+  std::cout << std::endl << "Result:" << std::endl;
+  for (size_t i = 0; i < N; i++) {
+    if (c[i] != a[i] + b[i]) {
+      std::cout << "Wrong value " << c[i] << " on element " << i << std::endl;
+      exit(-1);
+    }
+  }
+
+  std::cout << "Good computation!" << std::endl;
+  return 0;
+
+}
+----
