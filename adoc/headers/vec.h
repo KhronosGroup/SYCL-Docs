@@ -141,26 +141,39 @@ template <typename DataT, int NumElements> class vec {
   const DataT& operator[](int index) const;
 
   vec& operator=(const vec& rhs);
-  vec& operator=(const DataT& rhs);
+
+  // Available only when: T is convertible to DataT
+  template<typename T>
+  vec& operator=(const T& rhs);
 
   // OP is: +, -, *, /, %
-  /* If OP is %, available only when: DataT != float && DataT != double
-  && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // If OP is %, available only when: DataT != float && DataT != double && DataT != half
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: +=, -=, *=, /=, %=
-  /* If OP is %=, available only when: DataT != float && DataT != double
-  && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // If OP is %=, available only when: DataT != float && DataT != double && DataT != half
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is prefix ++, --
+  //
   // Available only when: DataT != bool
   friend vec& operatorOP(vec& rhs);
 
   // OP is postfix ++, --
+  //
   // Available only when: DataT != bool
   friend vec operatorOP(vec& lhs, int);
 
@@ -168,38 +181,70 @@ template <typename DataT, int NumElements> class vec {
   friend vec operatorOP(const vec& rhs);
 
   // OP is: &, |, ^
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: &=, |=, ^=
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is: <<, >>
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: <<=, >>=
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is: &&, ||
+  //
+  // Available only when: T is convertible to DataT
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: ==, !=, <, >, <=, >=
+  //
+  // Available only when: T is convertible to DataT
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
 
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs);
+
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec operator~(const vec& v);
 
   friend vec<RET, NumElements> operator!(const vec& v);
