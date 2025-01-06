@@ -441,6 +441,16 @@ The SYCL implementation guarantees the correct initialization and destruction of
 any resource handled by the underlying <<backend-api>>, except for those the
 user has obtained manually via the SYCL interoperability API.
 
+==== Synchronous and asynchronous resource management
+
+A SYCL implementation may manage <<backend-api>> resources synchronously by
+calling into the <<backend-api>> in the same host thread that the SYCL
+application uses to call into SYCL.
+A SYCL implementation may also manage <<backend-api>> resources asynchronously,
+using a host thread owned by the SYCL implementation.
+It is implementation-defined whether a given interaction between the
+<<sycl-runtime>> and a <<backend-api>> occurs synchronously or asynchronously.
+
 [[sec:command-groups-exec-order]]
 ==== SYCL command groups and execution order
 
