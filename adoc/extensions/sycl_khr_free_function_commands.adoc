@@ -540,8 +540,8 @@ _Preconditions_:
 
 _Effects (1-2)_: Equivalent to [code]#h.copy(src, dest)#.
 
-_Effects (3-4)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
-dest) })#
+_Effects (3-4)_: Equivalent to [code]#q.submit([&](handler& h) {
+h.require(dest); copy(h, src, dest); })#
 
 '''
 
@@ -589,8 +589,8 @@ _Preconditions_:
 
 _Effects (1-2)_: Equivalent to [code]#h.copy(src, dest)#.
 
-_Effects (3-4)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
-dest); })#.
+_Effects (3-4)_: Equivalent to [code]#q.submit([&](handler& h) { h.require(src);
+copy(h, src, dest); })#.
 
 '''
 
@@ -626,8 +626,8 @@ _Constraints_:
 
 _Effects (1)_: Equivalent to [code]#h.copy(src, dest)#.
 
-_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { copy(h, src,
-dest); })#.
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { h.require(src);
+h.require(dest); copy(h, src, dest); })#.
 
 _Throws_: A synchronous [code]#exception# with the [code]#errc::invalid# error
 code if [code]#dest.get_count() < src.get_count()#.
@@ -685,8 +685,8 @@ _Effects (2)_: Equivalent to [code]#h.fill(dest, src)#.
 _Effects (3)_: Equivalent to [code]#q.submit([&](handler& h) { fill(h, ptr,
 pattern, count); })#.
 
-_Effects (4)_: Equivalent to [code]#q.submit([&](handler& h) { fill(h, dest,
-src); })#.
+_Effects (4)_: Equivalent to [code]#q.submit([&](handler& h) { h.require(dest);
+fill(h, dest, src); })#.
 
 '''
 
@@ -705,8 +705,8 @@ void update_host(queue q, accessor<T, Dims, Mode, target::device> acc);    (2)
 ----
 _Effects (1)_: Equivalent to [code]#h.update_host(acc)#.
 
-_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { update_host(h,
-acc); })#.
+_Effects (2)_: Equivalent to [code]#q.submit([&](handler& h) { h.require(acc);
+update_host(h, acc); })#.
 
 '''
 
