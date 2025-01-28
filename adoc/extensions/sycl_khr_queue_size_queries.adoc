@@ -1,0 +1,106 @@
+[[sec:khr-queue-size-queries]]
+= sycl_khr_queue_size_queries
+
+This extension allows developers to query the size queues, meaning the number of
+nonfinished commands submitted to this particular queue.
+
+{note} Since commands are executed asynchronously, the returned value is a
+snapshot in time {endnote}
+
+{note} The behavior of [code]#size()# is associated with the SYCL [code]#queue#
+objets, and and not with the underlying <<native-backend-object>> {endnote}
+
+[[sec:khr-queue-size-queries-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-queue-size-queries-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_QUEUE_SIZE_QUERIES# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+
+[[sec:khr-queue-size-queries-funct]]
+== Queue Functions added to query size information
+
+
+This extension adds the following functions to the [code]#sycl::queue# clase,
+which provides information about the size of the queue.
+
+'''
+
+.[apidef]#khr::queue::empty#
+[source,role=synopsis,id=api:khr-queue-size-queries-empty]
+----
+bool empty() const
+----
+
+__Returns__: [code]#true# if [code]#(size() == 0)#.
+
+'''
+
+'''
+
+.[apidef]#khr::queue::size#
+[source,role=synopsis,id=api:khr-queue-size-queries-size]
+----
+size_t size() const
+----
+
+__Returns__: Returns the number of enqueued <<command,commands>> in the queue
+that have not been completed.
+
+{note}Since the implementation completes commands from the queue asynchronously,
+the returned value is a snapshot in time, and the actual number of uncompleted
+commands may be different by the time the function returns.
+{endnote}
+
+'''
+
+[[sec:khr-queue-size-queries-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <assert.h>
+#include <atomic>
+#include <iostream>
+#include <sycl/sycl.hpp>
+
+int main() {
+  sycl::queue q;
+  assert(q.empty() == true);
+  std::atomic_bool start = false;
+
+  auto e1 = q.submit([&](sycl::handler &cgh) {
+    cgh.host_task([&]() {
+      // To avoid the loop to be optimized away
+      int iter = 0;
+      while (start != true) {
+        iter++;
+      }
+      std::cout << iter << std::endl;
+    });
+  });
+  assert(q.size() == 1);
+  auto e2 = q.single_task(e1, [=] {});
+  assert(q.size() == 2);
+  start = true;
+  e2.wait();
+  assert(q.size() == 0);
+}
+----
