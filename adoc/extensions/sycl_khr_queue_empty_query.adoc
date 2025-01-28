@@ -1,0 +1,86 @@
+[[sec:khr-queue-empty-query]]
+= sycl_khr_queue_empty_query
+
+This extension allows developers to query the queue's emptiness, meaning if all
+commands submitted to a queue have been completed.
+
+[[sec:khr-queue-empty-query-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-queue-empty-query-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_QUEUE_EMPTY_QUERY# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+
+[[sec:khr-queue-empty-query-funct]]
+== New Queue Function to Query Emptiness
+
+This extension adds the following function to the [code]#sycl::queue# class,
+which provides information about the emptiness of the queue.
+
+'''
+
+.[apidef]#queue::khr_empty#
+[source,role=synopsis,id=api:queue-khr-empty]
+----
+bool khr_empty() const
+----
+
+__Returns__: Returns [code]#true# if all <<command,commands>> enqueued on this
+particular queue have completed, [code]#false# otherwize.
+
+{note} Since the implementation excute commands asynchronously, the returned
+value is a snapshot in time.
+{endnote}
+
+'''
+
+[[sec:khr-queue-empty-query-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <assert.h>
+#include <atomic>
+#include <iostream>
+#include <sycl/sycl.hpp>
+
+int main() {
+  sycl::queue q;
+  assert(q.khr_empty());
+  std::atomic_bool start = false;
+
+  auto e1 = q.submit([&](sycl::handler &cgh) {
+    cgh.host_task([&]() {
+      // To avoid the loop to be optimized away
+      int iter = 0;
+      while (start != true) {
+        iter++;
+      }
+      std::cout << iter << std::endl;
+    });
+  });
+  assert(!q.khr_empty());
+  auto e2 = q.single_task(e1, [=] {});
+  assert(!q.khr_empty());
+  start = true;
+  e2.wait();
+  assert(q.khr_empty());
+}
+----
