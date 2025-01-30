@@ -969,6 +969,15 @@ The [code]#platform# class also provides constructors, but constructing a new
 [code]#platform# instance merely creates a new object that is a copy of one of
 the objects returned by [api]#platform::get_platforms#.
 
+Each platform has an associated default context which contains all of the
+<<root-device,root devices>> in the platform.
+This default context does not have an asynchronous error handler.
+Applications can retrieve a copy of this default `context` object, for example,
+by constructing a `queue`.
+These copies follow the common reference semantics, as though they are all
+copies of an internal per-platform `context` object representing the platform's
+default context.
+
 The [code]#platform# class provides the common reference semantics as defined in
 <<sec:reference-semantics>>.
 
@@ -3774,10 +3783,6 @@ passing <<async-error,asynchronous errors>> at specific times to an
 The application can wait for all <<command-group,command groups>> submitted to a
 queue calling [api]#queue::wait# or [api]#queue::wait_and_throw#.
 
-All constructors of the [code]#queue# class implicitly construct a
-[code]#platform#, [code]#device#, and [code]#context# in order to facilitate the
-construction of the queue.
-
 A queue may be destroyed even when there are uncompleted <<command, commands>>
 that have been submitted to the queue.
 Doing so does not block.
@@ -3817,6 +3822,9 @@ explicit queue(const property_list& propList = {})
 
 _Effects:_ Constructs a [code]#queue# object using the device selected by
 [code]#default_selector_v#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 
 '''
 
@@ -3829,6 +3837,9 @@ explicit queue(const async_handler& asyncHandler,
 
 _Effects:_ Constructs a [code]#queue# object using the device selected by
 [code]#default_selector_v#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3848,6 +3859,9 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 
 '''
 
@@ -3867,6 +3881,9 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3879,6 +3896,9 @@ explicit queue(const device& syclDevice, const property_list& propList = {})
 
 _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 
 '''
 
@@ -3891,6 +3911,9 @@ explicit queue(const device& syclDevice, const async_handler& asyncHandler,
 
 _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3910,7 +3933,8 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
-The queue has the context [code]#syclContext#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#syclContext# does not contain the device selected by
@@ -3934,8 +3958,9 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
-The queue has the context [code]#syclContext# and the asynchronous error handler
-[code]#asyncHandler#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#syclContext# does not contain the device selected by
@@ -3950,8 +3975,10 @@ explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
 
-_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
-and the context [code]#syclContext#.
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
 [code]#syclDevice# is contained by [code]#syclContext# or is a
@@ -3967,8 +3994,10 @@ explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
 
-_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
-and the context [code]#syclContext#.
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
