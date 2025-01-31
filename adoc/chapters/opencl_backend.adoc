@@ -363,7 +363,8 @@ kernel
 a@
 [source]
 ----
-template <bundle_state State> kernel_bundle<State>
+template <bundle_state State>
+kernel_bundle<State>
 ----
    a@ [code]#cl_program#
    a@ [code]#std::vector<cl_program>#
@@ -551,9 +552,9 @@ a@
 [source]
 ----
 template <int Dimensions = 1, typename AllocatorT = image_allocator>
-sampled_image<Dimensions, AllocatorT>
-make_sampled_image(const cl_mem& clMemObject, const context& syclContext,
-                   image_sampler syclImageSampler, event availableEvent)
+sampled_image<Dimensions, AllocatorT> make_sampled_image(
+    const cl_mem& clMemObject, const context& syclContext,
+    image_sampler syclImageSampler, event availableEvent)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The instance of the SYCL [code]#image# class template being constructed must wait for the SYCL [code]#event# parameter, [code]#availableEvent# to signal that the [code]#cl_mem# instance is ready to be used.
@@ -563,9 +564,9 @@ a@
 [source]
 ----
 template <int Dimensions = 1, typename AllocatorT = image_allocator>
-sampled_image<Dimensions, AllocatorT>
-make_sampled_image(const cl_mem& clMemObject, const context& syclContext,
-                   image_sampler syclImageSampler)
+sampled_image<Dimensions, AllocatorT> make_sampled_image(
+    const cl_mem& clMemObject, const context& syclContext,
+    image_sampler syclImageSampler)
 ----
    a@ Constructs a SYCL [code]#sampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The SYCL [code]#context# parameter [code]#syclContext# is the context associated with the memory object.
@@ -574,9 +575,8 @@ a@
 [source]
 ----
 template <int Dimensions = 1, typename AllocatorT = image_allocator>
-unsampled_image<Dimensions, AllocatorT>
-make_unsampled_image(const cl_mem& clMemObject, const context& syclContext,
-                     event availableEvent)
+unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
+    const cl_mem& clMemObject, const context& syclContext, event availableEvent)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
       The instance of the SYCL [code]#image# class template being constructed must wait for the SYCL [code]#event# parameter, [code]#availableEvent# to signal that the [code]#cl_mem# instance is ready to be used.
@@ -586,8 +586,8 @@ a@
 [source]
 ----
 template <int Dimensions = 1, typename AllocatorT = image_allocator>
-unsampled_image<Dimensions, AllocatorT>
-make_unsampled_image(const cl_mem& clMemObject, const context& syclContext)
+unsampled_image<Dimensions, AllocatorT> make_unsampled_image(
+    const cl_mem& clMemObject, const context& syclContext)
 ----
    a@ Constructs a SYCL [code]#unsampled_image# instance from an OpenCL [code]#cl_mem# in accordance with the requirements described in <<sec:backend-interoperability>>.
 a@
@@ -680,7 +680,8 @@ However, for convenience, the following function is provided in the
 a@
 [source]
 ----
-template <typename openCLT> cl_uint get_reference_count(openCLT obj)
+template <typename openCLT>
+cl_uint get_reference_count(openCLT obj)
 ----
    a@ Returns the reference count of the given object
 |====
@@ -766,9 +767,9 @@ error is produced by invoking the OpenCL APIs.
 
 [source,,linenums]
 ----
-kernel_bundle<bundle_state::executable>
-create_bundle(const context& ctxt, const std::vector<device>& devs,
-              const std::vector<cl_kernel>& clKernels)
+kernel_bundle<bundle_state::executable> create_bundle(
+    const context& ctxt, const std::vector<device>& devs,
+    const std::vector<cl_kernel>& clKernels)
 ----
   . _Preconditions:_ The <<context>> specified by [code]#ctxt# must be
     associated with the OpenCL <<backend>>.
@@ -839,28 +840,28 @@ For example, a 3D global range specified in SYCL as:
 
 [source]
 ----
-range<3> R { r0, r1, r2 };
+range<3> R{r0, r1, r2};
 ----
 
 maps to an [code]#clEnqueueNDRangeKernel# [code]#global_work_size# argument of:
 
 [source]
 ----
-size_t cl_interop_range[3] = { r2, r1, r0 };
+size_t cl_interop_range[3] = {r2, r1, r0};
 ----
 
 Likewise, a 2D global range specified in SYCL as:
 
 [source]
 ----
-range<2> R { r0, r1 };
+range<2> R{r0, r1};
 ----
 
 maps to an [code]#clEnqueueNDRangeKernel# [code]#global_work_size# argument of:
 
 [source]
 ----
-size_t cl_interop_range[2] = { r1, r0 };
+size_t cl_interop_range[2] = {r1, r0};
 ----
 
 The mapping of highest dimension in SYCL to lowest dimension in OpenCL applies

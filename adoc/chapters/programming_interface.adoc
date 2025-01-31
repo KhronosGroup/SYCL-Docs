@@ -625,7 +625,8 @@ include::{header_dir}/properties.h[lines=4..-1]
 a@
 [source]
 ----
-template <typename Property> struct is_property
+template <typename Property>
+struct is_property
 ----
    a@ An explicit specialization of [code]#is_property# that inherits
       from [code]#std::true_type# must be provided for each property,
@@ -646,7 +647,8 @@ inline constexpr bool is_property_v;
 a@
 [source]
 ----
-template <typename Property, SyclObject> struct is_property_of
+template <typename Property, SyclObject>
+struct is_property_of
 ----
    a@ An explicit specialization of [code]#is_property_of# that
       inherits from [code]#std::true_type# must be provided for each
@@ -677,7 +679,8 @@ inline constexpr bool is_property_of_v;
 a@
 [source]
 ----
-template <typename Property> bool has_property() const noexcept
+template <typename Property>
+bool has_property() const noexcept
 ----
    a@ Returns true if [code]#T# was constructed with the property
       specified by [code]#Property#. Returns false if it was
@@ -686,7 +689,8 @@ template <typename Property> bool has_property() const noexcept
 a@
 [source]
 ----
-template <typename Property> Property get_property() const
+template <typename Property>
+Property get_property() const
 ----
    a@ Returns a copy of the property of type [code]#Property#
       that [code]#T# was constructed with. Must throw an
@@ -871,9 +875,9 @@ selectors>> could be:
 
 [source,,linenums]
 ----
-sycl::device my_gpu { sycl::gpu_selector_v };
+sycl::device my_gpu{sycl::gpu_selector_v};
 
-sycl::queue my_accelerator { sycl::accelerator_selector_v };
+sycl::queue my_accelerator{sycl::accelerator_selector_v};
 
 int prefer_my_vendor(const sycl::device& d) {
   // Return 1 if the vendor name is "MyVendor" or 0 else.
@@ -882,18 +886,17 @@ int prefer_my_vendor(const sycl::device& d) {
 }
 
 // Get the preferred device or another one if not available
-sycl::device preferred_device { prefer_my_vendor };
+sycl::device preferred_device{prefer_my_vendor};
 
 // This throws if there is no such device in the system
-sycl::queue half_precision_controller {
-  // Can use a lambda as a device ranking function.
-  // Returns a negative number to fail in the case there is no such device
-  [] (auto& d) { return d.has(sycl::aspect::fp16) ? 1 : -1; }
-};
+sycl::queue half_precision_controller{
+    // Can use a lambda as a device ranking function.
+    // Returns a negative number to fail in the case there is no such device
+    [](auto& d) { return d.has(sycl::aspect::fp16) ? 1 : -1; }};
 
 // To ease porting SYCL 1.2.1 code, there are types whose
 // construction leads to the equivalent predefined device selector
-sycl::queue my_old_style_gpu { sycl::gpu_selector {} };
+sycl::queue my_old_style_gpu{sycl::gpu_selector{}};
 ----
 
 Examples of using [code]#aspect_selector#:
@@ -901,7 +904,7 @@ Examples of using [code]#aspect_selector#:
 [[example:aspect-selector]]
 [source,,linenums]
 ----
-using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
+using namespace sycl;  // (optional) avoids need for "sycl::" before SYCL names
 
 // Unrestrained selection, equivalent to default_selector_v
 auto dev0 = device{aspect_selector()};
@@ -921,10 +924,9 @@ auto dev3 = device{aspect_selector<aspect::host_debuggable, aspect::fp16>()};
 // Pass aspects in an allowlist and a denylist
 // Only accept devices that support half and double floating point precision,
 // but exclude emulated devices and devices of type "custom"
-auto dev4 = device{aspect_selector(
-   std::vector{aspect::fp16, aspect::fp64},
-   std::vector{aspect::emulated, aspect::custom}
-)};
+auto dev4 =
+    device{aspect_selector(std::vector{aspect::fp16, aspect::fp64},
+                           std::vector{aspect::emulated, aspect::custom})};
 ----
 
 [NOTE]
@@ -1100,8 +1102,8 @@ Returns [code]#false# if this platform does not contain any devices.
 .[apidef]#platform::get_devices#
 [source,role=synopsis,id=api:platform-get-devices]
 ----
-std::vector<device>
-get_devices(info::device_type type = info::device_type::all) const
+std::vector<device> get_devices(
+    info::device_type type = info::device_type::all) const
 ----
 
 _Returns:_ A [code]#std::vector# containing all of the <<root-device,root
@@ -1142,7 +1144,7 @@ namespace sycl::info::platform {
 struct version {
   using return_type = std::string;
 };
-} // namespace sycl::info::platform
+}  // namespace sycl::info::platform
 ----
 
 _Remarks:_ Template parameter to [api]#platform::get_info#.
@@ -1158,7 +1160,7 @@ namespace sycl::info::platform {
 struct name {
   using return_type = std::string;
 };
-} // namespace sycl::info::platform
+}  // namespace sycl::info::platform
 ----
 
 _Remarks:_ Template parameter to [api]#platform::get_info#.
@@ -1174,7 +1176,7 @@ namespace sycl::info::platform {
 struct vendor {
   using return_type = std::string;
 };
-} // namespace sycl::info::platform
+}  // namespace sycl::info::platform
 ----
 
 _Remarks:_ Template parameter to [api]#platform::get_info#.
@@ -1191,7 +1193,7 @@ namespace sycl::info::platform {
 struct extensions {
   using return_type = std::vector<std::string>;
 };
-} // namespace sycl::info::platform
+}  // namespace sycl::info::platform
 ----
 
 Deprecated by SYCL 2020.
@@ -1377,7 +1379,7 @@ namespace sycl::info::context {
 struct platform {
   using return_type = platform;
 };
-} // namespace sycl::info::context
+}  // namespace sycl::info::context
 ----
 
 _Remarks:_ Template parameter to [api]#context::get_info#.
@@ -1393,7 +1395,7 @@ namespace sycl::info::context {
 struct devices {
   using return_type = std::vector<device>;
 };
-} // namespace sycl::info::context
+}  // namespace sycl::info::context
 ----
 
 _Remarks:_ Template parameter to [api]#context::get_info#.
@@ -1410,7 +1412,7 @@ namespace sycl::info::context {
 struct atomic_memory_order_capabilities {
   using return_type = std::vector<memory_order>;
 };
-} // namespace sycl::info::context
+}  // namespace sycl::info::context
 ----
 
 _Remarks:_ Template parameter to [api]#context::get_info#.
@@ -1441,7 +1443,7 @@ namespace sycl::info::context {
 struct atomic_fence_order_capabilities {
   using return_type = std::vector<memory_order>;
 };
-} // namespace sycl::info::context
+}  // namespace sycl::info::context
 ----
 
 _Remarks:_ Template parameter to [api]#context::get_info#.
@@ -1472,7 +1474,7 @@ namespace sycl::info::context {
 struct atomic_memory_scope_capabilities {
   using return_type = std::vector<memory_scope>;
 };
-} // namespace sycl::info::context
+}  // namespace sycl::info::context
 ----
 
 _Remarks:_ Template parameter to [api]#context::get_info#.
@@ -1494,7 +1496,7 @@ namespace sycl::info::context {
 struct atomic_fence_scope_capabilities {
   using return_type = std::vector<memory_scope>;
 };
-} // namespace sycl::info::context
+}  // namespace sycl::info::context
 ----
 
 _Remarks:_ Template parameter to [api]#context::get_info#.
@@ -1764,8 +1766,8 @@ _Throws:_
 [source,role=synopsis,id=api:device-create-sub-devices-partition-by-affinity-domain]
 ----
 template <info::partition_property Prop>
-std::vector<device>
-create_sub_devices(info::partition_affinity_domain domain) const
+std::vector<device> create_sub_devices(
+    info::partition_affinity_domain domain) const
 ----
 
 _Constraints:_ Available only when [code]#Prop# is
@@ -1815,8 +1817,8 @@ _Throws:_
 .[apidef]#device::get_devices#
 [source,role=synopsis,id=api:device-get-devices]
 ----
-static std::vector<device>
-get_devices(info::device_type type = info::device_type::all)
+static std::vector<device> get_devices(
+    info::device_type type = info::device_type::all)
 ----
 
 _Returns:_ A [code]#std::vector# containing all the <<root-device, root
@@ -1843,7 +1845,7 @@ namespace sycl::info::device {
 struct device_type {
   using return_type = info::device_type;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1860,7 +1862,7 @@ namespace sycl::info::device {
 struct vendor_id {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1876,7 +1878,7 @@ namespace sycl::info::device {
 struct max_compute_units {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1893,7 +1895,7 @@ namespace sycl::info::device {
 struct max_work_item_dimensions {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1909,11 +1911,11 @@ The minimum value is 3 if this device is not of device type
 [source,role=synopsis,id=api:info-device-max-work-item-sizes]
 ----
 namespace sycl::info::device {
-template<int Dimensions = 3>
+template <int Dimensions = 3>
 struct max_work_item_sizes<Dimensions> {
   using return_type = range<Dimensions>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1935,7 +1937,7 @@ namespace sycl::info::device {
 struct max_work_group_size {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1957,7 +1959,7 @@ namespace sycl::info::device {
 struct max_num_sub_groups {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -1975,7 +1977,7 @@ namespace sycl::info::device {
 struct sub_group_sizes {
   using return_type = std::vector<size_t>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2010,7 +2012,7 @@ struct preferred_vector_width_double {
 struct preferred_vector_width_half {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2051,7 +2053,7 @@ struct native_vector_width_double {
 struct native_vector_width_half {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2073,7 +2075,7 @@ namespace sycl::info::device {
 struct max_clock_frequency {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2089,7 +2091,7 @@ namespace sycl::info::device {
 struct address_bits {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2106,7 +2108,7 @@ namespace sycl::info::device {
 struct max_mem_alloc_size {
   using return_type = uint64_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2125,7 +2127,7 @@ namespace sycl::info::device {
 struct image_support {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2143,7 +2145,7 @@ namespace sycl::info::device {
 struct max_read_image_args {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2161,7 +2163,7 @@ namespace sycl::info::device {
 struct max_write_image_args {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2179,7 +2181,7 @@ namespace sycl::info::device {
 struct image2d_max_width {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2196,7 +2198,7 @@ namespace sycl::info::device {
 struct image2d_max_height {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2213,7 +2215,7 @@ namespace sycl::info::device {
 struct image3d_max_width {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2230,7 +2232,7 @@ namespace sycl::info::device {
 struct image3d_max_height {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2247,7 +2249,7 @@ namespace sycl::info::device {
 struct image3d_max_depth {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2264,7 +2266,7 @@ namespace sycl::info::device {
 struct image_max_buffer_size {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2283,7 +2285,7 @@ namespace sycl::info::device {
 struct max_samplers {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2300,7 +2302,7 @@ namespace sycl::info::device {
 struct max_parameter_size {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2321,7 +2323,7 @@ namespace sycl::info::device {
 struct mem_base_addr_align {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2338,7 +2340,7 @@ namespace sycl::info::device {
 struct half_fp_config {
   using return_type = std::vector<info::fp_config>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2369,7 +2371,7 @@ namespace sycl::info::device {
 struct single_fp_config {
   using return_type = std::vector<info::fp_config>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2400,7 +2402,7 @@ namespace sycl::info::device {
 struct double_fp_config {
   using return_type = std::vector<info::fp_config>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2435,7 +2437,7 @@ namespace sycl::info::device {
 struct global_mem_cache_type {
   using return_type = info::global_mem_cache_type;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2451,7 +2453,7 @@ namespace sycl::info::device {
 struct global_mem_cache_line_size {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2467,7 +2469,7 @@ namespace sycl::info::device {
 struct global_mem_cache_size {
   using return_type = uint64_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2483,7 +2485,7 @@ namespace sycl::info::device {
 struct global_mem_size {
   using return_type = uint64_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2499,7 +2501,7 @@ namespace sycl::info::device {
 struct max_constant_buffer_size {
   using return_type = uint64_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2519,7 +2521,7 @@ namespace sycl::info::device {
 struct max_constant_args {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2540,7 +2542,7 @@ namespace sycl::info::device {
 struct local_mem_type {
   using return_type = info::local_mem_type;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2560,7 +2562,7 @@ namespace sycl::info::device {
 struct local_mem_size {
   using return_type = uint64_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2578,7 +2580,7 @@ namespace sycl::info::device {
 struct error_correction_support {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2596,7 +2598,7 @@ namespace sycl::info::device {
 struct host_unified_memory {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2619,7 +2621,7 @@ namespace sycl::info::device {
 struct atomic_memory_order_capabilities {
   using return_type = std::vector<memory_order>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2645,7 +2647,7 @@ namespace sycl::info::device {
 struct atomic_fence_order_capabilities {
   using return_type = std::vector<memory_order>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2669,7 +2671,7 @@ namespace sycl::info::device {
 struct atomic_memory_scope_capabilities {
   using return_type = std::vector<memory_scope>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2691,7 +2693,7 @@ namespace sycl::info::device {
 struct atomic_fence_scope_capabilities {
   using return_type = std::vector<memory_scope>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2713,7 +2715,7 @@ namespace sycl::info::device {
 struct profiling_timer_resolution {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2729,7 +2731,7 @@ namespace sycl::info::device {
 struct is_endian_little {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2752,7 +2754,7 @@ namespace sycl::info::device {
 struct is_available {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2769,7 +2771,7 @@ namespace sycl::info::device {
 struct is_compiler_available {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2787,7 +2789,7 @@ namespace sycl::info::device {
 struct is_linker_available {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2805,7 +2807,7 @@ namespace sycl::info::device {
 struct execution_capabilities {
   using return_type = std::vector<info::execution_capability>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2831,7 +2833,7 @@ namespace sycl::info::device {
 struct queue_profiling {
   using return_type =
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2849,7 +2851,7 @@ namespace sycl::info::device {
 struct built_in_kernel_ids {
   using return_type = std::vector<kernel_id>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2866,7 +2868,7 @@ namespace sycl::info::device {
 struct built_in_kernels {
   using return_type = std::vector<std::string>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2888,7 +2890,7 @@ namespace sycl::info::device {
 struct platform {
   using return_type = platform;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2904,7 +2906,7 @@ namespace sycl::info::device {
 struct name {
   using return_type = std::string;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2920,7 +2922,7 @@ namespace sycl::info::device {
 struct vendor {
   using return_type = std::string;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2936,7 +2938,7 @@ namespace sycl::info::device {
 struct driver_version {
   using return_type = std::string;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2953,7 +2955,7 @@ namespace sycl::info::device {
 struct profile {
   using return_type = std::string;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -2981,7 +2983,7 @@ namespace sycl::info::device {
 struct version {
   using return_type = std::string;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -2997,7 +2999,7 @@ namespace sycl::info::device {
 struct backend_version {
   using return_type = std::string;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3016,7 +3018,7 @@ namespace sycl::info::device {
 struct aspects {
   using return_type = std::vector<aspect>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3032,7 +3034,7 @@ namespace sycl::info::device {
 struct extensions {
   using return_type = std::vector<std::string>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -3088,7 +3090,7 @@ namespace sycl::info::device {
 struct printf_buffer_size {
   using return_type = size_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -3109,7 +3111,7 @@ namespace sycl::info::device {
 struct preferred_interop_user_sync {
   using return_type = bool;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 Deprecated by SYCL 2020.
@@ -3133,11 +3135,10 @@ backend of this device is not OpenCL.
 [source,role=synopsis,id=api:info-device-parent-device]
 ----
 namespace sycl::info::device {
-info::device::parent_device
-struct parent_device {
+info::device::parent_device struct parent_device {
   using return_type = device;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3157,7 +3158,7 @@ namespace sycl::info::device {
 struct partition_max_sub_devices {
   using return_type = uint32_t;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3176,7 +3177,7 @@ namespace sycl::info::device {
 struct partition_properties {
   using return_type = std::vector<info::partition_property>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3195,7 +3196,7 @@ namespace sycl::info::device {
 struct partition_affinity_domains {
   using return_type = std::vector<info::partition_affinity_domain>;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3215,7 +3216,7 @@ namespace sycl::info::device {
 struct partition_type_property {
   using return_type = info::partition_property;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3238,7 +3239,7 @@ namespace sycl::info::device {
 struct partition_type_affinity_domain {
   using return_type = info::partition_affinity_domain;
 };
-} // namespace sycl::info::device
+}  // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
@@ -3559,15 +3560,15 @@ application will not be able to submit kernels to that device _D_.
 ----
 namespace sycl::info {
 enum class device_type : /* unspecified */ {
-  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
-  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
-  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
-  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
-  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
+  cpu,          // Maps to OpenCL CL_DEVICE_TYPE_CPU
+  gpu,          // Maps to OpenCL CL_DEVICE_TYPE_GPU
+  accelerator,  // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
+  custom,       // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
+  automatic,    // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
   host,
-  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
+  all  // Maps to OpenCL CL_DEVICE_TYPE_ALL
 };
-} // namespace sycl::info
+}  // namespace sycl::info
 ----
 
 [[sec:device-enum-partition-property]]
@@ -3582,7 +3583,7 @@ enum class partition_property : /* unspecified */ {
   partition_by_counts,
   partition_by_affinity_domain
 };
-} // namespace sycl::info
+}  // namespace sycl::info
 ----
 
 [[sec:device-enum-partition-affinity-domain]]
@@ -3600,7 +3601,7 @@ enum class partition_affinity_domain : /* unspecified */ {
   L1_cache,
   next_partitionable
 };
-} // namespace sycl::info
+}  // namespace sycl::info
 ----
 
 [[sec:device-enum-fp-config]]
@@ -3622,7 +3623,7 @@ enum class fp_config : /* unspecified */ {
   correctly_rounded_divide_sqrt,
   soft_float
 };
-} // namespace sycl::info
+}  // namespace sycl::info
 ----
 
 '''
@@ -3700,12 +3701,8 @@ are implemented in software.
 [source,role=synopsis]
 ----
 namespace sycl::info {
-enum class local_mem_type : /* unspecified */ {
-  none,
-  local,
-  global
-};
-} // namespace sycl::info
+enum class local_mem_type : /* unspecified */ { none, local, global };
+}  // namespace sycl::info
 ----
 
 [[sec:device-enum-global-mem-cache-type]]
@@ -3719,7 +3716,7 @@ enum class global_mem_cache_type : /* unspecified */ {
   read_only,
   read_write
 };
-} // namespace sycl::info
+}  // namespace sycl::info
 ----
 
 [[sec:device-enum-execution-capability]]
@@ -3737,7 +3734,7 @@ enum class execution_capability : /* unspecified */ {
   exec_kernel,
   exec_native_kernel
 };
-} // namespace sycl::info
+}  // namespace sycl::info
 ----
 
 '''
@@ -4547,7 +4544,7 @@ namespace sycl::info::queue {
 struct context {
   using return_type = context;
 };
-} // namespace sycl::info::queue
+}  // namespace sycl::info::queue
 ----
 
 _Remarks:_ Template parameter to [api]#queue::get_info#.
@@ -4563,7 +4560,7 @@ namespace sycl::info::queue {
 struct device {
   using return_type = device;
 };
-} // namespace sycl::info::queue
+}  // namespace sycl::info::queue
 ----
 
 _Remarks:_ Template parameter to [api]#queue::get_info#.
@@ -4777,7 +4774,8 @@ static void wait_and_throw(const std::vector<event>& eventList)
 a@
 [source]
 ----
-template <typename Param> typename Param::return_type get_info() const
+template <typename Param>
+typename Param::return_type get_info() const
 ----
    a@ Queries this SYCL [code]#event# for information requested by the
       template parameter [code]#Param#.
@@ -4789,7 +4787,8 @@ template <typename Param> typename Param::return_type get_info() const
 a@
 [source]
 ----
-template <typename Param> typename Param::return_type get_backend_info() const
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
    a@ Queries this SYCL [code]#event# for <<backend>>-specific information
       requested by the template parameter [code]#Param#.
@@ -4802,7 +4801,8 @@ template <typename Param> typename Param::return_type get_backend_info() const
 a@
 [source]
 ----
-template <typename Param> typename Param::return_type get_profiling_info() const
+template <typename Param>
+typename Param::return_type get_profiling_info() const
 ----
    a@ Queries this SYCL [code]#event# for profiling information requested
       by the parameter [code]#Param#. If the requested profiling information
@@ -4995,7 +4995,7 @@ can supply their own allocator class.
 [source,,linenums]
 ----
 {
-    buffer<int, 1, UserDefinedAllocator<int>> b(d);
+  buffer<int, 1, UserDefinedAllocator<int>> b(d);
 }
 ----
 
@@ -5049,7 +5049,8 @@ handle the potential race conditions.
 a@
 [source]
 ----
-template <class T> buffer_allocator
+template <class T>
+buffer_allocator
 ----
    a@ It is the default buffer allocator used by the runtime, when no allocator is
       defined by the user.
@@ -5165,8 +5166,7 @@ include::{header_dir}/buffer.h[lines=4..-1]
 a@
 [source]
 ----
-buffer(const range<Dimensions>& bufferRange,
-       const property_list& propList = {})
+buffer(const range<Dimensions>& bufferRange, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
       The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
@@ -5177,8 +5177,7 @@ buffer(const range<Dimensions>& bufferRange,
 a@
 [source]
 ----
-buffer(const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
+buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
        const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
@@ -5206,8 +5205,7 @@ buffer(T* hostData, const range<Dimensions>& bufferRange,
 a@
 [source]
 ----
-buffer(T* hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
+buffer(T* hostData, const range<Dimensions>& bufferRange, AllocatorT allocator,
        const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
@@ -5223,8 +5221,7 @@ buffer(T* hostData, const range<Dimensions>& bufferRange,
 a@
 [source]
 ----
-buffer(const T* hostData,
-       const range<Dimensions>& bufferRange,
+buffer(const T* hostData, const range<Dimensions>& bufferRange,
        const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
@@ -5255,10 +5252,8 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-buffer(const T* hostData,
-       const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
+buffer(const T* hostData, const range<Dimensions>& bufferRange,
+       AllocatorT allocator, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
       parameter provided.  The buffer assumes exclusive access to this
@@ -5290,8 +5285,7 @@ a@
 [source]
 ----
 template <typename Container>
-buffer(Container& container,
-       const property_list& propList = {})
+buffer(Container& container, const property_list& propList = {})
 ----
    a@ Construct a one dimensional SYCL [code]#buffer# instance
       from the elements starting at [code]#std::data(container)#
@@ -5347,8 +5341,7 @@ is convertible to [code]#T*#.
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T>& hostData,
-       const range<Dimensions>& bufferRange,
+buffer(const std::shared_ptr<T>& hostData, const range<Dimensions>& bufferRange,
        const property_list& propList = {})
 ----
    a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
@@ -5371,10 +5364,8 @@ constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
 a@
 [source]
 ----
-buffer(const std::shared_ptr<T>& hostData,
-       const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
+buffer(const std::shared_ptr<T>& hostData, const range<Dimensions>& bufferRange,
+       AllocatorT allocator, const property_list& propList = {})
 ----
    a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
       contents of its stored pointer.  The buffer assumes exclusive access to
@@ -5397,8 +5388,7 @@ a@
 [source,c++]
 ----
 buffer(const std::shared_ptr<T[]>& hostData,
-       const range<Dimensions>&  bufferRange,
-       const property_list& propList = {})
+       const range<Dimensions>& bufferRange, const property_list& propList = {})
 ----
    a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
       contents of its stored pointer.  The buffer assumes exclusive access to
@@ -5421,8 +5411,7 @@ a@
 [source,c++]
 ----
 buffer(const std::shared_ptr<T[]>& hostData,
-       const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
+       const range<Dimensions>& bufferRange, AllocatorT allocator,
        const property_list& propList = {})
 ----
    a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
@@ -5460,8 +5449,7 @@ a@
 [source]
 ----
 template <typename InputIterator>
-buffer(InputIterator first, InputIterator last,
-       AllocatorT allocator = {},
+buffer(InputIterator first, InputIterator last, AllocatorT allocator = {},
        const property_list& propList = {})
 ----
    a@ Create a new allocated 1D buffer initialized from the given elements
@@ -5610,8 +5598,8 @@ a@
 [source]
 ----
 template <access_mode Mode>
-accessor<T, Dimensions, Mode, target::host_buffer>
-get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {})
+accessor<T, Dimensions, Mode, target::host_buffer> get_access(
+    range<Dimensions> accessRange, id<Dimensions> accessOffset = {})
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
 
@@ -6065,8 +6053,7 @@ include::{header_dir}/unsampledImage.h[lines=4..-1]
 a@
 [source]
 ----
-unsampled_image(image_format format,
-                const range<Dimensions>& rangeRef,
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
                 const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
@@ -6090,10 +6077,8 @@ unsampled_image(image_format format,
 a@
 [source]
 ----
-unsampled_image(image_format format,
-                const range<Dimensions>& rangeRef,
-                AllocatorT allocator,
-                const property_list& propList = {})
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                AllocatorT allocator, const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with
       uninitialized memory.
@@ -6116,8 +6101,7 @@ unsampled_image(image_format format,
 a@
 [source]
 ----
-unsampled_image(image_format format,
-                const range<Dimensions>& rangeRef,
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {})
 ----
@@ -6144,10 +6128,8 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(image_format format,
-                const range<Dimensions>& rangeRef,
-                const range<Dimensions - 1>& pitch,
-                AllocatorT allocator,
+unsampled_image(image_format format, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
@@ -6200,8 +6182,7 @@ a@
 [source]
 ----
 unsampled_image(void* hostPointer, image_format format,
-                const range<Dimensions>& rangeRef,
-                AllocatorT allocator,
+                const range<Dimensions>& rangeRef, AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#unsampled_image# instance with the
@@ -6256,8 +6237,7 @@ a@
 ----
 unsampled_image(void* hostPointer, image_format format,
                 const range<Dimensions>& rangeRef,
-                const range<Dimensions - 1>& pitch,
-                AllocatorT allocator,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ Available only when: [code]#Dimensions > 1#.
@@ -6283,8 +6263,7 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-                image_format format,
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
                 const range<Dimensions>& rangeRef,
                 const property_list& propList = {})
 ----
@@ -6317,10 +6296,8 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-                image_format format,
-                const range<Dimensions>& rangeRef,
-                AllocatorT allocator,
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
+                const range<Dimensions>& rangeRef, AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ When [code]#hostPointer# is not empty, construct a SYCL
@@ -6352,8 +6329,7 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-                image_format format,
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
                 const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {})
@@ -6387,11 +6363,9 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-unsampled_image(std::shared_ptr<void>& hostPointer,
-                image_format format,
+unsampled_image(std::shared_ptr<void>& hostPointer, image_format format,
                 const range<Dimensions>& rangeRef,
-                const range<Dimensions - 1>& pitch,
-                AllocatorT allocator,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
                 const property_list& propList = {})
 ----
    a@ When [code]#hostPointer# is not empty, construct a SYCL
@@ -6478,12 +6452,11 @@ a@
 [source]
 ----
 template <typename DataT,
-         access_mode Mode = (std::is_const_v<DataT>
-                                 ? access_mode::read
-                                 : access_mode::read_write),
-         image_target Targ = image_target::device>
-unsampled_image_accessor<DataT, Dimensions, Mode, Targ>
-get_access(handler& commandGroupHandler)
+          access_mode Mode = (std::is_const_v<DataT> ? access_mode::read
+                                                     : access_mode::read_write),
+          image_target Targ = image_target::device>
+unsampled_image_accessor<DataT, Dimensions, Mode, Targ> get_access(
+    handler& commandGroupHandler)
 ----
    a@ Returns a valid [code]#unsampled_image_accessor# to the unsampled image
       with the specified data type, access mode and target in the command group.
@@ -6491,9 +6464,9 @@ get_access(handler& commandGroupHandler)
 a@
 [source]
 ----
-template <typename DataT, access_mode Mode = (std::is_const_v<DataT>
-                                                   ? access_mode::read
-                                                   : access_mode::read_write)>
+template <typename DataT,
+          access_mode Mode = (std::is_const_v<DataT> ? access_mode::read
+                                                     : access_mode::read_write)>
 host_unsampled_image_accessor<DataT, Dimensions, Mode> get_host_access();
 ----
    a@ Returns a valid [code]#host_unsampled_image_accessor# to the unsampled
@@ -6568,8 +6541,7 @@ a@
 [source]
 ----
 sampled_image(const void* hostPointer, image_format format,
-              image_sampler sampler,
-              const range<Dimensions>& rangeRef,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
               const property_list& propList = {})
 ----
    a@ Construct a SYCL [code]#sampled_image# instance with the
@@ -6595,8 +6567,7 @@ a@
 [source]
 ----
 sampled_image(const void* hostPointer, image_format format,
-              image_sampler sampler,
-              const range<Dimensions>& rangeRef,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6624,10 +6595,8 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-sampled_image(std::shared_ptr<const void>& hostPointer,
-              image_format format,
-              image_sampler sampler,
-              const range<Dimensions>& rangeRef,
+sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
               const property_list& propList = {})
 ----
    a@ When [code]#hostPointer# is not empty, construct a SYCL
@@ -6660,10 +6629,8 @@ Zero or more properties can be provided to the constructed SYCL
 a@
 [source]
 ----
-sampled_image(std::shared_ptr<const void>& hostPointer,
-              image_format format,
-              image_sampler sampler,
-              const range<Dimensions>& rangeRef,
+sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+              image_sampler sampler, const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6745,8 +6712,8 @@ a@
 [source]
 ----
 template <typename DataT, image_target Targ = image_target::device>
-sampled_image_accessor<DataT, Dimensions, Targ>
-get_access(handler& commandGroupHandler)
+sampled_image_accessor<DataT, Dimensions, Targ> get_access(
+    handler& commandGroupHandler)
 ----
    a@ Returns a valid [code]#sampled_image_accessor# to the sampled image with
       the specified data type and target in the command group.
@@ -6947,7 +6914,7 @@ For example, the following could be used:
 ----
 {
   auto ptr = std::make_unique<int>(-1234);
-  buffer<int, 1> b { std::move(ptr), range { 1 } };
+  buffer<int, 1> b{std::move(ptr), range{1}};
   // ptr is not valid anymore.
   // There is nowhere to copy data back
 }
@@ -7040,9 +7007,9 @@ runtime, and unlock the mutex when the data is not in use by the SYCL runtime.
 {
   std::mutex m;
   auto shD = std::make_shared<int>(42)
-  sycl::buffer b { shD, { sycl::property::buffer::use_mutex { m } } };
+      sycl::buffer b{shD, {sycl::property::buffer::use_mutex{m}}};
   {
-    std::lock_guard lck { m };
+    std::lock_guard lck{m};
 
     // User accesses the data
     do_something(shD);
@@ -7524,7 +7491,8 @@ include::{header_dir}/accessorBuffer.h[lines=4..-1]
 a@
 [source]
 ----
-template <access::decorated IsDecorated> accessor_ptr
+template <access::decorated IsDecorated>
+accessor_ptr
 ----
    a@ If [code]#(AccessTarget == target::device)#:
       [code]#multi_ptr<value_type, access::address_space::global_space, IsDecorated>#.
@@ -8498,8 +8466,8 @@ This function may only be called from within a <<command>>.
 a@
 [source]
 ----
-atomic<DataT, access::address_space::local_space>
-operator[](id<Dimensions> index) const
+atomic<DataT, access::address_space::local_space> operator[](
+    id<Dimensions> index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions > 0)#.
@@ -8744,8 +8712,8 @@ access to the single element that is accessed by this accessor.
 a@
 [source]
 ----
-atomic<DataT, access::address_space::global_space>
-operator[](id<Dimensions> index) const
+atomic<DataT, access::address_space::global_space> operator[](
+    id<Dimensions> index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions > 0)#.
@@ -8761,8 +8729,8 @@ the accessor's offset to [code]#index#.
 a@
 [source]
 ----
-atomic<DataT, access::address_space::global_space>
-operator[](size_t index) const
+atomic<DataT, access::address_space::global_space> operator[](
+    size_t index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions == 1)#.
@@ -9131,7 +9099,8 @@ include::{header_dir}/accessorLocal.h[lines=4..-1]
 a@
 [source]
 ----
-template <access::decorated IsDecorated> accessor_ptr
+template <access::decorated IsDecorated>
+accessor_ptr
 ----
    a@ Equal to
       [code]#multi_ptr<value_type, access::address_space::local_space, IsDecorated>#.
@@ -9774,7 +9743,8 @@ size_t size() const noexcept
 a@
 [source]
 ----
-template <typename CoordT> DataT read(const CoordT& coords) const
+template <typename CoordT>
+DataT read(const CoordT& coords) const
 ----
    a@ Available only when [code]#(AccessMode == access_mode::read ||
       AccessMode == access_mode::read_write)#.
@@ -9962,7 +9932,8 @@ size_t size() const noexcept
 a@
 [source]
 ----
-template <typename CoordT> DataT read(const CoordT& coords) const
+template <typename CoordT>
+DataT read(const CoordT& coords) const
 ----
    a@ Reads and returns a sampled element of the [code]#sampled_image# at the
       coordinates specified by [code]#coords#.  Permitted types for
@@ -10100,9 +10071,8 @@ multi_ptr(multi_ptr&&)
 a@
 [source]
 ----
-explicit
-multi_ptr(multi_ptr<ElementType, Space,
-                    access::decorated::yes>::pointer)
+explicit multi_ptr(
+    multi_ptr<ElementType, Space, access::decorated::yes>::pointer)
 ----
    a@ Constructor that takes as an argument a decorated pointer.
 
@@ -10116,11 +10086,9 @@ multi_ptr(std::nullptr_t)
 a@
 [source]
 ----
-template <typename AccDataT, int Dimensions,
-          access_mode Mode,
+template <typename AccDataT, int Dimensions, access_mode Mode,
           access::placeholder IsPlaceholder>
-multi_ptr(accessor<AccDataT, Dimensions, Mode,
-                   target::device, IsPlaceholder>)
+multi_ptr(accessor<AccDataT, Dimensions, Mode, target::device, IsPlaceholder>)
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::global_space || Space == access::address_space::generic_space) &&
@@ -10151,11 +10119,9 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <typename AccDataT, int Dimensions,
-          access_mode Mode,
+template <typename AccDataT, int Dimensions, access_mode Mode,
           access::placeholder IsPlaceholder>
-multi_ptr(accessor<AccDataT, Dimensions, Mode,
-                   target::local, IsPlaceholder>)
+multi_ptr(accessor<AccDataT, Dimensions, Mode, target::local, IsPlaceholder>)
 ----
    a@ Deprecated in SYCL 2020.  Use the overload with
       [code]#local_accessor# instead.
@@ -10172,11 +10138,9 @@ This constructor may only be called from within a <<command>>.
 a@
 [source]
 ----
-template <typename ElementType,
-          access::address_space Space,
+template <typename ElementType, access::address_space Space,
           access::decorated DecorateAddress>
-multi_ptr<ElementType, Space, DecorateAddress>
-make_ptr(ElementType* pointer)
+multi_ptr<ElementType, Space, DecorateAddress> make_ptr(ElementType* pointer)
 ----
    a@ Deprecated in SYCL 2020.  Use [code]#address_space_cast# instead.
 
@@ -10190,11 +10154,10 @@ with [code]#Space#.
 a@
 [source]
 ----
-template <access::address_space Space,
-          access::decorated DecorateAddress,
+template <access::address_space Space, access::decorated DecorateAddress,
           typename ElementType>
-multi_ptr<ElementType, Space, DecorateAddress>
-address_space_cast(ElementType* pointer)
+multi_ptr<ElementType, Space, DecorateAddress> address_space_cast(
+    ElementType* pointer)
 ----
    a@ Global function to create a [code]#multi_ptr# instance from
       [code]#pointer#, using the address space and decoration specified
@@ -10238,10 +10201,8 @@ multi_ptr& operator=(std::nullptr_t)
 a@
 [source]
 ----
-template <access::address_space AS,
-          access::decorated IsDecorated>
-multi_ptr&
-operator=(const multi_ptr<value_type, AS, IsDecorated>&)
+template <access::address_space AS, access::decorated IsDecorated>
+multi_ptr& operator=(const multi_ptr<value_type, AS, IsDecorated>&)
 ----
    a@ Available only when: [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
 
@@ -10250,10 +10211,8 @@ Assigns the value of the right hand side [code]#multi_ptr# into the [code]#gener
 a@
 [source]
 ----
-template<access::address_space AS,
-         access::decorated IsDecorated>
-multi_ptr&
-operator=(multi_ptr<value_type, AS, IsDecorated>&&)
+template <access::address_space AS, access::decorated IsDecorated>
+multi_ptr& operator=(multi_ptr<value_type, AS, IsDecorated>&&)
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
@@ -10299,10 +10258,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit
-operator multi_ptr<value_type,
-                   access::address_space::private_space,
-                   IsDecorated>() const
+explicit operator multi_ptr<value_type, access::address_space::private_space,
+                            IsDecorated>() const
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
@@ -10315,10 +10272,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit
-operator multi_ptr<const value_type,
-                   access::address_space::private_space,
-                   IsDecorated>() const
+explicit operator multi_ptr<
+    const value_type, access::address_space::private_space, IsDecorated>() const
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
@@ -10331,10 +10286,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit
-operator multi_ptr<value_type,
-                   access::address_space::global_space,
-                   IsDecorated>() const
+explicit operator multi_ptr<value_type, access::address_space::global_space,
+                            IsDecorated>() const
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
@@ -10347,10 +10300,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit
-operator multi_ptr<const value_type,
-                   access::address_space::global_space,
-                   IsDecorated>() const
+explicit operator multi_ptr<
+    const value_type, access::address_space::global_space, IsDecorated>() const
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
@@ -10363,10 +10314,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit
-operator multi_ptr<value_type,
-                   access::address_space::local_space,
-                   IsDecorated>() const
+explicit operator multi_ptr<value_type, access::address_space::local_space,
+                            IsDecorated>() const
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
@@ -10379,10 +10328,8 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-explicit
-operator multi_ptr<const value_type,
-                   access::address_space::local_space,
-                   IsDecorated>() const
+explicit operator multi_ptr<
+    const value_type, access::address_space::local_space, IsDecorated>() const
 ----
    a@ Available only when:
       [code]#(Space == access::address_space::generic_space)#.
@@ -10417,8 +10364,7 @@ a@
 [source]
 ----
 template <access::decorated IsDecorated>
-operator multi_ptr<const value_type, Space,
-                   IsDecorated>() const
+operator multi_ptr<const value_type, Space, IsDecorated>() const
 ----
    a@ Implicit conversion to a [code]#multi_ptr#
       of type [code]#const value_type#.
@@ -10426,8 +10372,7 @@ operator multi_ptr<const value_type, Space,
 a@
 [source]
 ----
-operator multi_ptr<value_type, Space,
-                   access::decorated::no>() const
+operator multi_ptr<value_type, Space, access::decorated::no>() const
 ----
    a@ Available only when:
       [code]#(is_decorated == true)#.
@@ -10438,8 +10383,7 @@ decorated pointers or references.
 a@
 [source]
 ----
-operator multi_ptr<value_type, Space,
-                   access::decorated::yes>() const
+operator multi_ptr<value_type, Space, access::decorated::yes>() const
 ----
    a@ Available only when:
       [code]#(is_decorated == false)#.
@@ -10942,15 +10886,10 @@ allocations inside of a SYCL program:
 namespace sycl {
 namespace usm {
 
-enum class alloc : /* unspecified */ {
-  host,
-  device,
-  shared,
-  unknown
-};
+enum class alloc : /* unspecified */ { host, device, shared, unknown };
 
 }
-}
+}  // namespace sycl
 ----
 
 USM is an optional feature which may not be supported by all devices, and
@@ -11170,23 +11109,22 @@ The constructors are listed in <<table.constructors.usm-allocator>>.
 ----
 template <typename T, usm::alloc AllocKind, size_t Alignment = 0>
 class usm_allocator {
-public:
+ public:
   using value_type = T;
   using propagate_on_container_copy_assignment = std::true_type;
   using propagate_on_container_move_assignment = std::true_type;
   using propagate_on_container_swap = std::true_type;
 
-public:
-  template <typename U> struct rebind {
+ public:
+  template <typename U>
+  struct rebind {
     typedef usm_allocator<U, AllocKind, Alignment> other;
   };
 
   usm_allocator() = delete;
-  usm_allocator(const context& syclContext,
-                const device& syclDevice,
+  usm_allocator(const context& syclContext, const device& syclDevice,
                 const property_list& propList = {});
-  usm_allocator(const queue& syclQueue,
-                const property_list& propList = {});
+  usm_allocator(const queue& syclQueue, const property_list& propList = {});
   usm_allocator(const usm_allocator& other);
   usm_allocator(usm_allocator&&) noexcept;
   usm_allocator& operator=(const usm_allocator&);
@@ -11210,8 +11148,8 @@ public:
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
 
   /// Inequality Comparison
-  /// Allocators only compare unequal if they are not of the same USM kind, alignment,
-  /// context, or device
+  /// Allocators only compare unequal if they are not of the same USM kind,
+  /// alignment, context, or device
   template <class U, usm::alloc AllocKindU, size_t AlignmentU>
   friend bool operator!=(const usm_allocator<T, AllocKind, Alignment>&,
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
@@ -11494,8 +11432,8 @@ a@
 ----
 template <typename T>
 T* sycl::aligned_alloc_host(size_t alignment, size_t count,
-                               const queue& syclQueue,
-                               const property_list& propList = {})
+                            const queue& syclQueue,
+                            const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 
@@ -12216,7 +12154,7 @@ a@
 ----
 nd_range<Dimensions>(
 range<Dimensions> globalSize,
-    range<Dimensions> localSize,
+range<Dimensions> localSize,
     id<Dimensions> offset = id<Dimensions>())
 ----
    a@ Construct an [code]#nd_range# from the local and global
@@ -12827,8 +12765,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<DataT> src,
+device_event async_work_group_copy(local_ptr<DataT> dest, global_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -12840,8 +12777,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<DataT> src,
+device_event async_work_group_copy(global_ptr<DataT> dest, local_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -12853,8 +12789,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<DataT> src,
+device_event async_work_group_copy(local_ptr<DataT> dest, global_ptr<DataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -12866,8 +12801,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<DataT> src,
+device_event async_work_group_copy(global_ptr<DataT> dest, local_ptr<DataT> src,
                                    size_t numElements, size_t destStride) const
 ----
     a@ Deprecated in SYCL 2020.
@@ -13368,8 +13302,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<DataT> src,
+device_event async_work_group_copy(local_ptr<DataT> dest, global_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -13381,8 +13314,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<DataT> src,
+device_event async_work_group_copy(global_ptr<DataT> dest, local_ptr<DataT> src,
                                    size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -13394,8 +13326,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(local_ptr<DataT> dest,
-                                   global_ptr<DataT> src,
+device_event async_work_group_copy(local_ptr<DataT> dest, global_ptr<DataT> src,
                                    size_t numElements, size_t srcStride) const
 ----
    a@ Deprecated in SYCL 2020.
@@ -13407,8 +13338,7 @@ a@
 [source]
 ----
 template <typename DataT>
-device_event async_work_group_copy(global_ptr<DataT> dest,
-                                   local_ptr<DataT> src,
+device_event async_work_group_copy(global_ptr<DataT> dest, local_ptr<DataT> src,
                                    size_t numElements, size_t destStride) const
 ----
     a@ Deprecated in SYCL 2020.
@@ -13667,7 +13597,7 @@ a@
 [source]
 ----
 std::is_arithmetic_v<AccumulatorT> ||
-    std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
 ----
 a@
 ----
@@ -13683,7 +13613,7 @@ a@
 [source]
 ----
 std::is_arithmetic_v<AccumulatorT> ||
-    std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
 ----
 a@
 ----
@@ -13789,7 +13719,7 @@ a@
 [source]
 ----
 std::is_floating_point_v<AccumulatorT> ||
-    std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
 ----
 a@
 ----
@@ -13820,7 +13750,7 @@ a@
 [source]
 ----
 std::is_floating_point_v<AccumulatorT> ||
-    std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
+std::is_same_v<std::remove_cv_t<AccumulatorT>, sycl::half>
 ----
 a@
 ----
@@ -14385,7 +14315,8 @@ class related to the kernel invocation.
 a@
 [source]
 ----
-template <typename T> void set_arg(int argIndex, T&& arg)
+template <typename T>
+void set_arg(int argIndex, T&& arg)
 ----
    a@ This function must only be used to set arguments for a kernel that
       was constructed using a backend specific interoperability function
@@ -15141,7 +15072,8 @@ detail on USM, please see <<sec:usm>>.
 a@
 [source]
 ----
-template <typename T> void copy(const T* src, T* dest, size_t count)
+template <typename T>
+void copy(const T* src, T* dest, size_t count)
 ----
 a@ Copies [code]#count# elements of type [code]#T# from the pointer [code]#src#
 to the pointer [code]#dest#.  The [code]#dest# and [code]#src# parameters must
@@ -15166,7 +15098,8 @@ from the queue's device.  Note that [code]#value# is interpreted as an
 a@
 [source]
 ----
-template <typename T> void fill(void* ptr, const T& pattern, size_t count)
+template <typename T>
+void fill(void* ptr, const T& pattern, size_t count)
 ----
 a@ Replicates the provided [code]#pattern# into the memory at address
 [code]#ptr#.  The [code]#ptr# must point within a USM allocation from the same
@@ -15453,7 +15386,7 @@ include::{header_dir}/expressingParallelism/classKernelHandler.h[lines=4..-1]
 
 [source,,linenums]
 ----
-template<auto& SpecName>
+template <auto& SpecName>
 typename std::remove_reference_t<decltype(SpecName)>::value_type
 get_specialization_constant();
 ----
@@ -16010,7 +15943,8 @@ identifier for a device's built-in kernels by querying the device with
 
 [source]
 ----
-template <typename KernelName> kernel_id get_kernel_id();
+template <typename KernelName>
+kernel_id get_kernel_id();
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -16359,7 +16293,8 @@ are compatible with the device [code]#dev#.
 
 [source]
 ----
-template <typename KernelName> bool is_compatible(const device& dev);
+template <typename KernelName>
+bool is_compatible(const device& dev);
 ----
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
@@ -16423,9 +16358,9 @@ specify these properties as an extension.
 
 [source]
 ----
-kernel_bundle<bundle_state::object>
-compile(const kernel_bundle<bundle_state::input>& inputBundle,
-        const std::vector<device>& devs, const property_list& propList = {});
+kernel_bundle<bundle_state::object> compile(
+    const kernel_bundle<bundle_state::input>& inputBundle,
+    const std::vector<device>& devs, const property_list& propList = {});
 ----
 
 _Effects:_ The device images from [code]#inputBundle# are translated into one or
@@ -16453,9 +16388,9 @@ _Throws:_
 
 [source]
 ----
-kernel_bundle<bundle_state::executable>
-link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
-     const std::vector<device>& devs, const property_list& propList = {});
+kernel_bundle<bundle_state::executable> link(
+    const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
+    const std::vector<device>& devs, const property_list& propList = {});
 ----
 
 _Effects:_ Duplicate device images from [code]#objectBundles# are eliminated as
@@ -16489,9 +16424,9 @@ _Throws:_
 
 [source]
 ----
-kernel_bundle<bundle_state::executable>
-build(const kernel_bundle<bundle_state::input>& inputBundle,
-      const std::vector<device>& devs, const property_list& propList = {});
+kernel_bundle<bundle_state::executable> build(
+    const kernel_bundle<bundle_state::input>& inputBundle,
+    const std::vector<device>& devs, const property_list& propList = {});
 ----
 
 _Effects:_ This function performs both an online compile and link operation,
@@ -16676,7 +16611,8 @@ _Throws:_
 
 [source]
 ----
-template <typename KernelName> kernel get_kernel() const;
+template <typename KernelName>
+kernel get_kernel() const;
 ----
 
 _Preconditions:_ This member function is only available if the kernel bundle's
@@ -16741,7 +16677,8 @@ specialization constants>>.
 
 [source]
 ----
-template <auto& SpecName> bool has_specialization_constant() const noexcept;
+template <auto& SpecName>
+bool has_specialization_constant() const noexcept;
 ----
 
 _Returns:_ [code]#true# if any device image in the kernel bundle uses the
@@ -16859,7 +16796,8 @@ _Returns:_ The kernel bundle that contains this kernel.
 
 [source]
 ----
-template <typename Param> typename Param::return_type get_info() const;
+template <typename Param>
+typename Param::return_type get_info() const;
 ----
 
 _Preconditions:_ The [code]#Param# must be one of the [code]#info::kernel#
@@ -16891,7 +16829,8 @@ _Throws:_
 
 [source]
 ----
-template <typename Param> typename Param::return_type get_backend_info() const;
+template <typename Param>
+typename Param::return_type get_backend_info() const;
 ----
 
 _Preconditions:_ The [code]#Param# must be one of a descriptor defined by a
@@ -18019,7 +17958,8 @@ vec<ConvertT, NumElements> convert() const
 a@
 [source]
 ----
-template <typename asT> asT as() const
+template <typename asT>
+asT as() const
 ----
    a@ Bitwise reinterprets this SYCL [code]#vec# as a SYCL [code]#vec# of a
       different element type and number of elements specified by [code]#asT#.
@@ -18199,26 +18139,20 @@ When [code]#NumElements == 3#, the vector is treated as though
 a@
 [source]
 ----
-template <access::address_space AddressSpace,
-          access::decorated IsDecorated>
-void load(
-  size_t offset,
-  multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
 
-void load(size_t offset, const DataT* ptr)
+    void load(size_t offset, const DataT* ptr)
 ----
    a@ Loads [code]#NumElements# elements into the components of this SYCL [code]#vec#. These elements are loaded from consecutive addresses, where the starting address is computed by adding [code]#offset * NumElements * sizeof(DataT)# bytes to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
 a@
 [source]
 ----
-template <access::address_space AddressSpace,
-          access::decorated IsDecorated>
-void store(
-  size_t offset,
-  multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+template <access::address_space AddressSpace, access::decorated IsDecorated>
+void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 
-void store(size_t offset, DataT* ptr) const
+    void store(size_t offset, DataT* ptr) const
 ----
    a@ Stores [code]#NumElements# components of this SYCL [code]#vec# into consecutive addresses, with the starting address determined by adding [code]#offset * NumElements * sizeof(DataT)# to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
@@ -18772,21 +18706,22 @@ a@
 operator vector_t() const
 #endif
 
-operator DataT() const
-static constexpr size_t byte_size() noexcept
-static constexpr size_t size() noexcept
+operator DataT() const static constexpr size_t byte_size() noexcept
+    static constexpr size_t size() noexcept
 
-size_t get_size() const   // Deprecated
-size_t get_count() const  // Deprecated
+    size_t get_size() const   // Deprecated
+    size_t get_count() const  // Deprecated
 
-template <typename ConvertT,
-          rounding_mode RoundingMode = rounding_mode::automatic>
-vec<ConvertT, NumElements> convert() const
+    template <typename ConvertT,
+              rounding_mode RoundingMode = rounding_mode::automatic>
+    vec<ConvertT, NumElements> convert() const
 
-template <typename asT> asT as() const
+    template <typename asT>
+    asT as() const
 
-template <access::address_space AddressSpace, access::decorated IsDecorated>
-void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+    template <access::address_space AddressSpace, access::decorated IsDecorated>
+    void store(size_t offset,
+               multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 ----
 |====
 _Availability:_ These functions are available in both
@@ -18884,7 +18819,8 @@ a@
 [source]
 ----
 template <access::address_space AddressSpace, access::decorated IsDecorated>
-void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) const
+void load(size_t offset,
+          multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) const
 ----
 |====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
@@ -18926,13 +18862,13 @@ corresponds to the position [code]#index# of the swizzle operation.
 a@
 [source]
 ----
-template</*unspecified*/>
-const __writeable_swizzle__&
-operator=(const __writeable_swizzle__</*unspecified*/>& rhs) const
+template </*unspecified*/>
+const __writeable_swizzle__& operator=(
+    const __writeable_swizzle__</*unspecified*/>& rhs) const
 
-template</*unspecified*/>
-const __writeable_swizzle__&
-operator=(const __const_swizzle__</*unspecified*/>& rhs) const
+    template </*unspecified*/>
+    const __writeable_swizzle__& operator=(
+        const __const_swizzle__</*unspecified*/>& rhs) const
 ----
 |====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
@@ -20204,8 +20140,8 @@ T operator=(T desired) const
 a@
 [source]
 ----
-T load(memory_order order = default_read_order, memory_scope scope =
-           default_scope) const
+T load(memory_order order = default_read_order,
+       memory_scope scope = default_scope) const
 ----
    a@ Atomically loads the value of the object referenced by this
       [code]#atomic_ref#.  The memory order of this atomic operation must be
@@ -20640,7 +20576,8 @@ include::{header_dir}/atomicoperations.h[lines=4..-1]
 a@
 [source]
 ----
-template <typename pointerT> atomic(multi_ptr<pointerT, AddressSpace> ptr)
+template <typename pointerT>
+atomic(multi_ptr<pointerT, AddressSpace> ptr)
 ----
    a@ Deprecated in SYCL 2020.
 
@@ -21313,7 +21250,8 @@ size_t get_max_statement_size() const
 a@
 [source]
 ----
-template <typename T> const stream& operator<<(const stream& os, const T& rhs)
+template <typename T>
+const stream& operator<<(const stream& os, const T& rhs)
 ----
    a@ Outputs any valid values (see <<table.operands.stream>>) as a stream of characters and applies any valid manipulator (see <<table.manipulators.stream>>) to the current stream.
 
@@ -26025,7 +25963,7 @@ type_ to represent the following types:
 .[apidef]#abs#
 [source,role=synopsis,id=api:abs]
 ----
-template<typename GenInt>
+template <typename GenInt>
 /*return-type*/ abs(GenInt x)
 ----
 
@@ -26046,7 +25984,7 @@ The return type is [code]#GenInt# unless [code]#GenInt# is the
 .[apidef]#abs_diff#
 [source,role=synopsis,id=api:abs_diff]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ abs_diff(GenInt1 x, GenInt2 y)
 ----
 
@@ -26074,7 +26012,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apidef]#add_sat#
 [source,role=synopsis,id=api:add_sat]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ add_sat(GenInt1 x, GenInt2 y)
 ----
 
@@ -26101,7 +26039,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apidef]#hadd#
 [source,role=synopsis,id=api:hadd]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ hadd(GenInt1 x, GenInt2 y)
 ----
 
@@ -26128,7 +26066,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apidef]#rhadd#
 [source,role=synopsis,id=api:rhadd]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ rhadd(GenInt1 x, GenInt2 y)
 ----
 
@@ -26209,7 +26147,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#clz#
 [source,role=synopsis,id=api:clz]
 ----
-template<typename GenInt>
+template <typename GenInt>
 /*return-type*/ clz(GenInt x)
 ----
 
@@ -26230,7 +26168,7 @@ The return type is [code]#GenInt# unless [code]#GenInt# is the
 .[apidef]#ctz#
 [source,role=synopsis,id=api:ctz]
 ----
-template<typename GenInt>
+template <typename GenInt>
 /*return-type*/ ctz(GenInt x)
 ----
 
@@ -26251,7 +26189,7 @@ The return type is [code]#GenInt# unless [code]#GenInt# is the
 .[apidef]#mad_hi#
 [source,role=synopsis,id=api:mad_hi]
 ----
-template<typename GenInt1, typename GenInt2, typename GenInt3>
+template <typename GenInt1, typename GenInt2, typename GenInt3>
 /*return-type*/ mad_hi(GenInt1 a, GenInt2 b, GenInt3 c)
 ----
 
@@ -26278,7 +26216,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apidef]#mad_sat#
 [source,role=synopsis,id=api:mad_sat]
 ----
-template<typename GenInt1, typename GenInt2, typename GenInt3>
+template <typename GenInt1, typename GenInt2, typename GenInt3>
 /*return-type*/ mad_sat(GenInt1 a, GenInt2 b, GenInt3 c)
 ----
 
@@ -26396,7 +26334,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#mul_hi#
 [source,role=synopsis,id=api:mul_hi]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ mul_hi(GenInt1 x, GenInt2 y)
 ----
 
@@ -26426,7 +26364,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apidef]#rotate#
 [source,role=synopsis,id=api:rotate]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ rotate(GenInt1 v, GenInt2 count)
 ----
 
@@ -26460,7 +26398,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apidef]#sub_sat#
 [source,role=synopsis,id=api:sub_sat]
 ----
-template<typename GenInt1, typename GenInt2>
+template <typename GenInt1, typename GenInt2>
 /*return-type*/ sub_sat(GenInt1 x, GenInt2 y)
 ----
 
@@ -26487,7 +26425,7 @@ The return type is [code]#GenInt1# unless [code]#GenInt1# is the
 .[apititle]#upsample#
 [source,role=synopsis,id=api:upsample-uint16]
 ----
-template<typename UInt8Bit1, typename UInt8Bit2>
+template <typename UInt8Bit1, typename UInt8Bit2>
 /*return-type*/ upsample(UInt8Bit1 hi, UInt8Bit2 lo)
 ----
 
@@ -26516,7 +26454,7 @@ the same number of elements as the inputs.
 .[apititle]#upsample#
 [source,role=synopsis,id=api:upsample,id=api:upsample-int16]
 ----
-template<typename Int8Bit, typename UInt8Bit>
+template <typename Int8Bit, typename UInt8Bit>
 /*return-type*/ upsample(Int8Bit hi, UInt8Bit lo)
 ----
 
@@ -26546,7 +26484,7 @@ the same number of elements as the inputs.
 .[apititle]#upsample#
 [source,role=synopsis,id=api:upsample-uint32]
 ----
-template<typename UInt16Bit1, typename UInt16Bit2>
+template <typename UInt16Bit1, typename UInt16Bit2>
 /*return-type*/ upsample(UInt16Bit1 hi, UInt16Bit2 lo)
 ----
 
@@ -26575,7 +26513,7 @@ the same number of elements as the inputs.
 .[apititle]#upsample#
 [source,role=synopsis,id=api:upsample-int32]
 ----
-template<typename Int16Bit, typename UInt16Bit>
+template <typename Int16Bit, typename UInt16Bit>
 /*return-type*/ upsample(Int16Bit hi, UInt16Bit lo)
 ----
 
@@ -26606,7 +26544,7 @@ the same number of elements as the inputs.
 .[apititle]#upsample#
 [source,role=synopsis,id=api:upsample-uint64]
 ----
-template<typename UInt32Bit1, typename UInt32Bit2>
+template <typename UInt32Bit1, typename UInt32Bit2>
 /*return-type*/ upsample(UInt32Bit1 hi, UInt32Bit2 lo)
 ----
 
@@ -26635,7 +26573,7 @@ the same number of elements as the inputs.
 .[apititle]#upsample#
 [source,role=synopsis,id=api:upsample-int64]
 ----
-template<typename Int32Bit, typename UInt32Bit>
+template <typename Int32Bit, typename UInt32Bit>
 /*return-type*/ upsample(Int32Bit hi, UInt32Bit lo)
 ----
 
@@ -26666,7 +26604,7 @@ the same number of elements as the inputs.
 .[apidef]#popcount#
 [source,role=synopsis,id=api:popcount]
 ----
-template<typename GenInt>
+template <typename GenInt>
 /*return-type*/ popcount(GenInt x)
 ----
 
@@ -26687,7 +26625,7 @@ The return type is [code]#GenInt# unless [code]#GenInt# is the
 .[apidef]#mad24#
 [source,role=synopsis,id=api:mad24]
 ----
-template<typename Int32Bit1, typename Int32Bit2, typename Int32Bit3>
+template <typename Int32Bit1, typename Int32Bit2, typename Int32Bit3>
 /*return-type*/ mad24(Int32Bit1 x, Int32Bit2 y, Int32Bit3 z)
 ----
 
@@ -26730,7 +26668,7 @@ The return type is [code]#Int32Bit1# unless [code]#Int32Bit1# is the
 .[apidef]#mul24#
 [source,role=synopsis,id=api:mul24]
 ----
-template<typename Int32Bit1, typename Int32Bit2>
+template <typename Int32Bit1, typename Int32Bit2>
 /*return-type*/ mul24(Int32Bit1 x, Int32Bit2 y)
 ----
 
@@ -26858,7 +26796,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#degrees#
 [source,role=synopsis,id=api:degrees]
 ----
-template<typename GenFloat>
+template <typename GenFloat>
 /*return-type*/ degrees(GenFloat radians)
 ----
 
@@ -27040,7 +26978,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#radians#
 [source,role=synopsis,id=api:radians]
 ----
-template<typename GenFloat>
+template <typename GenFloat>
 /*return-type*/ radians(GenFloat degrees)
 ----
 
@@ -27190,7 +27128,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#sign#
 [source,role=synopsis,id=api:sign]
 ----
-template<typename GenFloat>
+template <typename GenFloat>
 /*return-type*/ sign(GenFloat x)
 ----
 
@@ -27256,7 +27194,7 @@ The term _float geometric type_ represents these types:
 .[apidef]#cross#
 [source,role=synopsis,id=api:cross]
 ----
-template<typename Geo3or4Float1, typename Geo3or4Float2>
+template <typename Geo3or4Float1, typename Geo3or4Float2>
 /*return-type*/ cross(Geo3or4Float1 p0, Geo3or4Float2 p1)
 ----
 
@@ -27300,7 +27238,7 @@ The return type is [code]#Geo3or4Float1# unless [code]#Geo3or4Float1# is the
 .[apidef]#dot#
 [source,role=synopsis,id=api:dot]
 ----
-template<typename GeoFloat1, typename GeoFloat2>
+template <typename GeoFloat1, typename GeoFloat2>
 /*return-type*/ dot(GeoFloat1 p0, GeoFloat2 p1)
 ----
 
@@ -27323,7 +27261,7 @@ Otherwise, the return type is [code]#GeoFloat1::value_type#.
 .[apidef]#distance#
 [source,role=synopsis,id=api:distance]
 ----
-template<typename GeoFloat1, typename GeoFloat2>
+template <typename GeoFloat1, typename GeoFloat2>
 /*return-type*/ distance(GeoFloat1 p0, GeoFloat2 p1)
 ----
 
@@ -27347,7 +27285,7 @@ Otherwise, the return type is [code]#GeoFloat1::value_type#.
 .[apidef]#length#
 [source,role=synopsis,id=api:length]
 ----
-template<typename GeoFloat>
+template <typename GeoFloat>
 /*return-type*/ length(GeoFloat p)
 ----
 
@@ -27365,7 +27303,7 @@ Otherwise, the return type is [code]#GeoFloat::value_type#.
 .[apidef]#normalize#
 [source,role=synopsis,id=api:normalize]
 ----
-template<typename GeoFloat>
+template <typename GeoFloat>
 /*return-type*/ normalize(GeoFloat p)
 ----
 
@@ -27383,7 +27321,7 @@ The return type is [code]#GeoFloat# unless [code]#GeoFloat# is the
 .[apidef]#fast_distance#
 [source,role=synopsis,id=api:fast_distance]
 ----
-template<typename GeoFloat1, typename GeoFloat2>
+template <typename GeoFloat1, typename GeoFloat2>
 /*return-type*/ fast_distance(GeoFloat1 p0, GeoFloat2 p1)
 ----
 
@@ -27406,7 +27344,7 @@ Otherwise, the return type is [code]#GeoFloat1::value_type#.
 .[apidef]#fast_length#
 [source,role=synopsis,id=api:fast_length]
 ----
-template<typename GeoFloat>
+template <typename GeoFloat>
 /*return-type*/ fast_length(GeoFloat p)
 ----
 
@@ -27424,7 +27362,7 @@ Otherwise, the return type is [code]#GeoFloat::value_type#.
 .[apidef]#fast_normalize#
 [source,role=synopsis,id=api:fast_normalize]
 ----
-template<typename GeoFloat>
+template <typename GeoFloat>
 /*return-type*/ fast_normalize(GeoFloat p)
 ----
 
@@ -28445,7 +28383,7 @@ significant bit of all elements in [code]#x# are set.
 .[apidef]#bitselect#
 [source,role=synopsis,id=api:bitselect]
 ----
-template<typename GenType1, typename GenType2, typename GenType3>
+template <typename GenType1, typename GenType2, typename GenType3>
 /*return-type*/ bitselect(GenType1 a, GenType2 b, GenType3 c)
 ----
 
