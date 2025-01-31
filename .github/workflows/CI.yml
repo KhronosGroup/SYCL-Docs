@@ -52,3 +52,27 @@ jobs:
           name: spec-outputs
           path: |
             /tmp/out
+
+  check-clang-format:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Need to check out base branch as well
+      - name: Install clang-format
+        run: sudo apt update; sudo apt install -y clang-format
+      # Inspired by SYCL-CTS
+      - name: Run clang-format on changed files
+        run: |
+          set -o errexit -o pipefail -o noclobber -o nounset
+          DIFF=$( git diff -U0 --no-color -C ./adoc/code/ ${{ github.event.pull_request.base.sha }} | ./adoc/scripts/clang-format-diff.py -p1 )
+          if [ ! -z "$DIFF" ]; then
+            echo 'The following changes are not formatted according to `clang-format`:' >> $GITHUB_STEP_SUMMARY
+            echo '```diff' >> $GITHUB_STEP_SUMMARY
+            echo "$DIFF" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "Not all files are formatted according to clang-format. See workflow summary for details."
+            exit 1 # Fail CI run
+          fi
