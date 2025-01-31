@@ -16,7 +16,7 @@ int main() {
   // because the destructor of resultBuf will wait
   {
     // Wrap our data variable in a buffer
-        buffer<int, 1> resultBuf{data, range<1>{1024}};
+    buffer<int, 1> resultBuf{data, range<1>{1024}};
 
     // Create a command group to issue commands to the queue
     myQueue.submit([&](handler& cgh) {
