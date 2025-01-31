@@ -5,8 +5,7 @@
 
 SYCL_EXTERNAL void Foo();
 
-SYCL_EXTERNAL void Bar() { /* ... */
-}
+SYCL_EXTERNAL void Bar() { /* ... */ }
 
 SYCL_EXTERNAL extern void Baz();
 

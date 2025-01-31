@@ -6,7 +6,7 @@ myQueue.submit([&](handler& cgh) {
   cgh.parallel_for_work_group(
       range<3>(2, 2, 2), range<3>(2, 2, 2), [=](group<3> myGroup) {
         //[workgroup code]
-        int myLocal; // this variable is shared between workitems
+        int myLocal;  // this variable is shared between workitems
         // this variable will be instantiated for each work-item separately
         private_memory<int> myPrivate(myGroup);
 
