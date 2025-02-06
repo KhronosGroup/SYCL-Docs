@@ -37,10 +37,6 @@ template <typename DataT, int NumElements> class vec {
   using element_type = DataT;
   using value_type = DataT;
 
-#ifdef __SYCL_DEVICE_ONLY__
-  using vector_t = __unspecified__;
-#endif
-
   vec();
 
   explicit constexpr vec(const DataT& arg);
@@ -48,12 +44,6 @@ template <typename DataT, int NumElements> class vec {
   template <typename... ArgTN> constexpr vec(const ArgTN&... args);
 
   constexpr vec(const vec<DataT, NumElements>& rhs);
-
-#ifdef __SYCL_DEVICE_ONLY__
-  vec(vector_t nativeVector);
-
-  operator vector_t() const;
-#endif
 
   // Available only when: NumElements == 1
   operator DataT() const;
