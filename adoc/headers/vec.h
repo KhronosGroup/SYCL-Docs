@@ -74,45 +74,67 @@ template <typename DataT, int NumElements> class vec {
 
   template <typename AsT> AsT as() const;
 
-  template <int... swizzleIndexes> __swizzled_vec__ swizzle() const;
+  // Available on when the number of swizzleIndexes template parameters is
+  // 1, 2, 3, 4, 8, or 16.
+  // Available only when each of the swizzleIndexes template parameters is
+  // greater or equal to 0 and less than NumElements.
+  template <int... swizzleIndexes> __writeable_swizzle__ swizzle();
+  template <int... swizzleIndexes> __const_swizzle__ swizzle() const;
 
   // Available only when NumElements <= 4.
   // XYZW_ACCESS is: x, y, z, w, subject to NumElements.
-  __swizzled_vec__ XYZW_ACCESS() const;
+  __writeable_swizzle__ XYZW_ACCESS();
+  __const_swizzle__ XYZW_ACCESS() const;
 
   // Available only NumElements == 4.
   // RGBA_ACCESS is: r, g, b, a.
-  __swizzled_vec__ RGBA_ACCESS() const;
+  __writeable_swizzle__ RGBA_ACCESS();
+  __const_swizzle__ RGBA_ACCESS() const;
 
   // INDEX_ACCESS is: s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD,
   // sE, sF, subject to NumElements.
-  __swizzled_vec__ INDEX_ACCESS() const;
+  __writeable_swizzle__ INDEX_ACCESS();
+  __const_swizzle__ INDEX_ACCESS() const;
 
 #ifdef SYCL_SIMPLE_SWIZZLES
   // Available only when NumElements <= 4.
   // XYZW_SWIZZLE is all permutations with repetition of: x, y, z, w, subject to
   // NumElements.
-  __swizzled_vec__ XYZW_SWIZZLE() const;
+  __writeable_swizzle__ XYZW_SWIZZLE();
+  __const_swizzle__ XYZW_SWIZZLE() const;
 
   // Available only when NumElements == 4.
   // RGBA_SWIZZLE is all permutations with repetition of: r, g, b, a.
-  __swizzled_vec__ RGBA_SWIZZLE() const;
+  __writeable_swizzle__ RGBA_SWIZZLE();
+  __const_swizzle__ RGBA_SWIZZLE() const;
 
 #endif // #ifdef SYCL_SIMPLE_SWIZZLES
 
   // Available only when: NumElements > 1.
-  __swizzled_vec__ lo() const;
-  __swizzled_vec__ hi() const;
-  __swizzled_vec__ odd() const;
-  __swizzled_vec__ even() const;
+  __writeable_swizzle__ lo();
+  __const_swizzle__ lo() const;
+
+  __writeable_swizzle__ hi();
+  __const_swizzle__ hi() const;
+
+  __writeable_swizzle__ odd();
+  __const_swizzle__ odd() const;
+
+  __writeable_swizzle__ even();
+  __const_swizzle__ even() const;
 
   // load and store member functions
   template <access::address_space AddressSpace, access::decorated IsDecorated>
   void load(size_t offset,
             multi_ptr<const DataT, AddressSpace, IsDecorated> ptr);
+
+  void load(size_t offset, const DataT* ptr);
+
   template <access::address_space AddressSpace, access::decorated IsDecorated>
   void store(size_t offset,
              multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const;
+
+  void store(size_t offset, DataT* ptr) const;
 
   // subscript operator
   DataT& operator[](int index);

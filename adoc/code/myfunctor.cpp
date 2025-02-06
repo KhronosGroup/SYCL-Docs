@@ -10,7 +10,7 @@ class RandomFiller {
     randomNum_ = r(hwRand);
   }
   void operator()(item<1> item) const { ptr_[item.get_id()] = get_random(); }
-  int get_random() { return randomNum_; }
+  int get_random() const { return randomNum_; }
 
  private:
   accessor<int> ptr_;
@@ -18,8 +18,8 @@ class RandomFiller {
 };
 
 void workFunction(buffer<int, 1>& b, queue& q, const range<1> r) {
-  myQueue.submit([&](handler& cgh) {
-    accessor ptr { buf, cgh };
+  q.submit([&](handler& cgh) {
+    accessor ptr { b, cgh };
     RandomFiller filler { ptr };
 
     cgh.parallel_for(r, filler);

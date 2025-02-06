@@ -205,6 +205,16 @@ Amongst other things, this restriction makes it illegal for a
     implementation defines the [code]#SYCL_EXTERNAL# macro as described in
     <<subsec:syclexternal>>.
 
+Inside a <<discarded-statement>> or in the case of a
+<<manifestly-constant-evaluated>>, any code accepted by the C++ standard in this
+case is also accepted in a SYCL <<device-function>>.
+
+[NOTE]
+====
+The restriction waiver in <<discarded-statement>> or
+<<manifestly-constant-evaluated>> allows any kind of meta-programming in a
+<<device-function>>.
+====
 
 [[subsec:scalartypes]]
 == Built-in scalar data types
@@ -339,13 +349,18 @@ The standard {cpp} preprocessing directives and macros are supported.
 The following preprocessor macros must be defined by all conformant
 implementations:
 
-  * [code]#SYCL_LANGUAGE_VERSION# substitutes an integer reflecting the version
-    number and revision of the SYCL language being supported by the
-    implementation.
-    The version of SYCL defined in this document will have
-    [code]#SYCL_LANGUAGE_VERSION# substitute the integer
-    [code]#{SYCL_LANGUAGE_VERSION}#, composed with the general SYCL version
-    followed by 2 digits representing the revision number;
+  * [code]#SYCL_LANGUAGE_VERSION# is defined to an integer literal that
+    indicates the version of the SYCL specification to which the implementation
+    conforms.
++
+[width="100%",options="header",separator="@",cols="50%,50%"]
+|====
+@ SYCL version @ Macro defined as
+a@ SYCL 2020 a@ [code]#202012L#
+|====
++
+Future versions of the SYCL specification will define this macro to an integer
+literal with greater value.
   * [code]#SYCL_DEVICE_COPYABLE# is defined to 1 if the implementation supports
     explicitly specified <<device-copyable>> types as described in
     <<sec::device.copyable>>.
@@ -377,8 +392,17 @@ in <<sec:backends>> must be defined by all conformant implementations.
 
 A number of kernel features defined by this SYCL specification are optional;
 they may be supported on some devices but not on other devices.
+
+As stated in <<sec:language.restrictions.kernels>>, the restrictions for
+optional kernel features do not apply to discarded statements or to manifestly
+constant-evaluated expressions or conversions in device code.
+Device code may use optional features in <<discarded-statement>> or
+<<manifestly-constant-evaluated>> even if the device does not support the
+optional feature.
+
 As described in <<sec:device-aspects>>, an application can test whether a device
-supports these features by testing whether the device has an associated aspect.
+supports an optional feature by testing whether the device has an associated
+aspect.
 The following aspects are those that correspond to optional kernel features:
 
   * [code]#fp16#
@@ -615,12 +639,11 @@ values in the [code]#sycl::aspect# enumeration type (including any extended
 values the implementation may provide).  If it does not, the program is ill
 formed and the compiler must issue a diagnostic.
 
-See <<listing:device-has>> for an example of this attribute.
+See below for an example of this attribute.
 
 |====
 
 .Example of the [code]#sycl::device_has()# attribute
-[[listing:device-has]]
 [source,,linenums]
 ----
 include::{code_dir}/deviceHas.cpp[lines=4..-1]

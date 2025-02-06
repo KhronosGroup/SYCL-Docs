@@ -1,0 +1,41 @@
+name: Open CTS issue for spec changes
+on:
+  # We use the pull_request_target trigger to always run the workflow in the context of the base branch,
+  # since this allows us to access repository secrets even if the PR originates from a fork.
+  #
+  # Importantly, the workflow must not checkout any code from the PR branch, as this could allow an attacker
+  # to gain write access to the repository.
+  # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for more information.
+  pull_request_target:
+    types: opened
+    paths:
+      - 'adoc/**'
+    # We don't want to create issues for cherry-picks into older spec revisions
+    branches:
+      - main
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    # Skip if this is a purely editorial PR
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'editorial') }}
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.SYCL_ISSUE_BOT_APP_ID }}
+          private-key: ${{ secrets.SYCL_ISSUE_BOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: "SYCL-CTS"
+      - name: Create Issue
+        uses: dacbd/create-issue-action@v2.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo: SYCL-CTS
+          title: |
+            [Spec change] ${{ github.event.pull_request.title }}
+          body: |
+            Please review whether ${{ github.event.pull_request.html_url }} by @${{ github.triggering_actor }} requires any changes to the CTS.
+
+            **If changes are required**: Open a new PR addressing the changes and link it to this issue.
+            **If no changes are required**: Close this issue and proceed with the spec PR.
