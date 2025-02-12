@@ -9,8 +9,7 @@ class RandomFiller {
     std::uniform_int_distribution<> r { 1, 100 };
     randomNum_ = r(hwRand);
   }
-  void operator()(item<1> item) const { ptr_[item.get_id()] = get_random(); }
-  int get_random() const { return randomNum_; }
+  void operator()(item<1> item) const { ptr_[item.get_id()] = randomNum_; }
 
  private:
   accessor<int> ptr_;
