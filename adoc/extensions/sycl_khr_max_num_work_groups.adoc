@@ -2,7 +2,7 @@
 = sycl_khr_max_num_work_groups
 
 This extension allows developers to query iteration bounds in each dimension for a ND-range kernel.
-The implementation ensures the execution of the ND-range kernel if its global size is less than of equal to `max_num_work_groups_nd_range<N>` in each dimension.
+The implementation ensures the execution of the ND-range kernel if its global size is less than of equal to `max_num_work_groups<N>` in each dimension.
 
 
 [[sec:khr-max-num-work-groups-dependencies]]
@@ -30,7 +30,7 @@ An implementation supporting this extension must predefine the `SYCL_KHR_MAX_NUM
 |===
 | Device descriptors                                     | Return type | Description
 
-| `khr::info::device::max_num_work_groups_nd_range<N>`
+| `khr::info::device::max_num_work_groups<N>`
 | `id<N>`
 | Returns the maximum number of work-groups that can be submitted in each dimension of the `globalSize` of an `nd_range<N>`. The minimum value is `(1, 1, 1)` if the device is not `info::device_type::custom`.
 
@@ -64,7 +64,7 @@ main(int argc, char *argv[]) {
               << "\n";
 
     sycl::id<3> nd_limit =
-        gpu.get_info<sycl::khr::info::device::max_num_work_group_nd_range<3>>();
+        gpu.get_info<sycl::khr::info::device::max_num_work_groups<3>>();
     std::cout << "Max number groups for ND-Range: x_max: " << nd_limit[2]
               << " y_max: " << nd_limit[1] << " z_max: " << nd_limit[0]
               << std::endl;
