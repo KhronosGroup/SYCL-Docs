@@ -1,8 +1,8 @@
 [[sec:khr-max-num-work-groups]]
 = sycl_khr_max_num_work_groups
 
-This extension allows developers to query iteration bounds in each dimension for a ND-range or basic range kernel.
-The implementation ensures the execution of the ND-range kernel if its global size is less than of equal to `max_num_work_groups_nd_range<N>` in each dimension. This condition applies to basic range kernels with `max_num_work_groups_range<N>`.
+This extension allows developers to query iteration bounds in each dimension for a ND-range kernel.
+The implementation ensures the execution of the ND-range kernel if its global size is less than of equal to `max_num_work_groups_nd_range<N>` in each dimension.
 
 
 [[sec:khr-max-num-work-groups-dependencies]]
@@ -34,20 +34,15 @@ An implementation supporting this extension must predefine the `SYCL_KHR_MAX_NUM
 | `id<N>`
 | Returns the maximum number of work-groups that can be submitted in each dimension of the `globalSize` of an `nd_range<N>`. The minimum value is `(1, 1, 1)` if the device is not `info::device_type::custom`.
 
-
-| `khr::info::device::max_num_work_groups_range<N>`
-| `id<N>`
-| Returns the maximum number of work-groups that can be submitted in each dimension of a `range<N>` for a basic kernel. The minimum value is `(1, 1, 1)` if the device is not `info::device_type::custom`.
 |===
 
 === Note
-- N can take the value 1, 2 or 3
-// - nd_range allow barrier, and other scemantic who may impact the maximun size of allocation, hence we split the querry between the range and nd_range?
+- N can take the value 1, 2 or 3.
 
 [[sec:khr-max-num-work-groups-example]]
 == Example
 
-The example below demonstrates the use of this extension for an `nd_range` loop, the same code can be applied to a basic range by using the `max_num_work_group_range` device descriptor.
+The example below demonstrates the use of this extension to check bounds for an `nd_range` loop.
 
 [source,cpp]
 ----
