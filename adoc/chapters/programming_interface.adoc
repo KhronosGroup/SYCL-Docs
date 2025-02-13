@@ -6597,6 +6597,36 @@ a@
 sampled_image(const void* hostPointer, image_format format,
               image_sampler sampler,
               const range<Dimensions>& rangeRef,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ Construct a SYCL [code]#sampled_image# instance with the
+      [code]#hostPointer# parameter provided.  The [code]#sampled_image#
+      assumes exclusive access to this memory for the duration of its lifetime.
+      The host address is [code]#const#, so the host accesses must be
+      read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+      initialized with this memory and there is no write after its
+      destruction.
+      The constructed SYCL [code]#sampled_image# will use the allocator
+      parameter provided when allocating memory on the host.
+      The element size of the constructed SYCL [code]#sampled_image#
+      will be derived from the [code]#format# parameter.
+      Accessors that read the constructed SYCL [code]#sampled_image# will
+      use the [code]#sampler# parameter to sample the image.
+      The range of the constructed SYCL [code]#sampled_image# is
+      specified by the [code]#rangeRef# parameter provided.
+      The pitch of the constructed SYCL [code]#sampled_image# will be
+      the default size determined by the <<sycl-runtime>>.
+      Zero or more properties can be provided to the constructed SYCL
+      [code]#sampled_image# via an instance of
+      [code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6609,6 +6639,39 @@ The host address is [code]#const#, so the host accesses must be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this
 image is only initialized with this memory and there is no write after
 destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ Available only when: [code]#Dimensions > 1#.
+
+Construct a SYCL [code]#sampled_image# instance with the [code]#hostPointer#
+parameter provided.  The [code]#sampled_image# assumes exclusive access to this
+memory for the duration of its lifetime.
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this
+image is only initialized with this memory and there is no write after
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
 The element size of the constructed SYCL [code]#sampled_image#
 will be derived from the [code]#format# parameter.
 Accessors that read the constructed SYCL [code]#sampled_image# will
@@ -6664,6 +6727,45 @@ sampled_image(std::shared_ptr<const void>& hostPointer,
               image_format format,
               image_sampler sampler,
               const range<Dimensions>& rangeRef,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the default size determined by the <<sycl-runtime>>.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6682,6 +6784,46 @@ The host address is [code]#const#, so the host accesses can be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
 initialized with this memory and there is no write after its
 destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses can be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
 The element size of the constructed SYCL [code]#sampled_image#
 will be derived from the [code]#format# parameter.
 Accessors that read the constructed SYCL [code]#sampled_image# will
