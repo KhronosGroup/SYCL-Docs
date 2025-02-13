@@ -53,6 +53,8 @@ class sampled_image {
 
   size_t size() const noexcept;
 
+  AllocatorT get_allocator() const;
+
   template <typename DataT, image_target Targ = image_target::device>
   sampled_image_accessor<DataT, Dimensions, Targ>
   get_access(handler& commandGroupHandler, const property_list& propList = {});
