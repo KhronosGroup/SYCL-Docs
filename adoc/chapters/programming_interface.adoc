@@ -12075,7 +12075,8 @@ is the cast to [code]#size_t#.
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const size_t& rhs)
+// Available only when std::is_integral_v<T> is true
+range operatorOP(const range& lhs, const T& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12088,8 +12089,8 @@ Constructs and returns a new instance of the SYCL [code]#range# class
 template with the same dimensionality as [code]#lhs# [code]#range#,
 where each element of the new SYCL [code]#range# instance is the result
 of an element-wise [code]#OP# operator between each element of this
-SYCL [code]#range# and the [code]#rhs# [code]#size_t#. If
-the operator returns a [code]#bool#, the result is the cast to
+SYCL [code]#range# and the [code]#rhs# integral type. If
+the operator returns a [code]#bool#, the result is then cast to
 [code]#size_t#.
 
 a@
@@ -12108,20 +12109,22 @@ to [code]#size_t#.
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const size_t& rhs)
+// Available only when std::is_integral_v<T> is true
+range& operatorOP(range& lhs, const T& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
 Assigns each element of [code]#lhs# [code]#range# instance with the
 result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#range# and the [code]#rhs# [code]#size_t# and returns [code]#lhs# [code]#range#. If the
-operator returns a [code]#bool#, the result is the cast to
+of [code]#lhs# [code]#range# and the [code]#rhs# integral type and returns [code]#lhs# [code]#range#. If the
+operator returns a [code]#bool#, the result is then cast to
 [code]#size_t#.
 
 a@
 [source]
 ----
-range operatorOP(const size_t& lhs, const range& rhs)
+// Available only when std::is_integral_v<T> is true
+range operatorOP(const T& lhs, const range& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12134,9 +12137,9 @@ Constructs and returns a new instance of the SYCL [code]#range# class
 template with the same dimensionality as the [code]#rhs# SYCL
 [code]#range#, where each element of the new SYCL [code]#range#
 instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# [code]#size_t# and each element of the
+the [code]#lhs# integral type and each element of the
 [code]#rhs# SYCL [code]#range#. If the operator returns a
-[code]#bool#, the result is the cast to [code]#size_t#.
+[code]#bool#, the result is then cast to [code]#size_t#.
 
 a@
 [source]
@@ -12416,7 +12419,8 @@ If the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const size_t& rhs)
+// Available only when std::is_integral_v<T> is true
+id operatorOP(const id& lhs, const T& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12425,8 +12429,8 @@ Constructs and returns a new instance of the SYCL [code]#id# class
 template with the same dimensionality as [code]#lhs# [code]#id#, where
 each element of the new SYCL [code]#id# instance is the result of an
 element-wise [code]#OP# operator between each element of [code]#lhs#
-[code]#id# and the [code]#rhs# [code]#size_t#. If the
-operator returns a [code]#bool# the result is the cast to
+[code]#id# and the [code]#rhs# integral type. If the
+operator returns a [code]#bool# the result is then cast to
 [code]#size_t#.
 
 a@
@@ -12447,21 +12451,22 @@ the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const size_t& rhs)
+id& operatorOP(id& lhs, const T& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
 Assigns each element of [code]#lhs# [code]#id# instance with the
 result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#id# and the [code]#rhs# [code]#size_t#
+of [code]#lhs# [code]#id# and the [code]#rhs# integral type
 and returns [code]#lhs# [code]#id#. If the operator
-returns a [code]#bool# the result is the cast to [code]#size_t#.
+returns a [code]#bool# the result is then cast to [code]#size_t#.
 
 a@
 [source]
 ----
-id operatorOP(const size_t& lhs, const id& rhs)
+// Only available when std::is_integral_v<T> is true
+id operatorOP(const T& lhs, const id& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12470,9 +12475,9 @@ Constructs and returns a new instance of the SYCL [code]#id# class
 template with the same dimensionality as the [code]#rhs# SYCL
 [code]#id#, where each element of the new SYCL [code]#id#
 instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# [code]#size_t# and each element of the
+the [code]#lhs# integral type and each element of the
 [code]#rhs# SYCL [code]#id#. If the operator returns a
-[code]#bool# the result is the cast to [code]#size_t#.
+[code]#bool# the result is then cast to [code]#size_t#.
 
 a@
 [source]

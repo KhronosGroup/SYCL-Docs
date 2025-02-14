@@ -33,17 +33,24 @@ template <int Dimensions = 1> class id {
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend id operatorOP(const id& lhs, const id& rhs) { /* ... */
   }
-  friend id operatorOP(const id& lhs, const size_t& rhs) { /* ... */
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // Available only when std::is_integral_v<T> is true
+  friend id operatorOP(const id& lhs, const T& rhs) { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend id& operatorOP(id& lhs, const id& rhs) { /* ... */
   }
-  friend id& operatorOP(id& lhs, const size_t& rhs) { /* ... */
+
+  // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
+  // Available only when std::is_integral_v<T> is true
+  friend id& operatorOP(id& lhs, const T& rhs) { /* ... */
   }
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend id operatorOP(const size_t& lhs, const id& rhs) { /* ... */
+  // Available only when std::is_integral_v<T> is true
+  friend id operatorOP(const T& lhs, const id& rhs) { /* ... */
   }
 
   // OP is unary +, -

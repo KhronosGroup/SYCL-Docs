@@ -29,17 +29,24 @@ template <int Dimensions = 1> class range {
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend range operatorOP(const range& lhs, const range& rhs) { /* ... */
   }
-  friend range operatorOP(const range& lhs, const size_t& rhs) { /* ... */
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // Available only when std::is_integral_v<T> is true
+  friend range operatorOP(const range& lhs, const T& rhs) { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend range& operatorOP(range& lhs, const range& rhs) { /* ... */
   }
-  friend range& operatorOP(range& lhs, const size_t& rhs) { /* ... */
+
+  // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
+  // Available only when std::is_integral_v<T> is true
+  friend range& operatorOP(range& lhs, const T& rhs) { /* ... */
   }
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend range operatorOP(const size_t& lhs, const range& rhs) { /* ... */
+  // Available only when std::is_integral_v<T> is true
+  friend range operatorOP(const T& lhs, const range& rhs) { /* ... */
   }
 
   // OP is unary +, -
