@@ -12096,6 +12096,27 @@ the operator returns a [code]#bool#, the result is then cast to
 a@
 [source]
 ----
+// Available only when std::is_integral_v<T> is true
+range operatorOP(const T& lhs, const range& rhs)
+----
+   a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
+      [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
+      [code]#&#, [code]#|#, [code]#^#,
+      [code]#&&#, [code]#||#,
+      [code]#<#, [code]#>#, [code]#+<=+#,
+      [code]#>=#.
+
+Constructs and returns a new instance of the SYCL [code]#range# class
+template with the same dimensionality as the [code]#rhs# SYCL
+[code]#range#, where each element of the new SYCL [code]#range#
+instance is the result of an element-wise [code]#OP# operator between
+the [code]#lhs# integral type and each element of the
+[code]#rhs# SYCL [code]#range#. If the operator returns a
+[code]#bool#, the result is then cast to [code]#size_t#.
+
+a@
+[source]
+----
 range& operatorOP(range& lhs, const range& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -12119,27 +12140,6 @@ result of an element-wise [code]#OP# operator between each element
 of [code]#lhs# [code]#range# and the [code]#rhs# integral type and returns [code]#lhs# [code]#range#. If the
 operator returns a [code]#bool#, the result is then cast to
 [code]#size_t#.
-
-a@
-[source]
-----
-// Available only when std::is_integral_v<T> is true
-range operatorOP(const T& lhs, const range& rhs)
-----
-   a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
-      [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
-      [code]#&#, [code]#|#, [code]#^#,
-      [code]#&&#, [code]#||#,
-      [code]#<#, [code]#>#, [code]#+<=+#,
-      [code]#>=#.
-
-Constructs and returns a new instance of the SYCL [code]#range# class
-template with the same dimensionality as the [code]#rhs# SYCL
-[code]#range#, where each element of the new SYCL [code]#range#
-instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# integral type and each element of the
-[code]#rhs# SYCL [code]#range#. If the operator returns a
-[code]#bool#, the result is then cast to [code]#size_t#.
 
 a@
 [source]
@@ -12436,6 +12436,23 @@ operator returns a [code]#bool# the result is then cast to
 a@
 [source]
 ----
+// Only available when std::is_integral_v<T> is true
+id operatorOP(const T& lhs, const id& rhs)
+----
+   a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
+      [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
+
+Constructs and returns a new instance of the SYCL [code]#id# class
+template with the same dimensionality as the [code]#rhs# SYCL
+[code]#id#, where each element of the new SYCL [code]#id#
+instance is the result of an element-wise [code]#OP# operator between
+the [code]#lhs# integral type and each element of the
+[code]#rhs# SYCL [code]#id#. If the operator returns a
+[code]#bool# the result is then cast to [code]#size_t#.
+
+a@
+[source]
+----
 id& operatorOP(id& lhs, const id& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
@@ -12461,23 +12478,6 @@ result of an element-wise [code]#OP# operator between each element
 of [code]#lhs# [code]#id# and the [code]#rhs# integral type
 and returns [code]#lhs# [code]#id#. If the operator
 returns a [code]#bool# the result is then cast to [code]#size_t#.
-
-a@
-[source]
-----
-// Only available when std::is_integral_v<T> is true
-id operatorOP(const T& lhs, const id& rhs)
-----
-   a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
-      [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
-
-Constructs and returns a new instance of the SYCL [code]#id# class
-template with the same dimensionality as the [code]#rhs# SYCL
-[code]#id#, where each element of the new SYCL [code]#id#
-instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# integral type and each element of the
-[code]#rhs# SYCL [code]#id#. If the operator returns a
-[code]#bool# the result is then cast to [code]#size_t#.
 
 a@
 [source]
