@@ -716,6 +716,40 @@ Construct a SYCL [code]#property_list# with zero or more properties.
 
 |====
 
+=== Information queries
+
+Each of the following classes provides a generic mechanism for querying the
+class for information: [code]#context#, [code]#device#, [code]#event#,
+[code]#kernel#, [code]#platform#, and [code]#queue#.
+
+Each available query is described by an <<information-descriptor>>, which is is
+a class or class template implementing the interface below:
+
+[source]
+----
+class __InformationDescriptor__
+{
+ public:
+  using return_type = /* return type for this information query */;
+};
+----
+
+==== Information query interface
+
+The information query interface consists of a [code]#get_info()# function
+template, which is templated on an <<information-descriptor>>.
+
+[source,role=synopsis]
+----
+template <typename Param>
+typename Param::return_type get_info() const;
+----
+
+_Constraints_: [code]#Param# must be an <<information-descriptor>> compatible
+with the class, as listed in <<sec:information-descriptors>>.
+
+_Returns_: The information corresponding to [code]#Param# in the table of
+information descriptors associated with the class.
 
 
 == SYCL runtime classes
