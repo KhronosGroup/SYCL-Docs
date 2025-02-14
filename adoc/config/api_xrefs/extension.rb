@@ -54,8 +54,8 @@ class AddApiXrefs < Extensions::Postprocessor
   include Asciidoctor::Logging
 
   Id = /<\w+ id="([\w:-]*)"/
-  ApiSpan = /<span class="api">([\w:]*)<\/span>/
-  ApiDefSpan = /<span class="apidef">([\w:]*)<\/span>/
+  ApiSpan = /<span class="api">([\w:-]*)<\/span>/
+  ApiDefSpan = /<span class="apidef">([\w:-]*)<\/span>/
   ApiIdDiv = /<div id="([\w:-]*)"/
 
   def process document, output
