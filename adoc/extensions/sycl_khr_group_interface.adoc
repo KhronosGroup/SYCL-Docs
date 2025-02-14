@@ -33,9 +33,9 @@ below.
 [[sec:khr-group-interface-common]]
 == Common group interface
 
-The `khr::work_group`, `khr::sub_group` and `khr::work_item` objects defined by
-this extension all implement a common set of operations, which are shown in the
-synopsis below.
+The `khr::work_group`, `khr::sub_group` and `khr::member_item` objects defined
+by this extension all implement a common set of operations, which are shown in
+the synopsis below.
 The name [code]#+__group__+# in that synopsis is a placeholder for each of these
 three types.
 When the synopsis shows an ellipsis ([code]#+/*...*/+#), the subsequent sections
@@ -74,7 +74,7 @@ class __group__ {
 };
 
 template <typename Group>
-work_item<Group> get_item(Group g) noexcept;
+member_item<Group> get_item(Group g) noexcept;
 
 template <typename Group>
 bool leader_of(Group g) noexcept;
@@ -199,12 +199,12 @@ the number of work-items in each dimension of the group.
 [source,role=synopsis,id=api:common-group-get-item]
 ----
 template <typename Group>
-work_item<Group> get_item(Group g) noexcept;
+member_item<Group> get_item(Group g) noexcept;
 ----
 
 _Constraints_: `Group` is `work_group` or `sub_group`.
 
-_Returns_: A [code]#work_item# representing the calling work-item within group
+_Returns_: A [code]#member_item# representing the calling work-item within group
 [code]#g#.
 
 '''
@@ -384,20 +384,20 @@ If no such attribute is present, the value returned is determined by the
 
 '''
 
-[[sec:khr-group-interface-work_item]]
-== [code]#work_item# class
+[[sec:khr-group-interface-member_item]]
+== [code]#member_item# class
 
-The [code]#work_item# class template encapsulates all functionality required to
-represent a single <<work-item>> within a specific <<group>> of work-items.
+The [code]#member_item# class template encapsulates all functionality required
+to represent a single <<work-item>> within a specific <<group>> of work-items.
 
 The mechanism used to determine the calling work-item's position within a given
 group of work-items is implementation-defined, and there is subsequently no way
-for a user to construct arbitrary instances of the [code]#work_item# class
+for a user to construct arbitrary instances of the [code]#member_item# class
 template.
-Instances of the [code]#work_item# class template can only be acquired from a
+Instances of the [code]#member_item# class template can only be acquired from a
 call to [api]#khr::get_item#.
 
-The SYCL [code]#work_item# class template provides common by-value semantics
+The SYCL [code]#member_item# class template provides common by-value semantics
 (see <<sec:byval-semantics>>) and the common group interface (see
 <<sec:khr-group-interface-common>>).
 
@@ -406,7 +406,7 @@ The SYCL [code]#work_item# class template provides common by-value semantics
 namespace sycl::khr {
 
 template <typename ParentGroup>
-class work_item {
+class member_item {
 
  public:
   using id_type = typename ParentGroup::id_type;
@@ -456,7 +456,7 @@ int main() {
 
     // opt into the new group interface
     khr::work_group<1> g = ndit.get_group();
-    khr::work_item it = get_item(g);
+    khr::member_item it = get_item(g);
 
     // distribute N loop over work-groups
     for (size_t i = g.linear_id(); i < N; i += g.range().size()) {
