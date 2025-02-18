@@ -21712,10 +21712,6 @@ Some of the functions in the SYCL algorithms library introduce additional
 restrictions in order to maximize portability across different devices and to
 minimize the chances of encountering unexpected behavior.
 
-All algorithms are supported for the fundamental scalar types supported by SYCL
-(see <<table.types.fundamental>>) and instances of the SYCL [code]#vec# and
-[code]#marray# classes.
-
 The <<group>> argument to a SYCL algorithm denotes that it should be performed
 collaboratively by the work-items in the specified group.
 All algorithms act as group functions (as defined in <<sec:group-functions>>),
@@ -21752,9 +21748,10 @@ Boolean conditions applied to data held directly by the work-items in a group.
 include::{header_dir}/algorithms/any_of.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#Ptr# is a
-    pointer.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true; and
+    - [code]#Ptr# is a pointer or [code]#multi_ptr#.
+
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
@@ -21812,9 +21809,10 @@ _Returns:_ true if [code]#pred# is true for any work-item in group [code]#g#.
 include::{header_dir}/algorithms/all_of.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#Ptr# is a
-    pointer.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true; and
+    - [code]#Ptr# is a pointer or [code]#multi_ptr#.
+
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
@@ -21872,9 +21870,10 @@ _Returns:_ true if [code]#pred# is true for all work-items in group [code]#g#.
 include::{header_dir}/algorithms/none_of.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true and [code]#Ptr# is a
-    pointer.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true; and
+    - [code]#Ptr# is a pointer or [code]#multi_ptr#.
+
 +
 --
 _Preconditions:_ [code]#first# and [code]#last# must be the same for all
@@ -21943,8 +21942,10 @@ shifting values a fixed number of work-items to the left or right.
 include::{header_dir}/algorithms/shift.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if [code]#std::is_same_v<std::decay_t<Group>,
-    sub_group># is true and [code]#T# is a trivially copyable type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_same_v<std::decay_t<Group>, sub_group># is true; and
+    - [code]#T# is a trivially copyable type.
+
 +
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the group.
@@ -21963,8 +21964,10 @@ _Returns:_ the value of [code]#x# from the work-item whose group local id
 size, but the value returned in this case is unspecified.
 --
 
-  . _Constraints:_ Available only if [code]#std::is_same_v<std::decay_t<Group>,
-    sub_group># is true and [code]#T# is a trivially copyable type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_same_v<std::decay_t<Group>, sub_group># is true; and
+    - [code]#T# is a trivially copyable type.
+
 +
 --
 _Preconditions:_ [code]#delta# must be the same for all work-items in the group.
@@ -21997,8 +22000,10 @@ id and some fixed mask.
 include::{header_dir}/algorithms/permute.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if [code]#std::is_same_v<std::decay_t<Group>,
-    sub_group># is true and [code]#T# is a trivially copyable type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_same_v<std::decay_t<Group>, sub_group># is true; and
+    - [code]#T# is a trivially copyable type.
+
 +
 --
 _Preconditions:_ [code]#mask# must be the same for all work-items in the group.
@@ -22031,8 +22036,10 @@ by any other work-item in group [code]#g#.
 include::{header_dir}/algorithms/select.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if [code]#std::is_same_v<std::decay_t<Group>,
-    sub_group># is true and [code]#T# is a trivially copyable type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_same_v<std::decay_t<Group>, sub_group># is true; and
+    - [code]#T# is a trivially copyable type.
+
 +
 --
 _Effects:_ Blocks until all work-items in group [code]#g# have reached this
@@ -22074,10 +22081,12 @@ used for forward compatibility with future SYCL versions.
 include::{header_dir}/algorithms/reduce.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#Ptr# is a
-    pointer to a fundamental type, and [code]#BinaryOperation# is a SYCL
-    function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#Ptr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(*first, *first)# must return a value of type
@@ -22101,10 +22110,13 @@ iterators in the range [code]#[first, last)# using the operator
 sum defined in standard {cpp}.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#Ptr# is a
-    pointer to a fundamental type, [code]#T# is a fundamental type, and
-    [code]#BinaryOperation# is a SYCL function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#Ptr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(init, *first)# must return a value of type
@@ -22128,9 +22140,11 @@ using the operator [code]#binary_op#, where the values are combined according to
 the generalized sum defined in standard {cpp}.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#T# is a
-    fundamental type and [code]#BinaryOperation# is a SYCL function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
@@ -22151,10 +22165,12 @@ work-item in group [code]#g# using the operator [code]#binary_op#, where the
 values are combined according to the generalized sum defined in standard {cpp}.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#V# and
-    [code]#T# are fundamental types, and [code]#BinaryOperation# is a SYCL
-    function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#V# is a fundamental type, [code]#marray# or [code]#vec#;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
@@ -22208,10 +22224,14 @@ forward compatibility with future SYCL versions.
 include::{header_dir}/algorithms/exclusive_scan.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#InPtr# and
-    [code]#OutPtr# are pointers to fundamental types, and
-    [code]#BinaryOperation# is a SYCL function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#InPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#OutPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(*first, *first)# must return a value of type
@@ -22244,10 +22264,15 @@ same synchronization point is unblocked.
 _Returns:_ A pointer to the end of the output range.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#InPtr# and
-    [code]#OutPtr# are pointers to fundamental types, [code]#T# is a fundamental
-    type, and [code]#BinaryOperation# is a SYCL function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#InPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#OutPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(init, *first)# must return a value of type
@@ -22281,10 +22306,11 @@ same synchronization point is unblocked.
 _Returns:_ A pointer to the end of the output range.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#T# is a
-    fundamental type, and [code]#BinaryOperation# is a SYCL function object
-    type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
@@ -22310,10 +22336,12 @@ For multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#V# and
-    [code]#T# are fundamental types, and [code]#BinaryOperation# is a SYCL
-    function object type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#V# is a fundamental type, [code]#marray# or [code]#vec#;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
@@ -22343,10 +22371,14 @@ determined by their linear id.
 include::{header_dir}/algorithms/inclusive_scan.h[lines=4..-1]
 ----
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#InPtr# and
-    [code]#OutPtr# are pointers to fundamental types, and
-    [code]#BinaryOperation# is a SYCL function object type.
+. _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#InPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#OutPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(*first, *first)# must return a value of type
@@ -22378,10 +22410,15 @@ same synchronization point is unblocked.
 _Returns:_ A pointer to the end of the output range.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#InPtr# and
-    [code]#OutPtr# are pointers to fundamental types, [code]#BinaryOperation# is
-    a SYCL function object type, and [code]#T# is a fundamental type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#InPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#OutPtr# is a pointer or [code]#multi_ptr# to: a fundamental type,
+      [code]#marray# or [code]#vec#;
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#; and
+    - [code]#BinaryOperation# is a SYCL function object type.
+
 +
 --
 _Mandates:_ [code]#binary_op(init, *first)# must return a value of type
@@ -22415,10 +22452,11 @@ same synchronization point is unblocked.
 _Returns:_ A pointer to the end of the output range.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#T# is a
-    fundamental type, and [code]#BinaryOperation# is a SYCL function object
-    type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#BinaryOperation# is a SYCL function object type; and
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#.
+
 +
 --
 _Mandates:_ [code]#binary_op(x, x)# must return a value of type [code]#T#.
@@ -22442,10 +22480,12 @@ For multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
 --
 
-  . _Constraints:_ Available only if
-    [code]#sycl::is_group_v<std::decay_t<Group>># is true, [code]#V# is a
-    fundamental type, [code]#BinaryOperation# is a SYCL function object type,
-    and [code]#T# is a fundamental type.
+  . _Constraints:_ Available only if all of the following conditions are met:
+    - [code]#sycl::is_group_v<std::decay_t<Group>># is true;
+    - [code]#V# is a fundamental type, [code]#marray# or [code]#vec#;
+    - [code]#BinaryOperation# is a SYCL function object type; and
+    - [code]#T# is a fundamental type, [code]#marray# or [code]#vec#.
+
 +
 --
 _Mandates:_ [code]#binary_op(init, x)# must return a value of type [code]#T#.
