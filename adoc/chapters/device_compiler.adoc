@@ -216,132 +216,31 @@ The restriction waiver in <<discarded-statement>> or
 <<device-function>>.
 ====
 
-[[subsec:scalartypes]]
-== Built-in scalar data types
+== Data types
 
-In a SYCL device compiler, the device definition of all standard {cpp}
-fundamental types from <<table.types.fundamental>> must match the host
-definition of those types, in both size and alignment.
-A device compiler may have this preconfigured so that it can match them based on
-the definitions of those types on the platform, or there may be a necessity for
-a device compiler command-line option to ensure the types are the same.
+The following types must be available in device code:
 
-The standard {cpp} fixed width types, e.g. [code]#int8_t#, [code]#int16_t#,
-[code]#int32_t#,[code]#int64_t#, should have the same size as defined by the
-{cpp} standard for host and device.
+- The fundamental data types defined by the {cpp} core language (i.e.,
+  [code]#bool#, [code]#char#, [code]#signed char#, [code]#unsigned char#,
+  [code]#short int#, [code]#unsigned short int#, [code]#int#, [code]#unsigned
+  int#, [code]#long int#, [code]#unsigned long int#, [code]#long long int#,
+  [code]#unsigned long long int#, [code]#float# and [code]#double#);
 
+- The fixed width types defined by the {cpp} core language (e.g.,
+  [code]#int8_t#, [code]#int16_t#, [code]#int32_t#, [code]#int64_t#); and
 
-[[table.types.fundamental]]
-.Fundamental data types supported by SYCL
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Fundamental data type @ Description
-a@
-[source]
-----
-bool
-----
-   a@ A conditional data type which can be either true or false. The value
-      true expands to the integer constant 1 and the value false expands to the
-      integer constant 0.
+- Any type aliases defined by the {cpp} core language (e.g.,
+  [code]#std::size_t#, [code]#std::ptrdiff_t#).
 
-a@
-[source]
-----
-char
-----
-   a@ A signed or unsigned 8-bit integer, as defined by the {cpp} core language
+All types which are available in device code must have the same size, alignment
+requirements, and representation on both host and device.
+A device compiler may rely on additional command-line options to provide this
+guarantee for specific combinations of host and device.
 
-a@
-[source]
-----
-signed char
-----
-   a@ A signed 8-bit integer, as defined by the {cpp} core language
-
-a@
-[source]
-----
-unsigned char
-----
-   a@ An unsigned 8-bit integer, as defined by the {cpp} core language
-
-a@
-[source]
-----
-short int
-----
-   a@ A signed integer of at least 16-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-unsigned short int
-----
-   a@ An unsigned integer of at least 16-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-int
-----
-   a@ A signed integer of at least 16-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-unsigned int
-----
-   a@ An unsigned integer of at least 16-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-long int
-----
-   a@ A signed integer of at least 32-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-unsigned long int
-----
-   a@ An unsigned integer of at least 32-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-long long int
-----
-   a@ An integer of at least 64-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-unsigned long long int
-----
-   a@ An unsigned integer of at least 64-bits, as defined by the {cpp} core language
-
-a@
-[source]
-----
-float
-----
-   a@ A 32-bit floating-point. The float data type must conform to the IEEE 754
-      single precision storage format.
-
-a@
-[source]
-----
-double
-----
-   a@ A 64-bit floating-point. The double data type must conform to the IEEE 754
-      double precision storage format.  This type is only supported on devices
-      that have [code]#aspect::fp64#.
-
-|====
-
-
+The availability of these types in device code does not guarantee that they will
+be supported by all devices.
+Some types are only supported on devices with specific device aspects, as
+descrived in <<sec:device-aspects>>.
 
 == Preprocessor directives and macros
 
