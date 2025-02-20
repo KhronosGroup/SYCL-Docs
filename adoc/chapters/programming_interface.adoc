@@ -17853,8 +17853,8 @@ a@
 ----
 byte
 ----
-   a@ An unsigned 8-bit integer. This is deprecated in SYCL 2020 since {cpp17}
-      [code]#std::byte# can be used instead.
+   a@ An alias to [code]#std::uint8_t#.  This is deprecated in SYCL 2020 since
+      {cpp17} [code]#std::byte# can be used instead.
 
 a@
 [source]
@@ -17884,10 +17884,12 @@ from a swizzled set of component elements.
 
 The [code]#vec# class is templated on its number of elements and its element
 type.
-The number of elements parameter, _NumElements_, can be one of: 1, 2, 3, 4, 8 or 16.
+The number of elements parameter, [code]#NumElements#, must be one of: 1, 2, 3,
+4, 8 or 16.
 Any other value shall produce a compilation failure.
-The element type parameter, _DataT_, must be one of the basic scalar types
-supported in device code.
+The element type parameter, [code]#DataT#, must be the cv-unqualified version of
+one of the following: one of the built-in scalar data types listed in
+<<subsec:scalartypes>>, [code]#half#, or [code]#sycl::byte#.
 
 The SYCL [code]#vec# class template provides interoperability with the
 underlying vector type defined by [code]#vector_t# which is available only when
