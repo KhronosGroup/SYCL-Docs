@@ -3283,8 +3283,12 @@ describes them.
 .[apidef]#aspect::cpu#
 [role=synopsis,id=api:aspect-cpu]
 --
-A device that runs on a CPU.
-Devices with this aspect have device type [api]#info::device_type::cpu#.
+Indicates that the implementation identifies this device as a CPU that has
+device type [api]#info::device_type::cpu#.
+
+{note}A device with this aspect will typically share some or all of the
+execution resources available to the host {cpp} application.
+{endnote}
 --
 
 '''
@@ -3292,8 +3296,13 @@ Devices with this aspect have device type [api]#info::device_type::cpu#.
 .[apidef]#aspect::gpu#
 [role=synopsis,id=api:aspect-gpu]
 --
-A device that can also be used to accelerate a 3D graphics API.
-Devices with this aspect have device type [api]#info::device_type::gpu#.
+Indicates that the implementation identifies this device as a GPU that has
+device type [api]#info::device_type::gpu#.
+
+{note}A device with this aspect may have additional capabilities for
+accelerating graphics operations, via SYCL image functionality and/or
+interoperability with graphics APIs.
+{endnote}
 --
 
 '''
@@ -3301,9 +3310,12 @@ Devices with this aspect have device type [api]#info::device_type::gpu#.
 .[apidef]#aspect::accelerator#
 [role=synopsis,id=api:aspect-accelerator]
 --
-A dedicated accelerator device, usually using a peripheral interconnect for
-communication.
-Devices with this aspect have device type [api]#info::device_type::accelerator#.
+Indicates that the implementation identifies this device as an accelerator that
+has device type [api]#info::device_type::accelerator#.
+
+{note}A device with this aspect will typically be a dedicated accelerator
+device, with a peripheral interconnect for communication.
+{endnote}
 --
 
 '''
@@ -3311,10 +3323,11 @@ Devices with this aspect have device type [api]#info::device_type::accelerator#.
 .[apidef]#aspect::custom#
 [role=synopsis,id=api:aspect-custom]
 --
-A dedicated accelerator that can use the SYCL API, but programmable kernels
-cannot be dispatched to the device, only fixed functionality is available.
-See <<sec:pre-defined-kernels>>.
-Devices with this aspect have device type [api]#info::device_type::custom#.
+Indicates that this device is a custom accelerator that exposes only fixed
+functionality, and has device type [api]#info::device_type::custom#.
+
+A device with this aspect does not support execution of arbitrary kernels, and
+can only execute pre-defined kernels (see <<sec:pre-defined-kernels>>).
 --
 
 '''
@@ -3323,6 +3336,7 @@ Devices with this aspect have device type [api]#info::device_type::custom#.
 [role=synopsis,id=api:aspect-emulated]
 --
 Indicates that the device is somehow emulated.
+
 A device with this aspect is not intended for performance, and instead will
 generally have another purpose such as emulation or profiling.
 The precise definition of this aspect is left open to the SYCL implementation.
