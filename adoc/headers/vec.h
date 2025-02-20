@@ -83,18 +83,18 @@ template <typename DataT, int NumElements> class vec {
 
   // Available only when NumElements <= 4.
   // XYZW_ACCESS is: x, y, z, w, subject to NumElements.
-  __writeable_swizzle__ XYZW_ACCESS();
-  __const_swizzle__ XYZW_ACCESS() const;
+  DataT& XYZW_ACCESS();
+  const DataT& XYZW_ACCESS() const;
 
   // Available only NumElements == 4.
   // RGBA_ACCESS is: r, g, b, a.
-  __writeable_swizzle__ RGBA_ACCESS();
-  __const_swizzle__ RGBA_ACCESS() const;
+  DataT& RGBA_ACCESS();
+  const DataT& RGBA_ACCESS() const;
 
   // INDEX_ACCESS is: s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD,
   // sE, sF, subject to NumElements.
-  __writeable_swizzle__ INDEX_ACCESS();
-  __const_swizzle__ INDEX_ACCESS() const;
+  DataT& INDEX_ACCESS();
+  const DataT& INDEX_ACCESS() const;
 
 #ifdef SYCL_SIMPLE_SWIZZLES
   // Available only when NumElements <= 4.

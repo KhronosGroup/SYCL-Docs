@@ -18065,14 +18065,12 @@ The [code]#swizzleIndexes# argument pack specifies the elements in the swizzle.
 a@
 [source]
 ----
-__writeable_swizzle__ XYZW_ACCESS()
-__const_swizzle__ XYZW_ACCESS() const
+DataT& XYZW_ACCESS()
+const DataT& XYZW_ACCESS() const
 ----
    a@ Available only when: [code]#+NumElements <= 4+#.
 
-Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
-or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
-as described in <<swizzled-vec-class>>.
+Return a reference to the element identified by [code]#XYZW_ACCESS#.
 
 Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 [code]#x, y# for
@@ -18085,27 +18083,22 @@ Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 a@
 [source]
 ----
-__writeable_swizzle__ RGBA_ACCESS()
-__const_swizzle__ RGBA_ACCESS() const
+DataT& RGBA_ACCESS()
+const DataT& RGBA_ACCESS() const
 ----
    a@ Available only when: [code]#NumElements == 4#.
 
-Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
-or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
-as described in <<swizzled-vec-class>>.
+Return a reference to the element identified by [code]#RGBA_ACCESS#.
 
 Where [code]#RGBA_ACCESS# is: [code]#r, g, b, a#.
 
 a@
 [source]
 ----
-__writeable_swizzle__ INDEX_ACCESS()
-__const_swizzle__ INDEX_ACCESS() const
+DataT& INDEX_ACCESS()
+const DataT& INDEX_ACCESS() const
 ----
-  a@ Return an instance of the implementation-defined
-     [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# class
-     representing a swizzled view of the vector as described in
-     <<swizzled-vec-class>>.
+a@ Return a reference to the element identified by [code]#INDEX_ACCESS#.
 
 Where [code]#INDEX_ACCESS# is: [code]#s0# for [code]#NumElements == 1#,
 [code]#s0, s1# for
@@ -18842,43 +18835,62 @@ swizzle operation.
 a@
 [source]
 ----
-template <int... swizzleIndexes> __writeable_swizzle__</*unspecified*/> swizzle() const  (1)
+DataT& XYZW_ACCESS() const         (1)
+DataT& RGBA_ACCESS() const         (2)
+DataT& INDEX_ACCESS() const        (3)
 
-__writeable_swizzle__</*unspecified*/> XYZW_ACCESS() const                               (2)
-__writeable_swizzle__</*unspecified*/> RGBA_ACCESS() const                               (3)
-__writeable_swizzle__</*unspecified*/> INDEX_ACCESS() const                              (4)
-
-#ifdef SYCL_SIMPLE_SWIZZLES
-__writeable_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                              (5)
-__writeable_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                              (6)
-#endif
-
-__writeable_swizzle__</*unspecified*/> lo() const                                        (7)
-__writeable_swizzle__</*unspecified*/> hi() const                                        (8)
-__writeable_swizzle__</*unspecified*/> odd() const                                       (9)
-__writeable_swizzle__</*unspecified*/> even() const                                      (10)
-
-
-template <int... swizzleIndexes> __const_swizzle__</*unspecified*/> swizzle() const      (11)
-
-__const_swizzle__</*unspecified*/> XYZW_ACCESS() const                                   (12)
-__const_swizzle__</*unspecified*/> RGBA_ACCESS() const                                   (13)
-__const_swizzle__</*unspecified*/> INDEX_ACCESS() const                                  (14)
-
-#ifdef SYCL_SIMPLE_SWIZZLES
-__const_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                                  (15)
-__const_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                                  (16)
-#endif
-
-__const_swizzle__</*unspecified*/> lo() const                                            (17)
-__const_swizzle__</*unspecified*/> hi() const                                            (18)
-__const_swizzle__</*unspecified*/> odd() const                                           (19)
-__const_swizzle__</*unspecified*/> even() const                                          (20)
+const DataT& XYZW_ACCESS() const   (4)
+const DataT& RGBA_ACCESS() const   (5)
+const DataT& INDEX_ACCESS() const  (6)
 ----
 |====
-_Availability:_ Functions (1) - (10) are available only in
+_Availability:_ Functions (1) - (3) are available only in
 [code]#+__writeable_swizzle__+#.
-Functions (11) - (20) are available only in [code]#+__const_swizzle__+#.
+Functions (4) - (6) are available only in [code]#+__const_swizzle__+#.
+
+_Constraints:_ These functions have the same constraints as the equivalent
+member functions of the [code]#vec# class.
+
+_Returns:_ A reference to the element of the underlying [code]#vec# object that
+corresponds to the position of the swizzle operation identified by
+[code]#XYZW_ACCESS#, [code]#RGBA_ACCESS#, or [code]#INDEX_ACCESS#.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template <int... swizzleIndexes> __writeable_swizzle__</*unspecified*/> swizzle() const  (1)
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__writeable_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                              (2)
+__writeable_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                              (3)
+#endif
+
+__writeable_swizzle__</*unspecified*/> lo() const                                        (4)
+__writeable_swizzle__</*unspecified*/> hi() const                                        (5)
+__writeable_swizzle__</*unspecified*/> odd() const                                       (6)
+__writeable_swizzle__</*unspecified*/> even() const                                      (7)
+
+
+template <int... swizzleIndexes> __const_swizzle__</*unspecified*/> swizzle() const      (8)
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__const_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                                  (9)
+__const_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                                  (10)
+#endif
+
+__const_swizzle__</*unspecified*/> lo() const                                            (11)
+__const_swizzle__</*unspecified*/> hi() const                                            (12)
+__const_swizzle__</*unspecified*/> odd() const                                           (13)
+__const_swizzle__</*unspecified*/> even() const                                          (14)
+----
+|====
+_Availability:_ Functions (1) - (7) are available only in
+[code]#+__writeable_swizzle__+#.
+Functions (8) - (14) are available only in [code]#+__const_swizzle__+#.
 
 _Constraints:_ These functions have the same constraints as the equivalent
 member functions of the [code]#vec# class.
