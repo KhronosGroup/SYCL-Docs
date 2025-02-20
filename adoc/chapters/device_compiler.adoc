@@ -204,6 +204,7 @@ Amongst other things, this restriction makes it illegal for a
     However, a function may be defined in another translation unit if the
     implementation defines the [code]#SYCL_EXTERNAL# macro as described in
     <<subsec:syclexternal>>.
+  * Use of [code]#long double# types results in undefined behavior.
 
 Inside a <<discarded-statement>> or in the case of a
 <<manifestly-constant-evaluated>>, any code accepted by the C++ standard in this
@@ -218,27 +219,15 @@ The restriction waiver in <<discarded-statement>> or
 
 == Data types
 
-The following types must be available in device code:
-
-- The fundamental data types defined by the {cpp} core language (i.e.,
-  [code]#bool#, [code]#char#, [code]#signed char#, [code]#unsigned char#,
-  [code]#short int#, [code]#unsigned short int#, [code]#int#, [code]#unsigned
-  int#, [code]#long int#, [code]#unsigned long int#, [code]#long long int#,
-  [code]#unsigned long long int#, [code]#float# and [code]#double#);
-
-- The fixed width types defined by the {cpp} core language (e.g.,
-  [code]#int8_t#, [code]#int16_t#, [code]#int32_t#, [code]#int64_t#); and
-
-- Any type aliases defined by the {cpp} core language (e.g.,
-  [code]#std::size_t#, [code]#std::ptrdiff_t#).
+All fundamental types defined by the {cpp} core language must be available in
+device code except for those listed in <<sec:language.restrictions.kernels>>.
+However, the availability of these types in device code does not guarantee that
+they will be supported by all devices.
+Some types are only supported on devices with specific device aspects, as
+described in <<sec:device-aspects>>.
 
 All types which are available in device code must have the same size, alignment
 requirements, and representation on both host and device.
-
-The availability of these types in device code does not guarantee that they will
-be supported by all devices.
-Some types are only supported on devices with specific device aspects, as
-described in <<sec:device-aspects>>.
 
 For enumerations with a fixed underlying type, the same fixed type must be
 specified for host and device.
