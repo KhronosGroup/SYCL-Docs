@@ -41,6 +41,12 @@ three types.
 When the synopsis shows an ellipsis ([code]#+/*...*/+#), the subsequent sections
 clarify the definition for each type.
 
+Whether it is possible to query certain properties of a group at compile-time
+depends on the group's type.
+A member function that is not declared [code]#constexpr# in the synopsis below
+may still be declared [code]#constexpr# for a specific group type defined in a
+subsequent section.
+
 [source,role=synopsis]
 ----
 
@@ -62,14 +68,14 @@ class __group__ {
 
   range_type range() const noexcept;
 
-  constexpr extents_type extents() const noexcept; // C++23
-  constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept; // C++23
+  extents_type extents() const noexcept; // C++23
+  extents_type::index_type extent(extents_type::rank_type r) const noexcept; // C++23
 
-  static constexpr extents_type::rank_type rank() noexcept; // C++23
-  static constexpr extents_type::rank_type rank_dynamic() noexcept; // C++23
-  static constexpr size_t static_extent(rank_type r) noexcept; // C++23
+  constexpr static extents_type::rank_type rank() noexcept; // C++23
+  constexpr static extents_type::rank_type rank_dynamic() noexcept; // C++23
+  constexpr static size_t static_extent(rank_type r) noexcept; // C++23
 
-  constexpr size_type size() const noexcept;
+  size_type size() const noexcept;
 
 };
 
@@ -266,7 +272,19 @@ class work_group {
 
   /* -- common by-value interface members -- */
 
-  /* -- common group interface members -- */
+  id_type id() const noexcept;
+  linear_id_type linear_id() const noexcept;
+
+  range_type range() const noexcept;
+
+  extents_type extents() const noexcept; // C++23
+  extents_type::index_type extent(extents_type::rank_type r) const noexcept; // C++23
+
+  static constexpr extents_type::rank_type rank() noexcept; // C++23
+  static constexpr extents_type::rank_type rank_dynamic() noexcept; // C++23
+  static constexpr size_t static_extent(rank_type r) noexcept; // C++23
+
+  constexpr size_type size() const noexcept;
 
 };
 
@@ -294,6 +312,110 @@ _Returns_: A [code]#group# representing the same collection of work-items as
 this [code]#work_group#.
 
 '''
+
+.[apidef]#+work_group::id+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-id]
+----
+id_type id() const noexcept;
+----
+
+_Returns_: The index of this work-group within the <<nd-range>>.
+
+'''
+
+.[apidef]#+work_group::linear_id+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-linear-id]
+----
+linear_id_type linear_id() const noexcept;
+----
+
+_Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
+work-group within the <<nd-range>>.
+
+'''
+
+.[apidef]#+work_group::range+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-range]
+----
+range_type range() const noexcept;
+----
+
+_Returns_: An index space representing all work-groups in the <<nd-range>>.
+
+'''
+
+.[apidef]#+work_group::extents+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-extents]
+----
+extents_type extents() const noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Returns_: The number of work-items in each dimension of the work-group.
+
+'''
+
+.[apidef]#+work_group::extent+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-extent]
+----
+extents_type::index_type extent(extents_type::rank_type r) const noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Preconditions_: [code]#r < dimensions# is [code]#true#.
+
+_Returns_: The number of work-items in the specified dimension of the
+work-group.
+
+'''
+
+.[apidef]#+work_group::rank+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-rank]
+----
+static constexpr extents_type::rank_type rank() noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::rank();#.
+
+'''
+
+.[apidef]#+work_group::rank_dynamic+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-rank_dynamic]
+----
+static constexpr extents_type::rank_type rank_dynamic() noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
+
+'''
+
+.[apidef]#+work_group::static_extent+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-static_extent]
+----
+static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
+
+'''
+
+.[apidef]#+work_group::size+#
+[source,role=synopsis,id=api:khr-group-interface-work-group-size]
+----
+size_type size() const noexcept;
+----
+
+_Returns_: The total number of work-items in the work-group, equal to the
+product of the number of work-items in each dimension of the work-group.
+
 
 [[sec:khr-group-interface-sub_group]]
 == [code]#sub_group# class
@@ -332,11 +454,22 @@ class sub_group {
 
   operator sycl::sub_group() const noexcept;
 
-  constexpr size_type max_size() const noexcept;
-
   /* -- common by-value interface members -- */
 
-  /* -- common group interface members -- */
+  id_type id() const noexcept;
+  linear_id_type linear_id() const noexcept;
+
+  range_type range() const noexcept;
+
+  extents_type extents() const noexcept; // C++23
+  extents_type::index_type extent(extents_type::rank_type r) const noexcept; // C++23
+
+  static constexpr extents_type::rank_type rank() noexcept; // C++23
+  static constexpr extents_type::rank_type rank_dynamic() noexcept; // C++23
+  static constexpr size_t static_extent(rank_type r) noexcept; // C++23
+
+  size_type size() const noexcept;
+  size_type max_size() const noexcept;
 
 };
 
@@ -362,6 +495,109 @@ operator sycl::sub_group() const noexcept;
 
 _Returns_: A [code]#sycl::sub_group# representing the same collection of
 work-items as this [code]#sub_group#.
+
+'''
+
+.[apidef]#+sub_group::id+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-id]
+----
+id_type id() const noexcept;
+----
+
+_Returns_: The index of this sub-group within its parent work-group.
+
+'''
+
+.[apidef]#+sub_group::linear_id+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-linear-id]
+----
+linear_id_type linear_id() const noexcept;
+----
+
+_Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
+sub-group within its parent work-group.
+
+'''
+
+.[apidef]#+sub_group::range+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-range]
+----
+range_type range() const noexcept;
+----
+
+_Returns_: An index space representing all sub-groups in the same work-group.
+
+'''
+
+.[apidef]#+sub_group::extents+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-extents]
+----
+extents_type extents() const noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Returns_: The number of work-items in each dimension of the sub-group.
+
+'''
+
+.[apidef]#+sub_group::extent+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-extent]
+----
+extents_type::index_type extent(extents_type::rank_type r) const noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Preconditions_: [code]#r < dimensions# is [code]#true#.
+
+_Returns_: The number of work-items in the specified dimension of the sub-group.
+
+'''
+
+.[apidef]#+sub_group::rank+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-rank]
+----
+static constexpr extents_type::rank_type rank() noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::rank();#.
+
+'''
+
+.[apidef]#+sub_group::rank_dynamic+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-rank_dynamic]
+----
+static constexpr extents_type::rank_type rank_dynamic() noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
+
+'''
+
+.[apidef]#+sub_group::static_extent+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-static_extent]
+----
+static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
+
+'''
+
+.[apidef]#+sub_group::size+#
+[source,role=synopsis,id=api:khr-group-interface-sub-group-size]
+----
+size_type size() const noexcept;
+----
+
+_Returns_: The total number of work-items in the sub-group.
 
 '''
 
@@ -419,12 +655,126 @@ class member_item {
 
   /* -- common by-value interface members -- */
 
-  /* -- common group interface members -- */
+  id_type id() const noexcept;
+  linear_id_type linear_id() const noexcept;
+
+  range_type range() const noexcept;
+
+  constexpr extents_type extents() const noexcept; // C++23
+  constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept; // C++23
+
+  static constexpr extents_type::rank_type rank() noexcept; // C++23
+  static constexpr extents_type::rank_type rank_dynamic() noexcept; // C++23
+  static constexpr size_t static_extent(rank_type r) noexcept; // C++23
+
+  constexpr size_type size() const noexcept;
 
 };
 
 } // namespace sycl::khr
 ----
+
+.[apidef]#+member_item::id+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-id]
+----
+id_type id() const noexcept;
+----
+
+_Returns_: The index of this member-item within its parent group.
+
+'''
+
+.[apidef]#+member_item::linear_id+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-linear-id]
+----
+linear_id_type linear_id() const noexcept;
+----
+
+_Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
+member-item within its parent group.
+
+'''
+
+.[apidef]#+member_item::range+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-range]
+----
+range_type range() const noexcept;
+----
+
+_Returns_: An index space representing all member-items in the parent group.
+
+'''
+
+.[apidef]#+member_item::extents+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-extents]
+----
+constexpr extents_type extents() const noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Returns_: An [code]#extents# where all dimensions are 1.
+
+'''
+
+.[apidef]#+member_item::extent+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-extent]
+----
+constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Preconditions_: [code]#r < dimensions# is [code]#true#.
+
+_Returns_: Equivalent to [code]#return 1;#.
+
+'''
+
+.[apidef]#+member_item::rank+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-rank]
+----
+static constexpr extents_type::rank_type rank() noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::rank();#.
+
+'''
+
+.[apidef]#+member_item::rank_dynamic+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-rank_dynamic]
+----
+static constexpr extents_type::rank_type rank_dynamic() noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
+
+'''
+
+.[apidef]#+member_item::static_extent+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-static_extent]
+----
+static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
+----
+
+_Minimum C++ Version_: {cpp23}
+
+_Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
+
+'''
+
+.[apidef]#+member_item::size+#
+[source,role=synopsis,id=api:khr-group-interface-member-item-size]
+----
+constexpr size_type size() const noexcept;
+----
+
+_Returns_: Equivalent to [code]#return 1;#.
+
 
 [[sec:khr-group-interface-example]]
 == Example
