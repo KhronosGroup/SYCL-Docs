@@ -14425,7 +14425,7 @@ a@
 template <typename KernelName, typename KernelType>
 void single_task(const KernelType& kernelFunc)
 ----
-   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
+   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type.
       Specification of a <<kernel-name>> ([code]#typename KernelName#), as
       described in <<subsec:invokingkernels>>, is optional.
@@ -14440,7 +14440,7 @@ a@
 template <typename KernelName, int Dimensions, typename... Rest>
 void parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
 ----
-   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
+   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified range and given an item or integral type (e.g [code]#int#,
       [code]#size_t)#, if range is 1-dimensional, for indexing in the indexing
@@ -14467,7 +14467,7 @@ void parallel_for(range<Dimensions> numWorkItems, id<Dimensions> workItemOffset,
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
-      Defines and invokes a <<sycl-kernel-function>> as a lambda function
+      Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified range and offset and given an item or integral type
       (e.g [code]#int#, [code]#size_t)#, if range is 1-dimensional,
@@ -14490,7 +14490,7 @@ a@
 template <typename KernelName, int Dimensions, typename... Rest>
 void parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest)
 ----
-   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
+   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified <<nd-range>> and given an <<nd-item>>
       for indexing in the indexing space defined by the <<nd-range>>.
@@ -14519,7 +14519,7 @@ template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
 void parallel_for_work_group(range<Dimensions> numWorkGroups,
                              const WorkgroupFunctionType& kernelFunc)
 ----
-   a@ Defines and invokes a hierarchical kernel as a lambda function
+   a@ Defines and invokes a hierarchical kernel as a lambda expression
       or a named function object type,
       encoding the body of each work-group to launch. Generic kernel
       functions are permitted, in that case the argument type is a [code]#group#. May
@@ -14540,7 +14540,7 @@ void parallel_for_work_group(range<Dimensions> numWorkGroups,
                              range<Dimensions> workGroupSize,
                              const WorkgroupFunctionType& kernelFunc)
 ----
-   a@ Defines and invokes a hierarchical kernel as a lambda function
+   a@ Defines and invokes a hierarchical kernel as a lambda expression
       or a named function object type,
       encoding the body of each work-group to launch. Generic kernel
       functions are permitted, in that case the argument type is a [code]#group#.
@@ -14701,7 +14701,7 @@ What differs is the functionality that is available to the SYCL kernel function
 via the respective interfaces.
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function, and passing a SYCL [code]#id# parameter.
+using a lambda expression, and passing a SYCL [code]#id# parameter.
 In this case, only the global id is available.
 This variant of [code]#parallel_for# is designed for when it is not necessary to
 query the global range of the index space being executed across.
@@ -14712,7 +14712,7 @@ include::{code_dir}/basicparallelfor.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function and passing a SYCL [code]#item# parameter.
+using a lambda expression and passing a SYCL [code]#item# parameter.
 In this case, both the global id and global range are queryable.
 This variant of [code]#parallel_for# is designed for when it is necessary to
 query the global range of the index space being executed across.
@@ -14723,7 +14723,7 @@ include::{code_dir}/basicParallelForItem.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function and passing [code]#auto# parameter, treated as
+using a lambda expression and passing [code]#auto# parameter, treated as
 [code]#item#.
 In this case, both the global id and global range are queryable.
 The same effect can be achieved using class with templatized [code]#operator()#.
@@ -14736,7 +14736,7 @@ include::{code_dir}/basicParallelForGeneric.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function and passing an integral type parameter.
+using a lambda expression and passing an integral type parameter.
 This example is only valid when calling [code]#parallel_for# with
 [code]#range<1>#.
 In this case only the global id is available.
@@ -14870,7 +14870,7 @@ runtime, or by the number of work-groups and number of work-items for users who
 need more control.
 
 The body of the outer [code]#parallel_for_work_group# call consists of a lambda
-function or function object.
+expression or function object.
 The body of this function object contains code that is executed only once for
 the entire work-group.
 If the code has no side-effects and the compiler heuristic suggests that it is
@@ -16031,8 +16031,8 @@ template <typename KernelName> kernel_id get_kernel_id();
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to obtain their identifier via this
 function.
 Applications which call [code]#get_kernel_id()# for a [code]#KernelName# that is
@@ -16236,8 +16236,8 @@ kernel_bundle<State> get_kernel_bundle(const context& ctxt,
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use these functions.
 Applications which call these functions for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16332,8 +16332,8 @@ bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use these functions.
 Applications which call these functions for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16380,8 +16380,8 @@ template <typename KernelName> bool is_compatible(const device& dev);
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use this function.
 Applications which call this function for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16653,8 +16653,8 @@ bool has_kernel(const device& dev) const noexcept; // (2)
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use these functions.
 Applications which call these functions for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16699,8 +16699,8 @@ _Preconditions:_ This member function is only available if the kernel bundle's
 state is [code]#bundle_state::executable#.
 The template parameter [code]#KernelName# must be the <<type-kernel-name>> of a
 kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use this function.
 Applications which call this function for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -17170,7 +17170,7 @@ accesses between host and device are through <<accessor,accessors>> or through
 <<sec:usm, USM pointers>>.
 
 There are two ways of defining kernels: as named function objects or as lambda
-functions.
+expressions.
 A backend may also provide interoperability interfaces for defining kernels.
 
 
@@ -17211,23 +17211,23 @@ include::{code_dir}/myfunctor.cpp[lines=4..-1]
 
 
 [[sec:interfaces.kernels.as.lambdas]]
-=== Defining kernels as lambda functions
+=== Defining kernels as lambda expressions
 
-In {cpp}, function objects can be defined using lambda functions.
-Kernels may be defined as lambda functions in SYCL.
-The name of a lambda function in SYCL may optionally be specified by passing it
-as a template parameter to the invoking member function, and in that case, the
-lambda name is a [keyword]#{cpp} typename# which must be forward declarable at
-namespace scope.
-If the lambda function relies on template arguments, then if specified, the name
-of the lambda function must contain those template arguments which must also be
-forward declarable at namespace scope.
-The class used for the name of a lambda function is only used for naming
+In {cpp}, function objects can be defined using lambda expressions.
+Kernels may be defined as lambda expressions in SYCL.
+The name of a lambda expression in SYCL may optionally be specified by passing
+it as a template parameter to the invoking member function, and in that case,
+the lambda name is a [keyword]#{cpp} typename# which must be forward declarable
+at namespace scope.
+If the lambda expression relies on template arguments, then if specified, the
+name of the lambda expression must contain those template arguments which must
+also be forward declarable at namespace scope.
+The class used for the name of a lambda expression is only used for naming
 purposes and is not required to be defined.
 For details on restrictions for kernel naming, please refer to
 <<sec:naming.kernels>>.
 
-The kernel function for the lambda function is the lambda function itself.
+The kernel function for the lambda expression is the lambda expression itself.
 The kernel lambda must use copy for all of its captures (i.e. [code]#[=]#), and
 the lambda must not use the [code]#mutable# specifier.
 
@@ -17287,13 +17287,13 @@ a device copyable type in that case and the specialization is ignored.
 === Rules for parameter passing to kernels
 
 A SYCL application passes parameters to a kernel in different ways depending on
-whether the kernel is a named function object or a lambda function.
+whether the kernel is a named function object or a lambda expression.
 If the kernel is a named function object, the [code]#operator()# member function
 (or other member functions that it calls) may reference member variables inside
 the same named function object.
 Any such member variables become parameters to the kernel.
-If the kernel is a lambda function, any variables captured by the lambda become
-parameters to the kernel.
+If the kernel is a lambda expression, any variables captured by the lambda
+become parameters to the kernel.
 
 Regardless of how the parameter is passed, the following rules define the
 allowable types for a kernel parameter:
@@ -17390,8 +17390,8 @@ When an <<async-error>> instance has been passed to an <<async-handler>>, then
 that instance of the error has been consumed for handling and is not reported on
 any subsequent invocations of the <<async-handler>>.
 
-The <<async-handler>> may be a named function object type, a lambda function or
-a [code]#std::function#.
+The <<async-handler>> may be a named function object type, a lambda expression
+or a [code]#std::function#.
 The [code]#exception_list# object passed to the <<async-handler>> is constructed
 by the <<sycl-runtime>>.
 
@@ -17721,7 +17721,7 @@ kernel_argument
 ----
    a@ The application has passed an invalid argument to a
       <<sycl-kernel-function>>.  This includes captured variables if the
-      <<sycl-kernel-function>> is a lambda function.
+      <<sycl-kernel-function>> is a lambda expression.
 
 a@
 [source]
