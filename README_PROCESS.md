@@ -92,15 +92,22 @@ Although this process is a bit more verbose, it provides several advantages:
   create release notes for the next update revision of the specification.
   If we had instead merged the commit manually, we would lose this ability.
 
-**TODO:** It appears that the GitHub automatically-generated release notes do
-not show the correct author for these cherry-picked PRs.
-This author is displayed as the author of the person who creates the cherry
-picked PR, which is normally the specification editor.
-I tried setting the "author" and "committer" fields of the git commit before it
-is pushed to the PR, but this doesn't help.
-I think GitHub determines the author from the owner of the PR (not from any
-field in the commit), and GitHub does not provide a way to change the owner of a
-PR.
+  **TODO:** It appears that the GitHub automatically-generated release notes do
+  not show the correct author for these cherry-picked PRs.
+  This author is displayed as the author of the person who creates the cherry
+  picked PR, which is normally the specification editor.
+  I tried setting the "author" and "committer" fields of the git commit before
+  it is pushed to the PR, but this doesn't help.
+  I think GitHub determines the author from the owner of the PR (not from any
+  field in the commit), and GitHub does not provide a way to change the owner of
+  a PR.
+
+After cherry picking PRs from "main" to "sycl-xxxx", it's useful to compare the
+two branches and check that there are no unexpected differences:
+
+```
+$ git diff sycl-2020 main
+```
 
 
 ## Publishing an update revision
