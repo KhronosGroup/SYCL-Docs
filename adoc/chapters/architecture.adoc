@@ -93,7 +93,7 @@ and lifetimes of the various objects used within SYCL, as explained in
 
 A <<sycl-kernel-function>> is the scoped block of code that will be compiled
 using a device compiler.
-This code may be defined by the body of a lambda function or by the
+This code may be defined by the body of a lambda expression or by the
 [code]#operator()# function of a function object.
 Each instance of the <<sycl-kernel-function>> will be executed as a single,
 though not necessarily entirely independent, flow of execution and has to adhere
@@ -416,7 +416,7 @@ The resources managed by SYCL are:
     In SYCL, a device is accessible through a [code]#sycl::device# object.
   . <<kernel,Kernels>>: the SYCL functions that run on SYCL devices are defined
     as {cpp} function objects (a named function object type or a lambda
-    function).
+    expression).
     A kernel can be introspected through a [code]#sycl::kernel# object.
 +
 --
@@ -1210,7 +1210,7 @@ Host code and device code is written in the same {cpp} source file, enabling
 instantiation of templated kernels from host code and also enabling kernel
 source code to be shared between host and device.
 The device kernels are encapsulated {cpp} callable types (a function object with
-[code]#operator()# or a lambda function), which have been designated to be
+[code]#operator()# or a lambda expression), which have been designated to be
 compiled as SYCL kernels.
 
 SYCL programs target heterogeneous systems.
@@ -1821,8 +1821,8 @@ Implementations conformant to the reduced feature set
 (<<sec:feature-sets.reduced>>) can do this by using the {cpp} type of the
 <<sycl-kernel-function>>.
 This type is specified via the <<kernel-name>> template parameter if the
-<<sycl-kernel-function>> is a lambda function, or it is obtained from the class
-type if the <<sycl-kernel-function>> is an object.
+<<sycl-kernel-function>> is a lambda expression, or it is obtained from the
+class type if the <<sycl-kernel-function>> is an object.
 Implementations conformant to the full feature set (<<sec:feature-sets.full>>)
 do not require a <<kernel-name>> at the invocation site, so they must implement
 some other way to make the association.
