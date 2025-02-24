@@ -18682,6 +18682,23 @@ The constant [code]#NumElements# represents the number of elements in the result
 of the swizzle operation, which could be different from the number of elements
 in the underlying [code]#vec#.
 
+Because the template parameters to the [code]#+__writeable_swizzle__+# and
+[code]#+__const_swizzle__+# classes affect the {cpp} argument dependent lookup
+(ADL) behavior, implementations do not have complete freedom when choosing these
+template parameters.
+Implementations must choose template parameters that result in the following ADL
+behavior:
+
+* When an argument is the [code]#+__writeable_swizzle__+# type, the ADL search
+  set must include only the class template definition for
+  [code]#+__writeable_swizzle__+#, the class definition for [code]#DataT# (if it
+  is a class), and the namespace that contains [code]#DataT#.
+
+* When an argument is the [code]#+__const_swizzle__+# type, the ADL search set
+  must include only the class template definition for
+  [code]#+__const_swizzle__+#, the class definition for [code]#DataT# (if it is
+  a class), and the namespace that contains [code]#DataT#.
+
 When the string [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+#
 is used inside the class definition in the synopses below, it refers to the
 instantiation with the same set of template parameters as the enclosing class.
