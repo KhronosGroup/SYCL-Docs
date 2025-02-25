@@ -8,31 +8,41 @@ From this point forward, the SYCL specification is "unified", meaning that a
 single document serves as the official specification for all major versions
 from SYCL 2020 onwards.
 
-There are often two active branches in the repository: a branch named "main" and
-a branch whose name has the form "sycl-xxxx" (e.g. "sycl-2020").
-The "main" branch always exists, and it represents the most current version of
-the specification.
-Depending on the release cycle, "main" may represent the major version that is
-currently published, or it may represent a future major version that is not yet
-published.
-When "main" represents an unpublished major version, there is always a branch
-named "sycl-xxxx", which represents the major version that is currently
-published.
-This allows us to work on the next unpublished major version while still doing
-maintenance releases on the published version.
+Depending on the release cycle, there is either one active branch named "main"
+or two active branches named "main" and "sycl-xxxx" (where "xxxx" is a 4 digit
+year).
+In order to understand these branches, it may help to describe the current
+structure and how things will change in the future.
+At present, we have branches named "main" and "sycl-2020".
+The "sycl-2020" branch corresponds to the SYCL 2020 specification, which is a
+published major version.
+The "main" branch corresponds to the next major version of the SYCL
+specification (SYCL-Next), which is currently in development.
+Both branches are active at this point.
+Bug fixes and clarifications go into both branches, while new content that is
+specific to the SYCL-Next version goes only into "main".
+This allows us to work on SYCL-Next while we still make update revisions to SYCL
+2020.
 
-Bug fixes and clarifications to the specification are generally committed to
-both the "main" branch and to the "sycl-xxxx" branch (when it exists).
-New content that is destined only for the next as-of-yet unpublished major
-version is committed only to the "main" branch.
+Once SYCL-Next is published, it will also be the official specification for SYCL
+2020 because the specification document is "unified".
+Therefore, there is no need to maintain the "sycl-2020" branch anymore, and we
+will remove it at this point.
+(We will still have tags that identify each publication of the SYCL 2020
+specification.)
+Therefore, once SYCL-Next is published, we will have only one active branch named
+"main".
+Any bug fixes or clarifications to the SYCL-Next specification will be made to
+the "main" branch at this point, and we will publish update revisions from this
+branch.
 
-Once a new major version is published from "main", it is also the specification
-for all older major versions.
-Therefore, when we publish a new major version from "main", we delete the
-"sycl-xxxx" branch because it is no longer needed.
-
-We create a new "sycl-xxxx" branch immediately before making the first commit to
-"main" that we don't want to appear in the currently published major version.
+At some later point, we will start development of another major release
+SYCL-Next2.
+Immediately before making the first commit that is specific to SYCL-Next2, we
+will create a branch named "sycl-xxxx" (where "xxxx" represents the year in
+which SYCL-Next was approved by the working group).
+Bug fixes and clarifications to SYCL-Next will happen on this "sycl-xxxx" branch
+while new development happens on "main".
 
 
 ## Cherry pick strategy
@@ -123,7 +133,7 @@ When the working group decides it is time to publish an update revision, we
 follow this process.
 
 As noted above, the currently published major version may either correspond to
-the "main" branch or to the "sycl-xxxx" branch, depending on release cycle.
+the "main" branch or to the "sycl-xxxx" branch, depending on the release cycle.
 The instructions below refer to the branch that contains the currently published
 major version as `<current>`.
 
