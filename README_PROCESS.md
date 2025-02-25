@@ -106,7 +106,7 @@ After cherry picking PRs from "main" to "sycl-xxxx", it's useful to compare the
 two branches and check that there are no unexpected differences:
 
 ```
-$ git diff sycl-2020 main
+$ git diff sycl-xxxx main
 ```
 
 
@@ -116,7 +116,7 @@ $ git diff sycl-2020 main
 We should check this process again when publishing revision 10 to make sure they
 are accurate.
 
-The working group normally accumulates a number "clarification" PRs in this
+The working group normally accumulates a number of "clarification" PRs in this
 GitHub repository before publishing them as an update revision of the current
 specification.
 When the working group decides it is time to publish an update revision, we
