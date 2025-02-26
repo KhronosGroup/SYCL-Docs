@@ -969,6 +969,15 @@ The [code]#platform# class also provides constructors, but constructing a new
 [code]#platform# instance merely creates a new object that is a copy of one of
 the objects returned by [api]#platform::get_platforms#.
 
+Each platform has an associated default context which contains all of the
+<<root-device,root devices>> in the platform.
+This default context does not have an asynchronous error handler.
+Applications can retrieve a copy of this default `context` object, for example,
+by constructing a `queue`.
+These copies follow the common reference semantics, as though they are all
+copies of an internal per-platform `context` object representing the platform's
+default context.
+
 The [code]#platform# class provides the common reference semantics as defined in
 <<sec:reference-semantics>>.
 
@@ -1197,260 +1206,311 @@ Returns an empty list if this platform does not contain any devices.
 
 '''
 
-
-[[sec:interface.context.class]]
+[[sec:context-class]]
 === Context class
 
-The <<context>> class represents a SYCL <<context>>.
-A <<context>> represents the runtime data structures and state required by a
+The [code]#context# class represents a SYCL context.
+A context represents the runtime data structures and state required by a
 <<backend>> API to interact with a group of devices associated with a platform.
 
-The SYCL [code]#context# class provides the common reference semantics (see
-<<sec:reference-semantics>>).
-
-
-==== Context interface
-
-The constructors and member functions of the SYCL [code]#context# class are
-listed in <<table.constructors.context>> and <<table.members.context>>,
-respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-All member functions of the <<context>> class are synchronous and errors are
+All member functions of the [code]#context# class are synchronous and errors are
 handled by throwing synchronous SYCL exceptions.
 
-All constructors of the SYCL <<context>> class will construct an instance
+All constructors of the [code]#context# class construct an object that is
 associated with a particular <<backend>>, determined by the constructor
 parameters or, in the case of the default constructor, the SYCL [code]#device#
 produced by the [code]#default_selector_v#.
 
-A SYCL [code]#context# can optionally be constructed with an
-[code]#async_handler# parameter.
-In this case the [code]#async_handler# is used to report asynchronous SYCL
+A context can optionally be constructed with an [code]#async_handler# parameter.
+In this case the [code]#async_handler# is used to report asynchronous
 exceptions, as described in <<error-handling>>.
 
-Information about a SYCL <<context>> may be queried through the
-[code]#get_info()# member function.
+The [code]#context# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
-// Interface for class: context
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/context.h[lines=4..-1]
 ----
 
+[[sec:context-ctors]]
+==== Constructors
 
-[[table.constructors.context]]
-.Constructors of the SYCL [code]#context# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:context-ctor]
 ----
 explicit context(async_handler asyncHandler = {})
 ----
-   a@ Constructs a SYCL [code]#context# instance using an instance of
-      [code]#default_selector_v# to select the associated SYCL
-      [code]#platform# and [code]#device(s)#. The <<device,devices>> that
-      are associated with the constructed <<context>> are implementation-defined
-      but must contain the <<device>> chosen by the device selector. The
-      constructed SYCL [code]#context# will use the [code]#asyncHandler#
-      parameter to handle exceptions.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#context# object using the
+[code]#default_selector_v# to determine the associated platform and devices.
+The associated platform is the platform which contains the device selected by
+[code]#default_selector_v#.
+The <<device,devices>> that are associated with the constructed context are
+implementation-defined but must contain the device that is selected by
+[code]#default_selector_v#.
+The constructed context uses the [code]#asyncHandler# parameter to handle
+exceptions.
+
+'''
+
+.[apititle]#Construct from device#
+[source,role=synopsis,id=api:context-ctor-dev]
 ----
 explicit context(const device& dev, async_handler asyncHandler = {})
 ----
-   a@ Constructs a SYCL [code]#context# instance using the [code]#dev# parameter as the associated SYCL [code]#device# and the SYCL [code]#platform# associated with the [code]#dev# parameter as the associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#context# object using the [code]#dev# parameter
+to determine the associated platform and device.
+The associated platform is the platform that contains [code]#dev#, and the
+associated device is [code]#dev#.
+The constructed context uses the [code]#asyncHandler# parameter to handle
+exceptions.
+
+'''
+
+.[apititle]#Construct from device list#
+[source,role=synopsis,id=api:context-ctor-dev-list]
 ----
 explicit context(const std::vector<device>& deviceList,
                  async_handler asyncHandler = {})
 ----
-   a@ Constructs a SYCL [code]#context# instance using the SYCL [code]#device(s)# in the [code]#deviceList# parameter as the associated SYCL [code]#device(s)# and the SYCL [code]#platform# associated with each SYCL [code]#device# in the [code]#deviceList# parameter as the associated SYCL [code]#platform#. This requires that all SYCL [code]#devices# in the [code]#deviceList# parameter have the same associated SYCL [code]#platform#. The constructed SYCL [code]#context# will use the [code]#asyncHandler# parameter to handle exceptions.
 
-|====
+_Preconditions:_ All devices in [code]#deviceList# must be associated with the
+same platform.
 
+_Effects:_ Constructs a [code]#context# object using the [code]#deviceList#
+parameter to determine the associated platform and device.
+The associated platform is the platform that contains all of the devices in
+[code]#deviceList#.
+The associated devices are those devices in [code]#deviceList#.
+The constructed context uses the [code]#asyncHandler# parameter to handle
+exceptions.
 
+'''
 
-[[table.members.context]]
-.Member functions of the [code]#context# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:context-member-funcs]]
+==== Member functions
+
+.[apidef]#context::get_backend#
+[source,role=synopsis,id=api:context-get-backend]
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#context#.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#context# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.context.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Returns:_ The <<backend>> that is associated with this context.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-   a@ Queries this SYCL [code]#context# for <<backend>>-specific information
-      requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#context#.
+'''
 
-a@
-[source]
+.[apidef]#context::get_platform#
+[source,role=synopsis,id=api:context-get-platform]
 ----
 platform get_platform() const
 ----
-   a@ Returns the SYCL [code]#platform# that is associated with this SYCL [code]#context#. The value returned must be equal to that returned by [code]#get_info<info::context::platform>()#.
 
-a@
-[source]
+_Returns:_ The <<platform>> that is associated with this context.
+
+'''
+
+.[apidef]#context::get_devices#
+[source,role=synopsis,id=api:context-get-devices]
 ----
 std::vector<device> get_devices() const
 ----
-   a@ Returns a [code]#std::vector# containing all SYCL [code]#devices# that are associated with this SYCL [code]#context#. The value returned must be equal to that returned by [code]#get_info<info::context::devices>()#.
 
-|====
+_Returns:_ A [code]#std::vector# containing all the <<device,devices>> that are
+associated with this context.
 
+'''
 
-
-==== Context information descriptors
-
-A <<context>> can be queried for information using the [code]#get_info# member
-function of the [code]#context# class, specifying one of the info parameters in
-[code]#info::context#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<context>>.
-All info parameters in [code]#info::context# are specified in
-<<table.context.info>> and the synopsis for [code]#info::context# is described
-in <<appendix.context.descriptors>>.
-
-
-[[table.context.info]]
-.Context information descriptors
-// Jon: Dims{5cm}{4.4cm}{5cm}
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Context Descriptors @ Return type @ Description
-a@
-[source]
+.[apidef]#context::get_info#
+[source,role=synopsis,id=api:context-get-info]
 ----
-info::context::platform
+template <typename Param>
+typename Param::return_type get_info() const
 ----
 
-    @ [.code]#platform#
-   a@ Returns the <<platform>> associated with the <<context>>.
+_Constraints:_ The [code]#Param# must be an information descriptor for the
+context class.
 
-a@
-[source]
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:context-info-descriptors>> for the context information descriptors
+that are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#context::get_backend_info#
+[source,role=synopsis,id=api:context-get-backend-info]
 ----
-info::context::devices
+template <typename Param>
+typename Param::return_type get_backend_info() const
 ----
 
-    @ [.code]#std::vector<device>#
-   a@ Returns all of the <<device,devices>> associated with the <<context>>.
+_Constraints:_ The [code]#Param# must be a backend information descriptor for
+the context class.
 
-a@
-[source]
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this context.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+[[sec:context-info-descriptors]]
+==== Information descriptors
+
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#context::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#context::get_info#
+function.
+
+'''
+
+.[apidef]#info::context::platform#
+[source,role=synopsis,id=api:info-context-platform]
 ----
-info::context::atomic_memory_order_capabilities
+namespace sycl::info::context {
+struct platform {
+  using return_type = platform;
+};
+} // namespace sycl::info::context
 ----
 
-    @ [.code]#std::vector<memory_order>#
-   a@ This query applies only to the capabilities of atomic operations that are
-      applied to memory that can be concurrently accessed by multiple devices
-      in the context.  If these capabilities are not uniform across all devices
-      in the context, the query reports only the capabilities that are common
-      for all devices.
+_Remarks:_ Template parameter to [api]#context::get_info#.
 
-Returns the set of memory orders supported by these atomic operations.  When a
-context returns a "stronger" memory order in this set, it must also return all
-"weaker" memory orders.  (See <<sec:memory-ordering>> for a definition of
-"stronger" and "weaker" memory orders.) The memory orders
-[code]#memory_order::acquire#, [code]#memory_order::release#, and
-[code]#memory_order::acq_rel# are all the same strength.  If a context returns
-one of these, it must return them all.
+_Returns:_ The <<platform>> that is associated with this context.
+
+'''
+
+.[apidef]#info::context::devices#
+[source,role=synopsis,id=api:info-context-devices]
+----
+namespace sycl::info::context {
+struct devices {
+  using return_type = std::vector<device>;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ A [code]#std::vector# containing all the <<device,devices>> that are
+associated with this context.
+
+'''
+
+.[apidef]#info::context::atomic_memory_order_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-memory-order-capabilities]
+----
+namespace sycl::info::context {
+struct atomic_memory_order_capabilities {
+  using return_type = std::vector<memory_order>;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ This query applies only to the capabilities of atomic operations that
+are applied to memory that can be concurrently accessed by multiple devices in
+the context.
+If these capabilities are not uniform across all devices in the context, the
+query reports only the capabilities that are common for all devices.
+
+Returns the set of memory orders supported by these atomic operations.
+When a context returns a "stronger" memory order in this set, it must also
+return all "weaker" memory orders.
+(See <<sec:memory-ordering>> for a definition of "stronger" and "weaker" memory
+orders.)
+The memory orders [code]#memory_order::acquire#, [code]#memory_order::release#,
+and [code]#memory_order::acq_rel# are all the same strength.
+If a context returns one of these, it must return them all.
 
 At a minimum, each context must support [code]#memory_order::relaxed#.
 
-a@
-[source]
+'''
+
+.[apidef]#info::context::atomic_fence_order_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-fence-order-capabilities]
 ----
-info::context::atomic_fence_order_capabilities
+namespace sycl::info::context {
+struct atomic_fence_order_capabilities {
+  using return_type = std::vector<memory_order>;
+};
+} // namespace sycl::info::context
 ----
 
-    @ [.code]#std::vector<memory_order>#
-   a@ This query applies only to the capabilities of [code]#atomic_fence# when
-      applied to memory that can be concurrently accessed by multiple devices
-      in the context.  If these capabilities are not uniform across all devices
-      in the context, the query reports only the capabilities that are common
-      for all devices.
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ This query applies only to the capabilities of [code]#atomic_fence#
+when applied to memory that can be concurrently accessed by multiple devices in
+the context.
+If these capabilities are not uniform across all devices in the context, the
+query reports only the capabilities that are common for all devices.
 
 Returns the set of memory orders supported by these [code]#atomic_fence#
-operations.  When a context returns a "stronger" memory order in this set, it
-must also return all "weaker" memory orders.  (See <<sec:memory-ordering>> for
-a definition of "stronger" and "weaker" memory orders.)
+operations.
+When a context returns a "stronger" memory order in this set, it must also
+return all "weaker" memory orders.
+(See <<sec:memory-ordering>> for a definition of "stronger" and "weaker" memory
+orders.)
 
 At a minimum, each context must support [code]#memory_order::relaxed#,
 [code]#memory_order::acquire#, [code]#memory_order::release#, and
 [code]#memory_order::acq_rel#.
 
-a@
-[source]
-----
-info::context::atomic_memory_scope_capabilities
-----
+'''
 
-    @ [.code]#std::vector<memory_scope>#
-   a@ Returns the set of memory scopes supported by atomic operations on all
-      devices in the context.  When a context returns a "wider" memory scope
-      in this set, it must also return all "narrower" memory scopes.  (See
-      <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
-      At a minimum, each context must support [code]#memory_scope::work_item#,
-      [code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
-
-a@
-[source]
+.[apidef]#info::context::atomic_memory_scope_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-memory-scope-capabilities]
 ----
-info::context::atomic_fence_scope_capabilities
+namespace sycl::info::context {
+struct atomic_memory_scope_capabilities {
+  using return_type = std::vector<memory_scope>;
+};
+} // namespace sycl::info::context
 ----
 
-    @ [.code]#std::vector<memory_scope>#
-   a@ Returns the set of memory orderings supported by [code]#atomic_fence# on
-      all devices in the context.  When a context returns a "wider" memory
-      scope in this set, it must also return all "narrower" memory scopes.
-      (See <<sec:memory-scope>> for a definition of "wider" and "narrower"
-      scopes.) At a minimum, each context must support
-      [code]#memory_scope::work_item#, [code]#memory_scope::sub_group#, and
-      [code]#memory_scope::work_group#.
+_Remarks:_ Template parameter to [api]#context::get_info#.
 
-|====
+_Returns:_ The set of memory scopes supported by atomic operations on all
+devices in the context.
+When a context returns a "wider" memory scope in this set, it must also return
+all "narrower" memory scopes.
+(See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+At a minimum, each context must support [code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
 
+'''
 
+.[apidef]#info::context::atomic_fence_scope_capabilities#
+[source,role=synopsis,id=api:info-context-atomic-fence-scope-capabilities]
+----
+namespace sycl::info::context {
+struct atomic_fence_scope_capabilities {
+  using return_type = std::vector<memory_scope>;
+};
+} // namespace sycl::info::context
+----
+
+_Remarks:_ Template parameter to [api]#context::get_info#.
+
+_Returns:_ The set of memory orderings supported by [code]#atomic_fence# on all
+devices in the context.
+When a context returns a "wider" memory scope in this set, it must also return
+all "narrower" memory scopes.
+(See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
+At a minimum, each context must support [code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+
+'''
 
 [[sec:context-properties]]
-==== Context properties
+==== Properties
 
 The [code]#property_list# constructor parameters are present for extensibility.
 
@@ -2748,12 +2808,19 @@ struct execution_capabilities {
 } // namespace sycl::info::device
 ----
 
+Deprecated by SYCL 2020.
+
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ A [code]#std::vector# of the [api]#info::execution_capability# values
+_Returns:_ Only supported when the backend of this device is OpenCL (see
+<<chapter:opencl-backend>>).
+Returns a [code]#std::vector# of the [api]#info::execution_capability# values
 describing the supported execution capabilities.
-Note that this information is intended for OpenCL interoperability only as SYCL
-only supports [api]#info::execution_capability::exec_kernel#.
+Unless the device type is [api]#info::device_type::custom#, the returned vector
+will always include [api]#info::execution_capability::exec_kernel#.
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+backend of this device is not OpenCL.
 
 '''
 
@@ -3216,8 +3283,12 @@ describes them.
 .[apidef]#aspect::cpu#
 [role=synopsis,id=api:aspect-cpu]
 --
-A device that runs on a CPU.
-Devices with this aspect have device type [api]#info::device_type::cpu#.
+Indicates that the implementation identifies this device as a CPU that has
+device type [api]#info::device_type::cpu#.
+
+{note}A device with this aspect will typically share some or all of the
+execution resources available to the host {cpp} application.
+{endnote}
 --
 
 '''
@@ -3225,8 +3296,13 @@ Devices with this aspect have device type [api]#info::device_type::cpu#.
 .[apidef]#aspect::gpu#
 [role=synopsis,id=api:aspect-gpu]
 --
-A device that can also be used to accelerate a 3D graphics API.
-Devices with this aspect have device type [api]#info::device_type::gpu#.
+Indicates that the implementation identifies this device as a GPU that has
+device type [api]#info::device_type::gpu#.
+
+{note}A device with this aspect may have additional capabilities for
+accelerating graphics operations, via SYCL image functionality and/or
+interoperability with graphics APIs.
+{endnote}
 --
 
 '''
@@ -3234,9 +3310,12 @@ Devices with this aspect have device type [api]#info::device_type::gpu#.
 .[apidef]#aspect::accelerator#
 [role=synopsis,id=api:aspect-accelerator]
 --
-A dedicated accelerator device, usually using a peripheral interconnect for
-communication.
-Devices with this aspect have device type [api]#info::device_type::accelerator#.
+Indicates that the implementation identifies this device as an accelerator that
+has device type [api]#info::device_type::accelerator#.
+
+{note}A device with this aspect will typically be a dedicated accelerator
+device, with a peripheral interconnect for communication.
+{endnote}
 --
 
 '''
@@ -3244,10 +3323,11 @@ Devices with this aspect have device type [api]#info::device_type::accelerator#.
 .[apidef]#aspect::custom#
 [role=synopsis,id=api:aspect-custom]
 --
-A dedicated accelerator that can use the SYCL API, but programmable kernels
-cannot be dispatched to the device, only fixed functionality is available.
-See <<sec:pre-defined-kernels>>.
-Devices with this aspect have device type [api]#info::device_type::custom#.
+Indicates that this device is a custom accelerator that exposes only fixed
+functionality, and has device type [api]#info::device_type::custom#.
+
+A device with this aspect does not support execution of arbitrary kernels, and
+can only execute pre-defined kernels (see <<sec:pre-defined-kernels>>).
 --
 
 '''
@@ -3256,6 +3336,7 @@ Devices with this aspect have device type [api]#info::device_type::custom#.
 [role=synopsis,id=api:aspect-emulated]
 --
 Indicates that the device is somehow emulated.
+
 A device with this aspect is not intended for performance, and instead will
 generally have another purpose such as emulation or profiling.
 The precise definition of this aspect is left open to the SYCL implementation.
@@ -3658,6 +3739,11 @@ enum class global_mem_cache_type : /* unspecified */ {
 [[sec:device-enum-execution-capability]]
 ===== Execution capability
 
+Deprecated by SYCL 2020.
+
+The [code]#info::execution_capability# enumeration tells the type of kernels
+that can be submitted to a device from the OpenCL backend.
+
 [source,role=synopsis]
 ----
 namespace sycl::info {
@@ -3667,6 +3753,24 @@ enum class execution_capability : /* unspecified */ {
 };
 } // namespace sycl::info
 ----
+
+'''
+
+.[apidef]#info::execution_capability::exec_kernel#
+[role=synopsis,id=api:info-execution-capability-exec-kernel]
+--
+Device can execute SYCL kernels.
+--
+
+'''
+
+.[apidef]#info::execution_capability::exec_native_kernel#
+[role=synopsis,id=api:info-execution-capability-exec-native-kernel]
+--
+Device can execute native OpenCL kernels.
+--
+
+'''
 
 
 [[sec:queue-class]]
@@ -3692,10 +3796,6 @@ passing <<async-error,asynchronous errors>> at specific times to an
 
 The application can wait for all <<command-group,command groups>> submitted to a
 queue calling [api]#queue::wait# or [api]#queue::wait_and_throw#.
-
-All constructors of the [code]#queue# class implicitly construct a
-[code]#platform#, [code]#device#, and [code]#context# in order to facilitate the
-construction of the queue.
 
 A queue may be destroyed even when there are uncompleted <<command, commands>>
 that have been submitted to the queue.
@@ -3736,6 +3836,9 @@ explicit queue(const property_list& propList = {})
 
 _Effects:_ Constructs a [code]#queue# object using the device selected by
 [code]#default_selector_v#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 
 '''
 
@@ -3748,6 +3851,9 @@ explicit queue(const async_handler& asyncHandler,
 
 _Effects:_ Constructs a [code]#queue# object using the device selected by
 [code]#default_selector_v#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3767,6 +3873,9 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 
 '''
 
@@ -3786,6 +3895,9 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3798,6 +3910,9 @@ explicit queue(const device& syclDevice, const property_list& propList = {})
 
 _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 
 '''
 
@@ -3810,6 +3925,9 @@ explicit queue(const device& syclDevice, const async_handler& asyncHandler,
 
 _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is this platform's default context as described in
+<<sec:platform-class>>.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 '''
@@ -3829,7 +3947,8 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
-The queue has the context [code]#syclContext#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#syclContext# does not contain the device selected by
@@ -3853,8 +3972,9 @@ satisfies the requirements of a <<device-selector>> as defined in
 _Effects:_ The [code]#deviceSelector# is called for every <<root-device>> as
 described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
-The queue has the context [code]#syclContext# and the asynchronous error handler
-[code]#asyncHandler#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
+The queue has the asynchronous error handler [code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#syclContext# does not contain the device selected by
@@ -3869,8 +3989,10 @@ explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
 
-_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
-and the context [code]#syclContext#.
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
 [code]#syclDevice# is contained by [code]#syclContext# or is a
@@ -3886,8 +4008,10 @@ explicit queue(const context& syclContext, const device& syclDevice,
                const property_list& propList = {})
 ----
 
-_Effects:_ Constructs a [code]#queue# object using the device [code]#syclDevice#
-and the context [code]#syclContext#.
+_Effects:_ Constructs a [code]#queue# object using the device
+[code]#syclDevice#.
+The queue's platform is the platform that contains this device.
+The queue's context is [code]#syclContext#.
 The queue has the asynchronous error handler [code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
@@ -13530,9 +13654,11 @@ identity value automatically in order to avoid performance penalties.
 
 If an implementation can identify an identity value for a given combination of
 accumulator type and function object type, the value is defined as a member of
-the [code]#known_identity# trait class.
+the [code]#known_identity# trait class and can be retrieved using the
+[code]#known_identity_v# variable template.
 Whether this member value exists can be tested using the
-[code]#has_known_identity# trait class.
+[code]#has_known_identity# trait class or the [code]#has_known_identity_v#
+variable template.
 
 [source,,linenums]
 ----
@@ -14299,7 +14425,7 @@ a@
 template <typename KernelName, typename KernelType>
 void single_task(const KernelType& kernelFunc)
 ----
-   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
+   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type.
       Specification of a <<kernel-name>> ([code]#typename KernelName#), as
       described in <<subsec:invokingkernels>>, is optional.
@@ -14314,7 +14440,7 @@ a@
 template <typename KernelName, int Dimensions, typename... Rest>
 void parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
 ----
-   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
+   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified range and given an item or integral type (e.g [code]#int#,
       [code]#size_t)#, if range is 1-dimensional, for indexing in the indexing
@@ -14341,7 +14467,7 @@ void parallel_for(range<Dimensions> numWorkItems, id<Dimensions> workItemOffset,
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
-      Defines and invokes a <<sycl-kernel-function>> as a lambda function
+      Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified range and offset and given an item or integral type
       (e.g [code]#int#, [code]#size_t)#, if range is 1-dimensional,
@@ -14364,7 +14490,7 @@ a@
 template <typename KernelName, int Dimensions, typename... Rest>
 void parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest)
 ----
-   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda function
+   a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified <<nd-range>> and given an <<nd-item>>
       for indexing in the indexing space defined by the <<nd-range>>.
@@ -14393,7 +14519,7 @@ template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
 void parallel_for_work_group(range<Dimensions> numWorkGroups,
                              const WorkgroupFunctionType& kernelFunc)
 ----
-   a@ Defines and invokes a hierarchical kernel as a lambda function
+   a@ Defines and invokes a hierarchical kernel as a lambda expression
       or a named function object type,
       encoding the body of each work-group to launch. Generic kernel
       functions are permitted, in that case the argument type is a [code]#group#. May
@@ -14414,7 +14540,7 @@ void parallel_for_work_group(range<Dimensions> numWorkGroups,
                              range<Dimensions> workGroupSize,
                              const WorkgroupFunctionType& kernelFunc)
 ----
-   a@ Defines and invokes a hierarchical kernel as a lambda function
+   a@ Defines and invokes a hierarchical kernel as a lambda expression
       or a named function object type,
       encoding the body of each work-group to launch. Generic kernel
       functions are permitted, in that case the argument type is a [code]#group#.
@@ -14575,7 +14701,7 @@ What differs is the functionality that is available to the SYCL kernel function
 via the respective interfaces.
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function, and passing a SYCL [code]#id# parameter.
+using a lambda expression, and passing a SYCL [code]#id# parameter.
 In this case, only the global id is available.
 This variant of [code]#parallel_for# is designed for when it is not necessary to
 query the global range of the index space being executed across.
@@ -14586,7 +14712,7 @@ include::{code_dir}/basicparallelfor.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function and passing a SYCL [code]#item# parameter.
+using a lambda expression and passing a SYCL [code]#item# parameter.
 In this case, both the global id and global range are queryable.
 This variant of [code]#parallel_for# is designed for when it is necessary to
 query the global range of the index space being executed across.
@@ -14597,7 +14723,7 @@ include::{code_dir}/basicParallelForItem.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function and passing [code]#auto# parameter, treated as
+using a lambda expression and passing [code]#auto# parameter, treated as
 [code]#item#.
 In this case, both the global id and global range are queryable.
 The same effect can be achieved using class with templatized [code]#operator()#.
@@ -14610,7 +14736,7 @@ include::{code_dir}/basicParallelForGeneric.cpp[lines=4..-1]
 ----
 
 Below is an example of invoking a SYCL kernel function with [code]#parallel_for#
-using a lambda function and passing an integral type parameter.
+using a lambda expression and passing an integral type parameter.
 This example is only valid when calling [code]#parallel_for# with
 [code]#range<1>#.
 In this case only the global id is available.
@@ -14744,7 +14870,7 @@ runtime, or by the number of work-groups and number of work-items for users who
 need more control.
 
 The body of the outer [code]#parallel_for_work_group# call consists of a lambda
-function or function object.
+expression or function object.
 The body of this function object contains code that is executed only once for
 the entire work-group.
 If the code has no side-effects and the compiler heuristic suggests that it is
@@ -15905,8 +16031,8 @@ template <typename KernelName> kernel_id get_kernel_id();
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to obtain their identifier via this
 function.
 Applications which call [code]#get_kernel_id()# for a [code]#KernelName# that is
@@ -16110,8 +16236,8 @@ kernel_bundle<State> get_kernel_bundle(const context& ctxt,
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use these functions.
 Applications which call these functions for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16206,8 +16332,8 @@ bool has_kernel_bundle(const context& ctxt, const std::vector<device>& devs);
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use these functions.
 Applications which call these functions for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16254,8 +16380,8 @@ template <typename KernelName> bool is_compatible(const device& dev);
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use this function.
 Applications which call this function for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16527,8 +16653,8 @@ bool has_kernel(const device& dev) const noexcept; // (2)
 
 _Preconditions:_ The template parameter [code]#KernelName# must be the
 <<type-kernel-name>> of a kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use these functions.
 Applications which call these functions for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -16573,8 +16699,8 @@ _Preconditions:_ This member function is only available if the kernel bundle's
 state is [code]#bundle_state::executable#.
 The template parameter [code]#KernelName# must be the <<type-kernel-name>> of a
 kernel that is defined in the <<sycl-application>>.
-Since lambda functions have no standard type name, kernels defined as lambda
-functions must specify a [code]#KernelName# in their
+Since lambda expressions have no standard type name, kernels defined as lambda
+expressions must specify a [code]#KernelName# in their
 <<kernel-invocation-command>> in order to use this function.
 Applications which call this function for a [code]#KernelName# that is not
 defined are ill formed, and the implementation must issue a diagnostic in this
@@ -17044,7 +17170,7 @@ accesses between host and device are through <<accessor,accessors>> or through
 <<sec:usm, USM pointers>>.
 
 There are two ways of defining kernels: as named function objects or as lambda
-functions.
+expressions.
 A backend may also provide interoperability interfaces for defining kernels.
 
 
@@ -17067,7 +17193,7 @@ If the [code]#operator()# function writes to any of the member variables, the
 behavior is undefined.
 
 The following example defines a <<sycl-kernel-function>>, _RandomFiller_, which
-initializes a buffer with a random number.
+initializes all elements of a buffer with the same random number.
 The random number is generated during the construction of the function object
 while processing the command group.
 The [code]#operator()# member function of the function object receives an
@@ -17085,23 +17211,23 @@ include::{code_dir}/myfunctor.cpp[lines=4..-1]
 
 
 [[sec:interfaces.kernels.as.lambdas]]
-=== Defining kernels as lambda functions
+=== Defining kernels as lambda expressions
 
-In {cpp}, function objects can be defined using lambda functions.
-Kernels may be defined as lambda functions in SYCL.
-The name of a lambda function in SYCL may optionally be specified by passing it
-as a template parameter to the invoking member function, and in that case, the
-lambda name is a [keyword]#{cpp} typename# which must be forward declarable at
-namespace scope.
-If the lambda function relies on template arguments, then if specified, the name
-of the lambda function must contain those template arguments which must also be
-forward declarable at namespace scope.
-The class used for the name of a lambda function is only used for naming
+In {cpp}, function objects can be defined using lambda expressions.
+Kernels may be defined as lambda expressions in SYCL.
+The name of a lambda expression in SYCL may optionally be specified by passing
+it as a template parameter to the invoking member function, and in that case,
+the lambda name is a [keyword]#{cpp} typename# which must be forward declarable
+at namespace scope.
+If the lambda expression relies on template arguments, then if specified, the
+name of the lambda expression must contain those template arguments which must
+also be forward declarable at namespace scope.
+The class used for the name of a lambda expression is only used for naming
 purposes and is not required to be defined.
 For details on restrictions for kernel naming, please refer to
 <<sec:naming.kernels>>.
 
-The kernel function for the lambda function is the lambda function itself.
+The kernel function for the lambda expression is the lambda expression itself.
 The kernel lambda must use copy for all of its captures (i.e. [code]#[=]#), and
 the lambda must not use the [code]#mutable# specifier.
 
@@ -17161,13 +17287,13 @@ a device copyable type in that case and the specialization is ignored.
 === Rules for parameter passing to kernels
 
 A SYCL application passes parameters to a kernel in different ways depending on
-whether the kernel is a named function object or a lambda function.
+whether the kernel is a named function object or a lambda expression.
 If the kernel is a named function object, the [code]#operator()# member function
 (or other member functions that it calls) may reference member variables inside
 the same named function object.
 Any such member variables become parameters to the kernel.
-If the kernel is a lambda function, any variables captured by the lambda become
-parameters to the kernel.
+If the kernel is a lambda expression, any variables captured by the lambda
+become parameters to the kernel.
 
 Regardless of how the parameter is passed, the following rules define the
 allowable types for a kernel parameter:
@@ -17264,8 +17390,8 @@ When an <<async-error>> instance has been passed to an <<async-handler>>, then
 that instance of the error has been consumed for handling and is not reported on
 any subsequent invocations of the <<async-handler>>.
 
-The <<async-handler>> may be a named function object type, a lambda function or
-a [code]#std::function#.
+The <<async-handler>> may be a named function object type, a lambda expression
+or a [code]#std::function#.
 The [code]#exception_list# object passed to the <<async-handler>> is constructed
 by the <<sycl-runtime>>.
 
@@ -17595,7 +17721,7 @@ kernel_argument
 ----
    a@ The application has passed an invalid argument to a
       <<sycl-kernel-function>>.  This includes captured variables if the
-      <<sycl-kernel-function>> is a lambda function.
+      <<sycl-kernel-function>> is a lambda expression.
 
 a@
 [source]
@@ -17727,8 +17853,8 @@ a@
 ----
 byte
 ----
-   a@ An unsigned 8-bit integer. This is deprecated in SYCL 2020 since {cpp17}
-      [code]#std::byte# can be used instead.
+   a@ An alias to [code]#std::uint8_t#.  This is deprecated in SYCL 2020 since
+      {cpp17} [code]#std::byte# can be used instead.
 
 a@
 [source]
@@ -17758,10 +17884,12 @@ from a swizzled set of component elements.
 
 The [code]#vec# class is templated on its number of elements and its element
 type.
-The number of elements parameter, _NumElements_, can be one of: 1, 2, 3, 4, 8 or 16.
+The number of elements parameter, [code]#NumElements#, must be one of: 1, 2, 3,
+4, 8 or 16.
 Any other value shall produce a compilation failure.
-The element type parameter, _DataT_, must be one of the basic scalar types
-supported in device code.
+The element type parameter, [code]#DataT#, must be the cv-unqualified version of
+one of the following: one of the built-in scalar data types listed in
+<<subsec:scalartypes>>, [code]#half#, or [code]#sycl::byte#.
 
 The SYCL [code]#vec# class template provides interoperability with the
 underlying vector type defined by [code]#vector_t# which is available only when
@@ -17937,14 +18065,12 @@ The [code]#swizzleIndexes# argument pack specifies the elements in the swizzle.
 a@
 [source]
 ----
-__writeable_swizzle__ XYZW_ACCESS()
-__const_swizzle__ XYZW_ACCESS() const
+DataT& XYZW_ACCESS()
+const DataT& XYZW_ACCESS() const
 ----
    a@ Available only when: [code]#+NumElements <= 4+#.
 
-Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
-or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
-as described in <<swizzled-vec-class>>.
+Return a reference to the element identified by [code]#XYZW_ACCESS#.
 
 Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 [code]#x, y# for
@@ -17957,27 +18083,22 @@ Where [code]#XYZW_ACCESS# is: [code]#x# for [code]#NumElements == 1#,
 a@
 [source]
 ----
-__writeable_swizzle__ RGBA_ACCESS()
-__const_swizzle__ RGBA_ACCESS() const
+DataT& RGBA_ACCESS()
+const DataT& RGBA_ACCESS() const
 ----
    a@ Available only when: [code]#NumElements == 4#.
 
-Return an instance of the implementation-defined [code]#+__writeable_swizzle__+#
-or [code]#+__const_swizzle__+# class representing a swizzled view of the vector
-as described in <<swizzled-vec-class>>.
+Return a reference to the element identified by [code]#RGBA_ACCESS#.
 
 Where [code]#RGBA_ACCESS# is: [code]#r, g, b, a#.
 
 a@
 [source]
 ----
-__writeable_swizzle__ INDEX_ACCESS()
-__const_swizzle__ INDEX_ACCESS() const
+DataT& INDEX_ACCESS()
+const DataT& INDEX_ACCESS() const
 ----
-  a@ Return an instance of the implementation-defined
-     [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# class
-     representing a swizzled view of the vector as described in
-     <<swizzled-vec-class>>.
+a@ Return a reference to the element identified by [code]#INDEX_ACCESS#.
 
 Where [code]#INDEX_ACCESS# is: [code]#s0# for [code]#NumElements == 1#,
 [code]#s0, s1# for
@@ -18358,7 +18479,10 @@ a@
 template<typename T>
 vec operatorOP(const T& lhs, const vec& rhs)
 ----
-a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
+a@ _Constraints:_
+
+* [code]#T# is implicitly convertible to [code]#DataT#, and
+* [code]#DataT != float && DataT != double && DataT != half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -18419,7 +18543,7 @@ a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18447,7 +18571,7 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18461,7 +18585,7 @@ a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#uint64_t#.
+The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18614,6 +18738,23 @@ The constant [code]#NumElements# represents the number of elements in the result
 of the swizzle operation, which could be different from the number of elements
 in the underlying [code]#vec#.
 
+Because the template parameters to the [code]#+__writeable_swizzle__+# and
+[code]#+__const_swizzle__+# classes affect the {cpp} argument dependent lookup
+(ADL) behavior, implementations do not have complete freedom when choosing these
+template parameters.
+Implementations must choose template parameters that result in the following ADL
+behavior:
+
+* When an argument is the [code]#+__writeable_swizzle__+# type, the ADL search
+  set must include only the class template definition for
+  [code]#+__writeable_swizzle__+#, the class definition for [code]#DataT# (if it
+  is a class), and the namespace that contains [code]#DataT#.
+
+* When an argument is the [code]#+__const_swizzle__+# type, the ADL search set
+  must include only the class template definition for
+  [code]#+__const_swizzle__+#, the class definition for [code]#DataT# (if it is
+  a class), and the namespace that contains [code]#DataT#.
+
 When the string [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+#
 is used inside the class definition in the synopses below, it refers to the
 instantiation with the same set of template parameters as the enclosing class.
@@ -18762,43 +18903,62 @@ swizzle operation.
 a@
 [source]
 ----
-template <int... swizzleIndexes> __writeable_swizzle__</*unspecified*/> swizzle() const  (1)
+DataT& XYZW_ACCESS() const         (1)
+DataT& RGBA_ACCESS() const         (2)
+DataT& INDEX_ACCESS() const        (3)
 
-__writeable_swizzle__</*unspecified*/> XYZW_ACCESS() const                               (2)
-__writeable_swizzle__</*unspecified*/> RGBA_ACCESS() const                               (3)
-__writeable_swizzle__</*unspecified*/> INDEX_ACCESS() const                              (4)
-
-#ifdef SYCL_SIMPLE_SWIZZLES
-__writeable_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                              (5)
-__writeable_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                              (6)
-#endif
-
-__writeable_swizzle__</*unspecified*/> lo() const                                        (7)
-__writeable_swizzle__</*unspecified*/> hi() const                                        (8)
-__writeable_swizzle__</*unspecified*/> odd() const                                       (9)
-__writeable_swizzle__</*unspecified*/> even() const                                      (10)
-
-
-template <int... swizzleIndexes> __const_swizzle__</*unspecified*/> swizzle() const      (11)
-
-__const_swizzle__</*unspecified*/> XYZW_ACCESS() const                                   (12)
-__const_swizzle__</*unspecified*/> RGBA_ACCESS() const                                   (13)
-__const_swizzle__</*unspecified*/> INDEX_ACCESS() const                                  (14)
-
-#ifdef SYCL_SIMPLE_SWIZZLES
-__const_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                                  (15)
-__const_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                                  (16)
-#endif
-
-__const_swizzle__</*unspecified*/> lo() const                                            (17)
-__const_swizzle__</*unspecified*/> hi() const                                            (18)
-__const_swizzle__</*unspecified*/> odd() const                                           (19)
-__const_swizzle__</*unspecified*/> even() const                                          (20)
+const DataT& XYZW_ACCESS() const   (4)
+const DataT& RGBA_ACCESS() const   (5)
+const DataT& INDEX_ACCESS() const  (6)
 ----
 |====
-_Availability:_ Functions (1) - (10) are available only in
+_Availability:_ Functions (1) - (3) are available only in
 [code]#+__writeable_swizzle__+#.
-Functions (11) - (20) are available only in [code]#+__const_swizzle__+#.
+Functions (4) - (6) are available only in [code]#+__const_swizzle__+#.
+
+_Constraints:_ These functions have the same constraints as the equivalent
+member functions of the [code]#vec# class.
+
+_Returns:_ A reference to the element of the underlying [code]#vec# object that
+corresponds to the position of the swizzle operation identified by
+[code]#XYZW_ACCESS#, [code]#RGBA_ACCESS#, or [code]#INDEX_ACCESS#.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template <int... swizzleIndexes> __writeable_swizzle__</*unspecified*/> swizzle() const  (1)
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__writeable_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                              (2)
+__writeable_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                              (3)
+#endif
+
+__writeable_swizzle__</*unspecified*/> lo() const                                        (4)
+__writeable_swizzle__</*unspecified*/> hi() const                                        (5)
+__writeable_swizzle__</*unspecified*/> odd() const                                       (6)
+__writeable_swizzle__</*unspecified*/> even() const                                      (7)
+
+
+template <int... swizzleIndexes> __const_swizzle__</*unspecified*/> swizzle() const      (8)
+
+#ifdef SYCL_SIMPLE_SWIZZLES
+__const_swizzle__</*unspecified*/> XYZW_SWIZZLE() const                                  (9)
+__const_swizzle__</*unspecified*/> RGBA_SWIZZLE() const                                  (10)
+#endif
+
+__const_swizzle__</*unspecified*/> lo() const                                            (11)
+__const_swizzle__</*unspecified*/> hi() const                                            (12)
+__const_swizzle__</*unspecified*/> odd() const                                           (13)
+__const_swizzle__</*unspecified*/> even() const                                          (14)
+----
+|====
+_Availability:_ Functions (1) - (7) are available only in
+[code]#+__writeable_swizzle__+#.
+Functions (8) - (14) are available only in [code]#+__const_swizzle__+#.
 
 _Constraints:_ These functions have the same constraints as the equivalent
 member functions of the [code]#vec# class.
@@ -19279,8 +19439,8 @@ _Returns:_ A [code]#vec# object that represents the result of the operation.
 
 ==== Rounding modes
 
-The various rounding modes that can be used in the [code]#as# member function
-template are described in <<table.vec.roundingmodes>>.
+The various rounding modes that can be used in the [code]#convert# member
+function template are described in <<table.vec.roundingmodes>>.
 
 
 [[table.vec.roundingmodes]]
@@ -19484,7 +19644,7 @@ a@
 ----
 static constexpr std::size_t size() noexcept
 ----
-   a@ Returns the size of this SYCL [code]#marray# in bytes.
+   a@ Returns the number of elements in this SYCL [code]#marray# (i.e., [code]#NumElements#).
 
 a@
 [source]
@@ -20051,8 +20211,9 @@ The template parameter [code]#T# must be one of the following types:
 * [code]#unsigned long#,
 * [code]#long long#,
 * [code]#unsigned long long#,
-* [code]#float#, or
-* [code]#double#.
+* [code]#float#,
+* [code]#double#, or
+* Any pointer-to-object type.
 
 In addition, the type [code]#T# must satisfy one of the following conditions:
 
@@ -21044,7 +21205,7 @@ include::{header_dir}/stream.h[lines=4..-1]
 a@
 [source]
 ----
-char, signed char, unsigned char, int, unsigned int, short, unsigned short,
+bool, char, signed char, unsigned char, int, unsigned int, short, unsigned short,
 long int, unsigned long int, long long int, unsigned long long int
 ----
    a@ Outputs the value as a stream of characters.
@@ -24673,7 +24834,7 @@ template<typename NonScalar>        (4)
 
 *Overloads (1) - (3):*
 
-_Returns:_ The inverse square root of [code]#x#.
+_Returns:_ The reciprocal square root of [code]#x#.
 
 *Overload (4):*
 
@@ -24683,7 +24844,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   type; and
 * The element type is [code]#float#, [code]#double#, or [code]#half#.
 
-_Returns:_ For each element of [code]#x#, the inverse square root of
+_Returns:_ For each element of [code]#x#, the reciprocal square root of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
@@ -25364,7 +25525,7 @@ template<typename NonScalar>        (2)
 
 *Overload (1):*
 
-_Returns:_ The inverse square root of [code]#x#.
+_Returns:_ The reciprocal square root of [code]#x#.
 
 *Overload (2):*
 
@@ -25374,7 +25535,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   type; and
 * The element type is [code]#float#.
 
-_Returns:_ For each element of [code]#x#, the inverse square root of
+_Returns:_ For each element of [code]#x#, the reciprocal square root of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
@@ -25806,7 +25967,7 @@ template<typename NonScalar>        (2)
 
 *Overload (1):*
 
-_Returns:_ The inverse square root of [code]#x#.
+_Returns:_ The reciprocal square root of [code]#x#.
 
 *Overload (2):*
 
@@ -25816,7 +25977,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   type; and
 * The element type is [code]#float#.
 
-_Returns:_ For each element of [code]#x#, the inverse square root of
+_Returns:_ For each element of [code]#x#, the reciprocal square root of
 [code]#x[i]#.
 
 The return type is [code]#NonScalar# unless [code]#NonScalar# is the
