@@ -3,14 +3,12 @@
 
 class RandomFiller {
  public:
-  RandomFiller(accessor<int> ptr)
-      : ptr_ { ptr } {
+  RandomFiller(accessor<int> ptr) : ptr_{ptr} {
     std::random_device hwRand;
-    std::uniform_int_distribution<> r { 1, 100 };
+    std::uniform_int_distribution<> r{1, 100};
     randomNum_ = r(hwRand);
   }
-  void operator()(item<1> item) const { ptr_[item.get_id()] = get_random(); }
-  int get_random() const { return randomNum_; }
+  void operator()(item<1> item) const { ptr_[item.get_id()] = randomNum_; }
 
  private:
   accessor<int> ptr_;
@@ -19,8 +17,8 @@ class RandomFiller {
 
 void workFunction(buffer<int, 1>& b, queue& q, const range<1> r) {
   q.submit([&](handler& cgh) {
-    accessor ptr { b, cgh };
-    RandomFiller filler { ptr };
+    accessor ptr{b, cgh};
+    RandomFiller filler{ptr};
 
     cgh.parallel_for(r, filler);
   });
