@@ -229,3 +229,58 @@ Cherry pick the KHR's PR from the "main" branch to the "sycl-xxxx" branch,
 following the instructions above under "Cherry pick strategy".
 Since the KHR is an appendix in the main SYCL specification, the KHR will be
 published whenever the working group decides to publish an update revision.
+
+
+## Updating the Docker build image
+
+Our CI process builds the HTML and PDF versions of the specification from
+Asciidoc sources using a Docker image that contains all of the build tools.
+This Docker image is maintained and published by the Khronos organization.
+We choose to reference a specific version of this Docker imagae in our CI
+configuration, so we can precisely track the tooling version that is used to
+build our specification.
+However, this means that we need to manually update that version whenever a new
+Docker image is published.
+
+In order to be notified about new versions, the specification editor should
+register with https://docker-notify.com/ and watch for changes to
+`khronosgroup/docker-images`.
+This will cause you to get an email notification whenever a new Khronos Docker
+image is published on Docker Hub.
+We only care about changes to Docker images with tags named
+`asciidoctor-spec.xxxx`, so you can ignore notifications for other tags.
+
+When a new Docker image is published, create a PR like [this one][5] using the
+Docker SHA labeled as "Manifest digest".
+
+Before merging the PR, it's best to validate that the new tools don't cause any
+unexpected problems by doing the following:
+
+* Compare the HTML file "sycl-xxxx.html" that was created with the old Docker
+  image with the file that was created with the new Docker image.
+  This is a text file, so you can use the `diff` command.
+
+* Compare the PDF file "sycl-xxxx.pdf" that was created with the old Docker image
+  with the file that was created with the new Docker image.
+  You can use https://www.draftable.com/compare to do this.
+
+The date (and potentially the commit id) will be different.
+If there are any other differences, you should determine whether they are an
+expected result of the new build tools or if they indicate a problem that needs
+to be fixed.
+
+If you build the specification locally via `make docker-html docker-pdf`, then
+you should also update your local copy of the Docker image.
+The `Makefile` doesn't reference a specific version of the Docker image.
+Instead, it references an "alias" with a tag named `asciidoctor-spec` (without
+the `.xxxx` suffix).
+The Khronos maintainers update this alias whenever there is a new version, so
+you can update your local image via:
+
+```
+$ sudo docker pull khronosgroup/docker-images:asciidoctor-spec
+```
+
+And this will update your "alias" image with the latest version.
+
+[5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/595>
