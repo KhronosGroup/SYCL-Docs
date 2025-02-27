@@ -141,22 +141,33 @@ template <typename DataT, int NumElements> class vec {
   const DataT& operator[](int index) const;
 
   vec& operator=(const vec& rhs);
-  vec& operator=(const DataT& rhs);
+
+  // Available only when: T is convertible to DataT
+  template<typename T>
+  vec& operator=(const T& rhs);
 
   // OP is: +, -, *, /, %
   //
+  // Available only when: T is convertible to DataT
   // If OP is not %, available only when DataT is an arithmetic type or half.
   // If OP is %, available only when DataT is an integral type.
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: +=, -=, *=, /=, %=
   //
+  // Available only when: T is convertible to DataT
   // If OP is not %=, available only when DataT is an arithmetic type or half.
   // If OP is %=, available only when DataT is an integral type.
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is prefix ++, --
   //
@@ -177,41 +188,68 @@ template <typename DataT, int NumElements> class vec {
 
   // OP is: &, |, ^
   //
+  // Available only when: T is convertible to DataT
   // Available only when DataT is an integral type or std::byte.
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: &=, |=, ^=
   //
+  // Available only when: T is convertible to DataT
   // Available only when DataT is an integral type or std::byte.
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is: <<, >>
   //
+  // Available only when: T is convertible to DataT
   // Available only when DataT is an integral type.
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: <<=, >>=
   //
+  // Available only when: T is convertible to DataT
   // Available only when DataT is an integral type.
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is: &&, ||
   //
+  // Available only when: T is convertible to DataT
   // Available only when DataT is an arithmetic type or half.
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: ==, !=, <, >, <=, >=
+  //
+  // Available only when: T is convertible to DataT
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs);
 
   // Available only when DataT is an integral type or std::byte.
   friend vec operator~(const vec& v);
