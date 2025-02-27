@@ -11777,35 +11777,31 @@ necessary [code]#device#.
 
 ==== Memory deallocation functions
 
-[[table.usm.free]]
-.USM Deallocation Functions
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Function @ Description
-a@
-[source]
+.[apidef]#free#
+[source,role=synopsis,id=api:free]
 ----
-void sycl::free(void* ptr, const context& syclContext)
+void free(void* ptr, const context& ctxt); (1)
+void free(void* ptr, const queue& q);      (2)
 ----
-a@ Frees an allocation.
-The memory pointed to by [code]#ptr# must have been allocated using one of the
-USM allocation routines or it must be a null pointer.
-If [code]#ptr# is not null, the [code]#syclContext# must be the same
-[code]#context# that was used to allocate the memory.
-If [code]#ptr# is null, this function has no effect.
-Otherwise, the memory is freed without waiting for <<command, commands>>
-operating on it to be completed.
-If <<command, commands>> that use this memory are in-progress or are enqueued,
-the behavior is undefined.
 
-a@
-[source]
-----
-void sycl::free(void* ptr, const queue& syclQueue)
-----
-a@ Alternate form where [code]#syclQueue# provides the [code]#context#.
+*Overload (1):*
 
-|====
+_Preconditions_:
+
+* [code]#ptr# points to memory allocated against [code]#ctxt# using one of the
+  USM allocation routines, or is a null pointer; and
+
+* There are no in-progress or enqueued <<command, commands>> using the memory
+  pointed to by [code]#ptr#.
+
+_Effects_: The memory pointed to by [code]#ptr# is freed, without waiting for
+<<command, commands>> operating on it to be completed.
+
+_Remarks_: If [code]#ptr# is null, this function has no effect.
+
+*Overload (2):*
+
+_Effects_: Equivalent to [code]#return free(ptr, q.get_context());#.
 
 === Unified shared memory pointer queries
 
