@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
+/* Deprecated in SYCL 2020 */
 template <int Dimensions> class h_item {
  public:
   static constexpr int dimensions = Dimensions;

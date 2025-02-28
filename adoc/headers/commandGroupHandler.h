@@ -48,10 +48,12 @@ class handler {
   template <typename KernelName, int Dimensions, typename... Rest>
   void parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest);
 
+  // Deprecated in SYCL 2020.
   template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
   void parallel_for_work_group(range<Dimensions> numWorkGroups,
                                const WorkgroupFunctionType& kernelFunc);
 
+  // Deprecated in SYCL 2020.
   template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
   void parallel_for_work_group(range<Dimensions> numWorkGroups,
                                range<Dimensions> workGroupSize,
