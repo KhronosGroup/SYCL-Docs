@@ -31,7 +31,7 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
 
   /* -- common interface members -- */
 
-  void swap(accessor& other);
+  void swap(local_accessor& other);
 
   size_type byte_size() const noexcept;
 
