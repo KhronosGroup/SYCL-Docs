@@ -80,7 +80,7 @@ class __group__ {
 };
 
 template <typename Group>
-member_item<Group> get_item(Group g) noexcept;
+member_item<Group> get_member_item(Group g) noexcept;
 
 template <typename Group>
 bool leader_of(Group g) noexcept;
@@ -201,11 +201,11 @@ the number of work-items in each dimension of the group.
 [[sec:khr-group-interface-common-non-member-funcs]]
 === Non-member functions
 
-.[apidef]#khr::get_item#
-[source,role=synopsis,id=api:common-group-get-item]
+.[apidef]#khr::get_member_item#
+[source,role=synopsis,id=api:common-group-get-member-item]
 ----
 template <typename Group>
-member_item<Group> get_item(Group g) noexcept;
+member_item<Group> get_member_item(Group g) noexcept;
 ----
 
 _Constraints_: [code]#Group# is [code]#work_group# or [code]#sub_group#.
@@ -634,7 +634,7 @@ group of work-items is implementation-defined, and there is subsequently no way
 for a user to construct arbitrary instances of the [code]#member_item# class
 template.
 Instances of the [code]#member_item# class template can only be acquired from a
-call to [api]#khr::get_item#.
+call to [api]#khr::get_member_item#.
 
 The SYCL [code]#member_item# class template provides common by-value semantics
 (see <<sec:byval-semantics>>) and the common group interface (see
@@ -809,7 +809,7 @@ int main() {
 
     // opt into the new group interface
     khr::work_group<1> g = ndit.get_group();
-    khr::member_item it = get_item(g);
+    khr::member_item it = get_member_item(g);
 
     // distribute N loop over work-groups
     for (size_t i = g.linear_id(); i < N; i += g.range().size()) {
