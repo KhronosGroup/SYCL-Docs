@@ -1,0 +1,91 @@
+[[sec:khr-max-num-work-groups]]
+= sycl_khr_max_num_work_groups
+
+This extension allows developers to query iteration bounds in each dimension for a ND-range kernel.
+The implementation ensures the execution of the ND-range kernel of `N` dimension(s) if its number of work-groups is less than or equal to `max_num_work_groups<N>` in each dimension.
+
+
+[[sec:khr-max-num-work-groups-dependencies]]
+== Dependencies
+
+This extension does not depend on other extensions.
+
+[[sec:khr-max-num-work-groups-feature-test]]
+== Feature test macro
+An implementation supporting this extension must predefine the `SYCL_KHR_MAX_NUM_WORK_GROUPS` macro to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+== New device descriptors
+
+[options="header"]
+[cols="1,1,2", options="header"]
+|===
+| Device descriptors                                     | Return type | Description
+
+| `khr::info::device::max_num_work_groups<N>`
+| `id<N>`
+| Returns the maximum number of work-groups that can be submitted in each dimension of an `nd_range<N>`. The minimum value is 1 in each dimension if the device is not `info::device_type::custom`.
+
+|===
+
+Note: `N` can take the value 1, 2 or 3.
+
+[[sec:khr-max-num-work-groups-example]]
+== Example
+
+The example below demonstrates the use of this extension to check bounds for an 3D `nd_range` loop.
+
+[source,cpp]
+----
+
+#include <iostream>
+#include <sycl/sycl.hpp>
+
+int
+main(int argc, char *argv[]) {
+    size_t dim1 = std::stoi(argv[1]);
+    size_t dim2 = std::stoi(argv[2]);
+    size_t dim3 = std::stoi(argv[3]);
+    sycl::range<3> globalSize(dim1, dim2, dim3);
+    sycl::range<3> localSize(1, 1, 1);
+
+    sycl::queue queue;
+    sycl::device device = queue.get_device();
+    std::cout << "Running on " << device.get_info<sycl::info::device::name>()
+              << "\n";
+
+    sycl::id<3> nd_limit =
+        gpu.get_info<sycl::khr::info::device::max_num_work_groups<3>>();
+    std::cout << "Max number groups for ND-Range: max_0: " << nd_limit[0]
+              << " max_1: " << nd_limit[1] << " max_2: " << nd_limit[2]
+              << std::endl;
+
+
+    const auto nb_wg_2 = globalSize[2]/localSize[2];
+    const auto nb_wg_1 = globalSize[1]/localSize[1];
+    const auto nb_wg_0 = globalSize[0]/localSize[0];
+
+    // Should aways be satisfied at kernel submission
+    // user's responsibility to check
+    assert(nb_wg_0 <= nd_limit[2]
+        && nb_wg_1 <= nd_limit[1]
+        && nb_wg_2 <= nd_limit[0]);
+
+    // If the assertion if satisfied, the implementation guarantees
+    // the execution of the kernel
+    queue.parallel_for(
+        sycl::nd_range{globalSize, localSize},
+        [=](sycl::id<3> idx) { /*Kernel*/ }).wait();
+
+    return 0;
+}
+
+----
