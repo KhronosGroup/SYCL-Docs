@@ -12969,7 +12969,9 @@ template <typename... EventTN> void wait_for(EventTN... events) const
 
 
 [[hitem-class]]
-==== [code]#h_item# class
+==== [code]#h_item# class (deprecated)
+
+The [code]#h_item# class is deprecated in SYCL 2020.
 
 [code]#h_item<int Dimensions># identifies an instance of a
 [code]#group::parallel_for_work_item# function object executing at each point in
@@ -13334,7 +13336,8 @@ a@
 template <typename WorkItemFunctionT>
 void parallel_for_work_item(const WorkItemFunctionT& func) const
 ----
-   a@ Launch the work-items for this work-group.
+   a@ Deprecated in SYCL 2020.
+      Launch the work-items for this work-group.
 
 [code]#func# is a function object type with a public member function
 [code]#void F::operator()(h_item<Dimensions>)#
@@ -13357,7 +13360,8 @@ template <typename WorkItemFunctionT>
 void parallel_for_work_item(range<Dimensions> logicalRange,
                             const WorkItemFunctionT& func) const
 ----
-   a@ Launch the work-items for this work-group using a logical local range.
+   a@ Deprecated in SYCL 2020.
+      Launch the work-items for this work-group using a logical local range.
       The function object [code]#func# is executed as if the kernel were
       invoked with [code]#logicalRange# as the local range. This new local
       range is emulated and may not map one-to-one with the physical range.
@@ -14517,7 +14521,8 @@ template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
 void parallel_for_work_group(range<Dimensions> numWorkGroups,
                              const WorkgroupFunctionType& kernelFunc)
 ----
-   a@ Defines and invokes a hierarchical kernel as a lambda expression
+   a@ Deprecated in SYCL 2020.
+      Defines and invokes a hierarchical kernel as a lambda expression
       or a named function object type,
       encoding the body of each work-group to launch. Generic kernel
       functions are permitted, in that case the argument type is a [code]#group#. May
@@ -14538,7 +14543,8 @@ void parallel_for_work_group(range<Dimensions> numWorkGroups,
                              range<Dimensions> workGroupSize,
                              const WorkgroupFunctionType& kernelFunc)
 ----
-   a@ Defines and invokes a hierarchical kernel as a lambda expression
+   a@ Deprecated in SYCL 2020.
+      Defines and invokes a hierarchical kernel as a lambda expression
       or a named function object type,
       encoding the body of each work-group to launch. Generic kernel
       functions are permitted, in that case the argument type is a [code]#group#.
@@ -14854,7 +14860,10 @@ include::{code_dir}/parallelForWithKernelHandler.cpp[lines=4..-1]
 
 
 [[sec:parallel-for-hierarchical]]
-===== Parallel for hierarchical invoke
+===== Parallel for hierarchical invoke (deprecated)
+
+The behavior in this section and the [code]#private_memory# class are deprecated
+in SYCL 2020.
 
 The hierarchical parallel kernel execution interface provides the same
 functionality as is available from the <<nd-range>> interface, but exposed
