@@ -11965,6 +11965,9 @@ It can be constructed from integers.
 The SYCL [code]#range# class template provides the common by-value semantics
 (see <<sec:byval-semantics>>).
 
+Every instantiation of the SYCL [code]#range# class template is a trivially
+copyable type.
+
 A synopsis of the SYCL [code]#range# class is provided below.
 The constructors, member functions and non-member functions of the SYCL
 [code]#range# class are listed in <<table.constructors.range>>,
@@ -12212,6 +12215,9 @@ which the kernel is to be executed, and the range of each work group.
 The SYCL [code]#nd_range# class template provides the common by-value semantics
 (see <<sec:byval-semantics>>).
 
+Every instantiation of the SYCL [code]#nd_range# class template is a trivially
+copyable type.
+
 A synopsis of the SYCL [code]#nd_range# class is provided below.
 The constructors and member functions of the SYCL [code]#nd_range# class are
 listed in <<table.constructors.ndrange>> and <<table.members.ndrange>>
@@ -12295,6 +12301,9 @@ as a [code]#size_t#.
 
 The SYCL [code]#id# class template provides the common by-value semantics (see
 <<sec:byval-semantics>>).
+
+Every instantiation of the SYCL [code]#id# class template is a trivially
+copyable type.
 
 A synopsis of the SYCL [code]#id# class is provided below.
 The constructors, member functions and non-member functions of the SYCL
@@ -17901,6 +17910,9 @@ The element type parameter, [code]#DataT#, must be the cv-unqualified version of
 one of the following: one of the built-in scalar data types listed in
 <<subsec:scalartypes>>, [code]#half#, or [code]#sycl::byte#.
 
+Every instantiation of the SYCL [code]#vec# class template is a trivially
+copyable type.
+
 The SYCL [code]#vec# class template provides interoperability with the
 underlying vector type defined by [code]#vector_t# which is available only when
 compiled for the device.
@@ -19557,6 +19569,9 @@ The number of elements parameter, [code]#NumElements#, is a positive value of
 the [code]#std::size_t# type.
 The element type parameter, [code]#DataT#, must be a _numeric type_ as it is
 defined by {cpp} standard.
+
+If [code]#DataT# is a trivially copyable type, then [code]#marray<DataT,
+NumElements># is a trivially copyable type.
 
 An instance of the [code]#marray# class template can also be implicitly
 converted to an instance of the data type when the number of elements is
