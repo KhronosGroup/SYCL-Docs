@@ -8,9 +8,10 @@ class T {
 
       public
       :
-      // If any of the following five special member functions are not
-      // public, inline or defaulted, then all five of them should be
-      // explicitly declared (see rule of five).
+      // If any of the following five special member functions are declared,
+      // then all five of them should be explicitly declared (see rule of
+      // five).
+      //
       // Otherwise, none of them should be explicitly declared
       // (see rule of zero).
 
