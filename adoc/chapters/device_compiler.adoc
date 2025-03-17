@@ -549,7 +549,8 @@ reqd_work_group_size(dim0, dim1, dim2)
       size.  The number of arguments must match the dimensionality of the
       work-group used to invoke the kernel, and the order of the arguments
       matches the order of the dimension extents to the [code]#range#
-      constructor.  Each argument must be an integral constant expression.
+      constructor.  Each argument must be an integral constant expression that
+      is representable by [code]#size_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
@@ -575,8 +576,8 @@ work_group_size_hint(dim0, dim1, dim2)
       must match the dimensionality of the work-group used to invoke the
       kernel, and the order of the arguments matches the order of the dimension
       extents to the [code]#range# constructor.  Each argument must be an
-      integral constant expression.  The effect of this attribute, if any, is
-      implementation-defined.
+      integral constant expression that is representable by [code]#size_t#.
+      The effect of this attribute, if any, is implementation-defined.
 
 a@
 [source]
@@ -597,7 +598,7 @@ reqd_sub_group_size(size)
 ----
    a@ Indicates that the kernel must be compiled and executed with the specified
       sub-group size. The argument to the attribute must be an integral constant
-      expression.
+      expression that is representable by [code]#uint32_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
