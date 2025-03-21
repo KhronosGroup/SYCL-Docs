@@ -18031,6 +18031,21 @@ to allow standard conversion sequence for implicit conversion.
 a@
 [source]
 ----
+template<typename T>
+explicit operator T() const
+----
+a@ _Constraints:_
+
+* [code]#NumElements# is equal to 1, and
+* [code]#DataT# can be explicitly converted to [code]#T# via
+  [code]#static_cast<T>#, and
+* [code]#T# is not [code]#DataT#.
+
+Returns the value of the vector's element converted to [code]#T#.
+
+a@
+[source]
+----
 static constexpr size_t size() noexcept
 ----
    a@ Returns the number of elements of this SYCL [code]#vec#.
@@ -18883,6 +18898,10 @@ operator vector_t() const
 #endif
 
 operator DataT() const
+
+template<typename T>
+explicit operator T() const
+
 static constexpr size_t byte_size() noexcept
 static constexpr size_t size() noexcept
 
