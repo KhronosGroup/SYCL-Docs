@@ -43,7 +43,11 @@ template <typename DataT, int NumElements> class vec {
 
   vec();
 
+  // Available only when: NumElements > 1
   explicit constexpr vec(const DataT& arg);
+
+  // Available only when: NumElements == 1
+  constexpr vec(const DataT& arg);
 
   template <typename... ArgTN> constexpr vec(const ArgTN&... args);
 
