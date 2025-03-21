@@ -21821,7 +21821,7 @@ reported by [code]#Group::fence_scope#).
 SYCL provides an algorithms library based on the functions described in Section
 28 of the {cpp17} specification.
 The first argument to each function is a <<group>>, and data ranges can be
-described using pointers, iterators or instances of the [code]#multi_ptr# class.
+described using pointers or instances of the [code]#multi_ptr# class.
 The functions defined in this section are free functions available in the
 [code]#sycl# namespace.
 
@@ -21842,8 +21842,9 @@ Unless the description of a function says otherwise, how the elements of a range
 are processed by the work-items in a group is undefined.
 
 SYCL provides separate functions for algorithms which use the work-items in a
-group to execute an operation over a range of iterators and algorithms which are
-applied to data held directly by the work-items in a group.
+group to execute an operation over a range (specified by a start pointer and an
+end pointer) and algorithms which are applied to data held directly by the
+work-items in a group.
 An example of the usage of these functions is given below:
 
 [source,,linenums]
@@ -21888,7 +21889,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ true if [code]#pred# returns true when applied to the result of
-dereferencing any iterator in the range [code]#[first, last)#.
+dereferencing any pointer in the range [code]#[first, last)#.
 --
 
   . _Constraints:_ Available only if
@@ -21948,7 +21949,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ true if [code]#pred# returns true when applied to the result of
-dereferencing all iterators in the range [code]#[first, last)#.
+dereferencing all pointers in the range [code]#[first, last)#.
 --
 
   . _Constraints:_ Available only if
@@ -22008,7 +22009,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ true if [code]#pred# returns false when applied to the result of
-dereferencing all iterators in the range [code]#[first, last)#.
+dereferencing all pointers in the range [code]#[first, last)#.
 --
 
   . _Constraints:_ Available only if
@@ -22214,7 +22215,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ The result of combining the values resulting from dereferencing all
-iterators in the range [code]#[first, last)# using the operator
+pointers in the range [code]#[first, last)# using the operator
 [code]#binary_op#, where the values are combined according to the generalized
 sum defined in standard {cpp}.
 --
@@ -22241,7 +22242,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ The result of combining the values resulting from dereferencing all
-iterators in the range [code]#[first, last)# and the initial value [code]#init#
+pointers in the range [code]#[first, last)# and the initial value [code]#init#
 using the operator [code]#binary_op#, where the values are combined according to
 the generalized sum defined in standard {cpp}.
 --
