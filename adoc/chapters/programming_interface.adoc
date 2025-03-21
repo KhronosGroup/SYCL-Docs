@@ -17945,16 +17945,38 @@ a@
 ----
 explicit constexpr vec(const DataT& arg)
 ----
-   a@ Construct a vector of element type [code]#DataT# and
-      [code]#NumElements# dimensions by setting each value to [code]#arg# by
-      assignment.
+a@ _Constraints:_ [code]#NumElements# is greater than 1.
+
+Constructs a [code]#vec# object by assigning each element to [code]#arg#.
+
+a@
+[source]
+----
+constexpr vec(const DataT& arg)
+----
+a@ _Constraints:_ [code]#NumElements# is equal to 1.
+
+Constructs a 1-element [code]#vec# object by assigning the element to
+[code]#arg#.
 
 a@
 [source]
 ----
 template <typename... ArgTN> constexpr vec(const ArgTN&... args)
 ----
-   a@ Construct a SYCL [code]#vec# instance from any combination of scalar and SYCL [code]#vec# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#NumElements# of this [code]#vec# specialization.
+a@ _Constraints:_
+
+* The total number of elements from all parameters is greater than 1 and sums to
+[code]#NumElements#, and
+
+* Each type [code]#ArgTN# is one of the following:
+** A type that is implicitly convertible to [code]#DataT#, or
+** A [code]#vec# type whose element type is [code]#DataT#, or
+** A [code]#+__writeable_swizzle__+# type whose element type is [code]#DataT#, or
+** A [code]#+__const_swizzle__+# type whose element type is [code]#DataT#.
+
+Constructs a [code]#vec# object from a combination of scalar and vector
+parameters.
 
 a@
 [source]
