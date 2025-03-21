@@ -4155,13 +4155,10 @@ void wait_and_throw()
 _Effects:_ Blocks the calling thread until all commands previously submitted to
 this queue have completed.
 Synchronous errors are reported through SYCL exceptions.
-Any unconsumed <<async-error,asynchronous errors>> are passed to the
-<<async-handler>> associated with the queue or to the <<async-handler>>
-associated with the queue's context.
-If no user defined asynchronous error handler is associated with the queue or
-its context, then an implementation-defined default <<async-handler>> is called
-to handle any errors, as described in <<subsubsec:exception.nohandler>>.
 
+At least all unconsumed <<async-error,asynchronous errors>> held by this queue
+(or its associated context) are passed to the appropriate <<async-handler>> as
+described in <<subsubsec:async.handler.priorities>>.
 '''
 
 .[apidef]#queue::throw_asynchronous#
