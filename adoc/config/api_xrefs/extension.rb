@@ -70,16 +70,16 @@ class AddApiXrefs < Extensions::Postprocessor
       api_id_array = []
       if document.attr? 'api-xrefs'
         (document.attr 'api-xrefs').scan(/([^=\s]+)=([^=\s]+)/) do |api, id|
-          if not all_ids.key?(id)
-            logger.error "Id '#{id}' from api-xrefs is not defined"
-            next
-          end
           if not /^[\w:]+$/.match?(api)
             logger.error "API '#{api}' from api-xrefs contains invalid characters"
             next
           end
           if not /^[\w:-]+$/.match?(id)
             logger.error "Id '#{id}' from api-xrefs contains invalid characters"
+            next
+          end
+          if not all_ids.key?(id)
+            logger.error "Id '#{id}' from api-xrefs is not defined"
             next
           end
           api_id_array.push([api, id])
