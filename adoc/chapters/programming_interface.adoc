@@ -17895,18 +17895,10 @@ The element type parameter, [code]#DataT#, must be the cv-unqualified version of
 one of the following: one of the built-in scalar data types listed in
 <<subsec:scalartypes>>, [code]#half#, or [code]#sycl::byte#.
 
-The SYCL [code]#vec# class template provides interoperability with the
-underlying vector type defined by [code]#vector_t# which is available only when
-compiled for the device.
-The SYCL [code]#vec# class can be constructed from an instance of
-[code]#vector_t# and can implicitly convert to an instance of [code]#vector_t#
-in order to support interoperability with native <<backend>> functions from a
-SYCL kernel function.
-
-An instance of the SYCL [code]#vec# class template can also be implicitly
-converted to an instance of the data type when the number of elements is
-[code]#1# in order to allow single element vectors and scalars to be convertible
-with each other.
+An instance of the SYCL [code]#vec# class template can be implicitly converted
+to an instance of the data type when the number of elements is [code]#1# in
+order to allow single element vectors and scalars to be convertible with each
+other.
 
 ==== Vec interface
 
@@ -17980,15 +17972,6 @@ constexpr vec(const vec<DataT, NumElements>& rhs)
 ----
    a@ Construct a vector of element type [code]#DataT# and number of elements [code]#NumElements# by copy from another similar vector.
 
-a@
-[source]
-----
-vec(vector_t nativeVector)
-----
-   a@ Available only when: compiled for the device.
-
-Constructs a SYCL [code]#vec# instance from an instance of the underlying backend-native vector type defined by [code]#vector_t#.
-
 |====
 
 
@@ -17998,16 +17981,6 @@ Constructs a SYCL [code]#vec# instance from an instance of the underlying backen
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Member function @ Description
-a@
-[source]
-----
-operator vector_t() const
-----
-   a@ Available only when: compiled for the device.
-
-Converts this SYCL [code]#vec# instance to the underlying backend-native vector type
-defined by [code]#vector_t#.
-
 a@
 [source]
 ----
@@ -18830,22 +18803,6 @@ using value_type = DataT
 Each of these type aliases tells the type of an element in the underlying
 [code]#vec#.
 
-'''
-
-[frame=all,grid=none,separator="@"]
-|====
-a@
-[source]
-----
-#ifdef __SYCL_DEVICE_ONLY__
-using vector_t = /*unspecified*/
-#endif
-----
-|====
-This type alias is available only in device code.
-The [code]#vector_t# type represents a native vector type of [code]#NumElements#
-elements where each element's type is [code]#DataT#.
-
 [[sec:constructors.swizzled-vec]]
 ===== Constructors for the swizzled vector class templates
 
@@ -18888,10 +18845,6 @@ The destructors have no visible effect.
 a@
 [source]
 ----
-#ifdef __SYCL_DEVICE_ONLY__
-operator vector_t() const
-#endif
-
 operator DataT() const
 
 template<typename T>
