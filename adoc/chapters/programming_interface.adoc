@@ -21584,142 +21584,273 @@ requirements for both host and device.
 
 SYCL provides a number of function objects in the [code]#sycl# namespace on host
 and device.
-All function objects obey {cpp} conversion and promotion rules.
-Each function object is additionally specialized for [code]#void# as a
-_transparent_ function object that deduces its parameter types and return type.
 
-[source,,linenums]
+==== [code]#plus# class template
+
+[source,role=synopsis]
 ----
-include::{header_dir}/functional.h[lines=4..-1]
+include::{header_dir}/functional/plus.h[lines=4..-1]
 ----
 
-[[table.function.objects.plus]]
-.Member functions for the [code]#plus# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
-----
-T operator()(const T& x, const T& y) const
-----
-   a@ Returns the sum of its arguments, equivalent to [code]#pass:[x + y]#.
+'''
 
-|====
-
-[[table.function.objects.multiplies]]
-.Member functions for the [code]#multiplies# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apititle]#call operator#
+[source,role=synopsis,id=api:plus-call-operator]
 ----
-T operator()(const T& x, const T& y) const
+T operator()(const T& x, const T& y) const;
 ----
-   a@ Returns the product of its arguments, equivalent to [code]#x * y#.
 
-|====
+_Returns_: [code]#pass:[x + y]#.
 
-[[table.function.objects.bit-and]]
-.Member functions for the [code]#bit_and# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:plus-transparent-call-operator]
 ----
-T operator()(const T& x, const T& y) const
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) + std::forward<U>(u));
 ----
-   a@ Returns the bitwise AND of its arguments, equivalent to [code]#x & y#.
 
-|====
+// Strange formatting here because + requires pass, but pass breaks <T>/<U>.
+_Returns_: [code]#std::forward<T>(t)# [code]#pass:[+]#
+[code]#std::forward<U>(u)#.
 
-[[table.function.objects.bit-or]]
-.Member functions for the [code]#bit_or# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+==== [code]#multiplies# class template
+
+[source,role=synopsis]
 ----
-T operator()(const T& x, const T& y) const
+include::{header_dir}/functional/multiplies.h[lines=4..-1]
 ----
-   a@ Returns the bitwise OR of its arguments, equivalent to [code]#x | y#.
 
-|====
+'''
 
-[[table.function.objects.bit-xor]]
-.Member functions for the [code]#bit_xor# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apititle]#call operator#
+[source,role=synopsis,id=api:multiplies-call-operator]
 ----
-T operator()(const T& x, const T& y) const
+T operator()(const T& x, const T& y) const;
 ----
-   a@ Returns the bitwise XOR of its arguments, equivalent to [code]#x ^ y#.
 
-|====
+_Returns_: [code]#x * y#.
 
-[[table.function.objects.logical-and]]
-.Member functions for the [code]#logical_and# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:multiplies-transparent-call-operator]
 ----
-T operator()(const T& x, const T& y) const
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) * std::forward<U>(u));
 ----
-   a@ Returns the logical AND of its arguments, equivalent to [code]#x && y#.
 
-|====
+_Returns_: [code]#std::forward<T>(t) * std::forward<U>(u)#.
 
-[[table.function.objects.logical-or]]
-.Member functions for the [code]#logical_or# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+==== [code]#bit_and# class template
+
+[source,role=synopsis]
 ----
-T operator()(const T& x, const T& y) const
+include::{header_dir}/functional/bit_and.h[lines=4..-1]
 ----
-   a@ Returns the logical OR of its arguments, equivalent to [code]#x || y#.
 
-|====
+'''
 
-[[table.function.objects.minimum]]
-.Member functions for the [code]#minimum# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apititle]#call operator#
+[source,role=synopsis,id=api:bit_and-call-operator]
 ----
-T operator()(const T& x, const T& y) const
+T operator()(const T& x, const T& y) const;
 ----
-   a@ Returns the smaller value. Returns the first argument when the arguments
-      are equivalent.
 
-|====
+_Returns_: [code]#x & y#.
 
-[[table.function.objects.maximum]]
-.Member functions for the [code]#maximum# function object
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:bit_and-transparent-call-operator]
 ----
-T operator()(const T& x, const T& y) const
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) & std::forward<U>(u));
 ----
-   a@ Returns the larger value. Returns the first argument when the arguments
-      are equivalent.
 
-|====
+_Returns_: [code]#std::forward<T>(t) & std::forward<U>(u)#.
+
+==== [code]#bit_or# class template
+
+[source,role=synopsis]
+----
+include::{header_dir}/functional/bit_or.h[lines=4..-1]
+----
+
+'''
+
+.[apititle]#call operator#
+[source,role=synopsis,id=api:bit_or-call-operator]
+----
+T operator()(const T& x, const T& y) const;
+----
+
+_Returns_: [code]#x | y#.
+
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:bit_or-transparent-call-operator]
+----
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) | std::forward<U>(u));
+----
+
+_Returns_: [code]#std::forward<T>(t) | std::forward<U>(u)#.
+
+==== [code]#bit_xor# class template
+
+[source,role=synopsis]
+----
+include::{header_dir}/functional/bit_xor.h[lines=4..-1]
+----
+
+'''
+
+.[apititle]#call operator#
+[source,role=synopsis,id=api:bit_xor-call-operator]
+----
+T operator()(const T& x, const T& y) const;
+----
+
+_Returns_: [code]#x ^ y#.
+
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:bit_xor-transparent-call-operator]
+----
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) ^ std::forward<U>(u));
+----
+
+_Returns_: [code]#std::forward<T>(t) ^ std::forward<U>(u)#.
+
+==== [code]#logical_and# class template
+
+[source,role=synopsis]
+----
+include::{header_dir}/functional/logical_and.h[lines=4..-1]
+----
+
+'''
+
+.[apititle]#call operator#
+[source,role=synopsis,id=api:logical_and-call-operator]
+----
+bool operator()(const T& x, const T& y) const;
+----
+
+_Returns_: [code]#x && y#.
+
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:logical_and-transparent-call-operator]
+----
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) && std::forward<U>(u));
+----
+
+_Returns_: [code]#std::forward<T>(t) && std::forward<U>(u)#.
+
+==== [code]#logical_or# class template
+
+[source,role=synopsis]
+----
+include::{header_dir}/functional/logical_or.h[lines=4..-1]
+----
+
+'''
+
+.[apititle]#call operator#
+[source,role=synopsis,id=api:logical_or-call-operator]
+----
+bool operator()(const T& x, const T& y) const;
+----
+
+_Returns_: [code]#x || y#.
+
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:logical_or-transparent-call-operator]
+----
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+  -> decltype(std::forward<T>(t) || std::forward<U>(u));
+----
+
+_Returns_: [code]#std::forward<T>(t) || std::forward<U>(u)#.
+
+==== [code]#minimum# class template
+
+[source,role=synopsis]
+----
+include::{header_dir}/functional/minimum.h[lines=4..-1]
+----
+
+'''
+
+.[apititle]#call operator#
+[source,role=synopsis,id=api:minimum-call-operator]
+----
+T operator()(const T& x, const T& y) const;
+----
+
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The smaller value.
+Returns the first value when the arguments are equivalent.
+
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:minimum-transparent-call-operator]
+----
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+-> decltype(std::forward<U>(u) < std::forward<T>(t) ? std::forward<U>(u) : std::forward<T>(t));
+----
+
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The smaller value.
+Returns the first value when the arguments are equivalent.
+
+==== [code]#maximum# class template
+
+[source,role=synopsis]
+----
+include::{header_dir}/functional/maximum.h[lines=4..-1]
+----
+
+'''
+
+.[apititle]#call operator#
+[source,role=synopsis,id=api:maximum-call-operator]
+----
+T operator()(const T& x, const T& y) const;
+----
+
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The larger value.
+Returns the first value when the arguments are equivalent.
+
+'''
+
+.[apititle]#transparent call operator#
+[source,role=synopsis,id=api:maximum-transparent-call-operator]
+----
+template <class T, class U> constexpr auto operator()(T&& t, U&& u) const
+-> decltype(std::forward<T>(t) < std::forward<U>(u) ? std::forward<U>(u) : std::forward<T>(t));
+----
+
+_Preconditions_: [code]#T# meets the Cpp17LessThanComparable requirements.
+
+_Returns_: The larger value.
+Returns the first value when the arguments are equivalent.
+
 
 [[sec:group-functions]]
 === Group functions
