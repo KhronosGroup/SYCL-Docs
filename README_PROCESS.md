@@ -284,3 +284,28 @@ $ sudo docker pull khronosgroup/docker-images:asciidoctor-spec
 And this will update your "alias" image with the latest version.
 
 [5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/595>
+
+
+## Update the copyright date
+
+At the beginning of each calendar year, we update the copyright dates in the
+source files and also the copyright date of the published specification.
+These can all be updated by running the following script from the root of the
+repository:
+
+```
+$ bash ./adoc/scripts/update-copyright.sh
+```
+
+The script only updates files that have a copyright notice that matches a
+certain pattern, and it prints the file names of any suspect notices to stdout.
+If any file names are printed, examine them and update them manually.
+(See the comments at the top of the script for details.)
+
+Once you have finished, create a PR like [this one][6].
+
+It's a good idea to manually examine the generated HTML and PDF specifications
+afterwards to make sure the copyright date (at the start of the copyright
+notice) is as you expect.
+
+[6]: <https://github.com/KhronosGroup/SYCL-Docs/pull/786>
