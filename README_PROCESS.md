@@ -102,16 +102,6 @@ Although this process is a bit more verbose, it provides several advantages:
   create release notes for the next update revision of the specification.
   If we had instead merged the commit manually, we would lose this ability.
 
-  **TODO:** It appears that the GitHub automatically-generated release notes do
-  not show the correct author for these cherry-picked PRs.
-  This author is displayed as the author of the person who creates the cherry
-  picked PR, which is normally the specification editor.
-  I tried setting the "author" and "committer" fields of the git commit before
-  it is pushed to the PR, but this doesn't help.
-  I think GitHub determines the author from the owner of the PR (not from any
-  field in the commit), and GitHub does not provide a way to change the owner of
-  a PR.
-
 After cherry picking PRs from "main" to "sycl-xxxx", it's useful to compare the
 two branches and check that there are no unexpected differences:
 
@@ -122,12 +112,8 @@ $ git diff sycl-xxxx main
 
 ## Publishing an update revision
 
-**TODO:** These are my notes from publishing SYCL 2020 revision 9.
-We should check this process again when publishing revision 10 to make sure they
-are accurate.
-
-The working group normally accumulates a number of "clarification" PRs in this
-GitHub repository before publishing them as an update revision of the current
+The working group normally accumulates a number of "clarification" PRs in the
+SYCL-Docs repository before publishing them as an update revision of the current
 specification.
 When the working group decides it is time to publish an update revision, we
 follow this process.
@@ -143,9 +129,7 @@ major version as `<current>`.
   "spec-outputs" build artifact.
   This ZIP file contains the specification that is ready to publish.
 
-* Fork the following repository and create a PR:
-
-  https://github.com/KhronosGroup/SYCL-Registry
+* Fork the [SYCL-Registry][2] repository and create a PR:
 
   * Unzip "spec-outputs.zip" into the directory "specs/sycl-xxxx".
     This should overwrite "sycl-xxxx.html" and "sycl-xxxx.pdf" with new
@@ -153,46 +137,94 @@ major version as `<current>`.
   * Edit "index.php" to manually update the revision number and release date.
   * Do not merge this PR yet.
 
-  You can use [this PR][2] as a model.
+  You can use [this PR][3] as a model.
 
-* Create a draft release at our GitHub [Releases][3] area:
+* Create a draft release at our GitHub [Releases][4] area:
 
-  * Choose a release title of the form "Release N" (where N is the revision
+  * Choose a release title of the form "Revision N" (where N is the revision
     number).
   * Under "Choose a tag" enter a new tag name of the form "SYCL-xxxx/final-revN"
     and click "Create new tag on publish".
   * Make sure the "Target" drop-down selects the `<current>` branch.
-  * Click "Generate release notes" to automatically generate release notes for
-    this release.
+  * Create the release notes following the instructions below.
   * Upload the "spec-outputs.zip" file and attach it to the release.
   * Click "Save draft" to save the release as a draft.
 
-* Create a PR to the `<current>` branch of our GitHub repository with the
-  following:
+* Create a PR to the "main" branch of the SYCL-Docs repository:
 
   * Edit "README.md" to change the release number in the badges.
-  * Edit "sycl\_version.txt", changing `SYCLREVISION` to the next revision
-    number.
-    This will be the *next* revision number after the one you are publishing
-    now.
   * Do not merge this PR yet.
 
-  You can use [this PR][4] as a model.
+  Note that this PR is created against the "main" branch even if you are making
+  a release from the "sycl-xxxx" branch.
+  You can use [this PR][5] as a model.
 
 * When you are sure that you want to publish this release, do the following in
   quick succession and in this order:
 
-  * Merge the PR to https://github.com/KhronosGroup/SYCL-Registry
-  * Publish the draft release you created above
-  * Merge the PR to the `<current>` branch
+  * Merge the PR to [SYCL-Registry][2].
+  * Publish the draft release you created above.
+  * Merge the PR to the "main" branch of SYCL-Docs.
 
   Note that the draft release must be published before Merging the second PR,
   otherwise the release tag will be created at the wrong commit.
 
+* After publishing, you should also prepare for the next revision of the
+  specification by making one more PR to the SYCL-Docs repository.
+  This PR should be made to the `<current>` branch:
+
+  * Edit "sycl\_version.txt", changing `SYCLREVISION` to the next revision
+    number.
+
+  You can use [this PR][6] as a model.
+
 [1]: <https://github.com/KhronosGroup/SYCL-Docs/actions>
-[2]: <https://github.com/KhronosGroup/SYCL-Registry/pull/26>
-[3]: <https://github.com/KhronosGroup/SYCL-Docs/releases>
-[4]: <https://github.com/KhronosGroup/SYCL-Docs/pull/605>
+[2]: <https://github.com/KhronosGroup/SYCL-Registry>
+[3]: <https://github.com/KhronosGroup/SYCL-Registry/pull/27>
+[4]: <https://github.com/KhronosGroup/SYCL-Docs/releases>
+[5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/793>
+[6]: <https://github.com/KhronosGroup/SYCL-Docs/pull/795>
+
+
+## Generating release notes for an update release
+
+The process for generating the release notes is different depending on whether
+you are releasing from the "main" branch or from the "sycl-xxxx" branch.
+
+If you are releasing from the "main" branch, you can simply click the button
+"Generate release notes" when drafting the GitHub release.
+This will generate the release notes automatically.
+
+If you are releasing from the "sycl-xxxx" branch, you can start by clicking the
+"Generate release notes" button, but the author information needs to be updated
+manually.
+The problem occurs because of the way we cherry pick PRs from the "main" branch
+into the "sycl-xxxx" branch.
+When GitHub automatically generates the release notes, it appears to get the
+author information from the owner of the cherry picked PR.
+Normally, the specification editor creates the cherry picked PRs, so GitHub
+lists this person in the release notes rather than the owner of the original
+PR.
+
+We have not found a way to make cherry picks such that GitHub will automatically
+show the correct author.
+We have tried setting the "author" and "committer" fields of the git commit
+before pushing it to the PR, but this doesn't help.
+It appears that GitHub determines the author from the owner of the PR (not from
+any field in the PR's commits), and GitHub does not provide any way to change
+the owner of a PR.
+
+Instead, we manually edit the release notes after they are automatically
+generated.
+There are two ways to do this.
+One way is to open a second browser tab, create a temporary draft release from
+the "main" branch, and click the "Generate release notes" button in this other
+draft.
+You can then compare entries in the two versions of the release notes, copying
+the author information from the temporary release to the real one.
+The other way to fix the author information is to click on each PR number in the
+release notes, follow the link from the PR description "Cherry pick #NNN from
+main", and get the author from the "#NNN" PR.
 
 
 ## Creating a KHR ratification package
@@ -236,7 +268,7 @@ published whenever the working group decides to publish an update revision.
 Our CI process builds the HTML and PDF versions of the specification from
 Asciidoc sources using a Docker image that contains all of the build tools.
 This Docker image is maintained and published by the Khronos organization.
-We choose to reference a specific version of this Docker imagae in our CI
+We choose to reference a specific version of this Docker image in our CI
 configuration, so we can precisely track the tooling version that is used to
 build our specification.
 However, this means that we need to manually update that version whenever a new
@@ -250,7 +282,7 @@ image is published on Docker Hub.
 We only care about changes to Docker images with tags named
 `asciidoctor-spec.xxxx`, so you can ignore notifications for other tags.
 
-When a new Docker image is published, create a PR like [this one][5] using the
+When a new Docker image is published, create a PR like [this one][7] using the
 Docker SHA labeled as "Manifest digest".
 
 Before merging the PR, it's best to validate that the new tools don't cause any
@@ -283,7 +315,7 @@ $ sudo docker pull khronosgroup/docker-images:asciidoctor-spec
 
 And this will update your "alias" image with the latest version.
 
-[5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/595>
+[7]: <https://github.com/KhronosGroup/SYCL-Docs/pull/595>
 
 
 ## Update the copyright date
@@ -302,10 +334,10 @@ certain pattern, and it prints the file names of any suspect notices to stdout.
 If any file names are printed, examine them and update them manually.
 (See the comments at the top of the script for details.)
 
-Once you have finished, create a PR like [this one][6].
+Once you have finished, create a PR like [this one][8].
 
 It's a good idea to manually examine the generated HTML and PDF specifications
 afterwards to make sure the copyright date (at the start of the copyright
 notice) is as you expect.
 
-[6]: <https://github.com/KhronosGroup/SYCL-Docs/pull/786>
+[8]: <https://github.com/KhronosGroup/SYCL-Docs/pull/786>
