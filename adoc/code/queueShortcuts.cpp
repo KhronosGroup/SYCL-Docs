@@ -7,7 +7,7 @@ queue myQueue;
 auto usmPtr = malloc_device<int>(1024, myQueue);  // USM pointer
 
 int* data = /* pointer to some data */;
-buffer<int, 1> buf{data, range<1>{1024}};
+buffer buf{data, {1024}};
 accessor acc{buf};  // Placeholder accessor
 
 // Queue shortcut for a kernel invocation
