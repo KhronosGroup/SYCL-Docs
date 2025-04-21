@@ -1,0 +1,41 @@
+= sycl_khr_command_graph
+
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_COMMAND_GRAPH# to one of the values defined in the
+table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+== Usage example
+
+[source,role=synopsis]
+----
+#include <iostream>
+#include <sycl/sycl.hpp>
+
+int main() {
+  // Create a queue to work on.
+  queue myQueue;
+  
+  khr::command_graph myGraph{myQueue};
+
+  // ...
+
+  std::cout << "Good computation!" << std::endl;
+  return 0;
+}
+
+----
