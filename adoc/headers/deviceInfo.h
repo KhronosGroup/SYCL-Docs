@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -11,6 +11,8 @@ struct max_compute_units;
 struct max_work_item_dimensions;
 template <int Dimensions = 3> struct max_work_item_sizes;
 struct max_work_group_size;
+struct max_num_sub_groups;
+struct sub_group_sizes;
 struct preferred_vector_width_char;
 struct preferred_vector_width_short;
 struct preferred_vector_width_int;

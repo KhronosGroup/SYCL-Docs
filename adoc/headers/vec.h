@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -37,26 +37,24 @@ template <typename DataT, int NumElements> class vec {
   using element_type = DataT;
   using value_type = DataT;
 
-#ifdef __SYCL_DEVICE_ONLY__
-  using vector_t = __unspecified__;
-#endif
-
   vec();
 
+  // Available only when: NumElements > 1
   explicit constexpr vec(const DataT& arg);
+
+  // Available only when: NumElements == 1
+  constexpr vec(const DataT& arg);
 
   template <typename... ArgTN> constexpr vec(const ArgTN&... args);
 
   constexpr vec(const vec<DataT, NumElements>& rhs);
 
-#ifdef __SYCL_DEVICE_ONLY__
-  vec(vector_t nativeVector);
-
-  operator vector_t() const;
-#endif
-
   // Available only when: NumElements == 1
   operator DataT() const;
+
+  // Available only when: NumElements == 1 and T is explicitly convertible to DataT
+  template<typename T>
+  explicit operator T() const;
 
   static constexpr size_t byte_size() noexcept;
 

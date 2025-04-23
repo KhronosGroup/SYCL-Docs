@@ -314,11 +314,11 @@ following statements, where [code]#T# is the runtime class type:
     the last remaining host copy, in accordance with the above definition of a
     copy.
   * [code]#T# must be move constructible and move assignable in the host
-    application and within SYCL kernel functions in the case that T is a valid
-    kernel argument.
-    Any instance of T that is constructed as a move of another instance, via
-    either the move constructor or move assignment operator, must replace the
-    original instance rendering said instance invalid and must represent the
+    application and within SYCL kernel functions in the case that [code]#T# is a
+    valid kernel argument.
+    Any instance of [code]#T# that is constructed as a move of another instance,
+    via either the move constructor or move assignment operator, must replace
+    the original instance rendering said instance invalid and must represent the
     same underlying <<native-backend-object>> as the original instance where
     applicable.
   * [code]#T# must be equality comparable in the host application.
@@ -332,11 +332,11 @@ following statements, where [code]#T# is the runtime class type:
     implies [code]#b == a# and [code]#a != b# implies [code]#b != a#) and
     transitive (i.e. [code]#a == b && b == c# implies [code]#c == a#).
   * A specialization of [code]#std::hash# for [code]#T# must exist in the host
-    application that returns a unique value such that if two instances of T are
-    equal, in accordance with the above definition, then their resulting hash
-    values are also equal and subsequently if two hash values are not equal,
-    then their corresponding instances are also not equal, in accordance with
-    the above definition.
+    application that returns a unique value such that if two instances of
+    [code]#T# are equal, in accordance with the above definition, then their
+    resulting hash values are also equal and subsequently if two hash values are
+    not equal, then their corresponding instances are also not equal, in
+    accordance with the above definition.
 
 Some <<sycl-runtime>> classes will have additional behavior associated with
 copy, movement, assignment or destruction semantics.
@@ -453,15 +453,15 @@ and [code]#nd_range# must follow the following statements, where [code]#T# is
 the runtime class type:
 
   * [code]#T# must be default copy constructible and copy assignable in the host
-    application (in the case where T is available on the host) and within SYCL
-    kernel functions.
-  * [code]#T# must be default destructible in the host application (in the case
-    where T is available on the host) and within SYCL kernel functions.
-  * [code]#T# must be default move constructible and default move assignable in
-    the host application (in the case where T is available on the host) and
+    application (in the case where [code]#T# is available on the host) and
     within SYCL kernel functions.
+  * [code]#T# must be default destructible in the host application (in the case
+    where [code]#T# is available on the host) and within SYCL kernel functions.
+  * [code]#T# must be default move constructible and default move assignable in
+    the host application (in the case where [code]#T# is available on the host)
+    and within SYCL kernel functions.
   * [code]#T# must be equality comparable in the host application (in the case
-    where T is available on the host) and within SYCL kernel functions.
+    where [code]#T# is available on the host) and within SYCL kernel functions.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
     true if the value of all members are equal and non-equality between two
     instances of [code]#T# (i.e. [code]#a != b#) must be true if the value of
@@ -2109,9 +2109,6 @@ struct max_mem_alloc_size {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The maximum size of memory object allocation in bytes.
-The minimum value is max (1/4th of
-[code]#info::device::global_mem_size#,128*1024*1024) if this device is not of
-device type [api]#info::device_type::custom#.
 
 '''
 
@@ -4160,13 +4157,10 @@ void wait_and_throw()
 _Effects:_ Blocks the calling thread until all commands previously submitted to
 this queue have completed.
 Synchronous errors are reported through SYCL exceptions.
-Any unconsumed <<async-error,asynchronous errors>> are passed to the
-<<async-handler>> associated with the queue or to the <<async-handler>>
-associated with the queue's context.
-If no user defined asynchronous error handler is associated with the queue or
-its context, then an implementation-defined default <<async-handler>> is called
-to handle any errors, as described in <<subsubsec:exception.nohandler>>.
 
+At least all unconsumed <<async-error,asynchronous errors>> held by this queue
+(or its associated context) are passed to the appropriate <<async-handler>> as
+described in <<subsubsec:async.handler.priorities>>.
 '''
 
 .[apidef]#queue::throw_asynchronous#
@@ -11792,35 +11786,40 @@ necessary [code]#device#.
 
 ==== Memory deallocation functions
 
-[[table.usm.free]]
-.USM Deallocation Functions
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Function @ Description
-a@
-[source]
+.[apidef]#free#
+[source,role=synopsis,id=api:free]
 ----
-void sycl::free(void* ptr, const context& syclContext)
+void free(void* ptr, const context& ctxt); (1)
+void free(void* ptr, const queue& q);      (2)
 ----
-a@ Frees an allocation.
-The memory pointed to by [code]#ptr# must have been allocated using one of the
-USM allocation routines or it must be a null pointer.
-If [code]#ptr# is not null, the [code]#syclContext# must be the same
-[code]#context# that was used to allocate the memory.
-If [code]#ptr# is null, this function has no effect.
-Otherwise, the memory is freed without waiting for <<command, commands>>
-operating on it to be completed.
-If <<command, commands>> that use this memory are in-progress or are enqueued,
-the behavior is undefined.
 
-a@
-[source]
-----
-void sycl::free(void* ptr, const queue& syclQueue)
-----
-a@ Alternate form where [code]#syclQueue# provides the [code]#context#.
+*Overload (1):*
 
-|====
+_Preconditions_:
+
+* [code]#ptr# points to memory allocated against [code]#ctxt# using one of the
+  USM allocation routines, or is a null pointer;
+
+* [code]#ptr# has not previously been deallocated; and
+
+* There are no in-progress or enqueued <<command, commands>> using the memory
+  pointed to by [code]#ptr#.
+
+_Effects_: Causes the memory pointed to by [code]#ptr# to be deallocated.
+
+{note}Whether [code]#free# is blocking or non-blocking is unspecified.
+Applications should not rely on [code]#free# for synchronization, nor assume
+that [code]#free# cannot cause deadlocks.{endnote}
+
+_Remarks_: If [code]#ptr# is null, this function has no effect.
+
+*Overload (2):*
+
+_Effects_: Equivalent to [code]#return free(ptr, q.get_context());#.
+
+{note}Although this overload accepts a [code]#queue# argument, it does not
+submit a "free" <<command>> to the device; the [code]#queue# argument is only
+used to determine the [code]#context# associated with [code]#ptr#.{endnote}
 
 === Unified shared memory pointer queries
 
@@ -17909,18 +17908,10 @@ one of the following: one of the built-in scalar data types listed in
 Every instantiation of the SYCL [code]#vec# class template is a trivially
 copyable type.
 
-The SYCL [code]#vec# class template provides interoperability with the
-underlying vector type defined by [code]#vector_t# which is available only when
-compiled for the device.
-The SYCL [code]#vec# class can be constructed from an instance of
-[code]#vector_t# and can implicitly convert to an instance of [code]#vector_t#
-in order to support interoperability with native <<backend>> functions from a
-SYCL kernel function.
-
-An instance of the SYCL [code]#vec# class template can also be implicitly
-converted to an instance of the data type when the number of elements is
-[code]#1# in order to allow single element vectors and scalars to be convertible
-with each other.
+An instance of the SYCL [code]#vec# class template can be implicitly converted
+to an instance of the data type when the number of elements is [code]#1# in
+order to allow single element vectors and scalars to be convertible with each
+other.
 
 ==== Vec interface
 
@@ -17954,16 +17945,38 @@ a@
 ----
 explicit constexpr vec(const DataT& arg)
 ----
-   a@ Construct a vector of element type [code]#DataT# and
-      [code]#NumElements# dimensions by setting each value to [code]#arg# by
-      assignment.
+a@ _Constraints:_ [code]#NumElements# is greater than 1.
+
+Constructs a [code]#vec# object by assigning each element to [code]#arg#.
+
+a@
+[source]
+----
+constexpr vec(const DataT& arg)
+----
+a@ _Constraints:_ [code]#NumElements# is equal to 1.
+
+Constructs a 1-element [code]#vec# object by assigning the element to
+[code]#arg#.
 
 a@
 [source]
 ----
 template <typename... ArgTN> constexpr vec(const ArgTN&... args)
 ----
-   a@ Construct a SYCL [code]#vec# instance from any combination of scalar and SYCL [code]#vec# parameters of the same element type, providing the total number of elements for all parameters sum to [code]#NumElements# of this [code]#vec# specialization.
+a@ _Constraints:_
+
+* The total number of elements from all parameters is greater than 1 and sums to
+[code]#NumElements#, and
+
+* Each type [code]#ArgTN# is one of the following:
+** A type that is implicitly convertible to [code]#DataT#, or
+** A [code]#vec# type whose element type is [code]#DataT#, or
+** A [code]#+__writeable_swizzle__+# type whose element type is [code]#DataT#, or
+** A [code]#+__const_swizzle__+# type whose element type is [code]#DataT#.
+
+Constructs a [code]#vec# object from a combination of scalar and vector
+parameters.
 
 a@
 [source]
@@ -17971,15 +17984,6 @@ a@
 constexpr vec(const vec<DataT, NumElements>& rhs)
 ----
    a@ Construct a vector of element type [code]#DataT# and number of elements [code]#NumElements# by copy from another similar vector.
-
-a@
-[source]
-----
-vec(vector_t nativeVector)
-----
-   a@ Available only when: compiled for the device.
-
-Constructs a SYCL [code]#vec# instance from an instance of the underlying backend-native vector type defined by [code]#vector_t#.
 
 |====
 
@@ -17990,16 +17994,6 @@ Constructs a SYCL [code]#vec# instance from an instance of the underlying backen
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Member function @ Description
-a@
-[source]
-----
-operator vector_t() const
-----
-   a@ Available only when: compiled for the device.
-
-Converts this SYCL [code]#vec# instance to the underlying backend-native vector type
-defined by [code]#vector_t#.
-
 a@
 [source]
 ----
@@ -18014,6 +18008,21 @@ The SYCL [code]#vec# instance shall be implicitly convertible to the same data t
 to which [code]#DataT# is implicitly convertible.
 Note that conversion operator shall not be templated
 to allow standard conversion sequence for implicit conversion.
+
+a@
+[source]
+----
+template<typename T>
+explicit operator T() const
+----
+a@ _Constraints:_
+
+* [code]#NumElements# is equal to 1, and
+* [code]#DataT# can be explicitly converted to [code]#T# via
+  [code]#static_cast<T>#, and
+* [code]#T# is not [code]#DataT#.
+
+Returns the value of the vector's element converted to [code]#T#.
 
 a@
 [source]
@@ -18547,7 +18556,14 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18561,7 +18577,14 @@ a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18578,7 +18601,14 @@ the same template parameters as the [code]#rhs# SYCL [code]#vec#
 with each element of the new SYCL [code]#vec# instance the result of
 an element-wise [code]#OP# logical operation between the [code]#lhs# scalar and each element of the [code]#rhs# SYCL [code]#vec#.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#&&#, [code]#||#.
 
@@ -18589,7 +18619,14 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the element type [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# element is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18603,7 +18640,14 @@ a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the [code]#DataT# parameter of [code]#RET# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# relational operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false#.  The [code]#==#, [code]#<#, [code]#>#, [code]#+<=+# and [code]#>=# operations result in [code]#false# if either the [code]#lhs# element or the [code]#rhs# is a NaN.  The [code]#!=# operation results in [code]#true# if either the [code]#lhs# element or the [code]#rhs# is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18628,16 +18672,14 @@ and [code]#>=# operations result in [code]#false# if either the
 operation results in [code]#true# if either the [code]#lhs# or the
 [code]#rhs# element is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL
-[code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL
-[code]#vec# with [code]#DataT# of type [code]#int8_t# or
-[code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a
-SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET#
-must be [code]#int16_t#. For a SYCL [code]#vec# with
-[code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or
-[code]#float# [code]#RET# must be [code]#int32_t#. For a
-SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET#
-must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 Where [code]#OP# is: [code]#==#, [code]#!=#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
 
@@ -18657,7 +18699,14 @@ vec<RET, NumElements> operator!(const vec& v)
 ----
    a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise logical NOT operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
 
-The [code]#DataT# template parameter of the constructed SYCL [code]#vec#, [code]#RET#, varies depending on the [code]#DataT# template parameter of this SYCL [code]#vec#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int8_t# or [code]#uint8_t# [code]#RET# must be [code]#int8_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int16_t#, [code]#uint16_t# or [code]#half# [code]#RET# must be [code]#int16_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int32_t#, [code]#uint32_t# or [code]#float# [code]#RET# must be [code]#int32_t#. For a SYCL [code]#vec# with [code]#DataT# of type [code]#int64_t#, [code]#uint64_t# or [code]#double# [code]#RET# must be [code]#int64_t#.
+The element type of the returned [code]#vec#, [code]#RET#, varies depending on
+the size of the [code]#DataT# template parameter of the input [code]#vec#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
+defined integer type.
 
 |====
 
@@ -18807,22 +18856,6 @@ using value_type = DataT
 Each of these type aliases tells the type of an element in the underlying
 [code]#vec#.
 
-'''
-
-[frame=all,grid=none,separator="@"]
-|====
-a@
-[source]
-----
-#ifdef __SYCL_DEVICE_ONLY__
-using vector_t = /*unspecified*/
-#endif
-----
-|====
-This type alias is available only in device code.
-The [code]#vector_t# type represents a native vector type of [code]#NumElements#
-elements where each element's type is [code]#DataT#.
-
 [[sec:constructors.swizzled-vec]]
 ===== Constructors for the swizzled vector class templates
 
@@ -18836,13 +18869,9 @@ __writeable_swizzle__(const __writeable_swizzle__&) = delete
 
 __const_swizzle__() = delete
 __const_swizzle__(const __const_swizzle__&) = delete
-
-__const_swizzle__& operator=(const __const_swizzle__&) = delete
 ----
 |====
 The default constructor and copy constructor are deleted.
-
-The copy assignment operator for [code]#+__const_swizzle__+# is deleted.
 
 ===== Destructors for the swizzled vector class templates
 
@@ -18865,11 +18894,11 @@ The destructors have no visible effect.
 a@
 [source]
 ----
-#ifdef __SYCL_DEVICE_ONLY__
-operator vector_t() const
-#endif
-
 operator DataT() const
+
+template<typename T>
+explicit operator T() const
+
 static constexpr size_t byte_size() noexcept
 static constexpr size_t size() noexcept
 
@@ -19034,6 +19063,46 @@ Functions (2) is available only in [code]#+__const_swizzle__+#.
 
 _Returns:_ A reference to the element of the underlying [code]#vec# object that
 corresponds to the position [code]#index# of the swizzle operation.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+const __writeable_swizzle__&
+operator=(const __writeable_swizzle__& rhs) const
+----
+|====
+_Availability:_ Available only in [code]#+__writeable_swizzle__+#.
+
+_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
+not contain any repeated elements.
+
+_Effects:_ Assigns elements from the right hand side
+[code]#+__writeable_swizzle__+# view to elements of the left hand side
+[code]#+__writeable_swizzle__+# view.
+The value corresponding to the first element of the [code]#rhs# swizzle
+operation is assigned to the element of the underlying [code]#vec# object that
+corresponds to the first element of the left hand side swizzle operation, etc.
+
+_Returns:_ A reference to the left hand side [code]#+__writeable_swizzle__+#
+view.
+
+'''
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+const __const_swizzle__&
+operator=(const __const_swizzle__& rhs) const = delete;
+----
+|====
+The copy assignment operator is deleted for the [code]#+__const_swizzle__+#
+class.
 
 '''
 
@@ -21843,7 +21912,7 @@ reported by [code]#Group::fence_scope#).
 SYCL provides an algorithms library based on the functions described in Section
 28 of the {cpp17} specification.
 The first argument to each function is a <<group>>, and data ranges can be
-described using pointers, iterators or instances of the [code]#multi_ptr# class.
+described using pointers or instances of the [code]#multi_ptr# class.
 The functions defined in this section are free functions available in the
 [code]#sycl# namespace.
 
@@ -21864,8 +21933,9 @@ Unless the description of a function says otherwise, how the elements of a range
 are processed by the work-items in a group is undefined.
 
 SYCL provides separate functions for algorithms which use the work-items in a
-group to execute an operation over a range of iterators and algorithms which are
-applied to data held directly by the work-items in a group.
+group to execute an operation over a range (specified by a start pointer and an
+end pointer) and algorithms which are applied to data held directly by the
+work-items in a group.
 An example of the usage of these functions is given below:
 
 [source,,linenums]
@@ -21910,7 +21980,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ true if [code]#pred# returns true when applied to the result of
-dereferencing any iterator in the range [code]#[first, last)#.
+dereferencing any pointer in the range [code]#[first, last)#.
 --
 
   . _Constraints:_ Available only if
@@ -21970,7 +22040,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ true if [code]#pred# returns true when applied to the result of
-dereferencing all iterators in the range [code]#[first, last)#.
+dereferencing all pointers in the range [code]#[first, last)#.
 --
 
   . _Constraints:_ Available only if
@@ -22030,7 +22100,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ true if [code]#pred# returns false when applied to the result of
-dereferencing all iterators in the range [code]#[first, last)#.
+dereferencing all pointers in the range [code]#[first, last)#.
 --
 
   . _Constraints:_ Available only if
@@ -22236,7 +22306,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ The result of combining the values resulting from dereferencing all
-iterators in the range [code]#[first, last)# using the operator
+pointers in the range [code]#[first, last)# using the operator
 [code]#binary_op#, where the values are combined according to the generalized
 sum defined in standard {cpp}.
 --
@@ -22263,7 +22333,7 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ The result of combining the values resulting from dereferencing all
-iterators in the range [code]#[first, last)# and the initial value [code]#init#
+pointers in the range [code]#[first, last)# and the initial value [code]#init#
 using the operator [code]#binary_op#, where the values are combined according to
 the generalized sum defined in standard {cpp}.
 --
