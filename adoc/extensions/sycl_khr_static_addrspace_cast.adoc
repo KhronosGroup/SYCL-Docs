@@ -1,0 +1,85 @@
+[[sec:khr-static-addrspace-cast]]
+= sycl_khr_static_addrspace_cast
+
+[code]#sycl::address_space_cast# does two things: first, it checks whether a
+given raw pointer can be cast to a specific address space; and second, it
+performs the requested cast.
+In cases where a developer is asserting that a raw pointer points to an object
+in a specific address space, run-time checks are not required and may have
+undesirable performance impact.
+This extension defines [code]#static_addrspace_cast# to provide developers a
+mechanism which casts with no run-time checks, enabling address space casts
+without any performance overhead.
+
+[[sec:khr-static-addrspace-cast-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-static-addrspace-cast-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_STATIC_ADDRSPACE_CAST# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-static-addrspace-cast-functions]]
+== Static address space cast functions
+
+.[apidef]#static_addrspace_cast#
+[source,role=synopsis,id=api:khr-static-addrspace-cast-static_addrspace_cast]
+----
+namespace sycl::khr {
+
+template <access::address_space Space, typename ElementType>
+multi_ptr<ElementType, Space, access::decorated::no>
+static_addrspace_cast(ElementType* ptr);
+
+template <access::address_space Space, typename ElementType, access::decorated DecorateAddress>
+multi_ptr<ElementType, Space, DecorateAddress>
+static_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
+
+} // namespace khr::sycl
+----
+
+_Preconditions_: [code]#ptr# points to an object allocated in the address space
+designated by [code]#Space#.
+
+_Returns_: A [code]#multi_ptr# with the specified address space that points to
+the same object as [code]#ptr#.
+If [code]#ptr# is a [code]#multi_ptr# then the return value has the same
+decoration.
+
+{note}Implementations may choose to issue a diagnostic if they can prove that
+[code]#ptr# does not point to an object allocated in the address space
+designated by [code]#Space#.{endnote}
+
+[[sec:khr-static-addrspace-cast-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL name
+
+// This function accepts raw pointers, but assumes a global address space.
+template <typename T>
+void update_global(T* ptr, int x)
+{
+  // Assert that implementation can treat ptr as pointing to global.
+  auto mptr = khr::static_addrspace_cast<access::address_space::global_space>(ptr);
+
+  *mptr += x;
+}
+----
