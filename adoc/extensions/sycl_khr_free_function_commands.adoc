@@ -122,7 +122,7 @@ int main() {
 namespace sycl::khr {
 
 template <typename CommandGroupFunc>
-void submit(queue q, CommandGroupFunc&& cgf);
+void submit(const queue&, CommandGroupFunc&& cgf);
 
 }
 ----
@@ -136,7 +136,7 @@ _Effects_: Equivalent to [code]#q.submit(cgf)#.
 namespace sycl::khr {
 
 template <typename CommandGroupFunc>
-event submit_tracked(queue q, CommandGroupFunc&& cgf);
+event submit_tracked(const queue&, CommandGroupFunc&& cgf);
 
 }
 ----
@@ -163,13 +163,13 @@ template <typename KernelType>
 void launch(handler& h, range<3> r, const KernelType& k); (3)
 
 template <typename KernelType>
-void launch(queue q, range<1> r, const KernelType& k);    (4)
+void launch(const queue&, range<1> r, const KernelType& k);    (4)
 
 template <typename KernelType>
-void launch(queue q, range<2> r, const KernelType& k);    (5)
+void launch(const queue&, range<2> r, const KernelType& k);    (5)
 
 template <typename KernelType>
-void launch(queue q, range<3> r, const KernelType& k);    (6)
+void launch(const queue&, range<3> r, const KernelType& k);    (6)
 
 }
 ----
@@ -198,15 +198,15 @@ void launch(handler& h, range<3> r,
             const kernel& k, Args&&... args); (3)
 
 template <typename... Args>
-void launch(queue q, range<1> r,
+void launch(const queue&, range<1> r,
             const kernel& k, Args&&... args); (4)
 
 template <typename... Args>
-void launch(queue q, range<2> r,
+void launch(const queue&, range<2> r,
             const kernel& k, Args&&... args); (5)
 
 template <typename... Args>
-void launch(queue q, range<3> r,
+void launch(const queue&, range<3> r,
             const kernel& k, Args&&... args); (6)
 
 }
@@ -242,15 +242,15 @@ void launch_reduce(handler& h, range<3> r,
                    const KernelType& k, Reductions&&... reductions); (3)
 
 template <typename KernelType, typename... Reductions>
-void launch_reduce(queue q, range<1> r,
+void launch_reduce(const queue&, range<1> r,
                    const KernelType& k, Reductions&&... reductions); (4)
 
 template <typename KernelType, typename... Reductions>
-void launch_reduce(queue q, range<2> r,
+void launch_reduce(const queue&, range<2> r,
                    const KernelType& k, Reductions&&... reductions); (5)
 
 template <typename KernelType, typename... Reductions>
-void launch_reduce(queue q, range<3> r,
+void launch_reduce(const queue&, range<3> r,
                    const KernelType& k, Reductions&&... reductions); (6)
 
 }
@@ -284,15 +284,15 @@ void launch_grouped(handler& h, range<3> r, range<3> size,
                     const KernelType& k); (3)
 
 template <typename KernelType>
-void launch_grouped(queue q, range<1> r, range<1> size,
+void launch_grouped(const queue&, range<1> r, range<1> size,
                     const KernelType& k); (4)
 
 template <typename KernelType>
-void launch_grouped(queue q, range<2> r, range<2> size,
+void launch_grouped(const queue&, range<2> r, range<2> size,
                     const KernelType& k); (5)
 
 template <typename KernelType>
-void launch_grouped(queue q, range<3> r, range<3> size,
+void launch_grouped(const queue&, range<3> r, range<3> size,
                     const KernelType& k); (6)
 
 }
@@ -322,15 +322,15 @@ void launch_grouped(handler& h, range<3> r, range<3> size,
                     const kernel& k, Args&&... args); (3)
 
 template <typename... Args>
-void launch_grouped(queue q, range<1> r, range<1> size,
+void launch_grouped(const queue&, range<1> r, range<1> size,
                     const kernel& k, Args&&... args); (4)
 
 template <typename... Args>
-void launch_grouped(queue q, range<2> r, range<2> size,
+void launch_grouped(const queue&, range<2> r, range<2> size,
                     const kernel& k, Args&&... args); (5)
 
 template <typename... Args>
-void launch_grouped(queue q, range<3> r, range<3> size,
+void launch_grouped(const queue&, range<3> r, range<3> size,
                     const kernel& k, Args&&... args); (6)
 
 }
@@ -368,17 +368,17 @@ void launch_grouped_reduce(handler& h, range<3> r,
                            Reductions&&... reductions); (3)
 
 template <typename KernelType, typename... Reductions>
-void launch_grouped_reduce(queue q, range<1> r,
+void launch_grouped_reduce(const queue&, range<1> r,
                            range<1> size, const KernelType& k,
                            Reductions&&... reductions); (4)
 
 template <typename KernelType, typename... Reductions>
-void launch_grouped_reduce(queue q, range<2> r,
+void launch_grouped_reduce(const queue&, range<2> r,
                            range<2> size, const KernelType& k,
                            Reductions&&... reductions); (5)
 
 template <typename KernelType, typename... Reductions>
-void launch_grouped_reduce(queue q, range<3> r,
+void launch_grouped_reduce(const queue&, range<3> r,
                            range<3> size, const KernelType& k,
                            Reductions&&... reductions); (6)
 
@@ -404,7 +404,7 @@ template <typename KernelType>
 void launch_task(handler& h, const KernelType& k); (1)
 
 template <typename KernelType>
-void launch_task(queue q, const KernelType& k);    (2)
+void launch_task(const queue&, const KernelType& k);    (2)
 
 }
 ----
@@ -424,7 +424,7 @@ template <typename... Args>
 void launch_task(handler& h, const kernel& k, Args&&... args); (1)
 
 template <typename... Args>
-void launch_task(queue q, const kernel& k, Args&&... args);    (2)
+void launch_task(const queue&, const kernel& k, Args&&... args);    (2)
 
 }
 ----
@@ -449,7 +449,7 @@ namespace sycl::khr {
 
 void memcpy(handler& h, void* dest, const void* src, size_t numBytes); (1)
 
-void memcpy(queue q, void* dest, const void* src, size_t numBytes);    (2)
+void memcpy(const queue&, void* dest, const void* src, size_t numBytes);    (2)
 
 }
 ----
@@ -469,7 +469,7 @@ template <typename T>
 void copy(handler& h, const T* src, T* dest, size_t count); (1)
 
 template <typename T>
-void copy(queue q, const T* src, T* dest, size_t count);    (2)
+void copy(const queue&, const T* src, T* dest, size_t count);    (2)
 
 }
 ----
@@ -512,12 +512,12 @@ void copy(handler& h,
           accessor<DestT, DestDims, DestMode, target::device> dest); (2)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
-void copy(queue q,
+void copy(const queue&,
           const SrcT* src,
           accessor<DestT, DestDims, DestMode, target::device> dest); (3)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
-void copy(queue q,
+void copy(const queue&,
           std::shared_ptr<SrcT> src,
           accessor<DestT, DestDims, DestMode, target::device> dest); (4)
 
@@ -561,12 +561,12 @@ void copy(handler& h,
           std::shared_ptr<DestT> dest); (2)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
-void copy(queue q,
+void copy(const queue&,
           accessor<SrcT, SrcDims, SrcMode, target::device> src,
           DestT* dest);                 (3)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT>
-void copy(queue q,
+void copy(const queue&,
           accessor<SrcT, SrcDims, SrcMode, target::device> src,
           std::shared_ptr<DestT> dest); (4)
 
@@ -607,7 +607,7 @@ void copy(handler& h,
 
 template <typename SrcT, int SrcDims, access_mode SrcMode,
           typename DestT, int DestDims, access_mode DestMode>
-void copy(queue q,
+void copy(const queue&,
           accessor<SrcT, SrcDims, SrcMode, target::device> src,
           accessor<DestT, DestDims, DestMode, target::device> dest); (1)
 
@@ -641,7 +641,7 @@ namespace sycl::khr {
 
 void memset(handler& h, void* ptr, int value, size_t numBytes); (1)
 
-void memset(queue q, void* ptr, int value, size_t numBytes);    (2)
+void memset(const queue&, void* ptr, int value, size_t numBytes);    (2)
 
 }
 ----
@@ -666,10 +666,10 @@ void fill(handler& h,
           const T& src);                                       (2)
 
 template <typename T>
-void fill(queue q, T* ptr, const T& pattern, size_t count);    (3)
+void fill(const queue&, T* ptr, const T& pattern, size_t count);    (3)
 
 template <typename T, int Dims, access_mode Mode>
-void fill(queue q,
+void fill(const queue&,
           accessor<T, Dims, Mode, target::device> dest,
           const T& src);                                       (4)
 
@@ -699,7 +699,7 @@ template <typename T, int Dims, access_mode Mode>
 void update_host(handler& h, accessor<T, Dims, Mode, target::device> acc); (1)
 
 template <typename T, int Dims, access_mode Mode>
-void update_host(queue q, accessor<T, Dims, Mode, target::device> acc);    (2)
+void update_host(const queue&, accessor<T, Dims, Mode, target::device> acc);    (2)
 
 }
 ----
@@ -717,7 +717,7 @@ namespace sycl::khr {
 
 void prefetch(handler& h, void* ptr, size_t numBytes); (1)
 
-void prefetch(queue q, void* ptr, size_t numBytes);    (2)
+void prefetch(const queue&, void* ptr, size_t numBytes);    (2)
 
 }
 ----
@@ -735,7 +735,7 @@ namespace sycl::khr {
 
 void mem_advise(handler& h, void* ptr, size_t numBytes, int advice); (1)
 
-void mem_advise(queue q, void* ptr, size_t numBytes, int advice);    (2)
+void mem_advise(const queue&, void* ptr, size_t numBytes, int advice);    (2)
 
 }
 ----
@@ -755,7 +755,7 @@ namespace sycl::khr {
 
 void command_barrier(handler& h); (1)
 
-void command_barrier(queue q);    (2)
+void command_barrier(const queue&);    (2)
 
 }
 ----
@@ -779,7 +779,7 @@ namespace sycl::khr {
 
 void event_barrier(handler& h, const std::vector<event>& events); (1)
 
-void event_barrier(queue q, const std::vector<event>& events);    (2)
+void event_barrier(const queue&, const std::vector<event>& events);    (2)
 
 }
 ----
