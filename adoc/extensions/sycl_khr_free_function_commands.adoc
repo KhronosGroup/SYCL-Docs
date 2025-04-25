@@ -154,22 +154,22 @@ _Returns_: An [code]#event# associated with the submitted command.
 namespace sycl::khr {
 
 template <typename KernelType>
-void launch(handler& h, range<1> r, const KernelType& k); (1)
+void launch(handler& h, range<1> r, const KernelType& k);   (1)
 
 template <typename KernelType>
-void launch(handler& h, range<2> r, const KernelType& k); (2)
+void launch(handler& h, range<2> r, const KernelType& k);   (2)
 
 template <typename KernelType>
-void launch(handler& h, range<3> r, const KernelType& k); (3)
+void launch(handler& h, range<3> r, const KernelType& k);   (3)
 
 template <typename KernelType>
-void launch(const queue&, range<1> r, const KernelType& k);    (4)
+void launch(const queue&, range<1> r, const KernelType& k); (4)
 
 template <typename KernelType>
-void launch(const queue&, range<2> r, const KernelType& k);    (5)
+void launch(const queue&, range<2> r, const KernelType& k); (5)
 
 template <typename KernelType>
-void launch(const queue&, range<3> r, const KernelType& k);    (6)
+void launch(const queue&, range<3> r, const KernelType& k); (6)
 
 }
 ----
@@ -401,10 +401,10 @@ launch_grouped_reduce(h, r, size, k, reductions...); })+#.
 namespace sycl::khr {
 
 template <typename KernelType>
-void launch_task(handler& h, const KernelType& k); (1)
+void launch_task(handler& h, const KernelType& k);   (1)
 
 template <typename KernelType>
-void launch_task(const queue&, const KernelType& k);    (2)
+void launch_task(const queue&, const KernelType& k); (2)
 
 }
 ----
@@ -421,10 +421,10 @@ k); })#.
 namespace sycl::khr {
 
 template <typename... Args>
-void launch_task(handler& h, const kernel& k, Args&&... args); (1)
+void launch_task(handler& h, const kernel& k, Args&&... args);   (1)
 
 template <typename... Args>
-void launch_task(const queue&, const kernel& k, Args&&... args);    (2)
+void launch_task(const queue&, const kernel& k, Args&&... args); (2)
 
 }
 ----
@@ -447,9 +447,9 @@ k, args...); })+#.
 ----
 namespace sycl::khr {
 
-void memcpy(handler& h, void* dest, const void* src, size_t numBytes); (1)
+void memcpy(handler& h, void* dest, const void* src, size_t numBytes);   (1)
 
-void memcpy(const queue&, void* dest, const void* src, size_t numBytes);    (2)
+void memcpy(const queue&, void* dest, const void* src, size_t numBytes); (2)
 
 }
 ----
@@ -466,10 +466,10 @@ src, numBytes); })#.
 namespace sycl::khr {
 
 template <typename T>
-void copy(handler& h, const T* src, T* dest, size_t count); (1)
+void copy(handler& h, const T* src, T* dest, size_t count);   (1)
 
 template <typename T>
-void copy(const queue&, const T* src, T* dest, size_t count);    (2)
+void copy(const queue&, const T* src, T* dest, size_t count); (2)
 
 }
 ----
@@ -609,7 +609,7 @@ template <typename SrcT, int SrcDims, access_mode SrcMode,
           typename DestT, int DestDims, access_mode DestMode>
 void copy(const queue&,
           accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          accessor<DestT, DestDims, DestMode, target::device> dest); (1)
+          accessor<DestT, DestDims, DestMode, target::device> dest); (2)
 
 }
 ----
@@ -639,9 +639,9 @@ code if [code]#dest.get_count() < src.get_count()#.
 ----
 namespace sycl::khr {
 
-void memset(handler& h, void* ptr, int value, size_t numBytes); (1)
+void memset(handler& h, void* ptr, int value, size_t numBytes);   (1)
 
-void memset(const queue&, void* ptr, int value, size_t numBytes);    (2)
+void memset(const queue&, void* ptr, int value, size_t numBytes); (2)
 
 }
 ----
@@ -666,12 +666,12 @@ void fill(handler& h,
           const T& src);                                       (2)
 
 template <typename T>
-void fill(const queue&, T* ptr, const T& pattern, size_t count);    (3)
+void fill(const queue&, T* ptr, const T& pattern, size_t count); (3)
 
 template <typename T, int Dims, access_mode Mode>
 void fill(const queue&,
           accessor<T, Dims, Mode, target::device> dest,
-          const T& src);                                       (4)
+          const T& src);                                         (4)
 
 }
 ----
@@ -696,10 +696,10 @@ fill(h, dest, src); })#.
 namespace sycl::khr {
 
 template <typename T, int Dims, access_mode Mode>
-void update_host(handler& h, accessor<T, Dims, Mode, target::device> acc); (1)
+void update_host(handler& h, accessor<T, Dims, Mode, target::device> acc);   (1)
 
 template <typename T, int Dims, access_mode Mode>
-void update_host(const queue&, accessor<T, Dims, Mode, target::device> acc);    (2)
+void update_host(const queue&, accessor<T, Dims, Mode, target::device> acc); (2)
 
 }
 ----
@@ -715,9 +715,9 @@ update_host(h, acc); })#.
 ----
 namespace sycl::khr {
 
-void prefetch(handler& h, void* ptr, size_t numBytes); (1)
+void prefetch(handler& h, void* ptr, size_t numBytes);   (1)
 
-void prefetch(const queue&, void* ptr, size_t numBytes);    (2)
+void prefetch(const queue&, void* ptr, size_t numBytes); (2)
 
 }
 ----
@@ -733,9 +733,9 @@ numBytes); })#.
 ----
 namespace sycl::khr {
 
-void mem_advise(handler& h, void* ptr, size_t numBytes, int advice); (1)
+void mem_advise(handler& h, void* ptr, size_t numBytes, int advice);   (1)
 
-void mem_advise(const queue&, void* ptr, size_t numBytes, int advice);    (2)
+void mem_advise(const queue&, void* ptr, size_t numBytes, int advice); (2)
 
 }
 ----
@@ -753,9 +753,9 @@ ptr, numBytes, advice); })#.
 ----
 namespace sycl::khr {
 
-void command_barrier(handler& h); (1)
+void command_barrier(handler& h);   (1)
 
-void command_barrier(const queue&);    (2)
+void command_barrier(const queue&); (2)
 
 }
 ----
@@ -777,9 +777,9 @@ operation may be a no-op.{endnote}
 ----
 namespace sycl::khr {
 
-void event_barrier(handler& h, const std::vector<event>& events); (1)
+void event_barrier(handler& h, const std::vector<event>& events);   (1)
 
-void event_barrier(const queue&, const std::vector<event>& events);    (2)
+void event_barrier(const queue&, const std::vector<event>& events); (2)
 
 }
 ----
