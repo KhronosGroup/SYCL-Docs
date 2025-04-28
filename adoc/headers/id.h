@@ -27,6 +27,10 @@ template <int Dimensions = 1> class id {
   size_t& operator[](int dimension);
   size_t operator[](int dimension) const;
 
+  size_t x() const noexcept;
+  size_t y() const noexcept;
+  size_t z() const noexcept;
+
   // only available if Dimensions == 1
   operator size_t() const;
 

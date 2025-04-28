@@ -24,6 +24,10 @@ template <int Dimensions = 1> class range {
   size_t& operator[](int dimension);
   size_t operator[](int dimension) const;
 
+  size_t x() const noexcept;
+  size_t y() const noexcept;
+  size_t z() const noexcept;
+
   size_t size() const;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
