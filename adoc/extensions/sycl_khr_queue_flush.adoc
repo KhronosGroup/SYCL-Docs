@@ -1,0 +1,64 @@
+[[sec:khr-queue-flush]]
+= sycl_khr_queue_flush
+
+This extension allows developers to query the queue's emptiness, meaning if all
+commands submitted to a queue have been completed.
+
+[[sec:khr-queue-flush-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-queue-flush-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_QUEUE_FLUSH# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-queue-flush-funct]]
+== New Queue Command to Force Submission
+
+This extension adds the following function to the [code]#sycl::queue# class,
+which allows you to ensure forward progress without the need to call
+[code]]#sycl::queue::wait()# '''
+
+.[apidef]#queue::khr_flush#
+[source,role=synopsis,id=api:queue-khr-flush]
+----
+void khr_flush() const
+----
+
+_Effects:_ Behave as if another host thread submitted a
+[code]#sycl::queue::wait#.
+
+{note} This ensures that the event of at least one command submitted to the
+queue will reach the [code]#info::event_command_status::running#.
+{endnote} '''
+
+[[sec:khr-queue-flush-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+int main() {
+  sycl::queue Q;
+  auto e = Q.single_task([] {});
+  Q.khr_flush(); // UB without it
+  while (e.get_info<sycl::info::event::command_execution_status>() !=
+         sycl::info::event_command_status::complete) {
+  };
+}
+----
