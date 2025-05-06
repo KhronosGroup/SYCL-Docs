@@ -29,7 +29,7 @@ An implementation supporting this extension must predefine the macro
 
 This extension adds the following function to the [code]#sycl::queue# class,
 which allows you to ensure forward progress without the need to call
-[code]]#sycl::queue::wait()# '''
+[code]#sycl::queue::wait()# '''
 
 .[apidef]#queue::khr_flush#
 [source,role=synopsis,id=api:queue-khr-flush]
@@ -37,11 +37,10 @@ which allows you to ensure forward progress without the need to call
 void khr_flush() const
 ----
 
-_Effects:_ Behave as if another host thread submitted a
-[code]#sycl::queue::wait#.
+_Effects:_ Ensure that device code is able to make forward progress, as if an unspecified host thread providing concurrent forward progress guarantees called [code]#sycl::queue::wait#.
 
-{note} This ensures that the event of at least one command submitted to the
-queue will reach the [code]#info::event_command_status::running#.
+{note} This ensures that the event of at least one command previously submitted to the
+queue will enter the [code]#info::event_command_status::running# state.
 {endnote} '''
 
 [[sec:khr-queue-flush-example]]
