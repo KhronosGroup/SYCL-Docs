@@ -1,8 +1,8 @@
 [[sec:khr-queue-flush]]
 = sycl_khr_queue_flush
 
-This extension allows developers to query the queue's emptiness, meaning if all
-commands submitted to a queue have been completed.
+This extension allows developers to ensure that device code is able to make
+forward progress without the need to call [code]#sycl::queue::wait()#.
 
 [[sec:khr-queue-flush-dependencies]]
 == Dependencies
@@ -27,9 +27,9 @@ An implementation supporting this extension must predefine the macro
 [[sec:khr-queue-flush-funct]]
 == New Queue Command to Force Submission
 
-This extension adds the following function to the [code]#sycl::queue# class,
-which enables developers to ensure forward progress without the need to call
-[code]#sycl::queue::wait()# '''
+This extension adds the following function to the [code]#sycl::queue# class.
+
+'''
 
 .[apidef]#queue::khr_flush#
 [source,role=synopsis,id=api:queue-khr-flush]
@@ -37,11 +37,15 @@ which enables developers to ensure forward progress without the need to call
 void khr_flush() const
 ----
 
-_Effects:_ Ensure that device code is able to make forward progress, as if an unspecified host thread providing concurrent forward progress guarantees called [code]#sycl::queue::wait#.
+_Effects:_ Ensure that device code is able to make forward progress, as if an
+unspecified host thread providing concurrent forward progress guarantees called
+[code]#sycl::queue::wait#.
 
-{note} This ensures that the event of at least one command previously submitted to the
-queue will enter the [code]#info::event_command_status::running# state.
-{endnote} '''
+{note} This ensures that the event of at least one command previously submitted
+to the queue will enter the [code]#info::event_command_status::running# state.
+{endnote}
+
+'''
 
 [[sec:khr-queue-flush-example]]
 == Example
