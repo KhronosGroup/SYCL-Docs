@@ -2,7 +2,7 @@
 = sycl_khr_queue_flush
 
 This extension allows developers to ensure that device code is able to make
-forward progress without the need to call [code]#sycl::queue::wait()#.
+forward progress without the need to call [api]#queue::wait#.
 
 [[sec:khr-queue-flush-dependencies]]
 == Dependencies
@@ -24,12 +24,24 @@ An implementation supporting this extension must predefine the macro
 |Initial version of this extension.
 |===
 
-[[sec:khr-queue-flush-funct]]
-== New Queue Command to Force Submission
+[[sec:khr-queue-flush-queue]]
+== Extensions to the queue class
 
 This extension adds the following function to the [code]#sycl::queue# class.
 
 '''
+[source,role=synopsis,id=api:khr-queue-flush-queue]
+----
+namespace sycl {
+class queue {
+  void khr_flush() const;
+  // ...
+};
+}
+----
+
+[[sec:khr-queue-flush-queue-menber-funcs]]
+=== Member functions
 
 .[apidef]#queue::khr_flush#
 [source,role=synopsis,id=api:queue-khr-flush]
