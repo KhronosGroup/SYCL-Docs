@@ -424,12 +424,12 @@ implementation supports the features on any of its devices.
 Of course, applications that make use of optional kernel features should ensure
 that a kernel using such a feature is submitted only to a device that supports
 the feature.
-If the application submits a <<command-group>> using a secondary queue, then any
-kernel submitted from the <<command-group>> should use only features that are
-supported by both the primary queue's device and the secondary queue's device.
-If an application fails to do this, the implementation must throw a synchronous
-exception with the [code]#errc::kernel_not_supported# error code from the
-<<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
+If the application submits a <<command-group>> that has a secondary queue
+associated with it, then any kernel submitted from the <<command-group>> should
+use only features that are supported by both the primary queue's device and the
+secondary queue's device. If an application fails to do this, the implementation
+must throw a synchronous exception with the [code]#errc::kernel_not_supported#
+error code from the <<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
 
 It is legal for a SYCL application to define several kernels in the same
 translation unit even if they use different optional features, as shown in the
@@ -630,10 +630,10 @@ Specifying this attribute on a kernel has two effects.  First, it causes the
 [code]#errc::kernel_not_supported# error code if the kernel is submitted to a
 device that does not have one of the listed aspects.  (This includes the device
 associated with the secondary queue if the kernel is submitted from a
-<<command-group>> that has a secondary queue.)  Second, it causes the compiler
-to issue a diagnostic if the kernel (or any of the functions it calls) uses an
-optional feature that is associated with an aspect that is not listed in the
-attribute.
+<<command-group>> with an associated secondary queue.)  Second, it causes the
+compiler to issue a diagnostic if the kernel (or any of the functions it calls)
+uses an optional feature that is associated with an aspect that is not listed in
+the attribute.
 
 The value of each parameter to this attribute must be equal to one of the
 values in the [code]#sycl::aspect# enumeration type (including any extended
