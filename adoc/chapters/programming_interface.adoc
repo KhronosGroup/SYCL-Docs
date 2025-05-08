@@ -5431,18 +5431,19 @@ later.
 [code]#b#.
 [code]#subRange# specifies the size of the sub-buffer.
 
-The origin (based on [code]#baseIndex#) of the sub-buffer being constructed must
-be a multiple of the memory base address alignment of each SYCL [code]#device#
-which accesses data from the buffer.
-This value is retrievable via the SYCL [code]#device# class info query
-[code]#info::device::mem_base_addr_align#.
-Violating this requirement causes the implementation to throw an
-[code]#exception# with the [code]#errc::invalid# error code from the
-[code]#accessor# constructor (if the accessor is not a placeholder) or from
-[code]#handler::require()# (if the accessor is a placeholder).
-If the accessor is bound to a <<command-group>> with a secondary queue, the
-sub-buffer's alignment must be compatible with both the primary queue's device
-and the secondary queue's device, otherwise this exception is thrown.
+The origin (based on [code]#baseIndex#) of the sub-buffer being constructed
+must be a multiple of the memory base address alignment of each SYCL
+[code]#device# which accesses data from the buffer.  This value is retrievable
+via the SYCL [code]#device# class info query
+[code]#info::device::mem_base_addr_align#.  Violating this requirement causes
+the implementation to throw an [code]#exception# with the [code]#errc::invalid#
+error code from the [code]#accessor# constructor (if the accessor is not a
+placeholder) or from [code]#handler::require()# (if the accessor is a
+placeholder).  If the accessor is bound to a <<command-group>> with a secondary
+queue that the implementation intends on using in case of failure during
+enqueuing the <<command-group>> to the primary queue, the sub-buffer's alignment
+must be compatible with both the primary queue's device and the secondary
+queue's device, otherwise this exception is thrown.
 
 _Throws:_
 
@@ -14225,7 +14226,7 @@ A user can therefore supply a secondary queue when submitting a command group to
 the primary queue.
 If the <<sycl-runtime>> fails to enqueue or execute a command group on a primary
 queue, it can attempt to run the command group on the secondary queue.
-The circumstances in which it is, or is not, possible for a <<sycl-runtime>> to
+The circumstances in which the <<sycl-runtime>> may elect to
 fall-back from primary to secondary queue are unspecified in the specification.
 Even if a command group is run on the secondary queue, the requirement that host
 code within the command group is executed exactly once remains, regardless of
@@ -14518,9 +14519,13 @@ This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
 implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
-code if the [code]#kernelObject# is not compatible with either the device
-associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified).
+code if the [code]#kernelObject# is not compatible with the device
+associated with the primary queue of the <<command-group>>.
+Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
+code if the <<command-group>> has a secondary queue associated that the
+implementation intends on using in the case that the <<command-group>> fails to
+enqueue on the primary queue, and the [code]#kernelObject# is not compatible
+with the device associated with the secondary queue of the <<command-group>>.
 
 a@
 [source]
@@ -14540,9 +14545,13 @@ This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
 implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
-code if the [code]#kernelObject# is not compatible with either the device
-associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified).
+code if the [code]#kernelObject# is not compatible with the device associated
+with the primary queue of the <<command-group>>.
+Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
+code if the <<command-group>> has a secondary queue associated that the
+implementation intends on using in the case that the <<command-group>> fails to
+enqueue on the primary queue, and the [code]#kernelObject# is not compatible
+with the device associated with the secondary queue of the <<command-group>>.
 
 a@
 [source]
@@ -14567,9 +14576,13 @@ This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
 implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
-code if the [code]#kernelObject# is not compatible with either the device
-associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified).
+code if the [code]#kernelObject# is not compatible with the device associated
+with the primary queue of the <<command-group>>.
+Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
+code if the <<command-group>> has a secondary queue associated that the
+implementation intends on using in the case that the <<command-group>> fails to
+enqueue on the primary queue, and the [code]#kernelObject# is not compatible
+with the device associated with the secondary queue of the <<command-group>>.
 
 |====
 
@@ -15200,10 +15213,11 @@ If the <<command-group>> attempts to invoke a kernel that is not contained by a
 compatible device image in [code]#execBundle#, the <<kernel-invocation-command>>
 throws a synchronous [code]#exception# with the
 [code]#errc::kernel_not_supported# error code.
-If the <<command-group>> has a secondary queue, then the [code]#execBundle# must
-contain a kernel that is compatible with both the primary queue's device and the
-secondary queue's device, otherwise the <<kernel-invocation-command>> throws
-this exception.
+If the <<command-group>> has a secondary queue that the implementation intends
+on using in the case that the <<command-group>> fails to enqueue on the primary
+queue, then the [code]#execBundle# must contain a kernel that is compatible
+with both the primary queue's device and the secondary queue's device,
+otherwise the <<kernel-invocation-command>> throws this exception.
 
 Since the handler method for setting specialization constants is incompatible
 with the kernel bundle method, applications should not call this function if
@@ -15214,9 +15228,16 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if the
     <<context>> associated with the <<handler>> via its associated primary
-    <<queue>> or the <<context>> associated with the secondary <<queue>> (if
-    provided) is different from the <<context>> associated with the
+    <<queue>> is different from the <<context>> associated with the
     <<kernel-bundle>> specified by [code]#execBundle#.
+
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    <<handler>> has an associated secondary
+    <<queue>> that the implementation intends on using in the case that the
+    primary <<queue>> associated with the <<handler>> fails to enqueue this
+    <<command-group>>, and the <<context>> of the secondary queue is different
+    from the <<context>> associated with the <<kernel-bundle>> specified by
+    [code]#execBundle#.
 
   * An [code]#exception# with the [code]#errc::invalid# error code if
     [code]#handler::set_specialization_constant()# has been called for this
