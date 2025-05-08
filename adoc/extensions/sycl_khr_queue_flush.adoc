@@ -53,9 +53,15 @@ _Effects:_ Ensure that device code is able to make forward progress, as if an
 unspecified host thread providing concurrent forward progress guarantees called
 [api]#queue::wait#.
 
-{note} This ensures that the event of at least one command previously submitted
-to the queue will enter the [code]#info::event_command_status::running# state.
-{endnote}
+{note} Calling this function is an implementation-independent way to ensure that
+pending commands can start executing on the device without blocking the calling
+thread.
+Exactly when pending commands start executing is unspecified, as it depends on
+the scheduling behavior(s) of implementations and individual devices.
+However, if a call to [api]#queue::wait# would have been unblocked in a finite
+amount of time, a call to [api]#queue::khr_flush# guarantees that pending
+commands on that queue will execute in a finite amount of time.
+{endote}
 
 '''
 
