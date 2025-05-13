@@ -428,11 +428,9 @@ the feature.
 If the application submits a <<command-group>> using a secondary queue, then any
 kernel submitted from the <<command-group>> should use only features that are
 supported by both the primary queue's device and the secondary queue's device.
-If an application fails to do this and the implementation elects to use the
-secondary queue in the case of the <<command-group>> failing to enqueue on the
-primary queue, the implementation must throw a synchronous exception with the
-[code]#errc::kernel_not_supported# error code from the
-<<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
+If an application fails to do this, the implementation throws an
+[code]#exception# with the [code]#errc::kernel_not_supported# error code from
+the <<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
 
 It is legal for a SYCL application to define several kernels in the same
 translation unit even if they use different optional features, as shown in the
