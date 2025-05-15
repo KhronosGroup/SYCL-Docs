@@ -1055,16 +1055,17 @@ C libraries during offline compilation or during online compilation by the
 
 Linking with OpenCL C kernel functions offline is an optional feature and is
 unspecified.
-Linking with OpenCL C kernel functions online is performed by using the SYCL
-[code]#kernel_bundle# class to compile and link an OpenCL C source; using the
-[code]#compile_with_source# or [code]#build_with_source# member functions.
+Linking with OpenCL C kernel functions online is performed via the
+[code]#sycl::make_kernel_bundle# or [code]#sycl::opencl::create_bundle#
+functions, which both provide a mechanism to create an instance of a SYCL
+[code]#kernel_bundle# from a [code]#cl_program#.
 
 OpenCL C functions that are linked with, using either offline or online
 compilation, must be declared as [code]#extern "C"# function declarations.
 The function parameters of these function declarations must be defined as the
 OpenCL C interoperability aliases; [code]#pointer# of the [code]#multi_ptr#
-class template, [code]#vector_t# of the [code]#vec# class template and scalar
-data type aliases described in <<table.types.aliases>>.
+class template, and scalar data type aliases described in
+<<table.types.aliases>>.
 
 // \include{opencl_extensions}
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% begin opencl_extensions %%%%%%%%%%%%%%%%%%%%%%%%%%%%

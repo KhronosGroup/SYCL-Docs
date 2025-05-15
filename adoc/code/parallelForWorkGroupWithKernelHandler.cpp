@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 myQueue.submit([&](handler& cgh) {
@@ -7,7 +7,7 @@ myQueue.submit([&](handler& cgh) {
       range<3>(2, 2, 2), range<3>(2, 2, 2),
       [=](group<3> myGroup, kernel_handler kh) {
         //[workgroup code]
-        int myLocal; // this variable is shared between workitems
+        int myLocal;  // this variable is shared between workitems
         // this variable will be instantiated for each work-item separately
         private_memory<int> myPrivate(myGroup);
 

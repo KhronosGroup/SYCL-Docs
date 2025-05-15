@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -37,26 +37,24 @@ template <typename DataT, int NumElements> class vec {
   using element_type = DataT;
   using value_type = DataT;
 
-#ifdef __SYCL_DEVICE_ONLY__
-  using vector_t = __unspecified__;
-#endif
-
   vec();
 
+  // Available only when: NumElements > 1
   explicit constexpr vec(const DataT& arg);
+
+  // Available only when: NumElements == 1
+  constexpr vec(const DataT& arg);
 
   template <typename... ArgTN> constexpr vec(const ArgTN&... args);
 
   constexpr vec(const vec<DataT, NumElements>& rhs);
 
-#ifdef __SYCL_DEVICE_ONLY__
-  vec(vector_t nativeVector);
-
-  operator vector_t() const;
-#endif
-
   // Available only when: NumElements == 1
   operator DataT() const;
+
+  // Available only when: NumElements == 1 and T is explicitly convertible to DataT
+  template<typename T>
+  explicit operator T() const;
 
   static constexpr size_t byte_size() noexcept;
 
@@ -83,18 +81,18 @@ template <typename DataT, int NumElements> class vec {
 
   // Available only when NumElements <= 4.
   // XYZW_ACCESS is: x, y, z, w, subject to NumElements.
-  __writeable_swizzle__ XYZW_ACCESS();
-  __const_swizzle__ XYZW_ACCESS() const;
+  DataT& XYZW_ACCESS();
+  const DataT& XYZW_ACCESS() const;
 
   // Available only NumElements == 4.
   // RGBA_ACCESS is: r, g, b, a.
-  __writeable_swizzle__ RGBA_ACCESS();
-  __const_swizzle__ RGBA_ACCESS() const;
+  DataT& RGBA_ACCESS();
+  const DataT& RGBA_ACCESS() const;
 
   // INDEX_ACCESS is: s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD,
   // sE, sF, subject to NumElements.
-  __writeable_swizzle__ INDEX_ACCESS();
-  __const_swizzle__ INDEX_ACCESS() const;
+  DataT& INDEX_ACCESS();
+  const DataT& INDEX_ACCESS() const;
 
 #ifdef SYCL_SIMPLE_SWIZZLES
   // Available only when NumElements <= 4.
@@ -141,26 +139,39 @@ template <typename DataT, int NumElements> class vec {
   const DataT& operator[](int index) const;
 
   vec& operator=(const vec& rhs);
-  vec& operator=(const DataT& rhs);
+
+  // Available only when: T is convertible to DataT
+  template<typename T>
+  vec& operator=(const T& rhs);
 
   // OP is: +, -, *, /, %
-  /* If OP is %, available only when: DataT != float && DataT != double
-  && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // If OP is %, available only when: DataT != float && DataT != double && DataT != half
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: +=, -=, *=, /=, %=
-  /* If OP is %=, available only when: DataT != float && DataT != double
-  && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // If OP is %=, available only when: DataT != float && DataT != double && DataT != half
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is prefix ++, --
+  //
   // Available only when: DataT != bool
   friend vec& operatorOP(vec& rhs);
 
   // OP is postfix ++, --
+  //
   // Available only when: DataT != bool
   friend vec operatorOP(vec& lhs, int);
 
@@ -168,38 +179,70 @@ template <typename DataT, int NumElements> class vec {
   friend vec operatorOP(const vec& rhs);
 
   // OP is: &, |, ^
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: &=, |=, ^=
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is: <<, >>
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec operatorOP(const vec& lhs, const vec& rhs);
-  friend vec operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: <<=, >>=
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  //
+  // Available only when: T is convertible to DataT
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec& operatorOP(vec& lhs, const vec& rhs);
-  friend vec& operatorOP(vec& lhs, const DataT& rhs);
+
+  template<typename T>
+  friend vec& operatorOP(vec& lhs, const T& rhs);
 
   // OP is: &&, ||
+  //
+  // Available only when: T is convertible to DataT
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs);
 
   // OP is: ==, !=, <, >, <=, >=
+  //
+  // Available only when: T is convertible to DataT
   friend vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs);
-  friend vec<RET, NumElements> operatorOP(const vec& lhs, const DataT& rhs);
-  friend vec<RET, NumElements> operatorOP(const DataT& lhs, const vec& rhs);
 
-  /* Available only when: DataT != float && DataT != double && DataT != half. */
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs);
+
+  template<typename T>
+  friend vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs);
+
+  // Available only when: DataT != float && DataT != double && DataT != half
   friend vec operator~(const vec& v);
 
   friend vec<RET, NumElements> operator!(const vec& v);

@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2024 The Khronos Group, Inc.
+# Copyright (c) 2011-2025 The Khronos Group, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 require 'asciidoctor/extensions' unless RUBY_ENGINE == 'opal'
@@ -53,10 +53,10 @@ include ::Asciidoctor
 class AddApiXrefs < Extensions::Postprocessor
   include Asciidoctor::Logging
 
-  Id = /<\w+ id="([\w:-]*)"/
-  ApiSpan = /<span class="api">([\w:]*)<\/span>/
-  ApiDefSpan = /<span class="apidef">([\w:]*)<\/span>/
-  ApiIdDiv = /<div id="([\w:-]*)"/
+  Id = /<\w+ id="([\w:-]+)"/
+  ApiSpan = /<span class="api">([\w:]+)<\/span>/
+  ApiDefSpan = /<span class="apidef">([\w:]+)<\/span>/
+  ApiIdDiv = /<div id="([\w:-]+)"/
 
   def process document, output
 
@@ -69,12 +69,20 @@ class AddApiXrefs < Extensions::Postprocessor
       # in the document.  Populate "api_id_array" with this information.
       api_id_array = []
       if document.attr? 'api-xrefs'
-        (document.attr 'api-xrefs').scan(/([\w:-]*)=([\w:-]*)/) do |api, id|
+        (document.attr 'api-xrefs').scan(/([^=\s]+)=([^=\s]+)/) do |api, id|
+          if not /^[\w:]+$/.match?(api)
+            logger.error "API '#{api}' from api-xrefs contains invalid characters"
+            next
+          end
+          if not /^[\w:-]+$/.match?(id)
+            logger.error "Id '#{id}' from api-xrefs contains invalid characters"
+            next
+          end
           if not all_ids.key?(id)
             logger.error "Id '#{id}' from api-xrefs is not defined"
-          else
-            api_id_array.push([api, id])
+            next
           end
+          api_id_array.push([api, id])
         end
       end
 

@@ -349,13 +349,19 @@ The standard {cpp} preprocessing directives and macros are supported.
 The following preprocessor macros must be defined by all conformant
 implementations:
 
-  * [code]#SYCL_LANGUAGE_VERSION# substitutes an integer reflecting the version
-    number and revision of the SYCL language being supported by the
-    implementation.
-    The version of SYCL defined in this document will have
-    [code]#SYCL_LANGUAGE_VERSION# substitute the integer
-    [code]#{SYCL_LANGUAGE_VERSION}#, composed with the general SYCL version
-    followed by 2 digits representing the revision number;
+  * [code]#SYCL_LANGUAGE_VERSION# is defined to an integer literal that
+    indicates the version of the SYCL specification to which the implementation
+    conforms.
++
+[width="100%",options="header",separator="@",cols="50%,50%"]
+|====
+@ SYCL version @ Macro defined as
+a@ SYCL 2020 a@ [code]#202012L#
+a@ SYCL {SYCL_VERSION} a@ [code]#{SYCL_LANGUAGE_VERSION}L#
+|====
++
+Future versions of the SYCL specification will define this macro to an integer
+literal with greater value.
   * [code]#SYCL_DEVICE_COPYABLE# is defined to 1 if the implementation supports
     explicitly specified <<device-copyable>> types as described in
     <<sec::device.copyable>>.
@@ -501,11 +507,11 @@ in this section has implementation-defined effect.
 === Kernel attributes
 
 The attributes listed in <<table.kernel.attributes>> have a different position
-depending on whether the kernel is defined as a lambda function or as a named
+depending on whether the kernel is defined as a lambda expression or as a named
 function object.
 If the kernel is a named function object, the attribute is applied to the
 declarator-id in the function declaration.
-However, if the kernel is a lambda function, the attribute is applied to the
+However, if the kernel is a lambda expression, the attribute is applied to the
 lambda declarator.
 
 [NOTE]
@@ -544,7 +550,8 @@ reqd_work_group_size(dim0, dim1, dim2)
       size.  The number of arguments must match the dimensionality of the
       work-group used to invoke the kernel, and the order of the arguments
       matches the order of the dimension extents to the [code]#range#
-      constructor.  Each argument must be an integral constant expression.
+      constructor.  Each argument must be an integral constant expression that
+      is representable by [code]#size_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
@@ -570,8 +577,8 @@ work_group_size_hint(dim0, dim1, dim2)
       must match the dimensionality of the work-group used to invoke the
       kernel, and the order of the arguments matches the order of the dimension
       extents to the [code]#range# constructor.  Each argument must be an
-      integral constant expression.  The effect of this attribute, if any, is
-      implementation-defined.
+      integral constant expression that is representable by [code]#size_t#.
+      The effect of this attribute, if any, is implementation-defined.
 
 a@
 [source]
@@ -592,7 +599,7 @@ reqd_sub_group_size(size)
 ----
    a@ Indicates that the kernel must be compiled and executed with the specified
       sub-group size. The argument to the attribute must be an integral constant
-      expression.
+      expression that is representable by [code]#uint32_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
