@@ -1,0 +1,85 @@
+[[sec:khr-queue-empty-query]]
+= sycl_khr_queue_empty_query
+
+This extension allows developers to query the queue's emptiness, meaning if all
+commands submitted to a queue have been completed.
+
+[[sec:khr-queue-empty-query-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-queue-empty-query-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_QUEUE_EMPTY_QUERY# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+
+[[sec:khr-queue-empty-query-funct]]
+== New Queue Function to Query Emptiness
+
+This extension adds the following function to the [code]#sycl::queue# class,
+which provides information about the emptiness of the queue.
+
+{node} This khr is more usefull when used in conjuction with
+[code]#queue::khr_flush()#.
+{endnode}
+
+'''
+
+.[apidef]#queue::khr_empty#
+[source,role=synopsis,id=api:queue-khr-empty]
+----
+bool khr_empty() const
+----
+
+_Synchronization_: When this function returns [code]#true#, equivalent to
+[code]#queue::wait()#.
+
+_Returns:_ [code]#true# if all <<command,commands>> enqueued on this queue have
+completed, [code]#false# otherwise.
+
+{note} Since the implementation executes commands asynchronously, the returned
+value is a snapshot in time.
+{endnote}
+
+'''
+
+[[sec:khr-queue-empty-query-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <algorithm>
+#include <iostream>
+#include <sycl/sycl.hpp>
+int main() {
+  // Pool of queues, one per device
+  std::vector<sycl::queue> Qs;
+  for (sycl::device& d : sycl::device::get_devices())
+    Qs.push_back(sycl::queue(d));
+
+  // Useful recipe for load-balancing
+  auto it = std::find_if(Qs.begin(), Qs.end(),
+                         [](const sycl::queue& q) { return q.khr_empty(); });
+
+  if (it != Qs.end()) {
+    std::cout << "Empty queue present" << std::endl;
+  } else {
+    std::cout << "No empty queue" << std::endl;
+  }
+}
+----
