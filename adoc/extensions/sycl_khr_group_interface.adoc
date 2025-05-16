@@ -80,10 +80,10 @@ class __group__ {
 };
 
 template <typename Group>
-member_item<Group> get_member_item(Group g) noexcept;
+member_item<Group> get_member_item(const Group& g) noexcept;
 
 template <typename Group>
-bool leader_of(Group g) noexcept;
+bool leader_of(const Group& g) noexcept;
 
 } // namespace sycl::khr
 ----
@@ -205,7 +205,7 @@ the number of work-items in each dimension of the group.
 [source,role=synopsis,id=api:common-group-get-member-item]
 ----
 template <typename Group>
-member_item<Group> get_member_item(Group g) noexcept;
+member_item<Group> get_member_item(const Group& g) noexcept;
 ----
 
 _Constraints_: [code]#Group# is [code]#work_group# or [code]#sub_group#.
@@ -219,7 +219,7 @@ _Returns_: A [code]#member_item# representing the calling work-item within group
 [source,role=synopsis,id=api:common-group-leader_of]
 ----
 template <typename Group>
-bool leader_of(Group g) noexcept;
+bool leader_of(const Group& g) noexcept;
 ----
 
 _Constraints_: [code]#Group# is [code]#work_group#, [code]#sub_group# or
@@ -269,7 +269,7 @@ class work_group {
   static constexpr int dimensions = Dimensions;
   static constexpr memory_scope fence_scope = memory_scope::work_group;
 
-  work_group(group<Dimensions> g) noexcept;
+  work_group(const group<Dimensions>& g) noexcept;
 
   operator group<Dimensions>() const noexcept;
 
@@ -297,7 +297,7 @@ class work_group {
 .[apititle]#work_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-work-group-constructor]
 ----
-work_group(group<Dimensions> g) noexcept;
+work_group(const group<Dimensions>& g) noexcept;
 ----
 
 _Effects_: Constructs a [code]#work_group# representing the same collection of
@@ -453,7 +453,7 @@ class sub_group {
   static constexpr int dimensions = 1;
   static constexpr memory_scope fence_scope = memory_scope::sub_group;
 
-  sub_group(sycl::sub_group sg) noexcept;
+  sub_group(const sycl::sub_group& sg) noexcept;
 
   operator sycl::sub_group() const noexcept;
 
@@ -482,7 +482,7 @@ class sub_group {
 .[apititle]#sub_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-constructor]
 ----
-sub_group(sycl::sub_group sg) noexcept;
+sub_group(const sycl::sub_group& sg) noexcept;
 ----
 
 _Effects_: Constructs a [code]#sub_group# representing the same collection of
