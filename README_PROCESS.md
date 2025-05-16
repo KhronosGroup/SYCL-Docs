@@ -255,12 +255,15 @@ Click the link, scroll to the bottom, and click the download icon for the
 "spec-outputs" build artifact.
 Unpack the downloaded ZIP file, and copy the "html" and "katex" directories to
 `<root>/SYCL/<date>`.
+You can use [this MR][7] as a model.
 
 Once the board ratifies the package, the KHR is eligible to be published.
 Cherry pick the KHR's PR from the "main" branch to the "sycl-xxxx" branch,
 following the instructions above under "Cherry pick strategy".
 Since the KHR is an appendix in the main SYCL specification, the KHR will be
 published whenever the working group decides to publish an update revision.
+
+[7]: <https://gitlab.khronos.org/promoters/ratification-candidates/-/merge_requests/189>
 
 
 ## Updating the Docker build image
@@ -282,7 +285,7 @@ image is published on Docker Hub.
 We only care about changes to Docker images with tags named
 `asciidoctor-spec.xxxx`, so you can ignore notifications for other tags.
 
-When a new Docker image is published, create a PR like [this one][7] using the
+When a new Docker image is published, create a PR like [this one][8] using the
 Docker SHA labeled as "Manifest digest".
 
 Before merging the PR, it's best to validate that the new tools don't cause any
@@ -315,7 +318,7 @@ $ sudo docker pull khronosgroup/docker-images:asciidoctor-spec
 
 And this will update your "alias" image with the latest version.
 
-[7]: <https://github.com/KhronosGroup/SYCL-Docs/pull/595>
+[8]: <https://github.com/KhronosGroup/SYCL-Docs/pull/595>
 
 
 ## Update the copyright date
@@ -334,10 +337,10 @@ certain pattern, and it prints the file names of any suspect notices to stdout.
 If any file names are printed, examine them and update them manually.
 (See the comments at the top of the script for details.)
 
-Once you have finished, create a PR like [this one][8].
+Once you have finished, create a PR like [this one][9].
 
 It's a good idea to manually examine the generated HTML and PDF specifications
 afterwards to make sure the copyright date (at the start of the copyright
 notice) is as you expect.
 
-[8]: <https://github.com/KhronosGroup/SYCL-Docs/pull/786>
+[9]: <https://github.com/KhronosGroup/SYCL-Docs/pull/786>
