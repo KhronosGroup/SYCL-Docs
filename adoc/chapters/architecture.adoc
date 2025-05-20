@@ -1806,7 +1806,10 @@ between two devices.
 For example, this may occur when a <<command-group>> has a requirement for the
 contents of a buffer or when the application passes certain arguments to a
 <<sycl-kernel-function>> (as described in <<sec:kernel.parameter.passing>>).
-Such data must have a type that is <<device-copyable>> as defined below.
+Such data must have a type that is <<device-copyable>>, as defined below.
+
+An implementation can assume that it is always safe to perform bitwise copies of
+any object that has a device copyable type.
 
 Any type that is trivially copyable (as defined by the {cpp} core language) is
 implicitly device copyable.
@@ -1874,20 +1877,6 @@ When the application explicitly declares a class type to be device copyable,
 arrays of that type and cv-qualified versions of that type are also device
 copyable, and the implementation sets the [code]#is_device_copyable_v# trait to
 [code]#true# for these array and cv-qualified types.
-
-[NOTE]
-====
-It is unspecified whether the implementation actually calls the copy
-constructor, move constructor, copy assignment operator, or move assignment
-operator of a class declared as [code]#is_device_copyable_v# when doing an
-inter-device copy.
-Since these operations must all be the same as a bitwise copy, the
-implementation may simply copy the memory where the object resides.
-Likewise, it is unspecified whether the implementation actually calls the
-destructor for such a class on the device since the destructor must have no
-effect on the device.
-====
-
 
 == Endianness support
 
