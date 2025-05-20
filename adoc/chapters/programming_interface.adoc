@@ -716,6 +716,30 @@ Construct a SYCL [code]#property_list# with zero or more properties.
 
 |====
 
+=== Information queries
+
+Several classes in SYCL provide a generic mechanism for querying the class for
+information.
+
+Each available query is described by an <<information-descriptor>>, which is a
+class or class template that encapsulates an information query and its return
+type.
+
+==== Information query interface
+
+The information query interface consists of two function templates, templated on
+an <<information-descriptor>>:
+
+* The [code]#get_info()# function template can be used to query general
+  information that is available with any backend; and
+
+* The [code]#get_backend_info()# function template can be used to query
+  backend-specific information.
+
+The information that can be queried with [code]#get_info()# for a specific class
+is listed alongside the definition of that class.
+The information that can be queried with [code]#get_backend_info()# is defined
+in the corresponding <<backend>> specification.
 
 
 == SYCL runtime classes
@@ -2827,7 +2851,7 @@ backend of this device is not OpenCL.
 ----
 namespace sycl::info::device {
 struct queue_profiling {
-  using return_type =
+  using return_type = bool;
 };
 } // namespace sycl::info::device
 ----
@@ -3131,7 +3155,6 @@ backend of this device is not OpenCL.
 [source,role=synopsis,id=api:info-device-parent-device]
 ----
 namespace sycl::info::device {
-info::device::parent_device
 struct parent_device {
   using return_type = device;
 };
@@ -4893,6 +4916,9 @@ info::event_command_status::complete
 ----
    a@ Indicates that the command has finished running on the device.
       Attempting to wait on such an event will not block.
+
+Synchronization: When [code]#event::get_info# returns this value,
+the synchronization is equivalent to [code]#event::wait#.
 
 |====
 
@@ -7010,7 +7036,7 @@ if set final data is [code]#nullptr)#.
 {
   std::shared_ptr<int> ptr { data };
   {
-    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
+    buffer<int, 2> b { ptr, { 10, 10 } };
     // update the data
     [...]
   } // Data is copied back because there is an user side shared_ptr
@@ -7022,7 +7048,7 @@ if set final data is [code]#nullptr)#.
 {
   std::shared_ptr<int> ptr { data };
   {
-    buffer<int, 1> b { ptr, range<2>{ 10, 10 } };
+    buffer<int, 2> b { ptr, { 10, 10 } };
     // update the data
     [...]
     ptr.reset();
@@ -18056,14 +18082,17 @@ vec<ConvertT, NumElements> convert() const
 a@
 [source]
 ----
-template <typename asT> asT as() const
+template <typename AsT> AsT as() const
 ----
-   a@ Bitwise reinterprets this SYCL [code]#vec# as a SYCL [code]#vec# of a
-      different element type and number of elements specified by [code]#asT#.
-      The new SYCL [code]#vec# type must have the same storage size in bytes as
-      this SYCL [code]#vec#, and the size of the elements in the new SYCL
-      [code]#vec# ([code]#NumElements * sizeof(DataT)#) must be the same as the
-      size of the elements in this SYCL [code]#vec#.
+   a@ Equivalent to [code]#sycl::bit_cast<AsT>(*this)#.
+
+[NOTE]
+====
+Since the object representation of a [code]#vec<T, 3># contains padding bits
+(see <<memory-layout-and-alignment>>), using [code]#as# or [code]#bit_cast# to
+create a [code]#vec# with a different number of elements can lead to undefined
+behavior.
+====
 
 a@
 [source]
@@ -18929,8 +18958,6 @@ operator vec<DataT, NumElements>() const
 |====
 _Availability:_ These functions are available in both
 [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+#.
-
-_Constraints:_ Available only when [code]#NumElements > 1#.
 
 _Returns:_ A new [code]#vec# object that contains the result of the captured
 swizzle operation.
