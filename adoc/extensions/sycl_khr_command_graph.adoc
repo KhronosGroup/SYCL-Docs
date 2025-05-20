@@ -1,5 +1,16 @@
 = sycl_khr_command_graph
 
+The graph abstraction defines an explicitly lazy execution model by decoupling
+command creation from submission. These concepts are potentially tied together
+in SYCL implementations that eagerly submit work to a device when a
+command-group is submitted to a queue. By providing a prior construction stage
+before a workload of commands begins execution on the device, submission of
+multiple commands can happen in a single submission call instead of many,
+reducing the overhead of multiple independent command submissions. Deferral of
+command submission can also allow for the SYCL implementation to optimize
+dependencies within the user defined graph, which may improve concurrency
+and other performance metrics.
+
 == Dependencies
 
 This extension has no dependencies on other extensions.
@@ -35,11 +46,14 @@ int main() {
   queue myQueue;
   
   khr::command_graph myGraph{myQueue};
-  
+
   // Create some 2D buffers of float for our matrices
-  buffer<float, 2> a{range<2>{N, M}, {khr::property::graph::assume_buffer_outlives_graph{}}};
-  buffer<float, 2> b{range<2>{N, M}, {khr::property::graph::assume_buffer_outlives_graph{}}};
-  buffer<float, 2> c{range<2>{N, M}, {khr::property::graph::assume_buffer_outlives_graph{}}};
+  buffer<float, 2> a{range<2>{N, M},
+                     khr::property::graph::assume_buffer_outlives_graph{}};
+  buffer<float, 2> b{range<2>{N, M},
+                     khr::property::graph::assume_buffer_outlives_graph{}};
+  buffer<float, 2> c{range<2>{N, M},
+                     khr::property::graph::assume_buffer_outlives_graph{}};
 
   myGraph.begin_recording(myQueue);
 
