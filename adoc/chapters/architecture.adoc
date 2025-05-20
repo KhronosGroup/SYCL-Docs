@@ -1838,15 +1838,13 @@ device copyable.
 
 [NOTE]
 ====
-The types [code]#std::basic_string_view<CharT, Traits># and
-[code]#std::span<ElementType, Extent># are both view types, which reference
-underlying data that is not contained within their type.
-Although these view types are device copyable, the implementation copies just
-the view and not the contained data when doing an inter-device copy.
-In order to reference the contained data after such a copy, the application must
-allocate the contained data in unified shared memory (USM) that is accessible on
-both the host and device (or on both devices in the case of a device-to-device
-copy).
+Types such as [code]#std::basic_string_view<CharT, Traits># and
+[code]#std::span<ElementType, Extent># are view types, which reference
+underlying data that they do not own.
+Copying such a type only copies the view and not the referenced data.
+If a view is copied between the host and device or between two devices, it is
+the application's responsibility to ensure that the referenced data is allocated
+in memory that can be accessed by the recipient (see <<sec:usm>>).
 ====
 
 In addition, the implementation may allow the application to explicitly declare
