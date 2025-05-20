@@ -1852,11 +1852,11 @@ certain class types as device copyable.
 If the implementation has this support, it must predefine the preprocessor macro
 [code]#SYCL_DEVICE_COPYABLE# to [code]#1#, and it must not predefine this
 preprocessor macro if it does not have this support.
-When the implementation has this support, a class type [code]#T# is device
-copyable if all of the following statements are true:
+When the implementation has this support, an application may declare that a
+class type [code]#T# is device copyable by defining the trait
+[code]#is_device_copyable_v<T># to [code]#true# if all of the following
+statements are true:
 
-  * The application defines the trait [code]#is_device_copyable_v<T># to
-    [code]#true#;
   * Type [code]#T# has at least one eligible copy constructor, move constructor,
     copy assignment operator, or move assignment operator;
   * Each eligible copy constructor, move constructor, copy assignment operator,
@@ -1866,6 +1866,9 @@ copyable if all of the following statements are true:
     copy of the object;
   * Type [code]#T# has a [code]#public# non-deleted destructor; and
   * The destructor has no effect when executed on the device.
+
+Declaring that a class type [code]#T# is device copyable when any of these
+statements is not true results in undefined behavior.
 
 When the application explicitly declares a class type to be device copyable,
 arrays of that type and cv-qualified versions of that type are also device
