@@ -5279,8 +5279,8 @@ buffer(Container& container, AllocatorT allocator,
 template <typename Container>
 buffer(Container& container, const property_list& propList = {}); (2)
 ----
-Constraints:_ Available only if [code]#Container# must be a contiguous
-container, that is the following requirements must be met:
+Constraints:_ Available only if [code]#Container# is a contiguous container,
+that is the following requirements must be met:
 
 * [code]#std::data(container)# and [code]#std::size(container)# are well formed;
 
@@ -5397,16 +5397,6 @@ _Effects (2):_ Equivalent to `buffer(first, last, AllocatorT{}, propList)`.
 buffer(buffer& b, const id<Dimensions>& baseIndex,
        const range<Dimensions>& subRange);
 ----
-_Preconditions_:
-
-* The offset and range specified by [code]#baseIndex# and [code]#subRange#
-together must represent a contiguous region of the original SYCL [code]#buffer#.
-
-* The sum of [code]#baseIndex# and [code]#subRange# in any dimension must not
-exceed the parent buffer [code]#b# size [code]#bufferRange# in that dimension.
-
-* The parent buffer [code]#b# must not be a sub-buffer.
-
 _Effects:_ Create a new sub-buffer without allocation to have separate accessors
 later. [code]#b# is the buffer with the real data. [code]#baseIndex# specifies
 the origin of the sub-buffer inside the buffer [code]#b#. [code]#subRange#
@@ -5476,7 +5466,7 @@ size_t get_count() const;
 ----
 Deprecated by SYCL 2020.
 
-_Returns:_ The same value as [code]#size()#.
+_Effects:_ Equivalent to [code]#return size()#.
 '''
 
 .[apititle]#buffer::get_size#
@@ -5486,7 +5476,7 @@ size_t get_size() const;
 ----
 Deprecated by SYCL 2020.
 
-_Returns:_ The same value as [code]#byte_size()#.
+_Effects:_ Equivalent to [code]#return byte_size()#.
 '''
 
 .[apititle]#buffer::get_allocator#
