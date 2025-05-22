@@ -5207,14 +5207,16 @@ buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
 _Effects (1):_ Equivalent to `buffer(bufferRange, AllocatorT{}, propList)`.
 
 _Effects (2):_ Construct a SYCL [code]#buffer# instance with uninitialized
-memory. The constructed SYCL [code]#buffer# will use the [code]#allocator#
-parameter provided when allocating memory on the host. The range of the
-constructed SYCL [code]#buffer# is specified by the [code]#bufferRange#
-parameter provided. Data is not written back to the host on destruction of the
-[code]#buffer# unless the [code]#buffer# has a valid non-null pointer specified
-via the member function [code]#set_final_data()#. Zero or more properties can be
-provided to the constructed SYCL [code]#buffer# via an instance of
-[code]#property_list#.
+memory.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Data is not written back to the host on destruction of the [code]#buffer# unless
+the [code]#buffer# has a valid non-null pointer specified via the member
+function [code]#set_final_data()#.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 '''
 
 .[apititle]#Construct with host memory#
@@ -5232,35 +5234,39 @@ buffer(const T* hostData, const range<Dimensions>& bufferRange,
 buffer(const T* hostData, const range<Dimensions>& bufferRange,
        AllocatorT allocator, const property_list& propList = {}); (4)
 ----
-_Effects (1):_ Equivalent to
-`buffer(hostData, bufferRange, AllocatorT{}, propList)`.
+_Effects (1):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
 
 _Effects (2):_ Construct a SYCL [code]#buffer# instance with the
-[code]#hostData# parameter provided. The buffer is initialized with the memory
-specified by [code]#hostData#, and the buffer assumes exclusive access to this
-memory for the duration of its lifetime.  The constructed SYCL [code]#buffer#
-will use the [code]#allocator# parameter provided when allocating memory on the
-host.  The range of the constructed SYCL [code]#buffer# is specified by the
-[code]#bufferRange# parameter provided.  Zero or more properties can be provided
-to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+[code]#hostData# parameter provided.
+The buffer is initialized with the memory specified by [code]#hostData#, and the
+buffer assumes exclusive access to this memory for the duration of its lifetime.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
-_Effects (3):_ Equivalent to
-`buffer(hostData, bufferRange, AllocatorT{}, propList)`.
+_Effects (3):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
 
 _Effects (4):_ Construct a SYCL [code]#buffer# instance with the
-[code]#hostData# parameter provided.  The buffer assumes exclusive access to
-this memory for the duration of its lifetime.
+[code]#hostData# parameter provided.
+The buffer assumes exclusive access to this memory for the duration of its
+lifetime.
 
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
 
 The host address is [code]#const T#, so the host accesses can be read-only.
 However, the [code]#typename T# is not const so the device accesses can be both
-read and write accesses. Since, the [code]#hostData# is const, this buffer is
-only initialized with this memory and there is no write back after its
-destruction, unless the [code]#buffer# has another valid non-null final data
-address specified via the member function [code]#set_final_data()# after
-construction of the [code]#buffer#.
+read and write accesses.
+Since, the [code]#hostData# is const, this buffer is only initialized with this
+memory and there is no write back after its destruction, unless the
+[code]#buffer# has another valid non-null final data address specified via the
+member function [code]#set_final_data()# after construction of the
+[code]#buffer#.
 
 The range of the constructed SYCL [code]#buffer# is specified by the
 [code]#bufferRange# parameter provided.
@@ -5293,13 +5299,13 @@ _Effects (1):_ Equivalent to `buffer(container, AllocatorT{}, propList)`.
 
 _Effects (2):_ Construct a one dimensional SYCL [code]#buffer# instance from the
 elements starting at [code]#std::data(container)# and containing
-[code]#std::size(container)# number of elements. The buffer is initialized with
-the contents of [code]#container#, and the buffer assumes exclusive access to
-[code]#container# for the duration of its lifetime.
+[code]#std::size(container)# number of elements.
+The buffer is initialized with the contents of [code]#container#, and the buffer
+assumes exclusive access to [code]#container# for the duration of its lifetime.
 
 Data is written back to [code]#container# before the completion of
-[code]#buffer# destruction if the return type of [code]#std::data(container)#
-is not [code]#const#.
+[code]#buffer# destruction if the return type of [code]#std::data(container)# is
+not [code]#const#.
 
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
@@ -5327,41 +5333,47 @@ via an instance of [code]#property_list#.
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 ----
-_Effects (1):_ Equivalent to
-`buffer(hostData, bufferRange, AllocatorT{}, propList)`.
+_Effects (1):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
 
 _Effects (2):_ When [code]#hostData# is not empty, construct a SYCL buffer with
-the contents of its stored pointer.  The buffer assumes exclusive access to this
-memory for the duration of its lifetime.  The buffer also creates its own
-internal copy of the [code]#shared_ptr# that shares ownership of the
-[code]#hostData# memory, which means the application can safely release
-ownership of this [code]#shared_ptr# when the constructor returns.
+the contents of its stored pointer.
+The buffer assumes exclusive access to this memory for the duration of its
+lifetime.
+The buffer also creates its own internal copy of the [code]#shared_ptr# that
+shares ownership of the [code]#hostData# memory, which means the application can
+safely release ownership of this [code]#shared_ptr# when the constructor
+returns.
 
 When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
 memory.
 
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
-provided when allocating memory on the host.  The range of the constructed SYCL
-[code]#buffer# is specified by the [code]#bufferRange# parameter provided. Zero
-or more properties can be provided to the constructed SYCL [code]#buffer# via an
-instance of [code]#property_list#.
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
-_Effects (3):_ Equivalent to
-`buffer(hostData, bufferRange, AllocatorT{}, propList)`.
+_Effects (3):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
 
 _Effects (4):_ When [code]#hostData# is not empty, construct a SYCL buffer with
-the contents of its stored pointer.  The buffer assumes exclusive access to this
-memory for the duration of its lifetime.  The buffer also creates its own
-internal copy of the [code]#shared_ptr# that shares ownership of the
-[code]#hostData# memory, which means the application can safely release
-ownership of this [code]#shared_ptr# when the constructor returns.
+the contents of its stored pointer.
+The buffer assumes exclusive access to this memory for the duration of its
+lifetime.
+The buffer also creates its own internal copy of the [code]#shared_ptr# that
+shares ownership of the [code]#hostData# memory, which means the application can
+safely release ownership of this [code]#shared_ptr# when the constructor
+returns.
 
 When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
 memory.
 
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
-provided when allocating memory on the host.  The range of the constructed SYCL
-[code]#buffer# is specified by the [code]#bufferRange# parameter provided.
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 '''
@@ -5378,15 +5390,16 @@ buffer<T, 1>(InputIterator first, InputIterator last,
              const property_list& propList = {});
 ----
 _Effects (1):_ Create a new allocated 1D buffer initialized from the given
-elements ranging from [code]#first# up to one before [code]#last#. The data is
-copied to an intermediate memory position by the runtime. Data is not written
-back to the same iterator set provided. However, if the [code]#buffer# has a
-valid non-const iterator specified via the member function
-[code]#set_final_data()#, data will be copied back to that iterator. The
-constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
-provided when allocating memory on the host. Zero or more properties can be
-provided to the constructed SYCL [code]#buffer# via an instance of
-[code]#property_list#.
+elements ranging from [code]#first# up to one before [code]#last#.
+The data is copied to an intermediate memory position by the runtime.
+Data is not written back to the same iterator set provided.
+However, if the [code]#buffer# has a valid non-const iterator specified via the
+member function [code]#set_final_data()#, data will be copied back to that
+iterator.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
 _Effects (2):_ Equivalent to `buffer(first, last, AllocatorT{}, propList)`.
 '''
@@ -5398,33 +5411,35 @@ buffer(buffer& b, const id<Dimensions>& baseIndex,
        const range<Dimensions>& subRange);
 ----
 _Effects:_ Create a new sub-buffer without allocation to have separate accessors
-later. [code]#b# is the buffer with the real data. [code]#baseIndex# specifies
-the origin of the sub-buffer inside the buffer [code]#b#. [code]#subRange#
-specifies the size of the sub-buffer.
+later.
+[code]#b# is the buffer with the real data.
+[code]#baseIndex# specifies the origin of the sub-buffer inside the buffer
+[code]#b#.
+[code]#subRange# specifies the size of the sub-buffer.
 
-The origin (based on [code]#baseIndex#) of the sub-buffer being constructed
-must be a multiple of the memory base address alignment of each SYCL
-[code]#device# which accesses data from the buffer.  This value is retrievable
-via the SYCL [code]#device# class info query
-[code]#info::device::mem_base_addr_align#.  Violating this requirement causes
-the implementation to throw an [code]#exception# with the [code]#errc::invalid#
-error code from the [code]#accessor# constructor (if the accessor is not a
-placeholder) or from [code]#handler::require()# (if the accessor is a
-placeholder).  If the accessor is bound to a <<command-group>> with a secondary
-queue, the sub-buffer's alignment must be compatible with both the primary
-queue's device and the secondary queue's device, otherwise this exception is
-thrown.
+The origin (based on [code]#baseIndex#) of the sub-buffer being constructed must
+be a multiple of the memory base address alignment of each SYCL [code]#device#
+which accesses data from the buffer.
+This value is retrievable via the SYCL [code]#device# class info query
+[code]#info::device::mem_base_addr_align#.
+Violating this requirement causes the implementation to throw an
+[code]#exception# with the [code]#errc::invalid# error code from the
+[code]#accessor# constructor (if the accessor is not a placeholder) or from
+[code]#handler::require()# (if the accessor is a placeholder).
+If the accessor is bound to a <<command-group>> with a secondary queue, the
+sub-buffer's alignment must be compatible with both the primary queue's device
+and the secondary queue's device, otherwise this exception is thrown.
 
 _Throws:_
 
-* An [code]#exception# with the [code]#errc::invalid# error code if [code]#b#
-is a sub-buffer.
+* An [code]#exception# with the [code]#errc::invalid# error code if [code]#b# is
+a sub-buffer.
 
 * An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#subRange# corresponds to a a non-contiguous region of [code]#b#.
 
-- An [code]#exception# with the [code]#errc::invalid# error code if the sum
-of [code]#baseIndex# and [code]#subRange# in any dimension exceeds the parent
+* An [code]#exception# with the [code]#errc::invalid# error code if the sum of
+[code]#baseIndex# and [code]#subRange# in any dimension exceeds the parent
 buffer [code]#b# size [code]#bufferRange# in that dimension.
 '''
 
@@ -5446,8 +5461,8 @@ of elements in each dimension as passed to the constructor.
 ----
 size_t byte_size() const noexcept;
 ----
-_Returns:_ The size of the buffer storage in bytes. Equal to
-[code]#size()*sizeof(T)#.
+_Returns:_ The size of the buffer storage in bytes.
+Equal to [code]#size()*sizeof(T)#.
 '''
 
 .[apititle]#buffer::size#
@@ -5455,8 +5470,9 @@ _Returns:_ The size of the buffer storage in bytes. Equal to
 ----
 size_t size() const noexcept;
 ----
-_Returns:_ The total number of elements in the buffer. Equal to
-[code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
+mode and target in the command group buffer.
+The value of target can be [code]#target::device#,
+[code]#target::constant_buffer# or [code]#target::host_task#.
 '''
 
 .[apititle]#buffer::get_count#
@@ -5510,13 +5526,14 @@ mode and target in the command group buffer. The value of target can be
 [code]#target::host_task#.
 
 _Returns (2):_ A valid [code]#accessor# to the buffer with the specified access
-mode and target in the command group buffer.  The accessor is a
-<<ranged-accessor>>, where the range starts at the given offset from the
-beginning of the buffer.  The value of target can be [code]#target::device#,
+mode and target in the command group buffer.
+The accessor is a <<ranged-accessor>>, where the range starts at the given
+offset from the beginning of the buffer.
+The value of target can be [code]#target::device#,
 [code]#target::constant_buffer# or [code]#target::host_task#.
 
-_Returns (3):_ A  valid [code]#accessor# as if constructed via passing the
-buffer and all provided arguments to the [code]#accessor# constructor.
+_Returns (3):_ A valid [code]#accessor# as if constructed via passing the buffer
+and all provided arguments to the [code]#accessor# constructor.
 
 Possible implementation:
 
@@ -5530,8 +5547,8 @@ Possible implementation:
 [code]#+return host_accessor{*this, args...};+#
 
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
-the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
-the buffer in any dimension.
+the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
+buffer in any dimension.
 '''
 
 .[apititle]#Deprecated buffer::get_access#
@@ -5544,19 +5561,21 @@ template <access_mode Mode>
 accessor<T, Dimensions, Mode, target::host_buffer>
 get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {}); (2)
 ----
-Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
+Deprecated in SYCL 2020.
+Use [code]#get_host_access()# instead.
 
 _Returns (1):_ A valid host [code]#accessor# to the buffer with the specified
 access mode and target.
 
-_Returns (2):_ A valid host [code]#accessor# to the buffer with the specified access
-mode and target.  The accessor is a <<ranged-accessor>>, where the range starts
-at the given offset from the beginning of the buffer.  The value of target can
-only be [code]#target::host_buffer#.
+_Returns (2):_ A valid host [code]#accessor# to the buffer with the specified
+access mode and target.
+The accessor is a <<ranged-accessor>>, where the range starts at the given
+offset from the beginning of the buffer.
+The value of target can only be [code]#target::host_buffer#.
 
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
-the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
-the buffer in any dimension.
+the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
+buffer in any dimension.
 '''
 
 .[apititle]#buffer::set_final_data#
@@ -5587,7 +5606,7 @@ happen.
 void set_write_back(bool flag = true);
 ----
 _Effects:_ Dynamically forces or cancels the write-back of the data of a buffer
-on destruction according to       the value of [code]#flag#.
+on destruction according to the value of [code]#flag#.
 
 Forcing the write-back is similar to what happens during a normal write-back as
 described in <<sec:buf-sync-rules>> and <<sec:sharing-host-memory-with-dm>>.
@@ -5614,13 +5633,15 @@ _Returns:_ [code]#true# if this SYCL [code]#buffer# is a sub-buffer and
   reinterpret(range<ReinterpretDim> reinterpretRange) const;
 ----
 _Preconditions (2):_ Available when [code]#(ReinterpretDim == 1)# or when
-[code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) == sizeof(T)))#.
+[code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) ==
+sizeof(T)))#.
 
-_Effects:_ Creates a reinterpreted SYCL [code]#buffer#. The buffer object being
-reinterpreted can be a SYCL sub-buffer that was created from a SYCL
-[code]#buffer#. Reinterpreting a sub-buffer provides a reinterpreted view of
-the sub-buffer only, and does not change the offset or size of the sub-buffer
-view (in bytes) relative to the parent [code]#buffer#.
+_Effects:_ Creates a reinterpreted SYCL [code]#buffer#.
+The buffer object being reinterpreted can be a SYCL sub-buffer that was created
+from a SYCL [code]#buffer#.
+Reinterpreting a sub-buffer provides a reinterpreted view of the sub-buffer
+only, and does not change the offset or size of the sub-buffer view (in bytes)
+relative to the parent [code]#buffer#.
 
 _Returns (1):_ A reinterpreted SYCL [code]#buffer# with the type specified by
 [code]#ReinterpretT#, dimensions specified by [code]#ReinterpretDim# and range
@@ -5661,14 +5682,16 @@ class use_host_ptr {
 
 The [code]#use_host_ptr# property adds the requirement that the <<sycl-runtime>>
 must not allocate any memory for the SYCL [code]#buffer# and instead uses the
-provided host pointer directly. This prevents the <<sycl-runtime>> from
-allocating additional temporary storage on the host.
+provided host pointer directly.
+This prevents the <<sycl-runtime>> from allocating additional temporary storage
+on the host.
 
 This property has a special guarantee for buffers that are constructed from a
-[code]#hostData# pointer.  If a [code]#host_accessor# is constructed from such
-a buffer, then the address of the [code]#reference# type returned from the
-accessor's member functions such as [code]#operator[](id<>)# will be the same
-as the corresponding [code]#hostData# address.
+[code]#hostData# pointer.
+If a [code]#host_accessor# is constructed from such a buffer, then the address
+of the [code]#reference# type returned from the accessor's member functions such
+as [code]#operator[](id<>)# will be the same as the corresponding
+[code]#hostData# address.
 
 _Effects (1):_ Constructs an [code]#use_host_ptr# property object.
 
@@ -5687,13 +5710,14 @@ class use_mutex {
 ----
 
 The [code]#use_mutex# property is valid for the SYCL [code]#buffer#,
-[code]#unsampled_image# and [code]#sampled_image# classes. The property adds the
-requirement that the memory which is owned by the SYCL [code]#buffer# can be
-shared with the application via a [code]#std::mutex# provided to the property.
+[code]#unsampled_image# and [code]#sampled_image# classes.
+The property adds the requirement that the memory which is owned by the SYCL
+[code]#buffer# can be shared with the application via a [code]#std::mutex#
+provided to the property.
 The mutex [code]#m# is locked by the runtime whenever the data is in use and
-unlocked otherwise. The contents of [code]#hostData# are guaranteed to reflect
-the contents of the buffer when the [code]#std::mutex# is unlocked by the
-runtime.
+unlocked otherwise.
+The contents of [code]#hostData# are guaranteed to reflect the contents of the
+buffer when the [code]#std::mutex# is unlocked by the runtime.
 
 '''
 
