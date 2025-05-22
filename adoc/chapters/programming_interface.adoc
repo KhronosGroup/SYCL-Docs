@@ -5679,9 +5679,9 @@ _Effects (1):_ Constructs an [code]#use_host_ptr# property object.
 ----
 namespace sycl::property::buffer {
 class use_mutex {
-  use_mutex(std::mutex& mutexRef);  (1)
+  use_mutex(std::mutex& mutexRef);
 
-  std::mutex* get_mutex_ptr() const; (2)
+  std::mutex* get_mutex_ptr() const;
 };
 } // namespace sycl::property::buffer
 ----
@@ -5695,10 +5695,26 @@ unlocked otherwise. The contents of [code]#hostData# are guaranteed to reflect
 the contents of the buffer when the [code]#std::mutex# is unlocked by the
 runtime.
 
-_Effects (1):_ Constructs a SYCL [code]#use_mutex# property instance with a
+'''
+
+.[apidef]#property::buffer::use_mutex constructor#
+[source,role=synopsis,id=api:property-buffer-use-mutex-ctor]
+----
+use_mutex(std::mutex& mutexRef);
+----
+
+_Effects:_ Constructs a SYCL [code]#use_mutex# property instance with a
 reference to [code]#mutexRef# parameter provided.
 
-_Returns (2):_ The [code]#std::mutex# which was specified when constructing this
+'''
+
+.[apidef]#property::buffer::use_mutex::get_mutex_ptr#
+[source,role=synopsis,id=api:property-buffer-use-mutex-get-mutex-ptr]
+----
+std::mutex* get_mutex_ptr() const;
+----
+
+_Returns:_ The [code]#std::mutex# which was specified when constructing this
 SYCL [code]#use_mutex# property.
 
 '''
@@ -5720,11 +5736,27 @@ The [code]#context_bound# property adds the requirement that the SYCL
 [code]#buffer# can only be associated with a single SYCL [code]#context# that is
 provided to the property.
 
-_Effects (1):_ Constructs a SYCL [code]#context_bound# property instance with a
+'''
+
+.[apidef]#property::buffer::context_bound constructor#
+[source,role=synopsis,id=api:property-buffer-context-bound-ctor]
+----
+context_bound(context boundContext);
+----
+
+_Effects:_ Constructs a SYCL [code]#context_bound# property instance with a
 copy of a SYCL [code]#context#.
 
-_Returns (2):_ The [code]#context# which was specified when constructing this
-SYCL [code]#context_bound# property.
+'''
+
+.[apidef]#property::buffer::context_bound::get_context#
+[source,role=synopsis,id=api:property-buffer-context-bound-get-context]
+----
+context get_context() const;
+----
+
+_Returns:_ The [code]#context# which was specified when constructing this SYCL
+[code]#context_bound# property.
 
 '''
 
