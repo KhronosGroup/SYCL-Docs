@@ -17919,7 +17919,7 @@ The number of elements parameter, [code]#NumElements#, must be one of: 1, 2, 3,
 Any other value shall produce a compilation failure.
 The element type parameter, [code]#DataT#, must be the cv-unqualified version of
 one of the following: one of the built-in scalar data types listed in
-<<subsec:scalartypes>>, [code]#half#, or [code]#sycl::byte#.
+<<subsec:scalartypes>>, [code]#half#, [code]#sycl::byte#, or [code]#std::byte#.
 
 An instance of the SYCL [code]#vec# class template can be implicitly converted
 to an instance of the data type when the number of elements is [code]#1# in
@@ -18321,7 +18321,11 @@ a@
 ----
 vec operatorOP(const vec& lhs, const vec& rhs)
 ----
-   a@ If [code]#OP# is [code]#%#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_
+
+* If [code]#OP# is not [code]#%#, [code]#DataT# is an arithmetic type or
+  [code]#half#, and
+* If [code]#OP# is [code]#%#, [code]#DataT# is an integral type.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
@@ -18336,7 +18340,9 @@ vec operatorOP(const vec& lhs, const T& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* If [code]#OP# is [code]#%#, [code]#DataT != float && DataT != double && DataT != half#.
+* If [code]#OP# is not [code]#%#, [code]#DataT# is an arithmetic type or
+  [code]#half#, and
+* If [code]#OP# is [code]#%#, [code]#DataT# is an integral type.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -18351,7 +18357,9 @@ vec operatorOP(const T& lhs, const vec& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* If [code]#OP# is [code]#%#, [code]#DataT != float && DataT != double && DataT != half#.
+* If [code]#OP# is not [code]#%#, [code]#DataT# is an arithmetic type or
+  [code]#half#, and
+* If [code]#OP# is [code]#%#, [code]#DataT# is an integral type.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -18368,7 +18376,11 @@ a@
 ----
 vec& operatorOP(vec& lhs, const vec& rhs)
 ----
-   a@ If [code]#OP# is [code]#%=#, available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_
+
+* If [code]#OP# is not [code]#%=#, [code]#DataT# is an arithmetic type or
+  [code]#half#, and
+* If [code]#OP# is [code]#%=#, [code]#DataT# is an integral type.
 
 Perform an in-place element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec# and return [code]#lhs# [code]#vec#.
 
@@ -18383,7 +18395,9 @@ vec& operatorOP(vec& lhs, const T& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* If [code]#OP# is [code]#%=#, [code]#DataT != float && DataT != double && DataT != half#.
+* If [code]#OP# is not [code]#%=#, [code]#DataT# is an arithmetic type or
+  [code]#half#, and
+* If [code]#OP# is [code]#%=#, [code]#DataT# is an integral type.
 
 Perform an in-place element-wise [code]#OP# arithmetic operation between each element of [code]#lhs# [code]#vec# and [code]#rhs# scalar and return [code]#lhs# [code]#vec#.
 
@@ -18394,7 +18408,8 @@ a@
 ----
 vec& operatorOP(vec& v)
 ----
-   a@ Available only when: [code]#DataT != bool#.
+a@ _Constraints:_ [code]#DataT# is an arithmetic type or [code]#half# but
+[code]#DataT# is not [code]#bool#.
 
 Perform an in-place element-wise [code]#OP# prefix arithmetic operation on each element of [code]#v# and return [code]#v#.
 
@@ -18405,7 +18420,8 @@ a@
 ----
 vec operatorOP(vec& v, int)
 ----
-   a@ Available only when: [code]#DataT != bool#.
+a@ _Constraints:_ [code]#DataT# is an arithmetic type or [code]#half# but
+[code]#DataT# is not [code]#bool#.
 
 Perform an in-place element-wise [code]#OP# postfix arithmetic operation on each element of [code]#v# and return a copy of [code]#v# before the operation is performed.
 
@@ -18416,7 +18432,9 @@ a@
 ----
 vec operatorOP(const vec& v)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# unary arithmetic operation on each element of this SYCL [code]#vec#.
+a@ _Constraints:_ [code]#DataT# is an arithmetic type or [code]#half#.
+
+Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# unary arithmetic operation on each element of this SYCL [code]#vec#.
 
 Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
 
@@ -18425,7 +18443,7 @@ a@
 ----
 vec operatorOP(const vec& lhs, const vec& rhs)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_ [code]#DataT# is an integral type or [code]#std::byte#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
@@ -18440,7 +18458,7 @@ vec operatorOP(const vec& lhs, const T& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* [code]#DataT != float && DataT != double && DataT != half#.
+* [code]#DataT# is an integral type or [code]#std::byte#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -18455,7 +18473,7 @@ vec operatorOP(const T& lhs, const vec& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* [code]#DataT != float && DataT != double && DataT != half#.
+* [code]#DataT# is an integral type or [code]#std::byte#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -18469,7 +18487,7 @@ a@
 ----
 vec& operatorOP(vec& lhs, const vec& rhs)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_ [code]#DataT# is an integral type or [code]#std::byte#.
 
 Perform an in-place element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# SYCL [code]#vec# and return [code]#lhs# [code]#vec#.
 
@@ -18484,7 +18502,7 @@ vec& operatorOP(vec& lhs, const T& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* [code]#DataT != float && DataT != double && DataT != half#.
+* [code]#DataT# is an integral type or [code]#std::byte#.
 
 Perform an in-place element-wise [code]#OP# bitwise operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar and return a [code]#lhs# [code]#vec#.
 
@@ -18495,7 +18513,7 @@ a@
 ----
 vec operatorOP(const vec& lhs, const vec& rhs)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_ [code]#DataT# is an integral type.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
@@ -18510,7 +18528,7 @@ vec operatorOP(const vec& lhs, const T& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* [code]#DataT != float && DataT != double && DataT != half#.
+* [code]#DataT# is an integral type.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar. If [code]#OP# is [code]#>>#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
@@ -18525,7 +18543,7 @@ vec operatorOP(const T& lhs, const vec& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* [code]#DataT != float && DataT != double && DataT != half#.
+* [code]#DataT# is an integral type.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -18544,7 +18562,7 @@ a@
 ----
 vec& operatorOP(vec& lhs, const vec& rhs)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_ [code]#DataT# is an integral type.
 
 Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# SYCL [code]#vec# and returns [code]#lhs# [code]#vec#. If [code]#OP# is [code]#>>=#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
@@ -18559,7 +18577,7 @@ vec& operatorOP(vec& lhs, const T& rhs)
 a@ _Constraints:_
 
 * [code]#T# is implicitly convertible to [code]#DataT#, and
-* [code]#DataT != float && DataT != double && DataT != half#.
+* [code]#DataT# is an integral type.
 
 Perform an in-place element-wise [code]#OP# bitshift operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar and returns a reference to this SYCL [code]#vec#. If [code]#OP# is [code]#>>=#, [code]#DataT# is a signed type and [code]#lhs# [code]#vec# has a negative value any vacated bits viewed as an unsigned integer must be assigned the value [code]#1#, otherwise any vacated bits viewed as an unsigned integer must be assigned the value [code]#0#.
 
@@ -18570,7 +18588,9 @@ a@
 ----
 vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
+a@ _Constraints:_ [code]#DataT# is an arithmetic type or [code]#half#.
+
+Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#lhs# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and each element of the [code]#rhs# SYCL [code]#vec#.
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
@@ -18589,7 +18609,10 @@ a@
 template<typename T>
 vec<RET, NumElements> operatorOP(const vec& lhs, const T& rhs)
 ----
-a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
+a@ _Constraints:_
+
+* [code]#T# is implicitly convertible to [code]#DataT#, and
+* [code]#DataT# is an arithmetic type or [code]#half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as this SYCL [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise [code]#OP# logical operation between each element of [code]#lhs# [code]#vec# and the [code]#rhs# scalar.
 
@@ -18610,7 +18633,10 @@ a@
 template<typename T>
 vec<RET, NumElements> operatorOP(const T& lhs, const vec& rhs)
 ----
-a@ _Constraints:_ [code]#T# is implicitly convertible to [code]#DataT#.
+a@ _Constraints:_
+
+* [code]#T# is implicitly convertible to [code]#DataT#, and
+* [code]#DataT# is an arithmetic type or [code]#half#.
 
 Construct a new instance of the SYCL [code]#vec# class template with
 the same template parameters as the [code]#rhs# SYCL [code]#vec#
@@ -18704,7 +18730,7 @@ a@
 ----
 vec operator~(const vec& v)
 ----
-   a@ Available only when: [code]#DataT != float && DataT != double && DataT != half#.
+a@ _Constraints:_ [code]#DataT# is an integral type or [code]#std::byte#.
 
 Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise bitwise NOT operation on each element of [code]#v# [code]#vec#.
 
@@ -18713,7 +18739,9 @@ a@
 ----
 vec<RET, NumElements> operator!(const vec& v)
 ----
-   a@ Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise logical NOT operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
+a@ _Constraints:_ [code]#DataT# is an arithmetic type or [code]#half#.
+
+Construct a new instance of the SYCL [code]#vec# class template with the same template parameters as [code]#v# [code]#vec# with each element of the new SYCL [code]#vec# instance the result of an element-wise logical NOT operation on each element of [code]#v# [code]#vec#. Each element of the SYCL [code]#vec# that is returned must be [code]#-1# if the operation results in [code]#true# and [code]#0# if the operation results in [code]#false# or this SYCL [code]#vec# is a NaN.
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
@@ -19264,18 +19292,20 @@ friends of [code]#+__writeable_swizzle__+#.
 Overloads (4), (6), (8), (10), and (12) are hidden friends of
 [code]#+__const_swizzle__+#.
 
-_Constraints:_ If [code]#OP# is one of the following: [code]#%#, [code]#&#,
-[code]#|#, [code]#^#, [code]#<<#, [code]#>>#; available only when: [code]#DataT
-!= float && DataT != double && DataT != half#.
+_Constraints:_
 
-Overloads (1) - (4) are available only when the element data type of [code]#lhs#
-is the same as the element data type of [code]#rhs# and when the number of
-elements in the [code]#lhs# view is equal to the number of elements in the
-[code]#rhs# view.
-
-Overloads (9) - (12) are available only when [code]#T# is implicitly convertible
-to [code]#DataT# and when [code]#T# is not one of the swizzled vector class
-templates.
+* If [code]#OP# is [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#;
+  [code]#DataT# is an arithmetic type or [code]#half#, and
+* If [code]#OP# is [code]#%#, [code]#<<#, [code]#>>#; [code]#DataT# is an
+  integral type, and
+* If [code]#OP# is [code]#&#, [code]#|#, [code]#^#; [code]#DataT# is an integral
+  type or [code]#std::byte#, and
+* For overloads (1) - (4), the element data type of [code]#lhs# is the same as
+  the element data type of [code]#rhs# and the number of elements in the
+  [code]#lhs# view is equal to the number of elements in the [code]#rhs# view,
+  and
+* For overloads (9) - (12), [code]#T# is implicitly convertible to [code]#DataT#
+  and [code]#T# is not one of the swizzled vector class templates.
 
 _Effects:_ These functions behave as though the swizzle operation represented by
 each [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# parameter
@@ -19315,21 +19345,22 @@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#,
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when the left hand side
-[code]#+__writeable_swizzle__+# view does not contain any repeated elements.
+_Constraints:_
 
-If [code]#OP# is one of the following: [code]#%=#, [code]#&=#, [code]#|=#,
-[code]#^=#, [code]#+<<=+#, [code]#>>=#; available only when: [code]#DataT !=
-float && DataT != double && DataT != half#.
-
-Overloads (1) and (2) are available only when the element data type of
-[code]#lhs# is the same as the element data type of [code]#rhs# and when the
-number of elements in the [code]#lhs# view is equal to the number of elements in
-the [code]#rhs# view.
-
-Overloads (4) is available only when [code]#T# is implicitly convertible to
-[code]#DataT# and when [code]#T# is not one of the swizzled vector class
-templates.
+* The left hand side [code]#+__writeable_swizzle__+# view does not contain any
+  repeated elements, and
+* If [code]#OP# is [code]#pass:[+=]#, [code]#-=#, [code]#*=#, [code]#/=#;
+  [code]#DataT# is an arithmetic type or [code]#half#, and
+* If [code]#OP# is [code]#%=#, [code]#+<<=+#, [code]#>>=#; [code]#DataT# is an
+  integral type, and
+* If [code]#OP# is [code]#&=#, [code]#|=#, [code]#^=#; [code]#DataT# is an
+  integral type or [code]#std::byte#, and
+* For overloads (1) and (2), the element data type of [code]#lhs# is the same as
+  the element data type of [code]#rhs# and the number of elements in the
+  [code]#lhs# view is equal to the number of elements in the [code]#rhs# view,
+  and
+* For overload (4), [code]#T# is implicitly convertible to [code]#DataT# and
+  [code]#T# is not one of the swizzled vector class templates.
 
 _Effects:_ These functions operate as follow.
 
@@ -19365,9 +19396,12 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
-not contain any repeated elements.
-Available only when [code]#DataT# is not [code]#bool#.
+_Constraints:_
+
+* The [code]#+__writeable_swizzle__+# view does not contain any repeated
+  elements, and
+* [code]#DataT# is an arithmetic type or [code]#half# but [code]#DataT# is not
+  [code]#bool#.
 
 _Effects:_ Perform an in-place element-wise [code]#OP# prefix arithmetic
 operation on those elements of the [code]#vec# object that have corresponding
@@ -19392,9 +19426,12 @@ Where [code]#OP# is: [code]#pass:[++]#, [code]#--#.
 _Availability:_ These are hidden friend functions only in
 [code]#+__writeable_swizzle__+#.
 
-_Constraints:_ Available only when the [code]#+__writeable_swizzle__+# view does
-not contain any repeated elements.
-Available only when [code]#DataT# is not [code]#bool#.
+_Constraints:_
+
+* The [code]#+__writeable_swizzle__+# view does not contain any repeated
+  elements, and
+* [code]#DataT# is an arithmetic type or [code]#half# but [code]#DataT# is not
+  [code]#bool#.
 
 _Effects:_ Perform an in-place element-wise [code]#OP# postfix arithmetic
 operation on those elements of the [code]#vec# object that have corresponding
@@ -19422,6 +19459,8 @@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#.
 _Availability:_ Functions (1) are hidden friends in
 [code]#+__writeable_swizzle__+#.
 Functions (2) are hidden friends in [code]#+__const_swizzle__+#.
+
+_Constraints:_ [code]#DataT# is an arithmetic type or [code]#half#.
 
 _Effects:_ These functions behave as though the swizzle operation represented by
 the [code]#sv# parameter was first evaluated into a temporary [code]#vec#
@@ -19493,14 +19532,17 @@ friends of [code]#+__writeable_swizzle__+#.
 Overloads (4), (6), (8), (10), and (12) are hidden friends of
 [code]#+__const_swizzle__+#.
 
-_Constraints:_ Overloads (1) - (4) are available only when the element data type
-of [code]#lhs# is the same as the element data type of [code]#rhs# and when the
-number of elements in the [code]#lhs# view is equal to the number of elements in
-the [code]#rhs# view.
+_Constraints:_
 
-Overloads (9) - (12) are available only when [code]#T# is implicitly convertible
-to [code]#DataT# and when [code]#T# is not one of the swizzled vector class
-templates.
+* For overloads (1) - (4), the element data type of [code]#lhs# is the same as
+  the element data type of [code]#rhs# and the number of elements in the
+  [code]#lhs# view is equal to the number of elements in the [code]#rhs# view,
+  and
+* If [code]#OP# is [code]#&&#, [code]#||#; [code]#DataT# is an arithmetic type
+  or [code]#half#, and
+* For overloads (9) - (12), available only when [code]#T# is implicitly
+  convertible to [code]#DataT# and [code]#T# is not one of the swizzled vector
+  class templates.
 
 _Effects:_ These functions behave as though the swizzle operation represented by
 each [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# parameter
@@ -19527,8 +19569,11 @@ _Availability:_ Overloads (1) and (3) are hidden friends of
 [code]#+__writeable_swizzle__+#.
 Overloads (2) and (4) are hidden friends of [code]#+__const_swizzle__+#.
 
-_Constraints:_ Overloads (1) - (2) are available only when: [code]#DataT !=
-float && DataT != double && DataT != half#.
+_Constraints:_
+
+* For overloads (1) - (2), [code]#DataT# is an integral type or
+  [code]#std::byte#, and
+* For overloads (3) - (4), [code]#DataT# is an arithmetic type or [code]#half#.
 
 _Effects:_ These functions behave as though the swizzle operation represented by
 the [code]#+__writeable_swizzle__+# or [code]#+__const_swizzle__+# parameter was
