@@ -5164,19 +5164,6 @@ still undefined behavior.
 The SYCL [code]#buffer# class template provides the common reference semantics
 (see <<sec:reference-semantics>>).
 
-
-==== Buffer interface
-
-The constructors and member functions of the SYCL [code]#buffer# class template
-are listed in <<sec:buffer-ctors>> and <<sec:buffer-member-funcs>>,
-respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-Each constructor takes as the last parameter an optional SYCL
-[code]#property_list# to provide properties to the SYCL [code]#buffer#.
-
 The SYCL [code]#buffer# class template takes a template parameter
 [code]#AllocatorT# for specifying an allocator which is used by the
 <<sycl-runtime>> when allocating temporary memory on the host.
@@ -5186,7 +5173,7 @@ If no template argument is provided, then the default allocator for the SYCL
 
 // Interface for class: buffer
 
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/buffer.h[lines=4..-1]
 ----
@@ -5195,14 +5182,21 @@ include::{header_dir}/buffer.h[lines=4..-1]
 [[sec:buffer-ctors]]
 ==== Constructors
 
+All [code]#buffer# constructors take a parameter named [code]#propList# which
+allows the application to pass zero or more properties.
+These properties may specify additional effects of the constructor and
+resulting [code]#buffer# object.
+See <<sec:buffer-properties>> for the buffer properties that are defined by the
+<<core-spec>>.
+
 .[apititle]#Construct with uninitialized memory#
 [source,role=synopsis,id=api:buffer-ctor-uninit]
 ----
-buffer(const range<Dimensions>& bufferRange,
-       const property_list& propList = {}); (1)
+buffer(const range<Dimensions>& bufferRange,                        (1)
+       const property_list& propList = {});
 
-buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
-       const property_list& propList = {}); (2)
+buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,  (2)
+       const property_list& propList = {});
 ----
 _Effects (1):_ Equivalent to `buffer(bufferRange, AllocatorT{}, propList)`.
 
@@ -5217,22 +5211,23 @@ the [code]#buffer# has a valid non-null pointer specified via the member
 function [code]#set_final_data()#.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
+
 '''
 
 .[apititle]#Construct with host memory#
 [source,role=synopsis,id=api:buffer-ctor-host-mem]
 ----
-buffer(T* hostData, const range<Dimensions>& bufferRange,
-       const property_list& propList = {}); (1)
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
+       const property_list& propList = {});
 
 buffer(T* hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator, const property_list& propList = {}); (2)
+       AllocatorT allocator, const property_list& propList = {});  (2)
 
-buffer(const T* hostData, const range<Dimensions>& bufferRange,
-       const property_list& propList = {}); (3)
+buffer(const T* hostData, const range<Dimensions>& bufferRange,    (3)
+       const property_list& propList = {});
 
-buffer(const T* hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator, const property_list& propList = {}); (4)
+buffer(const T* hostData, const range<Dimensions>& bufferRange,    (4)
+       AllocatorT allocator, const property_list& propList = {});
 ----
 _Effects (1):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
 propList)`.
@@ -5273,17 +5268,18 @@ The range of the constructed SYCL [code]#buffer# is specified by the
 
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
+
 '''
 
 .[apititle]#Construct from a container#
 [source,role=synopsis,id=api:buffer-ctor-container]
 ----
 template <typename Container>
-buffer(Container& container, AllocatorT allocator,
-       const property_list& propList = {}); (1)
+buffer(Container& container, AllocatorT allocator,                 (1)
+       const property_list& propList = {});
 
 template <typename Container>
-buffer(Container& container, const property_list& propList = {}); (2)
+buffer(Container& container, const property_list& propList = {});  (2)
 ----
 _Constraints:_ Available only if [code]#Container# is a contiguous container,
 that is the following requirements must be met:
@@ -5312,24 +5308,25 @@ provided when allocating memory on the host.
 
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
+
 '''
 
 .[apititle]#Construct from memory owned by a shared pointer#
 [source,role=synopsis,id=api:buffer-ctor-shared-ptr]
 ----
   buffer(const std::shared_ptr<T>& hostData,
-         const range<Dimensions>& bufferRange, AllocatorT allocator,
+         const range<Dimensions>& bufferRange, AllocatorT allocator,  (1)
          const property_list& propList = {});
 
-  buffer(const std::shared_ptr<T>& hostData,
+  buffer(const std::shared_ptr<T>& hostData,                          (2)
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
-  buffer(const std::shared_ptr<T[]>& hostData,
+  buffer(const std::shared_ptr<T[]>& hostData,                        (3)
          const range<Dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {});
 
-  buffer(const std::shared_ptr<T[]>& hostData,
+  buffer(const std::shared_ptr<T[]>& hostData,                        (4)
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 ----
@@ -5376,17 +5373,18 @@ The range of the constructed SYCL [code]#buffer# is specified by the
 [code]#bufferRange# parameter provided.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
+
 '''
 
 .[apititle]#Construct from iterators#
 [source,role=synopsis,id=api:buffer-ctor-iterator]
 ----
 template <class InputIterator>
-buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
+buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,  (1)
              const property_list& propList = {});
 
 template <class InputIterator>
-buffer<T, 1>(InputIterator first, InputIterator last,
+buffer<T, 1>(InputIterator first, InputIterator last,                        (2)
              const property_list& propList = {});
 ----
 _Effects (1):_ Create a new allocated 1D buffer initialized from the given
@@ -5402,6 +5400,7 @@ Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
 _Effects (2):_ Equivalent to `buffer(first, last, AllocatorT{}, propList)`.
+
 '''
 
 .[apititle]#Construct sub-buffer#
@@ -5441,6 +5440,7 @@ a sub-buffer.
 * An [code]#exception# with the [code]#errc::invalid# error code if the sum of
 [code]#baseIndex# and [code]#subRange# in any dimension exceeds the parent
 buffer [code]#b# size [code]#bufferRange# in that dimension.
+
 '''
 
 
@@ -5454,6 +5454,7 @@ range<Dimensions> get_range() const;
 ----
 _Returns:_ A range object representing the size of the buffer in terms of number
 of elements in each dimension as passed to the constructor.
+
 '''
 
 .[apititle]#buffer::byte_size#
@@ -5463,6 +5464,7 @@ size_t byte_size() const noexcept;
 ----
 _Returns:_ The size of the buffer storage in bytes.
 Equal to [code]#size()*sizeof(T)#.
+
 '''
 
 .[apititle]#buffer::size#
@@ -5473,6 +5475,7 @@ size_t size() const noexcept;
 mode and target in the command group buffer.
 The value of target can be [code]#target::device#,
 [code]#target::constant_buffer# or [code]#target::host_task#.
+
 '''
 
 .[apititle]#buffer::get_count#
@@ -5483,6 +5486,7 @@ size_t get_count() const;
 Deprecated by SYCL 2020.
 
 _Effects:_ Equivalent to [code]#return size()#.
+
 '''
 
 .[apititle]#buffer::get_size#
@@ -5493,6 +5497,7 @@ size_t get_size() const;
 Deprecated by SYCL 2020.
 
 _Effects:_ Equivalent to [code]#return byte_size()#.
+
 '''
 
 .[apititle]#buffer::get_allocator#
@@ -5501,6 +5506,7 @@ _Effects:_ Equivalent to [code]#return byte_size()#.
 AllocatorT get_allocator() const;
 ----
 _Returns:_ The allocator provided to the buffer.
+
 '''
 
 .[apititle]#buffer::get_access#
@@ -5508,17 +5514,17 @@ _Returns:_ The allocator provided to the buffer.
 ----
 template <access_mode Mode = access_mode::read_write,
           target Targ = target::device>
-accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler); (1)
+accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler);  (1)
 
 template <access_mode Mode = access_mode::read_write,
           target Targ = target::device>
 accessor<T, Dimensions, Mode, Targ>
-get_access(handler& commandGroupHandler, range<Dimensions> accessRange,
-           id<Dimensions> accessOffset = {}); (2)
+get_access(handler& commandGroupHandler, range<Dimensions> accessRange,        (2)
+           id<Dimensions> accessOffset = {});
 
-template <typename... Ts> auto get_access(Ts...); (3)
+template <typename... Ts> auto get_access(Ts...);                              (3)
 
-template <typename... Ts> auto get_host_access(Ts...); (4)
+template <typename... Ts> auto get_host_access(Ts...);                         (4)
 ----
 _Returns (1):_ A valid [code]#accessor# to the buffer with the specified access
 mode and target in the command group buffer.
@@ -5549,17 +5555,18 @@ Possible implementation:
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
 buffer in any dimension.
+
 '''
 
 .[apititle]#Deprecated buffer::get_access#
 [source,role=synopsis,id=api:buffer-get-access-deprecated]
 ----
 template <access_mode Mode>
-accessor<T, Dimensions, Mode, target::host_buffer> get_access(); (1)
+accessor<T, Dimensions, Mode, target::host_buffer> get_access();              (1)
 
 template <access_mode Mode>
 accessor<T, Dimensions, Mode, target::host_buffer>
-get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {}); (2)
+get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {});  (2)
 ----
 Deprecated in SYCL 2020.
 Use [code]#get_host_access()# instead.
@@ -5576,6 +5583,7 @@ The value of target can only be [code]#target::host_buffer#.
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
 buffer in any dimension.
+
 '''
 
 .[apititle]#buffer::set_final_data#
@@ -5598,6 +5606,7 @@ expired.
 
 If [code]#Destination# is [code]#std::nullptr_t#, then the copy back will not
 happen.
+
 '''
 
 .[apititle]#buffer::set_write_back#
@@ -5612,6 +5621,7 @@ Forcing the write-back is similar to what happens during a normal write-back as
 described in <<sec:buf-sync-rules>> and <<sec:sharing-host-memory-with-dm>>.
 
 If there is nowhere to write-back, using this function does not have any effect.
+
 '''
 
 .[apititle]#buffer::is_sub_buffer#
@@ -5621,16 +5631,23 @@ bool is_sub_buffer() const;
 ----
 _Returns:_ [code]#true# if this SYCL [code]#buffer# is a sub-buffer and
 [code]#false# otherwise.
+
 '''
 
 .[apititle]#buffer::reinterpret#
 [source,role=synopsis,id=api:buffer-reinterpret]
 ----
-  template <typename ReinterpretT, int ReinterpretDim>
-  buffer<ReinterpretT, ReinterpretDim,
-         typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-             ReinterpretT>>
-  reinterpret(range<ReinterpretDim> reinterpretRange) const;
+template <typename ReinterpretT, int ReinterpretDim>
+buffer<ReinterpretT, ReinterpretDim,
+       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+           ReinterpretT>>
+reinterpret(range<ReinterpretDim> reinterpretRange) const;                 (1)
+
+template <typename ReinterpretT, int ReinterpretDim = Dimensions>
+buffer<ReinterpretT, ReinterpretDim,
+       typename std::allocator_traits<AllocatorT>::template rebind_alloc<
+           ReinterpretT>>
+reinterpret() const;                                                       (2)
 ----
 _Preconditions (2):_ Available when [code]#(ReinterpretDim == 1)# or when
 [code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) ==
@@ -5658,15 +5675,15 @@ represented by the type and range of this SYCL [code]#buffer# (or sub-buffer).
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
 the total size in bytes represented by this SYCL [code]#buffer# (or sub-buffer)
 is not evenly divisible by [code]#sizeof(ReinterpretT)#.
+
 '''
 
 
 [[sec:buffer-properties]]
-==== Buffer properties
+==== Properties
 
 This section describes the properties that can be passed in the [code]#propList#
 parameter of the <<sec:buffer-ctors, buffer constructors>>.
-
 
 '''
 
@@ -5785,7 +5802,7 @@ _Returns:_ The [code]#context# provided when constructing this property.
 
 
 [[sec:buf-sync-rules]]
-==== Buffer destruction rules
+==== Destruction rules
 
 Buffers are reference-counted.
 When a buffer value is constructed from another buffer, the two values reference
