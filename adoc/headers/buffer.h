@@ -2,29 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-namespace property {
-namespace buffer {
-class use_host_ptr {
- public:
-  use_host_ptr() = default;
-};
-
-class use_mutex {
- public:
-  use_mutex(std::mutex& mutexRef);
-
-  std::mutex* get_mutex_ptr() const;
-};
-
-class context_bound {
- public:
-  context_bound(context boundContext);
-
-  context get_context() const;
-};
-} // namespace buffer
-} // namespace property
-
 template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
 class buffer {
