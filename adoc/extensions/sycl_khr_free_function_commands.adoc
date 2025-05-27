@@ -123,6 +123,7 @@ free functions in this section results in undefined behavior.
 
 === Command-groups
 
+// Submit without creating an event.
 .[apititle]#submit#
 [source,role=synopsis,id=api:submit]
 ----
@@ -137,6 +138,7 @@ _Effects_: Equivalent to [code]#q.submit(cgf)#.
 
 '''
 
+// Submit and create an event.
 .[apititle]#submit_tracked#
 [source,role=synopsis,id=api:submit_tracked]
 ----
@@ -155,6 +157,8 @@ _Returns_: An [code]#event# associated with the submitted command.
 
 === Kernel launch
 
+// Launch a basic parallel_for with a function object.
+// New form of queue::parallel_for(range, ...)
 .[apititle]#launch# (kernel function)
 [source,role=synopsis,id=api:launch]
 ----
@@ -187,6 +191,8 @@ k); })#.
 
 '''
 
+// Launch a basic parallel_for with a sycl::kernel object.
+// New form of handler::parallel_for(range, ...) without set_args.
 .[apititle]#launch# (kernel object)
 [source,role=synopsis,id=api:launch-kernel]
 ----
@@ -231,6 +237,8 @@ k, args...); })+#.
 
 '''
 
+// Launch a basic parallel_for with a function object and reductions.
+// New form of parallel_for(range, reduction, ...)
 .[apititle]#launch_reduce# (kernel function)
 [source,role=synopsis,id=api:launch_reduce]
 ----
@@ -273,6 +281,8 @@ launch_reduce(h, r, k, reductions...); })+#.
 
 '''
 
+// Launch an ND-range parallel_for with a function object.
+// New form of parallel_for(nd_range, ...)
 .[apititle]#launch_grouped# (kernel function)
 [source,role=synopsis,id=api:launch_grouped]
 ----
@@ -311,6 +321,8 @@ launch_grouped(h, r, size, k); })#.
 
 '''
 
+// Launch an ND-range parallel_for with a sycl::kernel object.
+// New form of parallel_for(nd_range, ...) without set_args.
 .[apititle]#launch_grouped# (kernel object)
 [source,role=synopsis,id=api:launch_grouped-kernel]
 ----
@@ -354,6 +366,8 @@ launch_grouped(h, r, size, k, args...); })+#.
 
 '''
 
+// Launch an ND-range parallel_for with a function object and reductions.
+// New form of parallel_for(nd_range, ...)
 .[apititle]#launch_grouped_reduce# (kernel function)
 [source,role=synopsis,id=api:launch_grouped_reduce]
 ----
@@ -402,6 +416,8 @@ launch_grouped_reduce(h, r, size, k, reductions...); })+#.
 
 '''
 
+// Launch a single work-item with a function object.
+// New form of single_task(...)
 .[apititle]#launch_task# (kernel function)
 [source,role=synopsis,id=api:launch_task]
 ----
@@ -422,6 +438,8 @@ k); })#.
 
 '''
 
+// Launch a single work-item with a sycl::kernel object.
+// New form of single_task(...) without set_args.
 .[apititle]#launch_task# (kernel object)
 [source,role=synopsis,id=api:launch_task-kernel]
 ----
