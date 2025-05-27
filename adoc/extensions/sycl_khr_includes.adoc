@@ -179,12 +179,22 @@ Classes, constants, types and functions provided by the headers listed above
 exist within the [code]#::sycl# namespace as with the standard
 [code]#<sycl/sycl.hpp># header.
 
-Note: there is no strict requirement for the content of those headers, i.e. they
-may contain other functions and classes than documented in this extension. In
-fact, some classes, functions or enumerations are documented to be available
-through multiple headers. Nevertheless, implementations are encouraged to keep
-headers contents as small as reasonably possible to provide maximum benefit for
-users.
+There is no guarantee that headers documented by this extension contain anything
+else besides things listed in sections below. For example, [code]#queue# class
+has methods which accept [code]#accessor# object, but
+[code]#<sycl/khr/includes/queue># is not required to provide [code]#accessor#
+definition. Therefore, a portable application should include the corresponding
+header to get [code]#accessor# definition explicitly.
+
+[NOTE]
+====
+However, there is no requirement for the implementations to **only** provide
+through those headers exactly what's specified, i.e. they may contain other
+functions and classes than documented in this extension. In fact, some classes,
+functions or enumerations are documented to be available through multiple
+headers. Nevertheless, implementations are encouraged to keep headers contents
+as small as reasonably possible to provide maximum benefit for users.
+====
 
 [[sec:khr-includes-version]]
 === [code]#<sycl/khr/includes/version># header
@@ -238,13 +248,6 @@ This header file contains everything related to SYCL backend APIs:
 - [code]#backend_traits#
 - [code]#get_native#
 - [code]#make_*#
-
-Note that even though functions defined in the header operate with various
-classes like [code]#platform# or [code]#queue#, there is no guarantee that
-the [code]#<sycl/khr/includes/backend># header provides full definitions for
-those classes. In order to write a portable program, additional [code]##include#
-directives must be used in a SYCL program to ensure availability of the
-corresponding classes.
 
 [[sec:khr-includes-runtime]]
 === [code]#<sycl/khr/includes/runtime># header
