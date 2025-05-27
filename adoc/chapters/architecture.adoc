@@ -93,7 +93,7 @@ and lifetimes of the various objects used within SYCL, as explained in
 
 A <<sycl-kernel-function>> is the scoped block of code that will be compiled
 using a device compiler.
-This code may be defined by the body of a lambda function or by the
+This code may be defined by the body of a lambda expression or by the
 [code]#operator()# function of a function object.
 Each instance of the <<sycl-kernel-function>> will be executed as a single,
 though not necessarily entirely independent, flow of execution and has to adhere
@@ -370,7 +370,7 @@ The resources managed by SYCL are:
     In SYCL, a device is accessible through a [code]#sycl::device# object.
   . <<kernel,Kernels>>: the SYCL functions that run on SYCL devices are defined
     as {cpp} function objects (a named function object type or a lambda
-    function).
+    expression).
     A kernel can be introspected through a [code]#sycl::kernel# object.
 +
 --
@@ -903,7 +903,7 @@ image::{images}/host-acc.svg[align="center",opts="{imageopts}"]
 
 === SYCL device memory model
 
-The memory model for SYCL devices is based on the OpenCL 1.2 memory model.
+The memory model for SYCL devices is based on the OpenCL memory model.
 Work-items executing in a kernel have access to three distinct address spaces
 (memory regions) and a virtual address space overlapping some concrete address
 spaces:
@@ -1164,7 +1164,7 @@ Host code and device code is written in the same {cpp} source file, enabling
 instantiation of templated kernels from host code and also enabling kernel
 source code to be shared between host and device.
 The device kernels are encapsulated {cpp} callable types (a function object with
-[code]#operator()# or a lambda function), which have been designated to be
+[code]#operator()# or a lambda expression), which have been designated to be
 compiled as SYCL kernels.
 
 SYCL programs target heterogeneous systems.
@@ -1253,20 +1253,11 @@ Variables with <<reduction>> semantics can be added to work-group data parallel
 kernels using the features described in <<sec:reduction>>.
 
 
-=== Hierarchical data parallel kernels
+=== Hierarchical data parallel kernels (deprecated)
 
-[NOTE]
-====
-Based on developer and implementation feedback, the hierarchical data parallel
-kernel feature described next is undergoing improvements to better align with
-the frameworks and patterns prevalent in modern programming.
-As this is a key part of the SYCL API and we expect to make changes to it, we
-temporarily recommend that new codes refrain from using this feature until the
-new API is finished in a near-future version of the SYCL specification, when
-full use of the updated feature will be recommended for use in new code.
-Existing codes using this feature will of course be supported by conformant
-implementations of this specification.
-====
+Hierarchical data parallel kernels and all classes that are only available
+within such kernels are deprecated in SYCL 2020, and will be removed in a future
+version of SYCL.
 
 The SYCL compiler provides a way of specifying data parallel kernels that
 execute within work-groups via a different syntax which highlights the
@@ -1750,8 +1741,8 @@ Implementations conformant to the reduced feature set
 (<<sec:feature-sets.reduced>>) can do this by using the {cpp} type of the
 <<sycl-kernel-function>>.
 This type is specified via the <<kernel-name>> template parameter if the
-<<sycl-kernel-function>> is a lambda function, or it is obtained from the class
-type if the <<sycl-kernel-function>> is an object.
+<<sycl-kernel-function>> is a lambda expression, or it is obtained from the
+class type if the <<sycl-kernel-function>> is an object.
 Implementations conformant to the full feature set (<<sec:feature-sets.full>>)
 do not require a <<kernel-name>> at the invocation site, so they must implement
 some other way to make the association.

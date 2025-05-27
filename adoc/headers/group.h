@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -42,9 +42,11 @@ template <int Dimensions = 1> class group {
 
   bool leader() const;
 
+  // Deprecated in SYCL 2020.
   template <typename WorkItemFunctionT>
   void parallel_for_work_item(const WorkItemFunctionT& func) const;
 
+  // Deprecated in SYCL 2020.
   template <typename WorkItemFunctionT>
   void parallel_for_work_item(range<Dimensions> logicalRange,
                               const WorkItemFunctionT& func) const;

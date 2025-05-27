@@ -1,4 +1,4 @@
-# Copyright 2021-2024 The Khronos Group, Inc.
+# Copyright 2021-2025 The Khronos Group, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 # CI to build asciidoctor spec targets, on push or manually
@@ -28,8 +28,8 @@ jobs:
     # Use the Khronos container with the asciidoctor toolchain preinstalled.  We
     # reference the image by its SHA rather than its tag because they sometimes
     # overwrite a tag with a different image (which has a different SHA).  This
-    # SHA corresponds to tag "asciidoctor-spec.20240727".
-    container: khronosgroup/docker-images@sha256:089687083ceb36483a3917389e4278718ab19c594099634f5dd80e22540c960f
+    # SHA corresponds to tag "asciidoctor-spec.20250210".
+    container: khronosgroup/docker-images@sha256:9f5add2758a383ba329bc8c4b819dea9fb695ee629b05b7da4739ddf81d39073
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -52,3 +52,18 @@ jobs:
           name: spec-outputs
           path: |
             /tmp/out
+
+  check-clang-format:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need to check out base branch as well
+      - name: Install clang-format
+        run: sudo apt update; sudo apt install -y clang-format-18
+      # Inspired by SYCL-CTS
+      - name: Run clang-format on changed files from adoc/code/
+        run: |
+          git diff -U0 --no-color ${{ github.event.pull_request.base.sha }} ./adoc/code/ | ./adoc/scripts/clang-format-diff.py -p1

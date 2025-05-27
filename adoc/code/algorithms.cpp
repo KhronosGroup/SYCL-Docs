@@ -1,17 +1,17 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-buffer<int> inputBuf { 1024 };
-buffer<int> outputBuf { 2 };
+buffer<int> inputBuf{1024};
+buffer<int> outputBuf{2};
 {
   // Initialize buffer on the host with 0, 1, 2, 3, ..., 1023
-  host_accessor a { inputBuf };
+  host_accessor a{inputBuf};
   std::iota(a.begin(), a.end(), 0);
 }
 
 myQueue.submit([&](handler& cgh) {
-  accessor inputValues { inputBuf, cgh, read_only };
-  accessor outputValues { outputBuf, cgh, write_only, no_init };
+  accessor inputValues{inputBuf, cgh, read_only};
+  accessor outputValues{outputBuf, cgh, write_only, no_init};
 
   cgh.parallel_for(nd_range<1>(range<1>(16), range<1>(16)), [=](nd_item<1> it) {
     // Apply a group algorithm to any number of values, described by an iterator
@@ -31,5 +31,5 @@ myQueue.submit([&](handler& cgh) {
   });
 });
 
-host_accessor a { outputBuf };
+host_accessor a{outputBuf};
 assert(a[0] == 523776 && a[1] == 120);
