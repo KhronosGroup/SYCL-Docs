@@ -25,24 +25,22 @@ An implementation supporting this extension must predefine the `SYCL_KHR_MAX_WOR
 
 == New device descriptors
 
-[options="header"]
-[cols="1,1,2", options="header"]
-|===
-| Device descriptors                                     | Return type | Description
+[listing]
+[source,cpp,subs="verbatim,quotes"]
+----
+namespace sycl::khr::info::device {
+template<int Dimensions = 3>
+struct max_work_group_sizes {
+    using return_type = info::device_type;
+};
+} // namespace sycl::info::device
+----
 
-| `khr::info::device::max_work_group_sizes<1>`
-| `range<1>`
-| Returns the maximum number of work-groups that can be submitted to an `nd_range<1>`. The minimum value is 1 if the device is not `info::device_type::custom`.
+[.remark]#_Remarks:_ Template parameter to `device::get_info`.#
 
-| `khr::info::device::max_work_group_sizes<2>`
-| `range<2>`
-| Returns the maximum number of work-groups that can be submitted in each dimension of an `nd_range<2>`. The minimum value is 1 in each dimension if the device is not `info::device_type::custom`.
+[.constraints]#_Constraints:_ Available only when `Dimensions` is 1, 2 or 3.#
 
-| `khr::info::device::max_work_group_sizes<3>`
-| `range<3>`
-| Returns the maximum number of work-groups that can be submitted in each dimension of an `nd_range<3>`. The minimum value is 1 in each dimension if the device is not `info::device_type::custom`.
-
-|===
+[.return]#_Returns:_ The maximum number of work-groups that can be submitted in each dimension of an `nd_range<Dimensions>`. The minimum value is 1 in each dimension if the device is not `info::device_type::custom`.#
 
 
 [[sec:khr-max-work-group-sizes-example]]
