@@ -2,7 +2,7 @@
 = sycl_khr_max_num_work_groups
 
 This extension allows developers to query iteration bounds in each dimension for a ND-range kernel.
-The implementation ensures the execution of the ND-range kernel of `N` dimension(s) if its number of work-groups is less than or equal to `max_num_work_groups<N>` in each dimension.
+The implementation ensures the execution of the ND-range kernel of `N` dimension(s) if its number of work-groups is less than or equal to `max_work_group_sizes<N>` in each dimension.
 
 
 [[sec:khr-max-num-work-groups-dependencies]]
@@ -12,7 +12,7 @@ This extension does not depend on other extensions.
 
 [[sec:khr-max-num-work-groups-feature-test]]
 == Feature test macro
-An implementation supporting this extension must predefine the `SYCL_KHR_MAX_NUM_WORK_GROUPS` macro to one of the values defined in the table below.
+An implementation supporting this extension must predefine the `SYCL_KHR_MAX_WORK_GROUPS` macro to one of the values defined in the table below.
 
 [%header,cols="1,5"]
 |===
@@ -30,15 +30,15 @@ An implementation supporting this extension must predefine the `SYCL_KHR_MAX_NUM
 |===
 | Device descriptors                                     | Return type | Description
 
-| `khr::info::device::max_num_work_groups<1>`
+| `khr::info::device::max_work_group_sizes<1>`
 | `range<1>`
 | Returns the maximum number of work-groups that can be submitted to an `nd_range<1>`. The minimum value is 1 if the device is not `info::device_type::custom`.
 
-| `khr::info::device::max_num_work_groups<2>`
+| `khr::info::device::max_work_group_sizes<2>`
 | `range<2>`
 | Returns the maximum number of work-groups that can be submitted in each dimension of an `nd_range<2>`. The minimum value is 1 in each dimension if the device is not `info::device_type::custom`.
 
-| `khr::info::device::max_num_work_groups<3>`
+| `khr::info::device::max_work_group_sizes<3>`
 | `range<3>`
 | Returns the maximum number of work-groups that can be submitted in each dimension of an `nd_range<3>`. The minimum value is 1 in each dimension if the device is not `info::device_type::custom`.
 
@@ -70,7 +70,7 @@ main(int argc, char *argv[]) {
               << "\n";
 
     sycl::range<3> nd_limit =
-        device.get_info<sycl::khr::info::device::max_num_work_groups<3>>();
+        device.get_info<sycl::khr::info::device::max_work_group_sizes<3>>();
     std::cout << "Max number groups for ND-Range:"
               << " max_0: " << nd_limit[0]
               << " max_1: " << nd_limit[1]
