@@ -5220,8 +5220,8 @@ via an instance of [code]#property_list#.
 buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
        const property_list& propList = {});
 
-buffer(T* hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator, const property_list& propList = {});  (2)
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (2)
+       AllocatorT allocator, const property_list& propList = {});
 
 buffer(const T* hostData, const range<Dimensions>& bufferRange,    (3)
        const property_list& propList = {});
@@ -5274,12 +5274,12 @@ via an instance of [code]#property_list#.
 .[apititle]#Construct from a container#
 [source,role=synopsis,id=api:buffer-ctor-container]
 ----
-template <typename Container>
-buffer(Container& container, AllocatorT allocator,                 (1)
+template <typename Container>                                      (1)
+buffer(Container& container, AllocatorT allocator,
        const property_list& propList = {});
 
-template <typename Container>
-buffer(Container& container, const property_list& propList = {});  (2)
+template <typename Container>                                      (2)
+buffer(Container& container, const property_list& propList = {});
 ----
 _Constraints:_ Available only if [code]#Container# is a contiguous container,
 that is the following requirements must be met:
@@ -5314,8 +5314,8 @@ via an instance of [code]#property_list#.
 .[apititle]#Construct from memory owned by a shared pointer#
 [source,role=synopsis,id=api:buffer-ctor-shared-ptr]
 ----
-  buffer(const std::shared_ptr<T>& hostData,
-         const range<Dimensions>& bufferRange, AllocatorT allocator,  (1)
+  buffer(const std::shared_ptr<T>& hostData,                          (1)
+         const range<Dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {});
 
   buffer(const std::shared_ptr<T>& hostData,                          (2)
@@ -5379,12 +5379,12 @@ via an instance of [code]#property_list#.
 .[apititle]#Construct from iterators#
 [source,role=synopsis,id=api:buffer-ctor-iterator]
 ----
-template <class InputIterator>
-buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,  (1)
+template <class InputIterator>                                               (1)
+buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
              const property_list& propList = {});
 
-template <class InputIterator>
-buffer<T, 1>(InputIterator first, InputIterator last,                        (2)
+template <class InputIterator>                                               (2)
+buffer<T, 1>(InputIterator first, InputIterator last,
              const property_list& propList = {});
 ----
 _Effects (1):_ Create a new allocated 1D buffer initialized from the given
@@ -5512,14 +5512,14 @@ _Returns:_ The allocator provided to the buffer.
 .[apititle]#buffer::get_access#
 [source,role=synopsis,id=api:buffer-get-access]
 ----
-template <access_mode Mode = access_mode::read_write,
+template <access_mode Mode = access_mode::read_write,                          (1)
           target Targ = target::device>
-accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler);  (1)
+accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler);
 
-template <access_mode Mode = access_mode::read_write,
+template <access_mode Mode = access_mode::read_write,                          (2)
           target Targ = target::device>
 accessor<T, Dimensions, Mode, Targ>
-get_access(handler& commandGroupHandler, range<Dimensions> accessRange,        (2)
+get_access(handler& commandGroupHandler, range<Dimensions> accessRange,
            id<Dimensions> accessOffset = {});
 
 template <typename... Ts> auto get_access(Ts...);                              (3)
@@ -5561,12 +5561,12 @@ buffer in any dimension.
 .[apititle]#Deprecated buffer::get_access#
 [source,role=synopsis,id=api:buffer-get-access-deprecated]
 ----
-template <access_mode Mode>
-accessor<T, Dimensions, Mode, target::host_buffer> get_access();              (1)
+template <access_mode Mode>                                                   (1)
+accessor<T, Dimensions, Mode, target::host_buffer> get_access();
 
-template <access_mode Mode>
+template <access_mode Mode>                                                   (2)
 accessor<T, Dimensions, Mode, target::host_buffer>
-get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {});  (2)
+get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {});
 ----
 Deprecated in SYCL 2020.
 Use [code]#get_host_access()# instead.
@@ -5637,17 +5637,17 @@ _Returns:_ [code]#true# if this SYCL [code]#buffer# is a sub-buffer and
 .[apititle]#buffer::reinterpret#
 [source,role=synopsis,id=api:buffer-reinterpret]
 ----
-template <typename ReinterpretT, int ReinterpretDim>
+template <typename ReinterpretT, int ReinterpretDim>                       (1)
 buffer<ReinterpretT, ReinterpretDim,
        typename std::allocator_traits<AllocatorT>::template rebind_alloc<
            ReinterpretT>>
-reinterpret(range<ReinterpretDim> reinterpretRange) const;                 (1)
+reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
-template <typename ReinterpretT, int ReinterpretDim = Dimensions>
+template <typename ReinterpretT, int ReinterpretDim = Dimensions>          (2)
 buffer<ReinterpretT, ReinterpretDim,
        typename std::allocator_traits<AllocatorT>::template rebind_alloc<
            ReinterpretT>>
-reinterpret() const;                                                       (2)
+reinterpret() const;
 ----
 _Preconditions (2):_ Available when [code]#(ReinterpretDim == 1)# or when
 [code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) ==
