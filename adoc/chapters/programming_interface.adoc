@@ -7221,13 +7221,13 @@ access_mode::read_write
 
 ==== Deduction tags
 
-Some accessor constructors take a [code]#TagT# parameter, which is used to
-deduce template arguments for the constructor's class.
+Some accessor constructors take a [code]#DeductionTagT# parameter, which is used
+to deduce template arguments for the constructor's class.
 Each of the access modes in <<table.accessors.accessmode>> has an associated
 tag, but there are additional tags which set other template parameters in
 addition to the access mode.
 The synopsis below shows the namespace scope variables that the implementation
-provides as possible values for the [code]#TagT# parameter.
+provides as possible values for the [code]#DeductionTagT# parameter.
 
 [source,,linenums]
 ----
@@ -7634,8 +7634,8 @@ accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+template <typename AllocatorT, typename DeductionTagT>
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7662,9 +7662,9 @@ properties for the constructed accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         handler& commandGroupHandlerRef, TagT tag,
+         handler& commandGroupHandlerRef, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7695,9 +7695,9 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         range<Dimensions> accessRange, TagT tag,
+         range<Dimensions> accessRange, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7733,9 +7733,9 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         range<Dimensions> accessRange, id<Dimensions> accessOffset, TagT tag,
+         range<Dimensions> accessRange, id<Dimensions> accessOffset, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7772,10 +7772,10 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
          handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-         TagT tag, const property_list& propList = {})
+         DeductionTagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7813,10 +7813,10 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
          handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-         id<Dimensions> accessOffset, TagT tag,
+         id<Dimensions> accessOffset, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7944,8 +7944,8 @@ This function may only be called from within a <<command>>.
 [[sec:accessor.command.buffer.tags]]
 ===== Deduction tags for buffer command accessors
 
-Some [code]#accessor# constructors take a [code]#TagT# parameter, which is used
-to deduce template arguments.
+Some [code]#accessor# constructors take a [code]#DeductionTagT# parameter, which
+is used to deduce template arguments.
 The permissible values for this parameter are listed in
 <<table.accessors.command.buffer.tags>> along with the access mode and accessor
 target that they imply.
@@ -8905,8 +8905,8 @@ constructed accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
-host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+template <typename AllocatorT, typename DeductionTagT>
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -8937,9 +8937,9 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-              range<Dimensions> accessRange, TagT tag,
+              range<Dimensions> accessRange, DeductionTagT tag,
               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -8975,10 +8975,10 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
               range<Dimensions> accessRange, id<Dimensions> accessOffset,
-              TagT tag, const property_list& propList = {})
+              DeductionTagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -9056,8 +9056,8 @@ Assignment to the single element that is accessed by this accessor.
 [[sec:accessor.host.buffer.tags]]
 ===== Deduction tags for buffer host accessors
 
-Some [code]#host_accessor# constructors take a [code]#TagT# parameter, which is
-used to deduce template arguments.
+Some [code]#host_accessor# constructors take a [code]#DeductionTagT# parameter,
+which is used to deduce template arguments.
 The permissible values for this parameter are listed in
 <<table.accessors.host.buffer.tags>> along with the access mode that they imply.
 
