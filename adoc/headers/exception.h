@@ -39,11 +39,11 @@ class exception_list {
   using value_type = std::exception_ptr;
   using reference = value_type&;
   using const_reference = const value_type&;
-  using size_type = std::size_t;
+  using std::size_type = std::size_t;
   using iterator = /*unspecified*/;
   using const_iterator = /*unspecified*/;
 
-  size_type size() const;
+  std::size_type size() const;
   iterator begin() const; // first asynchronous exception
   iterator end() const;   // refer to past-the-end last asynchronous exception
 };

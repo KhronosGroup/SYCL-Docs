@@ -6,7 +6,7 @@ class sub_group {
  public:
   using id_type = id<1>;
   using range_type = range<1>;
-  using linear_id_type = uint32_t;
+  using linear_id_type = std::uint32_t;
   static constexpr int dimensions = 1;
   static constexpr memory_scope fence_scope = memory_scope::sub_group;
 
@@ -22,13 +22,13 @@ class sub_group {
 
   range<1> get_max_local_range() const;
 
-  uint32_t get_group_linear_id() const;
+  std::uint32_t get_group_linear_id() const;
 
-  uint32_t get_local_linear_id() const;
+  std::uint32_t get_local_linear_id() const;
 
-  uint32_t get_group_linear_range() const;
+  std::uint32_t get_group_linear_range() const;
 
-  uint32_t get_local_linear_range() const;
+  std::uint32_t get_local_linear_range() const;
 
   bool leader() const;
 };

@@ -118,7 +118,7 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
                              difference_type r) { /* ... */
   }
 
-  void prefetch(size_t numElements) const;
+  void prefetch(std::size_t numElements) const;
 
   friend bool operator==(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */
   }
