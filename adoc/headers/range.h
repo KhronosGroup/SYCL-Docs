@@ -10,36 +10,36 @@ template <int Dimensions = 1> class range {
 
   /* The following constructor is only available in the range class
    * specialization where: Dimensions==1 */
-  range(size_t dim0);
+  range(std::size_t dim0);
   /* The following constructor is only available in the range class
    * specialization where: Dimensions==2 */
-  range(size_t dim0, size_t dim1);
+  range(std::size_t dim0, std::size_t dim1);
   /* The following constructor is only available in the range class
    * specialization where: Dimensions==3 */
-  range(size_t dim0, size_t dim1, size_t dim2);
+  range(std::size_t dim0, std::size_t dim1, std::size_t dim2);
 
   /* -- common interface members -- */
 
-  size_t get(int dimension) const;
-  size_t& operator[](int dimension);
-  size_t operator[](int dimension) const;
+  std::size_t get(int dimension) const;
+  std::size_t& operator[](int dimension);
+  std::size_t operator[](int dimension) const;
 
-  size_t size() const;
+  std::size_t size() const;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend range operatorOP(const range& lhs, const range& rhs) { /* ... */
   }
-  friend range operatorOP(const range& lhs, const size_t& rhs) { /* ... */
+  friend range operatorOP(const range& lhs, const std::size_t& rhs) { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend range& operatorOP(range& lhs, const range& rhs) { /* ... */
   }
-  friend range& operatorOP(range& lhs, const size_t& rhs) { /* ... */
+  friend range& operatorOP(range& lhs, const std::size_t& rhs) { /* ... */
   }
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend range operatorOP(const size_t& lhs, const range& rhs) { /* ... */
+  friend range operatorOP(const std::size_t& lhs, const range& rhs) { /* ... */
   }
 
   // OP is unary +, -
@@ -56,8 +56,8 @@ template <int Dimensions = 1> class range {
 };
 
 // Deduction guides
-range(size_t)->range<1>;
-range(size_t, size_t)->range<2>;
-range(size_t, size_t, size_t)->range<3>;
+range(std::size_t)->range<1>;
+range(std::size_t, std::size_t)->range<2>;
+range(std::size_t, std::size_t, std::size_t)->range<3>;
 
 } // namespace sycl

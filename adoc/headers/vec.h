@@ -56,15 +56,15 @@ template <typename DataT, int NumElements> class vec {
   template<typename T>
   explicit operator T() const;
 
-  static constexpr size_t byte_size() noexcept;
+  static constexpr std::size_t byte_size() noexcept;
 
-  static constexpr size_t size() noexcept;
-
-  // Deprecated
-  size_t get_size() const;
+  static constexpr std::size_t size() noexcept;
 
   // Deprecated
-  size_t get_count() const;
+  std::size_t get_size() const;
+
+  // Deprecated
+  std::size_t get_count() const;
 
   template <typename ConvertT,
             rounding_mode RoundingMode = rounding_mode::automatic>
@@ -123,16 +123,16 @@ template <typename DataT, int NumElements> class vec {
 
   // load and store member functions
   template <access::address_space AddressSpace, access::decorated IsDecorated>
-  void load(size_t offset,
+  void load(std::size_t offset,
             multi_ptr<const DataT, AddressSpace, IsDecorated> ptr);
 
-  void load(size_t offset, const DataT* ptr);
+  void load(std::size_t offset, const DataT* ptr);
 
   template <access::address_space AddressSpace, access::decorated IsDecorated>
-  void store(size_t offset,
+  void store(std::size_t offset,
              multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const;
 
-  void store(size_t offset, DataT* ptr) const;
+  void store(std::size_t offset, DataT* ptr) const;
 
   // subscript operator
   DataT& operator[](int index);
