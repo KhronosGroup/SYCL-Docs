@@ -11,23 +11,23 @@ class buffer {
   using const_reference = const value_type&;
   using allocator_type = AllocatorT;
 
-  buffer(const range<Dimensions>& bufferRange,
-         const property_list& propList = {});
-
   buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {});
 
-  buffer(T* hostData, const range<Dimensions>& bufferRange,
+  buffer(const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
   buffer(T* hostData, const range<Dimensions>& bufferRange,
          AllocatorT allocator, const property_list& propList = {});
 
-  buffer(const T* hostData, const range<Dimensions>& bufferRange,
+  buffer(T* hostData, const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
   buffer(const T* hostData, const range<Dimensions>& bufferRange,
          AllocatorT allocator, const property_list& propList = {});
+
+  buffer(const T* hostData, const range<Dimensions>& bufferRange,
+         const property_list& propList = {});
 
   /* Available only if Container is a contiguous container:
        - std::data(container) and std::size(container) are well formed
@@ -60,13 +60,13 @@ class buffer {
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
-  template <class InputIterator>
-  buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
-               const property_list& propList = {});
+  template <typename InputIterator>
+  buffer(InputIterator first, InputIterator last, AllocatorT allocator,
+         const property_list& propList = {});
 
-  template <class InputIterator>
-  buffer<T, 1>(InputIterator first, InputIterator last,
-               const property_list& propList = {});
+  template <typename InputIterator>
+  buffer(InputIterator first, InputIterator last,
+         const property_list& propList = {});
 
   buffer(buffer& b, const id<Dimensions>& baseIndex,
          const range<Dimensions>& subRange);

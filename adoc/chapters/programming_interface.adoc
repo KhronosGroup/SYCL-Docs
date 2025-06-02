@@ -5275,11 +5275,11 @@ via an instance of [code]#property_list#.
 [source,role=synopsis,id=api:buffer-ctor-container]
 ----
 template <typename Container>                                      (1)
-buffer(Container& container, AllocatorT allocator,
-       const property_list& propList = {});
+buffer(Container& container, const property_list& propList = {});
 
 template <typename Container>                                      (2)
-buffer(Container& container, const property_list& propList = {});
+buffer(Container& container, AllocatorT allocator,
+       const property_list& propList = {});
 ----
 _Constraints:_ Available only if [code]#Container# is a contiguous container,
 that is the following requirements must be met:
@@ -5290,8 +5290,6 @@ that is the following requirements must be met:
   and
 
 * [code]#Dimensions == 1#.
-
-_Effects (1):_ Equivalent to `buffer(container, AllocatorT{}, propList)`.
 
 _Effects (2):_ Construct a one dimensional SYCL [code]#buffer# instance from the
 elements starting at [code]#std::data(container)# and containing
@@ -5309,31 +5307,30 @@ provided when allocating memory on the host.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
+_Effects (1):_ Equivalent to `buffer(container, AllocatorT{}, propList)`.
+
 '''
 
 .[apititle]#Construct from memory owned by a shared pointer#
 [source,role=synopsis,id=api:buffer-ctor-shared-ptr]
 ----
   buffer(const std::shared_ptr<T>& hostData,                          (1)
-         const range<Dimensions>& bufferRange, AllocatorT allocator,
+         const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
   buffer(const std::shared_ptr<T>& hostData,                          (2)
-         const range<Dimensions>& bufferRange,
-         const property_list& propList = {});
-
-  buffer(const std::shared_ptr<T[]>& hostData,                        (3)
          const range<Dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {});
 
-  buffer(const std::shared_ptr<T[]>& hostData,                        (4)
+  buffer(const std::shared_ptr<T[]>& hostData,                        (3)
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
+
+  buffer(const std::shared_ptr<T[]>& hostData,                        (4)
+         const range<Dimensions>& bufferRange, AllocatorT allocator,
+         const property_list& propList = {});
 ----
-_Effects (1):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
-propList)`.
-
-_Effects (2):_ When [code]#hostData# is not empty, construct a SYCL buffer with
+_Effects (1):_ When [code]#hostData# is not empty, construct a SYCL buffer with
 the contents of its stored pointer.
 The buffer assumes exclusive access to this memory for the duration of its
 lifetime.
@@ -5352,10 +5349,10 @@ The range of the constructed SYCL [code]#buffer# is specified by the
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
-_Effects (3):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+_Effects (2):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
 propList)`.
 
-_Effects (4):_ When [code]#hostData# is not empty, construct a SYCL buffer with
+_Effects (3):_ When [code]#hostData# is not empty, construct a SYCL buffer with
 the contents of its stored pointer.
 The buffer assumes exclusive access to this memory for the duration of its
 lifetime.
@@ -5373,6 +5370,9 @@ The range of the constructed SYCL [code]#buffer# is specified by the
 [code]#bufferRange# parameter provided.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
+
+_Effects (4):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
 
 '''
 
@@ -5380,12 +5380,12 @@ via an instance of [code]#property_list#.
 [source,role=synopsis,id=api:buffer-ctor-iterator]
 ----
 template <class InputIterator>                                               (1)
-buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
-             const property_list& propList = {});
+buffer(InputIterator first, InputIterator last, AllocatorT allocator,
+       const property_list& propList = {});
 
 template <class InputIterator>                                               (2)
-buffer<T, 1>(InputIterator first, InputIterator last,
-             const property_list& propList = {});
+buffer(InputIterator first, InputIterator last,
+       const property_list& propList = {});
 ----
 _Effects (1):_ Create a new allocated 1D buffer initialized from the given
 elements ranging from [code]#first# up to one before [code]#last#.
