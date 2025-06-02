@@ -5192,15 +5192,13 @@ See <<sec:buffer-properties>> for the buffer properties that are defined by the
 .[apititle]#Construct with uninitialized memory#
 [source,role=synopsis,id=api:buffer-ctor-uninit]
 ----
-buffer(const range<Dimensions>& bufferRange,                        (1)
+buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,  (1)
        const property_list& propList = {});
 
-buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,  (2)
+buffer(const range<Dimensions>& bufferRange,                        (2)
        const property_list& propList = {});
 ----
-_Effects (1):_ Equivalent to `buffer(bufferRange, AllocatorT{}, propList)`.
-
-_Effects (2):_ Construct a SYCL [code]#buffer# instance with uninitialized
+_Effects (1):_ Construct a SYCL [code]#buffer# instance with uninitialized
 memory.
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
@@ -5212,27 +5210,26 @@ function [code]#set_final_data()#.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
+_Effects (2):_ Equivalent to `buffer(bufferRange, AllocatorT{}, propList)`.
+
 '''
 
 .[apititle]#Construct with host memory#
 [source,role=synopsis,id=api:buffer-ctor-host-mem]
 ----
-buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
-       const property_list& propList = {});
-
 buffer(T* hostData, const range<Dimensions>& bufferRange,          (2)
        AllocatorT allocator, const property_list& propList = {});
 
-buffer(const T* hostData, const range<Dimensions>& bufferRange,    (3)
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
        const property_list& propList = {});
 
-buffer(const T* hostData, const range<Dimensions>& bufferRange,    (4)
+buffer(const T* hostData, const range<Dimensions>& bufferRange,    (3)
        AllocatorT allocator, const property_list& propList = {});
-----
-_Effects (1):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
-propList)`.
 
-_Effects (2):_ Construct a SYCL [code]#buffer# instance with the
+buffer(const T* hostData, const range<Dimensions>& bufferRange,    (4)
+       const property_list& propList = {});
+----
+_Effects (1):_ Construct a SYCL [code]#buffer# instance with the
 [code]#hostData# parameter provided.
 The buffer is initialized with the memory specified by [code]#hostData#, and the
 buffer assumes exclusive access to this memory for the duration of its lifetime.
@@ -5243,10 +5240,10 @@ The range of the constructed SYCL [code]#buffer# is specified by the
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
-_Effects (3):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+_Effects (2):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
 propList)`.
 
-_Effects (4):_ Construct a SYCL [code]#buffer# instance with the
+_Effects (3):_ Construct a SYCL [code]#buffer# instance with the
 [code]#hostData# parameter provided.
 The buffer assumes exclusive access to this memory for the duration of its
 lifetime.
@@ -5269,17 +5266,20 @@ The range of the constructed SYCL [code]#buffer# is specified by the
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
+_Effects (4):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
+
 '''
 
 .[apititle]#Construct from a container#
 [source,role=synopsis,id=api:buffer-ctor-container]
 ----
 template <typename Container>                                      (1)
-buffer(Container& container, const property_list& propList = {});
-
-template <typename Container>                                      (2)
 buffer(Container& container, AllocatorT allocator,
        const property_list& propList = {});
+
+template <typename Container>                                      (2)
+buffer(Container& container, const property_list& propList = {});
 ----
 _Constraints:_ Available only if [code]#Container# is a contiguous container,
 that is the following requirements must be met:
@@ -5315,19 +5315,19 @@ _Effects (2):_ Equivalent to `buffer(container, AllocatorT{}, propList)`.
 [source,role=synopsis,id=api:buffer-ctor-shared-ptr]
 ----
   buffer(const std::shared_ptr<T>& hostData,                          (1)
-         const range<Dimensions>& bufferRange,
+         const range<Dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {});
 
   buffer(const std::shared_ptr<T>& hostData,                          (2)
-         const range<Dimensions>& bufferRange, AllocatorT allocator,
-         const property_list& propList = {});
-
-  buffer(const std::shared_ptr<T[]>& hostData,                        (3)
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
-  buffer(const std::shared_ptr<T[]>& hostData,                        (4)
+  buffer(const std::shared_ptr<T[]>& hostData,                        (3)
          const range<Dimensions>& bufferRange, AllocatorT allocator,
+         const property_list& propList = {});
+
+  buffer(const std::shared_ptr<T[]>& hostData,                        (4)
+         const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 ----
 _Effects (1):_ When [code]#hostData# is not empty, construct a SYCL buffer with
