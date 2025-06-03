@@ -90,19 +90,22 @@ main(int argc, char *argv[]) {
         << " max_2: " << nd_limit[2]
         << std::endl;
 
-    std::cout << "Maximum total number of work-groups:"
-        << device.get_info<sycl::khr::info::device::max_total_work_groups>()
+    const size_t max_total =
+        device.get_info<sycl::khr::info::device::max_total_work_groups>();
+    std::cout << "Maximum total number of work-groups:" << max_total
         << std::endl;
 
     const auto nb_wg_2 = globalSize[2]/localSize[2];
     const auto nb_wg_1 = globalSize[1]/localSize[1];
     const auto nb_wg_0 = globalSize[0]/localSize[0];
+    const auto nb_wg_total = nb_wg_0*nb_wg_1*nb_wg_2;
 
     // Should always be satisfied at kernel submission
     // user's responsibility to check
     if (nb_wg_0 <= nd_limit[2]
      && nb_wg_1 <= nd_limit[1]
-     && nb_wg_2 <= nd_limit[0]) {
+     && nb_wg_2 <= nd_limit[0]
+     && nb_wg_total <= max_total) {
         std::cout << "Launching kernel" << std::endl;
         // If the condition is satisfied
         // the implementation guarantees the execution of the kernel
