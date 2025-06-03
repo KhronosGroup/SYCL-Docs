@@ -136,28 +136,28 @@ class buffer {
 };
 
 // Deduction guides
-template <class InputIterator, class AllocatorT>
+template <typename InputIterator, typename AllocatorT>
 buffer(InputIterator, InputIterator, AllocatorT, const property_list& = {})
     -> buffer<typename std::iterator_traits<InputIterator>::value_type, 1,
               AllocatorT>;
 
-template <class InputIterator>
+template <typename InputIterator>
 buffer(InputIterator, InputIterator, const property_list& = {})
     -> buffer<typename std::iterator_traits<InputIterator>::value_type, 1>;
 
-template <class T, int Dimensions, class AllocatorT>
+template <typename T, int Dimensions, typename AllocatorT>
 buffer(const T*, const range<Dimensions>&, AllocatorT,
        const property_list& = {}) -> buffer<T, Dimensions, AllocatorT>;
 
-template <class T, int Dimensions>
+template <typename T, int Dimensions>
 buffer(const T*, const range<Dimensions>&, const property_list& = {})
     -> buffer<T, Dimensions>;
 
-template <class Container, class AllocatorT>
+template <typename Container, typename AllocatorT>
 buffer(Container&, AllocatorT, const property_list& = {})
     -> buffer<typename Container::value_type, 1, AllocatorT>;
 
-template <class Container>
+template <typename Container>
 buffer(Container&, const property_list& = {})
     -> buffer<typename Container::value_type, 1>;
 
