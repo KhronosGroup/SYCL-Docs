@@ -436,6 +436,13 @@ module Rouge
         replace_me  # Replace with list of actual keywords
       )
 
+      # Exposition-only identifiers
+      sycl_exposition_only = %w(
+        register-events
+        register-accessors
+        has-tracking
+      )
+
       # Here are some interesting tokens
       # https://pygments.org/docs/tokens/ unused in C++ we can reuse
       # in SYCL mode:
@@ -466,6 +473,8 @@ module Rouge
       # Insert some specific rules at the beginning of the statement
       # rule of the C++ lexer
       prepend :statements do
+        rule %r/(?:#{sycl_exposition_only.join('|')})\b/,
+             Generic::Emph
         rule %r/(?:#{sycl_data_types.join('|')})\b/,
              Keyword::Pseudo
         rule %r/(?:#{sycl_functions.join('|')})\b/,
