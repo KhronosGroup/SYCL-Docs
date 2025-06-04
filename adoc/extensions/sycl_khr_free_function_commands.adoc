@@ -106,6 +106,131 @@ int main() {
 }
 ----
 
+== Requirements
+
+An instance of the [code]#requirements# class template encapsulates all of the
+requirements for scheduling a command.
+
+[source,role=synopsis]
+----
+namespace sycl::khr {
+
+template <typename T>
+struct is_requirement;
+
+template <typename T>
+static constexpr bool is_requirement_v = is_requirement<T>::value_type;
+
+template <typename... Requirements>
+class requirements {
+public:
+  // Only available if: all Requirements satisfy is_requirement_v
+  requirements(Requirements... values);
+
+  void register-accessors(handler& h) const;  // exposition only
+  void register-events(handler& h) const;     // exposition only
+  bool has-tracking() const;                  // exposition only
+};
+
+class tracking {
+public:
+  tracking(bool enabled=true);
+};
+
+}
+----
+
+Each instance of a type listed below defines a specific scheduling requirement.
+For each type, the [code]#is_requirement# type trait is specialized such that
+[code]#is_requirement_v<T># returns [code]#true#.
+
+* [code]#event#: The command must not begin executing until the event is
+  complete.
+
+* [code]#std::vector<event>#: The command must not begin executing until all
+  events in the vector are complete.
+
+* [code]#accessor#: The command must not begin executing until the
+  [code]#buffer# associated with the [code]#accessor# can be accessed in a
+  manner compatible with the specified [code]#access_mode#.
+
+* [code]#tracking#: The command must be submitted such that its state can be
+  tracked via an [code]#event# when the [code]#tracking# object is constructed
+  with an [code]#enabled# value of [code]#true#.
+
+'''
+
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:requirements-ctor]
+----
+template <typename... Requirements>
+requirements(Requirements... values);
+----
+
+_Constraints_: [code]#is_requirement_v# returns [code]#true# for each type in
+[code]#Requirements#.
+
+_Effects_: Constructs a [code]#requirements# object representing the set of
+requirements specified via the [code]#values# parameter pack.
+
+_Remarks_: If an instance of a requirement appears more than once in the
+[code]#values# parameter pack, the [code]#requirements# object behaves as if it
+had only been specified once.
+
+'''
+
+.[apititle]#requirements::register-accessors#
+[source,role=synopsis,id=api:register-accessors]
+----
+void register-accessors(handler& h) const; // exposition only
+----
+
+_Effects_: Calls [code]#h.require# for each [code]#accessor# passed to the
+constructor of this [code]#requirements# object.
+
+'''
+
+.[apititle]#requirements::register-events#
+[source,role=synopsis,id=api:register-events]
+----
+void register-events(handler& h) const; // exposition only
+----
+
+_Effects_: Calls [code]#h.depends_on# for each [code]#event# or
+[code]#std::vector<event># passed to the constructor of this
+[code]#requirements# object.
+
+'''
+
+.[apititle]#requirements::has-tracking#
+[source,role=synopsis,id=api:has-tracking]
+----
+bool has-tracking() const; // exposition only
+----
+
+_Returns_: [code]#true# if this [code]#requirements# object was constructed with
+a [code]#tracking# object with tracking enabled, and [code]#false# otherwise.
+
+'''
+
+.[apititle]#tracking# constructor
+[source,role=synopsis,id=api:tracking-ctor]
+----
+namespace sycl::khr {
+
+tracking(bool enabled=true);
+
+}
+----
+
+_Effects_: Construct a [code]#tracking# object, representing a requirement that
+a command must be submitted such that its state can be tracked via an
+[code]#event# when [code]#enabled# is [code]#true#.
+
+{note}If an [code]#event# is _not_ required, [code]#tracking(false)# should be
+expected to introduce a small amount of overhead compared to providing no
+[code]#tracking# requirement.{endnote}
+
 == New free functions
 
 === Kernel launch
@@ -117,26 +242,39 @@ int main() {
 ----
 namespace sycl::khr {
 
-template <typename KernelType>
-void launch(const queue&, range<1> r, const KernelType& k); (1)
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch(const queue& q, range<1> r, const requirements<Requirements>& reqs, const KernelType& k); (1)
+
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch(const queue& q, range<2> r, const requirements<Requirements>& reqs, const KernelType& k); (2)
+
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch(const queue& q, range<3> r, const requirements<Requirements>& reqs, const KernelType& k); (3)
 
 template <typename KernelType>
-void launch(const queue&, range<2> r, const KernelType& k); (2)
+std::optional<event> launch(const queue& q, range<1> r, const KernelType& k);                                         (4)
 
 template <typename KernelType>
-void launch(const queue&, range<3> r, const KernelType& k); (3)
+std::optional<event> launch(const queue& q, range<2> r, const KernelType& k);                                         (5)
+
+template <typename KernelType>
+std::optional<event> launch(const queue& q, range<3> r, const KernelType& k);                                         (6)
 
 }
 ----
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.parallel_for(r, k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (4-6): Equivalent to: [code]#return launch(q, r, {}, k);#.
 
 '''
 
@@ -147,29 +285,39 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename... Args>
-void launch(const queue&, range<1> r, const kernel& k,
-            Args&&... args); (1)
+template <typename... Args, typename... Requirements>
+std::optional<event> launch(const queue& q, range<1> r, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (1)
+
+template <typename... Args, typename... Requirements>
+std::optional<event> launch(const queue& q, range<2> r, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (2)
+
+template <typename... Args, typename... Requirements>
+std::optional<event> launch(const queue& q, range<3> r, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (3)
 
 template <typename... Args>
-void launch(const queue&, range<2> r, const kernel& k,
-            Args&&... args); (2)
+std::optional<event> launch(const queue& q, range<1> r, const kernel& k, Args&&... args);                                         (4)
 
 template <typename... Args>
-void launch(const queue&, range<3> r, const kernel& k,
-            Args&&... args); (3)
+std::optional<event> launch(const queue& q, range<2> r, const kernel& k, Args&&... args);                                         (5)
+
+template <typename... Args>
+std::optional<event> launch(const queue& q, range<3> r, const kernel& k, Args&&... args);                                         (6)
 
 }
 ----
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.set_args(args...);
   h.parallel_for(r, k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (4-6): Equivalent to: [code]#+return launch(q, r, {}, k, args...);+#.
 
 '''
 
@@ -180,31 +328,42 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename KernelType, typename... Reductions>
-void launch_reduce(const queue&, range<1> r,
-                   const KernelType& k, Reductions&&... reductions); (1)
+template <typename KernelType, typename... Requirements, typename... Reductions>
+std::optional<event> launch_reduce(const queue& q, range<1> r, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename... Requirements, typename... Reductions>
+std::optional<event> launch_reduce(const queue& q, range<2> r, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename... Requirements, typename... Reductions>
+std::optional<event> launch_reduce(const queue& q, range<3> r, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (3)
 
 template <typename KernelType, typename... Reductions>
-void launch_reduce(const queue&, range<2> r,
-                   const KernelType& k, Reductions&&... reductions); (2)
+std::optional<event> launch_reduce(const queue& q, range<1> r, const KernelType& k, Reductions&&... reductions);                                         (4)
 
 template <typename KernelType, typename... Reductions>
-void launch_reduce(const queue&, range<3> r,
-                   const KernelType& k, Reductions&&... reductions); (3)
+std::optional<event> launch_reduce(const queue& q, range<2> r, const KernelType& k, Reductions&&... reductions);                                         (5)
+
+template <typename KernelType, typename... Reductions>
+std::optional<event> launch_reduce(const queue& q, range<3> r, const KernelType& k, Reductions&&... reductions);                                         (6)
 
 }
 ----
 _Constraints_: The parameter pack consists of 1 or more objects created by the
 [code]#reduction# function.
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.parallel_for(r, reductions..., k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (4-6): Equivalent to [code]#+return launch_reduce(q, r, {},
+reductions...);+#.
 
 '''
 
@@ -215,28 +374,39 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename KernelType>
-void launch_grouped(const queue&, range<1> r,
-                    range<1> size, const KernelType& k); (1)
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements>& reqs, const KernelType& k); (1)
+
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements>& reqs, const KernelType& k); (2)
+
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements>& reqs, const KernelType& k); (3)
 
 template <typename KernelType>
-void launch_grouped(const queue&, range<2> r,
-                    range<2> size, const KernelType& k); (2)
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const KernelType& k);                                         (4)
 
 template <typename KernelType>
-void launch_grouped(const queue&, range<3> r,
-                    range<3> size, const KernelType& k); (3)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const KernelType& k);                                         (5)
+
+template <typename KernelType>
+std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const KernelType& k);                                         (6)
 
 }
 ----
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.parallel_for(nd_range(r, size), k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (4-6): Equivalent to [code]#return launch_grouped(q, r, size, {},
+k);#.
 
 '''
 
@@ -247,28 +417,40 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename... Args>
-void launch_grouped(const queue&, range<1> r, range<1> size,
-                    const kernel& k, Args&&... args); (1)
+template <typename... Args, typename... Requirements>
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (1)
+
+template <typename... Args, typename... Requirements>
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (2)
+
+template <typename... Args, typename... Requirements>
+std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (3)
 
 template <typename... Args>
-void launch_grouped(const queue&, range<2> r, range<2> size,
-                    const kernel& k, Args&&... args); (2)
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const kernel& k, Args&&... args);                                         (4)
 
 template <typename... Args>
-void launch_grouped(const queue&, range<3> r, range<3> size,
-                    const kernel& k, Args&&... args); (3)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                         (5)
+
+template <typename... Args>
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                         (6)
 
 }
 ----
-_Effects_: Equivalent to:
-[source,c++]
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.set_args(args...);
   h.parallel_for(nd_range(r, size), k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (4-6): Equivalent to: [code]#+return launch_grouped(q, r, size, {}, k,
+args...);+#.
 
 '''
 
@@ -279,34 +461,42 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename KernelType, typename... Reductions>
-void launch_grouped_reduce(const queue&,
-                           range<1> r, range<1> size, const KernelType& k,
-                           Reductions&&... reductions); (1)
+template <typename KernelType, typename... Reductions, typename... Requirements>
+std::optional<event> launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename... Reductions, typename... Requirements>
+std::optional<event> launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename... Reductions, typename... Requirements>
+std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (3)
 
 template <typename KernelType, typename... Reductions>
-void launch_grouped_reduce(const queue&,
-                           range<2> r, range<2> size, const KernelType& k,
-                           Reductions&&... reductions); (2)
+std::optional<event> launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const KernelType& k, Reductions&&... reductions);                                         (4)
 
 template <typename KernelType, typename... Reductions>
-void launch_grouped_reduce(const queue&,
-                           range<3> r, range<3> size, const KernelType& k,
-                           Reductions&&... reductions); (3)
+std::optional<event> launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const KernelType& k, Reductions&&... reductions);                                         (5)
+
+template <typename KernelType, typename... Reductions>
+std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const KernelType& k, Reductions&&... reductions);                                         (6)
 
 }
 ----
 _Constraints_: The parameter pack consists of 1 or more objects created by the
 [code]#reduction# function.
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) { 
+event ev = q.submit([&](handler& h) { 
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.parallel_for(nd_range(r, size), reductions..., k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (4-6): Equivalent to [code]#+return launch_grouped_reduce(q, r, size,
+{}, k, reductions...);+#.
 
 '''
 
@@ -317,20 +507,27 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
+template <typename KernelType, typename... Requirements>
+std::optional<event> launch_task(const queue& q, const requirements<Requirements>& reqs, const KernelType& k); (1)
+
 template <typename KernelType>
-void launch_task(const queue&, const KernelType& k);
+std::optional<event> launch_task(const queue& q, const KernelType& k);                                         (2)
 
 }
 ----
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_ (1): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.single_task(k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (2): Equivalent to [code]#return launch_task(q, {}, k);#.
 
 '''
 
@@ -341,19 +538,27 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
+template <typename... Args, typename... Requirements>
+std::optional<event> launch_task(const queue& q, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (1)
+
 template <typename... Args>
-void launch_task(const queue&, const kernel& k, Args&&... args);
+std::optional<event> launch_task(const queue& q, const kernel& k, Args&&... args);                                         (2)
 
 }
 ----
-_Effects_: Equivalent to:
-[source,c++]
+_Effects_ (1): Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.set_args(args...);
   h.single_task(k);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
+
+_Effects_ (2): Equivalent to [code]#+return launch_task(q, {}, k, args...);+#.
 
 '''
 
@@ -364,18 +569,21 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-void memcpy(const queue&, void* dest, const void* src, size_t numBytes);
+template <typename... Requirements>
+std::optional<event> memcpy(const queue& q, void* dest, const void* src, size_t numBytes, const requirements<Requirements>& reqs = {});
 
 }
 ----
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.memcpy(dest, src, numBytes);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -385,8 +593,8 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename T>
-void copy(const queue& q, const T* src, T* dest, size_t count);
+template <typename T, typename... Requirements>
+std::optional<event> copy(const queue& q, const T* src, T* dest, size_t count, const requirements<Requirements>& reqs = {});
 
 }
 ----
@@ -406,13 +614,15 @@ _Preconditions_:
 * If either [code]#src# or [code]#dest# is a pointer to a USM allocation, that
   allocation was created from the same context associated with [code]#q#.
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.copy(src, dest, count);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -422,13 +632,11 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
-void copy(const queue&, const SrcT* src,
-          accessor<DestT, DestDims, DestMode, target::device> dest); (1)
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
+std::optional<event> copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements>& reqs = {});           (1)
 
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode>
-void copy(const queue&, std::shared_ptr<SrcT> src,
-          accessor<DestT, DestDims, DestMode, target::device> dest); (2)
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
+std::optional<event> copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements>& reqs = {}); (2)
 
 }
 ----
@@ -447,14 +655,16 @@ _Preconditions_:
 * [code]#src# points to an allocation of at least as many bytes as the range
   represented by [code]#dest#.
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.require(dest);
   h.copy(src, dest);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -464,15 +674,11 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT> void
-          copy(const queue&,
-          accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          DestT* dest);                 (1)
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
+std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, const requirements<Requirements>& reqs = {});                 (1)
 
-template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT> void
-          copy(const queue&,
-          accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          std::shared_ptr<DestT> dest); (2)
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
+std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, const requirements<Requirements>& reqs = {}); (2)
 
 }
 ----
@@ -491,14 +697,16 @@ _Preconditions_:
 * [code]#dest# points to an allocation of at least as many bytes as the range
   represented by [code]#src#.
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.require(src);
   h.copy(src, dest);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -508,10 +716,8 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT,
-          int DestDims, access_mode DestMode>
-void copy(const queue&, accessor<SrcT, SrcDims, SrcMode, target::device> src,
-          accessor<DestT, DestDims, DestMode, target::device> dest);
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
+std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements>& reqs = {});
 
 }
 ----
@@ -526,11 +732,12 @@ _Constraints_:
 * [code]#DestMode# is [code]#access_mode::write# or
   [code]#access_mode::read_write#.
 
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.require(src);
   h.require(dest);
   h.copy(src, dest);
@@ -547,17 +754,20 @@ code if [code]#dest.get_count() < src.get_count()#.
 ----
 namespace sycl::khr {
 
-void memset(const queue&, void* ptr, int value, size_t numBytes);
+template <typename... Requirements>
+std::optional<event> memset(const queue& q, void* ptr, int value, size_t numBytes, const requirements<Requirements>& reqs = {});
 
 }
 ----
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.memset(ptr, value, numBytes);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -567,34 +777,35 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename T>
-void fill(const queue&, T* ptr, const T& pattern, size_t count); (1)
+template <typename T, typename... Requirements>
+std::optional<event> fill(const queue& q, T* ptr, const T& pattern, size_t count, const requirements<Requirements>& reqs = {});                     (1)
 
-template <typename T, int Dims, access_mode Mode>
-void fill(const queue&,
-          accessor<T, Dims, Mode, target::device> dest, const T& src); (2)
+template <typename T, int Dims, access_mode Mode, typename... Requirements>
+std::optional<event> fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, const requirements<Requirements>& reqs = {}); (2)
 
 }
 ----
 
 _Constraints (1)_: [code]#T# is <<device-copyable>>.
 
-_Effects (1)_: Equivalent to:
-
-[source,c++]
+_Effects (1)_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.fill(ptr, pattern, count);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
-_Effects (2)_: Equivalent to:
-
-[source,c++]
+_Effects (2)_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
   h.fill(dest, src);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -604,19 +815,21 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-template <typename T, int Dims, access_mode Mode>
-void update_host(const queue&, accessor<T, Dims, Mode, target::device> acc);
+template <typename T, int Dims, access_mode Mode, typename...Requirements>
+std::optional<event> update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, const requirements<Requirements>& reqs = {});
 
 }
 ----
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.require(acc);
   h.update_host(acc);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -626,17 +839,20 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-void prefetch(const queue&, void* ptr, size_t numBytes);
+template <typename... Requirements>
+std::optional<event> prefetch(const queue& q, void* ptr, size_t numBytes, const requirements<Requirements>& reqs = {});
 
 }
 ----
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.prefetch(ptr, numBytes);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -646,17 +862,20 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-void mem_advise(const queue&, void* ptr, size_t numBytes, int advice);
+template <typename... Requirements>
+std::optional<event> mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, const requirements<Requirements>& reqs = {});
 
 }
 ----
-_Effects_: Equivalent to:
-
-[source,c++]
+_Effects_: Equivalent to: +
+[source,sycl]
 ----
-q.submit([&](handler& h) {
+event ev = q.submit([&](handler& h) {
+  reqs.register-events(h);
+  reqs.register-accessors(h);
   h.mem_advise(ptr, numBytes, advice);
 });
+return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 '''
@@ -668,7 +887,8 @@ q.submit([&](handler& h) {
 ----
 namespace sycl::khr {
 
-void command_barrier(const queue&);
+template <typename... Requirements>
+std::optional<event> command_barrier(const queue& q, const requirements<Requirements>& reqs = {});
 
 }
 ----
@@ -676,10 +896,10 @@ _Effects_: Enqueues a command barrier.
 Any commands submitted after this barrier cannot begin execution until:
 
 * All commands previously submitted to this queue have completed; and
-* All commands associated with this command's dependencies have completed.
+* All requirements in [code]#reqs# are satisfied.
 
-{note}If a [code]#command_barrier# is submitted to an in-order queue and has no
-other dependencies, then this operation may be a no-op.{endnote}
+{note}If a [code]#command_barrier# is submitted to an in-order queue with no
+requirements, then this operation may be a no-op.{endnote}
 
 '''
 
@@ -688,17 +908,16 @@ other dependencies, then this operation may be a no-op.{endnote}
 ----
 namespace sycl::khr {
 
-void event_barrier(const queue&, const std::vector<event>& events);
+template <typename... Requirements>
+std::optional<event> event_barrier(const queue& q, const requirements<Requirements>& reqs = {});
 
 }
 ----
 _Effects_: Enqueues an event barrier.
-Any commands submitted after this barrier cannot begin execution until:
+Any commands submitted after this barrier cannot begin execution until all
+requirements in [code]#reqs# are satisfied.
 
-* All commands associated with [code]#events# have completed; and
-* All commands associated with this command's dependencies have completed.
-
-{note}For both overloads, if [code]#events# is empty and an event barrier has no
-other dependencies, then this operation may be a no-op.{endnote}
+{note}If an [code]#event_barrier# is submitted with no requirements, then this
+operation may be a no-op.{endnote}
 
 '''
