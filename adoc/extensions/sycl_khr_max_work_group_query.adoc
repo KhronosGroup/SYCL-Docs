@@ -1,17 +1,17 @@
-[[sec:khr-max-work-group-sizes]]
-= sycl_khr_max_work_group_sizes
+[[sec:khr-max-work-group-query]]
+= sycl_khr_max_work_group_id
 
 This extension allows developers to query iteration bounds in each dimension for a ND-range kernel.
-The application must ensure that the number of work-groups in each dimension [code]#N# of an ND-range kernel is less than or equal to [code]#max_work_group_sizes<N>#.
+The application must ensure that the number of work-groups in each dimension [code]#N# of an ND-range kernel is less than or equal to [code]#max_work_group_id<N>#.
 
-[[sec:khr-max-work-group-sizes-dependencies]]
+[[sec:khr-max-work-group-query-dependencies]]
 == Dependencies
 
 This extension does not depend on other extensions.
 
-[[sec:khr-max-work-group-sizes-feature-test]]
+[[sec:khr-max-work-group-query-feature-test]]
 == Feature test macro
-An implementation supporting this extension must predefine the [code]#SYCL_KHR_MAX_WORK_GROUP_SIZES# macro to one of the values defined in the table below.
+An implementation supporting this extension must predefine the [code]#SYCL_KHR_MAX_WORK_GROUP_QUERY# macro to one of the values defined in the table below.
 
 [%header,cols="1,5"]
 |===
@@ -24,12 +24,12 @@ An implementation supporting this extension must predefine the [code]#SYCL_KHR_M
 
 == New device descriptors
 
-.[apidef]#khr::info::device::max_work_group_sizes#
-[source,role=synopsis,id=api:khr-info-device-max-work-group-sizes]
+.[apidef]#khr::info::device::max_work_group_id#
+[source,role=synopsis,id=api:khr-info-device-max-work-group-query]
 ----
 namespace sycl::khr::info::device {
 template<int Dimensions = 3>
-struct max_work_group_sizes {
+struct max_work_group_id {
     using return_type = range<Dimensions>;
 };
 } // namespace sycl::khr::info::device
@@ -43,11 +43,11 @@ _Returns:_ The maximum number of work-groups that can be submitted in each dimen
 
 '''
 
-.[apidef]#khr::info::device::max_total_work_groups#
+.[apidef]#khr::info::device::max_work_group_linear_id#
 [source,role=synopsis,id=api:khr-info-device-max-total-work-groups]
 ----
 namespace sycl::khr::info::device {
-struct max_total_work_groups {
+struct max_work_group_linear_id {
     using return_type = size_t;
 };
 } // namespace sycl::khr::info::device
@@ -59,7 +59,7 @@ _Returns:_ The total maximum number of work-groups that can be submitted to an N
 
 '''
 
-[[sec:khr-max-work-group-sizes-example]]
+[[sec:khr-max-work-group-query-example]]
 == Example
 
 The example below demonstrates the use of this extension to check bounds for an 3D nd-range loop.
@@ -83,7 +83,7 @@ main(int argc, char *argv[]) {
         << "\n";
 
     sycl::range<3> nd_limit =
-        device.get_info<sycl::khr::info::device::max_work_group_sizes<3>>();
+        device.get_info<sycl::khr::info::device::max_work_group_id<3>>();
     std::cout << "Max number groups for ND-Range:"
         << " max_0: " << nd_limit[0]
         << " max_1: " << nd_limit[1]
@@ -91,7 +91,7 @@ main(int argc, char *argv[]) {
         << std::endl;
 
     const size_t max_total =
-        device.get_info<sycl::khr::info::device::max_total_work_groups>();
+        device.get_info<sycl::khr::info::device::max_work_group_linear_id>();
     std::cout << "Maximum total number of work-groups:" << max_total
         << std::endl;
 
