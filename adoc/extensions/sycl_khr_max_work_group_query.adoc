@@ -1,12 +1,8 @@
 [[sec:khr-max-work-group-query]]
 = sycl_khr_max_work_group_query
 
-This extension allows developers to query iteration bounds in each dimension
-for an ND-range kernel.
-
-The application must ensure that the number of work-groups in each dimension
-[code]#N# of an ND-range kernel is less than or equal to
-[code]#max_work_group_id<N>#.
+This extension allows developers to query iteration bounds in each dimension and in total for an ND-range kernel.
+The application must ensure that the number of work-groups in each dimension [code]#N# of an ND-range kernel is less than or equal to [code]#max_work_group_range<N>#.
 
 [[sec:khr-max-work-group-query-dependencies]]
 == Dependencies
@@ -30,12 +26,12 @@ defined in the table below.
 
 == New device descriptors
 
-.[apidef]#khr::info::device::max_work_group_id#
-[source,role=synopsis,id=api:khr-info-device-max-work-group-query]
+.[apidef]#khr::info::device::max_work_group_range#
+[source,role=synopsis,id=api:khr-info-device-max-work-group-range]
 ----
 namespace sycl::khr::info::device {
 template<int Dimensions = 3>
-struct max_work_group_id {
+struct max_work_group_range {
     using return_type = range<Dimensions>;
 };
 } // namespace sycl::khr::info::device
@@ -51,11 +47,11 @@ each dimension if the device is not [api]#info::device_type::custom#.
 
 '''
 
-.[apidef]#khr::info::device::max_work_group_linear_id#
-[source,role=synopsis,id=api:khr-info-device-max-total-work-groups]
+.[apidef]#khr::info::device::max_work_group_range_size#
+[source,role=synopsis,id=api:khr-info-device-max-work-group-range-size]
 ----
 namespace sycl::khr::info::device {
-struct max_work_group_linear_id {
+struct max_work_group_range_size {
     using return_type = size_t;
 };
 } // namespace sycl::khr::info::device
@@ -94,7 +90,7 @@ main(int argc, char *argv[]) {
         << "\n";
 
     sycl::range<3> nd_limit =
-        device.get_info<sycl::khr::info::device::max_work_group_id<3>>();
+        device.get_info<sycl::khr::info::device::max_work_group_range<3>>();
     std::cout << "Max number groups for ND-Range:"
         << " max_0: " << nd_limit[0]
         << " max_1: " << nd_limit[1]
@@ -102,7 +98,7 @@ main(int argc, char *argv[]) {
         << std::endl;
 
     const size_t max_total =
-        device.get_info<sycl::khr::info::device::max_work_group_linear_id>();
+        device.get_info<sycl::khr::info::device::max_work_group_range_size>();
     std::cout << "Maximum total number of work-groups:" << max_total
         << std::endl;
 
