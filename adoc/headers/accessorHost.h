@@ -33,8 +33,8 @@ class host_accessor {
                 const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
-  host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+  template <typename AllocatorT, typename DeductionTagT>
+  host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
                 const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -44,9 +44,9 @@ class host_accessor {
                 const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-                range<Dimensions> accessRange, TagT tag,
+                range<Dimensions> accessRange, DeductionTagT tag,
                 const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -56,10 +56,10 @@ class host_accessor {
                 const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
                 range<Dimensions> accessRange, id<Dimensions> accessOffset,
-                TagT tag, const property_list& propList = {});
+                DeductionTagT tag, const property_list& propList = {});
 
   /* -- common interface members -- */
 
