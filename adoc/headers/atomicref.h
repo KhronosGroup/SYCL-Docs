@@ -26,7 +26,7 @@ template <typename T, memory_order DefaultOrder, memory_scope DefaultScope,
 class atomic_ref {
  public:
   using value_type = T;
-  static constexpr size_t required_alignment = /* implementation-defined */;
+  static constexpr std::size_t required_alignment = /* implementation-defined */;
   static constexpr bool is_always_lock_free = /* implementation-defined */;
   static constexpr memory_order default_read_order =
       memory_order_traits<DefaultOrder>::read_order;
@@ -158,7 +158,7 @@ class atomic_ref<T*, DefaultOrder, DefaultScope, AddressSpace> {
 
   using value_type = T*;
   using difference_type = ptrdiff_t;
-  static constexpr size_t required_alignment = /* implementation-defined */;
+  static constexpr std::size_t required_alignment = /* implementation-defined */;
   static constexpr bool is_always_lock_free = /* implementation-defined */;
   static constexpr memory_order default_read_order =
       memory_order_traits<DefaultOrder>::read_order;
