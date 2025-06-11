@@ -470,10 +470,11 @@ It contains:
 - [code]#__writeable_swizzle__# and [code]#__const_swizzle__# classes defined
   by <<swizzled-vec-class>>
 
-Note that the simple swizzle functions ([code]#XYZW_SWIZZLE# and
-[code]#RGBA_SWIZZLE# defined by the table 123) are only available when the macro
-[code]#SYCL_SIMPLE_SWIZZLES# is defined before including
-[code]#<sycl/khr/includes/vec.hpp>#.
+In order to make simple swizzle functions ([code]#XYZW_SWIZZLE# and
+[code]#RGBA_SWIZZLE# defined by the table 123) available, the macro
+[code]#SYCL_SIMPLE_SWIZZLES# should be defined before *any* other
+[code]#sycl/# header is included. The recommended way of doing that is through
+command line options.
 
 [[sec:khr-includes-marray]]
 === [code]#<sycl/khr/includes/marray.hpp># header
@@ -619,9 +620,3 @@ then any macro defined by other extensions myst be made available through
 
 == Open issues/questions
 
-- The proposal says that simple swizzle functions are only available if
-  [code]#SYCL_SIMPLE_SWIZZLES# is defined _before_ including
-  [code]#<sycl/khr/includes/vec.hpp>#, but what if an implementation needs
-  [code]#vec# class for some other things? An example could be math built-in
-  functions. Need to evaluate if the proposed wording is actually implementable
-  and possibly change it.
