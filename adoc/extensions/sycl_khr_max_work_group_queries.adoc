@@ -1,0 +1,136 @@
+[[sec:khr-max-work-group-queries]]
+= sycl_khr_max_work_group_queries
+
+This extension allows developers to query iteration bounds in each dimension and
+in total for an ND-range kernel.
+The application must ensure that the number of work-groups of an ND-range kernel
+is within the range of values returned by these queries.
+
+[[sec:khr-max-work-group-queries-dependencies]]
+== Dependencies
+
+This extension does not depend on other extensions.
+
+[[sec:khr-max-work-group-queries-feature-test]]
+== Feature test macro
+An implementation supporting this extension must predefine the
+[code]#SYCL_KHR_MAX_WORK_GROUP_QUERIES# macro to one of the values defined in
+the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+== New device descriptors
+
+.[apidef]#khr::info::device::max_work_group_range#
+[source,role=synopsis,id=api:khr-info-device-max-work-group-range]
+----
+namespace sycl::khr::info::device {
+template<int Dimensions = 3>
+struct max_work_group_range {
+    using return_type = range<Dimensions>;
+};
+} // namespace sycl::khr::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Constraints:_ Available only when [code]#Dimensions# is 1, 2 or 3.
+
+_Returns:_ The maximum number of work-groups that can be submitted in each
+dimension of an [code]#nd_range<Dimensions># kernel.
+This is the maximum value that can be returned in each dimension from
+[api]#khr::work_group::range#.
+The minimum value is 1 in each dimension if the device is not
+[api]#info::device_type::custom#.
+
+'''
+
+.[apidef]#khr::info::device::max_work_group_range_size#
+[source,role=synopsis,id=api:khr-info-device-max-work-group-range-size]
+----
+namespace sycl::khr::info::device {
+struct max_work_group_range_size {
+    using return_type = size_t;
+};
+} // namespace sycl::khr::info::device
+----
+
+_Remarks:_ Template parameter to [api]#device::get_info#.
+
+_Returns:_ The total maximum number of work-groups that can be submitted to an
+ND-range kernel.
+This the maximum value that can be returned from
+[code]#khr::work_group::range().size()#.
+The minimum value is 1 if the device is not [api]#info::device_type::custom#.
+
+'''
+
+[[sec:khr-max-work-group-queries-example]]
+== Example
+
+The example below demonstrates the use of this extension to check bounds for an
+3D nd-range loop.
+
+[source,,linenums]
+----
+#include <iostream>
+#include <sycl/sycl.hpp>
+
+int
+main(int argc, char *argv[]) {
+    size_t dim1 = std::stoi(argv[1]);
+    size_t dim2 = std::stoi(argv[2]);
+    size_t dim3 = std::stoi(argv[3]);
+    sycl::range<3> globalSize(dim1, dim2, dim3);
+    sycl::range<3> localSize(1, 1, 1);
+
+    sycl::queue queue;
+    sycl::device device = queue.get_device();
+    std::cout << "Running on " << device.get_info<sycl::info::device::name>()
+        << "\n";
+
+    sycl::range<3> nd_limit =
+        device.get_info<sycl::khr::info::device::max_work_group_range<3>>();
+    std::cout << "Max number groups for ND-Range:"
+        << " max_0: " << nd_limit[0]
+        << " max_1: " << nd_limit[1]
+        << " max_2: " << nd_limit[2]
+        << std::endl;
+
+    const size_t max_total =
+        device.get_info<sycl::khr::info::device::max_work_group_range_size>();
+    std::cout << "Maximum total number of work-groups:" << max_total
+        << std::endl;
+
+    const auto nb_wg_2 = globalSize[2]/localSize[2];
+    const auto nb_wg_1 = globalSize[1]/localSize[1];
+    const auto nb_wg_0 = globalSize[0]/localSize[0];
+    const auto nb_wg_total = nb_wg_0*nb_wg_1*nb_wg_2;
+
+    // Should always be satisfied at kernel submission
+    // user's responsibility to check
+    if (nb_wg_0 <= nd_limit[0]
+     && nb_wg_1 <= nd_limit[1]
+     && nb_wg_2 <= nd_limit[2]
+     && nb_wg_total <= max_total) {
+        std::cout << "Launching kernel" << std::endl;
+        // If the condition is satisfied
+        // the implementation guarantees the execution of the kernel
+        queue.parallel_for(
+            sycl::nd_range{globalSize, localSize},
+            [=](sycl::id<3> idx) { /*Kernel*/ }).wait();
+    }
+    else{
+        std::cout << "Kernel exceeds work-group sizes limitation" << std::endl;
+    }
+
+    return 0;
+}
+----
