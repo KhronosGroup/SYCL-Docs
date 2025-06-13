@@ -127,9 +127,10 @@ public:
   // Only available if: all Requirements satisfy is_requirement_v
   requirements(Requirements... values);
 
-  void register-accessors(handler& h) const;  // exposition only
-  void register-events(handler& h) const;     // exposition only
-  bool has-tracking() const;                  // exposition only
+  void register-accessors(handler& h) const;     // exposition only
+  void register-events(handler& h) const;        // exposition only
+  void register-kernel-bundle(handler& h) const; // exposition only
+  bool has-tracking() const;                     // exposition only
 };
 
 class tracking {
@@ -158,6 +159,9 @@ For each type, the [code]#is_requirement# type trait is specialized such that
   tracked via an [code]#event# when the [code]#tracking# object is constructed
   with an [code]#enabled# value of [code]#true#.
 
+* [code]#kernel_bundle<bundle_state::executable>#: The command must be submitted
+  using a <<device image>> from the kernel bundle.
+
 '''
 
 .[apititle]#Default constructor#
@@ -167,15 +171,18 @@ template <typename... Requirements>
 requirements(Requirements... values);
 ----
 
-_Constraints_: [code]#is_requirement_v# returns [code]#true# for each type in
-[code]#Requirements#.
+_Constraints_:
+* [code]#is_requirement_v# returns [code]#true# for each type in
+  [code]#Requirements#; and
+* [code]#Requirements# contains at most one
+  [code]#kernel_bundle<bundle_state::executable>#.
 
 _Effects_: Constructs a [code]#requirements# object representing the set of
 requirements specified via the [code]#values# parameter pack.
 
-_Remarks_: If an instance of a requirement appears more than once in the
-[code]#values# parameter pack, the [code]#requirements# object behaves as if it
-had only been specified once.
+_Remarks_: Unless otherwise specified, if an instance of a requirement appears
+more than once in the [code]#values# parameter pack, the [code]#requirements#
+object behaves as if it had only been specified once.
 
 '''
 
@@ -199,6 +206,18 @@ void register-events(handler& h) const; // exposition only
 _Effects_: Calls [code]#h.depends_on# for each [code]#event# or
 [code]#std::vector<event># passed to the constructor of this
 [code]#requirements# object.
+
+'''
+
+.[apititle]#requirements::register-kernel-bundle#
+[source,role=synopsis,id=api:register-kernel-bundle]
+----
+void register-kernel-bundle(handler& h) const; // exposition only
+----
+
+_Effects_: Calls [code]#h.use_kernel_bundle# if a [code]#kernel_bundle# in
+executable state was passed to the constructor of this [code]#requirements#
+object and has no effect otherwise.
 
 '''
 
@@ -269,6 +288,7 @@ _Effects_ (1-3): Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.parallel_for(r, k);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -305,6 +325,10 @@ std::optional<event> launch(const queue& q, range<3> r, const kernel& k, Args&&.
 
 }
 ----
+
+_Constraints_ (1-3): [code]#Requirements# does not contain a
+[code]#kernel_bundle#.
+
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
@@ -357,6 +381,7 @@ _Effects_ (1-3): Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.parallel_for(r, reductions..., k);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -400,6 +425,7 @@ _Effects_ (1-3): Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.parallel_for(nd_range(r, size), k);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -437,6 +463,9 @@ std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, c
 
 }
 ----
+_Constraints_ (1-3): [code]#Requirements# does not contain a
+[code]#kernel_bundle#.
+
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
@@ -490,6 +519,7 @@ _Effects_ (1-3): Equivalent to: +
 event ev = q.submit([&](handler& h) { 
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.parallel_for(nd_range(r, size), reductions..., k);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -522,6 +552,7 @@ _Effects_ (1): Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.single_task(k);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -546,6 +577,9 @@ std::optional<event> launch_task(const queue& q, const kernel& k, Args&&... args
 
 }
 ----
+_Constraints_ (1): [code]#Requirements# does not contain a
+[code]#kernel_bundle#.
+
 _Effects_ (1): Equivalent to: +
 [source,sycl]
 ----
@@ -581,6 +615,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.memcpy(dest, src, numBytes);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -620,6 +655,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.copy(src, dest, count);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -661,6 +697,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.require(dest);
   h.copy(src, dest);
 });
@@ -703,6 +740,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.require(src);
   h.copy(src, dest);
 });
@@ -738,6 +776,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.require(src);
   h.require(dest);
   h.copy(src, dest);
@@ -765,6 +804,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.memset(ptr, value, numBytes);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -794,6 +834,7 @@ _Effects (1)_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.fill(ptr, pattern, count);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -826,6 +867,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.require(acc);
   h.update_host(acc);
 });
@@ -850,6 +892,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.prefetch(ptr, numBytes);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -873,6 +916,7 @@ _Effects_: Equivalent to: +
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
   h.mem_advise(ptr, numBytes, advice);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
