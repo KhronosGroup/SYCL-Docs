@@ -440,6 +440,7 @@ module Rouge
       sycl_exposition_only = %w(
         register-events
         register-accessors
+        register-kernel-bundle
         has-tracking
       )
 
