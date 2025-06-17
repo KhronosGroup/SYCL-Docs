@@ -264,22 +264,22 @@ expected to introduce a small amount of overhead compared to providing no
 namespace sycl::khr {
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch(const queue& q, range<1> r, const requirements<Requirements>& reqs, const KernelType& k); (1)
+std::optional<event> launch(const queue& q, range<1> r, const requirements<Requirements...>& reqs, const KernelType& k); (1)
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch(const queue& q, range<2> r, const requirements<Requirements>& reqs, const KernelType& k); (2)
+std::optional<event> launch(const queue& q, range<2> r, const requirements<Requirements...>& reqs, const KernelType& k); (2)
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch(const queue& q, range<3> r, const requirements<Requirements>& reqs, const KernelType& k); (3)
+std::optional<event> launch(const queue& q, range<3> r, const requirements<Requirements...>& reqs, const KernelType& k); (3)
 
 template <typename KernelType>
-std::optional<event> launch(const queue& q, range<1> r, const KernelType& k);                                         (4)
+std::optional<event> launch(const queue& q, range<1> r, const KernelType& k);                                            (4)
 
 template <typename KernelType>
-std::optional<event> launch(const queue& q, range<2> r, const KernelType& k);                                         (5)
+std::optional<event> launch(const queue& q, range<2> r, const KernelType& k);                                            (5)
 
 template <typename KernelType>
-std::optional<event> launch(const queue& q, range<3> r, const KernelType& k);                                         (6)
+std::optional<event> launch(const queue& q, range<3> r, const KernelType& k);                                            (6)
 
 }
 ----
@@ -308,22 +308,22 @@ _Effects_ (4-6): Equivalent to: [code]#return launch(q, r, {}, k);#.
 namespace sycl::khr {
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch(const queue& q, range<1> r, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (1)
+std::optional<event> launch(const queue& q, range<1> r, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (1)
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch(const queue& q, range<2> r, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (2)
+std::optional<event> launch(const queue& q, range<2> r, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (2)
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch(const queue& q, range<3> r, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (3)
+std::optional<event> launch(const queue& q, range<3> r, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (3)
 
 template <typename... Args>
-std::optional<event> launch(const queue& q, range<1> r, const kernel& k, Args&&... args);                                         (4)
+std::optional<event> launch(const queue& q, range<1> r, const kernel& k, Args&&... args);                                            (4)
 
 template <typename... Args>
-std::optional<event> launch(const queue& q, range<2> r, const kernel& k, Args&&... args);                                         (5)
+std::optional<event> launch(const queue& q, range<2> r, const kernel& k, Args&&... args);                                            (5)
 
 template <typename... Args>
-std::optional<event> launch(const queue& q, range<3> r, const kernel& k, Args&&... args);                                         (6)
+std::optional<event> launch(const queue& q, range<3> r, const kernel& k, Args&&... args);                                            (6)
 
 }
 ----
@@ -355,22 +355,22 @@ _Effects_ (4-6): Equivalent to: [code]#+return launch(q, r, {}, k, args...);+#.
 namespace sycl::khr {
 
 template <typename KernelType, typename... Requirements, typename... Reductions>
-std::optional<event> launch_reduce(const queue& q, range<1> r, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (1)
+std::optional<event> launch_reduce(const queue& q, range<1> r, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (1)
 
 template <typename KernelType, typename... Requirements, typename... Reductions>
-std::optional<event> launch_reduce(const queue& q, range<2> r, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (2)
+std::optional<event> launch_reduce(const queue& q, range<2> r, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (2)
 
 template <typename KernelType, typename... Requirements, typename... Reductions>
-std::optional<event> launch_reduce(const queue& q, range<3> r, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (3)
+std::optional<event> launch_reduce(const queue& q, range<3> r, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (3)
 
 template <typename KernelType, typename... Reductions>
-std::optional<event> launch_reduce(const queue& q, range<1> r, const KernelType& k, Reductions&&... reductions);                                         (4)
+std::optional<event> launch_reduce(const queue& q, range<1> r, const KernelType& k, Reductions&&... reductions);                                            (4)
 
 template <typename KernelType, typename... Reductions>
-std::optional<event> launch_reduce(const queue& q, range<2> r, const KernelType& k, Reductions&&... reductions);                                         (5)
+std::optional<event> launch_reduce(const queue& q, range<2> r, const KernelType& k, Reductions&&... reductions);                                            (5)
 
 template <typename KernelType, typename... Reductions>
-std::optional<event> launch_reduce(const queue& q, range<3> r, const KernelType& k, Reductions&&... reductions);                                         (6)
+std::optional<event> launch_reduce(const queue& q, range<3> r, const KernelType& k, Reductions&&... reductions);                                            (6)
 
 }
 ----
@@ -402,22 +402,22 @@ reductions...);+#.
 namespace sycl::khr {
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements>& reqs, const KernelType& k); (1)
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements...>& reqs, const KernelType& k); (1)
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements>& reqs, const KernelType& k); (2)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements...>& reqs, const KernelType& k); (2)
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements>& reqs, const KernelType& k); (3)
+std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements...>& reqs, const KernelType& k); (3)
 
 template <typename KernelType>
-std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const KernelType& k);                                         (4)
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const KernelType& k);                                            (4)
 
 template <typename KernelType>
-std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const KernelType& k);                                         (5)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const KernelType& k);                                            (5)
 
 template <typename KernelType>
-std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const KernelType& k);                                         (6)
+std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const KernelType& k);                                            (6)
 
 }
 ----
@@ -446,22 +446,22 @@ k);#.
 namespace sycl::khr {
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (1)
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (1)
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (2)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (2)
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (3)
+std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (3)
 
 template <typename... Args>
-std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const kernel& k, Args&&... args);                                         (4)
+std::optional<event> launch_grouped(const queue& q, range<1> r, range<1> size, const kernel& k, Args&&... args);                                            (4)
 
 template <typename... Args>
-std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                         (5)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                            (5)
 
 template <typename... Args>
-std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                         (6)
+std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                            (6)
 
 }
 ----
@@ -493,22 +493,22 @@ args...);+#.
 namespace sycl::khr {
 
 template <typename KernelType, typename... Reductions, typename... Requirements>
-std::optional<event> launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (1)
+std::optional<event> launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (1)
 
 template <typename KernelType, typename... Reductions, typename... Requirements>
-std::optional<event> launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (2)
+std::optional<event> launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (2)
 
 template <typename KernelType, typename... Reductions, typename... Requirements>
-std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const requirements<Requirements>& reqs, const KernelType& k, Reductions&&... reductions); (3)
+std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (3)
 
 template <typename KernelType, typename... Reductions>
-std::optional<event> launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const KernelType& k, Reductions&&... reductions);                                         (4)
+std::optional<event> launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const KernelType& k, Reductions&&... reductions);                                            (4)
 
 template <typename KernelType, typename... Reductions>
-std::optional<event> launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const KernelType& k, Reductions&&... reductions);                                         (5)
+std::optional<event> launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const KernelType& k, Reductions&&... reductions);                                            (5)
 
 template <typename KernelType, typename... Reductions>
-std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const KernelType& k, Reductions&&... reductions);                                         (6)
+std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const KernelType& k, Reductions&&... reductions);                                            (6)
 
 }
 ----
@@ -540,10 +540,10 @@ _Effects_ (4-6): Equivalent to [code]#+return launch_grouped_reduce(q, r, size,
 namespace sycl::khr {
 
 template <typename KernelType, typename... Requirements>
-std::optional<event> launch_task(const queue& q, const requirements<Requirements>& reqs, const KernelType& k); (1)
+std::optional<event> launch_task(const queue& q, const requirements<Requirements...>& reqs, const KernelType& k); (1)
 
 template <typename KernelType>
-std::optional<event> launch_task(const queue& q, const KernelType& k);                                         (2)
+std::optional<event> launch_task(const queue& q, const KernelType& k);                                            (2)
 
 }
 ----
@@ -572,10 +572,10 @@ _Effects_ (2): Equivalent to [code]#return launch_task(q, {}, k);#.
 namespace sycl::khr {
 
 template <typename... Args, typename... Requirements>
-std::optional<event> launch_task(const queue& q, const requirements<Requirements>& reqs, const kernel& k, Args&&... args); (1)
+std::optional<event> launch_task(const queue& q, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (1)
 
 template <typename... Args>
-std::optional<event> launch_task(const queue& q, const kernel& k, Args&&... args);                                         (2)
+std::optional<event> launch_task(const queue& q, const kernel& k, Args&&... args);                                            (2)
 
 }
 ----
@@ -606,7 +606,7 @@ _Effects_ (2): Equivalent to [code]#+return launch_task(q, {}, k, args...);+#.
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> memcpy(const queue& q, void* dest, const void* src, size_t numBytes, const requirements<Requirements>& reqs = {});
+std::optional<event> memcpy(const queue& q, void* dest, const void* src, size_t numBytes, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -631,7 +631,7 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename T, typename... Requirements>
-std::optional<event> copy(const queue& q, const T* src, T* dest, size_t count, const requirements<Requirements>& reqs = {});
+std::optional<event> copy(const queue& q, const T* src, T* dest, size_t count, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -671,10 +671,10 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
-std::optional<event> copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements>& reqs = {});           (1)
+std::optional<event> copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});           (1)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
-std::optional<event> copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements>& reqs = {}); (2)
+std::optional<event> copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {}); (2)
 
 }
 ----
@@ -714,10 +714,10 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
-std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, const requirements<Requirements>& reqs = {});                 (1)
+std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, const requirements<Requirements...>& reqs = {});                 (1)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
-std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, const requirements<Requirements>& reqs = {}); (2)
+std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, const requirements<Requirements...>& reqs = {}); (2)
 
 }
 ----
@@ -757,7 +757,7 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
-std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements>& reqs = {});
+std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -796,7 +796,7 @@ code if [code]#dest.get_count() < src.get_count()#.
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> memset(const queue& q, void* ptr, int value, size_t numBytes, const requirements<Requirements>& reqs = {});
+std::optional<event> memset(const queue& q, void* ptr, int value, size_t numBytes, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -820,10 +820,10 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename T, typename... Requirements>
-std::optional<event> fill(const queue& q, T* ptr, const T& pattern, size_t count, const requirements<Requirements>& reqs = {});                     (1)
+std::optional<event> fill(const queue& q, T* ptr, const T& pattern, size_t count, const requirements<Requirements...>& reqs = {});                     (1)
 
 template <typename T, int Dims, access_mode Mode, typename... Requirements>
-std::optional<event> fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, const requirements<Requirements>& reqs = {}); (2)
+std::optional<event> fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, const requirements<Requirements...>& reqs = {}); (2)
 
 }
 ----
@@ -859,7 +859,7 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename T, int Dims, access_mode Mode, typename...Requirements>
-std::optional<event> update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, const requirements<Requirements>& reqs = {});
+std::optional<event> update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -884,7 +884,7 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> prefetch(const queue& q, void* ptr, size_t numBytes, const requirements<Requirements>& reqs = {});
+std::optional<event> prefetch(const queue& q, void* ptr, size_t numBytes, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -908,7 +908,7 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, const requirements<Requirements>& reqs = {});
+std::optional<event> mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -934,7 +934,7 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> command_barrier(const queue& q, const requirements<Requirements>& reqs = {});
+std::optional<event> command_barrier(const queue& q, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -955,7 +955,7 @@ requirements, then this operation may be a no-op.{endnote}
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> event_barrier(const queue& q, const requirements<Requirements>& reqs = {});
+std::optional<event> event_barrier(const queue& q, const requirements<Requirements...>& reqs = {});
 
 }
 ----
