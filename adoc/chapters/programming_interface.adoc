@@ -4649,7 +4649,7 @@ When a queue is constructed with this property, the implementation captures
 profiling information for the <<command-group,command groups>> that are
 submitted to this queue.
 Applications can retrieve this profiling information by calling
-[code]#event::get_profiling_info# on the event that is returned when submitting
+[api]#event::get_profiling_info# on the event that is returned when submitting
 the command group.
 If the queue's associated device does not have [code]#aspect::queue_profiling#,
 passing this property to the queue's constructor causes the constructor to throw
@@ -4703,7 +4703,7 @@ a queue is destroyed, the handler is called and this might delay or block the
 destruction, according to the behavior of the handler.
 
 
-[[sec:interface.event]]
+[[sec:event-class]]
 === Event class
 
 An <<event>> in SYCL is an object that represents the status of an operation
@@ -4726,235 +4726,224 @@ execution.
 The SYCL [code]#event# class provides the common reference semantics (see
 <<sec:reference-semantics>>).
 
-The constructors and member functions of the SYCL [code]#event# class are listed
-in <<table.constructors.event>> and <<table.members.event>>, respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
 // Interface for class: event.h
 [source,,linenums]
 ----
 include::{header_dir}/event.h[lines=4..-1]
 ----
 
+[[sec:event-ctors]]
+==== Constructors
 
-[[table.constructors.event]]
-.Constructors of the [code]#event# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:event-ctor]
 ----
 event()
 ----
-   a@ Constructs an [code]#event# that is immediately ready.  The
-      [code]#event# has no dependencies and no associated commands.
-      Waiting on this [code]#event# will return immediately and querying
-      its status will return [code]#info::event_command_status::complete#.
 
-The event is constructed as though it was created from a default-constructed
-[code]#queue#.  Therefore, its backend is the same as the backend from the
-default device.
+_Effects:_ Constructs an [code]#event# that is immediately ready.
+The [code]#event# has no dependencies and no associated commands.
+Waiting on this [code]#event# will return immediately and querying its status
+will return [api]#info::event_command_status::complete#.
 
-|====
+_Remarks:_ The event is constructed as though it were created from a
+default-constructed [code]#queue#.
+Therefore, its backend is the same as the backend of the device selected by
+[code]#default_selector_v#.
 
+'''
 
+[[sec:event-member-funcs]]
+==== Member functions
 
-[[table.members.event]]
-.Member functions for the [code]#event# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apidef]#event::get_backend#
+[source,role=synopsis,id=api:queue-get_backend]
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#event#.
 
-a@
-[source]
+_Returns:_ The <<backend>> associated with this event.
+
+'''
+
+.[apidef]#event::get_wait_list#
+[source,role=synopsis,id=api:event-get_wait_list]
 ----
 std::vector<event> get_wait_list()
 ----
-   a@ Return the list of events that this event waits for in
-      the dependence graph.  Only direct dependencies are returned,
-      and not transitive dependencies that direct dependencies wait on.
-      Whether already completed events are included in the returned list
-      is implementation-defined.
 
-a@
-[source]
+_Returns:_ The list of events that this event waits for in the dependence graph.
+Only direct dependencies are returned, and not transitive dependencies that
+direct dependencies wait on.
+
+_Remarks:_ Whether already completed events are included in the returned list is
+implementation-defined.
+
+'''
+
+.[apidef]#event::wait#
+[source,role=synopsis,id=api:event-wait]
 ----
 void wait()
 ----
-   a@ Blocks until all commands associated with this event and any dependent
-      events have completed.
 
-a@
-[source]
+_Effects:_ Blocks until all commands associated with this event and any
+dependent events have completed.
+
+'''
+
+.[apidef]#event::wait_and_throw#
+[source,role=synopsis,id=api-event-wait_and_throw]
 ----
 void wait_and_throw()
 ----
-   a@ Blocks until all commands associated with this event and any dependent
-      events have completed.
 
-At least all unconsumed <<async-error,asynchronous errors>> held by queues (or
-their associated contexts) which were used to enqueue commands associated with
-this event and any dependent events, are passed to the appropriate
-<<async-handler>> as described in <<subsubsec:async.handler.priorities>>.
+_Effects:_
 
-[NOTE]
-====
-This behavior is equivalent to calling [code]#queue::throw_asynchronous()# on
+* Blocks until all commands associated with this event and any dependent events
+  have completed.
+
+* At least all unconsumed <<async-error,asynchronous errors>> held by queues (or
+  their associated contexts) which were used to enqueue commands associated with
+  this event and any dependent events are passed to the appropriate
+  <<async-handler>> as described in <<subsubsec:async.handler.priorities>>.
+
+{note}This behavior is equivalent to calling [api]#queue::throw_asynchronous# on
 the queue associated with this event and any dependent events.
-====
+{endnote}
 
-a@
-[source]
+'''
+
+.[apidef]#event::get_info#
+[source,role=synopsis,id=api:event-get_info]
+----
+template <typename Param>
+typename Param::return_type get_info() const
+----
+
+_Constraints:_ The [code]#Param# must be an information descriptor for the
+event class.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:event-info-descriptors>> for the event information descriptors that
+are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#event::get_backend_info#
+[source,role=synopsis,id=api:event-get_backend_info]
+----
+template <typename Param>
+typename Param::return_type get_backend_info() const
+----
+
+_Constraints:_ The [code]#Param# must be a backend information descriptor for
+the event class.
+
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this event.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+.[apidef]#event::get_profiling_info#
+[source,role=synopsis,id=api:event-get_profiling_info]
+----
+template <typename Param>
+typename Param::return_type get_profiling_info() const
+----
+
+_Constraints:_ The [code]#Param# must be a profiling information descriptor for
+the event class.
+
+_Effects:_ If the requested profiling information is unavailable when
+[code]#get_profiling_info# is called due to incompletion of
+<<command-group,command groups>> associated with the event, then the call to
+[code]#get_profiling_info# will block until the requested profiling information
+is available.
+
+{note} An example is asking for [code]#info::event_profiling::command_end# when
+the associated <<command-group>> action has yet to finish execution.
+{endnote}
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+SYCL queue that submitted the <<command-group>> that this event is associated
+with was not constructed with the [api]#property::queue::enable_profiling#
+property.
+
+Each profiling information descriptor specifies the return value.
+
+'''
+
+[[sec:event-static-member-funcs]]
+==== Static member functions
+
+.[apidef]#event::wait (with event list)#
+[source,role=synopsis,id=api-event-wait-with-list]
 ----
 static void wait(const std::vector<event>& eventList)
 ----
-   a@ Behaves as if calling [code]#event::wait()# on each event in
-      [code]#eventList#.
 
-a@
-[source]
+_Effects:_ Behaves as if calling [api]#event::wait# on each event in
+[code]#eventList#.
+
+'''
+
+.[apidef]#event::wait_and_throw (with event list)#
+[source,role=synopsis,id=api-event-wait_and_throw-with-list]
 ----
 static void wait_and_throw(const std::vector<event>& eventList)
 ----
-   a@ Behaves as if calling [code]#event::wait_and_throw()# on each event in
-      [code]#eventList#.
 
-a@
-[source]
+_Effects:_ Behaves as if calling [api]#event::wait_and_throw# on each event in
+[code]#eventList#.
+
+'''
+
+[[sec:event-info-descriptors]]
+==== Information descriptors
+
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#event::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#event::get_info#
+function.
+
+'''
+
+.[apidef]#info::event::command_execution_status#
+[source,role=synopsis,id=api:info-event-command_execution_status]
 ----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#event# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.event.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
-
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-   a@ Queries this SYCL [code]#event# for <<backend>>-specific information
-      requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#event#.
-
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_profiling_info() const
-----
-   a@ Queries this SYCL [code]#event# for profiling information requested
-      by the parameter [code]#Param#. If the requested profiling information
-      is unavailable when [code]#get_profiling_info# is called due to
-      incompletion of <<command-group,command groups>> associated with the [code]#event#,
-      then the call to [code]#get_profiling_info# will block until
-      the requested profiling information is available. An example is asking for
-      [code]#info::event_profiling::command_end# when the associated
-      <<command-group>> action has yet to finish execution.
-      Calls to [code]#get_profiling_info# must throw an [code]#exception#
-      with the [code]#errc::invalid# error code if the SYCL
-      [code]#queue# which submitted the <<command-group>> this
-      SYCL [code]#event# is associated with was not constructed with
-      the [code]#property::queue::enable_profiling# property.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in
-      <<table.event.profilinginfo>> to facilitate returning the type
-      associated with the [code]#Param# parameter.
-
-|====
-
-
-==== Event information and profiling descriptors
-
-An <<event>> can be queried for information using the [code]#get_info# member
-function of the [code]#event# class, specifying one of the info parameters in
-[code]#info::event#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<event>>.
-All info parameters in [code]#info::event# are specified in <<table.event.info>>
-and the synopsis for [code]#info::event# is described in
-<<appendix.event.descriptors>>.
-
-[[table.event.info]]
-.Event class information descriptors
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Event Descriptors @ Return type @ Description
-a@
-[source]
-----
-info::event::command_execution_status
+namespace sycl::info::event {
+struct command_execution_status {
+  using return_type = info::event_command_status;
+};
+} // namespace sycl::info::event
 ----
 
-    @ [.code]#info::event_command_status#
-   a@ Returns the event status of the command group and contained action
-      (e.g. kernel invocation) associated with this SYCL [code]#event#.
+_Returns:_ The event status of the command group and contained action (e.g.
+kernel invocation) associated with this event.
+The value returned is one of the following:
 
-|====
+* [api]#info::event_command_status::submitted#
 
-The [code]#info::event::command_execution_status# query returns one of the
-values defined in <<table.event.command-status>>.
+* [api]#info::event_command_status::running#
 
-[[table.event.command-status]]
-.Event command status
-[width="100%",options="header",separator="@",cols="45%,55%"]
-|====
-@ Status @ Description
-a@
-[source]
-----
-info::event_command_status::submitted
-----
-   a@ Indicates that the command has been submitted to the SYCL queue but has
-      not yet started running on the device.
+* [api]#info::event_command_status::complete#
 
-a@
-[source]
-----
-info::event_command_status::running
-----
-   a@ Indicates that the command has started running on the device but has not
-      yet completed.
+_Remarks:_ Template parameter to [api]#event::get_info#.
 
-a@
-[source]
-----
-info::event_command_status::complete
-----
-   a@ Indicates that the command has finished running on the device.
-      Attempting to wait on such an event will not block.
+'''
 
-Synchronization: When [code]#event::get_info# returns this value,
-the synchronization is equivalent to [code]#event::wait#.
+[[sec:event-profiling-info-descriptors]]
+==== Profiling information descriptors
 
-|====
-
-
-An <<event>> can be queried for profiling information using the
-[code]#get_profiling_info# member function of the [code]#event# class,
-specifying one of the profiling info parameters enumerated in
-[code]#info::event_profiling#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<event>>.
-All info parameters in [code]#info::event_profiling# are specified in
-<<table.event.profilinginfo>> and the synopsis for [code]#info::event_profiling#
-is described in <<appendix.event.descriptors>>.
+This section describes the profiling information descriptors that can be used as
+the [code]#Param# template parameter to [api]#event::get_profiling_info#.
 
 Each profiling descriptor returns a 64-bit timestamp that represents the number
 of nanoseconds that have elapsed since some implementation-defined timebase.
@@ -4962,59 +4951,133 @@ All events that share the same backend are guaranteed to share the same
 timebase, therefore the difference between two timestamps from the same backend
 yields the number of nanoseconds that have elapsed between those events.
 
-[[table.event.profilinginfo]]
-.Profiling information descriptors for the SYCL [code]#event# class
-[width="100%",options="header",separator="@",cols="43%,13%,44%"]
-|====
-@ Event information profiling descriptor @ Return type @ Description
-a@
-[source]
-----
-info::event_profiling::command_submit
-----
+When the description has a _Returns_ paragraph, this indicates the value
+returned by the [api]#event::get_profiling_info# function.
 
-    @ [.code]#std::uint64_t#
-   a@ Returns a timestamp telling when the associated <<command-group>> was
-      submitted to the [code]#queue#.  This is always some time after the
-      <<command-group-function-object>> returns and before the associated call
-      to [code]#queue::submit# returns.
+'''
 
-a@
-[source]
+.[apidef]#info::event_profiling::command_submit#
+[source,role=synopsis,id=api:info-event_profiling-command_submit]
 ----
-info::event_profiling::command_start
+namespace sycl::info::event_profiling {
+struct command_submit {
+  using return_type = std::uint64_t;
+};
+} // namespace sycl::info::event_profiling
 ----
 
-    @ [.code]#std::uint64_t#
-   a@ Querying this profiling descriptor blocks until the event's state becomes
-      either [code]#info::event_command_status::running# or
-      [code]#info::event_command_status::complete#.  The returned timestamp
-      tells when the action associated with the <<command-group>> (e.g. kernel
-      invocation) started executing on the device.  For any given event, this
-      timestamp is always greater than or equal to the
-      [code]#info::event_profiling::command_submit# timestamp.  Implementations
-      are encouraged to return a timestamp that is as close as possible to the
-      point when the action starts running on the device, but there is no
-      specific accuracy that is guaranteed.
+_Returns:_ The timestamp for when the associated <<command-group>> was submitted
+to the [code]#queue#.
 
-a@
-[source]
+_Remarks:_
+
+* Template parameter to [api]#event::get_profiling_info#.
+
+* The timestamp is always some time after the <<command-group-function-object>>
+  returns and before the associated call to [code]#queue::submit# returns.
+
+'''
+
+.[apidef]#info::event_profiling::command_start#
+[source,role=synopsis,id=api:info-event_profiling-command_start]
 ----
-info::event_profiling::command_end
+namespace sycl::info::event_profiling {
+struct command_start {
+  using return_type = std::uint64_t;
+};
+} // namespace sycl::info::event_profiling
 ----
 
-    @ [.code]#std::uint64_t#
-   a@ Querying this profiling descriptor blocks until the event's state becomes
-      [code]#info::event_command_status::complete#.  The returned timestamp
-      tells when the action associated with the <<command-group>> (e.g. kernel
-      invocation) finished executing on the device.  For any given event, this
-      timestamp is always greater than or equal to the
-      [code]#info::event_profiling::command_start# timestamp.
+_Effects:_ Querying this profiling descriptor blocks until the event's state
+becomes either [api]#info::event_command_status::running# or
+[api]#info::event_command_status::complete#.
 
+_Returns:_ The timestamp for when the action associated with the
+<<command-group>> (e.g., kernel invocation) started executing on the device.
 
-|====
+_Remarks:_
 
+* Template parameter to [api]#event::get_profiling_info#.
 
+* The timestamp is always greater than or equal to the
+  [api]#info::event_profiling::command_submit# timestamp.
+
+{note} Implementations are encouraged to return a timestamp that is as close as
+possible to the point when the action starts running on the device, but there is
+no specific accuracy that is guaranteed.
+{endnote}
+
+'''
+
+.[apidef]#info::event_profiling::command_end#
+[source,role=synopsis,id=api:info-event_profiling-command_end]
+----
+namespace sycl::info::event_profiling {
+struct command_end {
+  using return_type = std::uint64_t;
+};
+} // namespace sycl::info::event_profiling
+----
+
+_Effects:_ Querying this profiling descriptor blocks until the event's state
+becomes [api]#info::event_command_status::complete#.
+
+_Returns:_ The timestamp for when the action associated with the
+<<command-group>> (e.g., kernel invocation) finished executing on the device.
+
+_Remarks:_
+
+* Template parameter to [api]#event::get_profiling_info#.
+
+* The timestamp is always greater than or equal to the
+  [api]#info::event_profiling::command_start# timestamp.
+
+'''
+
+[[sec:event-other-enumerations]]
+==== Other enumerations
+
+[[sec:device-enum-event_command_status]]
+===== Event command status
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class event_command_status : /* unspecified */ {
+  submitted,
+  running,
+  complete
+};
+} // namespace sycl::info
+----
+
+.[apidef]#info::event_command_status::submitted#
+[role=synopsis,id=api:info-event_command_status-submitted]
+--
+Indicates that the command has been submitted to the SYCL queue but has not yet
+started running on the device.
+--
+
+'''
+
+.[apidef]#info::event_command_status::running#
+[role=synopsis,id=api:info-event_command_status-running]
+--
+Indicates that the command has started running on the device but has not yet
+completed.
+--
+
+'''
+
+.[apidef]#info::event_command_status::complete#
+[role=synopsis,id=api:info-event_command_status-complete]
+--
+Indicates that the command has finished running on the device.
+Attempting to wait on such an event will not block.
+
+_Synchronization:_ When [api]#event::get_info# returns this value, the
+synchronization is equivalent to [api]#event::wait#.
+--
 
 [[sec:data.access.and.storage]]
 == Data access and storage in SYCL
@@ -15619,8 +15682,8 @@ A <<host-task>> is enqueued on a <<queue>> via the [code]#host_task# member
 function of the [code]#handler# class.
 The <<event>> returned by the submission of the associated <<command-group>>
 enters the completed state (corresponding to a status of
-[code]#info::event_command_status::complete#) once the invocation of the
-provided {cpp} callable has returned.
+[api]#info::event_command_status::complete#) once the invocation of the provided
+{cpp} callable has returned.
 Any uncaught exception thrown during the execution of a <<host-task>> will be
 turned into an <<async-error>> that can be handled as described in
 <<subsubsec:exception.async>>.
@@ -17469,7 +17532,7 @@ or lambda, with an [code]#exception_list# as a parameter.
 Invocation of an <<async-handler>> may be triggered by the queue member
 functions [code]#queue::wait_and_throw()# or
 [code]#queue::throw_asynchronous()#, by the event member function
-[code]#event::wait_and_throw()#, or automatically on destruction of a queue or
+[api]#event::wait_and_throw#, or automatically on destruction of a queue or
 context that contains unconsumed asynchronous errors.
 When invoked, an <<async-handler>> is called and receives an
 [code]#exception_list# argument containing a list of exception objects
