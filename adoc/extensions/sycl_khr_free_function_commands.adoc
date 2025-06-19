@@ -302,6 +302,9 @@ std::optional<event> launch(const queue& q, range<3> r, const KernelType& k);   
 }
 ----
 
+_Constraints_ (1-3): Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
@@ -393,8 +396,15 @@ std::optional<event> launch_reduce(const queue& q, range<3> r, const KernelType&
 
 }
 ----
-_Constraints_: The parameter pack consists of 1 or more objects created by the
-[code]#reduction# function.
+_Constraints_ (1-3):
+
+* The parameter pack consists of 1 or more objects created by the
+[code]#reduction# function; and
+* Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Constraints_ (4-6): The parameter pack consists of 1 or more objects created by
+the [code]#reduction# function.
 
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
@@ -440,6 +450,10 @@ std::optional<event> launch_grouped(const queue& q, range<3> r, range<3> size, c
 
 }
 ----
+
+_Constraints_ (1-3): Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
@@ -532,8 +546,15 @@ std::optional<event> launch_grouped_reduce(const queue& q, range<3> r, range<3> 
 
 }
 ----
-_Constraints_: The parameter pack consists of 1 or more objects created by the
-[code]#reduction# function.
+_Constraints_ (1-3):
+
+* The parameter pack consists of 1 or more objects created by the
+[code]#reduction# function; and
+* Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Constraints_ (4-6): The parameter pack consists of 1 or more objects created by
+the [code]#reduction# function.
 
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
@@ -567,6 +588,9 @@ std::optional<event> launch_task(const queue& q, const KernelType& k);          
 
 }
 ----
+
+_Constraints_ (1): Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
 
 _Effects_ (1): Equivalent to: +
 [source,sycl]
