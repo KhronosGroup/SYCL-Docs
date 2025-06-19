@@ -346,15 +346,16 @@ std::optional<event> launch(const queue& q, range<3> r, const kernel& k, Args&&.
 }
 ----
 
-_Constraints_ (1-3): [code]#Requirements# does not contain a
-[code]#kernel_bundle#.
+_Constraints_ (1-3):
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.set_args(args...);
   h.parallel_for(r, k);
 });
@@ -483,15 +484,16 @@ std::optional<event> launch_grouped(const queue& q, range<2> r, range<2> size, c
 
 }
 ----
-_Constraints_ (1-3): [code]#Requirements# does not contain a
-[code]#kernel_bundle#.
+_Constraints_ (1-3):
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.set_args(args...);
   h.parallel_for(nd_range(r, size), k);
 });
@@ -597,15 +599,16 @@ std::optional<event> launch_task(const queue& q, const kernel& k, Args&&... args
 
 }
 ----
-_Constraints_ (1): [code]#Requirements# does not contain a
-[code]#kernel_bundle#.
+_Constraints_ (1):
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_ (1): Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.set_args(args...);
   h.single_task(k);
 });
@@ -629,14 +632,16 @@ std::optional<event> memcpy(const queue& q, void* dest, const void* src, size_t 
 }
 ----
 
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.memcpy(dest, src, numBytes);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -659,8 +664,9 @@ Copies between two USM pointers.
 
 _Constraints_:
 
-* [code]#T# is <<device-copyable>>; and
-* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+* [code]#T# is <<device-copyable>>;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Preconditions_:
 
@@ -678,7 +684,6 @@ _Effects_: Equivalent to: +
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.copy(src, dest, count);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -706,8 +711,9 @@ _Constraints_:
 
 * [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
 * [code]#DestMode# is [code]#access_mode::write# or
-  [code]#access_mode::read_write#; and
-* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+  [code]#access_mode::read_write#;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Preconditions_:
 
@@ -720,7 +726,6 @@ _Effects_: Equivalent to: +
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.require(dest);
   h.copy(src, dest);
 });
@@ -749,8 +754,9 @@ _Constraints_:
 
 * [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
 * [code]#DestMode# is [code]#access_mode::read# or
-  [code]#access_mode::read_write#; and
-* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+  [code]#access_mode::read_write#;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Preconditions_:
 
@@ -763,7 +769,6 @@ _Effects_: Equivalent to: +
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.require(src);
   h.copy(src, dest);
 });
@@ -791,15 +796,15 @@ _Constraints_:
 * [code]#SrcMode# is [code]#access_mode::read# or
   [code]#access_mode::read_write#;
 * [code]#DestMode# is [code]#access_mode::write# or
-  [code]#access_mode::read_write#; and
-* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+  [code]#access_mode::read_write#;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.require(src);
   h.require(dest);
   h.copy(src, dest);
@@ -822,14 +827,16 @@ std::optional<event> memset(const queue& q, void* ptr, int value, size_t numByte
 }
 ----
 
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.memset(ptr, value, numBytes);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -854,18 +861,19 @@ std::optional<event> fill(const queue& q, accessor<T, Dims, Mode, target::device
 _Constraints (1)_:
 
 * [code]#T# is <<device-copyable>>; and
-* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Constraints (2)_:
 
-* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects (1)_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.fill(ptr, pattern, count);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -876,7 +884,6 @@ _Effects (2)_: Equivalent to: +
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.fill(dest, src);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -895,14 +902,16 @@ std::optional<event> update_host(const queue& q, accessor<T, Dims, Mode, target:
 }
 ----
 
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.require(acc);
   h.update_host(acc);
 });
@@ -921,14 +930,16 @@ std::optional<event> prefetch(const queue& q, void* ptr, size_t numBytes, const 
 
 }
 ----
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.prefetch(ptr, numBytes);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -946,14 +957,16 @@ std::optional<event> mem_advise(const queue& q, void* ptr, size_t numBytes, int 
 
 }
 ----
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Equivalent to: +
 [source,sycl]
 ----
 event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
-  reqs.register-accessors(h);
   h.mem_advise(ptr, numBytes, advice);
 });
 return (reqs.has-tracking()) ? ev : std::nullopt;
@@ -973,7 +986,10 @@ std::optional<event> command_barrier(const queue& q, const requirements<Requirem
 
 }
 ----
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Enqueues a command barrier.
 Any commands submitted after this barrier cannot begin execution until:
@@ -996,7 +1012,10 @@ std::optional<event> event_barrier(const queue& q, const requirements<Requiremen
 
 }
 ----
-_Constraints_: [code]#Requirements# does not contain a [code]#kernel_bundle#.
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
 
 _Effects_: Enqueues an event barrier.
 Any commands submitted after this barrier cannot begin execution until all
