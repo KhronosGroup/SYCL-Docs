@@ -18,7 +18,7 @@ class host_accessor {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using difference_type =
       typename std::iterator_traits<iterator>::difference_type;
-  using size_type = size_t;
+  using std::size_type = std::size_t;
 
   host_accessor();
 
@@ -65,11 +65,11 @@ class host_accessor {
 
   void swap(host_accessor& other);
 
-  size_type byte_size() const noexcept;
+  std::size_type byte_size() const noexcept;
 
-  size_type size() const noexcept;
+  std::size_type size() const noexcept;
 
-  size_type max_size() const noexcept;
+  std::size_type max_size() const noexcept;
 
   bool empty() const noexcept;
 
@@ -92,10 +92,10 @@ class host_accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ operator[](size_t index) const;
+  __unspecified__ operator[](std::size_t index) const;
 
   /* Available only when: (Dimensions == 1) */
-  reference operator[](size_t index) const;
+  reference operator[](std::size_t index) const;
 
   std::add_pointer_t<value_type> get_pointer() const noexcept;
 
