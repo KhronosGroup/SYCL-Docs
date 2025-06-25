@@ -260,9 +260,11 @@ for kernel function interoperability.
 The availability and behavior of these template functions are defined by the
 <<backend>> specification document.
 
-The [code]#get_native# function must throw an [code]#exception# with the
-[code]#errc::backend_mismatch# error code if the backend of the SYCL object
-doesn't match the target backend.
+In <<application-scope>>, the [code]#get_native# function must throw a
+synchronous [code]#exception# with the [code]#errc::backend_mismatch# error code
+if the backend of the SYCL object doesn't match the target backend.
+In <<command-group-scope>> and <<kernel-scope>>, the behavior is undefined if
+the backend of the SYCL object doesn't match the target backend.
 
 [[sec:backend-interoperability-make]]
 ==== Template functions [code]#make_*#
