@@ -1096,6 +1096,9 @@ programming and to provide a meaningful way to describe the behavior of
 <<group,groups>> containing a single work-item.
 {endnote}
 
+Potentially concurrent conflicting actions with different memory scopes are
+considered a data race, resulting in undefined behavior.
+
 The memory scopes are listed above from narrowest
 ([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
 
@@ -1116,10 +1119,10 @@ supplied.
 ====
 The addition of memory scopes to the {cpp} memory model modifies the definition
 of some concepts from the {cpp} core language.
-For example: data races, the synchronizes-with relationship and sequential
-consistency must be defined in a way that accounts for atomic operations with
-differing (but compatible) scopes, in a manner similar to the <<opencl20, OpenCL
-2.0 specification>>.
+For example: the synchronizes-with relationship and sequential consistency must
+be defined in a way that accounts for atomic operations with differing (but
+compatible) scopes, in a manner similar to the <<opencl20, OpenCL 2.0
+specification>>.
 Efforts to formalize the memory model of SYCL are ongoing, and a formal memory
 model will be included in a future version of the SYCL specification.
 ====
