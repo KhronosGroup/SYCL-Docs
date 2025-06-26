@@ -54,7 +54,7 @@ struct max_constant_args;        // Deprecated
 struct local_mem_type;
 struct local_mem_size;
 struct error_correction_support;
-struct host_unified_memory;
+struct host_unified_memory; // Deprecated
 struct atomic_memory_order_capabilities;
 struct atomic_fence_order_capabilities;
 struct atomic_memory_scope_capabilities;
