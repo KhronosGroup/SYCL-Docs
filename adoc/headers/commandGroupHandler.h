@@ -5,6 +5,8 @@ namespace sycl {
 
 class handler {
  public:
+  handler() = delete;
+
   // A handler cannot be moved or copied.
   handler(const handler&) = delete;
   handler(handler&&) = delete;
