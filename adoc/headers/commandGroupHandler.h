@@ -4,10 +4,6 @@
 namespace sycl {
 
 class handler {
- private:
-  // implementation defined constructor
-  handler(___unspecified___);
-
  public:
   // A handler cannot be moved or copied.
   handler(const handler&) = delete;
