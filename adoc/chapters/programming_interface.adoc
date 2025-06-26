@@ -1888,6 +1888,15 @@ _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ A unique vendor device identifier.
 
+If the vendor has a PCI vendor ID, the low 16 bits must contain that PCI vendor
+ID, and the remaining bits must be set to zero.
+Otherwise, the value returned must be a valid Khronos vendor ID.
+Khronos vendor IDs are allocated starting at 0x10000, to distinguish them from
+the PCI vendor ID namespace.
+
+{note}Khronos vendor IDs are synchronized across APIs by utilizing Vulkan’s
+vk.xml as the central Khronos vendor ID registry.{endnote}
+
 '''
 
 .[apidef]#info::device::max_compute_units#
