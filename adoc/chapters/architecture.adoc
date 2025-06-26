@@ -1096,14 +1096,23 @@ programming and to provide a meaningful way to describe the behavior of
 <<group,groups>> containing a single work-item.
 {endnote}
 
-Potentially concurrent conflicting actions with different memory scopes are
-considered a data race, resulting in undefined behavior.
+Potentially concurrent conflicting actions with different memory scopes may lead
+to a data race, resulting in undefined behavior.
+An atomic operation _A_ with scope _S~1~_ operating on the same memory location
+as atomic operation _B_ with scope _S~2~_ is a data race if:
+
+* The work-items which executed _A_ and _B_ are not both in the same group of
+ work-items associated with scope _S~1~_; or
+* The work-items which executed _A_ and _B_ are not both in the same group of
+ work-items associated with scope _S~2~_.
 
 An atomic operation _A_ with scope _S~1~_ can only synchronize with another
 atomic operation _B_ with scope _S~2~_ if:
 
-* The work-item which executed _A_ is in both _S~1~_ and _S~2~_; and
-* The work-item which executed _B_ is in both _S~1~_ and _S~2~_.
+* The work-items which executed _A_ and _B_ are both in the same group of
+  work-items associated with scope _S~1~_; and
+* The work-items which executed _A_ and _B_ are both in the same group of
+  work-items associated with scope _S~2~_.
 
 The memory scopes are listed above from narrowest
 ([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
