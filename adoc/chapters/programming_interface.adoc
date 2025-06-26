@@ -12069,6 +12069,8 @@ size_t get(int dimension) const
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12077,6 +12079,8 @@ size_t& operator[](int dimension)
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12085,6 +12089,8 @@ size_t operator[](int dimension) const
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12412,8 +12418,9 @@ a@
 ----
 size_t get(int dimension) const
 ----
-   a@ Return the value of the [code]#id# for dimension
-      [code]#Dimension#.
+   a@ Return the value of the requested dimension of this [code]#id# object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12422,6 +12429,8 @@ size_t& operator[](int dimension)
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12430,6 +12439,8 @@ size_t operator[](int dimension) const
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12614,14 +12625,14 @@ a@
 ----
 size_t get_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_id()[dimension]#.
+   a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
 size_t operator[](int dimension) const
 ----
-   a@ Return the same value as [code]#get_id(dimension)#.
+   a@ Equivalent to [code]#return get_id(dimension)#.
 
 a@
 [source]
@@ -12636,7 +12647,7 @@ a@
 ----
 size_t get_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_range().get(dimension)#.
 
 a@
 [source]
@@ -12740,6 +12751,8 @@ size_t get_global_id(int dimension) const
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
       in the given [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12767,6 +12780,8 @@ size_t get_local_id(int dimension) const
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
       [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12801,6 +12816,8 @@ size_t get_group(int dimension) const
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
       given [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12824,6 +12841,8 @@ size_t get_group_range(int dimension) const
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12838,7 +12857,7 @@ a@
 ----
 size_t get_global_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
 a@
 [source]
@@ -12853,7 +12872,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
 a@
 [source]
@@ -13089,112 +13108,112 @@ a@
 ----
 range<Dimensions> get_global_range() const
 ----
-   a@ Return the same value as [code]#get_global().get_range()#
+   a@ Equivalent to [code]#return get_global().get_range()#
 
 a@
 [source]
 ----
 size_t get_global_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global().get_range(dimension)#
+   a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_global_id() const
 ----
-   a@ Return the same value as [code]#get_global().get_id()#
+   a@ Equivalent to [code]#return get_global().get_id()#
 
 a@
 [source]
 ----
 size_t get_global_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global().get_id(dimension)#
+   a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_local_range() const
 ----
-   a@ Return the same value as [code]#get_local().get_range()#
+   a@ Equivalent to [code]#return get_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_local_id() const
 ----
-   a@ Return the same value as [code]#get_local().get_id()#
+   a@ Equivalent to [code]#return get_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_logical_local_range() const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_range()#
+   a@ Equivalent to [code]#return get_logical_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_logical_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_logical_local_id() const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_id()#
+   a@ Equivalent to [code]#return get_logical_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_logical_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_physical_local_range() const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_range()#
+   a@ Equivalent to [code]#return get_physical_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_physical_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_physical_local_id() const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_id()#
+   a@ Equivalent to [code]#return get_physical_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_physical_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
 |====
 
@@ -13251,7 +13270,7 @@ a@
 ----
 size_t get_group_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_id()[dimension]#.
+   a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
 a@
 [source]
@@ -13269,7 +13288,7 @@ a@
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_id()[dimension]#.
+   a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
 It is undefined behavior for this member function to be invoked from within
 a [code]#parallel_for_work_item# context.
@@ -13287,7 +13306,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_range()[dimension]#.
+   a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
 a@
 [source]
@@ -13301,14 +13320,14 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_range()[dimension]#.
+   a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
 size_t operator[](int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_id(dimension)#.
+   a@ Equivalent to [code]#return get_group_id(dimension)#.
 
 a@
 [source]
@@ -13616,28 +13635,28 @@ a@
 ----
 uint32_t get_group_linear_id() const
 ----
-   a@ Return the same value as [code]#get_group_id()[0]#.
+   a@ Equivalent to [code]#return get_group_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_group_linear_range() const
 ----
-   a@ Return the same value as [code]#get_group_range()[0]#.
+   a@ Equivalent to [code]#return get_group_range()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_id() const
 ----
-   a@ Return the same value as [code]#get_local_id()[0]#.
+   a@ Equivalent to [code]#return get_local_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_range() const
 ----
-   a@ Return the same value as [code]#get_local_range()[0]#.
+   a@ Equivalent to [code]#return get_local_range()[0]#.
 
 a@
 [source]
