@@ -64,7 +64,7 @@ struct is_endian_little;
 struct is_available;
 struct is_compiler_available; // Deprecated
 struct is_linker_available;   // Deprecated
-struct execution_capabilities;
+struct execution_capabilities; // Deprecated
 struct queue_profiling;  // Deprecated
 struct built_in_kernels; // Deprecated
 struct built_in_kernel_ids;
@@ -134,6 +134,7 @@ enum class global_mem_cache_type : /* unspecified */ {
   read_write
 };
 
+// Deprecated
 enum class execution_capability : /* unspecified */ {
   exec_kernel,
   exec_native_kernel
