@@ -355,94 +355,115 @@ are hidden from qualified and unqualified lookup.
 Hidden friend functions have the benefits of avoiding accidental implicit
 conversions and faster compilation.
 
-These common special member functions and hidden friend functions are described
-in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>> respectively.
-
 [source,,linenums]
 ----
 include::{header_dir}/common-reference.h[lines=4..-1]
 ----
 
-[[table.specialmembers.common.reference]]
-.Common special member functions for reference semantics
-[width="100%",options="header",separator="@",cols="1,2"]
-|====
-@ Special member function @ Description
-a@
-[source]
+[[sec:reference-semantics-special-members]]
+==== Special member functions
+
+This section describes the special member functions that must be provided by all
+classes providing the common reference semantics (see also the
+<<rule-of-five>>).
+Each of these classes may provide further member functions, static member
+functions, etc., as documented in their respective sections.
+
+'''
+
+.[apititle]#Copy constructor#
+[source,role=synopsis,id=api:reference-semantics-ctor-copy]
 ----
 T(const T& rhs)
 ----
-   a@ Constructs a [code]#T# instance as a copy of the RHS SYCL
-      [code]#T# in accordance with the requirements set out above.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#T# instance as a copy of [code]#rhs# in
+accordance with the requirements set out above.
+
+'''
+
+.[apititle]#Move constructor#
+[source,role=synopsis,id=api:reference-semantics-ctor-move]
 ----
 T(T&& rhs)
 ----
-   a@ Constructs a SYCL [code]#T# instance as a move of the RHS SYCL
-      [code]#T# in accordance with the requirements set out above.
 
-a@
-[source]
+_Effects:_ Constructs a [code]#T# instance as a move of [code]#rhs# in
+accordance with the requirements set out above.
+
+'''
+
+.[apititle]#Copy assignment operator#
+[source,role=synopsis,id=api:reference-semantics-assignment-copy]
 ----
 T& operator=(const T& rhs)
 ----
-   a@ Assigns this SYCL [code]#T# instance with a copy of the RHS SYCL
-      [code]#T# in accordance with the requirements set out above.
 
-a@
-[source]
+_Effects:_ Assigns a copy of [code]#rhs# to this [code]#T# instance in
+accordance with the requirements set out above.
+
+'''
+
+.[apititle]#Move assignment operator#
+[source,role=synopsis,id=api:reference-semantics-assignment-move]
 ----
 T& operator=(T&& rhs)
 ----
-   a@ Assigns this SYCL [code]#T# instance with a move of the RHS SYCL
-      [code]#T# in accordance with the requirements set out above.
 
-a@
-[source]
+_Effects:_ Moves from [code]#rhs# and assigns to this [code]#T# instance in
+accordance with the requirements set out above.
+
+'''
+
+.[apititle]#Destructor#
+[source,role=synopsis,id=api:reference-semantics-destructor]
 ----
 ~T()
 ----
-   a@ Destroys this SYCL [code]#T# instance in accordance with the
-      requirements set out in <<sec:reference-semantics>>. On destruction
-      of the last copy, may perform additional lifetime related operations
-      required for the underlying <<native-backend-object>> specified in
-      the <<backend>> specification document, if this SYCL [code]#T# instance
-      was originally constructed using one of the backend interoperability
-      [code]#make_*# functions specified in
-      <<sec:backend-interoperability-make>>.
-      See the relevant backend specification for details.
 
-|====
+_Effects:_ Destroys this [code]#T# instance in accordance with the requirements
+set out above.
 
-[[table.hiddenfriends.common.reference]]
-.Common hidden friend functions for reference semantics
-[width="100%",options="header",separator="@"]
-|====
-@ Hidden friend function @ Description
-a@
-[source]
+_Remarks:_ On destruction of the last copy, may perform additional
+lifetime-related operations required for the underlying
+<<native-backend-object>> specified in the <<backend>> specification document,
+if this [code]#T# instance was originally constructed using one of the backend
+interoperability [code]#make_*# functions specified in
+<<sec:backend-interoperability-make>>.
+See the relevant backend specification for details.
+
+'''
+
+[[sec:reference-semantics-hidden-friends]]
+==== Hidden friend functions
+
+This section describes the hidden friend functions that must be provided by all
+classes providing the common reference semantics.
+Each of these classes may provide further member functions, static member
+functions, etc., as documented in their respective sections.
+
+'''
+
+.[apititle]#Equality operator#
+[source,role=synopsis,id=api:reference-semantics-equality]
 ----
 bool operator==(const T& lhs, const T& rhs)
 ----
-   a@ Returns true if this LHS SYCL [code]#T# is equal to the RHS SYCL
-      [code]#T# in accordance with the requirements set out above,
-      otherwise returns false.
 
-a@
-[source]
+_Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs# in accordance
+with the requirements set out above, otherwise returns false.
+
+'''
+
+.[apititle]#Inequality operator#
+[source,role=synopsis,id=api:reference-semantics-inequality]
 ----
 bool operator!=(const T& lhs, const T& rhs)
 ----
-   a@ Returns true if this LHS SYCL [code]#T# is not equal to the RHS
-      SYCL [code]#T# in accordance with the requirements set out above,
-      otherwise returns false.
+_Effects:_ Returns true if [code]#lhs# is not equal to [code]#rhs# in accordance
+with the requirements set out above, otherwise returns false.
 
-|====
-
+'''
 
 [[sec:byval-semantics]]
 === Common by-value semantics
@@ -482,77 +503,104 @@ special member functions and member functions in order to fulfill the copy,
 move, destruction and equality requirements, following the <<rule-of-five>> and
 the <<rule-of-zero>>.
 
-These common special member functions and hidden friend functions are described
-in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
-
 [source,,linenums]
 ----
 include::{header_dir}/common-byval.h[lines=4..-1]
 ----
 
-[[table.specialmembers.common.byval]]
-.Common special member functions for by-value semantics
-[width="100%",options="header",separator="@",cols="2,1"]
-|====
-@ Special member function _(see <<rule-of-five>> and <<rule-of-zero>>)_ @ Description
-a@
-[source]
-----
-T(const T& rhs);
-----
-   a@ Copy constructor.
+[[sec:value-semantics-special-members]]
+==== Special member functions
 
-a@
-[source]
-----
-T(T&& rhs);
-----
-   a@ Move constructor.
+This section describes the special member functions that may be provided by
+classes providing the common by-value semantics.
+If a class provides any one of these special member functions, all of the
+special member functions must be provided (see also the <<rule-of-five>> and the
+<<rule-of-zero>>).
+Each of these classes may provide further member functions, static member
+functions, etc., as documented in their respective sections.
 
-a@
-[source]
-----
-T& operator=(const T& rhs);
-----
-   a@ Copy assignment operator.
+'''
 
-a@
-[source]
+.[apititle]#Copy constructor#
+[source,role=synopsis,id=api:value-semantics-ctor-copy]
 ----
-T& operator=(T&& rhs);
+T(const T& rhs)
 ----
-   a@ Move assignment operator.
 
-a@
-[source]
-----
-~T();
-----
-   a@ Destructor.
+_Effects:_ Constructs a [code]#T# instance as a copy of [code]#rhs#.
 
-|====
+'''
 
-[[table.hiddenfriends.common.byval]]
-.Common hidden friend functions for by-value semantics
-[width="100%",options="header",separator="@",cols="1,1"]
-|====
-@ Hidden friend function @ Description
-a@
-[source]
+.[apititle]#Move constructor#
+[source,role=synopsis,id=api:value-semantics-ctor-move]
+----
+T(T&& rhs)
+----
+
+_Effects:_ Constructs a [code]#T# instance as a move of [code]#rhs#.
+
+'''
+
+.[apititle]#Copy assignment operator#
+[source,role=synopsis,id=api:value-semantics-assignment-copy]
+----
+T& operator=(const T& rhs)
+----
+
+_Effects:_ Assigns a copy of [code]#rhs# to this [code]#T# instance.
+
+'''
+
+.[apititle]#Move assignment operator#
+[source,role=synopsis,id=api:value-semantics-assignment-move]
+----
+T& operator=(T&& rhs)
+----
+
+_Effects:_ Moves from [code]#rhs# and assigns to this [code]#T# instance.
+
+'''
+
+.[apititle]#Destructor#
+[source,role=synopsis,id=api:value-semantics-destructor]
+----
+~T()
+----
+
+_Effects:_ Destroys this [code]#T# instance.
+
+'''
+
+[[sec:value-semantics-hidden-friends]]
+==== Hidden friend functions
+
+This section describes the hidden friend functions that must be provided by all
+classes providing the common by-value semantics.
+Each of these classes may provide further member functions, static member
+functions, etc., as documented in their respective sections.
+
+'''
+
+.[apititle]#Equality operator#
+[source,role=synopsis,id=api:value-semantics-equality]
 ----
 bool operator==(const T& lhs, const T& rhs)
 ----
-   a@ Returns true if this LHS SYCL [code]#T# is equal to the RHS SYCL [code]#T# in accordance with the requirements set out above, otherwise returns false.
 
-a@
-[source]
+_Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs# in accordance
+with the requirements set out above, otherwise returns false.
+
+'''
+
+.[apititle]#Inequality operator#
+[source,role=synopsis,id=api:value-semantics-inequality]
 ----
 bool operator!=(const T& lhs, const T& rhs)
 ----
-   a@ Returns true if this LHS SYCL [code]#T# is not equal to the RHS SYCL [code]#T# in accordance with the requirements set out above, otherwise returns false.
+_Effects:_ Returns true if [code]#lhs# is not equal to [code]#rhs# in accordance
+with the requirements set out above, otherwise returns false.
 
-|====
+'''
 
 === Properties
 
@@ -4723,9 +4771,6 @@ The SYCL [code]#event# class provides the common reference semantics (see
 
 The constructors and member functions of the SYCL [code]#event# class are listed
 in <<table.constructors.event>> and <<table.members.event>>, respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
 
 // Interface for class: event.h
 [source,,linenums]
@@ -5188,9 +5233,6 @@ The SYCL [code]#buffer# class template provides the common reference semantics
 The constructors and member functions of the SYCL [code]#buffer# class template
 are listed in <<table.constructors.buffer>> and <<table.members.buffer>>,
 respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
 
 Each constructor takes as the last parameter an optional SYCL
 [code]#property_list# to provide properties to the SYCL [code]#buffer#.
@@ -6057,9 +6099,6 @@ The constructors and member functions of the SYCL [code]#unsampled_image# and
 <<table.constructors.unsampledImage>>, <<table.members.unsampledImage>>,
 <<table.constructors.sampledImage>> and <<table.members.sampledImage>>,
 respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
 
 Where relevant, it is the responsibility of the user to ensure that the format
 of the data matches the format described by [code]#image_format#.
@@ -7554,10 +7593,8 @@ The constructors are listed in <<table.accessors.command.buffer.constructors>>,
 and the member functions are listed in <<table.accessors.common.members>> and
 <<table.accessors.command.buffer.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#accessor# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 For valid implicit conversions between accessor types refer to
 <<sec:accessor.command.buffer.conversions>>.
 Additionally, accessors of the same type must be equality comparable both in the
@@ -8129,10 +8166,8 @@ The constructors are listed in
 are listed in <<table.accessors.deprecated.common.members>> and
 <<table.accessors.deprecated.constant.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+As with other [code]#accessor# specializations, the class provides the common
+reference semantics as defined in <<sec:reference-semantics>>.
 Additionally, accessors of the same type must be equality comparable.
 
 [source,,linenums]
@@ -8345,10 +8380,8 @@ and the member functions are listed in
 <<table.accessors.deprecated.common.members>> and
 <<table.accessors.deprecated.host.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+As with other [code]#accessor# specializations, the class provides the common
+reference semantics as defined in <<sec:reference-semantics>>.
 Additionally, accessors of the same type must be equality comparable.
 
 [source,,linenums]
@@ -8483,10 +8516,8 @@ The constructors are listed in
 listed in <<table.accessors.deprecated.common.members>> and
 <<table.accessors.deprecated.local.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+As with other [code]#accessor# specializations, the class provides the common
+reference semantics as defined in <<sec:reference-semantics>>.
 Additionally, accessors of the same type must be equality comparable.
 
 [source,,linenums]
@@ -8861,10 +8892,8 @@ The constructors are listed in <<table.accessors.host.buffer.constructors>>, and
 the member functions are listed in <<table.accessors.common.members>> and
 <<table.accessors.host.buffer.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#host_accessor# class provides the common reference semantics as
+defined in <<sec:reference-semantics>>.
 For valid implicit conversions between accessor types refer to
 <<sec:accessor.host.buffer.conversions>>.
 Additionally, accessors of the same type must be equality comparable.
@@ -9162,10 +9191,8 @@ The constructors are listed in <<table.accessors.local.constructors>>, and the
 member functions are listed in <<table.accessors.common.members>> and
 <<table.accessors.local.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#host_accessor# class provides the common reference semantics as
+defined in <<sec:reference-semantics>>.
 For valid implicit conversions between accessor types refer to
 <<sec:accessor.local.conversions>>.
 Additionally, accessors of the same type must be equality comparable.
@@ -9715,10 +9742,8 @@ The constructors for the two classes are described in
 Both classes also have member functions with the same name, which are described
 in <<table.accessors.unsampled.image.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The two unsampled image accessor classes provides the common reference semantics
+as defined in <<sec:reference-semantics>>.
 For valid implicit conversions between unsampled accessor types refer to
 <<sec:accessor.unsampled.image.conversions>>.
 
@@ -9907,10 +9932,8 @@ The constructors for the two classes are described in
 Both classes also have member functions with the same name, which are described
 in <<table.accessors.sampled.image.members>>.
 
-The additional common special member functions and common member functions are
-listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The two sampled image accessor classes provides the common reference semantics
+as defined in <<sec:reference-semantics>>.
 For valid implicit conversions between sampled accessor types refer to
 <<sec:accessor.sampled.image.conversions>>.
 
@@ -12009,16 +12032,13 @@ iteration domain of either a single work-group in a parallel dispatch, or the
 overall Dimensions of the dispatch.
 It can be constructed from integers.
 
-The SYCL [code]#range# class template provides the common by-value semantics
-(see <<sec:byval-semantics>>).
+The SYCL [code]#range# class template provides the common by-value semantics as
+defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#range# class is provided below.
 The constructors, member functions and non-member functions of the SYCL
 [code]#range# class are listed in <<table.constructors.range>>,
 <<table.members.range>> and <<table.functions.range>> respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 [source,,linenums]
 ----
@@ -12263,16 +12283,12 @@ To define this the [code]#nd_range# comprises two ranges: the whole range over
 which the kernel is to be executed, and the range of each work group.
 
 The SYCL [code]#nd_range# class template provides the common by-value semantics
-(see <<sec:byval-semantics>>).
+as defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#nd_range# class is provided below.
 The constructors and member functions of the SYCL [code]#nd_range# class are
 listed in <<table.constructors.ndrange>> and <<table.members.ndrange>>
 respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
-
 
 [[table.constructors.ndrange]]
 .Constructors of the [code]#nd_range# class
@@ -12346,16 +12362,13 @@ It can be used as an index in an accessor of the same rank.
 The subscript operator ([code]#operator[](n)#) returns the component [code]#n#
 as a [code]#size_t#.
 
-The SYCL [code]#id# class template provides the common by-value semantics (see
-<<sec:byval-semantics>>).
+The SYCL [code]#id# class template provides the common by-value semantics as
+defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#id# class is provided below.
 The constructors, member functions and non-member functions of the SYCL
 [code]#id# class are listed in <<table.constructors.id>>, <<table.members.id>>
 and <<table.functions.id>> respectively.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 [source,,linenums]
 ----
@@ -12602,15 +12615,12 @@ It can optionally carry the offset of the range if provided to the
 Instances of the [code]#item# class are not user-constructible and are passed by
 the runtime to each instance of the function object.
 
-The SYCL [code]#item# class template provides the common by-value semantics (see
-<<sec:byval-semantics>>).
+The SYCL [code]#item# class template provides the common by-value semantics as
+defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#item# class is provided below.
 The member functions of the SYCL [code]#item# class are listed in
 <<table.members.id>>.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 // Interface for class: item
 [source,,linenums]
@@ -12726,14 +12736,11 @@ user-constructible and are passed by the runtime to each instance of the
 function object.
 
 The SYCL [code]#nd_item# class template provides the common by-value semantics
-(see <<sec:byval-semantics>>).
+as defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#nd_item# class is provided below.
 The member functions of the SYCL [code]#nd_item# class are listed in
 <<table.members.nditem>>.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 // interface for nd_item class
 [source,,linenums]
@@ -13054,15 +13061,12 @@ All returned <<item,items>> objects are offset-less.
 Instances of the [code]#h_item<int Dimensions># class are not user-constructible
 and are passed by the runtime to each instance of the function object.
 
-The SYCL [code]#h_item# class template provides the common by-value semantics
-(see <<sec:byval-semantics>>).
+The SYCL [code]#h_item# class template provides the common by-value semantics as
+defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#h_item# class is provided below.
 The member functions of the SYCL [code]#h_item# class are listed in
 <<table.members.hitem>>.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 [source,,linenums]
 ----
@@ -13245,15 +13249,12 @@ This allows the developer to always know how many work-items are in each
 executing work-group, even through the abstracted iteration range of the
 [code]#parallel_for_work_item# loops.
 
-The SYCL [code]#group# class template provides the common by-value semantics
-(see <<sec:byval-semantics>>).
+The SYCL [code]#group# class template provides the common by-value semantics as
+defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#group# class is provided below.
 The member functions of the SYCL [code]#group# class are listed in
 <<table.members.group>>.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 // Interface for class: group
 [source,,linenums]
@@ -13571,15 +13572,12 @@ The [code]#sub_group# class encapsulates all functionality required to represent
 a particular <<sub-group>> within a parallel execution.
 It is not user-constructible.
 
-The SYCL [code]#sub_group# class provides the common by-value semantics (see
-<<sec:byval-semantics>>).
+The SYCL [code]#sub_group# class provides the common by-value semantics as
+defined in <<sec:byval-semantics>>.
 
 A synopsis of the SYCL [code]#sub_group# class is provided below.
 The member functions of the SYCL [code]#sub_group# class are listed in
 <<table.members.subgroup>>.
-The additional common special member functions and common member functions are
-listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
-<<table.hiddenfriends.common.byval>> respectively.
 
 // Interface for class: subgroup
 [source,,linenums]
@@ -16054,10 +16052,8 @@ Some of the functions related to kernel bundles take an input parameter of type
 [code]#kernel_id# which identifies a kernel.
 A synopsis of the [code]#kernel_id# class is shown below along with a
 description of its member functions.
-Additionally, this class provides the common special member functions and common
-member functions that are listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#kernel_id# class provides the common reference semantics as defined
+in <<sec:reference-semantics>>.
 
 As with all SYCL objects that have the common reference semantics, kernel
 identifiers are equality comparable.
@@ -16655,10 +16651,8 @@ build(const kernel_bundle<bundle_state::input>& inputBundle,
 === The [code]#kernel_bundle# class
 
 A synopsis of the [code]#kernel_bundle# class is shown below.
-Additionally, this class provides the common special member functions and common
-member functions that are listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#kernel_bundle# class provides the common reference semantics as
+defined in <<sec:reference-semantics>>.
 
 As with all SYCL objects that have the common reference semantics, kernel
 bundles are equality comparable.
@@ -16911,10 +16905,8 @@ device_image_iterator end() const;   // (2)
 === The [code]#kernel# class
 
 A synopsis of the [code]#kernel# class is shown below.
-Additionally, this class provides the common special member functions and common
-member functions that are listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#kernel# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
 There is no public default constructor for this class.
 
@@ -17161,10 +17153,8 @@ info::kernel_device_specific::compile_sub_group_size
 === The [code]#device_image# class
 
 A synopsis of the [code]#device_image# class is shown below.
-Additionally, this class provides the common special member functions and common
-member functions that are listed in <<sec:reference-semantics>> in
-<<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#device_image# class provides the common reference semantics as
+defined in <<sec:reference-semantics>>.
 
 [source,,linenums]
 ----
@@ -21377,9 +21367,8 @@ The SYCL [code]#stream# class provides the common reference semantics (see
 The constructors and member functions of the SYCL [code]#stream# class are
 listed in <<table.constructors.stream>>, <<table.members.stream>>, and
 <<table.globals.stream>> respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
+The [code]#stream# class provides the common reference semantics as defined in
+<<sec:reference-semantics>>.
 
 The operand types that are supported by the SYCL [code]#stream# class
 [code]#operator<<()# operator are listed in <<table.operands.stream>>.
