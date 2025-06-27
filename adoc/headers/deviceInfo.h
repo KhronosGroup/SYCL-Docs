@@ -94,7 +94,7 @@ enum class device_type : /* unspecified */ {
   accelerator,
   custom,
   automatic,
-  host,
+  host, // Deprecated
   all
 };
 
