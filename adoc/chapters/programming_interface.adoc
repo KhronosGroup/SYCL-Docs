@@ -5251,15 +5251,6 @@ lifetime.
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
 
-The host address is [code]#const T#, so the host accesses can be read-only.
-However, the [code]#typename T# is not const so the device accesses can be both
-read and write accesses.
-Since, the [code]#hostData# is const, this buffer is only initialized with this
-memory and there is no write back after its destruction, unless the
-[code]#buffer# has another valid non-null final data address specified via the
-member function [code]#set_final_data()# after construction of the
-[code]#buffer#.
-
 The range of the constructed SYCL [code]#buffer# is specified by the
 [code]#bufferRange# parameter provided.
 
@@ -5268,6 +5259,10 @@ via an instance of [code]#property_list#.
 
 _Effects (4):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
 propList)`.
+
+_Remarks:_ When [code]#hostData# is a pointer to a const-qualified type, the
+buffer will not write back to any host memory unless requested via the member
+function [code]#set_final_data()#.
 
 '''
 
@@ -5298,10 +5293,6 @@ elements starting at [code]#std::data(container)# and containing
 The buffer is initialized with the contents of [code]#container#, and the buffer
 assumes exclusive access to [code]#container# for the duration of its lifetime.
 
-Data is written back to [code]#container# before the completion of
-[code]#buffer# destruction if the return type of [code]#std::data(container)# is
-not [code]#const#.
-
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
 
@@ -5309,6 +5300,10 @@ Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
 _Effects (2):_ Equivalent to `buffer(container, AllocatorT{}, propList)`.
+
+_Remarks:_ Data is written back to [code]#container# before the completion of
+[code]#buffer# destruction if the return type of [code]#std::data(container)# is
+not [code]#const#.
 
 '''
 
@@ -5402,6 +5397,9 @@ via an instance of [code]#property_list#.
 
 _Effects (2):_ Equivalent to `buffer(first, last, AllocatorT{}, propList)`.
 
+_Remarks:_ The buffer will not write back to any host memory unless requested
+via the member function [code]#set_final_data()#.
+
 '''
 
 .[apititle]#Construct sub-buffer#
@@ -5453,8 +5451,7 @@ buffer [code]#b# size [code]#bufferRange# in that dimension.
 ----
 range<Dimensions> get_range() const;
 ----
-_Returns:_ A range object representing the size of the buffer in terms of number
-of elements in each dimension as passed to the constructor.
+_Returns:_ A [code]#range# representing the number of elements in the buffer.
 
 '''
 
@@ -5473,9 +5470,8 @@ Equal to [code]#size()*sizeof(T)#.
 ----
 size_t size() const noexcept;
 ----
-mode and target in the command group buffer.
-The value of target can be [code]#target::device#,
-[code]#target::constant_buffer# or [code]#target::host_task#.
+_Returns:_ The total number of elements in the buffer.
+Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
 
 '''
 
@@ -5527,31 +5523,22 @@ template <typename... Ts> auto get_access(Ts...);                              (
 
 template <typename... Ts> auto get_host_access(Ts...);                         (4)
 ----
+_Constraints (1-2):_ Available only when [code]#Targ# is [code]#target::device#,
+[code]#target::constant_buffer# or [code]#target::host_task#.
+
 _Returns (1):_ A valid [code]#accessor# to the buffer with the specified access
 mode and target in the command group buffer.
-The value of target can be [code]#target::device#,
-[code]#target::constant_buffer# or [code]#target::host_task#.
 
 _Returns (2):_ A valid [code]#accessor# to the buffer with the specified access
 mode and target in the command group buffer.
 The accessor is a <<ranged-accessor>>, where the range starts at the given
 offset from the beginning of the buffer.
-The value of target can be [code]#target::device#,
-[code]#target::constant_buffer# or [code]#target::host_task#.
 
 _Returns (3):_ A valid [code]#accessor# as if constructed via passing the buffer
 and all provided arguments to the [code]#accessor# constructor.
 
-Possible implementation:
-
-[code]#+return accessor{*this, args...};+#
-
 _Returns (4):_ A valid [code]#host_accessor# as if constructed via passing the
 buffer and all provided arguments to the [code]#host_accessor# constructor.
-
-Possible implementation:
-
-[code]#+return host_accessor{*this, args...};+#
 
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
@@ -5579,7 +5566,6 @@ _Returns (2):_ A valid host [code]#accessor# to the buffer with the specified
 access mode and target.
 The accessor is a <<ranged-accessor>>, where the range starts at the given
 offset from the beginning of the buffer.
-The value of target can only be [code]#target::host_buffer#.
 
 _Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
 the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
@@ -5650,7 +5636,7 @@ buffer<ReinterpretT, ReinterpretDim,
            ReinterpretT>>
 reinterpret() const;
 ----
-_Preconditions (2):_ Available when [code]#(ReinterpretDim == 1)# or when
+_Constraints (2):_ Available when [code]#(ReinterpretDim == 1)# or when
 [code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) ==
 sizeof(T)))#.
 
