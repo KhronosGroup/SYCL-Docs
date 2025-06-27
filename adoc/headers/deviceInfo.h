@@ -89,13 +89,13 @@ struct partition_type_affinity_domain;
 } // namespace device
 
 enum class device_type : /* unspecified */ {
-  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
-  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
-  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
-  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
-  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
+  cpu,
+  gpu,
+  accelerator,
+  custom,
+  automatic,
   host,
-  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
+  all
 };
 
 enum class partition_property : /* unspecified */ {
