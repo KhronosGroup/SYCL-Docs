@@ -288,18 +288,18 @@ context doesn't match the target backend.
 [[sec:reference-semantics]]
 === Common reference semantics
 
-Some <<sycl-runtime>> classes provide the _common reference semantics_.
+Some <<sycl-runtime>> classes provide <<reference-semantics>>.
 Each of these classes must provide a common interface of special member
 functions in order to fulfill copy, move, and destruction requirements and
 hidden friend functions in order to fulfill equality requirements, as described
 below.
 
-Some classes providing the common reference semantics have additional behavior
+Some classes providing <<reference-semantics>> have additional behavior
 associated with copy, movement, assignment, or destruction semantics.
-If these are specified, they are in addition to the common reference semantics,
-unless stated otherwise.
+If these are specified, they are in addition to <<reference-semantics>>, unless
+stated otherwise.
 
-The following <<sycl-runtime>> classes provide the common reference semantics:
+The following <<sycl-runtime>> classes provide <<reference-semantics>>:
 [code]#accessor#, [code]#buffer#, [code]#context#, [code]#device#,
 [code]#device_image#, [code]#event#, [code]#host_accessor#,
 [code]#host_sampled_image_accessor#, [code]#host_unsampled_image_accessor#,
@@ -311,9 +311,8 @@ The following <<sycl-runtime>> classes provide the common reference semantics:
 [[sec:reference-semantics-reqs]]
 ==== Requirements
 
-Each <<sycl-runtime>> class that provides the common reference semantics must
-conform to the following requirements, where [code]#T# is the runtime class
-type:
+Each <<sycl-runtime>> class that provides <<reference-semantics>> must conform
+to the following requirements, where [code]#T# is the runtime class type:
 
 * _Copyability:_ [code]#T# must be copy constructible and copy assignable in the
   host application and within SYCL kernel functions in the case that [code]#T#
@@ -364,8 +363,7 @@ include::{header_dir}/common-reference.h[lines=4..-1]
 ==== Special member functions
 
 This section describes the special member functions that must be provided by all
-classes providing the common reference semantics (see also the
-<<rule-of-five>>).
+classes providing <<reference-semantics>> (see also the <<rule-of-five>>).
 Each of these classes may provide further member functions, static member
 functions, etc., as documented in their respective sections.
 
@@ -379,8 +377,8 @@ T(const T& rhs)
 
 _Effects:_ Constructs a [code]#T# instance that is a copy of [code]#rhs#.
 
-_Remarks:_ Conforms to the copy construction requirements of common reference
-semantics types, as specified in <<sec:reference-semantics-reqs>>.
+_Remarks:_ Conforms to the copy construction requirements of
+<<reference-semantics>>.
 
 '''
 
@@ -392,8 +390,8 @@ T(T&& rhs)
 
 _Effects:_ Constructs a [code]#T# instance via a move from [code]#rhs#.
 
-_Remarks:_ Conforms to the move construction requirements of common reference
-semantics types, as specified in <<sec:reference-semantics-reqs>>.
+_Remarks:_ Conforms to the move construction requirements of
+<<reference-semantics>>.
 
 '''
 
@@ -405,8 +403,8 @@ T& operator=(const T& rhs)
 
 _Effects:_ Assigns a copy of [code]#rhs# to this [code]#T# instance.
 
-_Remarks:_ Conforms to the copy assignment requirements of common reference
-semantics types, as specified in <<sec:reference-semantics-reqs>>.
+_Remarks:_ Conforms to the copy assignment requirements of
+<<reference-semantics>>.
 
 '''
 
@@ -418,8 +416,8 @@ T& operator=(T&& rhs)
 
 _Effects:_ Moves from [code]#rhs# and assigns to this [code]#T# instance.
 
-_Remarks:_ Conforms to the move assignment requirements of common reference
-semantics types, as specified in <<sec:reference-semantics-reqs>>.
+_Remarks:_ Conforms to the move assignment requirements of
+<<reference-semantics>>.
 
 '''
 
@@ -434,8 +432,7 @@ _Effects:_ Destroys this [code]#T# instance.
 
 _Remarks:_
 
-* Conforms to the destruction requirements of common reference semantics types,
-  as specified in <<sec:reference-semantics-reqs>>.
+* Conforms to the destruction requirements of <<reference-semantics>>.
 
 * On destruction of the last copy, may perform additional lifetime-related
   operations required for the underlying <<native-backend-object>> specified in
@@ -450,7 +447,7 @@ _Remarks:_
 ==== Hidden friend functions
 
 This section describes the hidden friend functions that must be provided by all
-classes providing the common reference semantics.
+classes providing <<reference-semantics>>.
 Each of these classes may provide further member functions, static member
 functions, etc., as documented in their respective sections.
 
@@ -465,8 +462,8 @@ bool operator==(const T& lhs, const T& rhs)
 _Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs#, and false
 otherwise.
 
-_Remarks:_ Conforms to the equality comparability requirements of common
-reference semantics types, as specified in <<sec:reference-semantics-reqs>>.
+_Remarks:_ Conforms to the equality comparability requirements of
+<<reference-semantics>>.
 
 '''
 
@@ -478,8 +475,8 @@ bool operator!=(const T& lhs, const T& rhs)
 
 _Effects:_ Equivalent to [code]#!(lhs == rhs)#.
 
-_Remarks:_ Conforms to the equality comparability requirements of common
-reference semantics types, as specified in <<sec:reference-semantics-reqs>>.
+_Remarks:_ Conforms to the equality comparability requirements
+<<reference-semantics>>.
 
 '''
 
