@@ -288,72 +288,72 @@ context doesn't match the target backend.
 [[sec:reference-semantics]]
 === Common reference semantics
 
-Each of the following <<sycl-runtime>> classes: [code]#accessor#,
-[code]#buffer#, [code]#context#, [code]#device#, [code]#device_image#,
-[code]#event#, [code]#host_accessor#, [code]#host_sampled_image_accessor#,
-[code]#host_unsampled_image_accessor#, [code]#kernel#, [code]#kernel_id#,
-[code]#kernel_bundle#, [code]#local_accessor#, [code]#platform#, [code]#queue#,
-[code]#sampled_image#, [code]#sampled_image_accessor#, [code]#stream#,
-[code]#unsampled_image# and [code]#unsampled_image_accessor# must obey the
-following statements, where [code]#T# is the runtime class type:
+Some <<sycl-runtime>> classes provide the _common reference semantics_.
+Each of these classes must provide a common interface of special member
+functions in order to fulfill copy, move, and destruction requirements and
+hidden friend functions in order to fulfill equality requirements, as described
+below.
 
-  * [code]#T# must be copy constructible and copy assignable in the host
-    application and within SYCL kernel functions in the case that [code]#T# is a
-    valid kernel argument.
-    Any instance of [code]#T# that is constructed as a copy of another instance,
-    via either the copy constructor or copy assignment operator, must behave
-    as-if it were the original instance and as-if any action performed on it
-    were also performed on the original instance and must represent the same
-    underlying <<native-backend-object>> as the original instance where
-    applicable.
-  * [code]#T# must be destructible in the host application and within SYCL
-    kernel functions in the case that [code]#T# is a valid kernel argument.
-    When any instance of [code]#T# is destroyed, including as a result of the
-    copy assignment operator, any behavior specific to [code]#T# that is
-    specified as performed on destruction is only performed if this instance is
-    the last remaining host copy, in accordance with the above definition of a
-    copy.
-  * [code]#T# must be move constructible and move assignable in the host
-    application and within SYCL kernel functions in the case that [code]#T# is a
-    valid kernel argument.
-    Any instance of [code]#T# that is constructed as a move of another instance,
-    via either the move constructor or move assignment operator, must replace
-    the original instance rendering said instance invalid and must represent the
-    same underlying <<native-backend-object>> as the original instance where
-    applicable.
-  * [code]#T# must be equality comparable in the host application.
-    Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
-    true if one instance is a copy of the other and non-equality between two
-    instances of [code]#T# (i.e. [code]#a != b#) must be true if neither
-    instance is a copy of the other, in accordance with the above definition of
-    a copy, unless either instance has become invalidated by a move operation.
-    By extension of the requirements above, equality on [code]#T# must guarantee
-    to be reflexive (i.e. [code]#a == a#), symmetric (i.e. [code]#a == b#
-    implies [code]#b == a# and [code]#a != b# implies [code]#b != a#) and
-    transitive (i.e. [code]#a == b && b == c# implies [code]#c == a#).
-  * A specialization of [code]#std::hash# for [code]#T# must exist in the host
-    application that returns a unique value such that if two instances of
-    [code]#T# are equal, in accordance with the above definition, then their
-    resulting hash values are also equal and subsequently if two hash values are
-    not equal, then their corresponding instances are also not equal, in
-    accordance with the above definition.
+Some classes providing the common reference semantics have additional behavior
+associated with copy, movement, assignment, or destruction semantics.
+If these are specified, they are in addition to the common reference semantics,
+unless stated otherwise.
 
-Some <<sycl-runtime>> classes will have additional behavior associated with
-copy, movement, assignment or destruction semantics.
-If these are specified they are in addition to those specified above unless
-stated otherwise.
+The following <<sycl-runtime>> classes provide the common reference semantics:
+[code]#accessor#, [code]#buffer#, [code]#context#, [code]#device#,
+[code]#device_image#, [code]#event#, [code]#host_accessor#,
+[code]#host_sampled_image_accessor#, [code]#host_unsampled_image_accessor#,
+[code]#kernel#, [code]#kernel_id#, [code]#kernel_bundle#,
+[code]#local_accessor#, [code]#platform#, [code]#queue#, [code]#sampled_image#,
+[code]#sampled_image_accessor#, [code]#stream#, [code]#unsampled_image#, and
+[code]#unsampled_image_accessor#.
 
-Each of the runtime classes mentioned above must provide a common interface of
-special member functions in order to fulfill the copy, move, destruction
-requirements and hidden friend functions in order to fulfill the equality
-requirements.
+[[sec:reference-semantics-reqs]]
+==== Requirements
 
-A hidden friend function is a function first declared via a [code]#friend#
-declaration with no additional out of class or namespace scope declarations.
-Hidden friend functions are only visible to ADL (Argument Dependent Lookup) and
-are hidden from qualified and unqualified lookup.
-Hidden friend functions have the benefits of avoiding accidental implicit
-conversions and faster compilation.
+Each <<sycl-runtime>> class that provides the common reference semantics must
+conform to the following requirements, where [code]#T# is the runtime class
+type:
+
+* _Copyability:_ [code]#T# must be copy constructible and copy assignable in the
+  host application and within SYCL kernel functions in the case that [code]#T#
+  is a valid kernel argument.
+  Any instance of [code]#T# that is constructed as a copy of another instance,
+  via either the copy constructor or copy assignment operator, must behave as-if
+  it were the original instance and as-if any action performed on it were also
+  performed on the original instance and must represent the same underlying
+  <<native-backend-object>> as the original instance where applicable.
+* _Destructibility:_ [code]#T# must be destructible in the host application and
+  within SYCL kernel functions in the case that [code]#T# is a valid kernel
+  argument.
+  When any instance of [code]#T# is destroyed, including as a result of the copy
+  assignment operator, any behavior specific to [code]#T# that is specified as
+  performed on destruction is only performed if this instance is the last
+  remaining host copy, in accordance with the above definition of a copy.
+* _Movability:_ [code]#T# must be move constructible and move assignable in the
+  host application and within SYCL kernel functions in the case that [code]#T#
+  is a valid kernel argument.
+  Any instance of [code]#T# that is constructed as a move of another instance,
+  via either the move constructor or move assignment operator, must replace the
+  original instance rendering said instance invalid and must represent the same
+  underlying <<native-backend-object>> as the original instance where
+  applicable.
+* _Equality:_ [code]#T# must be equality comparable in the host application.
+  Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be true
+  if one instance is a copy of the other and non-equality between two instances
+  of [code]#T# (i.e. [code]#a != b#) must be true if neither instance is a copy
+  of the other, in accordance with the above definition of a copy, unless either
+  instance has become invalidated by a move operation.
+  By extension of the requirements above, equality on [code]#T# must guarantee
+  to be reflexive (i.e. [code]#a == a#), symmetric (i.e. [code]#a == b# implies
+  [code]#b == a# and [code]#a != b# implies [code]#b != a#) and transitive (i.e.
+  [code]#a == b && b == c# implies [code]#c == a#).
+* _[code]#std::hash# specialization:_ A specialization of [code]#std::hash# for
+  [code]#T# must exist in the host application that returns a unique value such
+  that if two instances of [code]#T# are equal, in accordance with the above
+  definition, then their resulting hash values are also equal and subsequently
+  if two hash values are not equal, then their corresponding instances are also
+  not equal, in accordance with the above definition.
 
 [source,,linenums]
 ----
@@ -377,8 +377,10 @@ functions, etc., as documented in their respective sections.
 T(const T& rhs)
 ----
 
-_Effects:_ Constructs a [code]#T# instance as a copy of [code]#rhs# in
-accordance with the requirements set out above.
+_Effects:_ Constructs a [code]#T# instance that is a copy of [code]#rhs#.
+
+_Remarks:_ Conforms to the copy construction requirements of common reference
+semantics types, as specified in <<sec:reference-semantics-reqs>>.
 
 '''
 
@@ -388,8 +390,10 @@ accordance with the requirements set out above.
 T(T&& rhs)
 ----
 
-_Effects:_ Constructs a [code]#T# instance as a move of [code]#rhs# in
-accordance with the requirements set out above.
+_Effects:_ Constructs a [code]#T# instance via a move from [code]#rhs#.
+
+_Remarks:_ Conforms to the move construction requirements of common reference
+semantics types, as specified in <<sec:reference-semantics-reqs>>.
 
 '''
 
@@ -399,8 +403,10 @@ accordance with the requirements set out above.
 T& operator=(const T& rhs)
 ----
 
-_Effects:_ Assigns a copy of [code]#rhs# to this [code]#T# instance in
-accordance with the requirements set out above.
+_Effects:_ Assigns a copy of [code]#rhs# to this [code]#T# instance.
+
+_Remarks:_ Conforms to the copy assignment requirements of common reference
+semantics types, as specified in <<sec:reference-semantics-reqs>>.
 
 '''
 
@@ -410,8 +416,10 @@ accordance with the requirements set out above.
 T& operator=(T&& rhs)
 ----
 
-_Effects:_ Moves from [code]#rhs# and assigns to this [code]#T# instance in
-accordance with the requirements set out above.
+_Effects:_ Moves from [code]#rhs# and assigns to this [code]#T# instance.
+
+_Remarks:_ Conforms to the move assignment requirements of common reference
+semantics types, as specified in <<sec:reference-semantics-reqs>>.
 
 '''
 
@@ -421,16 +429,20 @@ accordance with the requirements set out above.
 ~T()
 ----
 
-_Effects:_ Destroys this [code]#T# instance in accordance with the requirements
-set out above.
+_Effects:_ Destroys this [code]#T# instance.
 
-_Remarks:_ On destruction of the last copy, may perform additional
-lifetime-related operations required for the underlying
-<<native-backend-object>> specified in the <<backend>> specification document,
-if this [code]#T# instance was originally constructed using one of the backend
-interoperability [code]#make_*# functions specified in
-<<sec:backend-interoperability-make>>.
-See the relevant backend specification for details.
+
+_Remarks:_
+
+* Conforms to the destruction requirements of common reference semantics types,
+  as specified in <<sec:reference-semantics-reqs>>.
+
+* On destruction of the last copy, may perform additional lifetime-related
+  operations required for the underlying <<native-backend-object>> specified in
+  the <<backend>> specification document, if this [code]#T# instance was
+  originally constructed using one of the backend interoperability
+  [code]#make_*# functions specified in <<sec:backend-interoperability-make>>.
+  See the relevant backend specification for details.
 
 '''
 
@@ -450,8 +462,11 @@ functions, etc., as documented in their respective sections.
 bool operator==(const T& lhs, const T& rhs)
 ----
 
-_Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs# in accordance
-with the requirements set out above, otherwise returns false.
+_Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs#, and false
+otherwise.
+
+_Remarks:_ Conforms to the equality comparability requirements of common
+reference semantics types, as specified in <<sec:reference-semantics-reqs>>.
 
 '''
 
@@ -460,8 +475,11 @@ with the requirements set out above, otherwise returns false.
 ----
 bool operator!=(const T& lhs, const T& rhs)
 ----
-_Effects:_ Returns true if [code]#lhs# is not equal to [code]#rhs# in accordance
-with the requirements set out above, otherwise returns false.
+
+_Effects:_ Equivalent to [code]#!(lhs == rhs)#.
+
+_Remarks:_ Conforms to the equality comparability requirements of common
+reference semantics types, as specified in <<sec:reference-semantics-reqs>>.
 
 '''
 
