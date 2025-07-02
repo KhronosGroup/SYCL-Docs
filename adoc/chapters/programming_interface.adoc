@@ -1983,9 +1983,17 @@ struct max_num_sub_groups {
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The maximum number of sub-groups in a work-group for any kernel
-executed on the device.
+_Returns:_ The maximum number of sub-groups that this device is capable of
+executing in a work-group.
 The minimum value is 1.
+The maximum number of sub-groups in a work-group depends on the kernel and the
+implementation.
+Use [code]#info::kernel_device_specific::max_num_sub_groups# to query this
+limit.
+
+{note}The largest work-group size supported by a device is likely to be the
+product of [code]#max_num_sub_groups# and the largest supported sub-group
+size.{endnote}
 
 '''
 
@@ -17102,7 +17110,11 @@ info::kernel_device_specific::max_num_sub_groups
 ----
 
     @ [code]#uint32_t#
-   a@ Returns the maximum number of sub-groups for this kernel.
+   a@ Returns the maximum number of sub-groups per work-group for this kernel.
+      The minimum number is 1.
+
+{note}Choosing a work-group size that contains the maximum number of sub-groups
+may improve the performance of some devices and implementations.{endnote}
 
 a@
 [source]
