@@ -300,59 +300,76 @@ If these are specified, they are in addition to <<reference-semantics>>, unless
 stated otherwise.
 
 The following <<sycl-runtime>> classes provide <<reference-semantics>>:
-[code]#accessor#, [code]#buffer#, [code]#context#, [code]#device#,
-[code]#device_image#, [code]#event#, [code]#host_accessor#,
-[code]#host_sampled_image_accessor#, [code]#host_unsampled_image_accessor#,
-[code]#kernel#, [code]#kernel_id#, [code]#kernel_bundle#,
-[code]#local_accessor#, [code]#platform#, [code]#queue#, [code]#sampled_image#,
-[code]#sampled_image_accessor#, [code]#stream#, [code]#unsampled_image#, and
-[code]#unsampled_image_accessor#.
+
+* [api]#accessor#
+* [api]#buffer#
+* [api]#context#
+* [api]#device#
+* [api]#device_image#
+* [api]#event#
+* [api]#host_accessor#
+* [api]#host_sampled_image_accessor#
+* [api]#host_unsampled_image_accessor#
+* [api]#kernel#
+* [api]#kernel_id#
+* [api]#kernel_bundle#
+* [api]#local_accessor#
+* [api]#platform#
+* [api]#queue#
+* [api]#sampled_image#
+* [api]#sampled_image_accessor#
+* [api]#stream#
+* [api]#unsampled_image#
+* [api]#unsampled_image_accessor#
 
 [[sec:reference-semantics-reqs]]
-==== Requirements
+==== Interface requirements
 
 Each <<sycl-runtime>> class that provides <<reference-semantics>> must conform
 to the following requirements, where [code]#T# is the runtime class type:
 
 * _Copyability:_ [code]#T# must be copy constructible and copy assignable in the
-  host application and within SYCL kernel functions in the case that [code]#T#
-  is a valid kernel argument.
-  Any instance of [code]#T# that is constructed as a copy of another instance,
-  via either the copy constructor or copy assignment operator, must behave as-if
-  it were the original instance and as-if any action performed on it were also
-  performed on the original instance and must represent the same underlying
-  <<native-backend-object>> as the original instance where applicable.
-* _Destructibility:_ [code]#T# must be destructible in the host application and
-  within SYCL kernel functions in the case that [code]#T# is a valid kernel
-  argument.
-  When any instance of [code]#T# is destroyed, including as a result of the copy
-  assignment operator, any behavior specific to [code]#T# that is specified as
-  performed on destruction is only performed if this instance is the last
-  remaining host copy, in accordance with the above definition of a copy.
+  host application.
+  If [code]#T# is a valid kernel argument, [code]#T# must also be copy
+  constructible and copy assignable within SYCL kernel functions.
+  Any instance of [code]#T# that is a copy of another instance must behave as-if
+  it were the original instance and must represent the same underlying
+  <<native-backend-object>>, where applicable.
+  Any action performed on such a copy must behave as-if it were also performed
+  on the original instance.
+* _Destructibility:_ [code]#T# must be destructible in the host application.
+  If [code]#T# is a valid kernel argument, [code]#T# must also be destructible
+  within SYCL kernel functions.
+  When any instance of [code]#T# is destroyed, any behavior specific to
+  [code]#T# that is specified as performed on destruction is only performed if
+  this instance is the last remaining host copy, in accordance with the above
+  definition of a copy.
 * _Movability:_ [code]#T# must be move constructible and move assignable in the
-  host application and within SYCL kernel functions in the case that [code]#T#
-  is a valid kernel argument.
-  Any instance of [code]#T# that is constructed as a move of another instance,
-  via either the move constructor or move assignment operator, must replace the
-  original instance rendering said instance invalid and must represent the same
-  underlying <<native-backend-object>> as the original instance where
-  applicable.
+  host application.
+  If [code]#T# is a valid kernel argument, [code]#T# must also be move
+  constructible and move assignable within SYCL kernel functions.
+  Any instance of [code]#T# that is the result of a move from another instance
+  must behave as-if it were the original instance and must represent the same
+  underlying <<native-backend-object>>, where applicable.
+  Move construction and move assignment render the moved-from instance of
+  [code]#T# invalid.
 * _Equality:_ [code]#T# must be equality comparable in the host application.
-  Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be true
-  if one instance is a copy of the other and non-equality between two instances
-  of [code]#T# (i.e. [code]#a != b#) must be true if neither instance is a copy
-  of the other, in accordance with the above definition of a copy, unless either
-  instance has become invalidated by a move operation.
-  By extension of the requirements above, equality on [code]#T# must guarantee
-  to be reflexive (i.e. [code]#a == a#), symmetric (i.e. [code]#a == b# implies
-  [code]#b == a# and [code]#a != b# implies [code]#b != a#) and transitive (i.e.
-  [code]#a == b && b == c# implies [code]#c == a#).
-* _[code]#std::hash# specialization:_ A specialization of [code]#std::hash# for
-  [code]#T# must exist in the host application that returns a unique value such
-  that if two instances of [code]#T# are equal, in accordance with the above
-  definition, then their resulting hash values are also equal and subsequently
-  if two hash values are not equal, then their corresponding instances are also
-  not equal, in accordance with the above definition.
+  Equality between two instances of [code]#T# (i.e., [code]#a == b#) must be
+  true if one instance is a copy of the other, and non-equality between two
+  instances of [code]#T# (i.e., [code]#a != b#) must be true if neither instance
+  is a copy of the other, in accordance with the above definition of a copy.
+  An instance of [code]#T# that has been invalidated by a move operation is not
+  considered to be a copy of any other [code]#T# instance.
+  Equality on [code]#T# must be guaranteed to be reflexive (i.e., [code]#a ==
+  a#), symmetric (i.e., [code]#a == b# implies [code]#b == a# and [code]#a != b#
+  implies [code]#b != a#), and transitive (i.e., [code]#a == b && b == c#
+  implies [code]#c == a#).
+* _Hashability:_ A specialization of [code]#std::hash# for [code]#T# must exist
+  in the host application.
+  The specialization of [code]#std::hash# must return a unique value such that
+  for two instances of [code]#T#, [code]#a# and [code]#b#, either [code]#(a ==
+  b) && std::hash(a) == std::hash(b)# evaluates to true, or [code]#(a != b) &&
+  std::hash(a) != std::hash(b)# evaluates to true.
 
 [source,,linenums]
 ----
@@ -429,7 +446,6 @@ _Remarks:_ Conforms to the move assignment requirements of
 
 _Effects:_ Destroys this [code]#T# instance.
 
-
 _Remarks:_
 
 * Conforms to the destruction requirements of <<reference-semantics>>.
@@ -473,9 +489,9 @@ _Remarks:_ Conforms to the equality comparability requirements of
 bool operator!=(const T& lhs, const T& rhs)
 ----
 
-_Effects:_ Equivalent to [code]#!(lhs == rhs)#.
+_Effects:_ Equivalent to [code]#return !(lhs == rhs)#.
 
-_Remarks:_ Conforms to the equality comparability requirements
+_Remarks:_ Conforms to the equality comparability requirements of
 <<reference-semantics>>.
 
 '''
@@ -4761,7 +4777,7 @@ a queue is destroyed, the handler is called and this might delay or block the
 destruction, according to the behavior of the handler.
 
 
-[[sec:interface.event]]
+[[sec:event-class]]
 === Event class
 
 An <<event>> in SYCL is an object that represents the status of an operation
@@ -6141,7 +6157,7 @@ r1 \cdot r2 \cdot s
 The SYCL [code]#unsampled_image# and [code]#sampled_image# class templates
 provide the common reference semantics (see <<sec:reference-semantics>>).
 
-
+[[sec:unsampled_image-class]]
 ==== Unsampled image interface
 
 Each constructor of the [code]#unsampled_image# takes an [code]#image_format# to
@@ -6647,8 +6663,7 @@ have any effect.
 
 |====
 
-
-
+[[sec:sampled_image-class]]
 ==== Sampled image interface
 
 Each constructor of the [code]#sampled_image# class requires a pointer to the
@@ -7239,7 +7254,7 @@ For the image accessors ([code]#unsampled_image_accessor#,
 * [code]#float4# ([code]#vec<float,4>#), or
 * [code]#half4# ([code]#vec<half,4>#)
 
-For [code]#local_accessor# see <<sec:accessor.local>> for the allowable
+For [code]#local_accessor# see <<sec:local_accessor-class>> for the allowable
 [code]#DataT# types.
 
 
@@ -8876,7 +8891,7 @@ the accessor's offset to [code]#index#.
 
 |====
 
-
+[[sec:host_accessor-class]]
 ==== Buffer accessor for host code
 
 The [code]#host_accessor# class provides access to data in a [code]#buffer# from
@@ -9168,7 +9183,7 @@ template parameters are the same.
 |====
 
 
-[[sec:accessor.local]]
+[[sec:local_accessor-class]]
 ==== Local accessor
 
 The [code]#local_accessor# class allocates device local memory and provides
@@ -9717,7 +9732,7 @@ called from within a <<command>>.
 
 |====
 
-
+[[sec:unsampled_image_accessor-class]]
 ==== Unsampled image accessors
 
 There are two classes which implement accessors for unsampled images,
@@ -9909,7 +9924,7 @@ There is an implicit conversion between the [code]#const# qualified and
 non-[code]#const# qualified specializations, provided that all other template
 parameters are the same.
 
-
+[[sec:sampled_image_accessor-class]]
 ==== Sampled image accessors
 
 There are two classes which implement accessors for sampled images,
@@ -16060,7 +16075,7 @@ bundle_state::executable
 
 |====
 
-
+[[sec:kernel_id-class]]
 === Kernel identifiers
 
 Some of the functions related to kernel bundles take an input parameter of type
@@ -16662,7 +16677,7 @@ build(const kernel_bundle<bundle_state::input>& inputBundle,
   . Equivalent to [code]#build(inputBundle, inputBundle.get_devices(),
     propList)#.
 
-
+[[sec:kernel_bundle-class]]
 === The [code]#kernel_bundle# class
 
 A synopsis of the [code]#kernel_bundle# class is shown below.
@@ -16916,7 +16931,7 @@ device_image_iterator end() const;   // (2)
   . _Returns:_ An iterator to one past the last <<device-image>> contained by
      the kernel bundle.
 
-
+[[sec:kernel-class]]
 === The [code]#kernel# class
 
 A synopsis of the [code]#kernel# class is shown below.
@@ -17164,7 +17179,7 @@ info::kernel_device_specific::compile_sub_group_size
 
 |====
 
-
+[[sec:device_image-class]]
 === The [code]#device_image# class
 
 A synopsis of the [code]#device_image# class is shown below.
