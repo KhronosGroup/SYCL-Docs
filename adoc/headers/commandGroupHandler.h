@@ -70,17 +70,17 @@ class handler {
   //------ USM functions
   //
 
-  void memcpy(void* dest, const void* src, size_t numBytes);
+  void memcpy(void* dest, const void* src, std::size_t numBytes);
 
-  template <typename T> void copy(const T* src, T* dest, size_t count);
+  template <typename T> void copy(const T* src, T* dest, std::size_t count);
 
-  void memset(void* ptr, int value, size_t numBytes);
+  void memset(void* ptr, int value, std::size_t numBytes);
 
-  template <typename T> void fill(void* ptr, const T& pattern, size_t count);
+  template <typename T> void fill(void* ptr, const T& pattern, std::size_t count);
 
-  void prefetch(void* ptr, size_t numBytes);
+  void prefetch(void* ptr, std::size_t numBytes);
 
-  void mem_advise(void* ptr, size_t numBytes, int advice);
+  void mem_advise(void* ptr, std::size_t numBytes, int advice);
 
   //------ Explicit memory operation APIs
   //
