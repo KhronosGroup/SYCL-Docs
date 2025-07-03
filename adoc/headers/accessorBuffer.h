@@ -44,7 +44,7 @@ class accessor {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using difference_type =
       typename std::iterator_traits<iterator>::difference_type;
-  using std::size_type = std::size_t;
+  using size_type = std::size_t;
 
   accessor();
 
@@ -133,11 +133,11 @@ class accessor {
 
   bool is_placeholder() const;
 
-  std::size_type byte_size() const noexcept;
+  size_type byte_size() const noexcept;
 
-  std::size_type size() const noexcept;
+  size_type size() const noexcept;
 
-  std::size_type max_size() const noexcept;
+  size_type max_size() const noexcept;
 
   // Deprecated
   std::size_t get_size() const;
