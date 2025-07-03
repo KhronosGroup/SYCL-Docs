@@ -340,10 +340,12 @@ to the following requirements, where [code]#T# is the runtime class type:
 * _Destructibility:_ [code]#T# must be destructible in the host application.
   If [code]#T# is a valid kernel argument, [code]#T# must also be destructible
   within SYCL kernel functions.
-  When any instance of [code]#T# is destroyed, any behavior specific to
-  [code]#T# that is specified as performed on destruction is only performed if
-  this instance is the last remaining host copy, in accordance with the above
-  definition of a copy.
+  When an instance of [code]#T# is destroyed, any copies of the [code]#T#
+  instance (as defined above) are unaffected.
+  When the last remaining host copy of an instance of [code]#T# is destroyed,
+  lifetime-related operations may be performed on the underlying
+  implementation-defined resource, including, where applicable, the destruction
+  of a <<native-backend-object>>.
 * _Movability:_ [code]#T# must be move constructible and move assignable in the
   host application.
   If [code]#T# is a valid kernel argument, [code]#T# must also be move
@@ -451,10 +453,13 @@ _Remarks:_
 * Conforms to the destruction requirements of <<reference-semantics>>.
 
 * On destruction of the last copy, may perform additional lifetime-related
-  operations required for the underlying <<native-backend-object>> specified in
-  the <<backend>> specification document, if this [code]#T# instance was
-  originally constructed using one of the backend interoperability
-  [code]#make_*# functions specified in <<sec:backend-interoperability-make>>.
+  operations required by any underlying <<native-backend-object>> or any other
+  implementation-defined resource managed by [code]#T#.
+
+* If this [code]#T# instance originated from a backend interoperability
+  [code]#make_*# function specified in <<sec:backend-interoperability-make>>,
+  then any required lifetime-related operations are performed on the
+  corresponding <<native-backend-object>>.
   See the relevant backend specification for details.
 
 '''
