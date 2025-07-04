@@ -337,6 +337,7 @@ to the following requirements, where [code]#T# is the runtime class type:
   <<native-backend-object>>, where applicable.
   Any action performed on such a copy must behave as-if it were also performed
   on the original instance.
+
 * _Destructibility:_ [code]#T# must be destructible in the host application.
   If [code]#T# is a valid kernel argument, [code]#T# must also be destructible
   within SYCL kernel functions.
@@ -346,6 +347,7 @@ to the following requirements, where [code]#T# is the runtime class type:
   lifetime-related operations may be performed on the underlying
   implementation-defined resource, including, where applicable, the destruction
   of a <<native-backend-object>>.
+
 * _Movability:_ [code]#T# must be move constructible and move assignable in the
   host application.
   If [code]#T# is a valid kernel argument, [code]#T# must also be move
@@ -355,7 +357,10 @@ to the following requirements, where [code]#T# is the runtime class type:
   underlying <<native-backend-object>>, where applicable.
   Move construction and move assignment render the moved-from instance of
   [code]#T# invalid.
+
 * _Equality:_ [code]#T# must be equality comparable in the host application.
+  If [code]#T# is a valid kernel argument, [code]#T# must also be equality
+  comparablewithin SYCL kernel functions.
   Equality between two instances of [code]#T# (i.e., [code]#a == b#) must be
   true if one instance is a copy of the other, and non-equality between two
   instances of [code]#T# (i.e., [code]#a != b#) must be true if neither instance
@@ -366,6 +371,7 @@ to the following requirements, where [code]#T# is the runtime class type:
   a#), symmetric (i.e., [code]#a == b# implies [code]#b == a# and [code]#a != b#
   implies [code]#b != a#), and transitive (i.e., [code]#a == b && b == c#
   implies [code]#c == a#).
+
 * _Hashability:_ A specialization of [code]#std::hash# for [code]#T# must exist
   in the host application.
   The specialization of [code]#std::hash# must return a unique value such that
@@ -504,51 +510,79 @@ _Remarks:_ Conforms to the equality comparability requirements of
 [[sec:byval-semantics]]
 === Common by-value semantics
 
-Each of the following <<sycl-runtime>> classes: [code]#id#, [code]#range#,
-[code]#item#, [code]#nd_item#, [code]#h_item#, [code]#group#, [code]#sub_group#
-and [code]#nd_range# must follow the following statements, where [code]#T# is
-the runtime class type:
+Some <<sycl-runtime>> classes provide <<byval-semantics>>.
+Each of these classes must provide a common interface of special member
+functions in order to fulfill copy, move, and destruction requirements and
+hidden friend functions in order to fulfill equality requirements, as described
+below.
 
-  * [code]#T# must be copy constructible and copy assignable in the host
-    application (in the case where [code]#T# is available on the host) and
-    within SYCL kernel functions.
-  * [code]#T# must be destructible in the host application (in the case where
-    [code]#T# is available on the host) and within SYCL kernel functions.
-  * [code]#T# must be move constructible and move assignable in the host
-    application (in the case where [code]#T# is available on the host) and
-    within SYCL kernel functions.
-  * [code]#T# must be equality comparable in the host application (in the case
-    where [code]#T# is available on the host) and within SYCL kernel functions.
-    Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
-    true if the value of all members are equal and non-equality between two
-    instances of [code]#T# (i.e. [code]#a != b#) must be true if the value of
-    any members are not equal, unless either instance has become invalidated by
-    a move operation.
-    By extension of the requirements above, equality on [code]#T# must guarantee
-    to be reflexive (i.e. [code]#a == a#), symmetric (i.e. [code]#a == b#
-    implies [code]#b == a# and [code]#a != b# implies [code]#b != a#) and
-    transitive (i.e. [code]#a == b && b == c# implies [code]#c == a#).
-
-Some <<sycl-runtime>> classes will have additional behavior associated with
-copy, movement, assignment or destruction semantics.
-If these are specified they are in addition to those specified above unless
+Some classes providing <<byval-semantics>> have additional behavior associated
+with copy, movement, assignment, or destruction semantics.
+If these are specified, they are in addition to <<byval-semantics>>, unless
 stated otherwise.
 
-Each of the runtime classes mentioned above must provide a common interface of
-special member functions and member functions in order to fulfill the copy,
-move, destruction and equality requirements, following the <<rule-of-five>> and
-the <<rule-of-zero>>.
+The following <<sycl-runtime>> classes provide <<byval-semantics>>:
+
+* [api]#group#
+* [api]#h_item#
+* [api]#id#
+* [api]#item#
+* [api]#nd_item#
+* [api]#nd_range#
+* [api]#range#
+* [api]#sub_group#
+
+[[sec:byval-semantics-reqs]]
+==== Interface requirements
+
+Each <<sycl-runtime>> class that provides <<byval-semantics>> must conform to
+the following requirements, where [code]#T# is the runtime class type:
+
+* _Copyability:_ [code]#T# must be copy constructible and copy assignable within
+  <<sycl-kernel-function,SYCL kernel functions>>.
+  If [code]#T# is available on the host, [code]#T# must also be copy
+  constructible and copy assignable on the host.
+
+* _Destructibility:_ [code]#T# must be destructible within
+  <<sycl-kernel-function,SYCL kernel functions>>.
+  If [code]#T# is available on the host, [code]#T# must also be destructible on
+  the host.
+
+* _Movability:_ [code]#T# must be move constructible and move assignable within
+  <<sycl-kernel-function,SYCL kernel functions>>.
+  If [code]#T# is available on the host, [code]#T# must also be move
+  constructible and move assignable on the host.
+
+* _Equality:_ [code]#T# must be equality comparable within
+  <<sycl-kernel-function,SYCL kernel functions>>.
+  If [code]#T# is available on the host, [code]#T# must also be equality
+  comparable on the host.
+  Equality between two instances of [code]#T# (i.e., [code]#a == b#) must be
+  true if the value of all members are equal and non-equality between two
+  instances of [code]#T# (i.e., [code]#a != b#) must be true if the value of any
+  member is not equal.
+  An instance of [code]#T# that has been invalidated by a move operation is not
+  considered to be equal to any other [code]#T# instance.
+  Equality on [code]#T# must be guaranteed to be reflexive (i.e., [code]#a ==
+  a#), symmetric (i.e., [code]#a == b# implies [code]#b == a# and [code]#a != b#
+  implies [code]#b != a#), and transitive (i.e., [code]#a == b && b == c#
+  implies [code]#c == a#).
+
+* _<<rule-of-five,Rule of five>> or <<rule-of-zero>>_: If [code]#T# explicitly
+  declares any one of the copy constructor, move constructor, copy assignment
+  operator, move assignment operator, or destructor, all of them must be
+  explicitly declared
 
 [source,,linenums]
 ----
 include::{header_dir}/common-byval.h[lines=4..-1]
 ----
 
-[[sec:value-semantics-special-members]]
+[[sec:byval-semantics-special-members]]
 ==== Special member functions
 
 This section describes the special member functions that may be provided by
-classes providing the common by-value semantics.
+classes providing the <<byval-semantics>>.
 If a class provides any one of these special member functions, all of the
 special member functions must be provided (see also the <<rule-of-five>> and the
 <<rule-of-zero>>).
@@ -558,83 +592,104 @@ functions, etc., as documented in their respective sections.
 '''
 
 .[apititle]#Copy constructor#
-[source,role=synopsis,id=api:value-semantics-ctor-copy]
+[source,role=synopsis,id=api:byval-semantics-ctor-copy]
 ----
 T(const T& rhs)
 ----
 
-_Effects:_ Constructs a [code]#T# instance as a copy of [code]#rhs#.
+_Effects:_ Constructs a [code]#T# instance that is a copy of [code]#rhs#.
+
+_Remarks:_ If this constructor is explicitly declared, all other special member
+functions must be explicitly declared as well (see the <<rule-of-five>>).
 
 '''
 
 .[apititle]#Move constructor#
-[source,role=synopsis,id=api:value-semantics-ctor-move]
+[source,role=synopsis,id=api:byval-semantics-ctor-move]
 ----
 T(T&& rhs)
 ----
 
-_Effects:_ Constructs a [code]#T# instance as a move of [code]#rhs#.
+_Effects:_ Constructs a [code]#T# instance via a move from [code]#rhs#.
+
+_Remarks:_ If this constructor is explicitly declared, all other special member
+functions must be explicitly declared as well (see the <<rule-of-five>>).
 
 '''
 
 .[apititle]#Copy assignment operator#
-[source,role=synopsis,id=api:value-semantics-assignment-copy]
+[source,role=synopsis,id=api:byval-semantics-assignment-copy]
 ----
 T& operator=(const T& rhs)
 ----
 
 _Effects:_ Assigns a copy of [code]#rhs# to this [code]#T# instance.
 
+_Remarks:_ If this assignment operator is explicitly declared, all other special
+member functions must be explicitly declared as well (see the <<rule-of-five>>).
+
 '''
 
 .[apititle]#Move assignment operator#
-[source,role=synopsis,id=api:value-semantics-assignment-move]
+[source,role=synopsis,id=api:byval-semantics-assignment-move]
 ----
 T& operator=(T&& rhs)
 ----
 
 _Effects:_ Moves from [code]#rhs# and assigns to this [code]#T# instance.
 
+_Remarks:_ If this assignment operator is explicitly declared, all other special
+member functions must be explicitly declared as well (see the <<rule-of-five>>).
+
 '''
 
 .[apititle]#Destructor#
-[source,role=synopsis,id=api:value-semantics-destructor]
+[source,role=synopsis,id=api:byval-semantics-destructor]
 ----
 ~T()
 ----
 
 _Effects:_ Destroys this [code]#T# instance.
 
+_Remarks_: If the destructor is explicitly declared, all other special member
+functions must be explicitly declared as well (see the <<rule-of-five>>).
+
 '''
 
-[[sec:value-semantics-hidden-friends]]
+[[sec:byval-semantics-hidden-friends]]
 ==== Hidden friend functions
 
 This section describes the hidden friend functions that must be provided by all
-classes providing the common by-value semantics.
+classes providing <<byval-semantics>>.
 Each of these classes may provide further member functions, static member
 functions, etc., as documented in their respective sections.
 
 '''
 
 .[apititle]#Equality operator#
-[source,role=synopsis,id=api:value-semantics-equality]
+[source,role=synopsis,id=api:byval-semantics-equality]
 ----
 bool operator==(const T& lhs, const T& rhs)
 ----
 
-_Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs# in accordance
-with the requirements set out above, otherwise returns false.
+_Effects:_ Returns true if [code]#lhs# is equal to [code]#rhs#, and false
+otherwise.
+
+_Remarks:_ Conforms to the equality comparability requirements of
+<<byval-semantics>>.
 
 '''
 
 .[apititle]#Inequality operator#
-[source,role=synopsis,id=api:value-semantics-inequality]
+[source,role=synopsis,id=api:byval-semantics-inequality]
 ----
 bool operator!=(const T& lhs, const T& rhs)
 ----
-_Effects:_ Returns true if [code]#lhs# is not equal to [code]#rhs# in accordance
-with the requirements set out above, otherwise returns false.
+
+_Effects:_ Equivalent to [code]#return !(lhs == rhs)#.
+
+_Remarks:_ Conforms to the equality comparability requirements of
+<<byval-semantics>>.
 
 '''
 
@@ -12636,7 +12691,7 @@ Then return the initial copy of the [code]#id#.
 
 
 
-[[subsec:item.class]]
+[[subsec:item-class]]
 ==== [code]#item# class
 
 <<item>> identifies an instance of the function object executing at each point
