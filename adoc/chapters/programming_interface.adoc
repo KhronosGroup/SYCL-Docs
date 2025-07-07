@@ -1129,6 +1129,10 @@ _Returns:_ A [code]#std::vector# containing all of the <<root-device,root
 devices>> associated with this platform which have the device type specified by
 [code]#type#.
 
+{note}Since the concept of a "host device" does not exist in SYCL 2020, if
+[code]#type# is [code]#info::device_type::host# this function will always return
+an empty vector.{endnote}
+
 _Remarks_: If [code]#type# is [code]#info::device_type::all#, the
 [code]#std::vector# contains all root devices in this platform.
 If [code]#type# is [code]#info::device_type::automatic# and the platform is not
@@ -1850,6 +1854,10 @@ get_devices(info::device_type type = info::device_type::all)
 _Returns:_ A [code]#std::vector# containing all the <<root-device, root
 devices>> from all <<backend, SYCL backends>> available in the system which have
 the device type [code]#type#.
+
+{note}Since the concept of a "host device" does not exist in SYCL 2020, if
+[code]#type# is [code]#info::device_type::host# this function will always return
+an empty vector.{endnote}
 
 _Remarks_: If [code]#type# is [code]#info::device_type::all#, the
 [code]#std::vector# contains all root devices in the system.
