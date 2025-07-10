@@ -69,6 +69,7 @@ class host_accessor {
 
   size_type size() const noexcept;
 
+  // Deprecated
   size_type max_size() const noexcept;
 
   bool empty() const noexcept;
