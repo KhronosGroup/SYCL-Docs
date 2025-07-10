@@ -452,14 +452,14 @@ Each of the following <<sycl-runtime>> classes: [code]#id#, [code]#range#,
 and [code]#nd_range# must follow the following statements, where [code]#T# is
 the runtime class type:
 
-  * [code]#T# must be default copy constructible and copy assignable in the host
+  * [code]#T# must be copy constructible and copy assignable in the host
     application (in the case where [code]#T# is available on the host) and
     within SYCL kernel functions.
-  * [code]#T# must be default destructible in the host application (in the case
-    where [code]#T# is available on the host) and within SYCL kernel functions.
-  * [code]#T# must be default move constructible and default move assignable in
-    the host application (in the case where [code]#T# is available on the host)
-    and within SYCL kernel functions.
+  * [code]#T# must be destructible in the host application (in the case where
+    [code]#T# is available on the host) and within SYCL kernel functions.
+  * [code]#T# must be move constructible and move assignable in the host
+    application (in the case where [code]#T# is available on the host) and
+    within SYCL kernel functions.
   * [code]#T# must be equality comparable in the host application (in the case
     where [code]#T# is available on the host) and within SYCL kernel functions.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
@@ -1888,6 +1888,15 @@ _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ A unique vendor device identifier.
 
+If the vendor has a PCI vendor ID, the low 16 bits must contain that PCI vendor
+ID, and the remaining bits must be set to zero.
+Otherwise, the value returned must be a valid Khronos vendor ID.
+Khronos vendor IDs are allocated starting at 0x10000, to distinguish them from
+the PCI vendor ID namespace.
+
+{note}Khronos vendor IDs are synchronized across APIs by utilizing Vulkan’s
+vk.xml as the central Khronos vendor ID registry.{endnote}
+
 '''
 
 .[apidef]#info::device::max_compute_units#
@@ -1983,9 +1992,17 @@ struct max_num_sub_groups {
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The maximum number of sub-groups in a work-group for any kernel
-executed on the device.
+_Returns:_ The maximum number of sub-groups that this device is capable of
+executing in a work-group.
 The minimum value is 1.
+The maximum number of sub-groups in a work-group depends on the kernel and the
+implementation.
+Use [code]#info::kernel_device_specific::max_num_sub_groups# to query this
+limit.
+
+{note}The largest work-group size supported by a device is likely to be the
+product of [code]#max_num_sub_groups# and the largest supported sub-group
+size.{endnote}
 
 '''
 
@@ -4184,6 +4201,7 @@ Synchronous errors are reported through SYCL exceptions.
 At least all unconsumed <<async-error,asynchronous errors>> held by this queue
 (or its associated context) are passed to the appropriate <<async-handler>> as
 described in <<subsubsec:async.handler.priorities>>.
+
 '''
 
 .[apidef]#queue::throw_asynchronous#
@@ -7221,13 +7239,13 @@ access_mode::read_write
 
 ==== Deduction tags
 
-Some accessor constructors take a [code]#TagT# parameter, which is used to
-deduce template arguments for the constructor's class.
+Some accessor constructors take a [code]#DeductionTagT# parameter, which is used
+to deduce template arguments for the constructor's class.
 Each of the access modes in <<table.accessors.accessmode>> has an associated
 tag, but there are additional tags which set other template parameters in
 addition to the access mode.
 The synopsis below shows the namespace scope variables that the implementation
-provides as possible values for the [code]#TagT# parameter.
+provides as possible values for the [code]#DeductionTagT# parameter.
 
 [source,,linenums]
 ----
@@ -7634,8 +7652,8 @@ accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+template <typename AllocatorT, typename DeductionTagT>
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7662,9 +7680,9 @@ properties for the constructed accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         handler& commandGroupHandlerRef, TagT tag,
+         handler& commandGroupHandlerRef, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7695,9 +7713,9 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         range<Dimensions> accessRange, TagT tag,
+         range<Dimensions> accessRange, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7733,9 +7751,9 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         range<Dimensions> accessRange, id<Dimensions> accessOffset, TagT tag,
+         range<Dimensions> accessRange, id<Dimensions> accessOffset, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7772,10 +7790,10 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
          handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-         TagT tag, const property_list& propList = {})
+         DeductionTagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7813,10 +7831,10 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
          handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-         id<Dimensions> accessOffset, TagT tag,
+         id<Dimensions> accessOffset, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7944,8 +7962,8 @@ This function may only be called from within a <<command>>.
 [[sec:accessor.command.buffer.tags]]
 ===== Deduction tags for buffer command accessors
 
-Some [code]#accessor# constructors take a [code]#TagT# parameter, which is used
-to deduce template arguments.
+Some [code]#accessor# constructors take a [code]#DeductionTagT# parameter, which
+is used to deduce template arguments.
 The permissible values for this parameter are listed in
 <<table.accessors.command.buffer.tags>> along with the access mode and accessor
 target that they imply.
@@ -8905,8 +8923,8 @@ constructed accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
-host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+template <typename AllocatorT, typename DeductionTagT>
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -8937,9 +8955,9 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-              range<Dimensions> accessRange, TagT tag,
+              range<Dimensions> accessRange, DeductionTagT tag,
               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -8975,10 +8993,10 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
               range<Dimensions> accessRange, id<Dimensions> accessOffset,
-              TagT tag, const property_list& propList = {})
+              DeductionTagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -9056,8 +9074,8 @@ Assignment to the single element that is accessed by this accessor.
 [[sec:accessor.host.buffer.tags]]
 ===== Deduction tags for buffer host accessors
 
-Some [code]#host_accessor# constructors take a [code]#TagT# parameter, which is
-used to deduce template arguments.
+Some [code]#host_accessor# constructors take a [code]#DeductionTagT# parameter,
+which is used to deduce template arguments.
 The permissible values for this parameter are listed in
 <<table.accessors.host.buffer.tags>> along with the access mode that they imply.
 
@@ -11837,6 +11855,10 @@ _Effects_: Causes the memory pointed to by [code]#ptr# to be deallocated.
 Applications should not rely on [code]#free# for synchronization, nor assume
 that [code]#free# cannot cause deadlocks.{endnote}
 
+_Synchronization_: A call to [code]#free# that deallocates a region of memory
+synchronizes with any allocation call that allocates all or part of the same
+region of memory.
+
 _Remarks_: If [code]#ptr# is null, this function has no effect.
 
 *Overload (2):*
@@ -12059,6 +12081,8 @@ size_t get(int dimension) const
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12067,6 +12091,8 @@ size_t& operator[](int dimension)
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12075,6 +12101,8 @@ size_t operator[](int dimension) const
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12402,8 +12430,9 @@ a@
 ----
 size_t get(int dimension) const
 ----
-   a@ Return the value of the [code]#id# for dimension
-      [code]#Dimension#.
+   a@ Return the value of the requested dimension of this [code]#id# object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12412,6 +12441,8 @@ size_t& operator[](int dimension)
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12420,6 +12451,8 @@ size_t operator[](int dimension) const
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12604,14 +12637,14 @@ a@
 ----
 size_t get_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_id()[dimension]#.
+   a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
 size_t operator[](int dimension) const
 ----
-   a@ Return the same value as [code]#get_id(dimension)#.
+   a@ Equivalent to [code]#return get_id(dimension)#.
 
 a@
 [source]
@@ -12626,7 +12659,7 @@ a@
 ----
 size_t get_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_range().get(dimension)#.
 
 a@
 [source]
@@ -12730,6 +12763,8 @@ size_t get_global_id(int dimension) const
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
       in the given [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12757,6 +12792,8 @@ size_t get_local_id(int dimension) const
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
       [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12791,6 +12828,8 @@ size_t get_group(int dimension) const
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
       given [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12814,6 +12853,8 @@ size_t get_group_range(int dimension) const
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12828,7 +12869,7 @@ a@
 ----
 size_t get_global_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
 a@
 [source]
@@ -12843,7 +12884,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
 a@
 [source]
@@ -13079,112 +13120,112 @@ a@
 ----
 range<Dimensions> get_global_range() const
 ----
-   a@ Return the same value as [code]#get_global().get_range()#
+   a@ Equivalent to [code]#return get_global().get_range()#
 
 a@
 [source]
 ----
 size_t get_global_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global().get_range(dimension)#
+   a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_global_id() const
 ----
-   a@ Return the same value as [code]#get_global().get_id()#
+   a@ Equivalent to [code]#return get_global().get_id()#
 
 a@
 [source]
 ----
 size_t get_global_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global().get_id(dimension)#
+   a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_local_range() const
 ----
-   a@ Return the same value as [code]#get_local().get_range()#
+   a@ Equivalent to [code]#return get_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_local_id() const
 ----
-   a@ Return the same value as [code]#get_local().get_id()#
+   a@ Equivalent to [code]#return get_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_logical_local_range() const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_range()#
+   a@ Equivalent to [code]#return get_logical_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_logical_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_logical_local_id() const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_id()#
+   a@ Equivalent to [code]#return get_logical_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_logical_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_physical_local_range() const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_range()#
+   a@ Equivalent to [code]#return get_physical_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_physical_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_physical_local_id() const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_id()#
+   a@ Equivalent to [code]#return get_physical_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_physical_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
 |====
 
@@ -13241,7 +13282,7 @@ a@
 ----
 size_t get_group_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_id()[dimension]#.
+   a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
 a@
 [source]
@@ -13259,7 +13300,7 @@ a@
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_id()[dimension]#.
+   a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
 It is undefined behavior for this member function to be invoked from within
 a [code]#parallel_for_work_item# context.
@@ -13277,7 +13318,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_range()[dimension]#.
+   a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
 a@
 [source]
@@ -13291,14 +13332,14 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_range()[dimension]#.
+   a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
 size_t operator[](int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_id(dimension)#.
+   a@ Equivalent to [code]#return get_group_id(dimension)#.
 
 a@
 [source]
@@ -13606,28 +13647,28 @@ a@
 ----
 uint32_t get_group_linear_id() const
 ----
-   a@ Return the same value as [code]#get_group_id()[0]#.
+   a@ Equivalent to [code]#return get_group_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_group_linear_range() const
 ----
-   a@ Return the same value as [code]#get_group_range()[0]#.
+   a@ Equivalent to [code]#return get_group_range()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_id() const
 ----
-   a@ Return the same value as [code]#get_local_id()[0]#.
+   a@ Equivalent to [code]#return get_local_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_range() const
 ----
-   a@ Return the same value as [code]#get_local_range()[0]#.
+   a@ Equivalent to [code]#return get_local_range()[0]#.
 
 a@
 [source]
@@ -17081,7 +17122,11 @@ info::kernel_device_specific::max_num_sub_groups
 ----
 
     @ [code]#std::uint32_t#
-   a@ Returns the maximum number of sub-groups for this kernel.
+   a@ Returns the maximum number of sub-groups per work-group for this kernel.
+      The minimum number is 1.
+
+{note}Choosing a work-group size that contains the maximum number of sub-groups
+may improve the performance of some devices and implementations.{endnote}
 
 a@
 [source]
@@ -17876,6 +17921,7 @@ Note these types are fundamental and therefore do not exist within the
 
 Additional scalar data types which are supported by SYCL within the [code]#sycl#
 namespace are described in <<table.types.additional>>.
+These data types are available on the host and in device code.
 
 
 [[table.types.additional]]
@@ -25788,7 +25834,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 '''
 
 
-=== Half precision math functions
+=== Half precision math functions (deprecated)
 
 This section describes the half precision math functions that are available in
 the [code]#sycl::half_precision# namespace in both host and device code.
@@ -25810,9 +25856,9 @@ description.
 .[apidef]#half_precision::cos#
 [source,role=synopsis,id=api:half-cos]
 ----
-float cos(float x)                (1)
+float cos(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ cos(NonScalar x)
 ----
 
@@ -25844,9 +25890,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::divide#
 [source,role=synopsis,id=api:half-divide]
 ----
-float divide(float x, float y)                      (1)
+float divide(float x, float y)                      (1) /* deprecated */
 
-template<typename NonScalar1, typename NonScalar2>  (2)
+template<typename NonScalar1, typename NonScalar2>  (2) /* deprecated */
 /*return-type*/ divide(NonScalar1 x, NonScalar2 y)
 ----
 
@@ -25874,9 +25920,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::exp#
 [source,role=synopsis,id=api:half-exp]
 ----
-float exp(float x)                (1)
+float exp(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ exp(NonScalar x)
 ----
 
@@ -25904,9 +25950,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::exp2#
 [source,role=synopsis,id=api:half-exp2]
 ----
-float exp2(float x)                (1)
+float exp2(float x)                (1) /* deprecated */
 
-template<typename NonScalar>       (2)
+template<typename NonScalar>       (2) /* deprecated */
 /*return-type*/ exp2(NonScalar x)
 ----
 
@@ -25934,9 +25980,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::exp10#
 [source,role=synopsis,id=api:half-exp10]
 ----
-float exp10(float x)                (1)
+float exp10(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ exp10(NonScalar x)
 ----
 
@@ -25964,9 +26010,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::log#
 [source,role=synopsis,id=api:half-log]
 ----
-float log(float x)                (1)
+float log(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ log(NonScalar x)
 ----
 
@@ -25993,9 +26039,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::log2#
 [source,role=synopsis,id=api:half-log2]
 ----
-float log2(float x)                (1)
+float log2(float x)                (1) /* deprecated */
 
-template<typename NonScalar>       (2)
+template<typename NonScalar>       (2) /* deprecated */
 /*return-type*/ log2(NonScalar x)
 ----
 
@@ -26022,9 +26068,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::log10#
 [source,role=synopsis,id=api:half-log10]
 ----
-float log10(float x)                (1)
+float log10(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ log10(NonScalar x)
 ----
 
@@ -26051,9 +26097,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::powr#
 [source,role=synopsis,id=api:half-powr]
 ----
-float powr(float x, float y)                        (1)
+float powr(float x, float y)                        (1) /* deprecated */
 
-template<typename NonScalar1, typename NonScalar2>  (2)
+template<typename NonScalar1, typename NonScalar2>  (2) /* deprecated */
 /*return-type*/ powr(NonScalar1 x, NonScalar2 y)
 ----
 
@@ -26086,9 +26132,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::recip#
 [source,role=synopsis,id=api:half-recip]
 ----
-float recip(float x)                (1)
+float recip(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ recip(NonScalar x)
 ----
 
@@ -26115,9 +26161,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::rsqrt#
 [source,role=synopsis,id=api:half-rsqrt]
 ----
-float rsqrt(float x)                (1)
+float rsqrt(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ rsqrt(NonScalar x)
 ----
 
@@ -26145,9 +26191,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::sin#
 [source,role=synopsis,id=api:half-sin]
 ----
-float sin(float x)                (1)
+float sin(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ sin(NonScalar x)
 ----
 
@@ -26179,9 +26225,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::sqrt#
 [source,role=synopsis,id=api:half-sqrt]
 ----
-float sqrt(float x)                (1)
+float sqrt(float x)                (1) /* deprecated */
 
-template<typename NonScalar>       (2)
+template<typename NonScalar>       (2) /* deprecated */
 /*return-type*/ sqrt(NonScalar x)
 ----
 
@@ -26208,9 +26254,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::tan#
 [source,role=synopsis,id=api:half-tan]
 ----
-float tan(float x)                (1)
+float tan(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ tan(NonScalar x)
 ----
 

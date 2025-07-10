@@ -54,7 +54,7 @@ struct max_constant_args;        // Deprecated
 struct local_mem_type;
 struct local_mem_size;
 struct error_correction_support;
-struct host_unified_memory;
+struct host_unified_memory; // Deprecated
 struct atomic_memory_order_capabilities;
 struct atomic_fence_order_capabilities;
 struct atomic_memory_scope_capabilities;
@@ -64,7 +64,7 @@ struct is_endian_little;
 struct is_available;
 struct is_compiler_available; // Deprecated
 struct is_linker_available;   // Deprecated
-struct execution_capabilities;
+struct execution_capabilities; // Deprecated
 struct queue_profiling;  // Deprecated
 struct built_in_kernels; // Deprecated
 struct built_in_kernel_ids;
@@ -134,6 +134,7 @@ enum class global_mem_cache_type : /* unspecified */ {
   read_write
 };
 
+// Deprecated
 enum class execution_capability : /* unspecified */ {
   exec_kernel,
   exec_native_kernel

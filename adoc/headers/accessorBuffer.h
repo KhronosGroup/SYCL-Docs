@@ -64,8 +64,8 @@ class accessor {
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
-  accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+  template <typename AllocatorT, typename DeductionTagT>
+  accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -74,9 +74,9 @@ class accessor {
            handler& commandGroupHandlerRef, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-           handler& commandGroupHandlerRef, TagT tag,
+           handler& commandGroupHandlerRef, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -85,9 +85,9 @@ class accessor {
            range<Dimensions> accessRange, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-           range<Dimensions> accessRange, TagT tag,
+           range<Dimensions> accessRange, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -97,9 +97,9 @@ class accessor {
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-           range<Dimensions> accessRange, id<Dimensions> accessOffset, TagT tag,
+           range<Dimensions> accessRange, id<Dimensions> accessOffset, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -109,10 +109,10 @@ class accessor {
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-           TagT tag, const property_list& propList = {});
+           DeductionTagT tag, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
@@ -121,10 +121,10 @@ class accessor {
            id<Dimensions> accessOffset, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-           id<Dimensions> accessOffset, TagT tag,
+           id<Dimensions> accessOffset, DeductionTagT tag,
            const property_list& propList = {});
 
   /* -- common interface members -- */
