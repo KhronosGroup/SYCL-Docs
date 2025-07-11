@@ -186,7 +186,7 @@ class multi_ptr {
   operator multi_ptr<value_type, Space, access::decorated::yes>() const;
 
   // Available only when: (Space == address_space::global_space)
-  void prefetch(size_t numElements) const;
+  void prefetch(std::size_t numElements) const;
 
   // Arithmetic operators
   friend multi_ptr& operator++(multi_ptr& mp) { /* ... */

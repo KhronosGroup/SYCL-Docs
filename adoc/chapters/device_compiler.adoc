@@ -226,9 +226,9 @@ A device compiler may have this preconfigured so that it can match them based on
 the definitions of those types on the platform, or there may be a necessity for
 a device compiler command-line option to ensure the types are the same.
 
-The standard {cpp} fixed width types, e.g. [code]#int8_t#, [code]#int16_t#,
-[code]#int32_t#,[code]#int64_t#, should have the same size as defined by the
-{cpp} standard for host and device.
+The standard {cpp} fixed width types, e.g. [code]#std::int8_t#,
+[code]#std::int16_t#, [code]#std::int32_t#,[code]#std::int64_t#, should have the
+same size as defined by the {cpp} standard for host and device.
 
 
 [[table.types.fundamental]]
@@ -550,7 +550,7 @@ reqd_work_group_size(dim0, dim1, dim2)
       work-group used to invoke the kernel, and the order of the arguments
       matches the order of the dimension extents to the [code]#range#
       constructor.  Each argument must be an integral constant expression that
-      is representable by [code]#size_t#.
+      is representable by [code]#std::size_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
@@ -576,7 +576,7 @@ work_group_size_hint(dim0, dim1, dim2)
       must match the dimensionality of the work-group used to invoke the
       kernel, and the order of the arguments matches the order of the dimension
       extents to the [code]#range# constructor.  Each argument must be an
-      integral constant expression that is representable by [code]#size_t#.
+      integral constant expression that is representable by [code]#std::size_t#.
       The effect of this attribute, if any, is implementation-defined.
 
 a@
@@ -598,7 +598,7 @@ reqd_sub_group_size(size)
 ----
    a@ Indicates that the kernel must be compiled and executed with the specified
       sub-group size. The argument to the attribute must be an integral constant
-      expression that is representable by [code]#uint32_t#.
+      expression that is representable by [code]#std::uint32_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.

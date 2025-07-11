@@ -108,19 +108,19 @@ class queue {
 
   /* -- Shortcut functions: memcpy -- */
 
-  event memcpy(void* dest, const void* src, size_t numBytes);
-  event memcpy(void* dest, const void* src, size_t numBytes, event depEvent);
-  event memcpy(void* dest, const void* src, size_t numBytes,
+  event memcpy(void* dest, const void* src, std::size_t numBytes);
+  event memcpy(void* dest, const void* src, std::size_t numBytes, event depEvent);
+  event memcpy(void* dest, const void* src, std::size_t numBytes,
                const std::vector<event>& depEvents);
 
   /* -- Shortcut functions: copy -- */
 
   template <typename T>
-  event copy(const T* src, T* dest, size_t count);
+  event copy(const T* src, T* dest, std::size_t count);
   template <typename T>
-  event copy(const T* src, T* dest, size_t count, event depEvent);
+  event copy(const T* src, T* dest, std::size_t count, event depEvent);
   template <typename T>
-  event copy(const T* src, T* dest, size_t count,
+  event copy(const T* src, T* dest, std::size_t count,
              const std::vector<event>& depEvents);
 
   template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,
@@ -152,19 +152,19 @@ class queue {
 
   /* -- Shortcut functions: memset -- */
 
-  event memset(void* ptr, int value, size_t numBytes);
-  event memset(void* ptr, int value, size_t numBytes, event depEvent);
-  event memset(void* ptr, int value, size_t numBytes,
+  event memset(void* ptr, int value, std::size_t numBytes);
+  event memset(void* ptr, int value, std::size_t numBytes, event depEvent);
+  event memset(void* ptr, int value, std::size_t numBytes,
                const std::vector<event>& depEvents);
 
   /* -- Shortcut functions: fill -- */
 
   template <typename T>
-  event fill(void* ptr, const T& pattern, size_t count);
+  event fill(void* ptr, const T& pattern, std::size_t count);
   template <typename T>
-  event fill(void* ptr, const T& pattern, size_t count, event depEvent);
+  event fill(void* ptr, const T& pattern, std::size_t count, event depEvent);
   template <typename T>
-  event fill(void* ptr, const T& pattern, size_t count,
+  event fill(void* ptr, const T& pattern, std::size_t count,
              const std::vector<event>& depEvents);
 
   template <typename T, int Dims, access_mode Mode, target Tgt,
@@ -173,16 +173,16 @@ class queue {
 
   /* -- Shortcut functions: prefetch -- */
 
-  event prefetch(void* ptr, size_t numBytes);
-  event prefetch(void* ptr, size_t numBytes, event depEvent);
-  event prefetch(void* ptr, size_t numBytes,
+  event prefetch(void* ptr, std::size_t numBytes);
+  event prefetch(void* ptr, std::size_t numBytes, event depEvent);
+  event prefetch(void* ptr, std::size_t numBytes,
                  const std::vector<event>& depEvents);
 
   /* -- Shortcut functions: mem_advise -- */
 
-  event mem_advise(void* ptr, size_t numBytes, int advice);
-  event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent);
-  event mem_advise(void* ptr, size_t numBytes, int advice,
+  event mem_advise(void* ptr, std::size_t numBytes, int advice);
+  event mem_advise(void* ptr, std::size_t numBytes, int advice, event depEvent);
+  event mem_advise(void* ptr, std::size_t numBytes, int advice,
                    const std::vector<event>& depEvents);
 
   /* -- Shortcut functions: update_host -- */
