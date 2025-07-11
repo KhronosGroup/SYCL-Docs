@@ -114,10 +114,13 @@ where [code]#<backend_name># is the name of the <<backend>> as defined in the
 extensions that a vendor may provide, including any <<backend>> that the vendor
 may define outside of the Khronos SYCL group.
 
-Unless otherwise specified, the behavior of a SYCL program is undefined if it
-adds any entity to namespace [code]#sycl# or to a namespace within namespace
-[code]#sycl#.
+Unless otherwise specified, the behavior of a SYCL program is undefined if:
 
+* it adds any entity to namespace [code]#sycl# or to a namespace within
+  namespace [code]#sycl#; or
+
+* it adds a template specialization for a class template defined in namespace
+  [code]#sycl# or defined in a namespace within namespace [code]#sycl#.
 
 == Class availability
 
@@ -13730,6 +13733,9 @@ include::{header_dir}/identity.h[lines=4..-1]
 For each of the partial specializations listed in <<table.identities>>,
 [code]#known_identity# exists and has the value shown.
 
+A SYCL program may define additional specializations of [code]#known_identity#
+and [code]#has_known_identity# only for program-defined types.
+
 [[table.identities]]
 .Known identities.
 [width="100%",options="header",separator="@",cols="25%,55%,20%"]
@@ -21693,6 +21699,12 @@ and device.
 All function objects obey {cpp} conversion and promotion rules.
 Each function object is additionally specialized for [code]#void# as a
 _transparent_ function object that deduces its parameter types and return type.
+
+{note}Using these function objects with program-defined types requires those
+types to define the associated operator (e.g., [code]#plus# requires
+[code]#pass:[operator+]#).
+For [code]#minimum# and [code]#maximum#, it is recommended to define all
+comparison operators.{endnote}
 
 [source,,linenums]
 ----
