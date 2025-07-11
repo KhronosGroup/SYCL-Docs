@@ -24,21 +24,41 @@ class sampled_image {
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const property_list& propList = {});
 
+  sampled_image(const void* hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                AllocatorT allocator,  const property_list& propList = {});
+
   /* Available only when: Dimensions > 1 */
   sampled_image(const void* hostPointer, image_format format,
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {});
 
+  /* Available only when: Dimensions > 1 */
+  sampled_image(const void* hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const property_list& propList = {});
+
   sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const property_list& propList = {});
+
+  sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                AllocatorT allocator, const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
   sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {});
+
+  /* Available only when: Dimensions > 1 */
+  sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                AllocatorT allocator, const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -52,6 +72,8 @@ class sampled_image {
   std::size_t byte_size() const noexcept;
 
   std::size_t size() const noexcept;
+
+  AllocatorT get_allocator() const;
 
   template <typename DataT, image_target Targ = image_target::device>
   sampled_image_accessor<DataT, Dimensions, Targ>
