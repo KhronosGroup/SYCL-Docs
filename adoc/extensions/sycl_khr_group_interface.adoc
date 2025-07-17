@@ -91,29 +91,29 @@ bool leader_of(const Group& g) noexcept;
 [[sec:khr-group-interface-common-member-funcs]]
 === Member functions
 
-.[apidef]#+__group__::id+#
+.[apidef]#+khr::__group__::id+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-id]
 ----
 id_type id() const noexcept;
 ----
 
 _Returns_: The index of this group within the index space returned by
-[api]#+__group__::range+#.
+[api]#+khr::__group__::range+#.
 
 '''
 
-.[apidef]#+__group__::linear_id+#
+.[apidef]#+khr::__group__::linear_id+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-linear-id]
 ----
 linear_id_type linear_id() const noexcept;
 ----
 
 _Returns_: The linearized index (see <<sec:multi-dim-linearization>>) of this
-group within the index space returned by [api]#+__group__::range+#.
+group within the index space returned by [api]#+khr::__group__::range+#.
 
 '''
 
-.[apidef]#+__group__::range+#
+.[apidef]#+khr::__group__::range+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-range]
 ----
 range_type range() const noexcept;
@@ -125,7 +125,7 @@ group.
 
 '''
 
-.[apidef]#+__group__::extents+#
+.[apidef]#+khr::__group__::extents+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-extents]
 ----
 constexpr extents_type extents() const noexcept;
@@ -137,7 +137,7 @@ _Returns_: The number of work-items in each dimension of the group.
 
 '''
 
-.[apidef]#+__group__::extent+#
+.[apidef]#+khr::__group__::extent+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-extent]
 ----
 constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept;
@@ -151,7 +151,7 @@ _Returns_: The number of work-items in the specified dimension of the group.
 
 '''
 
-.[apidef]#+__group__::rank+#
+.[apidef]#+khr::__group__::rank+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-rank]
 ----
 static constexpr extents_type::rank_type rank() noexcept;
@@ -163,7 +163,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank();#.
 
 '''
 
-.[apidef]#+__group__::rank_dynamic+#
+.[apidef]#+khr::__group__::rank_dynamic+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-rank_dynamic]
 ----
 static constexpr extents_type::rank_type rank_dynamic() noexcept;
@@ -175,7 +175,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 
 '''
 
-.[apidef]#+__group__::static_extent+#
+.[apidef]#+khr::__group__::static_extent+#
 [source,role=synopsis,id=api:khr-group-interface-common-group-static_extent]
 ----
 static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
@@ -187,7 +187,7 @@ _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
 '''
 
-.[apidef]#+__group__::size+#
+.[apidef]#+khr::__group__::size+#
 [source,role=synopsis,id=api:common-group-size]
 ----
 size_type size() const noexcept;
@@ -294,7 +294,7 @@ class work_group {
 } // namespace sycl::khr
 ----
 
-.[apititle]#work_group constructor#
+.[apititle]#khr::work_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-work-group-constructor]
 ----
 work_group(const group<Dimensions>& g) noexcept;
@@ -305,7 +305,7 @@ work-items as [code]#g#.
 
 '''
 
-.[apititle]#work_group conversion operator#
+.[apititle]#khr::work_group conversion operator#
 [source,role=synopsis,id=api:khr-group-interface-work-group-conversion-operator]
 ----
 operator group<Dimensions>() const noexcept;
@@ -316,7 +316,7 @@ this [code]#work_group#.
 
 '''
 
-.[apidef]#+work_group::id+#
+.[apidef]#+khr::work_group::id+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-id]
 ----
 id_type id() const noexcept;
@@ -326,7 +326,7 @@ _Returns_: The index of this work-group within the <<nd-range>>.
 
 '''
 
-.[apidef]#+work_group::linear_id+#
+.[apidef]#+khr::work_group::linear_id+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-linear-id]
 ----
 linear_id_type linear_id() const noexcept;
@@ -337,7 +337,7 @@ work-group within the <<nd-range>>.
 
 '''
 
-.[apidef]#+work_group::range+#
+.[apidef]#+khr::work_group::range+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-range]
 ----
 range_type range() const noexcept;
@@ -347,7 +347,7 @@ _Returns_: An index space representing all work-groups in the <<nd-range>>.
 
 '''
 
-.[apidef]#+work_group::extents+#
+.[apidef]#+khr::work_group::extents+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-extents]
 ----
 extents_type extents() const noexcept;
@@ -359,7 +359,7 @@ _Returns_: The number of work-items in each dimension of the work-group.
 
 '''
 
-.[apidef]#+work_group::extent+#
+.[apidef]#+khr::work_group::extent+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-extent]
 ----
 extents_type::index_type extent(extents_type::rank_type r) const noexcept;
@@ -374,7 +374,7 @@ work-group.
 
 '''
 
-.[apidef]#+work_group::rank+#
+.[apidef]#+khr::work_group::rank+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-rank]
 ----
 static constexpr extents_type::rank_type rank() noexcept;
@@ -386,7 +386,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank();#.
 
 '''
 
-.[apidef]#+work_group::rank_dynamic+#
+.[apidef]#+khr::work_group::rank_dynamic+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-rank_dynamic]
 ----
 static constexpr extents_type::rank_type rank_dynamic() noexcept;
@@ -398,7 +398,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 
 '''
 
-.[apidef]#+work_group::static_extent+#
+.[apidef]#+khr::work_group::static_extent+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-static_extent]
 ----
 static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
@@ -410,7 +410,7 @@ _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
 '''
 
-.[apidef]#+work_group::size+#
+.[apidef]#+khr::work_group::size+#
 [source,role=synopsis,id=api:khr-group-interface-work-group-size]
 ----
 size_type size() const noexcept;
@@ -479,7 +479,7 @@ class sub_group {
 } // namespace sycl::khr
 ----
 
-.[apititle]#sub_group constructor#
+.[apititle]#khr::sub_group constructor#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-constructor]
 ----
 sub_group(const sycl::sub_group& sg) noexcept;
@@ -490,7 +490,7 @@ work-items as [code]#sg#.
 
 '''
 
-.[apititle]#sub_group conversion operator#
+.[apititle]#khr::sub_group conversion operator#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-conversion-operator]
 ----
 operator sycl::sub_group() const noexcept;
@@ -501,7 +501,7 @@ work-items as this [code]#sub_group#.
 
 '''
 
-.[apidef]#+sub_group::id+#
+.[apidef]#+khr::sub_group::id+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-id]
 ----
 id_type id() const noexcept;
@@ -511,7 +511,7 @@ _Returns_: The index of this sub-group within its parent work-group.
 
 '''
 
-.[apidef]#+sub_group::linear_id+#
+.[apidef]#+khr::sub_group::linear_id+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-linear-id]
 ----
 linear_id_type linear_id() const noexcept;
@@ -522,7 +522,7 @@ sub-group within its parent work-group.
 
 '''
 
-.[apidef]#+sub_group::range+#
+.[apidef]#+khr::sub_group::range+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-range]
 ----
 range_type range() const noexcept;
@@ -532,7 +532,7 @@ _Returns_: An index space representing all sub-groups in the same work-group.
 
 '''
 
-.[apidef]#+sub_group::extents+#
+.[apidef]#+khr::sub_group::extents+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-extents]
 ----
 extents_type extents() const noexcept;
@@ -544,7 +544,7 @@ _Returns_: The number of work-items in each dimension of the sub-group.
 
 '''
 
-.[apidef]#+sub_group::extent+#
+.[apidef]#+khr::sub_group::extent+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-extent]
 ----
 extents_type::index_type extent(extents_type::rank_type r) const noexcept;
@@ -558,7 +558,7 @@ _Returns_: The number of work-items in the specified dimension of the sub-group.
 
 '''
 
-.[apidef]#+sub_group::rank+#
+.[apidef]#+khr::sub_group::rank+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-rank]
 ----
 static constexpr extents_type::rank_type rank() noexcept;
@@ -570,7 +570,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank();#.
 
 '''
 
-.[apidef]#+sub_group::rank_dynamic+#
+.[apidef]#+khr::sub_group::rank_dynamic+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-rank_dynamic]
 ----
 static constexpr extents_type::rank_type rank_dynamic() noexcept;
@@ -582,7 +582,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 
 '''
 
-.[apidef]#+sub_group::static_extent+#
+.[apidef]#+khr::sub_group::static_extent+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-static_extent]
 ----
 static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
@@ -594,7 +594,7 @@ _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
 '''
 
-.[apidef]#+sub_group::size+#
+.[apidef]#+khr::sub_group::size+#
 [source,role=synopsis,id=api:khr-group-interface-sub-group-size]
 ----
 size_type size() const noexcept;
@@ -677,7 +677,7 @@ class member_item {
 } // namespace sycl::khr
 ----
 
-.[apidef]#+member_item::id+#
+.[apidef]#+khr::member_item::id+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-id]
 ----
 id_type id() const noexcept;
@@ -687,7 +687,7 @@ _Returns_: The index of this member-item within its parent group.
 
 '''
 
-.[apidef]#+member_item::linear_id+#
+.[apidef]#+khr::member_item::linear_id+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-linear-id]
 ----
 linear_id_type linear_id() const noexcept;
@@ -698,7 +698,7 @@ member-item within its parent group.
 
 '''
 
-.[apidef]#+member_item::range+#
+.[apidef]#+khr::member_item::range+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-range]
 ----
 range_type range() const noexcept;
@@ -708,7 +708,7 @@ _Returns_: An index space representing all member-items in the parent group.
 
 '''
 
-.[apidef]#+member_item::extents+#
+.[apidef]#+khr::member_item::extents+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-extents]
 ----
 constexpr extents_type extents() const noexcept;
@@ -720,7 +720,7 @@ _Returns_: An [code]#extents# where all dimensions are 1.
 
 '''
 
-.[apidef]#+member_item::extent+#
+.[apidef]#+khr::member_item::extent+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-extent]
 ----
 constexpr extents_type::index_type extent(extents_type::rank_type r) const noexcept;
@@ -734,7 +734,7 @@ _Returns_: Equivalent to [code]#return 1;#.
 
 '''
 
-.[apidef]#+member_item::rank+#
+.[apidef]#+khr::member_item::rank+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-rank]
 ----
 static constexpr extents_type::rank_type rank() noexcept;
@@ -746,7 +746,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank();#.
 
 '''
 
-.[apidef]#+member_item::rank_dynamic+#
+.[apidef]#+khr::member_item::rank_dynamic+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-rank_dynamic]
 ----
 static constexpr extents_type::rank_type rank_dynamic() noexcept;
@@ -758,7 +758,7 @@ _Effects_: Equivalent to [code]#return extents_type::rank_dynamic();#.
 
 '''
 
-.[apidef]#+member_item::static_extent+#
+.[apidef]#+khr::member_item::static_extent+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-static_extent]
 ----
 static constexpr size_t static_extent(extents_type::rank_type r) noexcept;
@@ -770,7 +770,7 @@ _Effects_: Equivalent to [code]#return extents_type::static_extent(r);#.
 
 '''
 
-.[apidef]#+member_item::size+#
+.[apidef]#+khr::member_item::size+#
 [source,role=synopsis,id=api:khr-group-interface-member-item-size]
 ----
 constexpr size_type size() const noexcept;

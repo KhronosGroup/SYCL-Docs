@@ -85,9 +85,9 @@ class unsampled_image {
   /* Available only when: Dimensions > 1 */
   range<Dimensions - 1> get_pitch() const;
 
-  size_t byte_size() const noexcept;
+  std::size_t byte_size() const noexcept;
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   AllocatorT get_allocator() const;
 

@@ -91,6 +91,8 @@ For compatibility with SYCL 1.2.1, SYCL provides another standard header file:
 [code]#<sycl/sycl.hpp>#.
 In that case, all SYCL classes, constants, types and functions defined by this
 specification should exist within the [code]#::cl::sycl# {cpp} namespace.
+The [code]#<CL/sycl.hpp># header and all declarations within the
+[code]#::cl::sycl# namespace are deprecated.
 
 For consistency, the programming API will only refer to the
 [code]#<sycl/sycl.hpp># header and the [code]#::sycl# namespace, but this should
@@ -112,10 +114,13 @@ where [code]#<backend_name># is the name of the <<backend>> as defined in the
 extensions that a vendor may provide, including any <<backend>> that the vendor
 may define outside of the Khronos SYCL group.
 
-Unless otherwise specified, the behavior of a SYCL program is undefined if it
-adds any entity to namespace [code]#sycl# or to a namespace within namespace
-[code]#sycl#.
+Unless otherwise specified, the behavior of a SYCL program is undefined if:
 
+* it adds any entity to namespace [code]#sycl# or to a namespace within
+  namespace [code]#sycl#; or
+
+* it adds a template specialization for a class template defined in namespace
+  [code]#sycl# or defined in a namespace within namespace [code]#sycl#.
 
 == Class availability
 
@@ -452,14 +457,14 @@ Each of the following <<sycl-runtime>> classes: [code]#id#, [code]#range#,
 and [code]#nd_range# must follow the following statements, where [code]#T# is
 the runtime class type:
 
-  * [code]#T# must be default copy constructible and copy assignable in the host
+  * [code]#T# must be copy constructible and copy assignable in the host
     application (in the case where [code]#T# is available on the host) and
     within SYCL kernel functions.
-  * [code]#T# must be default destructible in the host application (in the case
-    where [code]#T# is available on the host) and within SYCL kernel functions.
-  * [code]#T# must be default move constructible and default move assignable in
-    the host application (in the case where [code]#T# is available on the host)
-    and within SYCL kernel functions.
+  * [code]#T# must be destructible in the host application (in the case where
+    [code]#T# is available on the host) and within SYCL kernel functions.
+  * [code]#T# must be move constructible and move assignable in the host
+    application (in the case where [code]#T# is available on the host) and
+    within SYCL kernel functions.
   * [code]#T# must be equality comparable in the host application (in the case
     where [code]#T# is available on the host) and within SYCL kernel functions.
     Equality between two instances of [code]#T# (i.e. [code]#a == b#) must be
@@ -1726,7 +1731,7 @@ by the [code]#extension# parameter.
 [source,role=synopsis,id=api:device-create-sub-devices-partition-equally]
 ----
 template <info::partition_property Prop>
-std::vector<device> create_sub_devices(size_t count) const
+std::vector<device> create_sub_devices(std::size_t count) const
 ----
 
 _Constraints:_ Available only when [code]#Prop# is
@@ -1755,7 +1760,7 @@ _Throws:_
 [source,role=synopsis,id=api:device-create-sub-devices-partition-by-counts]
 ----
 template <info::partition_property Prop>
-std::vector<device> create_sub_devices(const std::vector<size_t>& counts) const
+std::vector<device> create_sub_devices(const std::vector<std::size_t>& counts) const
 ----
 
 _Constraints:_ Available only when [code]#Prop# is
@@ -1879,7 +1884,7 @@ May not return [api]#info::device_type::all#.
 ----
 namespace sycl::info::device {
 struct vendor_id {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -1888,6 +1893,15 @@ _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ A unique vendor device identifier.
 
+If the vendor has a PCI vendor ID, the low 16 bits must contain that PCI vendor
+ID, and the remaining bits must be set to zero.
+Otherwise, the value returned must be a valid Khronos vendor ID.
+Khronos vendor IDs are allocated starting at 0x10000, to distinguish them from
+the PCI vendor ID namespace.
+
+{note}Khronos vendor IDs are synchronized across APIs by utilizing Vulkan’s
+vk.xml as the central Khronos vendor ID registry.{endnote}
+
 '''
 
 .[apidef]#info::device::max_compute_units#
@@ -1895,7 +1909,7 @@ _Returns:_ A unique vendor device identifier.
 ----
 namespace sycl::info::device {
 struct max_compute_units {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -1912,7 +1926,7 @@ The minimum value is 1.
 ----
 namespace sycl::info::device {
 struct max_work_item_dimensions {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -1954,7 +1968,7 @@ returned from this query is: (1) when [code]#Dimensions# is 1, (1, 1) when
 ----
 namespace sycl::info::device {
 struct max_work_group_size {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -1976,16 +1990,24 @@ Use [code]#info::kernel_device_specific::work_group_size# to query this limit.
 ----
 namespace sycl::info::device {
 struct max_num_sub_groups {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The maximum number of sub-groups in a work-group for any kernel
-executed on the device.
+_Returns:_ The maximum number of sub-groups that this device is capable of
+executing in a work-group.
 The minimum value is 1.
+The maximum number of sub-groups in a work-group depends on the kernel and the
+implementation.
+Use [code]#info::kernel_device_specific::max_num_sub_groups# to query this
+limit.
+
+{note}The largest work-group size supported by a device is likely to be the
+product of [code]#max_num_sub_groups# and the largest supported sub-group
+size.{endnote}
 
 '''
 
@@ -1994,14 +2016,14 @@ The minimum value is 1.
 ----
 namespace sycl::info::device {
 struct sub_group_sizes {
-  using return_type = std::vector<size_t>;
+  using return_type = std::vector<std::size_t>;
 };
 } // namespace sycl::info::device
 ----
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ A [code]#std::vector# of [code]#size_t# containing the set of
+_Returns:_ A [code]#std::vector# of [code]#std::size_t# containing the set of
 sub-group sizes supported by the device.
 
 '''
@@ -2011,25 +2033,25 @@ sub-group sizes supported by the device.
 ----
 namespace sycl::info::device {
 struct preferred_vector_width_char {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct preferred_vector_width_short {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct preferred_vector_width_int {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct preferred_vector_width_long {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct preferred_vector_width_float {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct preferred_vector_width_double {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct preferred_vector_width_half {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2052,25 +2074,25 @@ device does not have [api]#aspect::fp64# and must return 0 for
 ----
 namespace sycl::info::device {
 struct native_vector_width_char {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct native_vector_width_short {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct native_vector_width_int {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct native_vector_width_long {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct native_vector_width_float {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct native_vector_width_double {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 struct native_vector_width_half {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2092,7 +2114,7 @@ does not have [api]#aspect::fp64# and must return 0 for
 ----
 namespace sycl::info::device {
 struct max_clock_frequency {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2108,7 +2130,7 @@ _Returns:_ The maximum configured clock frequency of this device in MHz.
 ----
 namespace sycl::info::device {
 struct address_bits {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2125,7 +2147,7 @@ Must return either 32 or 64.
 ----
 namespace sycl::info::device {
 struct max_mem_alloc_size {
-  using return_type = uint64_t;
+  using return_type = std::uint64_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2159,7 +2181,7 @@ _Returns:_ The same value as [code]#device::has(aspect::image)#.
 ----
 namespace sycl::info::device {
 struct max_read_image_args {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2177,7 +2199,7 @@ The minimum value is 128 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct max_write_image_args {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2195,7 +2217,7 @@ The minimum value is 8 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct image2d_max_width {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2212,7 +2234,7 @@ The minimum value is 8192 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct image2d_max_height {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2229,7 +2251,7 @@ The minimum value is 8192 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct image3d_max_width {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2246,7 +2268,7 @@ The minimum value is 2048 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct image3d_max_height {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2263,7 +2285,7 @@ The minimum value is 2048 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct image3d_max_depth {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2280,7 +2302,7 @@ The minimum value is 2048 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct image_max_buffer_size {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2299,7 +2321,7 @@ feature is not supported in SYCL.
 ----
 namespace sycl::info::device {
 struct max_samplers {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2316,7 +2338,7 @@ The minimum value is 16 if the device has [api]#aspect::image#.
 ----
 namespace sycl::info::device {
 struct max_parameter_size {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2337,7 +2359,7 @@ kernel.
 ----
 namespace sycl::info::device {
 struct mem_base_addr_align {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2467,7 +2489,7 @@ _Returns:_ The type of global memory cache supported.
 ----
 namespace sycl::info::device {
 struct global_mem_cache_line_size {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2483,7 +2505,7 @@ _Returns:_ The size of global memory cache line in bytes.
 ----
 namespace sycl::info::device {
 struct global_mem_cache_size {
-  using return_type = uint64_t;
+  using return_type = std::uint64_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2499,7 +2521,7 @@ _Returns:_ The size of global memory cache in bytes.
 ----
 namespace sycl::info::device {
 struct global_mem_size {
-  using return_type = uint64_t;
+  using return_type = std::uint64_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2515,7 +2537,7 @@ _Returns:_ The size of global device memory in bytes.
 ----
 namespace sycl::info::device {
 struct max_constant_buffer_size {
-  using return_type = uint64_t;
+  using return_type = std::uint64_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2535,7 +2557,7 @@ The minimum value is 64 KB if this device is not of type
 ----
 namespace sycl::info::device {
 struct max_constant_args {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2576,7 +2598,7 @@ If this device is of type [api]#info::device_type::custom# this can also be
 ----
 namespace sycl::info::device {
 struct local_mem_size {
-  using return_type = uint64_t;
+  using return_type = std::uint64_t;
 };
 } // namespace sycl::info::device
 ----
@@ -2729,7 +2751,7 @@ At a minimum, each device must support [code]#memory_scope::work_item#,
 ----
 namespace sycl::info::device {
 struct profiling_timer_resolution {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -3108,7 +3130,7 @@ description of these extensions.
 ----
 namespace sycl::info::device {
 struct printf_buffer_size {
-  using return_type = size_t;
+  using return_type = std::size_t;
 };
 } // namespace sycl::info::device
 ----
@@ -3176,7 +3198,7 @@ device is not a sub device.
 ----
 namespace sycl::info::device {
 struct partition_max_sub_devices {
-  using return_type = uint32_t;
+  using return_type = std::uint32_t;
 };
 } // namespace sycl::info::device
 ----
@@ -4184,6 +4206,7 @@ Synchronous errors are reported through SYCL exceptions.
 At least all unconsumed <<async-error,asynchronous errors>> held by this queue
 (or its associated context) are passed to the appropriate <<async-handler>> as
 described in <<subsubsec:async.handler.priorities>>.
+
 '''
 
 .[apidef]#queue::throw_asynchronous#
@@ -4324,11 +4347,11 @@ queue.
 .[apidef]#queue::memcpy#
 [source,role=synopsis,id=api:queue-memcpy]
 ----
-event memcpy(void* dest, const void* src, size_t numBytes)                 (1)
+event memcpy(void* dest, const void* src, std::size_t numBytes)                 (1)
 
-event memcpy(void* dest, const void* src, size_t numBytes, event depEvent) (2)
+event memcpy(void* dest, const void* src, std::size_t numBytes, event depEvent) (2)
 
-event memcpy(void* dest, const void* src, size_t numBytes,                 (3)
+event memcpy(void* dest, const void* src, std::size_t numBytes,                 (3)
              const std::vector<event>& depEvents)
 ----
 
@@ -4352,13 +4375,13 @@ queue.
 [source,role=synopsis,id=api:queue-copy]
 ----
 template <typename T>                                                         (1)
-event copy(const T* src, T* dest, size_t count)
+event copy(const T* src, T* dest, std::size_t count)
 
 template <typename T>                                                         (2)
-event copy(const T* src, T* dest, size_t count, event depEvent)
+event copy(const T* src, T* dest, std::size_t count, event depEvent)
 
 template <typename T>                                                         (3)
-event copy(const T* srct, T* dest, size_t count,
+event copy(const T* srct, T* dest, std::size_t count,
            const std::vector<event>& depEvents)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, target SrcTgt,     (4)
@@ -4429,11 +4452,11 @@ queue.
 .[apidef]#queue::memset#
 [source,role=synopsis,id=api:queue-memset]
 ----
-event memset(void* ptr, int value, size_t numBytes)                 (1)
+event memset(void* ptr, int value, std::size_t numBytes)                 (1)
 
-event memset(void* ptr, int value, size_t numBytes, event depEvent) (2)
+event memset(void* ptr, int value, std::size_t numBytes, event depEvent) (2)
 
-event memset(void* ptr, int value, size_t numBytes,                 (3)
+event memset(void* ptr, int value, std::size_t numBytes,                 (3)
              const std::vector<event>& depEvents)
 ----
 
@@ -4457,13 +4480,13 @@ queue.
 [source,role=synopsis,id=api:queue-fill]
 ----
 template <typename T>                                                      (1)
-event fill(void* ptr, const T& pattern, size_t count)
+event fill(void* ptr, const T& pattern, std::size_t count)
 
 template <typename T>                                                      (2)
-event fill(void* ptr, const T& pattern, size_t count, event depEvent)
+event fill(void* ptr, const T& pattern, std::size_t count, event depEvent)
 
 template <typename T>                                                      (3)
-event fill(void* ptr, const T& pattern, size_t count,
+event fill(void* ptr, const T& pattern, std::size_t count,
            const std::vector<event>& depEvents)
 
 template <typename T, int Dims, access_mode Mode, target Tgt,              (4)
@@ -4494,11 +4517,11 @@ queue.
 .[apidef]#queue::prefetch#
 [source,role=synopsis,id=api:queue-prefetch]
 ----
-event prefetch(void* ptr, size_t numBytes)                                      (1)
+event prefetch(void* ptr, std::size_t numBytes)                                      (1)
 
-event prefetch(void* ptr, size_t numBytes, event depEvent)                      (2)
+event prefetch(void* ptr, std::size_t numBytes, event depEvent)                      (2)
 
-event prefetch(void* ptr, size_t numBytes, const std::vector<event>& depEvents) (3)
+event prefetch(void* ptr, std::size_t numBytes, const std::vector<event>& depEvents) (3)
 ----
 
 _Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
@@ -4520,11 +4543,11 @@ queue.
 .[apidef]#queue::mem_advise#
 [source,role=synopsis,id=api:queue-mem-advise]
 ----
-event mem_advise(void* ptr, size_t numBytes, int advice)                 (1)
+event mem_advise(void* ptr, std::size_t numBytes, int advice)                 (1)
 
-event mem_advise(void* ptr, size_t numBytes, int advice, event depEvent) (2)
+event mem_advise(void* ptr, std::size_t numBytes, int advice, event depEvent) (2)
 
-event mem_advise(void* ptr, size_t numBytes, int advice,                 (3)
+event mem_advise(void* ptr, std::size_t numBytes, int advice,                 (3)
                  const std::vector<event>& depEvents)
 ----
 
@@ -4950,7 +4973,7 @@ a@
 info::event_profiling::command_submit
 ----
 
-    @ [.code]#uint64_t#
+    @ [.code]#std::uint64_t#
    a@ Returns a timestamp telling when the associated <<command-group>> was
       submitted to the [code]#queue#.  This is always some time after the
       <<command-group-function-object>> returns and before the associated call
@@ -4962,7 +4985,7 @@ a@
 info::event_profiling::command_start
 ----
 
-    @ [.code]#uint64_t#
+    @ [.code]#std::uint64_t#
    a@ Querying this profiling descriptor blocks until the event's state becomes
       either [code]#info::event_command_status::running# or
       [code]#info::event_command_status::complete#.  The returned timestamp
@@ -4980,7 +5003,7 @@ a@
 info::event_profiling::command_end
 ----
 
-    @ [.code]#uint64_t#
+    @ [.code]#std::uint64_t#
    a@ Querying this profiling descriptor blocks until the event's state becomes
       [code]#info::event_command_status::complete#.  The returned timestamp
       tells when the action associated with the <<command-group>> (e.g. kernel
@@ -7162,8 +7185,8 @@ For the image accessors ([code]#unsampled_image_accessor#,
 [code]#sampled_image_accessor#, [code]#host_unsampled_image_accessor#, and
 [code]#host_sampled_image_accessor#), [code]#DataT# must be one of:
 
-* [code]#int4# ([code]#vec<int32_t,4>#),
-* [code]#uint4# ([code]#vec<uint32_t,4>#),
+* [code]#int4# ([code]#vec<std::int32_t,4>#),
+* [code]#uint4# ([code]#vec<std::uint32_t,4>#),
 * [code]#float4# ([code]#vec<float,4>#), or
 * [code]#half4# ([code]#vec<half,4>#)
 
@@ -7221,13 +7244,13 @@ access_mode::read_write
 
 ==== Deduction tags
 
-Some accessor constructors take a [code]#TagT# parameter, which is used to
-deduce template arguments for the constructor's class.
+Some accessor constructors take a [code]#DeductionTagT# parameter, which is used
+to deduce template arguments for the constructor's class.
 Each of the access modes in <<table.accessors.accessmode>> has an associated
 tag, but there are additional tags which set other template parameters in
 addition to the access mode.
 The synopsis below shows the namespace scope variables that the implementation
-provides as possible values for the [code]#TagT# parameter.
+provides as possible values for the [code]#DeductionTagT# parameter.
 
 [source,,linenums]
 ----
@@ -7375,7 +7398,7 @@ One, two, or three dimensional specializations of these accessors provide access
 to the elements they contain in two ways.
 The first way is through a subscript operator that takes an instance of an
 [code]#id# class which has the same dimensionality as the accessor.
-The second way is by passing a single [code]#size_t# value to multiple
+The second way is by passing a single [code]#std::size_t# value to multiple
 consecutive subscript operators as specified in <<sec:multi-dim-subscript>>.
 
 In all these cases, the reference to the contained element is of type
@@ -7634,8 +7657,8 @@ accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
-accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+template <typename AllocatorT, typename DeductionTagT>
+accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7662,9 +7685,9 @@ properties for the constructed accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         handler& commandGroupHandlerRef, TagT tag,
+         handler& commandGroupHandlerRef, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7695,9 +7718,9 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         range<Dimensions> accessRange, TagT tag,
+         range<Dimensions> accessRange, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7733,9 +7756,9 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-         range<Dimensions> accessRange, id<Dimensions> accessOffset, TagT tag,
+         range<Dimensions> accessRange, id<Dimensions> accessOffset, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7772,10 +7795,10 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
          handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-         TagT tag, const property_list& propList = {})
+         DeductionTagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -7813,10 +7836,10 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
          handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-         id<Dimensions> accessOffset, TagT tag,
+         id<Dimensions> accessOffset, DeductionTagT tag,
          const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -7880,7 +7903,7 @@ even if this is a <<ranged-accessor>> whose range does not start at the
 beginning of the buffer.  The return value is unspecified if the accessor is
 empty.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 Deprecated in SYCL 2020.  Use [code]#get_multi_ptr# instead.
 
@@ -7895,7 +7918,7 @@ Returns a pointer to the start of this accessor's underlying buffer, even if
 this is a <<ranged-accessor>> whose range does not start at the beginning of
 the buffer.  The return value is unspecified if the accessor is empty.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
@@ -7910,7 +7933,7 @@ even if this is a <<ranged-accessor>> whose range does not start at the
 beginning of the buffer.  The return value is unspecified if the accessor is
 empty.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
@@ -7923,7 +7946,7 @@ const accessor& operator=(const value_type& other) const
 
 Assignment to the single element that is accessed by this accessor.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
@@ -7936,7 +7959,7 @@ const accessor& operator=(value_type&& other) const
 
 Assignment to the single element that is accessed by this accessor.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 |====
 
@@ -7944,8 +7967,8 @@ This function may only be called from within a <<command>>.
 [[sec:accessor.command.buffer.tags]]
 ===== Deduction tags for buffer command accessors
 
-Some [code]#accessor# constructors take a [code]#TagT# parameter, which is used
-to deduce template arguments.
+Some [code]#accessor# constructors take a [code]#DeductionTagT# parameter, which
+is used to deduce template arguments.
 The permissible values for this parameter are listed in
 <<table.accessors.command.buffer.tags>> along with the access mode and accessor
 target that they imply.
@@ -8293,7 +8316,7 @@ constant_ptr<DataT> get_pointer() const noexcept
       at the beginning of the buffer.  The return value is unspecified if the
       accessor is empty.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 |====
 
@@ -8528,7 +8551,7 @@ Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
@@ -8543,12 +8566,12 @@ Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing, at the index specified by [code]#index#.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
 ----
-atomic<DataT, access::address_space::local_space> operator[](size_t index) const
+atomic<DataT, access::address_space::local_space> operator[](std::size_t index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions == 1)#.
@@ -8557,7 +8580,7 @@ Returns an instance of [code]#atomic# of type [code]#DataT# providing atomic
 access to the element stored within the work-group's local memory allocation
 that this accessor is accessing, at the index specified by [code]#index#.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
@@ -8568,7 +8591,7 @@ local_ptr<DataT> get_pointer() const noexcept
       that this accessor is accessing.  The return value is unspecified if the
       accessor is empty.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 |====
 
@@ -8710,7 +8733,7 @@ When [code]#AccessTarget# is [code]#target::local# or
 a@
 [source]
 ----
-__unspecified__ operator[](size_t index) const
+__unspecified__ operator[](std::size_t index) const
 ----
    a@ Available only when [code]#(Dimensions > 1)#.
 
@@ -8718,7 +8741,7 @@ Returns an instance of an undefined intermediate type representing this
 accessor, with the dimensionality [code]#Dimensions-1# and containing an
 implicit [code]#id# with index [code]#Dimensions# set to [code]#index#.  The
 intermediate type returned must provide all available subscript operators which
-take a [code]#size_t# parameter defined by this accessor class that are
+take a [code]#std::size_t# parameter defined by this accessor class that are
 appropriate for the type it represents (including this subscript operator).
 
 If this is a <<ranged-accessor>>, the implicit [code]#id# in the returned
@@ -8731,7 +8754,7 @@ When [code]#AccessTarget# is [code]#target::local# or
 a@
 [source]
 ----
-reference operator[](size_t index) const
+reference operator[](std::size_t index) const
 ----
    a@ When [code]#AccessTarget# is [code]#target::constant_buffer# or
       [code]#target::host_buffer#, available only when
@@ -8797,7 +8820,7 @@ a@
 [source]
 ----
 atomic<DataT, access::address_space::global_space>
-operator[](size_t index) const
+operator[](std::size_t index) const
 ----
    a@ Available only when
       [code]#(AccessMode == access_mode::atomic && Dimensions == 1)#.
@@ -8905,8 +8928,8 @@ constructed accessor.
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
-host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+template <typename AllocatorT, typename DeductionTagT>
+host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -8937,9 +8960,9 @@ Throws an [code]#exception# with the [code]#errc::invalid# error code if
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-              range<Dimensions> accessRange, TagT tag,
+              range<Dimensions> accessRange, DeductionTagT tag,
               const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
@@ -8975,10 +8998,10 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 a@
 [source]
 ----
-template <typename AllocatorT, typename TagT>
+template <typename AllocatorT, typename DeductionTagT>
 host_accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
               range<Dimensions> accessRange, id<Dimensions> accessOffset,
-              TagT tag, const property_list& propList = {})
+              DeductionTagT tag, const property_list& propList = {})
 ----
    a@ Available only when [code]#(Dimensions > 0)#.
 
@@ -9056,8 +9079,8 @@ Assignment to the single element that is accessed by this accessor.
 [[sec:accessor.host.buffer.tags]]
 ===== Deduction tags for buffer host accessors
 
-Some [code]#host_accessor# constructors take a [code]#TagT# parameter, which is
-used to deduce template arguments.
+Some [code]#host_accessor# constructors take a [code]#DeductionTagT# parameter,
+which is used to deduce template arguments.
 The permissible values for this parameter are listed in
 <<table.accessors.host.buffer.tags>> along with the access mode that they imply.
 
@@ -9249,7 +9272,7 @@ local_ptr<value_type> get_pointer() const noexcept
       region which corresponds to the calling work-group. The return value is
       unspecified if the accessor is empty.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 Deprecated in SYCL 2020.  Use [code]#get_multi_ptr# instead.
 
@@ -9275,7 +9298,7 @@ const local_accessor& operator=(const value_type& other) const
 
 Assignment to the single element that is accessed by this accessor.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 a@
 [source]
@@ -9286,7 +9309,7 @@ const local_accessor& operator=(const value_type&& other) const
 
 Assignment to the single element that is accessed by this accessor.
 
-This function may only be called from within a <<command>>.
+_Preconditions_: Must be called within a <<command>>.
 
 |====
 
@@ -9391,7 +9414,7 @@ a@
 ----
 size_type
 ----
-   a@ Equal to [code]#size_t#.
+   a@ Equal to [code]#std::size_t#.
 
 |====
 
@@ -9435,8 +9458,10 @@ a@
 ----
 size_type max_size() const noexcept
 ----
-   a@ Returns the maximum number of elements any accessor of this type would be
-      able to access.
+   a@ Deprecated by SYCL 2020.
+
+Returns the maximum number of elements any accessor of this type would be able
+to access.
 
 a@
 [source]
@@ -9496,7 +9521,7 @@ called from within a <<command>>.
 a@
 [source]
 ----
-__unspecified__ operator[](size_t index) const
+__unspecified__ operator[](std::size_t index) const
 ----
    a@ Available only when [code]#(Dimensions > 1)#.
 
@@ -9504,7 +9529,7 @@ Returns an instance of an undefined intermediate type representing this
 accessor, with the dimensionality [code]#Dimensions-1# and containing an
 implicit [code]#id# with index [code]#Dimensions# set to [code]#index#.  The
 intermediate type returned must provide all available subscript operators which
-take a [code]#size_t# parameter defined by this accessor class that are
+take a [code]#std::size_t# parameter defined by this accessor class that are
 appropriate for the type it represents (including this subscript operator).
 
 If this is a <<ranged-accessor>>, the implicit [code]#id# in the returned
@@ -9516,7 +9541,7 @@ called from within a <<command>>.
 a@
 [source]
 ----
-reference operator[](size_t index) const
+reference operator[](std::size_t index) const
 ----
    a@ For [code]#accessor# available only when
       [code]#(AccessMode != access_mode::atomic && Dimensions == 1)#.
@@ -10517,7 +10542,7 @@ std::add_pointer_t<value_type> get_raw() const
 a@
 [source]
 ----
-void prefetch(size_t numElements) const
+void prefetch(std::size_t numElements) const
 ----
    a@ Available only when: [code]#Space == access::address_space::global_space#.
 
@@ -11203,7 +11228,7 @@ The constructors are listed in <<table.constructors.usm-allocator>>.
 
 [source,,linenums]
 ----
-template <typename T, usm::alloc AllocKind, size_t Alignment = 0>
+template <typename T, usm::alloc AllocKind, std::size_t Alignment = 0>
 class usm_allocator {
 public:
   using value_type = T;
@@ -11231,23 +11256,23 @@ public:
   usm_allocator(usm_allocator<U, AllocKind, Alignment> const&) noexcept;
 
   /// Allocate memory
-  T* allocate(size_t count);
+  T* allocate(std::size_t count);
 
   /// Deallocate memory
-  void deallocate(T* Ptr, size_t count);
+  void deallocate(T* Ptr, std::size_t count);
 
   /// Equality Comparison
   ///
   /// Allocators only compare equal if they are of the same USM kind, alignment,
   /// context, and device
-  template <class U, usm::alloc AllocKindU, size_t AlignmentU>
+  template <class U, usm::alloc AllocKindU, std::size_t AlignmentU>
   friend bool operator==(const usm_allocator<T, AllocKind, Alignment>&,
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
 
   /// Inequality Comparison
   /// Allocators only compare unequal if they are not of the same USM kind, alignment,
   /// context, or device
-  template <class U, usm::alloc AllocKindU, size_t AlignmentU>
+  template <class U, usm::alloc AllocKindU, std::size_t AlignmentU>
   friend bool operator!=(const usm_allocator<T, AllocKind, Alignment>&,
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
 };
@@ -11316,7 +11341,7 @@ memory leak.
 a@
 [source]
 ----
-void* sycl::malloc_device(size_t numBytes, const device& syclDevice,
+void* sycl::malloc_device(std::size_t numBytes, const device& syclDevice,
                           const context& syclContext,
                           const property_list& propList = {})
 ----
@@ -11333,7 +11358,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_device(size_t count, const device& syclDevice,
+T* sycl::malloc_device(std::size_t count, const device& syclDevice,
                        const context& syclContext,
                        const property_list& propList = {})
 ----
@@ -11350,7 +11375,7 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void* sycl::malloc_device(size_t numBytes, const queue& syclQueue,
+void* sycl::malloc_device(std::size_t numBytes, const queue& syclQueue,
                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -11360,7 +11385,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_device(size_t count, const queue& syclQueue,
+T* sycl::malloc_device(std::size_t count, const queue& syclQueue,
                        const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -11369,7 +11394,7 @@ a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 a@
 [source]
 ----
-void* sycl::aligned_alloc_device(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                                  const device& syclDevice,
                                  const context& syclContext,
                                  const property_list& propList = {})
@@ -11388,7 +11413,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc_device(size_t alignment, size_t count,
+T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
                               const device& syclDevice,
                               const context& syclContext,
                               const property_list& propList = {})
@@ -11406,7 +11431,7 @@ the [code]#errc::invalid# error code.
 a@
 [source]
 ----
-void* sycl::aligned_alloc_device(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                                  const queue& syclQueue,
                                  const property_list& propList = {})
 ----
@@ -11417,7 +11442,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc_device(size_t alignment, size_t count,
+T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
                               const queue& syclQueue,
                               const property_list& propList = {})
 ----
@@ -11451,7 +11476,7 @@ memory leak.
 a@
 [source]
 ----
-void* sycl::malloc_host(size_t numBytes, const context& syclContext,
+void* sycl::malloc_host(std::size_t numBytes, const context& syclContext,
                         const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
@@ -11463,7 +11488,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_host(size_t count, const context& syclContext,
+T* sycl::malloc_host(std::size_t count, const context& syclContext,
                      const property_list& propList = {})
 ----
 a@ Returns a pointer to the newly allocated memory.  This allocation is
@@ -11474,7 +11499,7 @@ device in [code]#syclContext# has [code]#aspect::usm_host_allocations#.
 a@
 [source]
 ----
-void* sycl::malloc_host(size_t numBytes, const queue& syclQueue,
+void* sycl::malloc_host(std::size_t numBytes, const queue& syclQueue,
                         const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
@@ -11483,7 +11508,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_host(size_t count, const queue& syclQueue,
+T* sycl::malloc_host(std::size_t count, const queue& syclQueue,
                      const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
@@ -11491,7 +11516,7 @@ a@ Simplified form where [code]#syclQueue# provides the [code]#context#.
 a@
 [source]
 ----
-void* sycl::aligned_alloc_host(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                                const context& syclContext,
                                const property_list& propList = {})
 ----
@@ -11505,7 +11530,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc_host(size_t alignment, size_t count,
+T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
                             const context& syclContext,
                             const property_list& propList = {})
 ----
@@ -11518,7 +11543,7 @@ specified in elements of type [code]#T# and aligned according to
 a@
 [source]
 ----
-void* sycl::aligned_alloc_host(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                                const queue& syclQueue,
                                const property_list& propList = {})
 ----
@@ -11528,7 +11553,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc_host(size_t alignment, size_t count,
+T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
                                const queue& syclQueue,
                                const property_list& propList = {})
 ----
@@ -11561,7 +11586,7 @@ memory leak.
 a@
 [source]
 ----
-void* sycl::malloc_shared(size_t numBytes, const device& syclDevice,
+void* sycl::malloc_shared(std::size_t numBytes, const device& syclDevice,
                           const context& syclContext,
                           const property_list& propList = {})
 ----
@@ -11578,7 +11603,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_shared(size_t count, const device& syclDevice,
+T* sycl::malloc_shared(std::size_t count, const device& syclDevice,
                        const context& syclContext,
                        const property_list& propList = {})
 ----
@@ -11595,7 +11620,7 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void* sycl::malloc_shared(size_t numBytes, const queue& syclQueue,
+void* sycl::malloc_shared(std::size_t numBytes, const queue& syclQueue,
                           const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -11605,7 +11630,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc_shared(size_t count, const queue& syclQueue,
+T* sycl::malloc_shared(std::size_t count, const queue& syclQueue,
                        const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
@@ -11614,7 +11639,7 @@ a@ Simplified form where [code]#syclQueue# provides the [code]#device# and
 a@
 [source]
 ----
-void* sycl::aligned_alloc_shared(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                                  const device& syclDevice,
                                  const context& syclContext,
                                  const property_list& propList = {})
@@ -11633,7 +11658,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc_shared(size_t alignment, size_t count,
+T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
                               const device& syclDevice,
                               const context& syclContext,
                               const property_list& propList = {})
@@ -11651,7 +11676,7 @@ synchronous [code]#exception# with the [code]#errc::invalid# error code.
 a@
 [source]
 ----
-void* sycl::aligned_alloc_shared(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                                  const queue& syclQueue,
                                  const property_list& propList = {})
 ----
@@ -11662,7 +11687,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc_shared(size_t alignment, size_t count,
+T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
                               const queue& syclQueue,
                               const property_list& propList = {})
 ----
@@ -11706,7 +11731,7 @@ memory leak.
 a@
 [source]
 ----
-void* sycl::malloc(size_t numBytes, const device& syclDevice,
+void* sycl::malloc(std::size_t numBytes, const device& syclDevice,
                    const context& syclContext, usm::alloc kind,
                    const property_list& propList = {})
 ----
@@ -11722,7 +11747,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc(size_t count, const device& syclDevice,
+T* sycl::malloc(std::size_t count, const device& syclDevice,
                 const context& syclContext, usm::alloc kind,
                 const property_list& propList = {})
 ----
@@ -11738,7 +11763,7 @@ otherwise this function throws a synchronous [code]#exception# with the
 a@
 [source]
 ----
-void* sycl::malloc(size_t numBytes, const queue& syclQueue, usm::alloc kind,
+void* sycl::malloc(std::size_t numBytes, const queue& syclQueue, usm::alloc kind,
                    const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
@@ -11748,7 +11773,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::malloc(size_t count, const queue& syclQueue, usm::alloc kind,
+T* sycl::malloc(std::size_t count, const queue& syclQueue, usm::alloc kind,
                 const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
@@ -11757,7 +11782,7 @@ necessary [code]#device#.
 a@
 [source]
 ----
-void* sycl::aligned_alloc(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc(std::size_t alignment, std::size_t numBytes,
                           const device& syclDevice, const context& syclContext,
                           usm::alloc kind, const property_list& propList = {})
 ----
@@ -11774,7 +11799,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc(size_t alignment, size_t count, const device& syclDevice,
+T* sycl::aligned_alloc(std::size_t alignment, std::size_t count, const device& syclDevice,
                        const context& syclContext, usm::alloc kind,
                        const property_list& propList = {})
 ----
@@ -11790,7 +11815,7 @@ is contained by that context, otherwise this function throws a synchronous
 a@
 [source]
 ----
-void* sycl::aligned_alloc(size_t alignment, size_t numBytes,
+void* sycl::aligned_alloc(std::size_t alignment, std::size_t numBytes,
                           const queue& syclQueue, usm::alloc kind,
                           const property_list& propList = {})
 ----
@@ -11801,7 +11826,7 @@ a@
 [source]
 ----
 template <typename T>
-T* sycl::aligned_alloc(size_t alignment, size_t count, const queue& syclQueue,
+T* sycl::aligned_alloc(std::size_t alignment, std::size_t count, const queue& syclQueue,
                        usm::alloc kind, const property_list& propList = {})
 ----
 a@ Simplified form where [code]#syclQueue# provides the [code]#context# and any
@@ -11836,6 +11861,10 @@ _Effects_: Causes the memory pointed to by [code]#ptr# to be deallocated.
 {note}Whether [code]#free# is blocking or non-blocking is unspecified.
 Applications should not rely on [code]#free# for synchronization, nor assume
 that [code]#free# cannot cause deadlocks.{endnote}
+
+_Synchronization_: A call to [code]#free# that deallocates a region of memory
+synchronizes with any allocation call that allocates all or part of the same
+region of memory.
 
 _Remarks_: If [code]#ptr# is null, this function has no effect.
 
@@ -12019,7 +12048,7 @@ range()
 a@
 [source]
 ----
-range(size_t dim0)
+range(std::size_t dim0)
 ----
    a@ Construct a 1D range with value dim0.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12028,7 +12057,7 @@ range(size_t dim0)
 a@
 [source]
 ----
-range(size_t dim0, size_t dim1)
+range(std::size_t dim0, std::size_t dim1)
 ----
    a@ Construct a 2D range with values dim0 and dim1.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12037,7 +12066,7 @@ range(size_t dim0, size_t dim1)
 a@
 [source]
 ----
-range(size_t dim0, size_t dim1, size_t dim2)
+range(std::size_t dim0, std::size_t dim1, std::size_t dim2)
 ----
    a@ Construct a 3D range with values dim0, dim1 and dim2.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12059,6 +12088,8 @@ size_t get(int dimension) const
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12067,6 +12098,8 @@ size_t& operator[](int dimension)
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12075,6 +12108,8 @@ size_t operator[](int dimension) const
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12110,12 +12145,12 @@ where each element of the new SYCL [code]#range# instance is the
 result of an element-wise [code]#OP# operator between each element of
 [code]#lhs# [code]#range# and each element of the [code]#rhs#
 [code]#range#. If the operator returns a [code]#bool#, the result
-is the cast to [code]#size_t#.
+is the cast to [code]#std::size_t#.
 
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const size_t& rhs)
+range operatorOP(const range& lhs, const std::size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12128,9 +12163,9 @@ Constructs and returns a new instance of the SYCL [code]#range# class
 template with the same dimensionality as [code]#lhs# [code]#range#,
 where each element of the new SYCL [code]#range# instance is the result
 of an element-wise [code]#OP# operator between each element of this
-SYCL [code]#range# and the [code]#rhs# [code]#size_t#. If
+SYCL [code]#range# and the [code]#rhs# [code]#std::size_t#. If
 the operator returns a [code]#bool#, the result is the cast to
-[code]#size_t#.
+[code]#std::size_t#.
 
 a@
 [source]
@@ -12143,25 +12178,25 @@ Assigns each element of [code]#lhs# [code]#range# instance with the
 result of an element-wise [code]#OP# operator between each element
 of [code]#lhs# [code]#range# and each element of the [code]#rhs#
 [code]#range# and returns [code]#lhs# [code]#range#. If the operator returns a [code]#bool#, the result is the cast
-to [code]#size_t#.
+to [code]#std::size_t#.
 
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const size_t& rhs)
+range& operatorOP(range& lhs, const std::size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
 Assigns each element of [code]#lhs# [code]#range# instance with the
 result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#range# and the [code]#rhs# [code]#size_t# and returns [code]#lhs# [code]#range#. If the
+of [code]#lhs# [code]#range# and the [code]#rhs# [code]#std::size_t# and returns [code]#lhs# [code]#range#. If the
 operator returns a [code]#bool#, the result is the cast to
-[code]#size_t#.
+[code]#std::size_t#.
 
 a@
 [source]
 ----
-range operatorOP(const size_t& lhs, const range& rhs)
+range operatorOP(const std::size_t& lhs, const range& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12174,9 +12209,9 @@ Constructs and returns a new instance of the SYCL [code]#range# class
 template with the same dimensionality as the [code]#rhs# SYCL
 [code]#range#, where each element of the new SYCL [code]#range#
 instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# [code]#size_t# and each element of the
+the [code]#lhs# [code]#std::size_t# and each element of the
 [code]#rhs# SYCL [code]#range#. If the operator returns a
-[code]#bool#, the result is the cast to [code]#size_t#.
+[code]#bool#, the result is the cast to [code]#std::size_t#.
 
 a@
 [source]
@@ -12316,7 +12351,7 @@ id<Dimensions> get_offset() const
 an <<id>> into a global or local [code]#range#.
 It can be used as an index in an accessor of the same rank.
 The subscript operator ([code]#operator[](n)#) returns the component [code]#n#
-as a [code]#size_t#.
+as a [code]#std::size_t#.
 
 The SYCL [code]#id# class template provides the common by-value semantics (see
 <<sec:byval-semantics>>).
@@ -12350,7 +12385,7 @@ id()
 a@
 [source]
 ----
-id(size_t dim0)
+id(std::size_t dim0)
 ----
    a@ Construct a 1D [code]#id# with value dim0.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12359,7 +12394,7 @@ id(size_t dim0)
 a@
 [source]
 ----
-id(size_t dim0, size_t dim1)
+id(std::size_t dim0, std::size_t dim1)
 ----
    a@ Construct a 2D [code]#id# with values dim0, dim1.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12368,7 +12403,7 @@ id(size_t dim0, size_t dim1)
 a@
 [source]
 ----
-id(size_t dim0, size_t dim1, size_t dim2)
+id(std::size_t dim0, std::size_t dim1, std::size_t dim2)
 ----
    a@ Construct a 3D [code]#id# with values dim0, dim1, dim2.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12402,8 +12437,9 @@ a@
 ----
 size_t get(int dimension) const
 ----
-   a@ Return the value of the [code]#id# for dimension
-      [code]#Dimension#.
+   a@ Return the value of the requested dimension of this [code]#id# object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12412,6 +12448,8 @@ size_t& operator[](int dimension)
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12420,11 +12458,13 @@ size_t operator[](int dimension) const
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
 ----
-operator size_t() const
+operator std::size_t() const
 ----
    a@ Available only when: [code]#Dimensions == 1#
 
@@ -12451,12 +12491,12 @@ each element of the new SYCL [code]#id# instance is the result of an
 element-wise [code]#OP# operator between each element of [code]#lhs#
 [code]#id# and each element of the [code]#rhs# [code]#id#.
 If the operator returns a [code]#bool# the result is the cast to
-[code]#size_t#.
+[code]#std::size_t#.
 
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const size_t& rhs)
+id operatorOP(const id& lhs, const std::size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12465,9 +12505,9 @@ Constructs and returns a new instance of the SYCL [code]#id# class
 template with the same dimensionality as [code]#lhs# [code]#id#, where
 each element of the new SYCL [code]#id# instance is the result of an
 element-wise [code]#OP# operator between each element of [code]#lhs#
-[code]#id# and the [code]#rhs# [code]#size_t#. If the
+[code]#id# and the [code]#rhs# [code]#std::size_t#. If the
 operator returns a [code]#bool# the result is the cast to
-[code]#size_t#.
+[code]#std::size_t#.
 
 a@
 [source]
@@ -12482,26 +12522,26 @@ result of an element-wise [code]#OP# operator between each element
 of [code]#lhs# [code]#id# and each element of the [code]#rhs#
 [code]#id# and returns [code]#lhs# [code]#id#. If
 the operator returns a [code]#bool# the result is the cast to
-[code]#size_t#.
+[code]#std::size_t#.
 
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const size_t& rhs)
+id& operatorOP(id& lhs, const std::size_t& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
 Assigns each element of [code]#lhs# [code]#id# instance with the
 result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#id# and the [code]#rhs# [code]#size_t#
+of [code]#lhs# [code]#id# and the [code]#rhs# [code]#std::size_t#
 and returns [code]#lhs# [code]#id#. If the operator
-returns a [code]#bool# the result is the cast to [code]#size_t#.
+returns a [code]#bool# the result is the cast to [code]#std::size_t#.
 
 a@
 [source]
 ----
-id operatorOP(const size_t& lhs, const id& rhs)
+id operatorOP(const std::size_t& lhs, const id& rhs)
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12510,9 +12550,9 @@ Constructs and returns a new instance of the SYCL [code]#id# class
 template with the same dimensionality as the [code]#rhs# SYCL
 [code]#id#, where each element of the new SYCL [code]#id#
 instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# [code]#size_t# and each element of the
+the [code]#lhs# [code]#std::size_t# and each element of the
 [code]#rhs# SYCL [code]#id#. If the operator returns a
-[code]#bool# the result is the cast to [code]#size_t#.
+[code]#bool# the result is the cast to [code]#std::size_t#.
 
 a@
 [source]
@@ -12604,14 +12644,14 @@ a@
 ----
 size_t get_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_id()[dimension]#.
+   a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
 size_t operator[](int dimension) const
 ----
-   a@ Return the same value as [code]#get_id(dimension)#.
+   a@ Equivalent to [code]#return get_id(dimension)#.
 
 a@
 [source]
@@ -12626,7 +12666,7 @@ a@
 ----
 size_t get_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_range().get(dimension)#.
 
 a@
 [source]
@@ -12660,7 +12700,7 @@ write code that assumes an offset and still provides an offset-less [code]#item#
 a@
 [source]
 ----
-operator size_t() const
+operator std::size_t() const
 ----
    a@ Available only when: [code]#Dimensions == 1#
 
@@ -12730,6 +12770,8 @@ size_t get_global_id(int dimension) const
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
       in the given [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12757,6 +12799,8 @@ size_t get_local_id(int dimension) const
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
       [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12791,6 +12835,8 @@ size_t get_group(int dimension) const
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
       given [code]#Dimension#.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12814,6 +12860,8 @@ size_t get_group_range(int dimension) const
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
+      Results in undefined behavior if [code]#dimension# is not in the range
+      [code]#[0, Dimensions)#.
 
 a@
 [source]
@@ -12828,7 +12876,7 @@ a@
 ----
 size_t get_global_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
 a@
 [source]
@@ -12843,7 +12891,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_range().get(dimension)#.
+   a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
 a@
 [source]
@@ -12869,7 +12917,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12882,7 +12930,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12895,7 +12943,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   size_t numElements, size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12908,7 +12956,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   size_t numElements, size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const
 ----
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12921,7 +12969,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -12938,7 +12986,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -12955,7 +13003,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   size_t numElements, size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -12972,7 +13020,7 @@ a@
 template <typename DestDataT, SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   size_t numElements, size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const
 ----
     a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13079,112 +13127,112 @@ a@
 ----
 range<Dimensions> get_global_range() const
 ----
-   a@ Return the same value as [code]#get_global().get_range()#
+   a@ Equivalent to [code]#return get_global().get_range()#
 
 a@
 [source]
 ----
 size_t get_global_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global().get_range(dimension)#
+   a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_global_id() const
 ----
-   a@ Return the same value as [code]#get_global().get_id()#
+   a@ Equivalent to [code]#return get_global().get_id()#
 
 a@
 [source]
 ----
 size_t get_global_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_global().get_id(dimension)#
+   a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_local_range() const
 ----
-   a@ Return the same value as [code]#get_local().get_range()#
+   a@ Equivalent to [code]#return get_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_local_id() const
 ----
-   a@ Return the same value as [code]#get_local().get_id()#
+   a@ Equivalent to [code]#return get_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_logical_local_range() const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_range()#
+   a@ Equivalent to [code]#return get_logical_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_logical_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_logical_local_id() const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_id()#
+   a@ Equivalent to [code]#return get_logical_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_logical_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_logical_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
 a@
 [source]
 ----
 range<Dimensions> get_physical_local_range() const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_range()#
+   a@ Equivalent to [code]#return get_physical_local().get_range()#
 
 a@
 [source]
 ----
 size_t get_physical_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_range(dimension)#
+   a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
 a@
 [source]
 ----
 id<Dimensions> get_physical_local_id() const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_id()#
+   a@ Equivalent to [code]#return get_physical_local().get_id()#
 
 a@
 [source]
 ----
 size_t get_physical_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_physical_local().get_id(dimension)#
+   a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
 |====
 
@@ -13241,7 +13289,7 @@ a@
 ----
 size_t get_group_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_id()[dimension]#.
+   a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
 a@
 [source]
@@ -13259,7 +13307,7 @@ a@
 ----
 size_t get_local_id(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_id()[dimension]#.
+   a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
 It is undefined behavior for this member function to be invoked from within
 a [code]#parallel_for_work_item# context.
@@ -13277,7 +13325,7 @@ a@
 ----
 size_t get_local_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_local_range()[dimension]#.
+   a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
 a@
 [source]
@@ -13291,14 +13339,14 @@ a@
 ----
 size_t get_group_range(int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_range()[dimension]#.
+   a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
 size_t operator[](int dimension) const
 ----
-   a@ Return the same value as [code]#get_group_id(dimension)#.
+   a@ Equivalent to [code]#return get_group_id(dimension)#.
 
 a@
 [source]
@@ -13414,7 +13462,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13427,7 +13475,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13440,7 +13488,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   size_t numElements, size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13453,7 +13501,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   size_t numElements, size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const
 ----
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13466,7 +13514,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   size_t numElements) const
+                                   std::size_t numElements) const
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13483,7 +13531,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   size_t numElements, size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13500,7 +13548,7 @@ a@
 template <typename DestDataT, SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   size_t numElements, size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const
 ----
     a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13606,28 +13654,28 @@ a@
 ----
 uint32_t get_group_linear_id() const
 ----
-   a@ Return the same value as [code]#get_group_id()[0]#.
+   a@ Equivalent to [code]#return get_group_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_group_linear_range() const
 ----
-   a@ Return the same value as [code]#get_group_range()[0]#.
+   a@ Equivalent to [code]#return get_group_range()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_id() const
 ----
-   a@ Return the same value as [code]#get_local_id()[0]#.
+   a@ Equivalent to [code]#return get_local_id()[0]#.
 
 a@
 [source]
 ----
 uint32_t get_local_linear_range() const
 ----
-   a@ Return the same value as [code]#get_local_range()[0]#.
+   a@ Equivalent to [code]#return get_local_range()[0]#.
 
 a@
 [source]
@@ -13697,6 +13745,9 @@ include::{header_dir}/identity.h[lines=4..-1]
 
 For each of the partial specializations listed in <<table.identities>>,
 [code]#known_identity# exists and has the value shown.
+
+A SYCL program may define additional specializations of [code]#known_identity#
+and [code]#has_known_identity# only for program-defined types.
 
 [[table.identities]]
 .Known identities.
@@ -14164,7 +14215,7 @@ reducer& combine(const T& partial)
 a@
 [source]
 ----
-__unspecified__ operator[](size_t index)
+__unspecified__ operator[](std::size_t index)
 ----
    a@ Available only when: [code]#Dimensions > 0#.
       Returns an instance of an undefined intermediate type representing
@@ -14473,7 +14524,7 @@ void parallel_for(range<Dimensions> numWorkItems, Rest&&... rest)
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified range and given an item or integral type (e.g [code]#int#,
-      [code]#size_t)#, if range is 1-dimensional, for indexing in the indexing
+      [code]#std::size_t)#, if range is 1-dimensional, for indexing in the indexing
       space defined by range. Generic kernel functions are permitted,
       in that case the argument type is an [code]#item#.
       Specification of a <<kernel-name>> ([code]#typename KernelName#), as
@@ -14500,7 +14551,7 @@ void parallel_for(range<Dimensions> numWorkItems, id<Dimensions> workItemOffset,
       Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type,
       for the specified range and offset and given an item or integral type
-      (e.g [code]#int#, [code]#size_t)#, if range is 1-dimensional,
+      (e.g [code]#int#, [code]#std::size_t)#, if range is 1-dimensional,
       for indexing in the indexing space defined by range. Generic kernel functions
       are permitted, in that case the argument type is an [code]#item#.
       Specification of a <<kernel-name>> ([code]#typename KernelName#), as
@@ -14720,7 +14771,7 @@ specified by the [code]#range# parameter.
 Case 3) above allows the kernel function to take an argument of type [code]#id#
 because [code]#item# is implicitly convertible to [code]#id#.
 It also allows a 1-D kernel function to take an integral argument (e.g.
-[code]#int# or [code]#size_t#) because a 1-D [code]#item# is implicitly
+[code]#int# or [code]#std::size_t#) because a 1-D [code]#item# is implicitly
 convertible to these types.
 Finally, it allows the kernel function to take a user-defined argument type that
 can be constructed from [code]#item#, enabling users to layer their own
@@ -15180,7 +15231,7 @@ memory object accessed by [code]#dest#.
 a@
 [source]
 ----
-void memcpy(void* dest, const void* src, size_t numBytes)
+void memcpy(void* dest, const void* src, std::size_t numBytes)
 ----
 a@ Copies [code]#numBytes# of data from the pointer [code]#src# to the pointer
 [code]#dest#.  The [code]#dest# and [code]#src# parameters must each either be
@@ -15192,7 +15243,7 @@ detail on USM, please see <<sec:usm>>.
 a@
 [source]
 ----
-template <typename T> void copy(const T* src, T* dest, size_t count)
+template <typename T> void copy(const T* src, T* dest, std::size_t count)
 ----
 a@ Copies [code]#count# elements of type [code]#T# from the pointer [code]#src#
 to the pointer [code]#dest#.  The [code]#dest# and [code]#src# parameters must
@@ -15206,7 +15257,7 @@ The type [code]#T# must be <<device-copyable>>.
 a@
 [source]
 ----
-void memset(void* ptr, int value, size_t numBytes)
+void memset(void* ptr, int value, std::size_t numBytes)
 ----
 a@ Fills [code]#numBytes# bytes of memory beginning at address [code]#ptr#
 with [code]#value#.  The [code]#ptr# must point within a USM allocation from
@@ -15217,7 +15268,7 @@ from the queue's device.  Note that [code]#value# is interpreted as an
 a@
 [source]
 ----
-template <typename T> void fill(void* ptr, const T& pattern, size_t count)
+template <typename T> void fill(void* ptr, const T& pattern, std::size_t count)
 ----
 a@ Replicates the provided [code]#pattern# into the memory at address
 [code]#ptr#.  The [code]#ptr# must point within a USM allocation from the same
@@ -15230,7 +15281,7 @@ The type [code]#T# must be <<device-copyable>>.
 a@
 [source]
 ----
-void prefetch(void* ptr, size_t numBytes)
+void prefetch(void* ptr, std::size_t numBytes)
 ----
 a@ Enqueues a prefetch of [code]#num_bytes# of data starting at address
 [code]#ptr#.  The [code]#ptr# must point within a USM allocation from the same
@@ -15240,7 +15291,7 @@ queue's device.  For more detail on USM, please see <<sec:usm>>.
 a@
 [source]
 ----
-void mem_advise(void* ptr, size_t numBytes, int advice)
+void mem_advise(void* ptr, std::size_t numBytes, int advice)
 ----
 a@ Enqueues a command that provides information to the implementation about a
 region of USM starting at [code]#ptr# and extending for [code]#numBytes# bytes.
@@ -16976,7 +17027,7 @@ a@
 info::kernel::num_args
 ----
 
-    @ [code]#uint32_t#
+    @ [code]#std::uint32_t#
    a@ This descriptor may only be used to query a kernel that resides in a
       kernel bundle that was constructed using a backend specific
       interoperability function or to query a device built-in kernel, and the
@@ -17033,7 +17084,7 @@ a@
 info::kernel_device_specific::work_group_size
 ----
 
-    @ [code]#size_t#
+    @ [code]#std::size_t#
    a@ Returns the maximum number of work-items in a work-group that can be used
       to execute this kernel on the given device.
       This value will always be less than or equal to the value returned from
@@ -17055,7 +17106,7 @@ a@
 info::kernel_device_specific::preferred_work_group_size_multiple
 ----
 
-    @ [code]#size_t#
+    @ [code]#std::size_t#
    a@ Returns a value, of which work-group size is preferred to be a multiple,
       for executing a kernel on a particular device.  This is a performance
       hint.  The value must be less than or equal to that returned by
@@ -17067,7 +17118,7 @@ a@
 info::kernel_device_specific::private_mem_size
 ----
 
-    @ [code]#size_t#
+    @ [code]#std::size_t#
    a@ Returns the minimum amount of private memory, in bytes, used by each work-item
       in the kernel.  This value may include any private memory needed by an
       implementation to execute the kernel, including that used by the language
@@ -17080,8 +17131,12 @@ a@
 info::kernel_device_specific::max_num_sub_groups
 ----
 
-    @ [code]#uint32_t#
-   a@ Returns the maximum number of sub-groups for this kernel.
+    @ [code]#std::uint32_t#
+   a@ Returns the maximum number of sub-groups per work-group for this kernel.
+      The minimum number is 1.
+
+{note}Choosing a work-group size that contains the maximum number of sub-groups
+may improve the performance of some devices and implementations.{endnote}
 
 a@
 [source]
@@ -17089,7 +17144,7 @@ a@
 info::kernel_device_specific::compile_num_sub_groups
 ----
 
-    @ [code]#uint32_t#
+    @ [code]#std::uint32_t#
    a@ Returns the number of sub-groups specified by the kernel, or 0 (if not specified).
 
 a@
@@ -17098,7 +17153,7 @@ a@
 info::kernel_device_specific::max_sub_group_size
 ----
 
-    @ [code]#uint32_t#
+    @ [code]#std::uint32_t#
    a@ Returns the maximum sub-group size for this kernel.
 
 a@
@@ -17107,7 +17162,7 @@ a@
 info::kernel_device_specific::compile_sub_group_size
 ----
 
-    @ [code]#uint32_t#
+    @ [code]#std::uint32_t#
    a@ Returns the required sub-group size specified by the kernel, or 0 (if not specified).
 
 |====
@@ -17876,6 +17931,7 @@ Note these types are fundamental and therefore do not exist within the
 
 Additional scalar data types which are supported by SYCL within the [code]#sycl#
 namespace are described in <<table.types.additional>>.
+These data types are available on the host and in device code.
 
 
 [[table.types.additional]]
@@ -18045,7 +18101,7 @@ Returns the value of the vector's element converted to [code]#T#.
 a@
 [source]
 ----
-static constexpr size_t size() noexcept
+static constexpr std::size_t size() noexcept
 ----
    a@ Returns the number of elements of this SYCL [code]#vec#.
 a@
@@ -18057,7 +18113,7 @@ size_t get_count() const
 a@
 [source]
 ----
-static constexpr size_t byte_size() noexcept
+static constexpr std::size_t byte_size() noexcept
 ----
    a@ Returns the size of this SYCL [code]#vec# in bytes.
 
@@ -18261,10 +18317,10 @@ a@
 template <access::address_space AddressSpace,
           access::decorated IsDecorated>
 void load(
-  size_t offset,
+  std::size_t offset,
   multi_ptr<const DataT, AddressSpace, IsDecorated> ptr)
 
-void load(size_t offset, const DataT* ptr)
+void load(std::size_t offset, const DataT* ptr)
 ----
    a@ Loads [code]#NumElements# elements into the components of this SYCL [code]#vec#. These elements are loaded from consecutive addresses, where the starting address is computed by adding [code]#offset * NumElements * sizeof(DataT)# bytes to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
@@ -18274,10 +18330,10 @@ a@
 template <access::address_space AddressSpace,
           access::decorated IsDecorated>
 void store(
-  size_t offset,
+  std::size_t offset,
   multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 
-void store(size_t offset, DataT* ptr) const
+void store(std::size_t offset, DataT* ptr) const
 ----
    a@ Stores [code]#NumElements# components of this SYCL [code]#vec# into consecutive addresses, with the starting address determined by adding [code]#offset * NumElements * sizeof(DataT)# to the address specified by the [code]#ptr#. The [code]#ptr# must be aligned to [code]#alignof(DataT)#.
 
@@ -18599,10 +18655,10 @@ Construct a new instance of the SYCL [code]#vec# class template with the same te
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18623,10 +18679,10 @@ Construct a new instance of the SYCL [code]#vec# class template with the same te
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18650,10 +18706,10 @@ an element-wise [code]#OP# logical operation between the [code]#lhs# scalar and 
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18668,10 +18724,10 @@ vec<RET, NumElements> operatorOP(const vec& lhs, const vec& rhs)
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18689,10 +18745,10 @@ Construct a new instance of the SYCL [code]#vec# class template with the [code]#
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18721,10 +18777,10 @@ operation results in [code]#true# if either the [code]#lhs# or the
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18750,10 +18806,10 @@ Construct a new instance of the SYCL [code]#vec# class template with the same te
 
 The element type of the returned [code]#vec#, [code]#RET#, varies depending on
 the size of the [code]#DataT# template parameter of the input [code]#vec#.
-If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#int8_t#.
-If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#int16_t#.
-If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#int32_t#.
-If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#int64_t#.
+If [code]#sizeof(DataT)# is 1, [code]#RET# is [code]#std::int8_t#.
+If [code]#sizeof(DataT)# is 2, [code]#RET# is [code]#std::int16_t#.
+If [code]#sizeof(DataT)# is 4, [code]#RET# is [code]#std::int32_t#.
+If [code]#sizeof(DataT)# is 8, [code]#RET# is [code]#std::int64_t#.
 If [code]#sizeof(DataT)# is any other value, [code]#RET# is an implementation
 defined integer type.
 
@@ -18768,14 +18824,14 @@ The SYCL programming API provides all permutations of the type alias:
 
 where [code]#<elems># is [code]#2#, [code]#3#, [code]#4#, [code]#8# and
 [code]#16#, and pairings of [code]#<type># and [code]#<storage-type># for
-integral types are [code]#char# and [code]#int8_t#, [code]#uchar# and
-[code]#uint8_t#, [code]#short# and [code]#int16_t#, [code]#ushort# and
-[code]#uint16_t#, [code]#int# and [code]#int32_t#, [code]#uint# and
-[code]#uint32_t#, [code]#long# and [code]#int64_t#, [code]#ulong# and
-[code]#uint64_t#, and for floating point types are both [code]#half#,
+integral types are [code]#char# and [code]#std::int8_t#, [code]#uchar# and
+[code]#std::uint8_t#, [code]#short# and [code]#std::int16_t#, [code]#ushort# and
+[code]#std::uint16_t#, [code]#int# and [code]#std::int32_t#, [code]#uint# and
+[code]#std::uint32_t#, [code]#long# and [code]#std::int64_t#, [code]#ulong# and
+[code]#std::uint64_t#, and for floating point types are both [code]#half#,
 [code]#float# and [code]#double#.
 
-For example [code]#uint4# is the alias to [code]#vec<uint32_t, 4># and
+For example [code]#uint4# is the alias to [code]#vec<std::uint32_t, 4># and
 [code]#float16# is the alias to [code]#vec<float, 16>#.
 
 ==== Swizzles
@@ -18948,8 +19004,8 @@ operator DataT() const
 template<typename T>
 explicit operator T() const
 
-static constexpr size_t byte_size() noexcept
-static constexpr size_t size() noexcept
+static constexpr std::size_t byte_size() noexcept
+static constexpr std::size_t size() noexcept
 
 size_t get_size() const   // Deprecated
 size_t get_count() const  // Deprecated
@@ -18961,7 +19017,7 @@ vec<ConvertT, NumElements> convert() const
 template <typename asT> asT as() const
 
 template <access::address_space AddressSpace, access::decorated IsDecorated>
-void store(size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
+void store(std::size_t offset, multi_ptr<DataT, AddressSpace, IsDecorated> ptr) const
 ----
 |====
 _Availability:_ These functions are available in both
@@ -19076,7 +19132,7 @@ a@
 [source]
 ----
 template <access::address_space AddressSpace, access::decorated IsDecorated>
-void load(size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) const
+void load(std::size_t offset, multi_ptr<const DataT, AddressSpace, IsDecorated> ptr) const
 ----
 |====
 _Availability:_ Available only in [code]#+__writeable_swizzle__+#.
@@ -20178,14 +20234,14 @@ The SYCL programming API provides all permutations of the type alias:
 
 where [code]#<elems># is [code]#2#, [code]#3#, [code]#4#, [code]#8# and
 [code]#16#, and pairings of [code]#<type># and [code]#<storage-type># for
-integral types are [code]#char# and [code]#int8_t#, [code]#uchar# and
-[code]#uint8_t#, [code]#short# and [code]#int16_t#, [code]#ushort# and
-[code]#uint16_t#, [code]#int# and [code]#int32_t#, [code]#uint# and
-[code]#uint32_t#, [code]#long# and [code]#int64_t#, [code]#ulong# and
-[code]#uint64_t#, for floating point types are both [code]#half#, [code]#float#
-and [code]#double#, and for boolean type [code]#bool#.
+integral types are [code]#char# and [code]#std::int8_t#, [code]#uchar# and
+[code]#std::uint8_t#, [code]#short# and [code]#std::int16_t#, [code]#ushort# and
+[code]#std::uint16_t#, [code]#int# and [code]#std::int32_t#, [code]#uint# and
+[code]#std::uint32_t#, [code]#long# and [code]#std::int64_t#, [code]#ulong# and
+[code]#std::uint64_t#, for floating point types are both [code]#half#,
+[code]#float# and [code]#double#, and for boolean type [code]#bool#.
 
-For example [code]#muint4# is the alias to [code]#marray<uint32_t, 4># and
+For example [code]#muint4# is the alias to [code]#marray<std::uint32_t, 4># and
 [code]#mfloat16# is the alias to [code]#marray<float, 16>#.
 
 
@@ -21525,7 +21581,7 @@ defaultfloat
 a@
 [source]
 ----
-stream(size_t totalBufferSize, size_t workItemBufferSize, handler& cgh,
+stream(std::size_t totalBufferSize, std::size_t workItemBufferSize, handler& cgh,
        const property_list& propList = {})
 ----
    a@ Constructs a SYCL [code]#stream# instance associated with the command group
@@ -21659,6 +21715,12 @@ and device.
 All function objects obey {cpp} conversion and promotion rules.
 Each function object is additionally specialized for [code]#void# as a
 _transparent_ function object that deduces its parameter types and return type.
+
+{note}Using these function objects with program-defined types requires those
+types to define the associated operator (e.g., [code]#plus# requires
+[code]#pass:[operator+]#).
+For [code]#minimum# and [code]#maximum#, it is recommended to define all
+comparison operators.{endnote}
 
 [source,,linenums]
 ----
@@ -23924,8 +23986,8 @@ _Constraints:_ Available only if all of the following conditions are met:
    [code]#marray# of [code]#int# with the same number of elements as
    [code]#NonScalar#; or
 ** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type): A
-   {cpp} cv-unqualified pointer to [code]#vec# of [code]#int32_t# with the same
-   number of elements as [code]#NonScalar#; or
+   {cpp} cv-unqualified pointer to [code]#vec# of [code]#std::int32_t# with the
+   same number of elements as [code]#NonScalar#; or
 ** (If [code]#NonScalar# is [code]#marray#): A [code]#multi_ptr# whose
    [code]#Space# is equal to one of the _writeable address spaces_ as defined
    above and whose [code]#ElementType# is [code]#marray# of [code]#int# with the
@@ -23933,7 +23995,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type): A
    [code]#multi_ptr# whose [code]#Space# is equal to one of the _writeable
    address spaces_ as defined above and whose [code]#ElementType# is [code]#vec#
-   of [code]#int32_t# with the same number of elements as [code]#NonScalar#.
+   of [code]#std::int32_t# with the same number of elements as
+   [code]#NonScalar#.
 
 _Effects:_ Extracts the mantissa and exponent from each element of [code]#x#.
 Each mantissa is a floating point number whose magnitude is in the interval
@@ -24022,8 +24085,8 @@ The return type depends on [code]#NonScalar#.
 If [code]#NonScalar# is [code]#marray#, the return type is [code]#marray# of
 [code]#int# with the same number of element as [code]#NonScalar#.
 If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type, the
-return type is [code]#vec# of [code]#int32_t# with the same number of elements
-as [code]#NonScalar#.
+return type is [code]#vec# of [code]#std::int32_t# with the same number of
+elements as [code]#NonScalar#.
 
 '''
 
@@ -24057,7 +24120,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   of [code]#int# with the same number of elements as [code]#NonScalar1#; and
 * If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
   [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzle__+# type of
-  [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
+  [code]#std::int32_t# with the same number of elements as [code]#NonScalar1#.
 
 _Returns:_ For each element of [code]#x# and [code]#k#, the value [code]#x[i]#
 multiplied by 2^k[i]^.
@@ -24157,8 +24220,8 @@ _Constraints:_ Available only if all of the following conditions are met:
    [code]#marray# of [code]#int# with the same number of elements as
    [code]#NonScalar#; or
 ** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type): A
-   {cpp} cv-unqualified pointer to [code]#vec# of [code]#int32_t# with the same
-   number of elements as [code]#NonScalar#; or
+   {cpp} cv-unqualified pointer to [code]#vec# of [code]#std::int32_t# with the
+   same number of elements as [code]#NonScalar#; or
 ** (If [code]#NonScalar# is [code]#marray#): A [code]#multi_ptr# whose
    [code]#Space# is equal to one of the _writeable address spaces_ as defined
    above and whose [code]#ElementType# is [code]#marray# of [code]#int# with the
@@ -24166,7 +24229,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** (If [code]#NonScalar# is [code]#vec# or the [code]#+__swizzle__+# type): A
    [code]#multi_ptr# whose [code]#Space# is equal to one of the _writeable
    address spaces_ as defined above and whose [code]#ElementType# is [code]#vec#
-   of [code]#int32_t# with the same number of elements as [code]#NonScalar#.
+   of [code]#std::int32_t# with the same number of elements as
+   [code]#NonScalar#.
 
 _Effects:_ Computes the gamma function for each element of [code]#x# and writes
 the sign for each of these values to [code]#signp#.
@@ -24530,9 +24594,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#nan#
 [source,role=synopsis,id=api:nan]
 ----
-float nan(uint32_t nancode)             (1)
-double nan(uint64_t nancode)            (2)
-half nan(uint16_t nancode)              (3)
+float nan(std::uint32_t nancode)             (1)
+double nan(std::uint64_t nancode)            (2)
+half nan(std::uint16_t nancode)              (3)
 
 template<typename NonScalar>            (4)
 /*return-type*/ nan(NonScalar nancode)
@@ -24549,7 +24613,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#NonScalar# is [code]#marray#, [code]#vec#, or the [code]#+__swizzle__+#
   type; and
-* The element type is [code]#uint32_t#, [code]#uint64_t#, or [code]#uint16_t#.
+* The element type is [code]#std::uint32_t#, [code]#std::uint64_t#, or
+  [code]#std::uint16_t#.
 
 _Returns:_ A quiet NaN for each element of [code]#nancode#.
 Each [code]#nancode[i]# may be placed in the significand of the resulting NaN.
@@ -24559,20 +24624,20 @@ The return type depends on [code]#NonScalar#:
 [options="header",separator="@",cols="70%,30%"]
 |====
 @NonScalar @ Return Type
-@[code]#marray<uint32_t, N># @[code]#marray<float, N>#
-@[code]#marray<uint64_t, N># @[code]#marray<double, N>#
-@[code]#marray<uint16_t, N># @[code]#marray<half, N>#
+@[code]#marray<std::uint32_t, N># @[code]#marray<float, N>#
+@[code]#marray<std::uint64_t, N># @[code]#marray<double, N>#
+@[code]#marray<std::uint16_t, N># @[code]#marray<half, N>#
 
-@[code]#vec<uint32_t, N># +
- [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
+@[code]#vec<std::uint32_t, N># +
+ [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint32_t, N>#
 @[code]#vec<float, N>#
 
-@[code]#vec<uint64_t, N># +
- [code]#+__swizzle__+# that is convertible to [code]#vec<uint64_t, N>#
+@[code]#vec<std::uint64_t, N># +
+ [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint64_t, N>#
 @[code]#vec<double, N>#
 
-@[code]#vec<uint16_t, N># +
- [code]#+__swizzle__+# that is convertible to [code]#vec<uint16_t, N>#
+@[code]#vec<std::uint16_t, N># +
+ [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint16_t, N>#
 @[code]#vec<half, N>#
 |====
 
@@ -24684,7 +24749,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   of [code]#int# with the same number of elements as [code]#NonScalar1#; and
 * If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
   [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzle__+# type of
-  [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
+  [code]#std::int32_t# with the same number of elements as [code]#NonScalar1#.
 
 _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#y[i]#.
@@ -24834,8 +24899,8 @@ _Constraints:_ Available only if all of the following conditions are met:
    [code]#marray# of [code]#int# with the same number of elements as
    [code]#NonScalar1#; or
 ** (If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type): A
-   {cpp} cv-unqualified pointer to [code]#vec# of [code]#int32_t# with the same
-   number of elements as [code]#NonScalar1#; or
+   {cpp} cv-unqualified pointer to [code]#vec# of [code]#std::int32_t# with the
+   same number of elements as [code]#NonScalar1#; or
 ** (If [code]#NonScalar1# is [code]#marray#): A [code]#multi_ptr# whose
    [code]#Space# is equal to one of the _writeable address spaces_ as defined
    above and whose [code]#ElementType# is [code]#marray# of [code]#int# with the
@@ -24843,7 +24908,8 @@ _Constraints:_ Available only if all of the following conditions are met:
 ** (If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type): A
    [code]#multi_ptr# whose [code]#Space# is equal to one of the _writeable
    address spaces_ as defined above and whose [code]#ElementType# is [code]#vec#
-   of [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
+   of [code]#std::int32_t# with the same number of elements as
+   [code]#NonScalar1#.
 
 _Effects:_ Computes the value [code]#r# for each element of [code]#x# and
 [code]#y# such that [code]#r = x[i] - k*y[i]#, where [code]#k# is the integer
@@ -24928,7 +24994,7 @@ _Constraints:_ Available only if all of the following conditions are met:
   of [code]#int# with the same number of elements as [code]#NonScalar1#; and
 * If [code]#NonScalar1# is [code]#vec# or the [code]#+__swizzle__+# type,
   [code]#NonScalar2# is [code]#vec# or the [code]#+__swizzle__+# type of
-  [code]#int32_t# with the same number of elements as [code]#NonScalar1#.
+  [code]#std::int32_t# with the same number of elements as [code]#NonScalar1#.
 
 _Returns:_ For each element of [code]#x# and [code]#y#, the value of
 [code]#x[i]# raised to the power [code]#1/y[i]#.
@@ -25784,7 +25850,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 '''
 
 
-=== Half precision math functions
+=== Half precision math functions (deprecated)
 
 This section describes the half precision math functions that are available in
 the [code]#sycl::half_precision# namespace in both host and device code.
@@ -25806,9 +25872,9 @@ description.
 .[apidef]#half_precision::cos#
 [source,role=synopsis,id=api:half-cos]
 ----
-float cos(float x)                (1)
+float cos(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ cos(NonScalar x)
 ----
 
@@ -25840,9 +25906,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::divide#
 [source,role=synopsis,id=api:half-divide]
 ----
-float divide(float x, float y)                      (1)
+float divide(float x, float y)                      (1) /* deprecated */
 
-template<typename NonScalar1, typename NonScalar2>  (2)
+template<typename NonScalar1, typename NonScalar2>  (2) /* deprecated */
 /*return-type*/ divide(NonScalar1 x, NonScalar2 y)
 ----
 
@@ -25870,9 +25936,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::exp#
 [source,role=synopsis,id=api:half-exp]
 ----
-float exp(float x)                (1)
+float exp(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ exp(NonScalar x)
 ----
 
@@ -25900,9 +25966,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::exp2#
 [source,role=synopsis,id=api:half-exp2]
 ----
-float exp2(float x)                (1)
+float exp2(float x)                (1) /* deprecated */
 
-template<typename NonScalar>       (2)
+template<typename NonScalar>       (2) /* deprecated */
 /*return-type*/ exp2(NonScalar x)
 ----
 
@@ -25930,9 +25996,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::exp10#
 [source,role=synopsis,id=api:half-exp10]
 ----
-float exp10(float x)                (1)
+float exp10(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ exp10(NonScalar x)
 ----
 
@@ -25960,9 +26026,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::log#
 [source,role=synopsis,id=api:half-log]
 ----
-float log(float x)                (1)
+float log(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ log(NonScalar x)
 ----
 
@@ -25989,9 +26055,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::log2#
 [source,role=synopsis,id=api:half-log2]
 ----
-float log2(float x)                (1)
+float log2(float x)                (1) /* deprecated */
 
-template<typename NonScalar>       (2)
+template<typename NonScalar>       (2) /* deprecated */
 /*return-type*/ log2(NonScalar x)
 ----
 
@@ -26018,9 +26084,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::log10#
 [source,role=synopsis,id=api:half-log10]
 ----
-float log10(float x)                (1)
+float log10(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ log10(NonScalar x)
 ----
 
@@ -26047,9 +26113,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::powr#
 [source,role=synopsis,id=api:half-powr]
 ----
-float powr(float x, float y)                        (1)
+float powr(float x, float y)                        (1) /* deprecated */
 
-template<typename NonScalar1, typename NonScalar2>  (2)
+template<typename NonScalar1, typename NonScalar2>  (2) /* deprecated */
 /*return-type*/ powr(NonScalar1 x, NonScalar2 y)
 ----
 
@@ -26082,9 +26148,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::recip#
 [source,role=synopsis,id=api:half-recip]
 ----
-float recip(float x)                (1)
+float recip(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ recip(NonScalar x)
 ----
 
@@ -26111,9 +26177,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::rsqrt#
 [source,role=synopsis,id=api:half-rsqrt]
 ----
-float rsqrt(float x)                (1)
+float rsqrt(float x)                (1) /* deprecated */
 
-template<typename NonScalar>        (2)
+template<typename NonScalar>        (2) /* deprecated */
 /*return-type*/ rsqrt(NonScalar x)
 ----
 
@@ -26141,9 +26207,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::sin#
 [source,role=synopsis,id=api:half-sin]
 ----
-float sin(float x)                (1)
+float sin(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ sin(NonScalar x)
 ----
 
@@ -26175,9 +26241,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::sqrt#
 [source,role=synopsis,id=api:half-sqrt]
 ----
-float sqrt(float x)                (1)
+float sqrt(float x)                (1) /* deprecated */
 
-template<typename NonScalar>       (2)
+template<typename NonScalar>       (2) /* deprecated */
 /*return-type*/ sqrt(NonScalar x)
 ----
 
@@ -26204,9 +26270,9 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#half_precision::tan#
 [source,role=synopsis,id=api:half-tan]
 ----
-float tan(float x)                (1)
+float tan(float x)                (1) /* deprecated */
 
-template<typename NonScalar>      (2)
+template<typename NonScalar>      (2) /* deprecated */
 /*return-type*/ tan(NonScalar x)
 ----
 
@@ -26274,22 +26340,22 @@ type_ to represent the following types:
 * [code]#marray<unsigned int, N>#
 * [code]#marray<unsigned long, N>#
 * [code]#marray<unsigned long long, N>#
-* [code]#vec<int8_t, N>#
-* [code]#vec<int16_t, N>#
-* [code]#vec<int32_t, N>#
-* [code]#vec<int64_t, N>#
-* [code]#vec<uint8_t, N>#
-* [code]#vec<uint16_t, N>#
-* [code]#vec<uint32_t, N>#
-* [code]#vec<uint64_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int8_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int16_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int64_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<uint8_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<uint16_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<uint64_t, N>#
+* [code]#vec<std::int8_t, N>#
+* [code]#vec<std::int16_t, N>#
+* [code]#vec<std::int32_t, N>#
+* [code]#vec<std::int64_t, N>#
+* [code]#vec<std::uint8_t, N>#
+* [code]#vec<std::uint16_t, N>#
+* [code]#vec<std::uint32_t, N>#
+* [code]#vec<std::uint64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint64_t, N>#
 
 '''
 
@@ -26764,23 +26830,24 @@ template<typename UInt8Bit1, typename UInt8Bit2>
 
 _Constraints:_ Available only if one of the following conditions is met:
 
-* [code]#UInt8Bit1# and [code]#UInt8Bit2# are both [code]#uint8_t#;
+* [code]#UInt8Bit1# and [code]#UInt8Bit2# are both [code]#std::uint8_t#;
 * [code]#UInt8Bit1# and [code]#UInt8Bit2# are both [code]#marray# with element
-  type [code]#uint8_t# and the same number of elements; or
+  type [code]#std::uint8_t# and the same number of elements; or
 * [code]#UInt8Bit1# and [code]#UInt8Bit2# are any combination of [code]#vec# or
-  the [code]#+__swizzle__+# type with element type [code]#uint8_t# and the same
-  number of elements.
+  the [code]#+__swizzle__+# type with element type [code]#std::uint8_t# and the
+  same number of elements.
 
-_Returns:_ When the inputs are scalars, returns [code]#((uint16_t)hi << 8) |
-lo#.
-Otherwise, returns [code]#((uint16_t)hi[i] << 8) | lo[i]# for each element of
-[code]#hi# and [code]#lo#.
+_Returns:_ When the inputs are scalars, returns [code]#((std::uint16_t)hi << 8)
+| lo#.
+Otherwise, returns [code]#((std::uint16_t)hi[i] << 8) | lo[i]# for each element
+of [code]#hi# and [code]#lo#.
 
-The return type is [code]#uint16_t# when the inputs are scalar.
+The return type is [code]#std::uint16_t# when the inputs are scalar.
 When the inputs are [code]#marray#, the return type is [code]#marray# with
-element type [code]#uint16_t# and the same number of elements as the inputs.
-Otherwise, the return type is [code]#vec# with element type [code]#uint16_t# and
-the same number of elements as the inputs.
+element type [code]#std::uint16_t# and the same number of elements as the
+inputs.
+Otherwise, the return type is [code]#vec# with element type
+[code]#std::uint16_t# and the same number of elements as the inputs.
 
 '''
 
@@ -26793,24 +26860,26 @@ template<typename Int8Bit, typename UInt8Bit>
 
 _Constraints:_ Available only if one of the following conditions is met:
 
-* [code]#Int8Bit# is [code]#int8_t# and [code]#UInt8Bit# is [code]#uint8_t#;
-* [code]#Int8Bit# is [code]#marray# with element type [code]#int8_t# and
-  [code]#UInt8Bit# is [code]#marray# with element type [code]#uint8_t# and both
-  have the same number of elements; or
+* [code]#Int8Bit# is [code]#std::int8_t# and [code]#UInt8Bit# is
+  [code]#std::uint8_t#;
+* [code]#Int8Bit# is [code]#marray# with element type [code]#std::int8_t# and
+  [code]#UInt8Bit# is [code]#marray# with element type [code]#std::uint8_t# and
+  both have the same number of elements; or
 * [code]#Int8Bit# is [code]#vec# or the [code]#+__swizzle__+# type with element
-  type [code]#int8_t# and [code]#UInt8Bit# is [code]#vec# or the
-  [code]#+__swizzle__+# type with element type [code]#uint8_t# and both have the
-  same number of elements.
+  type [code]#std::int8_t# and [code]#UInt8Bit# is [code]#vec# or the
+  [code]#+__swizzle__+# type with element type [code]#std::uint8_t# and both
+  have the same number of elements.
 
-_Returns:_ When the inputs are scalars, returns [code]#((int16_t)hi << 8) | lo#.
-Otherwise, returns [code]#((int16_t)hi[i] << 8) | lo[i]# for each element of
-[code]#hi# and [code]#lo#.
+_Returns:_ When the inputs are scalars, returns [code]#((std::int16_t)hi << 8) |
+lo#.
+Otherwise, returns [code]#((std::int16_t)hi[i] << 8) | lo[i]# for each element
+of [code]#hi# and [code]#lo#.
 
-The return type is [code]#int16_t# when the inputs are scalar.
+The return type is [code]#std::int16_t# when the inputs are scalar.
 When the inputs are [code]#marray#, the return type is [code]#marray# with
-element type [code]#int16_t# and the same number of elements as the inputs.
-Otherwise, the return type is [code]#vec# with element type [code]#int16_t# and
-the same number of elements as the inputs.
+element type [code]#std::int16_t# and the same number of elements as the inputs.
+Otherwise, the return type is [code]#vec# with element type [code]#std::int16_t#
+and the same number of elements as the inputs.
 
 '''
 
@@ -26823,23 +26892,24 @@ template<typename UInt16Bit1, typename UInt16Bit2>
 
 _Constraints:_ Available only if one of the following conditions is met:
 
-* [code]#UInt16Bit1# and [code]#UInt16Bit2# are both [code]#uint16_t#;
+* [code]#UInt16Bit1# and [code]#UInt16Bit2# are both [code]#std::uint16_t#;
 * [code]#UInt16Bit1# and [code]#UInt16Bit2# are both [code]#marray# with element
-  type [code]#uint16_t# and the same number of elements; or
+  type [code]#std::uint16_t# and the same number of elements; or
 * [code]#UInt16Bit1# and [code]#UInt16Bit2# are any combination of [code]#vec#
-  or the [code]#+__swizzle__+# type with element type [code]#uint16_t# and the
-  same number of elements.
+  or the [code]#+__swizzle__+# type with element type [code]#std::uint16_t# and
+  the same number of elements.
 
-_Returns:_ When the inputs are scalars, returns [code]#((uint32_t)hi << 16) |
-lo#.
-Otherwise, returns [code]#((uint32_t)hi[i] << 16) | lo[i]# for each element of
-[code]#hi# and [code]#lo#.
+_Returns:_ When the inputs are scalars, returns [code]#((std::uint32_t)hi << 16)
+| lo#.
+Otherwise, returns [code]#((std::uint32_t)hi[i] << 16) | lo[i]# for each element
+of [code]#hi# and [code]#lo#.
 
-The return type is [code]#uint32_t# when the inputs are scalar.
+The return type is [code]#std::uint32_t# when the inputs are scalar.
 When the inputs are [code]#marray#, the return type is [code]#marray# with
-element type [code]#uint32_t# and the same number of elements as the inputs.
-Otherwise, the return type is [code]#vec# with element type [code]#uint32_t# and
-the same number of elements as the inputs.
+element type [code]#std::uint32_t# and the same number of elements as the
+inputs.
+Otherwise, the return type is [code]#vec# with element type
+[code]#std::uint32_t# and the same number of elements as the inputs.
 
 '''
 
@@ -26852,25 +26922,26 @@ template<typename Int16Bit, typename UInt16Bit>
 
 _Constraints:_ Available only if one of the following conditions is met:
 
-* [code]#Int16Bit# is [code]#int16_t# and [code]#UInt16Bit# is [code]#uint16_t#;
-* [code]#Int16Bit# is [code]#marray# with element type [code]#int16_t# and
-  [code]#UInt16Bit# is [code]#marray# with element type [code]#uint16_t# and
-  both have the same number of elements; or
+* [code]#Int16Bit# is [code]#std::int16_t# and [code]#UInt16Bit# is
+  [code]#std::uint16_t#;
+* [code]#Int16Bit# is [code]#marray# with element type [code]#std::int16_t# and
+  [code]#UInt16Bit# is [code]#marray# with element type [code]#std::uint16_t#
+  and both have the same number of elements; or
 * [code]#Int16Bit# is [code]#vec# or the [code]#+__swizzle__+# type with element
-  type [code]#int16_t# and [code]#UInt16Bit# is [code]#vec# or the
-  [code]#+__swizzle__+# type with element type [code]#uint16_t# and both have
-  the same number of elements.
+  type [code]#std::int16_t# and [code]#UInt16Bit# is [code]#vec# or the
+  [code]#+__swizzle__+# type with element type [code]#std::uint16_t# and both
+  have the same number of elements.
 
-_Returns:_ When the inputs are scalars, returns [code]#((int32_t)hi << 16) |
-lo#.
-Otherwise, returns [code]#((int32_t)hi[i] << 16) | lo[i]# for each element of
-[code]#hi# and [code]#lo#.
+_Returns:_ When the inputs are scalars, returns [code]#((std::int32_t)hi << 16)
+| lo#.
+Otherwise, returns [code]#((std::int32_t)hi[i] << 16) | lo[i]# for each element
+of [code]#hi# and [code]#lo#.
 
-The return type is [code]#int32_t# when the inputs are scalar.
+The return type is [code]#std::int32_t# when the inputs are scalar.
 When the inputs are [code]#marray#, the return type is [code]#marray# with
-element type [code]#int32_t# and the same number of elements as the inputs.
-Otherwise, the return type is [code]#vec# with element type [code]#int32_t# and
-the same number of elements as the inputs.
+element type [code]#std::int32_t# and the same number of elements as the inputs.
+Otherwise, the return type is [code]#vec# with element type [code]#std::int32_t#
+and the same number of elements as the inputs.
 
 '''
 
@@ -26883,23 +26954,24 @@ template<typename UInt32Bit1, typename UInt32Bit2>
 
 _Constraints:_ Available only if one of the following conditions is met:
 
-* [code]#UInt32Bit1# and [code]#UInt32Bit2# are both [code]#uint32_t#;
+* [code]#UInt32Bit1# and [code]#UInt32Bit2# are both [code]#std::uint32_t#;
 * [code]#UInt32Bit1# and [code]#UInt32Bit2# are both [code]#marray# with element
-  type [code]#uint32_t# and the same number of elements; or
+  type [code]#std::uint32_t# and the same number of elements; or
 * [code]#UInt32Bit1# and [code]#UInt32Bit2# are any combination of [code]#vec#
-  or the [code]#+__swizzle__+# type with element type [code]#uint32_t# and the
-  same number of elements.
+  or the [code]#+__swizzle__+# type with element type [code]#std::uint32_t# and
+  the same number of elements.
 
-_Returns:_ When the inputs are scalars, returns [code]#((uint64_t)hi << 32) |
-lo#.
-Otherwise, returns [code]#((uint64_t)hi[i] << 32) | lo[i]# for each element of
-[code]#hi# and [code]#lo#.
+_Returns:_ When the inputs are scalars, returns [code]#((std::uint64_t)hi << 32)
+| lo#.
+Otherwise, returns [code]#((std::uint64_t)hi[i] << 32) | lo[i]# for each element
+of [code]#hi# and [code]#lo#.
 
-The return type is [code]#uint64_t# when the inputs are scalar.
+The return type is [code]#std::uint64_t# when the inputs are scalar.
 When the inputs are [code]#marray#, the return type is [code]#marray# with
-element type [code]#uint64_t# and the same number of elements as the inputs.
-Otherwise, the return type is [code]#vec# with element type [code]#uint64_t# and
-the same number of elements as the inputs.
+element type [code]#std::uint64_t# and the same number of elements as the
+inputs.
+Otherwise, the return type is [code]#vec# with element type
+[code]#std::uint64_t# and the same number of elements as the inputs.
 
 '''
 
@@ -26912,25 +26984,26 @@ template<typename Int32Bit, typename UInt32Bit>
 
 _Constraints:_ Available only if one of the following conditions is met:
 
-* [code]#Int32Bit# is [code]#int32_t# and [code]#UInt32Bit# is [code]#uint32_t#;
-* [code]#Int32Bit# is [code]#marray# with element type [code]#int32_t# and
-  [code]#UInt32Bit# is [code]#marray# with element type [code]#uint32_t# and
-  both have the same number of elements; or
+* [code]#Int32Bit# is [code]#std::int32_t# and [code]#UInt32Bit# is
+  [code]#std::uint32_t#;
+* [code]#Int32Bit# is [code]#marray# with element type [code]#std::int32_t# and
+  [code]#UInt32Bit# is [code]#marray# with element type [code]#std::uint32_t#
+  and both have the same number of elements; or
 * [code]#Int32Bit# is [code]#vec# or the [code]#+__swizzle__+# type with element
-  type [code]#int32_t# and [code]#UInt32Bit# is [code]#vec# or the
-  [code]#+__swizzle__+# type with element type [code]#uint32_t# and both have
-  the same number of elements.
+  type [code]#std::int32_t# and [code]#UInt32Bit# is [code]#vec# or the
+  [code]#+__swizzle__+# type with element type [code]#std::uint32_t# and both
+  have the same number of elements.
 
-_Returns:_ When the inputs are scalars, returns [code]#((int64_t)hi << 32) |
-lo#.
-Otherwise, returns [code]#((int64_t)hi[i] << 32) | lo[i]# for each element of
-[code]#hi# and [code]#lo#.
+_Returns:_ When the inputs are scalars, returns [code]#((std::int64_t)hi << 32)
+| lo#.
+Otherwise, returns [code]#((std::int64_t)hi[i] << 32) | lo[i]# for each element
+of [code]#hi# and [code]#lo#.
 
-The return type is [code]#int64_t# when the inputs are scalar.
+The return type is [code]#std::int64_t# when the inputs are scalar.
 When the inputs are [code]#marray#, the return type is [code]#marray# with
-element type [code]#int64_t# and the same number of elements as the inputs.
-Otherwise, the return type is [code]#vec# with element type [code]#int64_t# and
-the same number of elements as the inputs.
+element type [code]#std::int64_t# and the same number of elements as the inputs.
+Otherwise, the return type is [code]#vec# with element type [code]#std::int64_t#
+and the same number of elements as the inputs.
 
 '''
 
@@ -26965,14 +27038,14 @@ template<typename Int32Bit1, typename Int32Bit2, typename Int32Bit3>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#Int32Bit1# is one of the following types:
-** [code]#int32_t#
-** [code]#uint32_t#
-** [code]#marray<int32_t, N>#
-** [code]#marray<uint32_t, N>#
-** [code]#vec<int32_t, N>#
-** [code]#vec<uint32_t, N>#
-** [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
-** [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
+** [code]#std::int32_t#
+** [code]#std::uint32_t#
+** [code]#marray<std::int32_t, N>#
+** [code]#marray<std::uint32_t, N>#
+** [code]#vec<std::int32_t, N>#
+** [code]#vec<std::uint32_t, N>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<std::int32_t, N>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint32_t, N>#
 * If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#Int32Bit2# and [code]#Int32Bit# must be the same as
   [code]#Int32Bit1#; and
@@ -27008,14 +27081,14 @@ template<typename Int32Bit1, typename Int32Bit2>
 _Constraints:_ Available only if all of the following conditions are met:
 
 * [code]#Int32Bit1# is one of the following types:
-** [code]#int32_t#
-** [code]#uint32_t#
-** [code]#marray<int32_t, N>#
-** [code]#marray<uint32_t, N>#
-** [code]#vec<int32_t, N>#
-** [code]#vec<uint32_t, N>#
-** [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
-** [code]#+__swizzle__+# that is convertible to [code]#vec<uint32_t, N>#
+** [code]#std::int32_t#
+** [code]#std::uint32_t#
+** [code]#marray<std::int32_t, N>#
+** [code]#marray<std::uint32_t, N>#
+** [code]#vec<std::int32_t, N>#
+** [code]#vec<std::uint32_t, N>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<std::int32_t, N>#
+** [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint32_t, N>#
 * If [code]#Int32Bit1# is not [code]#vec# or the [code]#+__swizzle__+# type,
   then [code]#Int32Bit2# must be the same as [code]#Int32Bit1#; and
 * If [code]#Int32Bit1# is [code]#vec# or the [code]#+__swizzle__+# type, then
@@ -27774,14 +27847,14 @@ The term _generic scalar type_ represents the following types:
 
 The term _vector element type_ represents these types:
 
-* [code]#int8_t#
-* [code]#int16_t#
-* [code]#int32_t#
-* [code]#int64_t#
-* [code]#uint8_t#
-* [code]#uint16_t#
-* [code]#uint32_t#
-* [code]#uint64_t#
+* [code]#std::int8_t#
+* [code]#std::int16_t#
+* [code]#std::int32_t#
+* [code]#std::int64_t#
+* [code]#std::uint8_t#
+* [code]#std::uint16_t#
+* [code]#std::uint32_t#
+* [code]#std::uint64_t#
 * [code]#float#
 * [code]#double#
 * [code]#half#
@@ -27834,15 +27907,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -27893,15 +27966,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -27952,15 +28025,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28011,15 +28084,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28070,15 +28143,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28129,15 +28202,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28188,15 +28261,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28242,15 +28315,15 @@ The return type depends on [code]#NonScalar#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28297,15 +28370,15 @@ The return type depends on [code]#NonScalar#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28351,15 +28424,15 @@ The return type depends on [code]#NonScalar#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28405,15 +28478,15 @@ The return type depends on [code]#NonScalar#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28469,15 +28542,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28532,15 +28605,15 @@ The return type depends on [code]#NonScalar1#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28586,15 +28659,15 @@ The return type depends on [code]#NonScalar#:
 
 @[code]#vec<float, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<float, N>#
-@[code]#vec<int32_t, N>#
+@[code]#vec<std::int32_t, N>#
 
 @[code]#vec<double, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<double, N>#
-@[code]#vec<int64_t, N>#
+@[code]#vec<std::int64_t, N>#
 
 @[code]#vec<half, N># +
  [code]#+__swizzle__+# that is convertible to [code]#vec<half, N>#
-@[code]#vec<int16_t, N>#
+@[code]#vec<std::int16_t, N>#
 |====
 
 '''
@@ -28614,14 +28687,14 @@ bool any(GenInt x)
 _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 
 * [code]#marray<bool, N>#
-* [code]#vec<int8_t, N>#
-* [code]#vec<int16_t, N>#
-* [code]#vec<int32_t, N>#
-* [code]#vec<int64_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int8_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int16_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int64_t, N>#
+* [code]#vec<std::int8_t, N>#
+* [code]#vec<std::int16_t, N>#
+* [code]#vec<std::int32_t, N>#
+* [code]#vec<std::int64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int64_t, N>#
 
 _Returns:_ When [code]#x# is [code]#marray#, returns a Boolean telling whether
 any element of [code]#x# is true.
@@ -28671,14 +28744,14 @@ bool all(GenInt x)
 _Constraints:_ Available only if [code]#GenInt# is one of the following types:
 
 * [code]#marray<bool, N>#
-* [code]#vec<int8_t, N>#
-* [code]#vec<int16_t, N>#
-* [code]#vec<int32_t, N>#
-* [code]#vec<int64_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int8_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int16_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int32_t, N>#
-* [code]#+__swizzle__+# that is convertible to [code]#vec<int64_t, N>#
+* [code]#vec<std::int8_t, N>#
+* [code]#vec<std::int16_t, N>#
+* [code]#vec<std::int32_t, N>#
+* [code]#vec<std::int64_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int8_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int16_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int32_t, N>#
+* [code]#+__swizzle__+# that is convertible to [code]#vec<std::int64_t, N>#
 
 _Returns:_ When [code]#x# is [code]#marray#, returns a Boolean telling whether
 all elements of [code]#x# are true.

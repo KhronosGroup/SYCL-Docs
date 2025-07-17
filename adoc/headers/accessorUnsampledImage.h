@@ -23,7 +23,7 @@ class unsampled_image_accessor {
 
   /* -- property interface members -- */
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   /* Available only when: AccessMode == access_mode::read
   if Dimensions == 1, CoordT = int
@@ -59,7 +59,7 @@ class host_unsampled_image_accessor {
 
   /* -- property interface members -- */
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   /* Available only when: (AccessMode == access_mode::read ||
                            AccessMode == access_mode::read_write)
