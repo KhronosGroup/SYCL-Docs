@@ -75,9 +75,11 @@ int main() {
   khr::command_barrier(myQueue);
 
   // Launch an asynchronous kernel to compute matrix addition c = a + b.
+  // Require that the scheduler create an event to track completion.
   range<2> local = { 2, 2 };
   range<2> global = { N, M };
-  khr::launch_grouped(myQueue, global, local, [=](nd_item<2> it) {
+  auto reqs = khr::requirements(khr::tracking());
+  auto ev = khr::launch_grouped(myQueue, global, local, reqs, [=](nd_item<2> it) {
     size_t i = it.get_global_id(0);
     size_t j = it.get_global_id(1);
     size_t index = i * M + j;
@@ -86,7 +88,7 @@ int main() {
 
   // Wait for all three kernels to complete before accessing the results.
   // This blocks the host until all previous kernels have completed.
-  myQueue.wait();
+  ev->wait();
 
   std::cout << std::endl << "Result:" << std::endl;
   for (size_t i = 0; i < N; i++) {
