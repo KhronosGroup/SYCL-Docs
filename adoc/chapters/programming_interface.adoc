@@ -5247,13 +5247,10 @@ _Effects (3):_ Construct a SYCL [code]#buffer# instance with the
 [code]#hostData# parameter provided.
 The buffer assumes exclusive access to this memory for the duration of its
 lifetime.
-
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
-
 The range of the constructed SYCL [code]#buffer# is specified by the
 [code]#bufferRange# parameter provided.
-
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
@@ -5332,10 +5329,8 @@ The buffer also creates its own internal copy of the [code]#shared_ptr# that
 shares ownership of the [code]#hostData# memory, which means the application can
 safely release ownership of this [code]#shared_ptr# when the constructor
 returns.
-
 When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
 memory.
-
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
 The range of the constructed SYCL [code]#buffer# is specified by the
@@ -5354,10 +5349,8 @@ The buffer also creates its own internal copy of the [code]#shared_ptr# that
 shares ownership of the [code]#hostData# memory, which means the application can
 safely release ownership of this [code]#shared_ptr# when the constructor
 returns.
-
 When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
 memory.
-
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
 provided when allocating memory on the host.
 The range of the constructed SYCL [code]#buffer# is specified by the
@@ -5412,7 +5405,6 @@ later.
 [code]#baseIndex# specifies the origin of the sub-buffer inside the buffer
 [code]#b#.
 [code]#subRange# specifies the size of the sub-buffer.
-
 The origin (based on [code]#baseIndex#) of the sub-buffer being constructed must
 be a multiple of the memory base address alignment of each SYCL [code]#device#
 which accesses data from the buffer.
@@ -5582,15 +5574,11 @@ void set_final_data(Destination finalData = nullptr);
 _Effects:_ The [code]#finalData# points to where the outcome of all the buffer
 processing is going to be copied to at destruction time, if the buffer was
 involved with a write accessor.
-
 Destination can be either an output iterator or a [code]#std::weak_ptr<T>#.
-
 Note that a raw pointer is a special case of output iterator and thus defines
 the host memory to which the result is to be copied.
-
 In the case of a weak pointer, the output is not updated if the weak pointer has
 expired.
-
 If [code]#Destination# is [code]#std::nullptr_t#, then the copy back will not
 happen.
 
@@ -5603,10 +5591,8 @@ void set_write_back(bool flag = true);
 ----
 _Effects:_ Dynamically forces or cancels the write-back of the data of a buffer
 on destruction according to the value of [code]#flag#.
-
 Forcing the write-back is similar to what happens during a normal write-back as
 described in <<sec:buf-sync-rules>> and <<sec:sharing-host-memory-with-dm>>.
-
 If there is nowhere to write-back, using this function does not have any effect.
 
 '''
