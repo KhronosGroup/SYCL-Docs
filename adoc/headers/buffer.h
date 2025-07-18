@@ -100,15 +100,15 @@ class buffer {
 
   range<Dimensions> get_range() const;
 
-  size_t byte_size() const noexcept;
+  std::size_t byte_size() const noexcept;
 
-  size_t size() const noexcept;
-
-  // Deprecated
-  size_t get_count() const;
+  std::size_t size() const noexcept;
 
   // Deprecated
-  size_t get_size() const;
+  std::size_t get_count() const;
+
+  // Deprecated
+  std::size_t get_size() const;
 
   AllocatorT get_allocator() const;
 

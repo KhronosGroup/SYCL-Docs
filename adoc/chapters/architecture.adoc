@@ -1807,7 +1807,10 @@ between two devices.
 For example, this may occur when a <<command-group>> has a requirement for the
 contents of a buffer or when the application passes certain arguments to a
 <<sycl-kernel-function>> (as described in <<sec:kernel.parameter.passing>>).
-Such data must have a type that is <<device-copyable>> as defined below.
+Such data must have a type that is <<device-copyable>>, as defined below.
+
+An implementation can assume that it is always safe to perform bitwise copies of
+any object that has a device copyable type.
 
 Any type that is trivially copyable (as defined by the {cpp} core language) is
 implicitly device copyable.
@@ -1839,15 +1842,13 @@ device copyable.
 
 [NOTE]
 ====
-The types [code]#std::basic_string_view<CharT, Traits># and
-[code]#std::span<ElementType, Extent># are both view types, which reference
-underlying data that is not contained within their type.
-Although these view types are device copyable, the implementation copies just
-the view and not the contained data when doing an inter-device copy.
-In order to reference the contained data after such a copy, the application must
-allocate the contained data in unified shared memory (USM) that is accessible on
-both the host and device (or on both devices in the case of a device-to-device
-copy).
+Types such as [code]#std::basic_string_view<CharT, Traits># and
+[code]#std::span<ElementType, Extent># are view types, which reference
+underlying data that they do not own.
+Copying such a type only copies the view and not the referenced data.
+If a view is copied between the host and device or between two devices, it is
+the application's responsibility to ensure that the referenced data is allocated
+in memory that can be accessed by the recipient (see <<sec:usm>>).
 ====
 
 In addition, the implementation may allow the application to explicitly declare
@@ -1855,40 +1856,28 @@ certain class types as device copyable.
 If the implementation has this support, it must predefine the preprocessor macro
 [code]#SYCL_DEVICE_COPYABLE# to [code]#1#, and it must not predefine this
 preprocessor macro if it does not have this support.
-When the implementation has this support, a class type [code]#T# is device
-copyable if all of the following statements are true:
+When the implementation has this support, an application may declare that a
+class type [code]#T# is device copyable by defining the trait
+[code]#is_device_copyable_v<T># to [code]#true# if all of the following
+statements are true:
 
-  * The application defines the trait [code]#is_device_copyable_v<T># to
-    [code]#true#;
   * Type [code]#T# has at least one eligible copy constructor, move constructor,
     copy assignment operator, or move assignment operator;
   * Each eligible copy constructor, move constructor, copy assignment operator,
     and move assignment operator is [code]#public#;
-  * When doing an inter-device transfer of an object of type [code]#T#, the
-    effect of each eligible copy constructor, move constructor, copy assignment
-    operator, and move assignment operator is the same as a bitwise copy of the
-    object;
-  * Type [code]#T# has a [code]#public# non-deleted destructor;
-  * The destructor has no effect when executed on the device.
+  * The effect of each eligible copy constructor, move constructor, copy
+    assignment operator, and move assignment operator is the same as a bitwise
+    copy of the object;
+  * Type [code]#T# has a [code]#public# non-deleted destructor; and
+  * The destructor has no effect.
+
+Declaring that a class type [code]#T# is device copyable when any of these
+statements is not true results in undefined behavior.
 
 When the application explicitly declares a class type to be device copyable,
 arrays of that type and cv-qualified versions of that type are also device
 copyable, and the implementation sets the [code]#is_device_copyable_v# trait to
 [code]#true# for these array and cv-qualified types.
-
-[NOTE]
-====
-It is unspecified whether the implementation actually calls the copy
-constructor, move constructor, copy assignment operator, or move assignment
-operator of a class declared as [code]#is_device_copyable_v# when doing an
-inter-device copy.
-Since these operations must all be the same as a bitwise copy, the
-implementation may simply copy the memory where the object resides.
-Likewise, it is unspecified whether the implementation actually calls the
-destructor for such a class on the device since the destructor must have no
-effect on the device.
-====
-
 
 == Endianness support
 

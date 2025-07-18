@@ -20,9 +20,9 @@ class accessor {
 
   /* -- common interface members -- */
 
-  size_t get_size() const;
+  std::size_t get_size() const;
 
-  size_t get_count() const;
+  std::size_t get_count() const;
 
   /* Available only when: (Dimensions > 0) */
   range<Dimensions> get_range() const;
@@ -36,11 +36,11 @@ class accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ operator[](size_t index) const;
+  __unspecified__ operator[](std::size_t index) const;
 
   /* Available only when: (AccessMode == access_mode::read_write && Dimensions
    * == 1) */
-  reference operator[](size_t index) const;
+  reference operator[](std::size_t index) const;
 
   /* Available only when: (AccessMode == access_mode::atomic && Dimensions == 0)
    */
@@ -54,7 +54,7 @@ class accessor {
   /* Available only when: (AccessMode == access_mode::atomic && Dimensions == 1)
    */
   atomic<DataT, access::address_space::local_space>
-  operator[](size_t index) const;
+  operator[](std::size_t index) const;
 
   local_ptr<DataT> get_pointer() const noexcept;
 };
