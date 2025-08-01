@@ -16,7 +16,7 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using difference_type =
       typename std::iterator_traits<iterator>::difference_type;
-  using size_type = size_t;
+  using size_type = std::size_t;
 
   local_accessor();
 
@@ -37,6 +37,7 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
 
   size_type size() const noexcept;
 
+  // Deprecated
   size_type max_size() const noexcept;
 
   bool empty() const noexcept;
@@ -56,10 +57,10 @@ template <typename DataT, int Dimensions = 1> class local_accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ operator[](size_t index) const;
+  __unspecified__ operator[](std::size_t index) const;
 
   /* Available only when: (Dimensions == 1) */
-  reference operator[](size_t index) const;
+  reference operator[](std::size_t index) const;
 
   /* Deprecated in SYCL 2020 */
   local_ptr<value_type> get_pointer() const noexcept;

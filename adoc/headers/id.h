@@ -10,40 +10,40 @@ template <int Dimensions = 1> class id {
 
   /* The following constructor is only available in the id class
    * specialization where: Dimensions==1 */
-  id(size_t dim0) noexcept;
+  id(std::size_t dim0) noexcept;
   /* The following constructor is only available in the id class
    * specialization where: Dimensions==2 */
-  id(size_t dim0, size_t dim1) noexcept;
+  id(std::size_t dim0, std::size_t dim1) noexcept;
   /* The following constructor is only available in the id class
    * specialization where: Dimensions==3 */
-  id(size_t dim0, size_t dim1, size_t dim2) noexcept;
+  id(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 
   /* -- common interface members -- */
 
   id(const range<Dimensions>& range) noexcept;
   id(const item<Dimensions>& item) noexcept;
 
-  size_t get(int dimension) const noexcept;
-  size_t& operator[](int dimension) noexcept;
-  size_t operator[](int dimension) const noexcept;
+  std::size_t get(int dimension) const noexcept;
+  std::size_t& operator[](int dimension) noexcept;
+  std::size_t operator[](int dimension) const noexcept;
 
   // only available if Dimensions == 1
-  operator size_t() const noexcept;
+  operator std::size_t() const noexcept;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend id operatorOP(const id& lhs, const id& rhs) noexcept { /* ... */
   }
-  friend id operatorOP(const id& lhs, const size_t& rhs) noexcept { /* ... */
+  friend id operatorOP(const id& lhs, const std::size_t& rhs) noexcept { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend id& operatorOP(id& lhs, const id& rhs) noexcept { /* ... */
   }
-  friend id& operatorOP(id& lhs, const size_t& rhs) noexcept { /* ... */
+  friend id& operatorOP(id& lhs, const std::size_t& rhs) noexcept { /* ... */
   }
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend id operatorOP(const size_t& lhs, const id& rhs) noexcept { /* ... */
+  friend id operatorOP(const std::size_t& lhs, const id& rhs) noexcept { /* ... */
   }
 
   // OP is unary +, -
@@ -60,8 +60,8 @@ template <int Dimensions = 1> class id {
 };
 
 // Deduction guides
-id(size_t)->id<1>;
-id(size_t, size_t)->id<2>;
-id(size_t, size_t, size_t)->id<3>;
+id(std::size_t)->id<1>;
+id(std::size_t, std::size_t)->id<2>;
+id(std::size_t, std::size_t, std::size_t)->id<3>;
 
 } // namespace sycl

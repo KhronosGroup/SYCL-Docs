@@ -12,13 +12,13 @@ template <int Dimensions = 1, bool WithOffset = true> class item {
 
   id<Dimensions> get_id() const noexcept;
 
-  size_t get_id(int dimension) const noexcept;
+  std::size_t get_id(int dimension) const noexcept;
 
-  size_t operator[](int dimension) const noexcept;
+  std::size_t operator[](int dimension) const noexcept;
 
   range<Dimensions> get_range() const noexcept;
 
-  size_t get_range(int dimension) const noexcept;
+  std::size_t get_range(int dimension) const noexcept;
 
   // Deprecated in SYCL 2020.
   // only available if WithOffset is true
@@ -29,8 +29,8 @@ template <int Dimensions = 1, bool WithOffset = true> class item {
   operator item<Dimensions, true>() const noexcept;
 
   // only available if Dimensions == 1
-  operator size_t() const noexcept;
+  operator std::size_t() const noexcept;
 
-  size_t get_linear_id() const noexcept;
+  std::size_t get_linear_id() const noexcept;
 };
 } // namespace sycl

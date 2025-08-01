@@ -21,34 +21,34 @@ template <int Dimensions> class h_item {
 
   range<Dimensions> get_global_range() const noexcept;
 
-  size_t get_global_range(int dimension) const noexcept;
+  std::size_t get_global_range(int dimension) const noexcept;
 
   id<Dimensions> get_global_id() const noexcept;
 
-  size_t get_global_id(int dimension) const noexcept;
+  std::size_t get_global_id(int dimension) const noexcept;
 
   range<Dimensions> get_local_range() const noexcept;
 
-  size_t get_local_range(int dimension) const noexcept;
+  std::size_t get_local_range(int dimension) const noexcept;
 
   id<Dimensions> get_local_id() const noexcept;
 
-  size_t get_local_id(int dimension) const noexcept;
+  std::size_t get_local_id(int dimension) const noexcept;
 
   range<Dimensions> get_logical_local_range() const noexcept;
 
-  size_t get_logical_local_range(int dimension) const noexcept;
+  std::size_t get_logical_local_range(int dimension) const noexcept;
 
   id<Dimensions> get_logical_local_id() const noexcept;
 
-  size_t get_logical_local_id(int dimension) const noexcept;
+  std::size_t get_logical_local_id(int dimension) const noexcept;
 
   range<Dimensions> get_physical_local_range() const noexcept;
 
-  size_t get_physical_local_range(int dimension) const noexcept;
+  std::size_t get_physical_local_range(int dimension) const noexcept;
 
   id<Dimensions> get_physical_local_id() const noexcept;
 
-  size_t get_physical_local_id(int dimension) const noexcept;
+  std::size_t get_physical_local_id(int dimension) const noexcept;
 };
 } // namespace sycl
