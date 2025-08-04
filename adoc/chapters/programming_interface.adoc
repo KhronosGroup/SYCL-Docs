@@ -4875,7 +4875,10 @@ SYCL queue that submitted the <<command-group>> that this event is associated
 with was not constructed with the [api]#property::queue::enable_profiling#
 property.
 
-Each profiling information descriptor specifies the return value.
+Each profiling information descriptor specifies the return value and may also
+specify preconditions, additional exceptions that are thrown, etc.
+See <<sec:event-profiling-info-descriptors>> for the profiling information
+descriptors that are defined by the <<core-spec>>.
 
 '''
 
@@ -4948,8 +4951,8 @@ the [code]#Param# template parameter to [api]#event::get_profiling_info#.
 Each profiling descriptor returns a 64-bit timestamp that represents the number
 of nanoseconds that have elapsed since some implementation-defined timebase.
 All events that share the same backend are guaranteed to share the same
-timebase, therefore the difference between two timestamps from the same backend
-yields the number of nanoseconds that have elapsed between those events.
+timebase, and therefore the difference between two timestamps from the same
+backend yields the number of nanoseconds that have elapsed between those events.
 
 When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
 the value returned by or the exceptions thrown by the
@@ -4969,11 +4972,6 @@ struct command_submit {
 
 _Returns:_ The timestamp for when the associated <<command-group>> was submitted
 to the [code]#queue#.
-
-_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
-SYCL queue that submitted the <<command-group>> that this event is associated
-with was not constructed with the [api]#property::queue::enable_profiling#
-property.
 
 _Remarks:_
 
@@ -5000,11 +4998,6 @@ becomes either [api]#info::event_command_status::running# or
 
 _Returns:_ The timestamp for when the action associated with the
 <<command-group>> (e.g., kernel invocation) started executing on the device.
-
-_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
-SYCL queue that submitted the <<command-group>> that this event is associated
-with was not constructed with the [api]#property::queue::enable_profiling#
-property.
 
 _Remarks:_
 
@@ -5035,11 +5028,6 @@ becomes [api]#info::event_command_status::complete#.
 
 _Returns:_ The timestamp for when the action associated with the
 <<command-group>> (e.g., kernel invocation) finished executing on the device.
-
-_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
-SYCL queue that submitted the <<command-group>> that this event is associated
-with was not constructed with the [api]#property::queue::enable_profiling#
-property.
 
 _Remarks:_
 
