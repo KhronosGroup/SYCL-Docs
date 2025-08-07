@@ -44,12 +44,12 @@ template <int Dimensions = 1> class group {
 
   // Deprecated in SYCL 2020.
   template <typename WorkItemFunctionT>
-  void parallel_for_work_item(const noexcept WorkItemFunctionT& func) const noexcept;
+  void parallel_for_work_item(const WorkItemFunctionT& func) const noexcept;
 
   // Deprecated in SYCL 2020.
   template <typename WorkItemFunctionT>
   void parallel_for_work_item(range<Dimensions> logicalRange,
-                              const noexcept WorkItemFunctionT& func) const noexcept;
+                              const WorkItemFunctionT& func) const noexcept;
 
   // Deprecated in SYCL 2020. 
   template <typename DataT>
