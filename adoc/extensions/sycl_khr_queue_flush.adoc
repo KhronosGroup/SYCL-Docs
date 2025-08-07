@@ -1,0 +1,87 @@
+[[sec:khr-queue-flush]]
+= sycl_khr_queue_flush
+
+This extension allows developers to ensure that device code is able to make
+forward progress without the need to call [api]#queue::wait#.
+
+[[sec:khr-queue-flush-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-queue-flush-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_QUEUE_FLUSH# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-queue-flush-queue]]
+== Extensions to the queue class
+
+This extension adds the following function to the [code]#sycl::queue# class.
+
+'''
+[source,role=synopsis,id=api:khr-queue-flush-queue]
+----
+namespace sycl {
+class queue {
+  void khr_flush() const;
+  // ...
+};
+}
+----
+
+[[sec:khr-queue-flush-queue-menber-funcs]]
+=== Member functions
+
+.[apidef]#queue::khr_flush#
+[source,role=synopsis,id=api:queue-khr-flush]
+----
+void khr_flush() const
+----
+
+_Effects:_ Ensure that device code is able to make forward progress, as if an
+unspecified host thread providing concurrent forward progress guarantees called
+[api]#queue::wait#.
+
+{note} Calling this function is an implementation-independent way to ensure that
+pending commands can start executing on the device without blocking the calling
+thread.
+Exactly when pending commands start executing is unspecified, as it depends on
+the scheduling behavior(s) of implementations and individual devices.
+However, if a call to [api]#queue::wait# would have been unblocked in a finite
+amount of time, a call to [api]#queue::khr_flush# guarantees that pending
+commands on that queue will execute in a finite amount of time.
+{endnote}
+
+'''
+
+[[sec:khr-queue-flush-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+int main() {
+  sycl::queue Q;
+  auto e = Q.single_task([] {});
+  Q.khr_flush();
+  // Note: there's no wait.
+  // Without flushing, whether the event is marked as complete is implementation-defined.
+  while (e.get_info<sycl::info::event::command_execution_status>() !=
+         sycl::info::event_command_status::complete) {
+  };
+}
+----
