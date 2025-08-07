@@ -12032,14 +12032,14 @@ include::{header_dir}/range.h[lines=4..-1]
 a@
 [source]
 ----
-range()
+range() noexcept;
 ----
    a@ Construct a SYCL [code]#range# with the value [code]#0# for each dimension.
 
 a@
 [source]
 ----
-range(std::size_t dim0)
+range(std::size_t dim0) noexcept;
 ----
    a@ Construct a 1D range with value dim0.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12048,7 +12048,7 @@ range(std::size_t dim0)
 a@
 [source]
 ----
-range(std::size_t dim0, std::size_t dim1)
+range(std::size_t dim0, std::size_t dim1) noexcept;
 ----
    a@ Construct a 2D range with values dim0 and dim1.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12057,7 +12057,7 @@ range(std::size_t dim0, std::size_t dim1)
 a@
 [source]
 ----
-range(std::size_t dim0, std::size_t dim1, std::size_t dim2)
+range(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 ----
    a@ Construct a 3D range with values dim0, dim1 and dim2.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12075,7 +12075,7 @@ range(std::size_t dim0, std::size_t dim1, std::size_t dim2)
 a@
 [source]
 ----
-size_t get(int dimension) const
+size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12085,7 +12085,7 @@ size_t get(int dimension) const
 a@
 [source]
 ----
-size_t& operator[](int dimension)
+size_t& operator[](int dimension) noexcept;
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
@@ -12095,7 +12095,7 @@ size_t& operator[](int dimension)
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12105,7 +12105,7 @@ size_t operator[](int dimension) const
 a@
 [source]
 ----
-size_t size() const
+size_t size() const noexcept;
 ----
    a@ Return the size of the range computed as dimension0*...*dimensionN.
 
@@ -12121,7 +12121,7 @@ size_t size() const
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const range& rhs)
+range operatorOP(const range& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12141,7 +12141,7 @@ is the cast to [code]#std::size_t#.
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const std::size_t& rhs)
+range operatorOP(const range& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12161,7 +12161,7 @@ the operator returns a [code]#bool#, the result is the cast to
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const range& rhs)
+range& operatorOP(range& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
@@ -12174,7 +12174,7 @@ to [code]#std::size_t#.
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const std::size_t& rhs)
+range& operatorOP(range& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
@@ -12187,7 +12187,7 @@ operator returns a [code]#bool#, the result is the cast to
 a@
 [source]
 ----
-range operatorOP(const std::size_t& lhs, const range& rhs)
+range operatorOP(const std::size_t& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12207,7 +12207,7 @@ the [code]#lhs# [code]#std::size_t# and each element of the
 a@
 [source]
 ----
-range operatorOP(const range& rhs)
+range operatorOP(const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: unary [code]#pass:[+]#, unary [code]#-#.
 
@@ -12220,7 +12220,7 @@ the [code]#rhs# SYCL [code]#range#.
 a@
 [source]
 ----
-range& operatorOP(range& rhs)
+range& operatorOP(range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -12231,7 +12231,7 @@ of an element-wise [code]#OP# operator on each element of the [code]#rhs#
 a@
 [source]
 ----
-range operatorOP(range& lhs, int)
+range operatorOP(range& lhs, int) noexcept;
 ----
    a@ Where [code]#OP# is: postfix [code]#pass:[++]#, postfix [code]#--#.
 
@@ -12283,7 +12283,7 @@ a@
 nd_range<Dimensions>(
 range<Dimensions> globalSize,
     range<Dimensions> localSize,
-    id<Dimensions> offset = id<Dimensions>())
+    id<Dimensions> offset = id<Dimensions>()) noexcept;
 ----
    a@ Construct an [code]#nd_range# from the local and global
       constituent ranges. Supplying the option offset is
@@ -12302,21 +12302,21 @@ range<Dimensions> globalSize,
 a@
 [source]
 ----
-range<Dimensions> get_global_range() const
+range<Dimensions> get_global_range() const noexcept;
 ----
    a@ Return the constituent global range.
 
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Return the constituent local range.
 
 a@
 [source]
 ----
-range<Dimensions> get_group_range() const
+range<Dimensions> get_group_range() const noexcept;
 ----
    a@ Return a range representing the number of groups in each
       dimension.  This range would result from
@@ -12325,7 +12325,7 @@ range<Dimensions> get_group_range() const
 a@
 [source]
 ----
-id<Dimensions> get_offset() const
+id<Dimensions> get_offset() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12369,14 +12369,14 @@ include::{header_dir}/id.h[lines=4..-1]
 a@
 [source]
 ----
-id()
+id() noexcept;
 ----
    a@ Construct a SYCL [code]#id# with the value [code]#0# for each dimension.
 
 a@
 [source]
 ----
-id(std::size_t dim0)
+id(std::size_t dim0) noexcept;
 ----
    a@ Construct a 1D [code]#id# with value dim0.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12385,7 +12385,7 @@ id(std::size_t dim0)
 a@
 [source]
 ----
-id(std::size_t dim0, std::size_t dim1)
+id(std::size_t dim0, std::size_t dim1) noexcept;
 ----
    a@ Construct a 2D [code]#id# with values dim0, dim1.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12394,7 +12394,7 @@ id(std::size_t dim0, std::size_t dim1)
 a@
 [source]
 ----
-id(std::size_t dim0, std::size_t dim1, std::size_t dim2)
+id(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 ----
    a@ Construct a 3D [code]#id# with values dim0, dim1, dim2.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12403,14 +12403,14 @@ id(std::size_t dim0, std::size_t dim1, std::size_t dim2)
 a@
 [source]
 ----
-id(const range<Dimensions>& range)
+id(const range<Dimensions>& range) noexcept;
 ----
    a@ Construct an [code]#id# from the dimensions of [code]#range#.
 
 a@
 [source]
 ----
-id(const item<Dimensions>& item)
+id(const item<Dimensions>& item) noexcept;
 ----
    a@ Construct an [code]#id# from [code]#item.get_id()#.
 
@@ -12426,7 +12426,7 @@ id(const item<Dimensions>& item)
 a@
 [source]
 ----
-size_t get(int dimension) const
+size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of this [code]#id# object.
       Results in undefined behavior if [code]#dimension# is not in the range
@@ -12435,7 +12435,7 @@ size_t get(int dimension) const
 a@
 [source]
 ----
-size_t& operator[](int dimension)
+size_t& operator[](int dimension) noexcept;
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
@@ -12445,7 +12445,7 @@ size_t& operator[](int dimension)
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
@@ -12455,7 +12455,7 @@ size_t operator[](int dimension) const
 a@
 [source]
 ----
-operator std::size_t() const
+operator std::size_t() const noexcept;
 ----
    a@ Available only when: [code]#Dimensions == 1#
 
@@ -12471,7 +12471,7 @@ Returns the same value as [code]#get(0)#.
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const id& rhs)
+id operatorOP(const id& lhs, const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12487,7 +12487,7 @@ If the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const std::size_t& rhs)
+id operatorOP(const id& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12503,7 +12503,7 @@ operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const id& rhs)
+id& operatorOP(id& lhs, const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -12518,7 +12518,7 @@ the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const std::size_t& rhs)
+id& operatorOP(id& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -12532,7 +12532,7 @@ returns a [code]#bool# the result is the cast to [code]#std::size_t#.
 a@
 [source]
 ----
-id operatorOP(const std::size_t& lhs, const id& rhs)
+id operatorOP(const std::size_t& lhs, const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12548,7 +12548,7 @@ the [code]#lhs# [code]#std::size_t# and each element of the
 a@
 [source]
 ----
-id operatorOP(const id& rhs)
+id operatorOP(const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: unary [code]#pass:[+]#, unary [code]#-#.
 
@@ -12561,7 +12561,7 @@ the [code]#rhs# SYCL [code]#id#.
 a@
 [source]
 ----
-id& operatorOP(id& rhs)
+id& operatorOP(id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -12572,7 +12572,7 @@ of an element-wise [code]#OP# operator on each element of the [code]#rhs#
 a@
 [source]
 ----
-id operatorOP(id& lhs, int)
+id operatorOP(id& lhs, int) noexcept;
 ----
    a@ Where [code]#OP# is: postfix [code]#pass:[++]#, postfix [code]#--#.
 
@@ -12625,7 +12625,7 @@ include::{header_dir}/item.h[lines=4..-1]
 a@
 [source]
 ----
-id<Dimensions> get_id() const
+id<Dimensions> get_id() const noexcept;
 ----
    a@ Return the constituent [code]#id#
       representing the work-item's position in the iteration space.
@@ -12633,21 +12633,21 @@ id<Dimensions> get_id() const
 a@
 [source]
 ----
-size_t get_id(int dimension) const
+size_t get_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id(dimension)#.
 
 a@
 [source]
 ----
-range<Dimensions> get_range() const
+range<Dimensions> get_range() const noexcept;
 ----
    a@ Returns a [code]#range# representing the dimensions of the
       range of possible values of the [code]#item#.
@@ -12655,14 +12655,14 @@ range<Dimensions> get_range() const
 a@
 [source]
 ----
-size_t get_range(int dimension) const
+size_t get_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_range().get(dimension)#.
 
 a@
 [source]
 ----
-id<Dimensions> get_offset() const
+id<Dimensions> get_offset() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12677,7 +12677,7 @@ This member function is only available if [code]#WithOffset# is [code]#true#.
 a@
 [source]
 ----
-operator item<Dimensions, true>() const
+operator item<Dimensions, true>() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12691,7 +12691,7 @@ write code that assumes an offset and still provides an offset-less [code]#item#
 a@
 [source]
 ----
-operator std::size_t() const
+operator std::size_t() const noexcept;
 ----
    a@ Available only when: [code]#Dimensions == 1#
 
@@ -12700,7 +12700,7 @@ Returns the same value as [code]#get_id(0)#.
 a@
 [source]
 ----
-size_t get_linear_id() const
+size_t get_linear_id() const noexcept;
 ----
    a@ Return the id as a linear index value. Calculating a linear
       address from the multi-dimensional index follows
@@ -12748,7 +12748,7 @@ include::{header_dir}/nditem.h[lines=4..-1]
 a@
 [source]
 ----
-id<Dimensions> get_global_id() const
+id<Dimensions> get_global_id() const noexcept;
 ----
    a@ Return the constituent <<global-id>> representing the
       work-item's position in the global iteration space.
@@ -12756,7 +12756,7 @@ id<Dimensions> get_global_id() const
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const
+size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
@@ -12767,7 +12767,7 @@ size_t get_global_id(int dimension) const
 a@
 [source]
 ----
-size_t get_global_linear_id() const
+size_t get_global_linear_id() const noexcept;
 ----
    a@ Return the constituent <<global-id>> as a linear index value, representing the work-item's
    position in the global iteration space.  The linear address is calculated from the
@@ -12777,7 +12777,7 @@ size_t get_global_linear_id() const
 a@
 [source]
 ----
-id<Dimensions> get_local_id() const
+id<Dimensions> get_local_id() const noexcept;
 ----
    a@ Return the constituent <<local-id>> representing the
       work-item's position within the current <<work-group>>.
@@ -12785,7 +12785,7 @@ id<Dimensions> get_local_id() const
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const
+size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
@@ -12796,7 +12796,7 @@ size_t get_local_id(int dimension) const
 a@
 [source]
 ----
-size_t get_local_linear_id() const
+size_t get_local_linear_id() const noexcept;
 ----
    a@ Return the constituent <<local-id>> as a linear index value, representing the work-item's
    position within the current <<work-group>>.  The linear address is calculated from the
@@ -12805,7 +12805,7 @@ size_t get_local_linear_id() const
 a@
 [source]
 ----
-group<Dimensions> get_group() const
+group<Dimensions> get_group() const noexcept;
 ----
    a@ Return the constituent <<work-group>>, [code]#group#
       representing the <<work-group>>'s position within the overall
@@ -12814,14 +12814,14 @@ group<Dimensions> get_group() const
 a@
 [source]
 ----
-sub_group get_sub_group() const
+sub_group get_sub_group() const noexcept;
 ----
    a@ Return a [code]#sub_group# representing the <<sub-group>> to which the work-item belongs.
 
 a@
 [source]
 ----
-size_t get_group(int dimension) const
+size_t get_group(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
@@ -12832,7 +12832,7 @@ size_t get_group(int dimension) const
 a@
 [source]
 ----
-size_t get_group_linear_id() const
+size_t get_group_linear_id() const noexcept;
 ----
    a@ Return the group id as a linear index value. Calculating a linear address
       from a multi-dimensional index follows <<sec:multi-dim-linearization>>.
@@ -12840,14 +12840,14 @@ size_t get_group_linear_id() const
 a@
 [source]
 ----
-range<Dimensions> get_group_range() const
+range<Dimensions> get_group_range() const noexcept;
 ----
    a@ Returns the number of <<work-group,work-groups>> in the iteration space.
 
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const
+size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
@@ -12857,7 +12857,7 @@ size_t get_group_range(int dimension) const
 a@
 [source]
 ----
-range<Dimensions> get_global_range() const
+range<Dimensions> get_global_range() const noexcept;
 ----
    a@ Returns a [code]#range# representing the dimensions of the
       global iteration space.
@@ -12865,14 +12865,14 @@ range<Dimensions> get_global_range() const
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const
+size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Returns a [code]#range# representing the dimensions of the current
       work-group.
@@ -12880,14 +12880,14 @@ range<Dimensions> get_local_range() const
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const
+size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
 a@
 [source]
 ----
-id<Dimensions> get_offset() const
+id<Dimensions> get_offset() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12898,7 +12898,7 @@ id<Dimensions> get_offset() const
 a@
 [source]
 ----
-nd_range<Dimensions> get_nd_range() const
+nd_range<Dimensions> get_nd_range() const noexcept;
 ----
    a@ Returns the [code]#nd_range# of the current execution.
 
@@ -12908,7 +12908,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12921,7 +12921,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12934,7 +12934,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12947,7 +12947,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12960,7 +12960,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -12977,7 +12977,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -12994,7 +12994,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13011,7 +13011,7 @@ a@
 template <typename DestDataT, SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13025,7 +13025,7 @@ destination stride specified by [code]#destStride# and returns a SYCL
 a@
 [source]
 ----
-template <typename... EventTN> void wait_for(EventTN... events) const
+template <typename... EventTN> void wait_for(EventTN... events) const noexcept;
 ----
    a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
@@ -13076,7 +13076,7 @@ include::{header_dir}/hitem.h[lines=4..-1]
 a@
 [source]
 ----
-item<Dimensions, false> get_global() const
+item<Dimensions, false> get_global() const noexcept;
 ----
    a@ Return the constituent global <<item>> representing the
       work-item's position in the global iteration space as provided upon kernel invocation.
@@ -13084,14 +13084,14 @@ item<Dimensions, false> get_global() const
 a@
 [source]
 ----
-item<Dimensions, false> get_local() const
+item<Dimensions, false> get_local() const noexcept;
 ----
    a@ Return the same value as [code]#get_logical_local()#.
 
 a@
 [source]
 ----
-item<Dimensions, false> get_logical_local() const
+item<Dimensions, false> get_logical_local() const noexcept;
 ----
    a@ Return the constituent element of the logical local <<item>>
       work-item's position in the local iteration space as provided upon the invocation of the
@@ -13107,7 +13107,7 @@ of the logical id and the physical range:
 a@
 [source]
 ----
-item<Dimensions, false> get_physical_local() const
+item<Dimensions, false> get_physical_local() const noexcept;
 ----
    a@ Return the constituent element of the physical local <<item>>
       work-item's position in the local iteration space as provided (by the user or the runtime)
@@ -13116,112 +13116,112 @@ item<Dimensions, false> get_physical_local() const
 a@
 [source]
 ----
-range<Dimensions> get_global_range() const
+range<Dimensions> get_global_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_range()#
 
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const
+size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_global_id() const
+id<Dimensions> get_global_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_id()#
 
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const
+size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_range()#
 
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const
+size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_local_id() const
+id<Dimensions> get_local_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_id()#
 
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const
+size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
 a@
 [source]
 ----
-range<Dimensions> get_logical_local_range() const
+range<Dimensions> get_logical_local_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_range()#
 
 a@
 [source]
 ----
-size_t get_logical_local_range(int dimension) const
+size_t get_logical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_logical_local_id() const
+id<Dimensions> get_logical_local_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_id()#
 
 a@
 [source]
 ----
-size_t get_logical_local_id(int dimension) const
+size_t get_logical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
 a@
 [source]
 ----
-range<Dimensions> get_physical_local_range() const
+range<Dimensions> get_physical_local_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_range()#
 
 a@
 [source]
 ----
-size_t get_physical_local_range(int dimension) const
+size_t get_physical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_physical_local_id() const
+id<Dimensions> get_physical_local_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_id()#
 
 a@
 [source]
 ----
-size_t get_physical_local_id(int dimension) const
+size_t get_physical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
@@ -13267,7 +13267,7 @@ include::{header_dir}/group.h[lines=4..-1]
 a@
 [source]
 ----
-id<Dimensions> get_group_id() const
+id<Dimensions> get_group_id() const noexcept;
 ----
    a@ Return an <<id>> representing the index of the work-group within the
       global <<nd-range>> for every dimension.  Since the work-items in a
@@ -13278,14 +13278,14 @@ id<Dimensions> get_group_id() const
 a@
 [source]
 ----
-size_t get_group_id(int dimension) const
+size_t get_group_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
 a@
 [source]
 ----
-id<Dimensions> get_local_id() const
+id<Dimensions> get_local_id() const noexcept;
 ----
    a@ Return a SYCL [code]#id# representing the calling work-item's position
       within the <<work-group>>.
@@ -13296,7 +13296,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const
+size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
@@ -13306,7 +13306,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Return a SYCL [code]#range# representing all dimensions of the local range.
       This local range may have been provided by the programmer, or chosen by the <<sycl-runtime>>.
@@ -13314,35 +13314,35 @@ range<Dimensions> get_local_range() const
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const
+size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
 a@
 [source]
 ----
-range<Dimensions> get_group_range() const
+range<Dimensions> get_group_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const
+size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexecpt;
 ----
    a@ Equivalent to [code]#return get_group_id(dimension)#.
 
 a@
 [source]
 ----
-range<Dimensions> get_max_local_range() const
+range<Dimensions> get_max_local_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the maximum number of work-items in any <<work-group>>
       in the [code]#nd_range#.
@@ -13350,7 +13350,7 @@ range<Dimensions> get_max_local_range() const
 a@
 [source]
 ----
-size_t get_group_linear_id() const
+size_t get_group_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the <<work-group-id>>.
       Calculating a linear <<work-group-id>>
@@ -13359,14 +13359,14 @@ size_t get_group_linear_id() const
 a@
 [source]
 ----
-size_t get_group_linear_range() const
+size_t get_group_linear_range() const noexcept;
 ----
    a@ Return the total number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
 ----
-size_t get_local_linear_id() const
+size_t get_local_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the calling work-item's <<local-id>>.
       Calculating a linear <<local-id>>
@@ -13378,14 +13378,14 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_linear_range() const
+size_t get_local_linear_range() const noexcept;
 ----
    a@ Return the total number of work-items in the <<work-group>>.
 
 a@
 [source]
 ----
-bool leader() const
+bool leader() const noexcept;
 ----
    a@ Return true for exactly one work-item in the <<work-group>>, if the
       calling work-item is the leader of the work-group, and false for all
@@ -13400,7 +13400,7 @@ a@
 [source]
 ----
 template <typename WorkItemFunctionT>
-void parallel_for_work_item(const WorkItemFunctionT& func) const
+void parallel_for_work_item(const WorkItemFunctionT& func) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Launch the work-items for this work-group.
@@ -13424,7 +13424,7 @@ a@
 ----
 template <typename WorkItemFunctionT>
 void parallel_for_work_item(range<Dimensions> logicalRange,
-                            const WorkItemFunctionT& func) const
+                            const WorkItemFunctionT& func) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Launch the work-items for this work-group using a logical local range.
@@ -13453,7 +13453,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13466,7 +13466,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13479,7 +13479,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13492,7 +13492,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13505,7 +13505,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13522,7 +13522,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13539,7 +13539,7 @@ a@
 template <typename DestDataT, SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13553,7 +13553,7 @@ destination stride specified by [code]#destStride# and returns a SYCL
 a@
 [source]
 ----
-template <typename... EventTN> void wait_for(EventTN... events) const
+template <typename... EventTN> void wait_for(EventTN... events) const noexcept;
 ----
    a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
@@ -13594,7 +13594,7 @@ include::{header_dir}/subgroup.h[lines=4..-1]
 a@
 [source]
 ----
-id<1> get_group_id() const
+id<1> get_group_id() const noexcept;
 ----
    a@ Return an <<id>> representing the index of the sub-group within the
       <<work-group>>.  Since the work-items that compose a sub-group are chosen
@@ -13606,7 +13606,7 @@ id<1> get_group_id() const
 a@
 [source]
 ----
-id<1> get_local_id() const
+id<1> get_local_id() const noexcept;
 ----
    a@ Return a SYCL [code]#id# representing the calling work-item's position
       within the <<sub-group>>.
@@ -13614,7 +13614,7 @@ id<1> get_local_id() const
 a@
 [source]
 ----
-range<1> get_local_range() const
+range<1> get_local_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the size of the <<sub-group>>.
       This size may be less than the value returned by
@@ -13625,7 +13625,7 @@ range<1> get_local_range() const
 a@
 [source]
 ----
-range<1> get_group_range() const
+range<1> get_group_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the number of
       <<sub-group,sub-groups>> in the <<work-group>>.
@@ -13633,7 +13633,7 @@ range<1> get_group_range() const
 a@
 [source]
 ----
-range<1> get_max_local_range() const
+range<1> get_max_local_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the maximum number of work-items
       permitted in a <<sub-group>> for the executing kernel.  This value may
@@ -13643,35 +13643,35 @@ range<1> get_max_local_range() const
 a@
 [source]
 ----
-uint32_t get_group_linear_id() const
+uint32_t get_group_linear_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_id()[0]#.
 
 a@
 [source]
 ----
-uint32_t get_group_linear_range() const
+uint32_t get_group_linear_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_range()[0]#.
 
 a@
 [source]
 ----
-uint32_t get_local_linear_id() const
+uint32_t get_local_linear_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_id()[0]#.
 
 a@
 [source]
 ----
-uint32_t get_local_linear_range() const
+uint32_t get_local_linear_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range()[0]#.
 
 a@
 [source]
 ----
-bool leader() const
+bool leader() const noexcept;
 ----
    a@ Return true for exactly one work-item in the <<sub-group>>, if the
       calling work-item is the leader of the sub-group, and false for all
