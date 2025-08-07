@@ -4,11 +4,15 @@
 namespace sycl {
 
 class handler {
- private:
-  // implementation defined constructor
-  handler(___unspecified___);
-
  public:
+  handler() = delete;
+
+  // A handler cannot be moved or copied.
+  handler(const handler&) = delete;
+  handler(handler&&) = delete;
+  handler& operator=(const handler&) = delete;
+  handler& operator=(handler&&) = delete;
+
   template <typename DataT, int Dimensions, access_mode AccessMode,
             target AccessTarget, access::placeholder IsPlaceholder>
   void require(
