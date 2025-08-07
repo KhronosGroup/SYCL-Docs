@@ -6,56 +6,56 @@ template <int Dimensions = 1> class id {
  public:
   static constexpr int dimensions = Dimensions;
 
-  id();
+  id() noexcept;
 
   /* The following constructor is only available in the id class
    * specialization where: Dimensions==1 */
-  id(std::size_t dim0);
+  id(std::size_t dim0) noexcept;
   /* The following constructor is only available in the id class
    * specialization where: Dimensions==2 */
-  id(std::size_t dim0, std::size_t dim1);
+  id(std::size_t dim0, std::size_t dim1) noexcept;
   /* The following constructor is only available in the id class
    * specialization where: Dimensions==3 */
-  id(std::size_t dim0, std::size_t dim1, std::size_t dim2);
+  id(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 
   /* -- common interface members -- */
 
-  id(const range<Dimensions>& range);
-  id(const item<Dimensions>& item);
+  id(const range<Dimensions>& range) noexcept;
+  id(const item<Dimensions>& item) noexcept;
 
-  std::size_t get(int dimension) const;
-  std::size_t& operator[](int dimension);
-  std::size_t operator[](int dimension) const;
+  std::size_t get(int dimension) const noexcept;
+  std::size_t& operator[](int dimension) noexcept;
+  std::size_t operator[](int dimension) const noexcept;
 
   // only available if Dimensions == 1
-  operator std::size_t() const;
+  operator std::size_t() const noexcept;
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend id operatorOP(const id& lhs, const id& rhs) { /* ... */
+  friend id operatorOP(const id& lhs, const id& rhs) noexcept { /* ... */
   }
-  friend id operatorOP(const id& lhs, const std::size_t& rhs) { /* ... */
+  friend id operatorOP(const id& lhs, const std::size_t& rhs) noexcept { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
-  friend id& operatorOP(id& lhs, const id& rhs) { /* ... */
+  friend id& operatorOP(id& lhs, const id& rhs) noexcept { /* ... */
   }
-  friend id& operatorOP(id& lhs, const std::size_t& rhs) { /* ... */
+  friend id& operatorOP(id& lhs, const std::size_t& rhs) noexcept { /* ... */
   }
 
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend id operatorOP(const std::size_t& lhs, const id& rhs) { /* ... */
+  friend id operatorOP(const std::size_t& lhs, const id& rhs) noexcept { /* ... */
   }
 
   // OP is unary +, -
-  friend id operatorOP(const id& rhs) { /* ... */
+  friend id operatorOP(const id& rhs) noexcept { /* ... */
   }
 
   // OP is prefix ++, --
-  friend id& operatorOP(id& rhs) { /* ... */
+  friend id& operatorOP(id& rhs) noexcept { /* ... */
   }
 
   // OP is postfix ++, --
-  friend id operatorOP(id& lhs, int) { /* ... */
+  friend id operatorOP(id& lhs, int) noexcept { /* ... */
   }
 };
 
