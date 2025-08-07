@@ -20573,7 +20573,20 @@ bool compare_exchange_weak(T& expected, T desired,
                            memory_order order = default_read_modify_write_order,
                            memory_scope scope = default_scope) const
 ----
-   a@ Equivalent to [code]#compare_exchange_weak(expected, desired, order, order, scope)#.
+   a@ Equivalent to:
+[source, c++]
+----
+memory_order success = order;
+memory_order failure;
+if (order == memory_order::acq_rel) {
+  failure = memory_order::acquire;
+} else if (order == memory_order::release) {
+  failure = memory_order::relaxed;
+} else {
+  failure = order;
+}
+return compare_exchange_weak(expected, desired, success, failure, scope);
+----
 
 a@
 [source]
@@ -20603,7 +20616,20 @@ bool compare_exchange_strong(
     T& expected, T desired,
     memory_order order = default_read_modify_write_order) const
 ----
-   a@ Equivalent to [code]#compare_exchange_strong(expected, desired, order, order, scope)#.
+   a@ Equivalent to:
+[source, c++]
+----
+memory_order success = order;
+memory_order failure;
+if (order == memory_order::acq_rel) {
+  failure = memory_order::acquire;
+} else if (order == memory_order::release) {
+  failure = memory_order::relaxed;
+} else {
+  failure = order;
+}
+return compare_exchange_strong(expected, desired, success, failure, scope);
+----
 
 |====
 
