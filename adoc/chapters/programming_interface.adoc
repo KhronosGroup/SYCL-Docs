@@ -5217,10 +5217,10 @@ _Effects (2):_ Equivalent to `buffer(bufferRange, AllocatorT{}, propList)`.
 .[apititle]#Construct with host memory#
 [source,role=synopsis,id=api:buffer-ctor-host-mem]
 ----
-buffer(T* hostData, const range<Dimensions>& bufferRange,          (2)
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
        AllocatorT allocator, const property_list& propList = {});
 
-buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (2)
        const property_list& propList = {});
 
 buffer(const T* hostData, const range<Dimensions>& bufferRange,    (3)
@@ -5405,6 +5405,7 @@ later.
 [code]#baseIndex# specifies the origin of the sub-buffer inside the buffer
 [code]#b#.
 [code]#subRange# specifies the size of the sub-buffer.
+
 The origin (based on [code]#baseIndex#) of the sub-buffer being constructed must
 be a multiple of the memory base address alignment of each SYCL [code]#device#
 which accesses data from the buffer.
@@ -5423,12 +5424,13 @@ _Throws:_
 * An [code]#exception# with the [code]#errc::invalid# error code if [code]#b# is
 a sub-buffer.
 
-* An [code]#exception# with the [code]#errc::invalid# error code if
-[code]#subRange# corresponds to a a non-contiguous region of [code]#b#.
+* An [code]#exception# with the [code]#errc::invalid# error code if the subrange
+formed by [code]#baseIndex# and [code]#subRange# is not a contiguous region of
+[code]#b#.
 
 * An [code]#exception# with the [code]#errc::invalid# error code if the sum of
 [code]#baseIndex# and [code]#subRange# in any dimension exceeds the parent
-buffer [code]#b# size [code]#bufferRange# in that dimension.
+buffer [code]#b# size ([code]#bufferRange#) in that dimension.
 
 '''
 
@@ -5552,10 +5554,10 @@ Deprecated in SYCL 2020.
 Use [code]#get_host_access()# instead.
 
 _Returns (1):_ A valid host [code]#accessor# to the buffer with the specified
-access mode and target.
+access mode.
 
 _Returns (2):_ A valid host [code]#accessor# to the buffer with the specified
-access mode and target.
+access mode.
 The accessor is a <<ranged-accessor>>, where the range starts at the given
 offset from the beginning of the buffer.
 
