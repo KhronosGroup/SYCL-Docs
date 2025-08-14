@@ -2,29 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
-namespace property {
-namespace buffer {
-class use_host_ptr {
- public:
-  use_host_ptr() = default;
-};
-
-class use_mutex {
- public:
-  use_mutex(std::mutex& mutexRef);
-
-  std::mutex* get_mutex_ptr() const;
-};
-
-class context_bound {
- public:
-  context_bound(context boundContext);
-
-  context get_context() const;
-};
-} // namespace buffer
-} // namespace property
-
 template <typename T, int Dimensions = 1,
           typename AllocatorT = buffer_allocator<std::remove_const_t<T>>>
 class buffer {
@@ -34,23 +11,23 @@ class buffer {
   using const_reference = const value_type&;
   using allocator_type = AllocatorT;
 
-  buffer(const range<Dimensions>& bufferRange,
-         const property_list& propList = {});
-
   buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {});
 
-  buffer(T* hostData, const range<Dimensions>& bufferRange,
+  buffer(const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
   buffer(T* hostData, const range<Dimensions>& bufferRange,
          AllocatorT allocator, const property_list& propList = {});
 
-  buffer(const T* hostData, const range<Dimensions>& bufferRange,
+  buffer(T* hostData, const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
   buffer(const T* hostData, const range<Dimensions>& bufferRange,
          AllocatorT allocator, const property_list& propList = {});
+
+  buffer(const T* hostData, const range<Dimensions>& bufferRange,
+         const property_list& propList = {});
 
   /* Available only if Container is a contiguous container:
        - std::data(container) and std::size(container) are well formed
@@ -83,13 +60,13 @@ class buffer {
          const range<Dimensions>& bufferRange,
          const property_list& propList = {});
 
-  template <class InputIterator>
-  buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
-               const property_list& propList = {});
+  template <typename InputIterator>
+  buffer(InputIterator first, InputIterator last, AllocatorT allocator,
+         const property_list& propList = {});
 
-  template <class InputIterator>
-  buffer<T, 1>(InputIterator first, InputIterator last,
-               const property_list& propList = {});
+  template <typename InputIterator>
+  buffer(InputIterator first, InputIterator last,
+         const property_list& propList = {});
 
   buffer(buffer& b, const id<Dimensions>& baseIndex,
          const range<Dimensions>& subRange);
@@ -159,28 +136,28 @@ class buffer {
 };
 
 // Deduction guides
-template <class InputIterator, class AllocatorT>
+template <typename InputIterator, typename AllocatorT>
 buffer(InputIterator, InputIterator, AllocatorT, const property_list& = {})
     -> buffer<typename std::iterator_traits<InputIterator>::value_type, 1,
               AllocatorT>;
 
-template <class InputIterator>
+template <typename InputIterator>
 buffer(InputIterator, InputIterator, const property_list& = {})
     -> buffer<typename std::iterator_traits<InputIterator>::value_type, 1>;
 
-template <class T, int Dimensions, class AllocatorT>
+template <typename T, int Dimensions, typename AllocatorT>
 buffer(const T*, const range<Dimensions>&, AllocatorT,
        const property_list& = {}) -> buffer<T, Dimensions, AllocatorT>;
 
-template <class T, int Dimensions>
+template <typename T, int Dimensions>
 buffer(const T*, const range<Dimensions>&, const property_list& = {})
     -> buffer<T, Dimensions>;
 
-template <class Container, class AllocatorT>
+template <typename Container, typename AllocatorT>
 buffer(Container&, AllocatorT, const property_list& = {})
     -> buffer<typename Container::value_type, 1, AllocatorT>;
 
-template <class Container>
+template <typename Container>
 buffer(Container&, const property_list& = {})
     -> buffer<typename Container::value_type, 1>;
 
