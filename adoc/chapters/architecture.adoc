@@ -1424,13 +1424,13 @@ must include the <<backend>>-specific headers for said <<backend>>.
 A <<command-group-function-object>> can be submitted either to a single queue to
 be executed on, or to a secondary queue.
 If a <<command-group-function-object>> fails to be enqueued to the primary
-queue, then the system may attempt to enqueue it to the secondary queue, if
-given as a parameter to the submit function.  It is implementation defined
+queue, then the implementation may attempt to enqueue it to the secondary queue,
+if given as a parameter to the submit function.  It is implementation defined
 whether the secondary queue is used as a fallback in this manner.
-If the <<command-group-function-object>> fails to be queued to both of these
-queues, or if it fails to be queued to the primary queue and the implementation
-elects not to enqueue it to the secondary queue, then a synchronous SYCL
-exception will be thrown.
+If the <<command-group-function-object>> fails to be enqueued to both of these
+queues, or if it fails to be enqueued to the primary queue and the
+implementation elects not to enqueue it to the secondary queue, then a
+synchronous SYCL exception will be thrown.
 
 It is possible that a command group may be successfully enqueued, but then
 asynchronously fail to run, for some reason.
