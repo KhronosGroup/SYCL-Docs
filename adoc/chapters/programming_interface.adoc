@@ -5431,19 +5431,21 @@ later.
 [code]#b#.
 [code]#subRange# specifies the size of the sub-buffer.
 
-The origin (based on [code]#baseIndex#) of the sub-buffer being constructed
-must be a multiple of the memory base address alignment of each SYCL
-[code]#device# which accesses data from the buffer.  This value is retrievable
-via the SYCL [code]#device# class info query
-[code]#info::device::mem_base_addr_align#.  Violating this requirement causes
-the implementation to throw an [code]#exception# with the [code]#errc::invalid#
-error code from the [code]#accessor# constructor (if the accessor is not a
-placeholder) or from [code]#handler::require()# (if the accessor is a
-placeholder).  If the accessor is bound to a <<command-group>> with a secondary
-queue, the sub-buffer's alignment must be compatible with both the primary
-queue's device and the secondary queue's device. If the implementation supports
-secondary queue fallback, it also throws this exception if the sub-buffer's
-alignment is not compatible with the secondary queue's device.
+The origin (based on [code]#baseIndex#) of the sub-buffer being constructed must
+be a multiple of the memory base address alignment of each SYCL [code]#device#
+which accesses data from the buffer.
+This value is retrievable via the SYCL [code]#device# class info query
+[code]#info::device::mem_base_addr_align#.
+Violating this requirement causes the implementation to throw an
+[code]#exception# with the [code]#errc::invalid# error code from the
+[code]#accessor# constructor (if the accessor is not a placeholder) or from
+[code]#handler::require()# (if the accessor is a placeholder).
+If the accessor is bound to a <<command-group>> with a secondary queue, the
+sub-buffer's alignment must be compatible with both the primary queue's device
+and the secondary queue's device.
+If the implementation supports secondary queue fallback, it also throws this
+exception if the sub-buffer's alignment is not compatible with the secondary
+queue's device.
 
 _Throws:_
 
@@ -14226,8 +14228,8 @@ A user can therefore supply a secondary queue when submitting a command group to
 the primary queue.
 If the <<sycl-runtime>> fails to enqueue or execute a command group on a primary
 queue, it can attempt to run the command group on the secondary queue.
-The circumstances in which the <<sycl-runtime>> may elect to
-fall-back from primary to secondary queue are unspecified.
+The circumstances in which the <<sycl-runtime>> may elect to fall-back from
+primary to secondary queue are unspecified.
 Even if a command group is run on the secondary queue, the requirement that host
 code within the command group is executed exactly once remains, regardless of
 whether the fallback queue is used for execution.
