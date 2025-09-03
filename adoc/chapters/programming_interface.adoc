@@ -1136,6 +1136,17 @@ _Returns:_ A [code]#std::vector# containing all of the <<root-device,root
 devices>> associated with this platform which have the device type specified by
 [code]#type#.
 
+{note}Since the concept of a "host device" does not exist in SYCL 2020, if
+[code]#type# is [code]#info::device_type::host# this function will always return
+an empty vector.{endnote}
+
+_Remarks_: If [code]#type# is [code]#info::device_type::all#, the
+[code]#std::vector# contains all root devices in this platform.
+If [code]#type# is [code]#info::device_type::automatic# and the platform is not
+empty, the [code]#std::vector# contains a single root device corresponding to an
+implementation-defined default device for this platform.
+If the platform is empty, any call to this function returns an empty vector.
+
 '''
 
 [[sec:platform-static-member-funcs]]
@@ -1851,6 +1862,16 @@ _Returns:_ A [code]#std::vector# containing all the <<root-device, root
 devices>> from all <<backend, SYCL backends>> available in the system which have
 the device type [code]#type#.
 
+{note}Since the concept of a "host device" does not exist in SYCL 2020, if
+[code]#type# is [code]#info::device_type::host# this function will always return
+an empty vector.{endnote}
+
+_Remarks_: If [code]#type# is [code]#info::device_type::all#, the
+[code]#std::vector# contains all root devices in the system.
+If [code]#type# is [code]#info::device_type::automatic#, the [code]#std::vector#
+contains one root device from each non-empty platform, corresponding to the
+device returned by [code]#platform::get_devices(info::device_type::automatic)#.
+
 '''
 
 [[sec:device-info-descriptors]]
@@ -1877,7 +1898,8 @@ struct device_type {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The device type associated with the device.
-May not return [api]#info::device_type::all#.
+May not return [code]#info::device_type::all# or
+[code]#info::device_type::automatic#.
 
 '''
 
@@ -3609,13 +3631,13 @@ application will not be able to submit kernels to that device _D_.
 ----
 namespace sycl::info {
 enum class device_type : /* unspecified */ {
-  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
-  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
-  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
-  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
-  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
-  host,
-  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
+  cpu,
+  gpu,
+  accelerator,
+  custom,
+  automatic,
+  host, // Deprecated by SYCL 2020
+  all
 };
 } // namespace sycl::info
 ----
