@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: MIT
 
 // Exposition only
@@ -21,7 +21,7 @@ class reducer {
   reducer& combine(const T& partial);
 
   /* Only available if Dimensions > 0 */
-  __unspecified__ operator[](size_t index)
+  __unspecified__ operator[](std::size_t index)
 
       /* Only available if identity value is known */
       T identity() const;

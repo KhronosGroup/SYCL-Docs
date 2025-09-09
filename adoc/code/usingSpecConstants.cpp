@@ -1,8 +1,8 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 #include <sycl/sycl.hpp>
-using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
+using namespace sycl;  // (optional) avoids need for "sycl::" before SYCL names
 
 using coeff_t = std::array<std::array<float, 3>, 3>;
 
@@ -16,8 +16,8 @@ void do_conv(buffer<float, 2> in, buffer<float, 2> out) {
   queue myQueue;
 
   myQueue.submit([&](handler& cgh) {
-    accessor in_acc { in, cgh, read_only };
-    accessor out_acc { out, cgh, write_only };
+    accessor in_acc{in, cgh, read_only};
+    accessor out_acc{out, cgh, write_only};
 
     // Set the coefficient of the convolution as constant.
     // This will build a specific kernel the coefficient available as literals.
