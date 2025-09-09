@@ -265,8 +265,10 @@ for kernel function interoperability.
 The availability and behavior of these template functions are defined by the
 <<backend>> specification document.
 
-The [code]#get_native# function must throw an [code]#exception# with the
-[code]#errc::backend_mismatch# error code if the backend of the SYCL object
+In host code, the [code]#get_native# function must throw a synchronous
+[code]#exception# with the [code]#errc::backend_mismatch# error code if the
+backend of the SYCL object doesn't match the target backend.
+In device code, the behavior is undefined if the backend of the SYCL object
 doesn't match the target backend.
 
 [[sec:backend-interoperability-make]]
@@ -593,7 +595,7 @@ A property may be applicable to more than one class, however some properties may
 not be compatible with each other.
 See the requirements for the properties of the SYCL [code]#buffer# class, SYCL
 [code]#unsampled_image# class and SYCL [code]#sampled_image# class in
-<<table.properties.buffer>> and <<table.properties.image>> respectively.
+<<sec:buffer-properties>> and <<table.properties.image>> respectively.
 
 Properties can be passed to a <<sycl-runtime>> class via an instance of
 [code]#property_list#.
@@ -604,7 +606,6 @@ A SYCL implementation or a <<backend>> may provide additional properties other
 than those defined here, provided they are defined in accordance with the
 requirements described in <<sec:headers-and-namespaces>>.
 
-[[subsec:properties-interface]]
 ==== Properties interface
 
 Each of the runtime classes mentioned above must provide a common interface of
@@ -1134,6 +1135,17 @@ get_devices(info::device_type type = info::device_type::all) const
 _Returns:_ A [code]#std::vector# containing all of the <<root-device,root
 devices>> associated with this platform which have the device type specified by
 [code]#type#.
+
+{note}Since the concept of a "host device" does not exist in SYCL 2020, if
+[code]#type# is [code]#info::device_type::host# this function will always return
+an empty vector.{endnote}
+
+_Remarks_: If [code]#type# is [code]#info::device_type::all#, the
+[code]#std::vector# contains all root devices in this platform.
+If [code]#type# is [code]#info::device_type::automatic# and the platform is not
+empty, the [code]#std::vector# contains a single root device corresponding to an
+implementation-defined default device for this platform.
+If the platform is empty, any call to this function returns an empty vector.
 
 '''
 
@@ -1850,6 +1862,16 @@ _Returns:_ A [code]#std::vector# containing all the <<root-device, root
 devices>> from all <<backend, SYCL backends>> available in the system which have
 the device type [code]#type#.
 
+{note}Since the concept of a "host device" does not exist in SYCL 2020, if
+[code]#type# is [code]#info::device_type::host# this function will always return
+an empty vector.{endnote}
+
+_Remarks_: If [code]#type# is [code]#info::device_type::all#, the
+[code]#std::vector# contains all root devices in the system.
+If [code]#type# is [code]#info::device_type::automatic#, the [code]#std::vector#
+contains one root device from each non-empty platform, corresponding to the
+device returned by [code]#platform::get_devices(info::device_type::automatic)#.
+
 '''
 
 [[sec:device-info-descriptors]]
@@ -1876,7 +1898,8 @@ struct device_type {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The device type associated with the device.
-May not return [api]#info::device_type::all#.
+May not return [code]#info::device_type::all# or
+[code]#info::device_type::automatic#.
 
 '''
 
@@ -3617,13 +3640,13 @@ application will not be able to submit kernels to that device _D_.
 ----
 namespace sycl::info {
 enum class device_type : /* unspecified */ {
-  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
-  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
-  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
-  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
-  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
-  host,
-  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
+  cpu,
+  gpu,
+  accelerator,
+  custom,
+  automatic,
+  host, // Deprecated by SYCL 2020
+  all
 };
 } // namespace sycl::info
 ----
@@ -4650,7 +4673,7 @@ When a queue is constructed with this property, the implementation captures
 profiling information for the <<command-group,command groups>> that are
 submitted to this queue.
 Applications can retrieve this profiling information by calling
-[code]#event::get_profiling_info# on the event that is returned when submitting
+[api]#event::get_profiling_info# on the event that is returned when submitting
 the command group.
 If the queue's associated device does not have [code]#aspect::queue_profiling#,
 passing this property to the queue's constructor causes the constructor to throw
@@ -4704,7 +4727,7 @@ a queue is destroyed, the handler is called and this might delay or block the
 destruction, according to the behavior of the handler.
 
 
-[[sec:interface.event]]
+[[sec:event-class]]
 === Event class
 
 An <<event>> in SYCL is an object that represents the status of an operation
@@ -4727,296 +4750,362 @@ execution.
 The SYCL [code]#event# class provides the common reference semantics (see
 <<sec:reference-semantics>>).
 
-The constructors and member functions of the SYCL [code]#event# class are listed
-in <<table.constructors.event>> and <<table.members.event>>, respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
 // Interface for class: event.h
 [source,,linenums]
 ----
 include::{header_dir}/event.h[lines=4..-1]
 ----
 
+[[sec:event-ctors]]
+==== Constructors
 
-[[table.constructors.event]]
-.Constructors of the [code]#event# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:event-ctor]
 ----
 event()
 ----
-   a@ Constructs an [code]#event# that is immediately ready.  The
-      [code]#event# has no dependencies and no associated commands.
-      Waiting on this [code]#event# will return immediately and querying
-      its status will return [code]#info::event_command_status::complete#.
 
-The event is constructed as though it was created from a default-constructed
-[code]#queue#.  Therefore, its backend is the same as the backend from the
-default device.
+_Effects:_ Constructs an [code]#event# that is immediately ready.
+The [code]#event# has no dependencies and no associated commands.
+Waiting on this [code]#event# will return immediately and querying its status
+will return [api]#info::event_command_status::complete#.
 
-|====
+_Remarks:_ The event is constructed as though it were created from a
+default-constructed [code]#queue#.
+Therefore, its backend is the same as the backend of the device selected by
+[code]#default_selector_v#.
 
+'''
 
+[[sec:event-member-funcs]]
+==== Member functions
 
-[[table.members.event]]
-.Member functions for the [code]#event# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apidef]#event::get_backend#
+[source,role=synopsis,id=api:queue-get_backend]
 ----
 backend get_backend() const noexcept
 ----
-   a@ Returns a [code]#backend# identifying the <<backend>> associated
-      with this [code]#event#.
 
-a@
-[source]
+_Returns:_ The <<backend>> associated with this event.
+
+'''
+
+.[apidef]#event::get_wait_list#
+[source,role=synopsis,id=api:event-get_wait_list]
 ----
 std::vector<event> get_wait_list()
 ----
-   a@ Return the list of events that this event waits for in
-      the dependence graph.  Only direct dependencies are returned,
-      and not transitive dependencies that direct dependencies wait on.
-      Whether already completed events are included in the returned list
-      is implementation-defined.
 
-a@
-[source]
+_Returns:_ The list of events that this event waits for in the dependence graph.
+Only direct dependencies are returned, and not transitive dependencies that
+direct dependencies wait on.
+
+_Remarks:_ Whether already completed events are included in the returned list is
+implementation-defined.
+
+'''
+
+.[apidef]#event::wait#
+[source,role=synopsis,id=api:event-wait]
 ----
 void wait()
 ----
-   a@ Blocks until all commands associated with this event and any dependent
-      events have completed.
 
-a@
-[source]
+_Effects:_ Blocks until all commands associated with this event and any
+dependent events have completed.
+
+'''
+
+.[apidef]#event::wait_and_throw#
+[source,role=synopsis,id=api-event-wait_and_throw]
 ----
 void wait_and_throw()
 ----
-   a@ Blocks until all commands associated with this event and any dependent
-      events have completed.
 
-At least all unconsumed <<async-error,asynchronous errors>> held by queues (or
-their associated contexts) which were used to enqueue commands associated with
-this event and any dependent events, are passed to the appropriate
-<<async-handler>> as described in <<subsubsec:async.handler.priorities>>.
+_Effects:_
 
-[NOTE]
-====
-This behavior is equivalent to calling [code]#queue::throw_asynchronous()# on
+* Blocks until all commands associated with this event and any dependent events
+  have completed.
+
+* At least all unconsumed <<async-error,asynchronous errors>> held by queues (or
+  their associated contexts) which were used to enqueue commands associated with
+  this event and any dependent events are passed to the appropriate
+  <<async-handler>> as described in <<subsubsec:async.handler.priorities>>.
+
+{note}This behavior is equivalent to calling [api]#queue::throw_asynchronous# on
 the queue associated with this event and any dependent events.
-====
+{endnote}
 
-a@
-[source]
+'''
+
+.[apidef]#event::get_info#
+[source,role=synopsis,id=api:event-get_info]
+----
+template <typename Param>
+typename Param::return_type get_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is an information descriptor
+for the event class.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, exceptions that are thrown, etc.
+See <<sec:event-info-descriptors>> for the event information descriptors that
+are defined by the <<core-spec>>.
+
+'''
+
+.[apidef]#event::get_backend_info#
+[source,role=synopsis,id=api:event-get_backend_info]
+----
+template <typename Param>
+typename Param::return_type get_backend_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is a backend information
+descriptor for the event class.
+
+_Throws:_ An [code]#exception# with the [code]#errc::backend_mismatch# error
+code if the backend that corresponds with [code]#Param# is different from the
+backend that is associated with this event.
+
+Each information descriptor specifies the return value and may also specify
+preconditions, additional exceptions that are thrown, etc.
+
+'''
+
+.[apidef]#event::get_profiling_info#
+[source,role=synopsis,id=api:event-get_profiling_info]
+----
+template <typename Param>
+typename Param::return_type get_profiling_info() const
+----
+
+_Constraints:_ Available only when [code]#Param# is a profiling information
+descriptor for the event class.
+
+_Effects:_ If the requested profiling information is unavailable when
+[code]#get_profiling_info# is called due to incompletion of
+<<command-group,command groups>> associated with the event, then the call to
+[code]#get_profiling_info# will block until the requested profiling information
+is available.
+
+{note} An example is asking for [code]#info::event_profiling::command_end# when
+the associated <<command-group>> action has yet to finish execution.
+{endnote}
+
+_Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
+SYCL queue that submitted the <<command-group>> that this event is associated
+with was not constructed with the [api]#property::queue::enable_profiling#
+property.
+
+Each profiling information descriptor specifies the return value and may also
+specify preconditions, additional exceptions that are thrown, etc.
+See <<sec:event-profiling-info-descriptors>> for the profiling information
+descriptors that are defined by the <<core-spec>>.
+
+'''
+
+[[sec:event-static-member-funcs]]
+==== Static member functions
+
+.[apidef]#event::wait (with event list)#
+[source,role=synopsis,id=api-event-wait-with-list]
 ----
 static void wait(const std::vector<event>& eventList)
 ----
-   a@ Behaves as if calling [code]#event::wait()# on each event in
-      [code]#eventList#.
 
-a@
-[source]
+_Effects:_ Behaves as if calling [api]#event::wait# on each event in
+[code]#eventList#.
+
+'''
+
+.[apidef]#event::wait_and_throw (with event list)#
+[source,role=synopsis,id=api-event-wait_and_throw-with-list]
 ----
 static void wait_and_throw(const std::vector<event>& eventList)
 ----
-   a@ Behaves as if calling [code]#event::wait_and_throw()# on each event in
-      [code]#eventList#.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_info() const
-----
-   a@ Queries this SYCL [code]#event# for information requested by the
-      template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in <<table.event.info>> to
-      facilitate returning the type associated with the [code]#Param#
-      parameter.
+_Effects:_ Behaves as if calling [api]#event::wait_and_throw# on each event in
+[code]#eventList#.
 
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_backend_info() const
-----
-   a@ Queries this SYCL [code]#event# for <<backend>>-specific information
-      requested by the template parameter [code]#Param#.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the <<backend>> specification.
-      Must throw an [code]#exception# with the [code]#errc::backend_mismatch#
-      error code if the <<backend>> that corresponds with [code]#Param# is different
-      from the <<backend>> that is associated with this [code]#event#.
-
-a@
-[source]
-----
-template <typename Param> typename Param::return_type get_profiling_info() const
-----
-   a@ Queries this SYCL [code]#event# for profiling information requested
-      by the parameter [code]#Param#. If the requested profiling information
-      is unavailable when [code]#get_profiling_info# is called due to
-      incompletion of <<command-group,command groups>> associated with the [code]#event#,
-      then the call to [code]#get_profiling_info# will block until
-      the requested profiling information is available. An example is asking for
-      [code]#info::event_profiling::command_end# when the associated
-      <<command-group>> action has yet to finish execution.
-      Calls to [code]#get_profiling_info# must throw an [code]#exception#
-      with the [code]#errc::invalid# error code if the SYCL
-      [code]#queue# which submitted the <<command-group>> this
-      SYCL [code]#event# is associated with was not constructed with
-      the [code]#property::queue::enable_profiling# property.
-      The type alias [code]#Param::return_type# must be defined in
-      accordance with the info parameters in
-      <<table.event.profilinginfo>> to facilitate returning the type
-      associated with the [code]#Param# parameter.
-
-|====
-
+'''
 
 [[sec:event-info-descriptors]]
-==== Event information and profiling descriptors
+==== Information descriptors
 
-An <<event>> can be queried for information using the [code]#get_info# member
-function of the [code]#event# class, specifying one of the info parameters in
-[code]#info::event#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<event>>.
-All info parameters in [code]#info::event# are specified in <<table.event.info>>
-and the synopsis for [code]#info::event# is described in
-<<appendix.event.descriptors>>.
+This section describes the information descriptors that can be used as the
+[code]#Param# template parameter to [api]#event::get_info#.
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the [api]#event::get_info#
+function.
 
-[[table.event.info]]
-.Event class information descriptors
-[width="100%",options="header",separator="@",cols="37%,19%,44%"]
-|====
-@ Event Descriptors @ Return type @ Description
-a@
-[source]
+'''
+
+.[apidef]#info::event::command_execution_status#
+[source,role=synopsis,id=api:info-event-command_execution_status]
 ----
-info::event::command_execution_status
+namespace sycl::info::event {
+struct command_execution_status {
+  using return_type = info::event_command_status;
+};
+} // namespace sycl::info::event
 ----
 
-    @ [.code]#info::event_command_status#
-   a@ Returns the event status of the command group and contained action
-      (e.g. kernel invocation) associated with this SYCL [code]#event#.
+_Returns:_ The event status of the command group and contained action (e.g.
+kernel invocation) associated with this event.
+The value returned is one of the following:
 
-|====
+* [api]#info::event_command_status::submitted#
 
-The [code]#info::event::command_execution_status# query returns one of the
-values defined in <<table.event.command-status>>.
+* [api]#info::event_command_status::running#
 
-[[table.event.command-status]]
-.Event command status
-[width="100%",options="header",separator="@",cols="45%,55%"]
-|====
-@ Status @ Description
-a@
-[source]
-----
-info::event_command_status::submitted
-----
-   a@ Indicates that the command has been submitted to the SYCL queue but has
-      not yet started running on the device.
+* [api]#info::event_command_status::complete#
 
-a@
-[source]
-----
-info::event_command_status::running
-----
-   a@ Indicates that the command has started running on the device but has not
-      yet completed.
+_Remarks:_ Template parameter to [api]#event::get_info#.
 
-a@
-[source]
-----
-info::event_command_status::complete
-----
-   a@ Indicates that the command has finished running on the device.
-      Attempting to wait on such an event will not block.
+'''
 
-Synchronization: When [code]#event::get_info# returns this value,
-the synchronization is equivalent to [code]#event::wait#.
+[[sec:event-profiling-info-descriptors]]
+==== Profiling information descriptors
 
-|====
-
-
-An <<event>> can be queried for profiling information using the
-[code]#get_profiling_info# member function of the [code]#event# class,
-specifying one of the profiling info parameters enumerated in
-[code]#info::event_profiling#.
-The possible values for each info parameter and any restrictions are defined in
-the specification of the <<backend>> associated with the <<event>>.
-All info parameters in [code]#info::event_profiling# are specified in
-<<table.event.profilinginfo>> and the synopsis for [code]#info::event_profiling#
-is described in <<appendix.event.descriptors>>.
+This section describes the profiling information descriptors that can be used as
+the [code]#Param# template parameter to [api]#event::get_profiling_info#.
 
 Each profiling descriptor returns a 64-bit timestamp that represents the number
 of nanoseconds that have elapsed since some implementation-defined timebase.
 All events that share the same backend are guaranteed to share the same
-timebase, therefore the difference between two timestamps from the same backend
-yields the number of nanoseconds that have elapsed between those events.
+timebase, and therefore the difference between two timestamps from the same
+backend yields the number of nanoseconds that have elapsed between those events.
 
-[[table.event.profilinginfo]]
-.Profiling information descriptors for the SYCL [code]#event# class
-[width="100%",options="header",separator="@",cols="43%,13%,44%"]
-|====
-@ Event information profiling descriptor @ Return type @ Description
-a@
-[source]
-----
-info::event_profiling::command_submit
-----
+When the description has a _Returns_, _Throws_, etc. paragraph, this indicates
+the value returned by or the exceptions thrown by the
+[api]#event::get_profiling_info# function.
 
-    @ [.code]#std::uint64_t#
-   a@ Returns a timestamp telling when the associated <<command-group>> was
-      submitted to the [code]#queue#.  This is always some time after the
-      <<command-group-function-object>> returns and before the associated call
-      to [code]#queue::submit# returns.
+'''
 
-a@
-[source]
+.[apidef]#info::event_profiling::command_submit#
+[source,role=synopsis,id=api:info-event_profiling-command_submit]
 ----
-info::event_profiling::command_start
+namespace sycl::info::event_profiling {
+struct command_submit {
+  using return_type = std::uint64_t;
+};
+} // namespace sycl::info::event_profiling
 ----
 
-    @ [.code]#std::uint64_t#
-   a@ Querying this profiling descriptor blocks until the event's state becomes
-      either [code]#info::event_command_status::running# or
-      [code]#info::event_command_status::complete#.  The returned timestamp
-      tells when the action associated with the <<command-group>> (e.g. kernel
-      invocation) started executing on the device.  For any given event, this
-      timestamp is always greater than or equal to the
-      [code]#info::event_profiling::command_submit# timestamp.  Implementations
-      are encouraged to return a timestamp that is as close as possible to the
-      point when the action starts running on the device, but there is no
-      specific accuracy that is guaranteed.
+_Returns:_ The timestamp corresponding to when the associated <<command-group>>
+was submitted to the [code]#queue#.
 
-a@
-[source]
+_Remarks:_
+
+* Template parameter to [api]#event::get_profiling_info#.
+
+* The timestamp is always some time after the <<command-group-function-object>>
+  returns and before the associated call to [code]#queue::submit# returns.
+
+'''
+
+.[apidef]#info::event_profiling::command_start#
+[source,role=synopsis,id=api:info-event_profiling-command_start]
 ----
-info::event_profiling::command_end
+namespace sycl::info::event_profiling {
+struct command_start {
+  using return_type = std::uint64_t;
+};
+} // namespace sycl::info::event_profiling
 ----
 
-    @ [.code]#std::uint64_t#
-   a@ Querying this profiling descriptor blocks until the event's state becomes
-      [code]#info::event_command_status::complete#.  The returned timestamp
-      tells when the action associated with the <<command-group>> (e.g. kernel
-      invocation) finished executing on the device.  For any given event, this
-      timestamp is always greater than or equal to the
-      [code]#info::event_profiling::command_start# timestamp.
+_Effects:_ Querying this profiling descriptor blocks until the event's state
+becomes either [api]#info::event_command_status::running# or
+[api]#info::event_command_status::complete#.
 
+_Returns:_ The timestamp corresponding to when the action associated with the
+<<command-group>> (e.g., kernel invocation) started executing on the device.
 
-|====
+_Remarks:_
 
+* Template parameter to [api]#event::get_profiling_info#.
 
+* The timestamp is always greater than or equal to the
+  [api]#info::event_profiling::command_submit# timestamp.
+
+{note} Implementations are encouraged to return a timestamp that is as close as
+possible to the point when the action starts running on the device, but there is
+no specific accuracy that is guaranteed.
+{endnote}
+
+'''
+
+.[apidef]#info::event_profiling::command_end#
+[source,role=synopsis,id=api:info-event_profiling-command_end]
+----
+namespace sycl::info::event_profiling {
+struct command_end {
+  using return_type = std::uint64_t;
+};
+} // namespace sycl::info::event_profiling
+----
+
+_Effects:_ Querying this profiling descriptor blocks until the event's state
+becomes [api]#info::event_command_status::complete#.
+
+_Returns:_ The timestamp corresponding to when the action associated with the
+<<command-group>> (e.g., kernel invocation) finished executing on the device.
+
+_Remarks:_
+
+* Template parameter to [api]#event::get_profiling_info#.
+
+* The timestamp is always greater than or equal to the
+  [api]#info::event_profiling::command_start# timestamp.
+
+'''
+
+[[sec:event-other-enumerations]]
+==== Other enumerations
+
+[[sec:device-enum-event_command_status]]
+===== Event command status
+
+[source,role=synopsis]
+----
+namespace sycl::info {
+enum class event_command_status : /* unspecified */ {
+  submitted,
+  running,
+  complete
+};
+} // namespace sycl::info
+----
+
+.[apidef]#info::event_command_status::submitted#
+[role=synopsis,id=api:info-event_command_status-submitted]
+--
+Indicates that the command has been submitted to the SYCL queue but has not yet
+started running on the device.
+--
+
+'''
+
+.[apidef]#info::event_command_status::running#
+[role=synopsis,id=api:info-event_command_status-running]
+--
+Indicates that the command has started running on the device but has not yet
+completed.
+--
+
+'''
+
+.[apidef]#info::event_command_status::complete#
+[role=synopsis,id=api:info-event_command_status-complete]
+--
+Indicates that the command has finished running on the device.
+Attempting to wait on such an event will not block.
+
+_Synchronization:_ When [api]#event::get_info# returns this value, the
+synchronization is equivalent to [api]#event::wait#.
+--
 
 [[sec:data.access.and.storage]]
 == Data access and storage in SYCL
@@ -5189,19 +5278,6 @@ still undefined behavior.
 The SYCL [code]#buffer# class template provides the common reference semantics
 (see <<sec:reference-semantics>>).
 
-
-==== Buffer interface
-
-The constructors and member functions of the SYCL [code]#buffer# class template
-are listed in <<table.constructors.buffer>> and <<table.members.buffer>>,
-respectively.
-The additional common special member functions and common member functions are
-listed in <<table.specialmembers.common.reference>> and
-<<table.hiddenfriends.common.reference>>, respectively.
-
-Each constructor takes as the last parameter an optional SYCL
-[code]#property_list# to provide properties to the SYCL [code]#buffer#.
-
 The SYCL [code]#buffer# class template takes a template parameter
 [code]#AllocatorT# for specifying an allocator which is used by the
 <<sycl-runtime>> when allocating temporary memory on the host.
@@ -5211,718 +5287,614 @@ If no template argument is provided, then the default allocator for the SYCL
 
 // Interface for class: buffer
 
-[source,,linenums]
+[source,role=synopsis]
 ----
 include::{header_dir}/buffer.h[lines=4..-1]
 ----
 
 
-[[table.constructors.buffer]]
-.Constructors of the [code]#buffer# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+[[sec:buffer-ctors]]
+==== Constructors
+
+All [code]#buffer# constructors take a parameter named [code]#propList# which
+allows the application to pass zero or more properties.
+These properties may specify additional effects of the constructor and resulting
+[code]#buffer# object.
+See <<sec:buffer-properties>> for the buffer properties that are defined by the
+<<core-spec>>.
+
+.[apititle]#Construct with uninitialized memory#
+[source,role=synopsis,id=api:buffer-ctor-uninit]
 ----
-buffer(const range<Dimensions>& bufferRange,
-       const property_list& propList = {})
+buffer(const range<Dimensions>& bufferRange, AllocatorT allocator,  (1)
+       const property_list& propList = {});
+
+buffer(const range<Dimensions>& bufferRange,                        (2)
+       const property_list& propList = {});
 ----
-   a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
-      The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Data is not written back to the host on destruction of the [code]#buffer# unless the [code]#buffer# has a valid non-null pointer specified via the member function [code]#set_final_data()#.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+_Effects (1):_ Construct a SYCL [code]#buffer# instance with uninitialized
+memory.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Data is not written back to the host on destruction of the [code]#buffer# unless
+the [code]#buffer# has a valid non-null pointer specified via the member
+function [code]#set_final_data()#.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects (2):_ Equivalent to `buffer(bufferRange, AllocatorT{}, propList)`.
+
+'''
+
+.[apititle]#Construct with host memory#
+[source,role=synopsis,id=api:buffer-ctor-host-mem]
 ----
-buffer(const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (1)
+       AllocatorT allocator, const property_list& propList = {});
+
+buffer(T* hostData, const range<Dimensions>& bufferRange,          (2)
+       const property_list& propList = {});
+
+buffer(const T* hostData, const range<Dimensions>& bufferRange,    (3)
+       AllocatorT allocator, const property_list& propList = {});
+
+buffer(const T* hostData, const range<Dimensions>& bufferRange,    (4)
+       const property_list& propList = {});
 ----
-   a@ Construct a SYCL [code]#buffer# instance with uninitialized memory.
-      The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
-      The range of the constructed SYCL [code]#buffer# is specified by the [code]#bufferRange# parameter provided.
-      Data is not written back to the host on destruction of the [code]#buffer# unless the [code]#buffer# has a valid non-null pointer specified via the member function [code]#set_final_data()#.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+_Effects (1):_ Construct a SYCL [code]#buffer# instance with the
+[code]#hostData# parameter provided.
+The buffer is initialized with the memory specified by [code]#hostData#, and the
+buffer assumes exclusive access to this memory for the duration of its lifetime.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects (2):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
+
+_Effects (3):_ Construct a SYCL [code]#buffer# instance with the
+[code]#hostData# parameter provided.
+The buffer assumes exclusive access to this memory for the duration of its
+lifetime.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
+
+_Effects (4):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
+
+_Remarks:_ When [code]#hostData# is a pointer to a const-qualified type, the
+buffer will not write back to any host memory unless requested via the member
+function [code]#set_final_data()#.
+
+'''
+
+.[apititle]#Construct from a container#
+[source,role=synopsis,id=api:buffer-ctor-container]
 ----
-buffer(T* hostData, const range<Dimensions>& bufferRange,
-       const property_list& propList = {})
-----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
-      parameter provided.  The buffer is initialized with the memory specified
-      by [code]#hostData#, and the buffer assumes exclusive access to this
-      memory for the duration of its lifetime.  The constructed SYCL
-      [code]#buffer# will use a default constructed [code]#AllocatorT# when
-      allocating memory on the host.  The range of the constructed SYCL
-      [code]#buffer# is specified by the [code]#bufferRange# parameter
-      provided.  Zero or more properties can be provided to the constructed
-      SYCL [code]#buffer# via an instance of [code]#property_list#.
-
-a@
-[source]
-----
-buffer(T* hostData, const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
-----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
-      parameter provided.  The buffer is initialized with the memory specified
-      by [code]#hostData#, and the buffer assumes exclusive access to this
-      memory for the duration of its lifetime.  The constructed SYCL
-      [code]#buffer# will use the [code]#allocator# parameter provided when
-      allocating memory on the host.  The range of the constructed SYCL
-      [code]#buffer# is specified by the [code]#bufferRange# parameter
-      provided.  Zero or more properties can be provided to the constructed
-      SYCL [code]#buffer# via an instance of [code]#property_list#.
-
-a@
-[source]
-----
-buffer(const T* hostData,
-       const range<Dimensions>& bufferRange,
-       const property_list& propList = {})
-----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
-      parameter provided.  The buffer assumes exclusive access to this memory
-      for the duration of its lifetime.
-
-The constructed SYCL [code]#buffer# will use a default
-constructed [code]#AllocatorT# when allocating memory on
-the host.
-
-The host address is [code]#const T#, so the host accesses
-can be read-only. However, the [code]#typename T# is not const so
-the device accesses can be both read and write accesses. Since
-the [code]#hostData# is const, this buffer is only initialized with
-this memory and there is no write back after its destruction,
-unless the [code]#buffer# has another valid non-null final
-data address specified via the member function
-[code]#set_final_data()# after construction of the
-[code]#buffer#.
-
-The range of the constructed SYCL [code]#buffer# is
-specified by the [code]#bufferRange# parameter provided.
-
-Zero or more properties can be provided to the constructed SYCL
-[code]#buffer# via an instance of
-[code]#property_list#.
-
-a@
-[source]
-----
-buffer(const T* hostData,
-       const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
-----
-   a@ Construct a SYCL [code]#buffer# instance with the [code]#hostData#
-      parameter provided.  The buffer assumes exclusive access to this
-      memory for the duration of its lifetime.
-
-The constructed SYCL [code]#buffer# will use the
-[code]#allocator# parameter provided when allocating
-memory on the host.
-
-The host address is [code]#const T#, so the host accesses
-can be read-only. However, the [code]#typename T# is not const so
-the device accesses can be both read and write accesses. Since,
-the [code]#hostData# is const, this buffer is only initialized
-with this memory and there is no write back after its
-destruction, unless the [code]#buffer# has another valid
-non-null final data address specified via the member function
-[code]#set_final_data()# after construction of the
-[code]#buffer#.
-
-The range of the constructed SYCL [code]#buffer# is
-specified by the [code]#bufferRange# parameter provided.
-
-Zero or more properties can be provided to the constructed SYCL
-[code]#buffer# via an instance of
-[code]#property_list#.
-
-
-a@
-[source]
-----
-template <typename Container>
-buffer(Container& container,
-       const property_list& propList = {})
-----
-   a@ Construct a one dimensional SYCL [code]#buffer# instance
-      from the elements starting at [code]#std::data(container)#
-      and containing [code]#std::size(container)# number of elements.
-      The buffer is initialized with the contents of [code]#container#,
-      and the buffer assumes exclusive access to [code]#container# for
-      the duration of its lifetime.
-
-Data is written back to [code]#container# before the completion of
-[code]#buffer# destruction if the return type of [code]#std::data(container)#
-is not [code]#const#.
-
-The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
-
-Zero or more properties can be provided to the constructed SYCL
-[code]#buffer# via an instance of
-[code]#property_list#.
-
-This constructor is only defined for a [code]#buffer# parameterized
-with [code]#Dimensions == 1#, and when [code]#std::data(container)#
-is convertible to [code]#T*#.
-
-
-a@
-[source]
-----
-template <typename Container>
+template <typename Container>                                      (1)
 buffer(Container& container, AllocatorT allocator,
-       const property_list& propList = {})
+       const property_list& propList = {});
+
+template <typename Container>                                      (2)
+buffer(Container& container, const property_list& propList = {});
 ----
-   a@ Construct a one dimensional SYCL [code]#buffer# instance
-      from the elements starting at [code]#std::data(container)#
-      and containing [code]#std::size(container)# number of elements.
-      The buffer is initialized with the contents of [code]#container#,
-      and the buffer assumes exclusive access to [code]#container# for
-      the duration of its lifetime.
+_Preconditions:_ [code]#container# is a contiguous container.
 
-Data is written back to [code]#container# before the completion of
-[code]#buffer# destruction if the return type of [code]#std::data(container)#
-is not [code]#const#.
+_Constraints:_ Available only when:
 
-The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
+* [code]#std::data(container)# and [code]#std::size(container)# are well formed;
 
-Zero or more properties can be provided to the constructed SYCL
-[code]#buffer# via an instance of
-[code]#property_list#.
+* the return type of [code]#std::data(container)# is convertible to [code]#T*#;
+  and
 
-This constructor is only defined for a [code]#buffer# parameterized
-with [code]#Dimensions == 1#, and when [code]#std::data(container)#
-is convertible to [code]#T*#.
+* [code]#Dimensions == 1#.
 
-
-a@
-[source]
-----
-buffer(const std::shared_ptr<T>& hostData,
-       const range<Dimensions>& bufferRange,
-       const property_list& propList = {})
-----
-   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
-      contents of its stored pointer.  The buffer assumes exclusive access to
-      this memory for the duration of its lifetime.  The buffer also creates
-      its own internal copy of the [code]#shared_ptr# that shares ownership of
-      the [code]#hostData# memory, which means the application can safely
-      release ownership of this [code]#shared_ptr# when the constructor
-      returns.
-
-When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
-memory.
-
-The constructed SYCL [code]#buffer# will use a default constructed
-[code]#AllocatorT# when allocating memory on the host.  The range of the
-constructed SYCL [code]#buffer# is specified by the [code]#bufferRange#
-parameter provided.  Zero or more properties can be provided to the
-constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
-
-a@
-[source]
-----
-buffer(const std::shared_ptr<T>& hostData,
-       const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
-----
-   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
-      contents of its stored pointer.  The buffer assumes exclusive access to
-      this memory for the duration of its lifetime.  The buffer also creates
-      its own internal copy of the [code]#shared_ptr# that shares ownership of
-      the [code]#hostData# memory, which means the application can safely
-      release ownership of this [code]#shared_ptr# when the constructor
-      returns.
-
-When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
-memory.
-
+_Effects (1):_ Construct a one dimensional SYCL [code]#buffer# instance from the
+elements starting at [code]#std::data(container)# and containing
+[code]#std::size(container)# number of elements.
+The buffer is initialized with the contents of [code]#container#, and the buffer
+assumes exclusive access to [code]#container# for the duration of its lifetime.
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
-provided when allocating memory on the host.  The range of the constructed SYCL
-[code]#buffer# is specified by the [code]#bufferRange# parameter provided.
+provided when allocating memory on the host.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
-a@
-[source,c++]
-----
-buffer(const std::shared_ptr<T[]>& hostData,
-       const range<Dimensions>&  bufferRange,
-       const property_list& propList = {})
-----
-   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
-      contents of its stored pointer.  The buffer assumes exclusive access to
-      this memory for the duration of its lifetime.  The buffer also creates
-      its own internal copy of the [code]#shared_ptr# that shares ownership of
-      the [code]#hostData# memory, which means the application can safely
-      release ownership of this [code]#shared_ptr# when the constructor
-      returns.
+_Effects (2):_ Equivalent to `buffer(container, AllocatorT{}, propList)`.
 
+_Remarks:_ Data is written back to [code]#container# before the completion of
+[code]#buffer# destruction if the return type of [code]#std::data(container)# is
+not [code]#const#.
+
+'''
+
+.[apititle]#Construct from memory owned by a shared pointer#
+[source,role=synopsis,id=api:buffer-ctor-shared-ptr]
+----
+  buffer(const std::shared_ptr<T>& hostData,                          (1)
+         const range<Dimensions>& bufferRange, AllocatorT allocator,
+         const property_list& propList = {});
+
+  buffer(const std::shared_ptr<T>& hostData,                          (2)
+         const range<Dimensions>& bufferRange,
+         const property_list& propList = {});
+
+  buffer(const std::shared_ptr<T[]>& hostData,                        (3)
+         const range<Dimensions>& bufferRange, AllocatorT allocator,
+         const property_list& propList = {});
+
+  buffer(const std::shared_ptr<T[]>& hostData,                        (4)
+         const range<Dimensions>& bufferRange,
+         const property_list& propList = {});
+----
+_Effects (1):_ When [code]#hostData# is not empty, construct a SYCL buffer with
+the contents of its stored pointer.
+The buffer assumes exclusive access to this memory for the duration of its
+lifetime.
+The buffer also creates its own internal copy of the [code]#shared_ptr# that
+shares ownership of the [code]#hostData# memory, which means the application can
+safely release ownership of this [code]#shared_ptr# when the constructor
+returns.
 When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
 memory.
-
-The constructed SYCL [code]#buffer# will use a default constructed
-[code]#AllocatorT# when allocating memory on the host.  The range of the
-constructed SYCL [code]#buffer# is specified by the [code]#bufferRange#
-parameter provided.  Zero or more properties can be provided to the
-constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
-
-a@
-[source,c++]
-----
-buffer(const std::shared_ptr<T[]>& hostData,
-       const range<Dimensions>& bufferRange,
-       AllocatorT allocator,
-       const property_list& propList = {})
-----
-   a@ When [code]#hostData# is not empty, construct a SYCL buffer with the
-      contents of its stored pointer.  The buffer assumes exclusive access to
-      this memory for the duration of its lifetime.  The buffer also creates
-      its own internal copy of the [code]#shared_ptr# that shares ownership of
-      the [code]#hostData# memory, which means the application can safely
-      release ownership of this [code]#shared_ptr# when the constructor
-      returns.
-
-When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
-memory.
-
 The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
-provided when allocating memory on the host.  The range of the constructed SYCL
-[code]#buffer# is specified by the [code]#bufferRange# parameter provided.
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
 Zero or more properties can be provided to the constructed SYCL [code]#buffer#
 via an instance of [code]#property_list#.
 
-a@
-[source]
-----
-template <typename InputIterator>
-buffer(InputIterator first, InputIterator last,
-       const property_list& propList = {})
-----
-   a@ Create a new allocated 1D buffer initialized from the given elements
-      ranging from [code]#first# up to one before [code]#last#.
-      The data is copied to an intermediate memory position by the runtime.
-      Data is not written back to the same iterator set provided. However, if the [code]#buffer# has a valid non-const iterator specified via the member function [code]#set_final_data()#, data will be copied back to that iterator.
-      The constructed SYCL [code]#buffer# will use a default constructed [code]#AllocatorT# when allocating memory on the host.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+_Effects (2):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
 
-a@
-[source]
-----
-template <typename InputIterator>
-buffer(InputIterator first, InputIterator last,
-       AllocatorT allocator = {},
-       const property_list& propList = {})
-----
-   a@ Create a new allocated 1D buffer initialized from the given elements
-      ranging from [code]#first# up to one before [code]#last#.
-      The data is copied to an intermediate memory position by the runtime.
-      Data is not written back to the same iterator set provided. However, if the [code]#buffer# has a valid non-const iterator specified via the member function [code]#set_final_data()#, data will be copied back to that iterator.
-      The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter provided when allocating memory on the host.
-      Zero or more properties can be provided to the constructed SYCL [code]#buffer# via an instance of [code]#property_list#.
+_Effects (3):_ When [code]#hostData# is not empty, construct a SYCL buffer with
+the contents of its stored pointer.
+The buffer assumes exclusive access to this memory for the duration of its
+lifetime.
+The buffer also creates its own internal copy of the [code]#shared_ptr# that
+shares ownership of the [code]#hostData# memory, which means the application can
+safely release ownership of this [code]#shared_ptr# when the constructor
+returns.
+When [code]#hostData# is empty, construct a SYCL buffer with uninitialized
+memory.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+The range of the constructed SYCL [code]#buffer# is specified by the
+[code]#bufferRange# parameter provided.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
 
-a@
-[source]
+_Effects (4):_ Equivalent to `buffer(hostData, bufferRange, AllocatorT{},
+propList)`.
+
+'''
+
+.[apititle]#Construct from iterators#
+[source,role=synopsis,id=api:buffer-ctor-iterator]
+----
+template <typename InputIterator>                                      (1)
+buffer(InputIterator first, InputIterator last, AllocatorT allocator,
+       const property_list& propList = {});
+
+template <typename InputIterator>                                      (2)
+buffer(InputIterator first, InputIterator last,
+       const property_list& propList = {});
+----
+_Effects (1):_ Create a new allocated 1D buffer initialized from the given
+elements ranging from [code]#first# up to one before [code]#last#.
+The data is copied to an intermediate memory position by the runtime.
+Data is not written back to the same iterator set provided.
+However, if the [code]#buffer# has a valid non-const iterator specified via the
+member function [code]#set_final_data()#, data will be copied back to that
+iterator.
+The constructed SYCL [code]#buffer# will use the [code]#allocator# parameter
+provided when allocating memory on the host.
+Zero or more properties can be provided to the constructed SYCL [code]#buffer#
+via an instance of [code]#property_list#.
+
+_Effects (2):_ Equivalent to `buffer(first, last, AllocatorT{}, propList)`.
+
+_Remarks:_ The buffer will not write back to any host memory unless requested
+via the member function [code]#set_final_data()#.
+
+'''
+
+.[apititle]#Construct sub-buffer#
+[source,role=synopsis,id=api:buffer-ctor-subbuffer]
 ----
 buffer(buffer& b, const id<Dimensions>& baseIndex,
-       const range<Dimensions>& subRange)
+       const range<Dimensions>& subRange);
 ----
-   a@ Create a new sub-buffer without allocation to have separate
-      accessors later. [code]#b# is the buffer with the real data, which must not be a sub-buffer.
-      [code]#baseIndex# specifies the origin of the sub-buffer inside the
-      buffer [code]#b#. [code]#subRange# specifies the size of the sub-buffer.
-      The sum of [code]#baseIndex# and [code]#subRange# in any dimension must not
-      exceed the parent buffer ([code]#b)# size ([code]#bufferRange)# in that dimension,
-      and an [code]#exception# with the [code]#errc::invalid# error code must be thrown if violated.
+_Effects:_ Create a new sub-buffer without allocation to have separate accessors
+later.
+[code]#b# is the buffer with the real data.
+[code]#baseIndex# specifies the origin of the sub-buffer inside the buffer
+[code]#b#.
+[code]#subRange# specifies the size of the sub-buffer.
 
-The offset and range specified by [code]#baseIndex# and
-[code]#subRange# together must represent a contiguous
-region of the original SYCL [code]#buffer#.
+The origin (based on [code]#baseIndex#) of the sub-buffer being constructed must
+be a multiple of the memory base address alignment of each SYCL [code]#device#
+which accesses data from the buffer.
+This value is retrievable via the SYCL [code]#device# class info query
+[code]#info::device::mem_base_addr_align#.
+Violating this requirement causes the implementation to throw an
+[code]#exception# with the [code]#errc::invalid# error code from the
+[code]#accessor# constructor (if the accessor is not a placeholder) or from
+[code]#handler::require()# (if the accessor is a placeholder).
+If the accessor is bound to a <<command-group>> with a secondary queue, the
+sub-buffer's alignment must be compatible with both the primary queue's device
+and the secondary queue's device.
+If the implementation supports secondary queue fallback, it also throws this
+exception if the sub-buffer's alignment is not compatible with the secondary
+queue's device.
 
-If a non-contiguous region of a buffer is requested when
-constructing a sub-buffer, then an [code]#exception# with
-the [code]#errc::invalid# error code must be
-thrown.
+_Throws:_
 
-The origin (based on [code]#baseIndex#) of the sub-buffer being constructed
-must be a multiple of the memory base address alignment of each SYCL
-[code]#device# which accesses data from the buffer.  This value is retrievable
-via the SYCL [code]#device# class info query
-[code]#info::device::mem_base_addr_align#.  Violating this requirement causes
-the implementation to throw an [code]#exception# with the [code]#errc::invalid#
-error code from the [code]#accessor# constructor (if the accessor is not a
-placeholder) or from [code]#handler::require()# (if the accessor is a
-placeholder).  If the accessor is bound to a <<command-group>> with a secondary
-queue, the sub-buffer's alignment must be compatible with both the primary
-queue's device and the secondary queue's device, otherwise this exception is
-thrown.
+* An [code]#exception# with the [code]#errc::invalid# error code if [code]#b# is
+a sub-buffer.
 
-Must throw an [code]#exception# with the [code]#errc::invalid# error code if
-[code]#b# is a sub-buffer.
+* An [code]#exception# with the [code]#errc::invalid# error code if the subrange
+formed by [code]#baseIndex# and [code]#subRange# is not a contiguous region of
+[code]#b#.
 
-|====
+* An [code]#exception# with the [code]#errc::invalid# error code if the sum of
+[code]#baseIndex# and [code]#subRange# in any dimension exceeds the parent
+buffer [code]#b# size ([code]#bufferRange#) in that dimension.
+
+'''
 
 
+[[sec:buffer-member-funcs]]
+==== Member functions
 
-[[table.members.buffer]]
-.Member functions for the [code]#buffer# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apititle]#buffer::get_range#
+[source,role=synopsis,id=api:buffer-get-range]
 ----
-range<Dimensions> get_range() const
+range<Dimensions> get_range() const;
 ----
-   a@ Return a range object representing the
-      size of the buffer in terms of number
-      of elements in each dimension as passed
-      to the constructor.
+_Returns:_ A [code]#range# representing the number of elements in the buffer.
 
-a@
-[source]
-----
-size_t size() const noexcept
-----
-   a@ Returns the total number of elements in the buffer.
-      Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
-a@
-[source]
-----
-size_t get_count() const
-----
-   a@ Returns the same value as [code]#size()#. Deprecated.
-a@
-[source]
-----
-size_t byte_size() const noexcept
-----
-   a@ Returns the size of the buffer storage in bytes.
-      Equal to [code]#size()*sizeof(T)#.
-a@
-[source]
-----
-size_t get_size() const
-----
-   a@ Returns the same value as [code]#byte_size()#. Deprecated.
-a@
-[source]
-----
-AllocatorT get_allocator() const
-----
-   a@ Returns the allocator provided to the buffer.
+'''
 
-a@
-[source]
+.[apititle]#buffer::byte_size#
+[source,role=synopsis,id=api:buffer-byte-size]
 ----
-template <access_mode Mode = access_mode::read_write,
+size_t byte_size() const noexcept;
+----
+_Returns:_ The size of the buffer storage in bytes.
+Equal to [code]#size()*sizeof(T)#.
+
+'''
+
+.[apititle]#buffer::size#
+[source,role=synopsis,id=api:buffer-size]
+----
+size_t size() const noexcept;
+----
+_Returns:_ The total number of elements in the buffer.
+Equal to [code]#+get_range()[0] * ...
+* get_range()[Dimensions-1]+#.
+
+'''
+
+.[apititle]#buffer::get_count#
+[source,role=synopsis,id=api:buffer-get-count]
+----
+size_t get_count() const;
+----
+Deprecated by SYCL 2020.
+
+_Effects:_ Equivalent to [code]#return size()#.
+
+'''
+
+.[apititle]#buffer::get_size#
+[source,role=synopsis,id=api:buffer-get-size]
+----
+size_t get_size() const;
+----
+Deprecated by SYCL 2020.
+
+_Effects:_ Equivalent to [code]#return byte_size()#.
+
+'''
+
+.[apititle]#buffer::get_allocator#
+[source,role=synopsis,id=api:buffer-get-allocator]
+----
+AllocatorT get_allocator() const;
+----
+_Returns:_ The allocator provided to the buffer.
+
+'''
+
+.[apititle]#buffer::get_access#
+[source,role=synopsis,id=api:buffer-get-access]
+----
+template <access_mode Mode = access_mode::read_write,                          (1)
           target Targ = target::device>
-accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler)
-----
-   a@ Returns a valid [code]#accessor# to the buffer with the specified
-      access mode and target in the command group buffer.
-      The value of target can be [code]#target::device#,
-      [code]#target::constant_buffer# or
-      [code]#target::host_task#.
+accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler);
 
-a@
-[source]
-----
-template <access_mode Mode>
-accessor<T, Dimensions, Mode, target::host_buffer> get_access()
-----
-   a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
-
-Returns a valid host [code]#accessor# to the buffer with the specified
-access mode and target.
-
-a@
-[source]
-----
-template <access_mode Mode = access_mode::read_write,
+template <access_mode Mode = access_mode::read_write,                          (2)
           target Targ = target::device>
-accessor<T, Dimensions, Mode, Targ> get_access(handler& commandGroupHandler,
-                                               range<Dimensions> accessRange,
-                                               id<Dimensions> accessOffset = {})
-----
-   a@ Returns a valid [code]#accessor# to the buffer with the specified access
-      mode and target in the command group buffer.  The accessor is a
-      <<ranged-accessor>>, where the range starts at the given offset from the
-      beginning of the buffer.  The value of target can be
-      [code]#target::device#, [code]#target::constant_buffer# or
-      [code]#target::host_task#.
+accessor<T, Dimensions, Mode, Targ>
+get_access(handler& commandGroupHandler, range<Dimensions> accessRange,
+           id<Dimensions> accessOffset = {});
 
-Throws an [code]#exception# with the [code]#errc::invalid# error code if
-the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
-the buffer in any dimension.
+template <typename... Ts> auto get_access(Ts...);                              (3)
 
-a@
-[source]
+template <typename... Ts> auto get_host_access(Ts...);                         (4)
 ----
-template <access_mode Mode>
+_Constraints (1)-(2):_ Available only when [code]#Targ# is
+[code]#target::device#, [code]#target::constant_buffer# or
+[code]#target::host_task#.
+
+_Returns (1):_ A valid [code]#accessor# to the buffer with the specified access
+mode and target in the command group buffer.
+
+_Returns (2):_ A valid [code]#accessor# to the buffer with the specified access
+mode and target in the command group buffer.
+The accessor is a <<ranged-accessor>>, where the range starts at the given
+offset from the beginning of the buffer.
+
+_Returns (3):_ A valid [code]#accessor# as if constructed via passing the buffer
+and all provided arguments to the [code]#accessor# constructor.
+
+_Returns (4):_ A valid [code]#host_accessor# as if constructed via passing the
+buffer and all provided arguments to the [code]#host_accessor# constructor.
+
+_Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
+the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
+buffer in any dimension.
+
+'''
+
+.[apititle]#Deprecated buffer::get_access#
+[source,role=synopsis,id=api:buffer-get-access-deprecated]
+----
+template <access_mode Mode>                                                   (1)
+accessor<T, Dimensions, Mode, target::host_buffer> get_access();
+
+template <access_mode Mode>                                                   (2)
 accessor<T, Dimensions, Mode, target::host_buffer>
-get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {})
+get_access(range<Dimensions> accessRange, id<Dimensions> accessOffset = {});
 ----
-   a@ Deprecated in SYCL 2020.  Use [code]#get_host_access()# instead.
+Deprecated in SYCL 2020.
+Use [code]#get_host_access()# instead.
 
-Returns a valid host [code]#accessor# to the buffer with the specified access
-mode and target.  The accessor is a <<ranged-accessor>>, where the range starts
-at the given offset from the beginning of the buffer.  The value of target can
-only be [code]#target::host_buffer#.
+_Returns (1):_ A valid host [code]#accessor# to the buffer with the specified
+access mode.
 
-Throws an [code]#exception# with the [code]#errc::invalid# error code if
-the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
-the buffer in any dimension.
+_Returns (2):_ A valid host [code]#accessor# to the buffer with the specified
+access mode.
+The accessor is a <<ranged-accessor>>, where the range starts at the given
+offset from the beginning of the buffer.
 
-a@
-[source]
-----
-template <typename... Ts> auto get_access(Ts... args)
-----
-   a@ Returns a valid [code]#accessor# as if constructed via passing the buffer
-      and all provided arguments to the [code]#accessor# constructor.
+_Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
+the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of the
+buffer in any dimension.
 
-Possible implementation:
+'''
 
-[code]#+return accessor{*this, args...};+#
-
-a@
-[source]
-----
-template <typename... Ts> auto get_host_access(Ts... args)
-----
-   a@ Returns a valid [code]#host_accessor# as if constructed via passing the
-      buffer and all provided arguments to the [code]#host_accessor#
-      constructor.
-
-Possible implementation:
-
-[code]#+return host_accessor{*this, args...};+#
-
-a@
-[source]
+.[apititle]#buffer::set_final_data#
+[source,role=synopsis,id=api:buffer-set-final-data]
 ----
 template <typename Destination = std::nullptr_t>
-void set_final_data(Destination finalData = nullptr)
+void set_final_data(Destination finalData = nullptr);
 ----
-   a@ The [code]#finalData# points to where the outcome of all
-      the buffer processing is going to be copied to at destruction
-      time, if the buffer was involved with a write accessor.
+_Effects:_ The [code]#finalData# points to where the outcome of all the buffer
+processing is going to be copied to at destruction time, if the buffer was
+involved with a write accessor.
+Destination can be either an output iterator or a [code]#std::weak_ptr<T>#.
+Note that a raw pointer is a special case of output iterator and thus defines
+the host memory to which the result is to be copied.
+In the case of a weak pointer, the output is not updated if the weak pointer has
+expired.
+If [code]#Destination# is [code]#std::nullptr_t#, then the copy back will not
+happen.
 
-Destination can be either an output iterator or a
-[code]#std::weak_ptr<T>#.
+'''
 
-Note that a raw pointer is a special case of output iterator and
-thus defines the host memory to which the result is to be
-copied.
-
-In the case of a weak pointer, the output is not updated if the
-weak pointer has expired.
-
-If [code]#Destination# is [code]#std::nullptr_t#, then
-the copy back will not happen.
-
-a@
-[source]
+.[apititle]#buffer::set_write_back#
+[source,role=synopsis,id=api:buffer-set-write-back]
 ----
-void set_write_back(bool flag = true)
+void set_write_back(bool flag = true);
 ----
-   a@ This member function allows dynamically forcing or canceling the
-      write-back of the data of a buffer on destruction according to
-      the value of [code]#flag#.
+_Effects:_ Dynamically forces or cancels the write-back of the data of a buffer
+on destruction according to the value of [code]#flag#.
+Forcing the write-back is similar to what happens during a normal write-back as
+described in <<sec:buf-sync-rules>> and <<sec:sharing-host-memory-with-dm>>.
+If there is nowhere to write-back, using this function does not have any effect.
 
-Forcing the write-back is similar to what happens during a
-normal write-back as described in <<sec:buf-sync-rules>>
-and <<sec:sharing-host-memory-with-dm>>.
+'''
 
-If there is nowhere to write-back, using this function does not
-have any effect.
-
-a@
-[source]
+.[apititle]#buffer::is_sub_buffer#
+[source,role=synopsis,id=api:buffer-is-sub-buffer]
 ----
-bool is_sub_buffer() const
+bool is_sub_buffer() const;
 ----
-   a@ Returns true if this SYCL [code]#buffer# is a sub-buffer, otherwise
-      returns false.
+_Returns:_ [code]#true# if this SYCL [code]#buffer# is a sub-buffer and
+[code]#false# otherwise.
 
-a@
-[source]
+'''
+
+.[apititle]#buffer::reinterpret#
+[source,role=synopsis,id=api:buffer-reinterpret]
 ----
-template <typename ReinterpretT, int ReinterpretDim>
+template <typename ReinterpretT, int ReinterpretDim>                       (1)
 buffer<ReinterpretT, ReinterpretDim,
        typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-           std::remove_const_t<ReinterpretT>>>
-reinterpret(range<ReinterpretDim> reinterpretRange) const
-----
-   a@ Creates and returns a reinterpreted SYCL [code]#buffer#
-      with the type specified by [code]#ReinterpretT#,
-      dimensions specified by [code]#ReinterpretDim# and range
-      specified by [code]#reinterpretRange#.  The buffer object
-      being reinterpreted can be a SYCL sub-buffer that was created
-      from a SYCL [code]#buffer# and must throw
-      [code]#exception# with the
-      [code]#errc::invalid# error code if the total
-      size in bytes represented by the type and range of the
-      reinterpreted SYCL [code]#buffer# (or sub-buffer) does not
-      equal the total size in bytes represented by the type and range
-      of this SYCL [code]#buffer# (or sub-buffer).
-      Reinterpreting a sub-buffer provides a reinterpreted view of
-      the sub-buffer only, and does not change the offset or size of
-      the sub-buffer view (in bytes) relative to the parent
-      [code]#buffer#.
+           ReinterpretT>>
+reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
-a@
-[source]
-----
-template <typename ReinterpretT, int ReinterpretDim = Dimensions>
+template <typename ReinterpretT, int ReinterpretDim = Dimensions>          (2)
 buffer<ReinterpretT, ReinterpretDim,
        typename std::allocator_traits<AllocatorT>::template rebind_alloc<
-           std::remove_const_t<ReinterpretT>>>
-reinterpret() const
+           ReinterpretT>>
+reinterpret() const;
 ----
-   a@ Creates and returns a reinterpreted SYCL [code]#buffer#
-      with the type specified by [code]#ReinterpretT# and
-      dimensions specified by [code]#ReinterpretDim#.
-      Only valid when [code]#(ReinterpretDim == 1)# or when
-      [code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) == sizeof(T)))#.
-      The buffer object being reinterpreted can be a SYCL sub-buffer
-      that was created from a SYCL [code]#buffer#.  The implementation must
-      throw an [code]#exception# with the [code]#errc::invalid# error code
-      if the total size in bytes represented by this SYCL [code]#buffer# (or
-      sub-buffer) is not evenly divisible by [code]#sizeof(ReinterpretT)#.
-      Reinterpreting a sub-buffer provides a reinterpreted view
-      of the sub-buffer only,
-      and does not change the offset or size of the sub-buffer view (in bytes)
-      relative to the parent [code]#buffer#.
+_Constraints (2):_ Available when [code]#(ReinterpretDim == 1)# or when
+[code]#\((ReinterpretDim == Dimensions) && (sizeof(ReinterpretT) ==
+sizeof(T)))#.
 
-|====
+_Effects:_ Creates a reinterpreted SYCL [code]#buffer#.
+The buffer object being reinterpreted can be a SYCL sub-buffer that was created
+from a SYCL [code]#buffer#.
+Reinterpreting a sub-buffer provides a reinterpreted view of the sub-buffer
+only, and does not change the offset or size of the sub-buffer view (in bytes)
+relative to the parent [code]#buffer#.
 
+_Returns (1):_ A reinterpreted SYCL [code]#buffer# with the type specified by
+[code]#ReinterpretT#, dimensions specified by [code]#ReinterpretDim# and range
+specified by [code]#reinterpretRange#.
+
+_Returns (2):_ A reinterpreted SYCL [code]#buffer# with the type specified by
+[code]#ReinterpretT# and dimensions specified by [code]#ReinterpretDim#.
+
+_Throws (1):_ An [code]#exception# with the [code]#errc::invalid# error code if
+the total size in bytes represented by the type and range of the reinterpreted
+SYCL [code]#buffer# (or sub-buffer) does not equal the total size in bytes
+represented by the type and range of this SYCL [code]#buffer# (or sub-buffer).
+
+_Throws (2):_ An [code]#exception# with the [code]#errc::invalid# error code if
+the total size in bytes represented by this SYCL [code]#buffer# (or sub-buffer)
+is not evenly divisible by [code]#sizeof(ReinterpretT)#.
+
+'''
 
 
 [[sec:buffer-properties]]
-==== Buffer properties
+==== Properties
 
-The properties that can be provided when constructing the SYCL [code]#buffer#
-class are described in <<table.properties.buffer>>.
+This section describes the properties that can be passed in the [code]#propList#
+parameter of the <<sec:buffer-ctors, buffer constructors>>.
 
+'''
 
-[[table.properties.buffer]]
-.Properties supported by the SYCL [code]#buffer# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Property @ Description
-a@
-[source]
+.[apidef]#property::buffer::use_host_ptr#
+[source,role=synopsis,id=api:property-buffer-use-host-ptr]
 ----
-property::buffer::use_host_ptr
+namespace sycl::property::buffer {
+class use_host_ptr {
+  use_host_ptr();  (1)
+};
+} // namespace sycl::property::buffer
 ----
-   a@ The [code]#use_host_ptr# property adds the requirement that the <<sycl-runtime>> must not allocate any memory for the SYCL [code]#buffer# and instead uses the provided host pointer directly. This prevents the <<sycl-runtime>> from allocating additional temporary storage on the host.
+
+The [code]#use_host_ptr# property adds the requirement that the <<sycl-runtime>>
+must not allocate any memory for the SYCL [code]#buffer# and instead uses the
+provided host pointer directly.
+This prevents the <<sycl-runtime>> from allocating additional temporary storage
+on the host.
 
 This property has a special guarantee for buffers that are constructed from a
-[code]#hostData# pointer.  If a [code]#host_accessor# is constructed from such
-a buffer, then the address of the [code]#reference# type returned from the
-accessor's member functions such as [code]#operator[](id<>)# will be the same
-as the corresponding [code]#hostData# address.
+[code]#hostData# pointer.
+If a [code]#host_accessor# is constructed from such a buffer, then the address
+of the [code]#reference# type returned from the accessor's member functions such
+as [code]#operator[](id<>)# will be the same as the corresponding
+[code]#hostData# address.
 
-a@
-[source]
+_Effects (1):_ Constructs an [code]#use_host_ptr# property object.
+
+'''
+
+.[apidef]#property::buffer::use_mutex#
+[source,role=synopsis,id=api:property-buffer-use-mutex]
 ----
-property::buffer::use_mutex
+namespace sycl::property::buffer {
+class use_mutex {
+  use_mutex(std::mutex& mutexRef);
+
+  std::mutex* get_mutex_ptr() const;
+};
+} // namespace sycl::property::buffer
 ----
-   a@ The [code]#use_mutex# property is valid for the SYCL
-      [code]#buffer#, [code]#unsampled_image# and
-      [code]#sampled_image# classes. The property adds the
-      requirement that the memory which is owned by the SYCL
-      [code]#buffer# can be shared with the application via a
-      [code]#std::mutex# provided to the property. The mutex
-      [code]#m# is locked by the runtime whenever the data is in
-      use and unlocked otherwise. The contents of [code]#hostData# are
-      guaranteed to reflect the contents of the buffer when the
-      [code]#std::mutex# is unlocked by the runtime.
 
-a@
-[source]
+The [code]#use_mutex# property is valid for the SYCL [code]#buffer#,
+[code]#unsampled_image# and [code]#sampled_image# classes.
+The property adds the requirement that the memory which is owned by the SYCL
+[code]#buffer# can be shared with the application via a [code]#std::mutex#
+provided to the property.
+The mutex [code]#m# is locked by the runtime whenever the data is in use and
+unlocked otherwise.
+The contents of [code]#hostData# are guaranteed to reflect the contents of the
+buffer when the [code]#std::mutex# is unlocked by the runtime.
+
+'''
+
+.[apidef]#property::buffer::use_mutex constructor#
+[source,role=synopsis,id=api:property-buffer-use-mutex-ctor]
 ----
-property::buffer::context_bound
+use_mutex(std::mutex& mutexRef);
 ----
-   a@ The [code]#context_bound# property adds the requirement that the SYCL [code]#buffer# can only be associated with a single SYCL [code]#context# that is provided to the property.
 
-|====
+_Effects:_ Constructs a SYCL [code]#use_mutex# property instance with a
+reference to [code]#mutexRef#.
 
+'''
 
-The constructors and special member functions of the buffer property classes are
-listed in <<table.constructors.properties.buffer>> and
-<<table.members.properties.buffer>> respectively.
-
-
-[[table.constructors.properties.buffer]]
-.Constructors of the [code]#buffer# [code]#property# classes
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
+.[apidef]#property::buffer::use_mutex::get_mutex_ptr#
+[source,role=synopsis,id=api:property-buffer-use-mutex-get-mutex-ptr]
 ----
-property::buffer::use_host_ptr::use_host_ptr()
+std::mutex* get_mutex_ptr() const;
 ----
-   a@ Constructs a SYCL [code]#use_host_ptr# property instance.
 
-a@
-[source]
+_Returns:_ A pointer to the [code]#std::mutex# provided when constructing this
+property.
+
+'''
+
+.[apidef]#property::buffer::context_bound#
+[source,role=synopsis,id=api:property-buffer-context-bound]
 ----
-property::buffer::use_mutex::use_mutex(std::mutex& mutexRef)
+namespace sycl::property::buffer {
+class context_bound {
+ public:
+  context_bound(context boundContext);
+
+  context get_context() const;
+};
+} // namespace sycl::property::buffer
 ----
-   a@ Constructs a SYCL [code]#use_mutex# property instance with a reference to [code]#mutexRef# parameter provided.
 
-a@
-[source]
+The [code]#context_bound# property adds the requirement that the SYCL
+[code]#buffer# can only be associated with a single SYCL [code]#context# that is
+provided to the property.
+
+'''
+
+.[apidef]#property::buffer::context_bound constructor#
+[source,role=synopsis,id=api:property-buffer-context-bound-ctor]
 ----
-property::buffer::context_bound::context_bound(context boundContext)
+context_bound(context boundContext);
 ----
-   a@ Constructs a SYCL [code]#context_bound# property instance with a copy of a SYCL [code]#context#.
 
-|====
+_Effects:_ Constructs a SYCL [code]#context_bound# property instance with a copy
+of a SYCL [code]#context#.
 
+'''
 
-
-[[table.members.properties.buffer]]
-.Member functions of the [code]#buffer# [code]#property# classes
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+.[apidef]#property::buffer::context_bound::get_context#
+[source,role=synopsis,id=api:property-buffer-context-bound-get-context]
 ----
-std::mutex* property::buffer::use_mutex::get_mutex_ptr() const
+context get_context() const;
 ----
-   a@ Returns the [code]#std::mutex# which was specified when
-      constructing this SYCL [code]#use_mutex# property.
 
-a@
-[source]
-----
-context property::buffer::context_bound::get_context() const
-----
-   a@ Returns the [code]#context# which was specified when
-      constructing this SYCL [code]#context_bound# property.
+_Returns:_ The [code]#context# provided when constructing this property.
 
-|====
-
+'''
 
 
 [[sec:buf-sync-rules]]
-==== Buffer destruction rules
+==== Destruction rules
 
 Buffers are reference-counted.
 When a buffer value is constructed from another buffer, the two values reference
@@ -7244,7 +7216,6 @@ access_mode::read_write
 |====
 
 
-[[subsec:accessor-deduction-tags]]
 ==== Deduction tags
 
 Some accessor constructors take a [code]#DeductionTagT# parameter, which is used
@@ -7265,7 +7236,6 @@ being constructed, so they are described more fully below in the section that
 pertains to each of the accessor types.
 
 
-[[sec:accessor-properties]]
 ==== Properties
 
 All accessor constructors accept a [code]#property_list# parameter, which
@@ -11166,7 +11136,6 @@ Users may query the device to determine if system allocations are supported for
 use on the device, through [code]#aspect::usm_system_allocations#.
 
 
-[[subsec:usm-allocations]]
 === USM allocations
 
 USM provides several allocation functions.
@@ -11881,7 +11850,6 @@ _Effects_: Equivalent to [code]#return free(ptr, q.get_context());#.
 submit a "free" <<command>> to the device; the [code]#queue# argument is only
 used to determine the [code]#context# associated with [code]#ptr#.{endnote}
 
-[[subsec:usm-mem-ptr-queries]]
 === Unified shared memory pointer queries
 
 Since USM pointers look like raw {cpp} pointers, users cannot deduce what kind
@@ -12047,14 +12015,14 @@ include::{header_dir}/range.h[lines=4..-1]
 a@
 [source]
 ----
-range()
+range() noexcept;
 ----
    a@ Construct a SYCL [code]#range# with the value [code]#0# for each dimension.
 
 a@
 [source]
 ----
-range(std::size_t dim0)
+range(std::size_t dim0) noexcept;
 ----
    a@ Construct a 1D range with value dim0.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12063,7 +12031,7 @@ range(std::size_t dim0)
 a@
 [source]
 ----
-range(std::size_t dim0, std::size_t dim1)
+range(std::size_t dim0, std::size_t dim1) noexcept;
 ----
    a@ Construct a 2D range with values dim0 and dim1.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12072,7 +12040,7 @@ range(std::size_t dim0, std::size_t dim1)
 a@
 [source]
 ----
-range(std::size_t dim0, std::size_t dim1, std::size_t dim2)
+range(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 ----
    a@ Construct a 3D range with values dim0, dim1 and dim2.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12090,7 +12058,7 @@ range(std::size_t dim0, std::size_t dim1, std::size_t dim2)
 a@
 [source]
 ----
-size_t get(int dimension) const
+size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12100,7 +12068,7 @@ size_t get(int dimension) const
 a@
 [source]
 ----
-size_t& operator[](int dimension)
+size_t& operator[](int dimension) noexcept;
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
@@ -12110,7 +12078,7 @@ size_t& operator[](int dimension)
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12120,7 +12088,7 @@ size_t operator[](int dimension) const
 a@
 [source]
 ----
-size_t size() const
+size_t size() const noexcept;
 ----
    a@ Return the size of the range computed as dimension0*...*dimensionN.
 
@@ -12136,7 +12104,7 @@ size_t size() const
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const range& rhs)
+range operatorOP(const range& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12156,7 +12124,7 @@ is the cast to [code]#std::size_t#.
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const std::size_t& rhs)
+range operatorOP(const range& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12176,7 +12144,7 @@ the operator returns a [code]#bool#, the result is the cast to
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const range& rhs)
+range& operatorOP(range& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
@@ -12189,7 +12157,7 @@ to [code]#std::size_t#.
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const std::size_t& rhs)
+range& operatorOP(range& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
@@ -12202,7 +12170,7 @@ operator returns a [code]#bool#, the result is the cast to
 a@
 [source]
 ----
-range operatorOP(const std::size_t& lhs, const range& rhs)
+range operatorOP(const std::size_t& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12222,7 +12190,7 @@ the [code]#lhs# [code]#std::size_t# and each element of the
 a@
 [source]
 ----
-range operatorOP(const range& rhs)
+range operatorOP(const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: unary [code]#pass:[+]#, unary [code]#-#.
 
@@ -12235,7 +12203,7 @@ the [code]#rhs# SYCL [code]#range#.
 a@
 [source]
 ----
-range& operatorOP(range& rhs)
+range& operatorOP(range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -12246,7 +12214,7 @@ of an element-wise [code]#OP# operator on each element of the [code]#rhs#
 a@
 [source]
 ----
-range operatorOP(range& lhs, int)
+range operatorOP(range& lhs, int) noexcept;
 ----
    a@ Where [code]#OP# is: postfix [code]#pass:[++]#, postfix [code]#--#.
 
@@ -12298,7 +12266,7 @@ a@
 nd_range<Dimensions>(
 range<Dimensions> globalSize,
     range<Dimensions> localSize,
-    id<Dimensions> offset = id<Dimensions>())
+    id<Dimensions> offset = id<Dimensions>()) noexcept;
 ----
    a@ Construct an [code]#nd_range# from the local and global
       constituent ranges. Supplying the option offset is
@@ -12317,21 +12285,21 @@ range<Dimensions> globalSize,
 a@
 [source]
 ----
-range<Dimensions> get_global_range() const
+range<Dimensions> get_global_range() const noexcept;
 ----
    a@ Return the constituent global range.
 
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Return the constituent local range.
 
 a@
 [source]
 ----
-range<Dimensions> get_group_range() const
+range<Dimensions> get_group_range() const noexcept;
 ----
    a@ Return a range representing the number of groups in each
       dimension.  This range would result from
@@ -12340,7 +12308,7 @@ range<Dimensions> get_group_range() const
 a@
 [source]
 ----
-id<Dimensions> get_offset() const
+id<Dimensions> get_offset() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12384,14 +12352,14 @@ include::{header_dir}/id.h[lines=4..-1]
 a@
 [source]
 ----
-id()
+id() noexcept;
 ----
    a@ Construct a SYCL [code]#id# with the value [code]#0# for each dimension.
 
 a@
 [source]
 ----
-id(std::size_t dim0)
+id(std::size_t dim0) noexcept;
 ----
    a@ Construct a 1D [code]#id# with value dim0.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12400,7 +12368,7 @@ id(std::size_t dim0)
 a@
 [source]
 ----
-id(std::size_t dim0, std::size_t dim1)
+id(std::size_t dim0, std::size_t dim1) noexcept;
 ----
    a@ Construct a 2D [code]#id# with values dim0, dim1.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12409,7 +12377,7 @@ id(std::size_t dim0, std::size_t dim1)
 a@
 [source]
 ----
-id(std::size_t dim0, std::size_t dim1, std::size_t dim2)
+id(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 ----
    a@ Construct a 3D [code]#id# with values dim0, dim1, dim2.
       Only valid when the template parameter [code]#Dimensions# is equal
@@ -12418,14 +12386,14 @@ id(std::size_t dim0, std::size_t dim1, std::size_t dim2)
 a@
 [source]
 ----
-id(const range<Dimensions>& range)
+id(const range<Dimensions>& range) noexcept;
 ----
    a@ Construct an [code]#id# from the dimensions of [code]#range#.
 
 a@
 [source]
 ----
-id(const item<Dimensions>& item)
+id(const item<Dimensions>& item) noexcept;
 ----
    a@ Construct an [code]#id# from [code]#item.get_id()#.
 
@@ -12441,7 +12409,7 @@ id(const item<Dimensions>& item)
 a@
 [source]
 ----
-size_t get(int dimension) const
+size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of this [code]#id# object.
       Results in undefined behavior if [code]#dimension# is not in the range
@@ -12450,7 +12418,7 @@ size_t get(int dimension) const
 a@
 [source]
 ----
-size_t& operator[](int dimension)
+size_t& operator[](int dimension) noexcept;
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
@@ -12460,7 +12428,7 @@ size_t& operator[](int dimension)
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
@@ -12470,7 +12438,7 @@ size_t operator[](int dimension) const
 a@
 [source]
 ----
-operator std::size_t() const
+operator std::size_t() const noexcept;
 ----
    a@ Available only when: [code]#Dimensions == 1#
 
@@ -12486,7 +12454,7 @@ Returns the same value as [code]#get(0)#.
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const id& rhs)
+id operatorOP(const id& lhs, const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12502,7 +12470,7 @@ If the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const std::size_t& rhs)
+id operatorOP(const id& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12518,7 +12486,7 @@ operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const id& rhs)
+id& operatorOP(id& lhs, const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -12533,7 +12501,7 @@ the operator returns a [code]#bool# the result is the cast to
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const std::size_t& rhs)
+id& operatorOP(id& lhs, const std::size_t& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
@@ -12547,7 +12515,7 @@ returns a [code]#bool# the result is the cast to [code]#std::size_t#.
 a@
 [source]
 ----
-id operatorOP(const std::size_t& lhs, const id& rhs)
+id operatorOP(const std::size_t& lhs, const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12563,7 +12531,7 @@ the [code]#lhs# [code]#std::size_t# and each element of the
 a@
 [source]
 ----
-id operatorOP(const id& rhs)
+id operatorOP(const id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: unary [code]#pass:[+]#, unary [code]#-#.
 
@@ -12576,7 +12544,7 @@ the [code]#rhs# SYCL [code]#id#.
 a@
 [source]
 ----
-id& operatorOP(id& rhs)
+id& operatorOP(id& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: prefix [code]#pass:[++]#, prefix [code]#--#.
 
@@ -12587,7 +12555,7 @@ of an element-wise [code]#OP# operator on each element of the [code]#rhs#
 a@
 [source]
 ----
-id operatorOP(id& lhs, int)
+id operatorOP(id& lhs, int) noexcept;
 ----
    a@ Where [code]#OP# is: postfix [code]#pass:[++]#, postfix [code]#--#.
 
@@ -12640,7 +12608,7 @@ include::{header_dir}/item.h[lines=4..-1]
 a@
 [source]
 ----
-id<Dimensions> get_id() const
+id<Dimensions> get_id() const noexcept;
 ----
    a@ Return the constituent [code]#id#
       representing the work-item's position in the iteration space.
@@ -12648,21 +12616,21 @@ id<Dimensions> get_id() const
 a@
 [source]
 ----
-size_t get_id(int dimension) const
+size_t get_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id(dimension)#.
 
 a@
 [source]
 ----
-range<Dimensions> get_range() const
+range<Dimensions> get_range() const noexcept;
 ----
    a@ Returns a [code]#range# representing the dimensions of the
       range of possible values of the [code]#item#.
@@ -12670,14 +12638,14 @@ range<Dimensions> get_range() const
 a@
 [source]
 ----
-size_t get_range(int dimension) const
+size_t get_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_range().get(dimension)#.
 
 a@
 [source]
 ----
-id<Dimensions> get_offset() const
+id<Dimensions> get_offset() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12692,7 +12660,7 @@ This member function is only available if [code]#WithOffset# is [code]#true#.
 a@
 [source]
 ----
-operator item<Dimensions, true>() const
+operator item<Dimensions, true>() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12706,7 +12674,7 @@ write code that assumes an offset and still provides an offset-less [code]#item#
 a@
 [source]
 ----
-operator std::size_t() const
+operator std::size_t() const noexcept;
 ----
    a@ Available only when: [code]#Dimensions == 1#
 
@@ -12715,7 +12683,7 @@ Returns the same value as [code]#get_id(0)#.
 a@
 [source]
 ----
-size_t get_linear_id() const
+size_t get_linear_id() const noexcept;
 ----
    a@ Return the id as a linear index value. Calculating a linear
       address from the multi-dimensional index follows
@@ -12763,7 +12731,7 @@ include::{header_dir}/nditem.h[lines=4..-1]
 a@
 [source]
 ----
-id<Dimensions> get_global_id() const
+id<Dimensions> get_global_id() const noexcept;
 ----
    a@ Return the constituent <<global-id>> representing the
       work-item's position in the global iteration space.
@@ -12771,7 +12739,7 @@ id<Dimensions> get_global_id() const
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const
+size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
@@ -12782,7 +12750,7 @@ size_t get_global_id(int dimension) const
 a@
 [source]
 ----
-size_t get_global_linear_id() const
+size_t get_global_linear_id() const noexcept;
 ----
    a@ Return the constituent <<global-id>> as a linear index value, representing the work-item's
    position in the global iteration space.  The linear address is calculated from the
@@ -12792,7 +12760,7 @@ size_t get_global_linear_id() const
 a@
 [source]
 ----
-id<Dimensions> get_local_id() const
+id<Dimensions> get_local_id() const noexcept;
 ----
    a@ Return the constituent <<local-id>> representing the
       work-item's position within the current <<work-group>>.
@@ -12800,7 +12768,7 @@ id<Dimensions> get_local_id() const
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const
+size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
@@ -12811,7 +12779,7 @@ size_t get_local_id(int dimension) const
 a@
 [source]
 ----
-size_t get_local_linear_id() const
+size_t get_local_linear_id() const noexcept;
 ----
    a@ Return the constituent <<local-id>> as a linear index value, representing the work-item's
    position within the current <<work-group>>.  The linear address is calculated from the
@@ -12820,7 +12788,7 @@ size_t get_local_linear_id() const
 a@
 [source]
 ----
-group<Dimensions> get_group() const
+group<Dimensions> get_group() const noexcept;
 ----
    a@ Return the constituent <<work-group>>, [code]#group#
       representing the <<work-group>>'s position within the overall
@@ -12829,14 +12797,14 @@ group<Dimensions> get_group() const
 a@
 [source]
 ----
-sub_group get_sub_group() const
+sub_group get_sub_group() const noexcept;
 ----
    a@ Return a [code]#sub_group# representing the <<sub-group>> to which the work-item belongs.
 
 a@
 [source]
 ----
-size_t get_group(int dimension) const
+size_t get_group(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
@@ -12847,7 +12815,7 @@ size_t get_group(int dimension) const
 a@
 [source]
 ----
-size_t get_group_linear_id() const
+size_t get_group_linear_id() const noexcept;
 ----
    a@ Return the group id as a linear index value. Calculating a linear address
       from a multi-dimensional index follows <<sec:multi-dim-linearization>>.
@@ -12855,14 +12823,14 @@ size_t get_group_linear_id() const
 a@
 [source]
 ----
-range<Dimensions> get_group_range() const
+range<Dimensions> get_group_range() const noexcept;
 ----
    a@ Returns the number of <<work-group,work-groups>> in the iteration space.
 
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const
+size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
@@ -12872,7 +12840,7 @@ size_t get_group_range(int dimension) const
 a@
 [source]
 ----
-range<Dimensions> get_global_range() const
+range<Dimensions> get_global_range() const noexcept;
 ----
    a@ Returns a [code]#range# representing the dimensions of the
       global iteration space.
@@ -12880,14 +12848,14 @@ range<Dimensions> get_global_range() const
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const
+size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Returns a [code]#range# representing the dimensions of the current
       work-group.
@@ -12895,14 +12863,14 @@ range<Dimensions> get_local_range() const
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const
+size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
 a@
 [source]
 ----
-id<Dimensions> get_offset() const
+id<Dimensions> get_offset() const noexcept;
     // Deprecated in SYCL 2020.
 ----
    a@ Deprecated in SYCL 2020.
@@ -12913,7 +12881,7 @@ id<Dimensions> get_offset() const
 a@
 [source]
 ----
-nd_range<Dimensions> get_nd_range() const
+nd_range<Dimensions> get_nd_range() const noexcept;
 ----
    a@ Returns the [code]#nd_range# of the current execution.
 
@@ -12923,7 +12891,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12936,7 +12904,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12949,7 +12917,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12962,7 +12930,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -12975,7 +12943,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -12992,7 +12960,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13009,7 +12977,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13026,7 +12994,7 @@ a@
 template <typename DestDataT, SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13040,7 +13008,7 @@ destination stride specified by [code]#destStride# and returns a SYCL
 a@
 [source]
 ----
-template <typename... EventTN> void wait_for(EventTN... events) const
+template <typename... EventTN> void wait_for(EventTN... events) const noexcept;
 ----
    a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
@@ -13091,7 +13059,7 @@ include::{header_dir}/hitem.h[lines=4..-1]
 a@
 [source]
 ----
-item<Dimensions, false> get_global() const
+item<Dimensions, false> get_global() const noexcept;
 ----
    a@ Return the constituent global <<item>> representing the
       work-item's position in the global iteration space as provided upon kernel invocation.
@@ -13099,14 +13067,14 @@ item<Dimensions, false> get_global() const
 a@
 [source]
 ----
-item<Dimensions, false> get_local() const
+item<Dimensions, false> get_local() const noexcept;
 ----
    a@ Return the same value as [code]#get_logical_local()#.
 
 a@
 [source]
 ----
-item<Dimensions, false> get_logical_local() const
+item<Dimensions, false> get_logical_local() const noexcept;
 ----
    a@ Return the constituent element of the logical local <<item>>
       work-item's position in the local iteration space as provided upon the invocation of the
@@ -13122,7 +13090,7 @@ of the logical id and the physical range:
 a@
 [source]
 ----
-item<Dimensions, false> get_physical_local() const
+item<Dimensions, false> get_physical_local() const noexcept;
 ----
    a@ Return the constituent element of the physical local <<item>>
       work-item's position in the local iteration space as provided (by the user or the runtime)
@@ -13131,112 +13099,112 @@ item<Dimensions, false> get_physical_local() const
 a@
 [source]
 ----
-range<Dimensions> get_global_range() const
+range<Dimensions> get_global_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_range()#
 
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const
+size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_global_id() const
+id<Dimensions> get_global_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_id()#
 
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const
+size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_range()#
 
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const
+size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_local_id() const
+id<Dimensions> get_local_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_id()#
 
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const
+size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
 a@
 [source]
 ----
-range<Dimensions> get_logical_local_range() const
+range<Dimensions> get_logical_local_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_range()#
 
 a@
 [source]
 ----
-size_t get_logical_local_range(int dimension) const
+size_t get_logical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_logical_local_id() const
+id<Dimensions> get_logical_local_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_id()#
 
 a@
 [source]
 ----
-size_t get_logical_local_id(int dimension) const
+size_t get_logical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
 a@
 [source]
 ----
-range<Dimensions> get_physical_local_range() const
+range<Dimensions> get_physical_local_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_range()#
 
 a@
 [source]
 ----
-size_t get_physical_local_range(int dimension) const
+size_t get_physical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
 a@
 [source]
 ----
-id<Dimensions> get_physical_local_id() const
+id<Dimensions> get_physical_local_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_id()#
 
 a@
 [source]
 ----
-size_t get_physical_local_id(int dimension) const
+size_t get_physical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
@@ -13282,7 +13250,7 @@ include::{header_dir}/group.h[lines=4..-1]
 a@
 [source]
 ----
-id<Dimensions> get_group_id() const
+id<Dimensions> get_group_id() const noexcept;
 ----
    a@ Return an <<id>> representing the index of the work-group within the
       global <<nd-range>> for every dimension.  Since the work-items in a
@@ -13293,14 +13261,14 @@ id<Dimensions> get_group_id() const
 a@
 [source]
 ----
-size_t get_group_id(int dimension) const
+size_t get_group_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
 a@
 [source]
 ----
-id<Dimensions> get_local_id() const
+id<Dimensions> get_local_id() const noexcept;
 ----
    a@ Return a SYCL [code]#id# representing the calling work-item's position
       within the <<work-group>>.
@@ -13311,7 +13279,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const
+size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
@@ -13321,7 +13289,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-range<Dimensions> get_local_range() const
+range<Dimensions> get_local_range() const noexcept;
 ----
    a@ Return a SYCL [code]#range# representing all dimensions of the local range.
       This local range may have been provided by the programmer, or chosen by the <<sycl-runtime>>.
@@ -13329,35 +13297,35 @@ range<Dimensions> get_local_range() const
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const
+size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
 a@
 [source]
 ----
-range<Dimensions> get_group_range() const
+range<Dimensions> get_group_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const
+size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const
+size_t operator[](int dimension) const noexecpt;
 ----
    a@ Equivalent to [code]#return get_group_id(dimension)#.
 
 a@
 [source]
 ----
-range<Dimensions> get_max_local_range() const
+range<Dimensions> get_max_local_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the maximum number of work-items in any <<work-group>>
       in the [code]#nd_range#.
@@ -13365,7 +13333,7 @@ range<Dimensions> get_max_local_range() const
 a@
 [source]
 ----
-size_t get_group_linear_id() const
+size_t get_group_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the <<work-group-id>>.
       Calculating a linear <<work-group-id>>
@@ -13374,14 +13342,14 @@ size_t get_group_linear_id() const
 a@
 [source]
 ----
-size_t get_group_linear_range() const
+size_t get_group_linear_range() const noexcept;
 ----
    a@ Return the total number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
 ----
-size_t get_local_linear_id() const
+size_t get_local_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the calling work-item's <<local-id>>.
       Calculating a linear <<local-id>>
@@ -13393,14 +13361,14 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_linear_range() const
+size_t get_local_linear_range() const noexcept;
 ----
    a@ Return the total number of work-items in the <<work-group>>.
 
 a@
 [source]
 ----
-bool leader() const
+bool leader() const noexcept;
 ----
    a@ Return true for exactly one work-item in the <<work-group>>, if the
       calling work-item is the leader of the work-group, and false for all
@@ -13415,7 +13383,7 @@ a@
 [source]
 ----
 template <typename WorkItemFunctionT>
-void parallel_for_work_item(const WorkItemFunctionT& func) const
+void parallel_for_work_item(const WorkItemFunctionT& func) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Launch the work-items for this work-group.
@@ -13439,7 +13407,7 @@ a@
 ----
 template <typename WorkItemFunctionT>
 void parallel_for_work_item(range<Dimensions> logicalRange,
-                            const WorkItemFunctionT& func) const
+                            const WorkItemFunctionT& func) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Launch the work-items for this work-group using a logical local range.
@@ -13468,7 +13436,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13481,7 +13449,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13494,7 +13462,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(local_ptr<DataT> dest,
                                    global_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13507,7 +13475,7 @@ a@
 template <typename DataT>
 device_event async_work_group_copy(global_ptr<DataT> dest,
                                    local_ptr<DataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Deprecated in SYCL 2020.
       Has the same effect as the overload taking [code]#decorated_local_ptr#
@@ -13520,7 +13488,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements) const
+                                   std::size_t numElements) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13537,7 +13505,7 @@ a@
 template <typename DestDataT, typename SrcDataT>
 device_event async_work_group_copy(decorated_local_ptr<DestDataT> dest,
                                    decorated_global_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t srcStride) const
+                                   std::size_t numElements, std::size_t srcStride) const noexcept;
 ----
    a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13554,7 +13522,7 @@ a@
 template <typename DestDataT, SrcDataT>
 device_event async_work_group_copy(decorated_global_ptr<DestDataT> dest,
                                    decorated_local_ptr<SrcDataT> src,
-                                   std::size_t numElements, std::size_t destStride) const
+                                   std::size_t numElements, std::size_t destStride) const noexcept;
 ----
     a@ Available only when: (std::is_same_v<DestDataT,
         std::remove_const_t<SrcDataT>> == true)
@@ -13568,7 +13536,7 @@ destination stride specified by [code]#destStride# and returns a SYCL
 a@
 [source]
 ----
-template <typename... EventTN> void wait_for(EventTN... events) const
+template <typename... EventTN> void wait_for(EventTN... events) const noexcept;
 ----
    a@ Permitted type for [code]#EventTN# is [code]#device_event#.
       Waits for the asynchronous operations associated with each [code]#device_event# to complete.
@@ -13609,7 +13577,7 @@ include::{header_dir}/subgroup.h[lines=4..-1]
 a@
 [source]
 ----
-id<1> get_group_id() const
+id<1> get_group_id() const noexcept;
 ----
    a@ Return an <<id>> representing the index of the sub-group within the
       <<work-group>>.  Since the work-items that compose a sub-group are chosen
@@ -13621,7 +13589,7 @@ id<1> get_group_id() const
 a@
 [source]
 ----
-id<1> get_local_id() const
+id<1> get_local_id() const noexcept;
 ----
    a@ Return a SYCL [code]#id# representing the calling work-item's position
       within the <<sub-group>>.
@@ -13629,7 +13597,7 @@ id<1> get_local_id() const
 a@
 [source]
 ----
-range<1> get_local_range() const
+range<1> get_local_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the size of the <<sub-group>>.
       This size may be less than the value returned by
@@ -13640,7 +13608,7 @@ range<1> get_local_range() const
 a@
 [source]
 ----
-range<1> get_group_range() const
+range<1> get_group_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the number of
       <<sub-group,sub-groups>> in the <<work-group>>.
@@ -13648,7 +13616,7 @@ range<1> get_group_range() const
 a@
 [source]
 ----
-range<1> get_max_local_range() const
+range<1> get_max_local_range() const noexcept;
 ----
    a@ Return a [code]#range# representing the maximum number of work-items
       permitted in a <<sub-group>> for the executing kernel.  This value may
@@ -13658,35 +13626,35 @@ range<1> get_max_local_range() const
 a@
 [source]
 ----
-uint32_t get_group_linear_id() const
+uint32_t get_group_linear_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_id()[0]#.
 
 a@
 [source]
 ----
-uint32_t get_group_linear_range() const
+uint32_t get_group_linear_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_range()[0]#.
 
 a@
 [source]
 ----
-uint32_t get_local_linear_id() const
+uint32_t get_local_linear_id() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_id()[0]#.
 
 a@
 [source]
 ----
-uint32_t get_local_linear_range() const
+uint32_t get_local_linear_range() const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range()[0]#.
 
 a@
 [source]
 ----
-bool leader() const
+bool leader() const noexcept;
 ----
    a@ Return true for exactly one work-item in the <<sub-group>>, if the
       calling work-item is the leader of the sub-group, and false for all
@@ -14349,8 +14317,8 @@ A user can therefore supply a secondary queue when submitting a command group to
 the primary queue.
 If the <<sycl-runtime>> fails to enqueue or execute a command group on a primary
 queue, it can attempt to run the command group on the secondary queue.
-The circumstances in which it is, or is not, possible for a <<sycl-runtime>> to
-fall-back from primary to secondary queue are unspecified in the specification.
+The circumstances in which the <<sycl-runtime>> may elect to fall-back from
+primary to secondary queue are unspecified.
 Even if a command group is run on the secondary queue, the requirement that host
 code within the command group is executed exactly once remains, regardless of
 whether the fallback queue is used for execution.
@@ -14371,9 +14339,6 @@ All of the accessors defined in <<command-group-scope>> take as a parameter an
 instance of the <<handler>>, and all the kernel invocation functions are member
 functions of this class.
 
-The constructors of the SYCL [code]#handler# class are described in
-<<table.constructors.handler>>.
-
 It is disallowed for an instance of the SYCL [code]#handler# class to be moved
 or copied.
 
@@ -14382,21 +14347,6 @@ or copied.
 ----
 include::{header_dir}/commandGroupHandler.h[lines=4..-1]
 ----
-
-
-[[table.constructors.handler]]
-.Constructors of the [code]#handler# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Constructor @ Description
-a@
-[source]
-----
-handler(___unspecified___)
-----
-   a@ Unspecified implementation-defined constructor.
-
-|====
 
 
 [[sub.section.requirement]]
@@ -14660,9 +14610,12 @@ This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
 implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
-code if the [code]#kernelObject# is not compatible with either the device
-associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified).
+code if the [code]#kernelObject# is not compatible with the device
+associated with the primary queue of the <<command-group>>.
+Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
+code if the <<command-group>> has a secondary queue, the implementation supports
+secondary queue fallback, and the [code]#kernelObject# is not compatible with
+the device associated with the secondary queue.
 
 a@
 [source]
@@ -14682,9 +14635,12 @@ This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
 implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
-code if the [code]#kernelObject# is not compatible with either the device
-associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified).
+code if the [code]#kernelObject# is not compatible with the device associated
+with the primary queue of the <<command-group>>.
+Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
+code if the <<command-group>> has a secondary queue, the implementation supports
+secondary queue fallback, and the [code]#kernelObject# is not compatible with
+the device associated with the secondary queue.
 
 a@
 [source]
@@ -14709,9 +14665,12 @@ This invocation function ignores any [code]#kernel_bundle# that was bound to
 this command group handler via [code]#handler::use_kernel_bundle()# and instead
 implicitly uses the kernel bundle that contains the [code]#kernelObject#.
 Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
-code if the [code]#kernelObject# is not compatible with either the device
-associated with the primary queue of the <<command-group>> or with the device
-associated with the secondary queue (if specified).
+code if the [code]#kernelObject# is not compatible with the device associated
+with the primary queue of the <<command-group>>.
+Throws an [code]#exception# with the [code]#errc::kernel_not_supported# error
+code if the <<command-group>> has a secondary queue, the implementation supports
+secondary queue fallback, and the [code]#kernelObject# is not compatible with
+the device associated with the secondary queue.
 
 |====
 
@@ -15342,10 +15301,10 @@ If the <<command-group>> attempts to invoke a kernel that is not contained by a
 compatible device image in [code]#execBundle#, the <<kernel-invocation-command>>
 throws a synchronous [code]#exception# with the
 [code]#errc::kernel_not_supported# error code.
-If the <<command-group>> has a secondary queue, then the [code]#execBundle# must
-contain a kernel that is compatible with both the primary queue's device and the
-secondary queue's device, otherwise the <<kernel-invocation-command>> throws
-this exception.
+If the <<command-group>> has a secondary queue and the implementation supports
+secondary queue fallback, then the [code]#execBundle# must contain a kernel that
+is compatible with both the primary queue's device and the secondary queue's
+device, otherwise the <<kernel-invocation-command>> throws this exception.
 
 Since the handler method for setting specialization constants is incompatible
 with the kernel bundle method, applications should not call this function if
@@ -15356,8 +15315,13 @@ _Throws:_
 
   * An [code]#exception# with the [code]#errc::invalid# error code if the
     <<context>> associated with the <<handler>> via its associated primary
-    <<queue>> or the <<context>> associated with the secondary <<queue>> (if
-    provided) is different from the <<context>> associated with the
+    <<queue>> is different from the <<context>> associated with the
+    <<kernel-bundle>> specified by [code]#execBundle#.
+
+  * An [code]#exception# with the [code]#errc::invalid# error code if the
+    <<handler>> has an associated secondary <<queue>>, the implementation
+    supports secondary queue fallback, and the <<context>> of the secondary
+    queue is different from the <<context>> associated with the
     <<kernel-bundle>> specified by [code]#execBundle#.
 
   * An [code]#exception# with the [code]#errc::invalid# error code if
@@ -15625,8 +15589,8 @@ A <<host-task>> is enqueued on a <<queue>> via the [code]#host_task# member
 function of the [code]#handler# class.
 The <<event>> returned by the submission of the associated <<command-group>>
 enters the completed state (corresponding to a status of
-[code]#info::event_command_status::complete#) once the invocation of the
-provided {cpp} callable has returned.
+[api]#info::event_command_status::complete#) once the invocation of the provided
+{cpp} callable has returned.
 Any uncaught exception thrown during the execution of a <<host-task>> will be
 turned into an <<async-error>> that can be handled as described in
 <<subsubsec:exception.async>>.
@@ -17014,7 +16978,6 @@ _Throws:_
     the <<backend>> that corresponds with [code]#Param# is different from the
     <<backend>> that is associated with this kernel bundle.
 
-[[sec:kernel-info-descriptors]]
 ==== Kernel information descriptors
 
 A <<kernel>> can be queried for information using the [code]#get_info()# member
@@ -17342,7 +17305,6 @@ declarable ([code]#std::complex#).
 include::{code_dir}/lambdaNameExamples.cpp[lines=4..-1]
 ----
 
-[[subsec:is-device-copyable-type-trait]]
 === [code]#is_device_copyable# type trait
 
 ....
@@ -17477,7 +17439,7 @@ or lambda, with an [code]#exception_list# as a parameter.
 Invocation of an <<async-handler>> may be triggered by the queue member
 functions [code]#queue::wait_and_throw()# or
 [code]#queue::throw_asynchronous()#, by the event member function
-[code]#event::wait_and_throw()#, or automatically on destruction of a queue or
+[api]#event::wait_and_throw#, or automatically on destruction of a queue or
 context that contains unconsumed asynchronous errors.
 When invoked, an <<async-handler>> is called and receives an
 [code]#exception_list# argument containing a list of exception objects
@@ -18824,7 +18786,6 @@ defined integer type.
 |====
 
 
-[[subsec:vec-aliases]]
 ==== Aliases
 
 The SYCL programming API provides all permutations of the type alias:
@@ -20235,7 +20196,6 @@ marray<bool, NumElements> operator!(const marray& v)
 
 
 
-[[subsec:marray-aliases]]
 ==== Aliases
 
 The SYCL programming API provides all permutations of the type alias:
@@ -20597,7 +20557,20 @@ bool compare_exchange_weak(T& expected, T desired,
                            memory_order order = default_read_modify_write_order,
                            memory_scope scope = default_scope) const
 ----
-   a@ Equivalent to [code]#compare_exchange_weak(expected, desired, order, order, scope)#.
+   a@ Equivalent to:
+[source, c++]
+----
+memory_order success = order;
+memory_order failure;
+if (order == memory_order::acq_rel) {
+  failure = memory_order::acquire;
+} else if (order == memory_order::release) {
+  failure = memory_order::relaxed;
+} else {
+  failure = order;
+}
+return compare_exchange_weak(expected, desired, success, failure, scope);
+----
 
 a@
 [source]
@@ -20627,7 +20600,20 @@ bool compare_exchange_strong(
     T& expected, T desired,
     memory_order order = default_read_modify_write_order) const
 ----
-   a@ Equivalent to [code]#compare_exchange_strong(expected, desired, order, order, scope)#.
+   a@ Equivalent to:
+[source, c++]
+----
+memory_order success = order;
+memory_order failure;
+if (order == memory_order::acq_rel) {
+  failure = memory_order::acquire;
+} else if (order == memory_order::release) {
+  failure = memory_order::relaxed;
+} else {
+  failure = order;
+}
+return compare_exchange_strong(expected, desired, success, failure, scope);
+----
 
 |====
 
@@ -21926,7 +21912,6 @@ described in <<sec:kernel.query>>.
 It is undefined behavior for any group function to be invoked within a
 [code]#parallel_for_work_group# or [code]#parallel_for_work_item# context.
 
-[[subsec:group-type-traits]]
 ==== Group type trait
 
 [source,,linenums]
@@ -22443,6 +22428,10 @@ _Returns:_ The result of combining the values resulting from dereferencing all
 pointers in the range [code]#[first, last)# using the operator
 [code]#binary_op#, where the values are combined according to the generalized
 sum defined in standard {cpp}.
+
+_Remarks:_ Intermediate results are stored as objects of type
+[code]#std::iterator_traits<Ptr>::value_type#.
+
 --
 
   . _Constraints:_ Available only if
@@ -22470,6 +22459,8 @@ _Returns:_ The result of combining the values resulting from dereferencing all
 pointers in the range [code]#[first, last)# and the initial value [code]#init#
 using the operator [code]#binary_op#, where the values are combined according to
 the generalized sum defined in standard {cpp}.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
   . _Constraints:_ Available only if
@@ -22493,6 +22484,8 @@ same synchronization point is unblocked.
 _Returns:_ The result of combining all the values of [code]#x# specified by each
 work-item in group [code]#g# using the operator [code]#binary_op#, where the
 values are combined according to the generalized sum defined in standard {cpp}.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
   . _Constraints:_ Available only if
@@ -22518,6 +22511,8 @@ _Returns:_ The result of combining all the values of [code]#x# specified by each
 work-item in group [code]#g# and the initial value [code]#init# using the
 operator [code]#binary_op#, where the values are combined according to the
 generalized sum defined in standard {cpp}.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
 ==== [code]#exclusive_scan# and [code]#inclusive_scan#
@@ -22586,6 +22581,9 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
+
+_Remarks:_ Intermediate results are stored as objects of type
+[code]#std::iterator_traits<OutPtr>::value_type#.
 --
 
   . _Constraints:_ Available only if
@@ -22623,6 +22621,8 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
   . _Constraints:_ Available only if
@@ -22652,6 +22652,8 @@ The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
 For multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
   . _Constraints:_ Available only if
@@ -22680,6 +22682,8 @@ The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
 For multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
 [source,,linenums]
@@ -22720,6 +22724,9 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
+
+_Remarks:_ Intermediate results are stored as objects of type
+[code]#std::iterator_traits<OutPtr>::value_type#.
 --
 
   . _Constraints:_ Available only if
@@ -22757,6 +22764,8 @@ The completion of the algorithm happens before any work-item blocking on the
 same synchronization point is unblocked.
 
 _Returns:_ A pointer to the end of the output range.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
   . _Constraints:_ Available only if
@@ -22784,6 +22793,8 @@ The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
 For multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
   . _Constraints:_ Available only if
@@ -22812,6 +22823,8 @@ The scan is computed using a generalized noncommutative sum as defined in
 standard {cpp}.
 For multi-dimensional groups, the order of work-items in group [code]#g# is
 determined by their linear id.
+
+_Remarks:_ Intermediate results are stored as objects of type [code]#T#.
 --
 
 
@@ -25423,7 +25436,6 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 '''
 
 
-[[sec:native-precision-math-functions]]
 === Native precision math functions
 
 This section describes the native precision math functions that are available in
@@ -25862,7 +25874,6 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 '''
 
 
-[[sec:half-precision-math-functions]]
 === Half precision math functions (deprecated)
 
 This section describes the half precision math functions that are available in
@@ -27126,7 +27137,6 @@ The return type is [code]#Int32Bit1# unless [code]#Int32Bit1# is the
 '''
 
 
-[[sec:common-functions]]
 === Common functions
 
 This section describes the common functions that are available in the
@@ -27872,6 +27882,13 @@ The term _vector element type_ represents these types:
 * [code]#float#
 * [code]#double#
 * [code]#half#
+
+{note}The behavior of these functions for [code]#vec# input parameter types
+follows the OpenCL C behavior where the value -1 represents "true" and the value
+0 represents "false".
+Functions that check the truthiness of a [code]#vec# element check whether the
+high bit of the element is set, which again aligns with OpenCL C.
+{endnote}
 
 '''
 
