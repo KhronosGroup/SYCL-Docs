@@ -1,28 +1,15 @@
 [[sec:khr-includes]]
 = sycl_khr_includes
 
-The core SYCL specification says that all APIs provided by the specification are
-accessible through single [code]#<sycl/sycl.hpp># header file.
-
-That leads to increased compilation times because SYCL users have to pay for
-features that they are not even using. Moreover, the situation doesn't scale
-well with more extensions being proposed.
-
-This extension provides an alternative set of header files which provide
-limited set of APIs each, thus allowing user to avoid paying compilation time
-cost for features that are not used by an application.
-
-The alternative set of headers provided by this extension does not introduce
-any new functionality, but simply provides an alternative way of accessing the
-core SYCL 2020 features with less compile-time overhead on features unused by
-an application.
+This extension provides an alternative set of header files, with each providing
+a limited set of APIs.
+This allows developers to avoid paying compilation time cost for features that
+are not used by an application.
 
 [[sec:khr-includes-dependencies]]
 == Dependencies
 
-This extension has no dependencies on other extensions. However, other
-extensions may not be adapted to be used together with this extension. See
-<<sec:khr-includes-other-extensions>> for more details about this.
+This extension has no dependencies on other extensions.
 
 [[sec:khr-includes-feature-test]]
 == Feature test macro
@@ -41,11 +28,9 @@ below.
 |===
 
 {note}
-Please note that an implementation may choose the
-<<subsec:library-only, library-only approach>> to implementing the SYCL
-specification and therefore it won't be possible for it to predefine any macro
-outside of header files. See <<sec:khr-includes-version>> below
-about performing a portable check for this extension.
+A <<subsec:library-only>> implementation of SYCL cannot predefine macros outside
+of header files.
+See <<sec:khr-includes-version>> for a portable way to check for this extension.
 {endnote}
 
 [[sec:khr-includes-full-list-of-headers]]
