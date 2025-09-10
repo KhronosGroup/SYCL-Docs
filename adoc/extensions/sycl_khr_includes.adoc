@@ -36,8 +36,8 @@ See <<sec:khr-includes-version>> for a portable way to check for this extension.
 [[sec:khr-includes-full-list-of-headers]]
 == Extension overview
 
-The <<table.khr-includes-list>> below provides a list of all new
-headers with high-level description of their content.
+<<table.khr-includes-list>> provides a list of all new headers with high-level
+description of their content.
 
 All headers are provided under [code]#<sycl/khr/includes/># include path.
 
@@ -190,9 +190,10 @@ exist within the [code]#::sycl# namespace as with the standard
 There is no guarantee that headers documented by this extension contain anything
 else besides things listed in sections below. For example, [code]#queue# class
 has methods which accept [code]#accessor# object, but
-[code]#<sycl/khr/includes/queue.hpp># is not required to provide [code]#accessor#
-definition. Therefore, a portable application should include the corresponding
-header to get [code]#accessor# definition explicitly.
+[code]#<sycl/khr/includes/queue.hpp># is not required to provide a definition of
+[code]#accessor#.
+Therefore, a portable application should include the corresponding header to
+define [code]#accessor# definition explicitly.
 
 {note}
 However, there is no requirement for the implementations to **only** provide
@@ -208,17 +209,17 @@ as small as reasonably possible to provide maximum benefit for users.
 
 This header provides definitions of:
 
-* [code]#SYCL_KHR_INCLUDES# macro
-* All macro defined by <<sec:preprocessor-directives-and-macros>>
-* All macro defined by other extensions supported by an implementation
+* [code]#SYCL_KHR_INCLUDES# macro;
+* All macros defined in <<sec:preprocessor-directives-and-macros>>;
+* Any macros defined by other extensions supported by an implementation; and
 * Backend macros in the form of [code]#SYCL_BACKEND_<backend_name># defined by
-  <<sec:backend-macros>>
+  <<sec:backend-macros>>.
 
 [code]#<sycl/khr/includes/version.hpp># header is included by every other header
 documented by this extension, as well as [code]#<sycl/sycl.hpp>#.
 
-There is no guarantee that the aforementioned macro are defined before the
-inclusion point of [code]#<sycl/khr/includes/version.hpp>#.
+There is no guarantee that the aforementioned macros are defined before
+[code]#<sycl/khr/includes/version.hpp># is included.
 
 {note}Implementations providing a dedicated SYCL compiler can predefine those
 macro within the compiler. However, the SYCL standard allows for library-only
@@ -226,8 +227,8 @@ implementations and therefore a portable application should not assume that
 any macro definitions are available until [code]#<sycl/khr/includes/version.hpp># is
 included.{endnote}
 
-To properly detect in a portable way if this extension is supported by an
-implementation, the following approach should be used:
+The code below demonstrates a portable way to detect if this extension is
+supported:
 
 [source]
 ----
@@ -642,9 +643,9 @@ of fine-grained headers is an extension specification itself. However, there are
 many existing extensions which may not have been updated to account for this
 extension.
 
-Therefore, any extension which does not explicitly document how can it
-be accessed through header files, should be assumed to be available through
-[code]#<sycl/sycl.hpp># only.
+Any extension which does not explicitly document how it can be accessed through
+header files should be assumed to be available only through
+[code]#<sycl/sycl.hpp>#.
 
 {note}It _may_ seem safe to assume that if an extension modifies some existing
 class, then its functionality should be available through a header file which
@@ -652,9 +653,8 @@ exposes that class. However, there exist implementation possibilities where this
 won't be the case and therefore this assumption is not safe to make for
 applications that aim to be portable between SYCL implementations.{endnote}
 
-If an implementation supports this extension together with other extensions,
-then any macro defined by other extensions must be made available through
-[code]#<sycl/khr/includes/version.hpp># header.
+If an implementation supports this extension, then any macro defined by other
+supported extensions must be defined in [code]#<sycl/khr/includes/version.hpp>#.
 
 == Open issues/questions
 
