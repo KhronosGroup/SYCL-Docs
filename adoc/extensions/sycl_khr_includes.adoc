@@ -209,12 +209,6 @@ documented by this extension, as well as [code]#<sycl/sycl.hpp>#.
 There is no guarantee that the aforementioned macros are defined before
 [code]#<sycl/khr/includes/version.hpp># is included.
 
-{note}Implementations providing a dedicated SYCL compiler can predefine those
-macro within the compiler. However, the SYCL standard allows for library-only
-implementations and therefore a portable application should not assume that
-any macro definitions are available until [code]#<sycl/khr/includes/version.hpp># is
-included.{endnote}
-
 The code below demonstrates a portable way to detect if this extension is
 supported:
 
@@ -582,34 +576,12 @@ pre-adopted from the next C++ specification.
 
 This header contains definition of [code]#byte# type alias
 
-[[sec:khr-includes-macro]]
-=== Preprocessor directives and macros
-
-In case a SYCL implementation is made using library-only approach, macros
-defined by <<sec:preprocessor-directives-and-macros>> should be available
-regardless of which one of the headers introduced by this extension is included.
-
-For example, [code]#SYCL_LANGUAGE_VERSION# macro should be available even if
-a translation unit within an application only includes
-[code]#<sycl/khr/includes/vec.hpp># header.
-
 [[sec:khr-includes-other-extensions]]
 === Co-existence with other extensions
-
-The ultimate source of truth about accessibility of an extension through a set
-of fine-grained headers is an extension specification itself. However, there are
-many existing extensions which may not have been updated to account for this
-extension.
 
 Any extension which does not explicitly document how it can be accessed through
 header files should be assumed to be available only through
 [code]#<sycl/sycl.hpp>#.
-
-{note}It _may_ seem safe to assume that if an extension modifies some existing
-class, then its functionality should be available through a header file which
-exposes that class. However, there exist implementation possibilities where this
-won't be the case and therefore this assumption is not safe to make for
-applications that aim to be portable between SYCL implementations.{endnote}
 
 If an implementation supports this extension, then any macro defined by other
 supported extensions must be defined in [code]#<sycl/khr/includes/version.hpp>#.
