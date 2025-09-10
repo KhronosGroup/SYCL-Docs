@@ -215,19 +215,19 @@ supported:
 [source]
 ----
 #if __has_include(<sycl/khr/includes/version.hpp>)
-// The extension is supported, but the SYCL_KHR_INCLUDES is not
-// guaranteed to be defined at this point for library-only implementations
+// The extension is supported, but the SYCL_KHR_INCLUDES is not necessarily
+// defined
 
 #include <sycl/khr/includes/version.hpp>
-// Now the SYCL_KHR_INCLUDES macro is guaranteed to be defined for all kinds of
-// implementations
+// SYCL_KHR_INCLUDES macro is guaranteed to be defined if the extension is
+// supported.
+#endif
 
-// Use the extension
+#if SYCL_KHR_INCLUDES
+// Extension is supported
 #include <sycl/khr/includes/vec.hpp>
-
 #else
-// Extension is not supported by an implementation
-// Fallback to the core SYCL standard
+// Extension is not supported
 #include <sycl/sycl.hpp>
 #endif
 ----
