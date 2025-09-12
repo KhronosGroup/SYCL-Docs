@@ -1,8 +1,8 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 #include <sycl/sycl.hpp>
-using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
+using namespace sycl;  // (optional) avoids need for "sycl::" before SYCL names
 
 int main() {
   queue myQueue;
@@ -18,7 +18,7 @@ int main() {
     // pre-compiled kernel from "myBundle".
     cgh.use_kernel_bundle(myBundle);
 
-    cgh.parallel_for(range { 1024 }, ([=](item index) {
+    cgh.parallel_for(range{1024}, ([=](item index) {
                        // kernel code
                      }));
   });

@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -10,11 +10,11 @@ template <int Dimensions = 1> class nd_range {
 
   // The offset is deprecated in SYCL 2020.
   nd_range(range<Dimensions> globalSize, range<Dimensions> localSize,
-           id<Dimensions> offset = id<Dimensions>());
+           id<Dimensions> offset = id<Dimensions>()) noexcept;
 
-  range<Dimensions> get_global_range() const;
-  range<Dimensions> get_local_range() const;
-  range<Dimensions> get_group_range() const;
-  id<Dimensions> get_offset() const; // Deprecated in SYCL 2020.
+  range<Dimensions> get_global_range() const noexcept;
+  range<Dimensions> get_local_range() const noexcept;
+  range<Dimensions> get_group_range() const noexcept;
+  id<Dimensions> get_offset() const noexcept; // Deprecated in SYCL 2020.
 };
 } // namespace sycl
