@@ -561,7 +561,7 @@ the [code]#reduction# function.
 _Effects_ (1-3): Equivalent to: +
 [source,sycl]
 ----
-event ev = q.submit([&](handler& h) { 
+event ev = q.submit([&](handler& h) {
   reqs.register-events(h);
   reqs.register-accessors(h);
   reqs.register-kernel-bundle(h);
@@ -642,6 +642,39 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 ----
 
 _Effects_ (2): Equivalent to [code]#+return launch_task(q, {}, k, args...);+#.
+
+'''
+
+=== Host tasks
+
+.[apititle]#launch_host#
+[source,role=synopsis,id=api:launch_host]
+----
+namespace sycl::khr {
+
+template <typename T, typename... Requirements>
+std::optional<event> launch_host(const queue& q, const requirements<Requirements...>& reqs, T&& hostTaskCallable); (1)
+
+template <typename T, typename... Requirements>
+std::optional<event> launch_host(const queue& q, T&& hostTaskCallable); (2)
+
+}
+----
+
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#.
+
+_Effects_ (1): Equivalent to: +
+[source,sycl]
+----
+event ev = q.submit([&](handler& h) {
+  h.host_task(hostTaskCallable);
+});
+return (reqs.has-tracking()) ? ev : std::nullopt;
+----
+
+_Effects_ (2): Equivalent to [code]#+return launch_host(q, {}, hostTaskCallable);+#.
 
 '''
 
