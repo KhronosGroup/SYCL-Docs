@@ -33,17 +33,27 @@ template <int Dimensions = 1> class id {
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend id operatorOP(const id& lhs, const id& rhs) noexcept { /* ... */
   }
-  friend id operatorOP(const id& lhs, const std::size_t& rhs) noexcept { /* ... */
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // Available only when std::is_integral_v<T> is true
+  template <typename T>
+  friend id operatorOP(const id& lhs, const T& rhs) noexcept { /* ... */
+  }
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // Available only when std::is_integral_v<T> is true
+  template <typename T>
+  friend id operatorOP(const T& lhs, const id& rhs) noexcept { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend id& operatorOP(id& lhs, const id& rhs) noexcept { /* ... */
   }
-  friend id& operatorOP(id& lhs, const std::size_t& rhs) noexcept { /* ... */
-  }
 
-  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend id operatorOP(const std::size_t& lhs, const id& rhs) noexcept { /* ... */
+  // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
+  // Available only when std::is_integral_v<T> is true
+  template <typename T>
+  friend id& operatorOP(id& lhs, const T& rhs) noexcept { /* ... */
   }
 
   // OP is unary +, -

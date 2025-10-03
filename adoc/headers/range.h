@@ -29,17 +29,27 @@ template <int Dimensions = 1> class range {
   // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
   friend range operatorOP(const range& lhs, const range& rhs) noexcept { /* ... */
   }
-  friend range operatorOP(const range& lhs, const std::size_t& rhs) noexcept { /* ... */
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // Available only when std::is_integral_v<T> is true
+  template <typename T>
+  friend range operatorOP(const range& lhs, const T& rhs) noexcept { /* ... */
+  }
+
+  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
+  // Available only when std::is_integral_v<T> is true
+  template <typename T>
+  friend range operatorOP(const T& lhs, const range& rhs) noexcept { /* ... */
   }
 
   // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
   friend range& operatorOP(range& lhs, const range& rhs) noexcept { /* ... */
   }
-  friend range& operatorOP(range& lhs, const std::size_t& rhs) noexcept { /* ... */
-  }
 
-  // OP is: +, -, *, /, %, <<, >>, &, |, ^, &&, ||, <, >, <=, >=
-  friend range operatorOP(const std::size_t& lhs, const range& rhs) noexcept { /* ... */
+  // OP is: +=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=
+  // Available only when std::is_integral_v<T> is true
+  template <typename T>
+  friend range& operatorOP(range& lhs, const T& rhs) noexcept { /* ... */
   }
 
   // OP is unary +, -
