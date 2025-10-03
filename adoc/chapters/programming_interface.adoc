@@ -5556,7 +5556,7 @@ _Returns:_ A [code]#range# representing the number of elements in the buffer.
 .[apititle]#buffer::byte_size#
 [source,role=synopsis,id=api:buffer-byte-size]
 ----
-size_t byte_size() const noexcept;
+std::size_t byte_size() const noexcept;
 ----
 _Returns:_ The size of the buffer storage in bytes.
 Equal to [code]#size()*sizeof(T)#.
@@ -5566,7 +5566,7 @@ Equal to [code]#size()*sizeof(T)#.
 .[apititle]#buffer::size#
 [source,role=synopsis,id=api:buffer-size]
 ----
-size_t size() const noexcept;
+std::size_t size() const noexcept;
 ----
 _Returns:_ The total number of elements in the buffer.
 Equal to [code]#+get_range()[0] * ...
@@ -5577,7 +5577,7 @@ Equal to [code]#+get_range()[0] * ...
 .[apititle]#buffer::get_count#
 [source,role=synopsis,id=api:buffer-get-count]
 ----
-size_t get_count() const;
+std::size_t get_count() const;
 ----
 Deprecated by SYCL 2020.
 
@@ -5588,7 +5588,7 @@ _Effects:_ Equivalent to [code]#return size()#.
 .[apititle]#buffer::get_size#
 [source,role=synopsis,id=api:buffer-get-size]
 ----
-size_t get_size() const;
+std::size_t get_size() const;
 ----
 Deprecated by SYCL 2020.
 
@@ -6473,7 +6473,7 @@ pitch of the image in bytes.
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the image.
       Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
@@ -6481,7 +6481,7 @@ size_t size() const noexcept
 a@
 [source]
 ----
-size_t byte_size() const noexcept
+std::size_t byte_size() const noexcept
 ----
    a@ Returns the size of the image storage in bytes.  The number of
       bytes may be greater than [code]#size()*element size#
@@ -6747,7 +6747,7 @@ pitch of the image in bytes.
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the image.
       Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
@@ -6755,7 +6755,7 @@ size_t size() const noexcept
 a@
 [source]
 ----
-size_t byte_size() const noexcept
+std::size_t byte_size() const noexcept
 ----
    a@ Returns the size of the image storage in bytes.  The number of
       bytes may be greater than [code]#size()*element size#
@@ -8047,13 +8047,13 @@ the additional member functions described in
 a@
 [source]
 ----
-size_t get_size() const
+std::size_t get_size() const
 ----
    a@ Returns the same value as [code]#byte_size()#.
 a@
 [source]
 ----
-size_t get_count() const
+std::size_t get_count() const
 ----
    a@ Returns the same value as [code]#size()#.
 
@@ -8609,7 +8609,7 @@ const_reference
 a@
 [source]
 ----
-size_t get_size() const noexcept
+std::size_t get_size() const noexcept
 ----
    a@ Returns the size in bytes of the memory region this accessor may access.
 
@@ -8624,7 +8624,7 @@ size in bytes of the accessor's local memory allocation, per work-group.
 a@
 [source]
 ----
-size_t get_count() const noexcept
+std::size_t get_count() const noexcept
 ----
    a@ Returns the number of [code]#DataT# elements of the memory region this
       accessor may access.
@@ -9789,7 +9789,7 @@ host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the number of elements of the underlying [code]#unsampled_image#
       that this accessor is accessing.
@@ -9977,7 +9977,7 @@ host_sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the number of elements of the underlying [code]#sampled_image#
       that this accessor is accessing.
@@ -12047,7 +12047,7 @@ range(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 a@
 [source]
 ----
-size_t get(int dimension) const noexcept;
+std::size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12057,7 +12057,7 @@ size_t get(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t& operator[](int dimension) noexcept;
+std::size_t& operator[](int dimension) noexcept;
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
@@ -12067,7 +12067,7 @@ size_t& operator[](int dimension) noexcept;
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexcept;
+std::size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12077,7 +12077,7 @@ size_t operator[](int dimension) const noexcept;
 a@
 [source]
 ----
-size_t size() const noexcept;
+std::size_t size() const noexcept;
 ----
    a@ Return the size of the range computed as dimension0*...*dimensionN.
 
@@ -12404,7 +12404,7 @@ id(const item<Dimensions>& item) noexcept;
 a@
 [source]
 ----
-size_t get(int dimension) const noexcept;
+std::size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of this [code]#id# object.
       Results in undefined behavior if [code]#dimension# is not in the range
@@ -12413,7 +12413,7 @@ size_t get(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t& operator[](int dimension) noexcept;
+std::size_t& operator[](int dimension) noexcept;
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
@@ -12423,7 +12423,7 @@ size_t& operator[](int dimension) noexcept;
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexcept;
+std::size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
@@ -12616,14 +12616,14 @@ id<Dimensions> get_id() const noexcept;
 a@
 [source]
 ----
-size_t get_id(int dimension) const noexcept;
+std::size_t get_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexcept;
+std::size_t operator[](int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id(dimension)#.
 
@@ -12638,7 +12638,7 @@ range<Dimensions> get_range() const noexcept;
 a@
 [source]
 ----
-size_t get_range(int dimension) const noexcept;
+std::size_t get_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_range().get(dimension)#.
 
@@ -12683,7 +12683,7 @@ Returns the same value as [code]#get_id(0)#.
 a@
 [source]
 ----
-size_t get_linear_id() const noexcept;
+std::size_t get_linear_id() const noexcept;
 ----
    a@ Return the id as a linear index value. Calculating a linear
       address from the multi-dimensional index follows
@@ -12739,7 +12739,7 @@ id<Dimensions> get_global_id() const noexcept;
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const noexcept;
+std::size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
@@ -12750,7 +12750,7 @@ size_t get_global_id(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t get_global_linear_id() const noexcept;
+std::size_t get_global_linear_id() const noexcept;
 ----
    a@ Return the constituent <<global-id>> as a linear index value, representing the work-item's
    position in the global iteration space.  The linear address is calculated from the
@@ -12768,7 +12768,7 @@ id<Dimensions> get_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const noexcept;
+std::size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
@@ -12779,7 +12779,7 @@ size_t get_local_id(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t get_local_linear_id() const noexcept;
+std::size_t get_local_linear_id() const noexcept;
 ----
    a@ Return the constituent <<local-id>> as a linear index value, representing the work-item's
    position within the current <<work-group>>.  The linear address is calculated from the
@@ -12804,7 +12804,7 @@ sub_group get_sub_group() const noexcept;
 a@
 [source]
 ----
-size_t get_group(int dimension) const noexcept;
+std::size_t get_group(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
@@ -12815,7 +12815,7 @@ size_t get_group(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t get_group_linear_id() const noexcept;
+std::size_t get_group_linear_id() const noexcept;
 ----
    a@ Return the group id as a linear index value. Calculating a linear address
       from a multi-dimensional index follows <<sec:multi-dim-linearization>>.
@@ -12830,7 +12830,7 @@ range<Dimensions> get_group_range() const noexcept;
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const noexcept;
+std::size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
@@ -12848,7 +12848,7 @@ range<Dimensions> get_global_range() const noexcept;
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const noexcept;
+std::size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
@@ -12863,7 +12863,7 @@ range<Dimensions> get_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const noexcept;
+std::size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
@@ -13106,7 +13106,7 @@ range<Dimensions> get_global_range() const noexcept;
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const noexcept;
+std::size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
@@ -13120,7 +13120,7 @@ id<Dimensions> get_global_id() const noexcept;
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const noexcept;
+std::size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
@@ -13134,7 +13134,7 @@ range<Dimensions> get_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const noexcept;
+std::size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
@@ -13148,7 +13148,7 @@ id<Dimensions> get_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const noexcept;
+std::size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
@@ -13162,7 +13162,7 @@ range<Dimensions> get_logical_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_logical_local_range(int dimension) const noexcept;
+std::size_t get_logical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
@@ -13176,7 +13176,7 @@ id<Dimensions> get_logical_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_logical_local_id(int dimension) const noexcept;
+std::size_t get_logical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
@@ -13190,7 +13190,7 @@ range<Dimensions> get_physical_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_physical_local_range(int dimension) const noexcept;
+std::size_t get_physical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
@@ -13204,7 +13204,7 @@ id<Dimensions> get_physical_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_physical_local_id(int dimension) const noexcept;
+std::size_t get_physical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
@@ -13261,7 +13261,7 @@ id<Dimensions> get_group_id() const noexcept;
 a@
 [source]
 ----
-size_t get_group_id(int dimension) const noexcept;
+std::size_t get_group_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
@@ -13279,7 +13279,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const noexcept;
+std::size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
@@ -13297,7 +13297,7 @@ range<Dimensions> get_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const noexcept;
+std::size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
@@ -13311,14 +13311,14 @@ range<Dimensions> get_group_range() const noexcept;
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const noexcept;
+std::size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexecpt;
+std::size_t operator[](int dimension) const noexecpt;
 ----
    a@ Equivalent to [code]#return get_group_id(dimension)#.
 
@@ -13333,7 +13333,7 @@ range<Dimensions> get_max_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_group_linear_id() const noexcept;
+std::size_t get_group_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the <<work-group-id>>.
       Calculating a linear <<work-group-id>>
@@ -13342,14 +13342,14 @@ size_t get_group_linear_id() const noexcept;
 a@
 [source]
 ----
-size_t get_group_linear_range() const noexcept;
+std::size_t get_group_linear_range() const noexcept;
 ----
    a@ Return the total number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
 ----
-size_t get_local_linear_id() const noexcept;
+std::size_t get_local_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the calling work-item's <<local-id>>.
       Calculating a linear <<local-id>>
@@ -13361,7 +13361,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_linear_range() const noexcept;
+std::size_t get_local_linear_range() const noexcept;
 ----
    a@ Return the total number of work-items in the <<work-group>>.
 
@@ -17699,7 +17699,7 @@ context get_context() const
 a@
 [source]
 ----
-size_t size() const
+std::size_t size() const
 ----
    a@ Returns the size of the list
 
@@ -18074,7 +18074,7 @@ static constexpr std::size_t size() noexcept
 a@
 [source]
 ----
-size_t get_count() const
+std::size_t get_count() const
 ----
    a@ Returns the same value as [code]#size()#. Deprecated.
 a@
@@ -18090,7 +18090,7 @@ alignment as described in <<memory-layout-and-alignment>>.
 a@
 [source]
 ----
-size_t get_size() const
+std::size_t get_size() const
 ----
    a@ Returns the same value as [code]#byte_size()#. Deprecated.
 a@
@@ -18974,8 +18974,8 @@ explicit operator T() const
 static constexpr std::size_t byte_size() noexcept
 static constexpr std::size_t size() noexcept
 
-size_t get_size() const   // Deprecated
-size_t get_count() const  // Deprecated
+std::size_t get_size() const   // Deprecated
+std::size_t get_count() const  // Deprecated
 
 template <typename ConvertT,
           rounding_mode RoundingMode = rounding_mode::automatic>
@@ -21597,26 +21597,26 @@ stream(std::size_t totalBufferSize, std::size_t workItemBufferSize, handler& cgh
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the total buffer size, in bytes.
 a@
 [source]
 ----
-size_t get_size() const
+std::size_t get_size() const
 ----
    a@ Returns the same value as [code]#size()#. Deprecated.
 a@
 [source]
 ----
-size_t get_work_item_buffer_size() const
+std::size_t get_work_item_buffer_size() const
 ----
    a@ Returns the buffer size per work-item, in bytes.
 
 a@
 [source]
 ----
-size_t get_max_statement_size() const
+std::size_t get_max_statement_size() const
 ----
    a@ Deprecated query with same functionality as [code]#get_work_item_buffer_size()#.
 
