@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -10,27 +10,27 @@ template <int Dimensions = 1, bool WithOffset = true> class item {
 
   /* -- common interface members -- */
 
-  id<Dimensions> get_id() const;
+  id<Dimensions> get_id() const noexcept;
 
-  size_t get_id(int dimension) const;
+  std::size_t get_id(int dimension) const noexcept;
 
-  size_t operator[](int dimension) const;
+  std::size_t operator[](int dimension) const noexcept;
 
-  range<Dimensions> get_range() const;
+  range<Dimensions> get_range() const noexcept;
 
-  size_t get_range(int dimension) const;
+  std::size_t get_range(int dimension) const noexcept;
 
   // Deprecated in SYCL 2020.
   // only available if WithOffset is true
-  id<Dimensions> get_offset() const;
+  id<Dimensions> get_offset() const noexcept;
 
   // Deprecated in SYCL 2020.
   // only available if WithOffset is false
-  operator item<Dimensions, true>() const;
+  operator item<Dimensions, true>() const noexcept;
 
   // only available if Dimensions == 1
-  operator size_t() const;
+  operator std::size_t() const noexcept;
 
-  size_t get_linear_id() const;
+  std::size_t get_linear_id() const noexcept;
 };
 } // namespace sycl

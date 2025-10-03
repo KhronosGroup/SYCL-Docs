@@ -93,7 +93,7 @@ and lifetimes of the various objects used within SYCL, as explained in
 
 A <<sycl-kernel-function>> is the scoped block of code that will be compiled
 using a device compiler.
-This code may be defined by the body of a lambda function or by the
+This code may be defined by the body of a lambda expression or by the
 [code]#operator()# function of a function object.
 Each instance of the <<sycl-kernel-function>> will be executed as a single,
 though not necessarily entirely independent, flow of execution and has to adhere
@@ -370,7 +370,7 @@ The resources managed by SYCL are:
     In SYCL, a device is accessible through a [code]#sycl::device# object.
   . <<kernel,Kernels>>: the SYCL functions that run on SYCL devices are defined
     as {cpp} function objects (a named function object type or a lambda
-    function).
+    expression).
     A kernel can be introspected through a [code]#sycl::kernel# object.
 +
 --
@@ -549,8 +549,7 @@ Programmers may use these events to explicitly coordinate host and device
 execution.
 Host code can wait for an event to complete, which will block execution on the
 host until the action(s) represented by the event have completed.
-The [code]#event# class is described in greater detail in
-<<sec:interface.event>>.
+The [code]#event# class is described in greater detail in <<sec:event-class>>.
 
 Events may also be used to explicitly order the execution of kernels.
 Host code may wait for the completion of specific event, which blocks execution
@@ -903,7 +902,7 @@ image::{images}/host-acc.svg[align="center",opts="{imageopts}"]
 
 === SYCL device memory model
 
-The memory model for SYCL devices is based on the OpenCL 1.2 memory model.
+The memory model for SYCL devices is based on the OpenCL memory model.
 Work-items executing in a kernel have access to three distinct address spaces
 (memory regions) and a virtual address space overlapping some concrete address
 spaces:
@@ -1164,7 +1163,7 @@ Host code and device code is written in the same {cpp} source file, enabling
 instantiation of templated kernels from host code and also enabling kernel
 source code to be shared between host and device.
 The device kernels are encapsulated {cpp} callable types (a function object with
-[code]#operator()# or a lambda function), which have been designated to be
+[code]#operator()# or a lambda expression), which have been designated to be
 compiled as SYCL kernels.
 
 SYCL programs target heterogeneous systems.
@@ -1230,43 +1229,47 @@ When the global size is zero, the kernel function is not executed, the local
 size is ignored, and any dependencies are satisfied.
 
 Work-groups may be further subdivided into <<sub-group,sub-groups>>.
-The work-items that compose a sub-group are selected in an
-implementation-defined way, and therefore the size and number of sub-groups may
-differ for each kernel.
-Moreover, different devices may make different guarantees with respect to how
-sub-groups within a work-group are scheduled.
-The maximum number of work-items in any sub-group in a kernel is based on a
-combination of the kernel and its dispatch dimensions.
-The size of any sub-group in the dispatch is between 1 and this maximum
-sub-group size, and the size of an individual sub-group is invariant for the
-duration of a kernel's execution.
+Each sub-group in a work-group is one-dimensional, and the maximum number of
+work-items within each sub-group is fixed for a given combination of kernel,
+device and work-group size.
+The size of each sub-group is between 1 and this maximum sub-group size, and is
+invariant for the duration of a kernel's execution.
+
+If the number of work-items in the highest-numbered dimension of a work-group is
+evenly divisible by the sub-group size, all sub-groups in the work-group contain
+the same number of work-items.
+Otherwise, the division of a work-group into sub-groups is
+implementation-defined.
+
+{note}For example, a two-dimensional work-group of size {2, 3} with a maximum
+sub-group size of 16 may be split into two sub-groups of size 3, or treated as a
+single sub-group of size 6.{endnote}
+
+The numbering of work-items in a sub-group reflects the linear numbering of the
+work-items in the work-group.
+Specifically, if a work-item has a linear ID i~s~ in the sub-group and a linear
+ID i~w~ in the work-group, the work-item with linear ID i~s~+1 in the sub-group
+has linear ID i~w~+1 in the work-group.
+
 Similarly to work-groups, the [code]#group_barrier# function can be used to
 block a work-item until all work-items in the same sub-group arrive at the
 barrier.
 
 Portable device code must not assume that work-items within a sub-group execute
-in any particular order, that work-groups are subdivided into sub-groups in a
-specific way, nor that the work-items within a sub-group provide specific
+in any particular order, that work-groups where the highest-numbered dimension
+is not evenly divisible by the sub-group size are subdivided into sub-groups in
+a specific way, nor that the work-items within a sub-group provide specific
 forward progress guarantees.
 
 Variables with <<reduction>> semantics can be added to work-group data parallel
 kernels using the features described in <<sec:reduction>>.
 
 
-=== Hierarchical data parallel kernels
+=== Hierarchical data parallel kernels (deprecated)
 
-[NOTE]
-====
-Based on developer and implementation feedback, the hierarchical data parallel
-kernel feature described next is undergoing improvements to better align with
-the frameworks and patterns prevalent in modern programming.
-As this is a key part of the SYCL API and we expect to make changes to it, we
-temporarily recommend that new codes refrain from using this feature until the
-new API is finished in a near-future version of the SYCL specification, when
-full use of the updated feature will be recommended for use in new code.
-Existing codes using this feature will of course be supported by conformant
-implementations of this specification.
-====
+Hierarchical data parallel kernels and all classes that are only available
+within such kernels are deprecated in SYCL 2020, and will be removed in a future
+version of SYCL.
 
 The SYCL compiler provides a way of specifying data parallel kernels that
 execute within work-groups via a different syntax which highlights the
@@ -1433,10 +1436,14 @@ must include the <<backend>>-specific headers for said <<backend>>.
 A <<command-group-function-object>> can be submitted either to a single queue to
 be executed on, or to a secondary queue.
 If a <<command-group-function-object>> fails to be enqueued to the primary
-queue, then the system will attempt to enqueue it to the secondary queue, if
-given as a parameter to the submit function.
-If the <<command-group-function-object>> fails to be queued to both of these
-queues, then a synchronous SYCL exception will be thrown.
+queue, then the implementation may attempt to enqueue it to the secondary queue,
+if given as a parameter to the submit function.
+It is implementation defined whether the secondary queue is used as a fallback
+in this manner.
+If the <<command-group-function-object>> fails to be enqueued to both of these
+queues, or if it fails to be enqueued to the primary queue and the
+implementation elects not to enqueue it to the secondary queue, then a
+synchronous SYCL exception will be thrown.
 
 It is possible that a command group may be successfully enqueued, but then
 asynchronously fail to run, for some reason.
@@ -1750,8 +1757,8 @@ Implementations conformant to the reduced feature set
 (<<sec:feature-sets.reduced>>) can do this by using the {cpp} type of the
 <<sycl-kernel-function>>.
 This type is specified via the <<kernel-name>> template parameter if the
-<<sycl-kernel-function>> is a lambda function, or it is obtained from the class
-type if the <<sycl-kernel-function>> is an object.
+<<sycl-kernel-function>> is a lambda expression, or it is obtained from the
+class type if the <<sycl-kernel-function>> is an object.
 Implementations conformant to the full feature set (<<sec:feature-sets.full>>)
 do not require a <<kernel-name>> at the invocation site, so they must implement
 some other way to make the association.
@@ -1815,7 +1822,10 @@ between two devices.
 For example, this may occur when a <<command-group>> has a requirement for the
 contents of a buffer or when the application passes certain arguments to a
 <<sycl-kernel-function>> (as described in <<sec:kernel.parameter.passing>>).
-Such data must have a type that is <<device-copyable>> as defined below.
+Such data must have a type that is <<device-copyable>>, as defined below.
+
+An implementation can assume that it is always safe to perform bitwise copies of
+any object that has a device copyable type.
 
 Any type that is trivially copyable (as defined by the {cpp} core language) is
 implicitly device copyable.
@@ -1847,15 +1857,13 @@ device copyable.
 
 [NOTE]
 ====
-The types [code]#std::basic_string_view<CharT, Traits># and
-[code]#std::span<ElementType, Extent># are both view types, which reference
-underlying data that is not contained within their type.
-Although these view types are device copyable, the implementation copies just
-the view and not the contained data when doing an inter-device copy.
-In order to reference the contained data after such a copy, the application must
-allocate the contained data in unified shared memory (USM) that is accessible on
-both the host and device (or on both devices in the case of a device-to-device
-copy).
+Types such as [code]#std::basic_string_view<CharT, Traits># and
+[code]#std::span<ElementType, Extent># are view types, which reference
+underlying data that they do not own.
+Copying such a type only copies the view and not the referenced data.
+If a view is copied between the host and device or between two devices, it is
+the application's responsibility to ensure that the referenced data is allocated
+in memory that can be accessed by the recipient (see <<sec:usm>>).
 ====
 
 In addition, the implementation may allow the application to explicitly declare
@@ -1863,40 +1871,28 @@ certain class types as device copyable.
 If the implementation has this support, it must predefine the preprocessor macro
 [code]#SYCL_DEVICE_COPYABLE# to [code]#1#, and it must not predefine this
 preprocessor macro if it does not have this support.
-When the implementation has this support, a class type [code]#T# is device
-copyable if all of the following statements are true:
+When the implementation has this support, an application may declare that a
+class type [code]#T# is device copyable by defining the trait
+[code]#is_device_copyable_v<T># to [code]#true# if all of the following
+statements are true:
 
-  * The application defines the trait [code]#is_device_copyable_v<T># to
-    [code]#true#;
   * Type [code]#T# has at least one eligible copy constructor, move constructor,
     copy assignment operator, or move assignment operator;
   * Each eligible copy constructor, move constructor, copy assignment operator,
     and move assignment operator is [code]#public#;
-  * When doing an inter-device transfer of an object of type [code]#T#, the
-    effect of each eligible copy constructor, move constructor, copy assignment
-    operator, and move assignment operator is the same as a bitwise copy of the
-    object;
-  * Type [code]#T# has a [code]#public# non-deleted destructor;
-  * The destructor has no effect when executed on the device.
+  * The effect of each eligible copy constructor, move constructor, copy
+    assignment operator, and move assignment operator is the same as a bitwise
+    copy of the object;
+  * Type [code]#T# has a [code]#public# non-deleted destructor; and
+  * The destructor has no effect.
+
+Declaring that a class type [code]#T# is device copyable when any of these
+statements is not true results in undefined behavior.
 
 When the application explicitly declares a class type to be device copyable,
 arrays of that type and cv-qualified versions of that type are also device
 copyable, and the implementation sets the [code]#is_device_copyable_v# trait to
 [code]#true# for these array and cv-qualified types.
-
-[NOTE]
-====
-It is unspecified whether the implementation actually calls the copy
-constructor, move constructor, copy assignment operator, or move assignment
-operator of a class declared as [code]#is_device_copyable_v# when doing an
-inter-device copy.
-Since these operations must all be the same as a bitwise copy, the
-implementation may simply copy the memory where the object resides.
-Likewise, it is unspecified whether the implementation actually calls the
-destructor for such a class on the device since the destructor must have no
-effect on the device.
-====
-
 
 == Endianness support
 
