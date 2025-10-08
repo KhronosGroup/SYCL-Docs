@@ -14,6 +14,11 @@ class context {
   explicit context(const device& dev, async_handler asyncHandler,
                    const property_list& propList = {});
 
+  explicit context(const platform& plt, const property_list& propList = {});
+
+  explicit context(const platform& plt, async_handler asyncHandler,
+                   const property_list& propList = {});
+
   explicit context(const std::vector<device>& deviceList,
                    const property_list& propList = {});
 
