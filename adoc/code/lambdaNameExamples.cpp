@@ -1,13 +1,15 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 // Explicit kernel names can be optionally forward declared at namespace scope
 class MyForwardDeclName;
 
-template <typename T> class MyTemplatedKernelName;
+template <typename T>
+class MyTemplatedKernelName;
 
 // Define and launch templated kernel
-template <typename T> void templatedFunction() {
+template <typename T>
+void templatedFunction() {
   queue myQueue;
 
   // Launch A: No explicit kernel name
@@ -47,9 +49,9 @@ int main() {
     });
   });
 
-  templatedFunction<int>(); // OK
+  templatedFunction<int>();  // OK
 
-  templatedFunction<std::complex<float>>(); // Launch A is OK, Launch B illegal
+  templatedFunction<std::complex<float>>();  // Launch A is OK, Launch B illegal
   // because std::complex is not forward declarable according to C++, and was
   // used in an explicit kernel name which must be forward declarable.
 }

@@ -226,9 +226,9 @@ A device compiler may have this preconfigured so that it can match them based on
 the definitions of those types on the platform, or there may be a necessity for
 a device compiler command-line option to ensure the types are the same.
 
-The standard {cpp} fixed width types, e.g. [code]#int8_t#, [code]#int16_t#,
-[code]#int32_t#,[code]#int64_t#, should have the same size as defined by the
-{cpp} standard for host and device.
+The standard {cpp} fixed width types, e.g. [code]#std::int8_t#,
+[code]#std::int16_t#, [code]#std::int32_t#,[code]#std::int64_t#, should have the
+same size as defined by the {cpp} standard for host and device.
 
 
 [[table.types.fundamental]]
@@ -349,13 +349,19 @@ The standard {cpp} preprocessing directives and macros are supported.
 The following preprocessor macros must be defined by all conformant
 implementations:
 
-  * [code]#SYCL_LANGUAGE_VERSION# substitutes an integer reflecting the version
-    number and revision of the SYCL language being supported by the
-    implementation.
-    The version of SYCL defined in this document will have
-    [code]#SYCL_LANGUAGE_VERSION# substitute the integer
-    [code]#{SYCL_LANGUAGE_VERSION}#, composed with the general SYCL version
-    followed by 2 digits representing the revision number;
+  * [code]#SYCL_LANGUAGE_VERSION# is defined to an integer literal that
+    indicates the version of the SYCL specification to which the implementation
+    conforms.
++
+[width="100%",options="header",separator="@",cols="50%,50%"]
+|====
+@ SYCL version @ Macro defined as
+a@ SYCL 2020 a@ [code]#202012L#
+a@ SYCL {SYCL_VERSION} a@ [code]#{SYCL_LANGUAGE_VERSION}L#
+|====
++
+Future versions of the SYCL specification will define this macro to an integer
+literal with greater value.
   * [code]#SYCL_DEVICE_COPYABLE# is defined to 1 if the implementation supports
     explicitly specified <<device-copyable>> types as described in
     <<sec::device.copyable>>.
@@ -422,9 +428,9 @@ the feature.
 If the application submits a <<command-group>> using a secondary queue, then any
 kernel submitted from the <<command-group>> should use only features that are
 supported by both the primary queue's device and the secondary queue's device.
-If an application fails to do this, the implementation must throw a synchronous
-exception with the [code]#errc::kernel_not_supported# error code from the
-<<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
+If an application fails to do this, the implementation throws an
+[code]#exception# with the [code]#errc::kernel_not_supported# error code from
+the <<kernel-invocation-command>> (e.g. [code]#parallel_for()#).
 
 It is legal for a SYCL application to define several kernels in the same
 translation unit even if they use different optional features, as shown in the
@@ -501,11 +507,11 @@ in this section has implementation-defined effect.
 === Kernel attributes
 
 The attributes listed in <<table.kernel.attributes>> have a different position
-depending on whether the kernel is defined as a lambda function or as a named
+depending on whether the kernel is defined as a lambda expression or as a named
 function object.
 If the kernel is a named function object, the attribute is applied to the
 declarator-id in the function declaration.
-However, if the kernel is a lambda function, the attribute is applied to the
+However, if the kernel is a lambda expression, the attribute is applied to the
 lambda declarator.
 
 [NOTE]
@@ -544,7 +550,8 @@ reqd_work_group_size(dim0, dim1, dim2)
       size.  The number of arguments must match the dimensionality of the
       work-group used to invoke the kernel, and the order of the arguments
       matches the order of the dimension extents to the [code]#range#
-      constructor.  Each argument must be an integral constant expression.
+      constructor.  Each argument must be an integral constant expression that
+      is representable by [code]#std::size_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
@@ -570,8 +577,8 @@ work_group_size_hint(dim0, dim1, dim2)
       must match the dimensionality of the work-group used to invoke the
       kernel, and the order of the arguments matches the order of the dimension
       extents to the [code]#range# constructor.  Each argument must be an
-      integral constant expression.  The effect of this attribute, if any, is
-      implementation-defined.
+      integral constant expression that is representable by [code]#std::size_t#.
+      The effect of this attribute, if any, is implementation-defined.
 
 a@
 [source]
@@ -592,7 +599,7 @@ reqd_sub_group_size(size)
 ----
    a@ Indicates that the kernel must be compiled and executed with the specified
       sub-group size. The argument to the attribute must be an integral constant
-      expression.
+      expression that is representable by [code]#std::uint32_t#.
 
 Kernels that are decorated with this attribute may not call functions that are
 defined in another translation unit via the [code]#SYCL_EXTERNAL# macro.
@@ -624,10 +631,10 @@ Specifying this attribute on a kernel has two effects.  First, it causes the
 [code]#errc::kernel_not_supported# error code if the kernel is submitted to a
 device that does not have one of the listed aspects.  (This includes the device
 associated with the secondary queue if the kernel is submitted from a
-<<command-group>> that has a secondary queue.)  Second, it causes the compiler
-to issue a diagnostic if the kernel (or any of the functions it calls) uses an
-optional feature that is associated with an aspect that is not listed in the
-attribute.
+<<command-group>> that has a secondary queue and the implementation supports
+secondary queue fallback.)  Second, it causes the compiler to issue a diagnostic
+if the kernel (or any of the functions it calls) uses an optional feature that
+is associated with an aspect that is not listed in the attribute.
 
 The value of each parameter to this attribute must be equal to one of the
 values in the [code]#sycl::aspect# enumeration type (including any extended

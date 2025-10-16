@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright 2016-2024 The Khronos Group Inc.
+# Copyright 2016-2025 The Khronos Group Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -96,7 +96,7 @@ class ReflowCallbacks:
         """True if justification should break to a new line after the end of a
         sentence."""
 
-        self.breakInitial = True
+        self.breakInitial = False
         """True if justification should break to a new line after something
         that appears to be an initial in someone's name. **TBD**"""
 

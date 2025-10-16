@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -51,24 +51,24 @@ __width_manipulator__ setw(int width);
 
 class stream {
  public:
-  stream(size_t totalBufferSize, size_t workItemBufferSize,
+  stream(std::size_t totalBufferSize, std::size_t workItemBufferSize,
          handler& cgh, const property_list& propList = {});
 
   /* -- common interface members -- */
 
   /* -- property interface members -- */
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   // Deprecated
-  size_t get_size() const;
+  std::size_t get_size() const;
 
-  size_t get_work_item_buffer_size() const;
+  std::size_t get_work_item_buffer_size() const;
 
   /* get_max_statement_size() has the same functionality as
      get_work_item_buffer_size(), and is provided for backward compatibility.
      get_max_statement_size() is a deprecated query. */
-  size_t get_max_statement_size() const;
+  std::size_t get_max_statement_size() const;
 };
 
 template <typename T> const stream& operator<<(const stream& os, const T& rhs);
