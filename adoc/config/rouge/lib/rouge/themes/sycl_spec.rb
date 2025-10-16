@@ -33,7 +33,8 @@ module Rouge
       style Comment::Single,                  :fg => '#9acd32'
       # Use a clearer white background
       style Text,                             :bg => '#ffffff'
-
+      # Render exposition-only functions in italics to match ISO C++
+      style Generic::Emph,                    :fg => '#000000', :italic => true
     end
   end
 end
