@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -58,9 +58,9 @@ class accessor {
 
   bool is_placeholder() const;
 
-  size_t get_size() const noexcept;
+  std::size_t get_size() const noexcept;
 
-  size_t get_count() const noexcept;
+  std::size_t get_count() const noexcept;
 
   /* Available only when: (Dimensions > 0) */
   range<Dimensions> get_range() const;
@@ -75,10 +75,10 @@ class accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ operator[](size_t index) const;
+  __unspecified__ operator[](std::size_t index) const;
 
   /* Available only when: (Dimensions == 1) */
-  reference operator[](size_t index) const;
+  reference operator[](std::size_t index) const;
 
   constant_ptr<DataT> get_pointer() const noexcept;
 };

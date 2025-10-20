@@ -9,6 +9,10 @@
   * The overload with a fallback/secondary queue parameter of the
     [code]#submit()# member function of [code]#sycl::queue# was deprecated.
 
+  * Added shorthand aliases for address spaces to reduce verbosity, enabling
+    (for example) [code]#sycl::access::address_space::global_space# to be
+    replaced with [code]#sycl::addrspace_global#.
+
 == What has changed from SYCL 1.2.1 to SYCL 2020
 
 The SYCL runtime moved from namespace [code]#cl::sycl# provided by
@@ -23,7 +27,7 @@ described in <<sec:progmodel.minimumcppversion>>.
 Features of {cpp17} are now enabled within the specification, such as deduction
 guides for class template argument deduction.
 
-Naming of lambda functions passed to kernel invocations is now optional.
+Naming of lambda expressions passed to kernel invocations is now optional.
 
 Changes to buffers, images and accessors:
 
@@ -349,8 +353,8 @@ Implicit conversions from one-dimensional [code]#item# and one-dimensional
 [code]#id# to scalar types have been defined.
 All of these modifications lead to simpler SYCL code in common use cases.
 
-The behaviour of executing a kernel over a [code]#range# or [code]#nd_range#
-with index space of zero has been clarified.
+The behavior of executing a kernel over a [code]#range# or [code]#nd_range# with
+index space of zero has been clarified.
 
 Some device-specific queries have been renamed to more clearly be
 "`device-specific kernel`" [code]#get_info# queries
@@ -466,5 +470,9 @@ In SYCL 1.2.1, the [code]#handler::copy()# overload with two [code]#accessor#
 parameters did not clearly specify which accessor's size determines the amount
 of memory that is copied.
 The spec now clarifies that the [code]#src# accessor's size is used.
+
+Any code considered as a <<discarded-statement>> or as a
+<<manifestly-constant-evaluated>> by the C++ standard is now also accepted in
+SYCL device function.
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%% end what_changed %%%%%%%%%%%%%%%%%%%%%%%%%%%%

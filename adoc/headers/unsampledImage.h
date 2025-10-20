@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -85,9 +85,9 @@ class unsampled_image {
   /* Available only when: Dimensions > 1 */
   range<Dimensions - 1> get_pitch() const;
 
-  size_t byte_size() const noexcept;
+  std::size_t byte_size() const noexcept;
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   AllocatorT get_allocator() const;
 

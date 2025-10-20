@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -48,7 +48,7 @@ class accessor {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using difference_type =
       typename std::iterator_traits<iterator>::difference_type;
-  using size_type = size_t;
+  using size_type = std::size_t;
 
   accessor();
 
@@ -68,8 +68,8 @@ class accessor {
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
-  accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, TagT tag,
+  template <typename AllocatorT, typename DeductionTagT>
+  accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -78,9 +78,9 @@ class accessor {
            handler& commandGroupHandlerRef, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-           handler& commandGroupHandlerRef, TagT tag,
+           handler& commandGroupHandlerRef, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -89,9 +89,9 @@ class accessor {
            range<Dimensions> accessRange, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-           range<Dimensions> accessRange, TagT tag,
+           range<Dimensions> accessRange, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -101,9 +101,9 @@ class accessor {
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
-           range<Dimensions> accessRange, id<Dimensions> accessOffset, TagT tag,
+           range<Dimensions> accessRange, id<Dimensions> accessOffset, DeductionTagT tag,
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
@@ -113,10 +113,10 @@ class accessor {
            const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-           TagT tag, const property_list& propList = {});
+           DeductionTagT tag, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
   template <typename AllocatorT>
@@ -125,10 +125,10 @@ class accessor {
            id<Dimensions> accessOffset, const property_list& propList = {});
 
   /* Available only when: (Dimensions > 0) */
-  template <typename AllocatorT, typename TagT>
+  template <typename AllocatorT, typename DeductionTagT>
   accessor(buffer<DataT, Dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<Dimensions> accessRange,
-           id<Dimensions> accessOffset, TagT tag,
+           id<Dimensions> accessOffset, DeductionTagT tag,
            const property_list& propList = {});
 
   /* -- common interface members -- */
@@ -141,13 +141,14 @@ class accessor {
 
   size_type size() const noexcept;
 
+  // Deprecated
   size_type max_size() const noexcept;
 
   // Deprecated
-  size_t get_size() const;
+  std::size_t get_size() const;
 
   // Deprecated
-  size_t get_count() const;
+  std::size_t get_count() const;
 
   bool empty() const noexcept;
 
@@ -172,11 +173,11 @@ class accessor {
   reference operator[](id<Dimensions> index) const;
 
   /* Available only when: (Dimensions > 1) */
-  __unspecified__ operator[](size_t index) const;
+  __unspecified__ operator[](std::size_t index) const;
 
   /* Available only when: (AccessMode != access_mode::atomic && Dimensions == 1)
    */
-  reference operator[](size_t index) const;
+  reference operator[](std::size_t index) const;
 
   /* Deprecated
   Available only when: (AccessMode == access_mode::atomic && Dimensions ==  0)

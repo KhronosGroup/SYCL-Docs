@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -33,12 +33,12 @@ class device {
 
   // Available only when Prop == info::partition_property::partition_equally
   template <info::partition_property Prop>
-  std::vector<device> create_sub_devices(size_t count) const;
+  std::vector<device> create_sub_devices(std::size_t count) const;
 
   // Available only when Prop == info::partition_property::partition_by_counts
   template <info::partition_property Prop>
   std::vector<device>
-  create_sub_devices(const std::vector<size_t>& counts) const;
+  create_sub_devices(const std::vector<std::size_t>& counts) const;
 
   // Available only when Prop ==
   // info::partition_property::partition_by_affinity_domain

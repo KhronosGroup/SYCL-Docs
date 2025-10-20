@@ -99,7 +99,7 @@ For the full description please refer to <<subsec:buffers>>.
     A type which is callable with [code]#operator()# that takes a reference to a
     <<handler>>, that defines a <<command-group>> which can be submitted by a
     <<queue>>.
-    The function object can be a named type, lambda function or
+    The function object can be a named type, lambda expression or
     [code]#std::function#.
 
 [[handler]]command group handler::
@@ -131,7 +131,7 @@ For the full description please refer to <<subsec:buffers>>.
     <<backend>> API to interact with a group of <<device,devices>> associated
     with a <<platform>>.
     The context is defined as the [code]#sycl::context# class, for further
-    details please see <<sec:interface.context.class>>.
+    details please see <<sec:context-class>>.
 
 [[control-flow]]control flow::
     When all <<work-item, work-items>> in a <<group>> are executing the same
@@ -187,6 +187,12 @@ For the full description please refer to <<subsec:buffers>>.
     integer rank.
     One of the device with the highest non-negative value is selected.
     See <<sec:device-selector>> for more details.
+
+[[discarded-statement]]discarded statement::
+    ISO C++ +[stmt.if]+ describes a discarded statement as the branch statement
+    of an [code]#if constexpr# which is not instantiated because of the boolean
+    condition.
+    For more context, see <<sec:language.restrictions.kernels>>.
 
 [[event]]event::
     A SYCL object that represents the status of an operation that is being
@@ -278,6 +284,15 @@ For the full description please refer to <<subsec:buffers>>.
   * [code]#sycl::group# : The <<group>> class that contains the
     <<work-group-id>> and the member functions on a <<work-group>>.
 
+[[information-descriptor]]information descriptor::
+    A class encapsulating an information query and its return type.
+    For example, an information descriptor called
+    [code]#sycl::info::class::name# with a return type of [code]#std::string#
+    would describe a query for the name of the entity represented by that class,
+    where the name can be an arbitrary string.
+    Any information descriptors supported by a SYCL class are listed alongside
+    the definition of that class, or in a <<backend>> specification.
+
 [[input]]input::
     A state which a <<kernel-bundle>> can be in, representing
     <<sycl-kernel-function,SYCL kernel functions>> as a source or intermediate
@@ -339,6 +354,14 @@ For the full description please refer to <<subsec:buffers>>.
     Local memory is a memory region associated with a <<work-group>> and
     accessible only by <<work-item,work-items>> in that <<work-group>>.
 
+[[manifestly-constant-evaluated]]manifestly constant-evaluated expression or conversion::
+    ISO C++ +[expr.const]+ describes manifestly constant-evaluated expression or
+    conversion like constant expressions, condition of an +if constexpr+, an
+    immediate invocation, used in template parameters, in constant
+    initialization, etc.
+    This is evaluated at compile-time by the compiler.
+    For more context, see <<sec:language.restrictions.kernels>>.
+
 [[mem-fence]]mem-fence::
     A memory fence provides control over re-ordering of memory load and store
     operations when coupled with an atomic operation.
@@ -352,7 +375,6 @@ For the full description please refer to <<subsec:buffers>>.
 [[native-specialization-constant]]native-specialization constant::
     A <<specialization-constant>> in a device image whose value can be used by
     an online compiler as an immediate value during the compilation.
-
 
 [[nd-item]]nd-item::
     A unique identifier representing a single <<work-item>> and <<work-group>>
@@ -513,7 +535,7 @@ For the full description please refer to <<subsec:buffers>>.
     <<handler>>.
     A <<sycl-kernel-function>> defines an entry point to a <<kernel>>.
     The function object can be a named <<device-copyable>> type or lambda
-    function.
+    expression.
 
 [[sycl-runtime]]SYCL runtime::
     A SYCL runtime is an implementation of the SYCL API specification.
@@ -525,7 +547,7 @@ For the full description please refer to <<subsec:buffers>>.
 [[type-kernel-name]]type kernel name::
     The name of a <<sycl-kernel-function>> in type form, this can be either a
     <<kernel-name>> provided to a <<kernel-invocation-command>> or the type of a
-    function object use as a <<sycl-kernel-function>>.
+    function object used as a <<sycl-kernel-function>>.
 
 [[usm]]USM::
 +

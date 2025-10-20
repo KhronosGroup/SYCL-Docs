@@ -1,14 +1,18 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 
 class handler {
- private:
-  // implementation defined constructor
-  handler(___unspecified___);
-
  public:
+  handler() = delete;
+
+  // A handler cannot be moved or copied.
+  handler(const handler&) = delete;
+  handler(handler&&) = delete;
+  handler& operator=(const handler&) = delete;
+  handler& operator=(handler&&) = delete;
+
   template <typename DataT, int Dimensions, access_mode AccessMode,
             target AccessTarget, access::placeholder IsPlaceholder>
   void require(
@@ -48,10 +52,12 @@ class handler {
   template <typename KernelName, int Dimensions, typename... Rest>
   void parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest);
 
+  // Deprecated in SYCL 2020.
   template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
   void parallel_for_work_group(range<Dimensions> numWorkGroups,
                                const WorkgroupFunctionType& kernelFunc);
 
+  // Deprecated in SYCL 2020.
   template <typename KernelName, typename WorkgroupFunctionType, int Dimensions>
   void parallel_for_work_group(range<Dimensions> numWorkGroups,
                                range<Dimensions> workGroupSize,
@@ -68,17 +74,17 @@ class handler {
   //------ USM functions
   //
 
-  void memcpy(void* dest, const void* src, size_t numBytes);
+  void memcpy(void* dest, const void* src, std::size_t numBytes);
 
-  template <typename T> void copy(const T* src, T* dest, size_t count);
+  template <typename T> void copy(const T* src, T* dest, std::size_t count);
 
-  void memset(void* ptr, int value, size_t numBytes);
+  void memset(void* ptr, int value, std::size_t numBytes);
 
-  template <typename T> void fill(void* ptr, const T& pattern, size_t count);
+  template <typename T> void fill(void* ptr, const T& pattern, std::size_t count);
 
-  void prefetch(void* ptr, size_t numBytes);
+  void prefetch(void* ptr, std::size_t numBytes);
 
-  void mem_advise(void* ptr, size_t numBytes, int advice);
+  void mem_advise(void* ptr, std::size_t numBytes, int advice);
 
   //------ Explicit memory operation APIs
   //
@@ -128,5 +134,9 @@ class handler {
   template <auto& SpecName>
   typename std::remove_reference_t<decltype(SpecName)>::value_type
   get_specialization_constant();
+
+  template <typename T>
+  void host_task(T&& hostTaskCallable);
+
 };
 } // namespace sycl

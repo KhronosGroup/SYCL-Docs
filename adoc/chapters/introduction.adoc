@@ -3,154 +3,148 @@
 [[introduction]]
 = Introduction
 
-SYCL (pronounced "`sickle`") is a royalty-free, cross-platform abstraction {cpp}
-programming model for heterogeneous computing.
-SYCL builds on the underlying concepts, portability and efficiency of parallel
-API or standards like OpenCL while adding much of the ease of use and
-flexibility of single-source {cpp}.
+// What is SYCL?
+SYCL (pronounced "`sickle`") is a royalty-free, cross-platform API for
+heterogeneous computing in {cpp}.
 
-Developers using SYCL are able to write standard modern {cpp} code, with many of
-the techniques they are accustomed to, such as inheritance and templates.
-At the same time, developers have access to the full range of capabilities of
-the underlying implementation (such as OpenCL) both through the features of the
-SYCL libraries and, where necessary, through interoperation with code written
-directly using the underneath implementation, via their APIs.
+SYCL enables developers to write standard {cpp} code that executes on a wide
+range of devices, using modern techniques such as inheritance, templates, and
+lambda expressions.
+All computational kernels to be executed on a device can be written inside {cpp}
+source files as normal {cpp} code, alongside any code intended to be run on a
+system's host processor.
+This concept, known as "`single-source`" programming, reduces the complexity of
+heterogeneous programming for developers and gives compilers greater
+opportunities to analyze/optimize across the host-device boundary.
 
-To reduce programming effort and increase the flexibility with which developers
-can write code, SYCL extends the concepts found in standards like OpenCL model
-in a few ways beyond the general use of {cpp} features:
+// How does SYCL relate to C++?
+SYCL is designed to be as close to standard {cpp} as possible, and some
+implementations of SYCL may be able to use a standard {cpp} compiler to target
+CPU devices.
+However, to ensure portability of device code across a wide range of devices,
+SYCL imposes some restrictions on the set of {cpp} features that SYCL
+implementations are required to support within device code.
+These restrictions may not be applicable to all devices and can therefore be
+relaxed by specific Khronos extensions or vendor extensions.
 
-  * execution of parallel kernels on a heterogeneous device is made
-    simultaneously convenient and flexible.
-    Common parallel patterns are prioritized with simple syntax, which through a
-    series {cpp} types allow the programmer to express additional requirements,
-    such as dependencies, if needed;
-  * when using buffers and accessors, data access in SYCL is separated from data
-    storage.
-    By relying on the {cpp}-style resource acquisition is initialization (RAII)
-    idiom to capture data dependencies between device code blocks, the runtime
-    library can track data movement and provide correct behavior without the
-    complexity of manually managing event dependencies between kernel instances
-    and without the programmer having to explicitly move data.
-    This approach enables the data-parallel task-graphs that might be already
-    part of the execution model to be built up easily and safely by SYCL
-    programmers;
-  * Unified Shared Memory (<<usm>>) provides a mechanism for explicit data
-    allocation and movement.
-    This approach enables the use of pointer-based algorithms and data
-    structures on heterogeneous devices, and allows for increased re-use of code
-    across host and device;
-  * the hierarchical parallelism syntax offers a way of expressing data
-    parallelism similar to the OpenCL device or OpenMP target device execution
-    model in an easy-to-understand modern {cpp} form.
-    It more cleanly layers parallel loops to avoid fragmentation of code and to
-    more efficiently map to CPU-style architectures.
+// How does SYCL relate to lower-level APIs?
+SYCL was originally based on OpenCL, and retains an execution model, runtime
+feature set, and device capability set inspired by the OpenCL standard.
+However, there is no requirement that SYCL implementations must use OpenCL; SYCL
+implementations are free to support devices via any low-level API (or
+"`backend`") they choose.
 
-SYCL retains the execution model, runtime feature set and device capabilities
-inspired by the OpenCL standard.
-This standard imposes some limitations on the full range of {cpp} features that
-SYCL is able to support.
-This ensures portability of device code across as wide a range of devices as
-possible.
-As a result, while the code can be written in standard {cpp} syntax with
-interoperability with standard {cpp} programs, the entire set of {cpp} features
-is not available in SYCL device code.
-In particular, SYCL device code, as defined by this specification, does not
-support virtual function calls, function pointers in general, exceptions,
-runtime type information or the full set of {cpp} libraries that may depend on
-these features or on features of a particular host compiler.
-Nevertheless, these basic restrictions can be relieved by some specific Khronos
-or vendor extensions.
+// What are some key features of SYCL?
+Some of the key features of SYCL are:
 
-SYCL implements an <<smcp>> design which offers the power of source integration
-while allowing toolchains to remain flexible.
-The <<smcp>> design supports embedding of code intended to be compiled for a
-device, for example a GPU, inline with host code.
-This embedding of code offers three primary benefits:
+  * Common parallel patterns, such as <<sec:reduction, reductions>> and
+    <<sec:algorithms, group algorithms>>, are exposed via high-level
+    abstractions.
 
-Simplicity::
-    For novice programmers using frameworks like OpenCL, the separation of host
-    and device source code in OpenCL can become complicated to deal with,
-    particularly when similar kernel code is used for multiple different
-    operations on different data types.
-    A single compiler flow and integrated tool chain combined with libraries
-    that perform a lot of simple tasks simplifies initial OpenCL programs to a
-    minimum complexity.
-    This reduces the learning curve for programmers new to heterogeneous
-    programming and allows them to concentrate on parallelization techniques
-    rather than syntax.
-Reuse::
-    {cpp}'s type system allows for complex interactions between different code
-    units and supports efficient abstract interface design and reuse of library
-    code.
-    For example, a [keyword]#transform# or [keyword]#map# operation applied to
-    an array of data may allow specialization on both the operation applied to
-    each element of the array and on the type of the data.
-    The <<smcp>> design of SYCL enables this interaction to bridge the host
-    code/device code boundary such that the device code to be specialized on
-    both of these factors directly from the host code.
-Efficiency::
-    Tight integration with the type system and reuse of library code enables a
-    compiler to perform inlining of code and to produce efficient specialized
-    device code based on decisions made in the host code without having to
-    generate kernel source strings dynamically.
+  * Interoperability with the lower-level capabilities of specific
+    <<sec:backends, backends>> guarantees access to platform-specific
+    optimizations.
 
-The use of {cpp} features such as generic programming, templated code,
-functional programming and inheritance on top of existing heterogeneous
-execution model opens a wide scope for innovation in software design for
-heterogeneous systems.
-Clean integration of device and host code within a single {cpp} type system
-enables the development of modern, templated generic and adaptable libraries
-that build simple, yet efficient, interfaces to offer more developers access to
-heterogeneous computing capabilities and devices.
-SYCL is intended to serve as a foundation for innovation in programming models
-for heterogeneous systems, that builds on open and widely implemented standard
-foundation like OpenCL or Vulkan.
+  * <<subsec:buffers, Buffers>> and <<subsec:accessors, accessors>> provide a
+    simple way to build task-graphs without manually managing dependencies.
 
-SYCL is designed to be as close to standard {cpp} as possible.
-In practice, this means that as long as no dependence is created on SYCL's
-integration with the underlying implementation, a standard {cpp} compiler can
-compile SYCL programs and they will run correctly on a host CPU.
-Any use of specialized low-level features can be masked using the C preprocessor
-in the same way that compiler-specific intrinsics may be hidden to ensure
-portability between different host compilers.
+  * <<sec:usm, Unified Shared Memory>> (USM) provides an explicit,
+    pointer-based, mechanism for managing and sharing data.
 
-SYCL is designed to allow a compilation flow where the source file is passed
-through multiple different compilers, including a standard {cpp} host compiler
-of the developer's choice, and where the resulting application combines the
-results of these compilation passes.
-This is distinct from a single-source flow that might use language extensions
-that preclude the use of a standard host compiler.
-The SYCL standard does not preclude the use of a single compiler flow, but is
-designed to not require it.
-SYCL can also be implemented purely as a library, in which case no special
-compiler support is required at all.
+// How would you summarize SYCL?
+SYCL has been designed to enable implementations on a wide variety of platforms,
+permitting easy integration with other platform-specific technologies.
+Both users and implementers are encouraged to build upon SYCL as an open
+platform for system-wide heterogeneous programming.
 
-The advantages of this design are two-fold.
-First, it offers better integration with existing tool chains.
-An application that already builds using a chosen compiler can continue to do so
-when SYCL code is added.
-Using the SYCL tools on a source file within a project will both compile for a
-device and let the same source file be compiled using the same host compiler
-that the rest of the project is compiled with.
-Linking and library relationships are unaffected.
-This design simplifies porting of pre-existing applications to SYCL.
-Second, the design allows the optimal compiler to be chosen for each device
-where different vendors may provide optimized tool-chains.
 
-To summarize, SYCL enables computational kernels to be written inside {cpp}
-source files as normal {cpp} code, leading to the concept of "`single-source`"
-programming.
-This means that software developers can develop and use generic algorithms and
-data structures using standard {cpp} template techniques, while still supporting
-multi-platform, multi-device heterogeneous execution.
-Access to the low level APIs of an underlying implementation (such as OpenCL) is
-also supported.
-The specification has been designed to enable implementation across as wide a
-variety of platforms as possible as well as ease of integration with other
-platform-specific technologies, thereby letting both users and implementers
-build on top of SYCL as an open platform for system-wide heterogeneous
-processing innovation.
+[[sec:normativerefs]]
+== Normative references
+
+Normative references are references to external documents or resources to which
+implementers of SYCL must comply with all, or specified portions of, as
+described in this specification.
+
+International Organization for Standardization (ISO). +
+ISO/IEC 14882:2017 - Programming languages - {cpp},
+https://www.iso.org/standard/68564.html +
+(Referred to as {cpp17} in this document.)
+
+International Organization for Standardization (ISO). +
+ISO/IEC 14882:2020 - Programming languages - {cpp},
+https://www.iso.org/standard/79358.html +
+(Referred to as {cpp20} in this document.)
+
+International Organization for Standardization (ISO). +
+ISO/IEC 14882:2024 - Programming languages - {cpp},
+https://www.iso.org/standard/83626.html +
+(Referred to as {cpp23} in this document.)
+
+// Jon: are any of the OpenCL specifications normative? They are also
+// referred to from the SYCL spec, and some of the definitions appear to be
+// required.
+
+
+[[sec:nonnormativerefs]]
+== Non-normative notes and examples
+
+Unless stated otherwise, text within this SYCL specification is normative and
+defines the required behavior of a SYCL implementation.
+Non-normative / informational notes are included within this specification using
+either of two formats.
+One format for non-normative notes is the "`note`" callout of this form:
+
+[NOTE]
+====
+Information within a note callout, such as this text, is for informational
+purposes and does not impose requirements on or specify behavior of a SYCL
+implementation.
+====
+
+The other format for a non-normative note is like this:
+
+{note}This is also a non-normative note.
+{endnote}
+
+Source code examples within the specification are provided to aid with
+understanding, and are non-normative.
+
+In case of any conflict between a non-normative note or source example, and
+normative text within the specification, the normative text must be taken to be
+correct.
+
+
+[[sec:progmodel.minimumcppversion]]
+== Minimum version of {cpp}
+
+A SYCL implementation must conform to {cpp17} or to one of the more recent {cpp}
+versions listed in <<sec:normativerefs>>.
+The version of {cpp} to which a SYCL implementation conforms is referred to as
+the {cpp} core language in this document.
+All APIs in this specification are available regardless of the version of the
+{cpp} core language unless the description specifically states otherwise.
+If an API is documented with the phrase "Minimum C++ Version: __Version__", then
+that API is available only if the version of the implementation's {cpp} core
+language is at least _Version_.
+
+{note}Not all {cpp} features are supported in SYCL <<device-function, device
+functions>>.
+See <<sec:language.restrictions.kernels>>.
+{endnote}
+
+{note}Applications should take care when using SYCL APIs or {cpp} features that
+are not available in {cpp17}.
+The use of such APIs or features may prevent an application from being portable
+across all implementations of SYCL.
+{endnote}
+
+{note}Implementations may choose to make APIs documented as "Minimum C++
+Version: __Version__" available even when the {cpp} version is less than
+_Version_.
+The recommended practice in this case is to use [code]#+__has_include+# and the
+appropriate {cpp} feature-test macros to improve the portability of SYCL
+applications across implementations.
+{endnote}
 
 
 [[sec::unified-spec]]

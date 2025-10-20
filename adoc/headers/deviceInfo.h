@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -11,6 +11,8 @@ struct max_compute_units;
 struct max_work_item_dimensions;
 template <int Dimensions = 3> struct max_work_item_sizes;
 struct max_work_group_size;
+struct max_num_sub_groups;
+struct sub_group_sizes;
 struct preferred_vector_width_char;
 struct preferred_vector_width_short;
 struct preferred_vector_width_int;
@@ -52,7 +54,7 @@ struct max_constant_args;        // Deprecated
 struct local_mem_type;
 struct local_mem_size;
 struct error_correction_support;
-struct host_unified_memory;
+struct host_unified_memory; // Deprecated
 struct atomic_memory_order_capabilities;
 struct atomic_fence_order_capabilities;
 struct atomic_memory_scope_capabilities;
@@ -62,7 +64,7 @@ struct is_endian_little;
 struct is_available;
 struct is_compiler_available; // Deprecated
 struct is_linker_available;   // Deprecated
-struct execution_capabilities;
+struct execution_capabilities; // Deprecated
 struct queue_profiling;  // Deprecated
 struct built_in_kernels; // Deprecated
 struct built_in_kernel_ids;
@@ -87,13 +89,13 @@ struct partition_type_affinity_domain;
 } // namespace device
 
 enum class device_type : /* unspecified */ {
-  cpu,         // Maps to OpenCL CL_DEVICE_TYPE_CPU
-  gpu,         // Maps to OpenCL CL_DEVICE_TYPE_GPU
-  accelerator, // Maps to OpenCL CL_DEVICE_TYPE_ACCELERATOR
-  custom,      // Maps to OpenCL CL_DEVICE_TYPE_CUSTOM
-  automatic,   // Maps to OpenCL CL_DEVICE_TYPE_DEFAULT
-  host,
-  all // Maps to OpenCL CL_DEVICE_TYPE_ALL
+  cpu,
+  gpu,
+  accelerator,
+  custom,
+  automatic,
+  host, // Deprecated
+  all
 };
 
 enum class partition_property : /* unspecified */ {
@@ -132,6 +134,7 @@ enum class global_mem_cache_type : /* unspecified */ {
   read_write
 };
 
+// Deprecated
 enum class execution_capability : /* unspecified */ {
   exec_kernel,
   exec_native_kernel
