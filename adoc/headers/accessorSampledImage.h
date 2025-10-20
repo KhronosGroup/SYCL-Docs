@@ -9,6 +9,9 @@ template <typename DataT, int Dimensions,
           image_target AccessTarget = image_target::device>
 class sampled_image_accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+  static constexpr image_target access_target = AccessTarget;
+
   using value_type = const DataT;
   using reference = const DataT&;
   using const_reference = const DataT&;
@@ -33,6 +36,8 @@ class sampled_image_accessor {
 
 template <typename DataT, int Dimensions> class host_sampled_image_accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+
   using value_type = const DataT;
   using reference = const DataT&;
   using const_reference = const DataT&;
