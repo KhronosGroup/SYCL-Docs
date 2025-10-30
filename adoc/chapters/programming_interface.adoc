@@ -17432,10 +17432,9 @@ The queue and context classes can optionally take an asynchronous handler object
 <<async-handler>> on construction, which is a callable such as a function class
 or lambda, with an [code]#exception_list# as a parameter.
 Invocation of an <<async-handler>> may be triggered by the queue member
-functions [code]#queue::wait_and_throw()# or
-[code]#queue::throw_asynchronous()#, by the event member function
-[api]#event::wait_and_throw#, or automatically on destruction of a queue or
-context that contains unconsumed asynchronous errors.
+functions [api]#queue::wait_and_throw# or [api]#queue::throw_asynchronous#, by
+the event member function [api]#event::wait_and_throw#, or automatically on
+destruction of a queue or context that contains unconsumed asynchronous errors.
 When invoked, an <<async-handler>> is called and receives an
 [code]#exception_list# argument containing a list of exception objects
 representing any unconsumed <<async-error,asynchronous errors>> associated with
@@ -17465,30 +17464,25 @@ when possible, and must then invoke [code]#std::terminate# or equivalent.
 [[subsubsec:async.handler.priorities]]
 ==== Priorities of async handlers
 
-If the SYCL runtime can associate an <<async-error>> with a specific queue,
-then:
+If the async error is reported from a call to [api]#queue::wait_and_throw#,
+[api]#queue::throw_asynchronous#, or from the queue destructor, the async error
+is reported as follows:
 
-  * If the queue was constructed with an <<async-handler>>, that handler is
-    invoked to handle the error.
-  * Otherwise if the context enclosed by the queue was constructed with an
-    <<async-handler>>, that handler is invoked to handle the error.
-  * Otherwise when no handler was passed to either queue or context on
-    construction, then a default handler is invoked to handle the error, as
-    described by <<subsubsec:exception.nohandler>>.
-  * All handler invocations in this list occur at times as defined by
-    <<subsubsec:exception.async>>.
+* If the queue was constructed with an <<async-handler>>, that handler is
+  invoked to handle the error.
+* Otherwise if the context enclosed by the queue was constructed with an
+  <<async-handler>>, that handler is invoked to handle the error.
+* Otherwise, the default handler is invoked to handle the error as described in
+  <<subsubsec:exception.nohandler>>.
 
-If the SYCL runtime cannot associate an <<async-error>> with a specific queue,
-then:
+If the async error is reported from a call to [api]#event::wait_and_throw# and
+if the event was created from a queue that has not yet been destroyed, the async
+error is reported using the rules above for that queue.
 
-  * If the context in which the error occurred was constructed with an
-    <<async-handler>>, then that handler is invoked to handle the error.
-  * Otherwise when no handler was passed to the associated context on
-    construction, then a default handler is invoked to handle the error, as
-    described by <<subsubsec:exception.nohandler>>.
-  * All handler invocations in this list occur at times as defined by
-    <<subsubsec:exception.async>>.
-
+Otherwise, the async error is reported from a call to
+[api]#event::wait_and_throw# and the event was created from a queue that has
+since been destroyed.
+The behavior is undefined in this case.
 
 ==== Asynchronous errors with a secondary queue
 
