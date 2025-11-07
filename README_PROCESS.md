@@ -123,6 +123,13 @@ the "main" branch or to the "sycl-xxxx" branch, depending on the release cycle.
 The instructions below refer to the branch that contains the currently published
 major version as `<current>`.
 
+* This is a good time to make sure the list of contributors in the
+  "Acknowledgements" section is up to date.
+  Follow the instructions below for generating the release notes and scan the
+  list of new PRs to see who has contributed since the last revision.
+  For anyone who is not already listed as a contributor, first ask if they want
+  to be listed (not everyone does), and then add them via a new PR.
+
 * Go to our GitHub [Actions][1] tab and find the workflow run that merges the
   most recent PR to the `<current>` branch.
   Click the link, scroll to the bottom, and click the download icon for the
