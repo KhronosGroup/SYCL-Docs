@@ -10,6 +10,8 @@ class sub_group {
   static constexpr int dimensions = 1;
   static constexpr memory_scope fence_scope = memory_scope::sub_group;
 
+  sub_group() = delete;
+
   /* -- common interface members -- */
 
   id<1> get_group_id() const noexcept;
