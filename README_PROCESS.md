@@ -160,11 +160,19 @@ major version as `<current>`.
 * Create a PR to the "main" branch of the SYCL-Docs repository:
 
   * Edit "README.md" to change the release number in the badges.
+  * Edit ".github/ISSUE\_TEMPLATE/bug\_report.yml" and
+    ".github/ISSUE\_TEMPLATE/clarification\_request.yml".
+    Add the new revision to the "Specification Version" drop-down, and remove
+    the oldest revision from the drop-down.
+    For brevity, the drop-down contains only the current revision and the
+    previous one.
   * Do not merge this PR yet.
 
   Note that this PR is created against the "main" branch even if you are making
   a release from the "sycl-xxxx" branch.
-  You can use [this PR][5] as a model.
+  You can use [this PR][5] and [this PR][5a] as a model.
+  (TODO: When the next revision is published, update this README with a single
+  example PR that combines these two things.)
 
 * When you are sure that you want to publish this release, do the following in
   quick succession and in this order:
@@ -190,6 +198,7 @@ major version as `<current>`.
 [3]: <https://github.com/KhronosGroup/SYCL-Registry/pull/27>
 [4]: <https://github.com/KhronosGroup/SYCL-Docs/releases>
 [5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/793>
+[5a]: <https://github.com/KhronosGroup/SYCL-Docs/pull/946>
 [6]: <https://github.com/KhronosGroup/SYCL-Docs/pull/795>
 
 
