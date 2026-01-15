@@ -123,6 +123,13 @@ the "main" branch or to the "sycl-xxxx" branch, depending on the release cycle.
 The instructions below refer to the branch that contains the currently published
 major version as `<current>`.
 
+* This is a good time to make sure the list of contributors in the
+  "Acknowledgements" section is up to date.
+  Follow the instructions below for generating the release notes and scan the
+  list of new PRs to see who has contributed since the last revision.
+  For anyone who is not already listed as a contributor, first ask if they want
+  to be listed (not everyone does), and then add them via a new PR.
+
 * Go to our GitHub [Actions][1] tab and find the workflow run that merges the
   most recent PR to the `<current>` branch.
   Click the link, scroll to the bottom, and click the download icon for the
@@ -153,11 +160,19 @@ major version as `<current>`.
 * Create a PR to the "main" branch of the SYCL-Docs repository:
 
   * Edit "README.md" to change the release number in the badges.
+  * Edit ".github/ISSUE\_TEMPLATE/bug\_report.yml" and
+    ".github/ISSUE\_TEMPLATE/clarification\_request.yml".
+    Add the new revision to the "Specification Version" drop-down, and remove
+    the oldest revision from the drop-down.
+    For brevity, the drop-down contains only the current revision and the
+    previous one.
   * Do not merge this PR yet.
 
   Note that this PR is created against the "main" branch even if you are making
   a release from the "sycl-xxxx" branch.
-  You can use [this PR][5] as a model.
+  You can use [this PR][5] and [this PR][5a] as a model.
+  (TODO: When the next revision is published, update this README with a single
+  example PR that combines these two things.)
 
 * When you are sure that you want to publish this release, do the following in
   quick succession and in this order:
@@ -183,6 +198,7 @@ major version as `<current>`.
 [3]: <https://github.com/KhronosGroup/SYCL-Registry/pull/27>
 [4]: <https://github.com/KhronosGroup/SYCL-Docs/releases>
 [5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/793>
+[5a]: <https://github.com/KhronosGroup/SYCL-Docs/pull/946>
 [6]: <https://github.com/KhronosGroup/SYCL-Docs/pull/795>
 
 

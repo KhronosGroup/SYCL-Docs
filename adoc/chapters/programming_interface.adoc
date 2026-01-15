@@ -11,8 +11,8 @@ available for any <<backend, SYCL backends>>, with the exception of the
 interoperability interface, which is described in general terms in this
 document, not pertaining to any particular <<backend>>.
 
-SYCL guarantees that all the member functions and special member functions of
-the SYCL classes described are thread safe.
+All functions defined in this specification are thread-safe, unless otherwise
+specified.
 
 The underlying types for all enumerations defined in this specification are
 implementation-defined.
@@ -1575,8 +1575,8 @@ objects returned by [api]#device::get_devices#.
 
 A device can be partitioned into multiple devices, by calling the
 [code]#device::create_sub_devices# member function template.
-The resulting [code]#device# objects are considered sub devices, and it is valid
-to partition these sub devices further.
+The resulting [code]#device# objects are considered sub-devices, and it is valid
+to partition these sub-devices further.
 The range of support for this feature is <<backend>> and device specific and can
 be queried for through [api]#device::get_info#.
 
@@ -1750,13 +1750,13 @@ std::vector<device> create_sub_devices(std::size_t count) const
 _Constraints:_ Available only when [code]#Prop# is
 [api]#info::partition_property::partition_equally#.
 
-_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+_Returns:_ A [code]#std::vector# of sub-devices partitioned from this
 [code]#device# object based on the [code]#count# parameter.
-The returned vector contains as many sub devices as can be created such that
-each sub device contains [code]#count# compute units.
+The returned vector contains as many sub-devices as can be created such that
+each sub-device contains [code]#count# compute units.
 If the device's total number of compute units (as returned by
 [api]#info::device::max_compute_units#) is not evenly divided by [code]#count#,
-then the remaining compute units are not included in any of the sub devices.
+then the remaining compute units are not included in any of the sub-devices.
 
 _Throws:_
 
@@ -1779,9 +1779,9 @@ std::vector<device> create_sub_devices(const std::vector<std::size_t>& counts) c
 _Constraints:_ Available only when [code]#Prop# is
 [api]#info::partition_property::partition_by_counts#.
 
-_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+_Returns:_ A [code]#std::vector# of sub-devices partitioned from this
 [code]#device# object based on the [code]#counts# parameter.
-For each non-zero value _M_ in the [code]#counts# vector, a sub device with _M_
+For each non-zero value _M_ in the [code]#counts# vector, a sub-device with _M_
 compute units is created.
 
 _Throws:_
@@ -1792,7 +1792,7 @@ _Throws:_
 
 * An [code]#exception# with the [code]#errc::invalid# error code if the number
   of non-zero values in [code]#counts# exceeds the device's maximum number of
-  sub devices (as returned by [api]#info::device::partition_max_sub_devices#) or
+  sub-devices (as returned by [api]#info::device::partition_max_sub_devices#) or
   if the total of all the values in the [code]#counts# vector exceeds the total
   number of compute units in the device (as returned by
   [api]#info::device::max_compute_units#).
@@ -1810,32 +1810,32 @@ create_sub_devices(info::partition_affinity_domain domain) const
 _Constraints:_ Available only when [code]#Prop# is
 [api]#info::partition_property::partition_by_affinity_domain#.
 
-_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+_Returns:_ A [code]#std::vector# of sub-devices partitioned from this
 [code]#device# object based on the [code]#domain# parameter, which must be one
 of the following values:
 
-* [api]#info::partition_affinity_domain::numa#: Split the device into sub
-  devices comprised of compute units that share a NUMA node.
+* [api]#info::partition_affinity_domain::numa#: Split the device into
+  sub-devices comprised of compute units that share a NUMA node.
 
-* [api]#info::partition_affinity_domain::L4_cache#: Split the device into sub
-  devices comprised of compute units that share a level 4 data cache.
+* [api]#info::partition_affinity_domain::L4_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 4 data cache.
 
-* [api]#info::partition_affinity_domain::L3_cache#: Split the device into sub
-  devices comprised of compute units that share a level 3 data cache.
+* [api]#info::partition_affinity_domain::L3_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 3 data cache.
 
-* [api]#info::partition_affinity_domain::L2_cache#: Split the device into sub
-  devices comprised of compute units that share a level 2 data cache.
+* [api]#info::partition_affinity_domain::L2_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 2 data cache.
 
-* [api]#info::partition_affinity_domain::L1_cache#: Split the device into sub
-  devices comprised of compute units that share a level 1 data cache.
+* [api]#info::partition_affinity_domain::L1_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 1 data cache.
 
 * [api]#info::partition_affinity_domain::next_partitionable#: Split the device
   along the next partitionable affinity domain.
-  The implementation shall find the first level along which the device or sub
-  device may be further subdivided in the order [code]#numa#, [code]#L4_cache#,
-  [code]#L3_cache#, [code]#L2_cache#, [code]#L1_cache#, and partition the device
-  into sub devices comprised of compute units that share memory subsystems at
-  this level.
+  The implementation shall find the first level along which the device or
+  sub-device may be further subdivided in the order [code]#numa#,
+  [code]#L4_cache#, [code]#L3_cache#, [code]#L2_cache#, [code]#L1_cache#, and
+  partition the device into sub-devices comprised of compute units that share
+  memory subsystems at this level.
   The user may determine what happened via
   [api]#info::device::partition_type_affinity_domain#.
 
@@ -3209,11 +3209,11 @@ struct parent_device {
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The parent device to which this sub device is a child if this is a
-sub device.
+_Returns:_ The parent device to which this sub-device is a child if this is a
+sub-device.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if this
-device is not a sub device.
+device is not a sub-device.
 
 '''
 
@@ -3229,7 +3229,7 @@ struct partition_max_sub_devices {
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The maximum number of sub devices that can be created when this
+_Returns:_ The maximum number of sub-devices that can be created when this
 device is partitioned.
 The value returned cannot exceed the value returned by
 [api]#info::device::max_compute_units#.
@@ -3251,7 +3251,7 @@ _Remarks:_ Template parameter to [api]#device::get_info#.
 _Returns:_ A [code]#std::vector# of the partition properties supported by this
 device.
 An element is returned in this vector only if the device can be partitioned into
-at least two sub devices along that partition property.
+at least two sub-devices along that partition property.
 
 '''
 
@@ -3271,7 +3271,7 @@ _Returns:_ A [code]#std::vector# of the partition affinity domains supported by
 this device when partitioning with
 [api]#info::partition_property::partition_by_affinity_domain#.
 An element is returned in this vector only if the device can be partitioned into
-at least two sub devices along that affinity domain.
+at least two sub-devices along that affinity domain.
 
 '''
 
@@ -3288,7 +3288,7 @@ struct partition_type_property {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The partition property of this device.
-If this device is not a sub device then the return value is
+If this device is not a sub-device then the return value is
 [api]#info::partition_property::no_partition#, otherwise it is one of the
 following values:
 
@@ -3311,7 +3311,7 @@ struct partition_type_affinity_domain {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The partition affinity domain of this device.
-If this device is not a sub device or the sub device was not partitioned with
+If this device is not a sub-device or the sub-device was not partitioned with
 [api]#info::partition_property::partition_by_affinity_domain# then the return
 value is [api]#info::partition_affinity_domain::not_applicable#, otherwise it is
 one of the following values:
@@ -5148,11 +5148,9 @@ can supply their own allocator class.
 }
 ----
 
-When an allocator returns a [code]#nullptr#, the runtime cannot allocate data on
-the host.
-Note that in this case the runtime will raise an error if it requires host
-memory but it is not available (e.g when moving data across <<backend>>
-contexts).
+Note that if the runtime requires host memory (e.g., when moving data across
+<<backend>> contexts), but the allocator fails to allocate the memory, then the
+runtime will raise an error.
 
 In some cases, the implementation may retain a copy of the allocator object even
 after the buffer is destroyed.
@@ -5177,8 +5175,6 @@ STL-based libraries (e.g, Intel's TBB provides an allocator).
 ==== Default allocators
 
 A default allocator is always defined by the implementation.
-For allocations greater than size zero, when successful it is guaranteed to
-return non-[code]#nullptr# and new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the type
 (therefore, the default allocator for a buffer of type [code]#const int# will be
 an [code]#Allocator<int>)#.
@@ -6629,6 +6625,36 @@ a@
 sampled_image(const void* hostPointer, image_format format,
               image_sampler sampler,
               const range<Dimensions>& rangeRef,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ Construct a SYCL [code]#sampled_image# instance with the
+      [code]#hostPointer# parameter provided.  The [code]#sampled_image#
+      assumes exclusive access to this memory for the duration of its lifetime.
+      The host address is [code]#const#, so the host accesses must be
+      read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+      initialized with this memory and there is no write after its
+      destruction.
+      The constructed SYCL [code]#sampled_image# will use the allocator
+      parameter provided when allocating memory on the host.
+      The element size of the constructed SYCL [code]#sampled_image#
+      will be derived from the [code]#format# parameter.
+      Accessors that read the constructed SYCL [code]#sampled_image# will
+      use the [code]#sampler# parameter to sample the image.
+      The range of the constructed SYCL [code]#sampled_image# is
+      specified by the [code]#rangeRef# parameter provided.
+      The pitch of the constructed SYCL [code]#sampled_image# will be
+      the default size determined by the <<sycl-runtime>>.
+      Zero or more properties can be provided to the constructed SYCL
+      [code]#sampled_image# via an instance of
+      [code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6641,6 +6667,39 @@ The host address is [code]#const#, so the host accesses must be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this
 image is only initialized with this memory and there is no write after
 destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ Available only when: [code]#Dimensions > 1#.
+
+Construct a SYCL [code]#sampled_image# instance with the [code]#hostPointer#
+parameter provided.  The [code]#sampled_image# assumes exclusive access to this
+memory for the duration of its lifetime.
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this
+image is only initialized with this memory and there is no write after
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
 The element size of the constructed SYCL [code]#sampled_image#
 will be derived from the [code]#format# parameter.
 Accessors that read the constructed SYCL [code]#sampled_image# will
@@ -6696,6 +6755,45 @@ sampled_image(std::shared_ptr<const void>& hostPointer,
               image_format format,
               image_sampler sampler,
               const range<Dimensions>& rangeRef,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the default size determined by the <<sycl-runtime>>.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6714,6 +6812,46 @@ The host address is [code]#const#, so the host accesses can be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
 initialized with this memory and there is no write after its
 destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses can be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
 The element size of the constructed SYCL [code]#sampled_image#
 will be derived from the [code]#format# parameter.
 Accessors that read the constructed SYCL [code]#sampled_image# will
@@ -6772,6 +6910,13 @@ std::size_t byte_size() const noexcept
       bytes may be greater than [code]#size()*element size#
       due to padding of elements, rows and slices of the image for
       efficient access.
+
+a@
+[source]
+----
+AllocatorT get_allocator() const
+----
+   a@ Returns the allocator provided to the image.
 
 a@
 [source]
@@ -17448,10 +17593,9 @@ The queue and context classes can optionally take an asynchronous handler object
 <<async-handler>> on construction, which is a callable such as a function class
 or lambda, with an [code]#exception_list# as a parameter.
 Invocation of an <<async-handler>> may be triggered by the queue member
-functions [code]#queue::wait_and_throw()# or
-[code]#queue::throw_asynchronous()#, by the event member function
-[api]#event::wait_and_throw#, or automatically on destruction of a queue or
-context that contains unconsumed asynchronous errors.
+functions [api]#queue::wait_and_throw# or [api]#queue::throw_asynchronous#, by
+the event member function [api]#event::wait_and_throw#, or automatically on
+destruction of a queue or context that contains unconsumed asynchronous errors.
 When invoked, an <<async-handler>> is called and receives an
 [code]#exception_list# argument containing a list of exception objects
 representing any unconsumed <<async-error,asynchronous errors>> associated with
@@ -17481,30 +17625,25 @@ when possible, and must then invoke [code]#std::terminate# or equivalent.
 [[subsubsec:async.handler.priorities]]
 ==== Priorities of async handlers
 
-If the SYCL runtime can associate an <<async-error>> with a specific queue,
-then:
+If the async error is reported from a call to [api]#queue::wait_and_throw#,
+[api]#queue::throw_asynchronous#, or from the queue destructor, the async error
+is reported as follows:
 
-  * If the queue was constructed with an <<async-handler>>, that handler is
-    invoked to handle the error.
-  * Otherwise if the context enclosed by the queue was constructed with an
-    <<async-handler>>, that handler is invoked to handle the error.
-  * Otherwise when no handler was passed to either queue or context on
-    construction, then a default handler is invoked to handle the error, as
-    described by <<subsubsec:exception.nohandler>>.
-  * All handler invocations in this list occur at times as defined by
-    <<subsubsec:exception.async>>.
+* If the queue was constructed with an <<async-handler>>, that handler is
+  invoked to handle the error.
+* Otherwise if the context enclosed by the queue was constructed with an
+  <<async-handler>>, that handler is invoked to handle the error.
+* Otherwise, the default handler is invoked to handle the error as described in
+  <<subsubsec:exception.nohandler>>.
 
-If the SYCL runtime cannot associate an <<async-error>> with a specific queue,
-then:
+If the async error is reported from a call to [api]#event::wait_and_throw# and
+if the event was created from a queue that has not yet been destroyed, the async
+error is reported using the rules above for that queue.
 
-  * If the context in which the error occurred was constructed with an
-    <<async-handler>>, then that handler is invoked to handle the error.
-  * Otherwise when no handler was passed to the associated context on
-    construction, then a default handler is invoked to handle the error, as
-    described by <<subsubsec:exception.nohandler>>.
-  * All handler invocations in this list occur at times as defined by
-    <<subsubsec:exception.async>>.
-
+Otherwise, the async error is reported from a call to
+[api]#event::wait_and_throw# and the event was created from a queue that has
+since been destroyed.
+The behavior is undefined in this case.
 
 ==== Asynchronous errors with a secondary queue
 
