@@ -683,13 +683,13 @@ hostTaskCallable);+#.
 
 === Memory operations
 
-.[apititle]#memcpy#
-[source,role=synopsis,id=api:memcpy]
+.[apititle]#enqueue_memcpy#
+[source,role=synopsis,id=api:enqueue_memcpy]
 ----
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> memcpy(const queue& q, void* dest, const void* src, size_t numBytes, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_memcpy(const queue& q, void* dest, const void* src, size_t numBytes, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -711,13 +711,13 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#copy# (USM pointers)
-[source,role=synopsis,id=api:copy-pointer]
+.[apititle]#enqueue_copy# (USM pointers)
+[source,role=synopsis,id=api:enqueue_copy-pointer]
 ----
 namespace sycl::khr {
 
 template <typename T, typename... Requirements>
-std::optional<event> copy(const queue& q, const T* src, T* dest, size_t count, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_copy(const queue& q, const T* src, T* dest, size_t count, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -753,16 +753,16 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#copy# (accessors, host to device)
-[source,role=synopsis,id=api:copy-accessor-h2d]
+.[apititle]#enqueue_copy# (accessors, host to device)
+[source,role=synopsis,id=api:enqueue_copy-accessor-h2d]
 ----
 namespace sycl::khr {
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
-std::optional<event> copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});           (1)
+std::optional<event> enqueue_copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});           (1)
 
 template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
-std::optional<event> copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {}); (2)
+std::optional<event> enqueue_copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {}); (2)
 
 }
 ----
@@ -796,16 +796,16 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#copy# (accessors, device to host)
-[source,role=synopsis,id=api:copy-accessor-d2h]
+.[apititle]#enqueue_copy# (accessors, device to host)
+[source,role=synopsis,id=api:enqueue_copy-accessor-d2h]
 ----
 namespace sycl::khr {
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
-std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, const requirements<Requirements...>& reqs = {});                 (1)
+std::optional<event> enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, const requirements<Requirements...>& reqs = {});                 (1)
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
-std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, const requirements<Requirements...>& reqs = {}); (2)
+std::optional<event> enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, const requirements<Requirements...>& reqs = {}); (2)
 
 }
 ----
@@ -839,13 +839,13 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#copy# (accessors, device to device)
-[source,role=synopsis,id=api:copy-accessor-d2d]
+.[apititle]#enqueue_copy# (accessors, device to device)
+[source,role=synopsis,id=api:enqueue_copy-accessor-d2d]
 ----
 namespace sycl::khr {
 
 template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
-std::optional<event> copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -878,13 +878,13 @@ code if [code]#dest.get_count() < src.get_count()#.
 
 '''
 
-.[apititle]#memset#
-[source,role=synopsis,id=api:memset]
+.[apititle]#enqueue_memset#
+[source,role=synopsis,id=api:enqueue_memset]
 ----
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> memset(const queue& q, void* ptr, int value, size_t numBytes, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_memset(const queue& q, void* ptr, int value, size_t numBytes, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -906,16 +906,16 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#fill#
-[source,role=synopsis,id=api:fill]
+.[apititle]#enqueue_fill#
+[source,role=synopsis,id=api:enqueue_fill]
 ----
 namespace sycl::khr {
 
 template <typename T, typename... Requirements>
-std::optional<event> fill(const queue& q, T* ptr, const T& pattern, size_t count, const requirements<Requirements...>& reqs = {});                     (1)
+std::optional<event> enqueue_fill(const queue& q, T* ptr, const T& pattern, size_t count, const requirements<Requirements...>& reqs = {});                     (1)
 
 template <typename T, int Dims, access_mode Mode, typename... Requirements>
-std::optional<event> fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, const requirements<Requirements...>& reqs = {}); (2)
+std::optional<event> enqueue_fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, const requirements<Requirements...>& reqs = {}); (2)
 
 }
 ----
@@ -953,13 +953,13 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#update_host#
-[source,role=synopsis,id=api:update_host]
+.[apititle]#enqueue_update_host#
+[source,role=synopsis,id=api:enqueue_update_host]
 ----
 namespace sycl::khr {
 
 template <typename T, int Dims, access_mode Mode, typename...Requirements>
-std::optional<event> update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -982,13 +982,13 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#prefetch#
-[source,role=synopsis,id=api:prefetch]
+.[apititle]#enqueue_prefetch#
+[source,role=synopsis,id=api:enqueue_prefetch]
 ----
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> prefetch(const queue& q, void* ptr, size_t numBytes, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_prefetch(const queue& q, void* ptr, size_t numBytes, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -1009,13 +1009,13 @@ return (reqs.has-tracking()) ? ev : std::nullopt;
 
 '''
 
-.[apititle]#mem_advise#
-[source,role=synopsis,id=api:mem_advise]
+.[apititle]#enqueue_mem_advise#
+[source,role=synopsis,id=api:enqueue_mem_advise]
 ----
 namespace sycl::khr {
 
 template <typename... Requirements>
-std::optional<event> mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, const requirements<Requirements...>& reqs = {});
+std::optional<event> enqueue_mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, const requirements<Requirements...>& reqs = {});
 
 }
 ----
