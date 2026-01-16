@@ -11,8 +11,8 @@ available for any <<backend, SYCL backends>>, with the exception of the
 interoperability interface, which is described in general terms in this
 document, not pertaining to any particular <<backend>>.
 
-SYCL guarantees that all the member functions and special member functions of
-the SYCL classes described are thread safe.
+All functions defined in this specification are thread-safe, unless otherwise
+specified.
 
 The underlying types for all enumerations defined in this specification are
 implementation-defined.
@@ -1576,8 +1576,8 @@ objects returned by [api]#device::get_devices#.
 
 A device can be partitioned into multiple devices, by calling the
 [code]#device::create_sub_devices# member function template.
-The resulting [code]#device# objects are considered sub devices, and it is valid
-to partition these sub devices further.
+The resulting [code]#device# objects are considered sub-devices, and it is valid
+to partition these sub-devices further.
 The range of support for this feature is <<backend>> and device specific and can
 be queried for through [api]#device::get_info#.
 
@@ -1751,13 +1751,13 @@ std::vector<device> create_sub_devices(std::size_t count) const
 _Constraints:_ Available only when [code]#Prop# is
 [api]#info::partition_property::partition_equally#.
 
-_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+_Returns:_ A [code]#std::vector# of sub-devices partitioned from this
 [code]#device# object based on the [code]#count# parameter.
-The returned vector contains as many sub devices as can be created such that
-each sub device contains [code]#count# compute units.
+The returned vector contains as many sub-devices as can be created such that
+each sub-device contains [code]#count# compute units.
 If the device's total number of compute units (as returned by
 [api]#info::device::max_compute_units#) is not evenly divided by [code]#count#,
-then the remaining compute units are not included in any of the sub devices.
+then the remaining compute units are not included in any of the sub-devices.
 
 _Throws:_
 
@@ -1780,9 +1780,9 @@ std::vector<device> create_sub_devices(const std::vector<std::size_t>& counts) c
 _Constraints:_ Available only when [code]#Prop# is
 [api]#info::partition_property::partition_by_counts#.
 
-_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+_Returns:_ A [code]#std::vector# of sub-devices partitioned from this
 [code]#device# object based on the [code]#counts# parameter.
-For each non-zero value _M_ in the [code]#counts# vector, a sub device with _M_
+For each non-zero value _M_ in the [code]#counts# vector, a sub-device with _M_
 compute units is created.
 
 _Throws:_
@@ -1793,7 +1793,7 @@ _Throws:_
 
 * An [code]#exception# with the [code]#errc::invalid# error code if the number
   of non-zero values in [code]#counts# exceeds the device's maximum number of
-  sub devices (as returned by [api]#info::device::partition_max_sub_devices#) or
+  sub-devices (as returned by [api]#info::device::partition_max_sub_devices#) or
   if the total of all the values in the [code]#counts# vector exceeds the total
   number of compute units in the device (as returned by
   [api]#info::device::max_compute_units#).
@@ -1811,32 +1811,32 @@ create_sub_devices(info::partition_affinity_domain domain) const
 _Constraints:_ Available only when [code]#Prop# is
 [api]#info::partition_property::partition_by_affinity_domain#.
 
-_Returns:_ A [code]#std::vector# of sub devices partitioned from this
+_Returns:_ A [code]#std::vector# of sub-devices partitioned from this
 [code]#device# object based on the [code]#domain# parameter, which must be one
 of the following values:
 
-* [api]#info::partition_affinity_domain::numa#: Split the device into sub
-  devices comprised of compute units that share a NUMA node.
+* [api]#info::partition_affinity_domain::numa#: Split the device into
+  sub-devices comprised of compute units that share a NUMA node.
 
-* [api]#info::partition_affinity_domain::L4_cache#: Split the device into sub
-  devices comprised of compute units that share a level 4 data cache.
+* [api]#info::partition_affinity_domain::L4_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 4 data cache.
 
-* [api]#info::partition_affinity_domain::L3_cache#: Split the device into sub
-  devices comprised of compute units that share a level 3 data cache.
+* [api]#info::partition_affinity_domain::L3_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 3 data cache.
 
-* [api]#info::partition_affinity_domain::L2_cache#: Split the device into sub
-  devices comprised of compute units that share a level 2 data cache.
+* [api]#info::partition_affinity_domain::L2_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 2 data cache.
 
-* [api]#info::partition_affinity_domain::L1_cache#: Split the device into sub
-  devices comprised of compute units that share a level 1 data cache.
+* [api]#info::partition_affinity_domain::L1_cache#: Split the device into
+  sub-devices comprised of compute units that share a level 1 data cache.
 
 * [api]#info::partition_affinity_domain::next_partitionable#: Split the device
   along the next partitionable affinity domain.
-  The implementation shall find the first level along which the device or sub
-  device may be further subdivided in the order [code]#numa#, [code]#L4_cache#,
-  [code]#L3_cache#, [code]#L2_cache#, [code]#L1_cache#, and partition the device
-  into sub devices comprised of compute units that share memory subsystems at
-  this level.
+  The implementation shall find the first level along which the device or
+  sub-device may be further subdivided in the order [code]#numa#,
+  [code]#L4_cache#, [code]#L3_cache#, [code]#L2_cache#, [code]#L1_cache#, and
+  partition the device into sub-devices comprised of compute units that share
+  memory subsystems at this level.
   The user may determine what happened via
   [api]#info::device::partition_type_affinity_domain#.
 
@@ -3210,11 +3210,11 @@ struct parent_device {
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The parent device to which this sub device is a child if this is a
-sub device.
+_Returns:_ The parent device to which this sub-device is a child if this is a
+sub-device.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if this
-device is not a sub device.
+device is not a sub-device.
 
 '''
 
@@ -3230,7 +3230,7 @@ struct partition_max_sub_devices {
 
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
-_Returns:_ The maximum number of sub devices that can be created when this
+_Returns:_ The maximum number of sub-devices that can be created when this
 device is partitioned.
 The value returned cannot exceed the value returned by
 [api]#info::device::max_compute_units#.
@@ -3252,7 +3252,7 @@ _Remarks:_ Template parameter to [api]#device::get_info#.
 _Returns:_ A [code]#std::vector# of the partition properties supported by this
 device.
 An element is returned in this vector only if the device can be partitioned into
-at least two sub devices along that partition property.
+at least two sub-devices along that partition property.
 
 '''
 
@@ -3272,7 +3272,7 @@ _Returns:_ A [code]#std::vector# of the partition affinity domains supported by
 this device when partitioning with
 [api]#info::partition_property::partition_by_affinity_domain#.
 An element is returned in this vector only if the device can be partitioned into
-at least two sub devices along that affinity domain.
+at least two sub-devices along that affinity domain.
 
 '''
 
@@ -3289,7 +3289,7 @@ struct partition_type_property {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The partition property of this device.
-If this device is not a sub device then the return value is
+If this device is not a sub-device then the return value is
 [api]#info::partition_property::no_partition#, otherwise it is one of the
 following values:
 
@@ -3312,7 +3312,7 @@ struct partition_type_affinity_domain {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The partition affinity domain of this device.
-If this device is not a sub device or the sub device was not partitioned with
+If this device is not a sub-device or the sub-device was not partitioned with
 [api]#info::partition_property::partition_by_affinity_domain# then the return
 value is [api]#info::partition_affinity_domain::not_applicable#, otherwise it is
 one of the following values:
@@ -5149,11 +5149,9 @@ can supply their own allocator class.
 }
 ----
 
-When an allocator returns a [code]#nullptr#, the runtime cannot allocate data on
-the host.
-Note that in this case the runtime will raise an error if it requires host
-memory but it is not available (e.g when moving data across <<backend>>
-contexts).
+Note that if the runtime requires host memory (e.g., when moving data across
+<<backend>> contexts), but the allocator fails to allocate the memory, then the
+runtime will raise an error.
 
 In some cases, the implementation may retain a copy of the allocator object even
 after the buffer is destroyed.
@@ -5178,8 +5176,6 @@ STL-based libraries (e.g, Intel's TBB provides an allocator).
 ==== Default allocators
 
 A default allocator is always defined by the implementation.
-For allocations greater than size zero, when successful it is guaranteed to
-return non-[code]#nullptr# and new memory positions every call.
 The default allocator for const buffers will remove the const-ness of the type
 (therefore, the default allocator for a buffer of type [code]#const int# will be
 an [code]#Allocator<int>)#.
@@ -5568,7 +5564,7 @@ _Returns:_ A [code]#range# representing the number of elements in the buffer.
 .[apititle]#buffer::byte_size#
 [source,role=synopsis,id=api:buffer-byte-size]
 ----
-size_t byte_size() const noexcept;
+std::size_t byte_size() const noexcept;
 ----
 _Returns:_ The size of the buffer storage in bytes.
 Equal to [code]#size()*sizeof(T)#.
@@ -5578,7 +5574,7 @@ Equal to [code]#size()*sizeof(T)#.
 .[apititle]#buffer::size#
 [source,role=synopsis,id=api:buffer-size]
 ----
-size_t size() const noexcept;
+std::size_t size() const noexcept;
 ----
 _Returns:_ The total number of elements in the buffer.
 Equal to [code]#+get_range()[0] * ...
@@ -5589,7 +5585,7 @@ Equal to [code]#+get_range()[0] * ...
 .[apititle]#buffer::get_count#
 [source,role=synopsis,id=api:buffer-get-count]
 ----
-size_t get_count() const;
+std::size_t get_count() const;
 ----
 Deprecated by SYCL 2020.
 
@@ -5600,7 +5596,7 @@ _Effects:_ Equivalent to [code]#return size()#.
 .[apititle]#buffer::get_size#
 [source,role=synopsis,id=api:buffer-get-size]
 ----
-size_t get_size() const;
+std::size_t get_size() const;
 ----
 Deprecated by SYCL 2020.
 
@@ -6485,7 +6481,7 @@ pitch of the image in bytes.
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the image.
       Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
@@ -6493,7 +6489,7 @@ size_t size() const noexcept
 a@
 [source]
 ----
-size_t byte_size() const noexcept
+std::size_t byte_size() const noexcept
 ----
    a@ Returns the size of the image storage in bytes.  The number of
       bytes may be greater than [code]#size()*element size#
@@ -6630,6 +6626,36 @@ a@
 sampled_image(const void* hostPointer, image_format format,
               image_sampler sampler,
               const range<Dimensions>& rangeRef,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ Construct a SYCL [code]#sampled_image# instance with the
+      [code]#hostPointer# parameter provided.  The [code]#sampled_image#
+      assumes exclusive access to this memory for the duration of its lifetime.
+      The host address is [code]#const#, so the host accesses must be
+      read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+      initialized with this memory and there is no write after its
+      destruction.
+      The constructed SYCL [code]#sampled_image# will use the allocator
+      parameter provided when allocating memory on the host.
+      The element size of the constructed SYCL [code]#sampled_image#
+      will be derived from the [code]#format# parameter.
+      Accessors that read the constructed SYCL [code]#sampled_image# will
+      use the [code]#sampler# parameter to sample the image.
+      The range of the constructed SYCL [code]#sampled_image# is
+      specified by the [code]#rangeRef# parameter provided.
+      The pitch of the constructed SYCL [code]#sampled_image# will be
+      the default size determined by the <<sycl-runtime>>.
+      Zero or more properties can be provided to the constructed SYCL
+      [code]#sampled_image# via an instance of
+      [code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6642,6 +6668,39 @@ The host address is [code]#const#, so the host accesses must be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this
 image is only initialized with this memory and there is no write after
 destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(const void* hostPointer, image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ Available only when: [code]#Dimensions > 1#.
+
+Construct a SYCL [code]#sampled_image# instance with the [code]#hostPointer#
+parameter provided.  The [code]#sampled_image# assumes exclusive access to this
+memory for the duration of its lifetime.
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this
+image is only initialized with this memory and there is no write after
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
 The element size of the constructed SYCL [code]#sampled_image#
 will be derived from the [code]#format# parameter.
 Accessors that read the constructed SYCL [code]#sampled_image# will
@@ -6697,6 +6756,45 @@ sampled_image(std::shared_ptr<const void>& hostPointer,
               image_format format,
               image_sampler sampler,
               const range<Dimensions>& rangeRef,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses must be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the default size determined by the <<sycl-runtime>>.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
               const range<Dimensions - 1>& pitch,
               const property_list& propList = {})
 ----
@@ -6715,6 +6813,46 @@ The host address is [code]#const#, so the host accesses can be
 read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
 initialized with this memory and there is no write after its
 destruction.
+The element size of the constructed SYCL [code]#sampled_image#
+will be derived from the [code]#format# parameter.
+Accessors that read the constructed SYCL [code]#sampled_image# will
+use the [code]#sampler# parameter to sample the image.
+The range of the constructed SYCL [code]#sampled_image# is
+specified by the [code]#rangeRef# parameter provided.
+The pitch of the constructed SYCL [code]#sampled_image# will be
+the [code]#pitch# parameter provided.
+Zero or more properties can be provided to the constructed SYCL
+[code]#sampled_image# via an instance of
+[code]#property_list#.
+
+a@
+[source]
+----
+sampled_image(std::shared_ptr<const void>& hostPointer,
+              image_format format,
+              image_sampler sampler,
+              const range<Dimensions>& rangeRef,
+              const range<Dimensions - 1>& pitch,
+              AllocatorT allocator,
+              const property_list& propList = {})
+----
+   a@ When [code]#hostPointer# is not empty, construct a SYCL
+      [code]#sampled_image# with the contents of its stored pointer.  The
+      [code]#sampled_image# assumes exclusive access to this memory for the
+      duration of its lifetime.  The [code]#sampled_image# also creates its
+      own internal copy of the [code]#shared_ptr# that shares ownership of the
+      [code]#hostData# memory, which means the application can safely release
+      ownership of this [code]#shared_ptr# when the constructor returns.
+
+When [code]#hostPointer# is empty, construct a SYCL [code]#sampled_image#
+with uninitialized memory.
+
+The host address is [code]#const#, so the host accesses can be
+read-only. Since, the [code]#hostPointer# is [code]#const#, this image is only
+initialized with this memory and there is no write after its
+destruction.
+The constructed SYCL [code]#sampled_image# will use the allocator
+parameter provided when allocating memory on the host.
 The element size of the constructed SYCL [code]#sampled_image#
 will be derived from the [code]#format# parameter.
 Accessors that read the constructed SYCL [code]#sampled_image# will
@@ -6759,7 +6897,7 @@ pitch of the image in bytes.
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the total number of elements in the image.
       Equal to [code]#+get_range()[0] * ... * get_range()[Dimensions-1]+#.
@@ -6767,12 +6905,19 @@ size_t size() const noexcept
 a@
 [source]
 ----
-size_t byte_size() const noexcept
+std::size_t byte_size() const noexcept
 ----
    a@ Returns the size of the image storage in bytes.  The number of
       bytes may be greater than [code]#size()*element size#
       due to padding of elements, rows and slices of the image for
       efficient access.
+
+a@
+[source]
+----
+AllocatorT get_allocator() const
+----
+   a@ Returns the allocator provided to the image.
 
 a@
 [source]
@@ -8061,13 +8206,13 @@ the additional member functions described in
 a@
 [source]
 ----
-size_t get_size() const
+std::size_t get_size() const
 ----
    a@ Returns the same value as [code]#byte_size()#.
 a@
 [source]
 ----
-size_t get_count() const
+std::size_t get_count() const
 ----
    a@ Returns the same value as [code]#size()#.
 
@@ -8623,7 +8768,7 @@ const_reference
 a@
 [source]
 ----
-size_t get_size() const noexcept
+std::size_t get_size() const noexcept
 ----
    a@ Returns the size in bytes of the memory region this accessor may access.
 
@@ -8638,7 +8783,7 @@ size in bytes of the accessor's local memory allocation, per work-group.
 a@
 [source]
 ----
-size_t get_count() const noexcept
+std::size_t get_count() const noexcept
 ----
    a@ Returns the number of [code]#DataT# elements of the memory region this
       accessor may access.
@@ -9803,7 +9948,7 @@ host_unsampled_image_accessor(unsampled_image<Dimensions, AllocatorT>& imageRef,
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the number of elements of the underlying [code]#unsampled_image#
       that this accessor is accessing.
@@ -9991,7 +10136,7 @@ host_sampled_image_accessor(sampled_image<Dimensions, AllocatorT>& imageRef,
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the number of elements of the underlying [code]#sampled_image#
       that this accessor is accessing.
@@ -12063,7 +12208,7 @@ range(std::size_t dim0, std::size_t dim1, std::size_t dim2) noexcept;
 a@
 [source]
 ----
-size_t get(int dimension) const noexcept;
+std::size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12073,7 +12218,7 @@ size_t get(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t& operator[](int dimension) noexcept;
+std::size_t& operator[](int dimension) noexcept;
 ----
    a@ Return the l-value of the specified dimension of the
       [code]#range#.
@@ -12083,7 +12228,7 @@ size_t& operator[](int dimension) noexcept;
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexcept;
+std::size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the specified dimension of the
       [code]#range#.
@@ -12093,7 +12238,7 @@ size_t operator[](int dimension) const noexcept;
 a@
 [source]
 ----
-size_t size() const noexcept;
+std::size_t size() const noexcept;
 ----
    a@ Return the size of the range computed as dimension0*...*dimensionN.
 
@@ -12124,12 +12269,14 @@ where each element of the new SYCL [code]#range# instance is the
 result of an element-wise [code]#OP# operator between each element of
 [code]#lhs# [code]#range# and each element of the [code]#rhs#
 [code]#range#. If the operator returns a [code]#bool#, the result
-is the cast to [code]#std::size_t#.
+is then cast to [code]#std::size_t#.
 
 a@
 [source]
 ----
-range operatorOP(const range& lhs, const std::size_t& rhs) noexcept;
+// Available only when std::is_integral_v<T> is true
+template <typename T>
+range operatorOP(const range& lhs, const T& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12142,40 +12289,16 @@ Constructs and returns a new instance of the SYCL [code]#range# class
 template with the same dimensionality as [code]#lhs# [code]#range#,
 where each element of the new SYCL [code]#range# instance is the result
 of an element-wise [code]#OP# operator between each element of this
-SYCL [code]#range# and the [code]#rhs# [code]#std::size_t#. If
-the operator returns a [code]#bool#, the result is the cast to
+SYCL [code]#range# and the [code]#rhs# integral type. If
+the operator returns a [code]#bool#, the result is then cast to
 [code]#std::size_t#.
 
 a@
 [source]
 ----
-range& operatorOP(range& lhs, const range& rhs) noexcept;
-----
-   a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
-
-Assigns each element of [code]#lhs# [code]#range# instance with the
-result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#range# and each element of the [code]#rhs#
-[code]#range# and returns [code]#lhs# [code]#range#. If the operator returns a [code]#bool#, the result is the cast
-to [code]#std::size_t#.
-
-a@
-[source]
-----
-range& operatorOP(range& lhs, const std::size_t& rhs) noexcept;
-----
-   a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
-
-Assigns each element of [code]#lhs# [code]#range# instance with the
-result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#range# and the [code]#rhs# [code]#std::size_t# and returns [code]#lhs# [code]#range#. If the
-operator returns a [code]#bool#, the result is the cast to
-[code]#std::size_t#.
-
-a@
-[source]
-----
-range operatorOP(const std::size_t& lhs, const range& rhs) noexcept;
+// Available only when std::is_integral_v<T> is true
+template <typename T>
+range operatorOP(const T& lhs, const range& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#,
       [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
@@ -12188,9 +12311,37 @@ Constructs and returns a new instance of the SYCL [code]#range# class
 template with the same dimensionality as the [code]#rhs# SYCL
 [code]#range#, where each element of the new SYCL [code]#range#
 instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# [code]#std::size_t# and each element of the
+the [code]#lhs# integral type and each element of the
 [code]#rhs# SYCL [code]#range#. If the operator returns a
-[code]#bool#, the result is the cast to [code]#std::size_t#.
+[code]#bool#, the result is then cast to [code]#std::size_t#.
+
+a@
+[source]
+----
+range& operatorOP(range& lhs, const range& rhs) noexcept;
+----
+   a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
+
+Assigns each element of [code]#lhs# [code]#range# instance with the
+result of an element-wise [code]#OP# operator between each element
+of [code]#lhs# [code]#range# and each element of the [code]#rhs#
+[code]#range# and returns [code]#lhs# [code]#range#. If the operator returns a [code]#bool#, the result is then cast
+to [code]#std::size_t#.
+
+a@
+[source]
+----
+// Available only when std::is_integral_v<T> is true
+template <typename T>
+range& operatorOP(range& lhs, const T& rhs) noexcept;
+----
+   a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#, [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
+
+Assigns each element of [code]#lhs# [code]#range# instance with the
+result of an element-wise [code]#OP# operator between each element
+of [code]#lhs# [code]#range# and the [code]#rhs# integral type and returns [code]#lhs# [code]#range#. If the
+operator returns a [code]#bool#, the result is then cast to
+[code]#std::size_t#.
 
 a@
 [source]
@@ -12414,7 +12565,7 @@ id(const item<Dimensions>& item) noexcept;
 a@
 [source]
 ----
-size_t get(int dimension) const noexcept;
+std::size_t get(int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of this [code]#id# object.
       Results in undefined behavior if [code]#dimension# is not in the range
@@ -12423,7 +12574,7 @@ size_t get(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t& operator[](int dimension) noexcept;
+std::size_t& operator[](int dimension) noexcept;
 ----
    a@ Return a reference to the requested dimension of the [code]#id#
       object.
@@ -12433,7 +12584,7 @@ size_t& operator[](int dimension) noexcept;
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexcept;
+std::size_t operator[](int dimension) const noexcept;
 ----
    a@ Return the value of the requested dimension of the [code]#id#
       object.
@@ -12469,13 +12620,15 @@ template with the same dimensionality as [code]#lhs# [code]#id#, where
 each element of the new SYCL [code]#id# instance is the result of an
 element-wise [code]#OP# operator between each element of [code]#lhs#
 [code]#id# and each element of the [code]#rhs# [code]#id#.
-If the operator returns a [code]#bool# the result is the cast to
+If the operator returns a [code]#bool# the result is then cast to
 [code]#std::size_t#.
 
 a@
 [source]
 ----
-id operatorOP(const id& lhs, const std::size_t& rhs) noexcept;
+// Available only when std::is_integral_v<T> is true
+template <typename T>
+id operatorOP(const id& lhs, const T& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
       [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
@@ -12484,9 +12637,27 @@ Constructs and returns a new instance of the SYCL [code]#id# class
 template with the same dimensionality as [code]#lhs# [code]#id#, where
 each element of the new SYCL [code]#id# instance is the result of an
 element-wise [code]#OP# operator between each element of [code]#lhs#
-[code]#id# and the [code]#rhs# [code]#std::size_t#. If the
-operator returns a [code]#bool# the result is the cast to
+[code]#id# and the [code]#rhs# integral type. If the
+operator returns a [code]#bool# the result is then cast to
 [code]#std::size_t#.
+
+a@
+[source]
+----
+// Only available when std::is_integral_v<T> is true
+template <typename T>
+id operatorOP(const T& lhs, const id& rhs) noexcept;
+----
+   a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
+      [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
+
+Constructs and returns a new instance of the SYCL [code]#id# class
+template with the same dimensionality as the [code]#rhs# SYCL
+[code]#id#, where each element of the new SYCL [code]#id#
+instance is the result of an element-wise [code]#OP# operator between
+the [code]#lhs# integral type and each element of the
+[code]#rhs# SYCL [code]#id#. If the operator returns a
+[code]#bool# the result is then cast to [code]#std::size_t#.
 
 a@
 [source]
@@ -12500,38 +12671,23 @@ Assigns each element of [code]#lhs# [code]#id# instance with the
 result of an element-wise [code]#OP# operator between each element
 of [code]#lhs# [code]#id# and each element of the [code]#rhs#
 [code]#id# and returns [code]#lhs# [code]#id#. If
-the operator returns a [code]#bool# the result is the cast to
+the operator returns a [code]#bool# the result is then cast to
 [code]#std::size_t#.
 
 a@
 [source]
 ----
-id& operatorOP(id& lhs, const std::size_t& rhs) noexcept;
+template <typename T>
+id& operatorOP(id& lhs, const T& rhs) noexcept;
 ----
    a@ Where [code]#OP# is: [code]#pass:[+=]#, [code]#-=#,[code]#*=#, [code]#/=#, [code]#%=#,
       [code]#+<<=+#, [code]#>>=#, [code]#&=#, [code]#|=#, [code]#^=#.
 
 Assigns each element of [code]#lhs# [code]#id# instance with the
 result of an element-wise [code]#OP# operator between each element
-of [code]#lhs# [code]#id# and the [code]#rhs# [code]#std::size_t#
+of [code]#lhs# [code]#id# and the [code]#rhs# integral type
 and returns [code]#lhs# [code]#id#. If the operator
-returns a [code]#bool# the result is the cast to [code]#std::size_t#.
-
-a@
-[source]
-----
-id operatorOP(const std::size_t& lhs, const id& rhs) noexcept;
-----
-   a@ Where [code]#OP# is: [code]#pass:[+]#, [code]#-#, [code]#*#, [code]#/#, [code]#%#, [code]#<<#, [code]#>>#,
-      [code]#&#, [code]#|#, [code]#^#, [code]#&&#, [code]#||#, [code]#<#, [code]#>#, [code]#+<=+#, [code]#>=#.
-
-Constructs and returns a new instance of the SYCL [code]#id# class
-template with the same dimensionality as the [code]#rhs# SYCL
-[code]#id#, where each element of the new SYCL [code]#id#
-instance is the result of an element-wise [code]#OP# operator between
-the [code]#lhs# [code]#std::size_t# and each element of the
-[code]#rhs# SYCL [code]#id#. If the operator returns a
-[code]#bool# the result is the cast to [code]#std::size_t#.
+returns a [code]#bool# the result is then cast to [code]#std::size_t#.
 
 a@
 [source]
@@ -12621,14 +12777,14 @@ id<Dimensions> get_id() const noexcept;
 a@
 [source]
 ----
-size_t get_id(int dimension) const noexcept;
+std::size_t get_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexcept;
+std::size_t operator[](int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_id(dimension)#.
 
@@ -12643,7 +12799,7 @@ range<Dimensions> get_range() const noexcept;
 a@
 [source]
 ----
-size_t get_range(int dimension) const noexcept;
+std::size_t get_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_range().get(dimension)#.
 
@@ -12688,7 +12844,7 @@ Returns the same value as [code]#get_id(0)#.
 a@
 [source]
 ----
-size_t get_linear_id() const noexcept;
+std::size_t get_linear_id() const noexcept;
 ----
    a@ Return the id as a linear index value. Calculating a linear
       address from the multi-dimensional index follows
@@ -12744,7 +12900,7 @@ id<Dimensions> get_global_id() const noexcept;
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const noexcept;
+std::size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<global-id>>
       representing the work-item's position in the <<nd-range>>
@@ -12755,7 +12911,7 @@ size_t get_global_id(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t get_global_linear_id() const noexcept;
+std::size_t get_global_linear_id() const noexcept;
 ----
    a@ Return the constituent <<global-id>> as a linear index value, representing the work-item's
    position in the global iteration space.  The linear address is calculated from the
@@ -12773,7 +12929,7 @@ id<Dimensions> get_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const noexcept;
+std::size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the <<local-id>> representing the
       work-item's position within the current <<work-group>> in the given
@@ -12784,7 +12940,7 @@ size_t get_local_id(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t get_local_linear_id() const noexcept;
+std::size_t get_local_linear_id() const noexcept;
 ----
    a@ Return the constituent <<local-id>> as a linear index value, representing the work-item's
    position within the current <<work-group>>.  The linear address is calculated from the
@@ -12809,7 +12965,7 @@ sub_group get_sub_group() const noexcept;
 a@
 [source]
 ----
-size_t get_group(int dimension) const noexcept;
+std::size_t get_group(int dimension) const noexcept;
 ----
    a@ Return the constituent element of the group [code]#id# representing
       the work-group's position within the overall [code]#nd_range# in the
@@ -12820,7 +12976,7 @@ size_t get_group(int dimension) const noexcept;
 a@
 [source]
 ----
-size_t get_group_linear_id() const noexcept;
+std::size_t get_group_linear_id() const noexcept;
 ----
    a@ Return the group id as a linear index value. Calculating a linear address
       from a multi-dimensional index follows <<sec:multi-dim-linearization>>.
@@ -12835,7 +12991,7 @@ range<Dimensions> get_group_range() const noexcept;
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const noexcept;
+std::size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Return the number of <<work-group,work-groups>> for [code]#Dimension# in the
       iteration space.
@@ -12853,7 +13009,7 @@ range<Dimensions> get_global_range() const noexcept;
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const noexcept;
+std::size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global_range().get(dimension)#.
 
@@ -12868,7 +13024,7 @@ range<Dimensions> get_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const noexcept;
+std::size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range().get(dimension)#.
 
@@ -13111,7 +13267,7 @@ range<Dimensions> get_global_range() const noexcept;
 a@
 [source]
 ----
-size_t get_global_range(int dimension) const noexcept;
+std::size_t get_global_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_range(dimension)#
 
@@ -13125,7 +13281,7 @@ id<Dimensions> get_global_id() const noexcept;
 a@
 [source]
 ----
-size_t get_global_id(int dimension) const noexcept;
+std::size_t get_global_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_global().get_id(dimension)#
 
@@ -13139,7 +13295,7 @@ range<Dimensions> get_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const noexcept;
+std::size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_range(dimension)#
 
@@ -13153,7 +13309,7 @@ id<Dimensions> get_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const noexcept;
+std::size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local().get_id(dimension)#
 
@@ -13167,7 +13323,7 @@ range<Dimensions> get_logical_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_logical_local_range(int dimension) const noexcept;
+std::size_t get_logical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_range(dimension)#
 
@@ -13181,7 +13337,7 @@ id<Dimensions> get_logical_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_logical_local_id(int dimension) const noexcept;
+std::size_t get_logical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_logical_local().get_id(dimension)#
 
@@ -13195,7 +13351,7 @@ range<Dimensions> get_physical_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_physical_local_range(int dimension) const noexcept;
+std::size_t get_physical_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_range(dimension)#
 
@@ -13209,7 +13365,7 @@ id<Dimensions> get_physical_local_id() const noexcept;
 a@
 [source]
 ----
-size_t get_physical_local_id(int dimension) const noexcept;
+std::size_t get_physical_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_physical_local().get_id(dimension)#
 
@@ -13266,7 +13422,7 @@ id<Dimensions> get_group_id() const noexcept;
 a@
 [source]
 ----
-size_t get_group_id(int dimension) const noexcept;
+std::size_t get_group_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_id()[dimension]#.
 
@@ -13284,7 +13440,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_id(int dimension) const noexcept;
+std::size_t get_local_id(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_id()[dimension]#.
 
@@ -13302,7 +13458,7 @@ range<Dimensions> get_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_local_range(int dimension) const noexcept;
+std::size_t get_local_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_local_range()[dimension]#.
 
@@ -13316,14 +13472,14 @@ range<Dimensions> get_group_range() const noexcept;
 a@
 [source]
 ----
-size_t get_group_range(int dimension) const noexcept;
+std::size_t get_group_range(int dimension) const noexcept;
 ----
    a@ Equivalent to [code]#return get_group_range()[dimension]#.
 
 a@
 [source]
 ----
-size_t operator[](int dimension) const noexecpt;
+std::size_t operator[](int dimension) const noexecpt;
 ----
    a@ Equivalent to [code]#return get_group_id(dimension)#.
 
@@ -13338,7 +13494,7 @@ range<Dimensions> get_max_local_range() const noexcept;
 a@
 [source]
 ----
-size_t get_group_linear_id() const noexcept;
+std::size_t get_group_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the <<work-group-id>>.
       Calculating a linear <<work-group-id>>
@@ -13347,14 +13503,14 @@ size_t get_group_linear_id() const noexcept;
 a@
 [source]
 ----
-size_t get_group_linear_range() const noexcept;
+std::size_t get_group_linear_range() const noexcept;
 ----
    a@ Return the total number of <<work-group,work-groups>> in the [code]#nd_range#.
 
 a@
 [source]
 ----
-size_t get_local_linear_id() const noexcept;
+std::size_t get_local_linear_id() const noexcept;
 ----
    a@ Get a linearized version of the calling work-item's <<local-id>>.
       Calculating a linear <<local-id>>
@@ -13366,7 +13522,7 @@ a [code]#parallel_for_work_item# context.
 a@
 [source]
 ----
-size_t get_local_linear_range() const noexcept;
+std::size_t get_local_linear_range() const noexcept;
 ----
    a@ Return the total number of work-items in the <<work-group>>.
 
@@ -17444,10 +17600,9 @@ The queue and context classes can optionally take an asynchronous handler object
 <<async-handler>> on construction, which is a callable such as a function class
 or lambda, with an [code]#exception_list# as a parameter.
 Invocation of an <<async-handler>> may be triggered by the queue member
-functions [code]#queue::wait_and_throw()# or
-[code]#queue::throw_asynchronous()#, by the event member function
-[api]#event::wait_and_throw#, or automatically on destruction of a queue or
-context that contains unconsumed asynchronous errors.
+functions [api]#queue::wait_and_throw# or [api]#queue::throw_asynchronous#, by
+the event member function [api]#event::wait_and_throw#, or automatically on
+destruction of a queue or context that contains unconsumed asynchronous errors.
 When invoked, an <<async-handler>> is called and receives an
 [code]#exception_list# argument containing a list of exception objects
 representing any unconsumed <<async-error,asynchronous errors>> associated with
@@ -17477,30 +17632,25 @@ when possible, and must then invoke [code]#std::terminate# or equivalent.
 [[subsubsec:async.handler.priorities]]
 ==== Priorities of async handlers
 
-If the SYCL runtime can associate an <<async-error>> with a specific queue,
-then:
+If the async error is reported from a call to [api]#queue::wait_and_throw#,
+[api]#queue::throw_asynchronous#, or from the queue destructor, the async error
+is reported as follows:
 
-  * If the queue was constructed with an <<async-handler>>, that handler is
-    invoked to handle the error.
-  * Otherwise if the context enclosed by the queue was constructed with an
-    <<async-handler>>, that handler is invoked to handle the error.
-  * Otherwise when no handler was passed to either queue or context on
-    construction, then a default handler is invoked to handle the error, as
-    described by <<subsubsec:exception.nohandler>>.
-  * All handler invocations in this list occur at times as defined by
-    <<subsubsec:exception.async>>.
+* If the queue was constructed with an <<async-handler>>, that handler is
+  invoked to handle the error.
+* Otherwise if the context enclosed by the queue was constructed with an
+  <<async-handler>>, that handler is invoked to handle the error.
+* Otherwise, the default handler is invoked to handle the error as described in
+  <<subsubsec:exception.nohandler>>.
 
-If the SYCL runtime cannot associate an <<async-error>> with a specific queue,
-then:
+If the async error is reported from a call to [api]#event::wait_and_throw# and
+if the event was created from a queue that has not yet been destroyed, the async
+error is reported using the rules above for that queue.
 
-  * If the context in which the error occurred was constructed with an
-    <<async-handler>>, then that handler is invoked to handle the error.
-  * Otherwise when no handler was passed to the associated context on
-    construction, then a default handler is invoked to handle the error, as
-    described by <<subsubsec:exception.nohandler>>.
-  * All handler invocations in this list occur at times as defined by
-    <<subsubsec:exception.async>>.
-
+Otherwise, the async error is reported from a call to
+[api]#event::wait_and_throw# and the event was created from a queue that has
+since been destroyed.
+The behavior is undefined in this case.
 
 ==== Asynchronous errors with a secondary queue
 
@@ -17709,7 +17859,7 @@ context get_context() const
 a@
 [source]
 ----
-size_t size() const
+std::size_t size() const
 ----
    a@ Returns the size of the list
 
@@ -18084,7 +18234,7 @@ static constexpr std::size_t size() noexcept
 a@
 [source]
 ----
-size_t get_count() const
+std::size_t get_count() const
 ----
    a@ Returns the same value as [code]#size()#. Deprecated.
 a@
@@ -18100,7 +18250,7 @@ alignment as described in <<memory-layout-and-alignment>>.
 a@
 [source]
 ----
-size_t get_size() const
+std::size_t get_size() const
 ----
    a@ Returns the same value as [code]#byte_size()#. Deprecated.
 a@
@@ -18985,8 +19135,8 @@ explicit operator T() const
 static constexpr std::size_t byte_size() noexcept
 static constexpr std::size_t size() noexcept
 
-size_t get_size() const   // Deprecated
-size_t get_count() const  // Deprecated
+std::size_t get_size() const   // Deprecated
+std::size_t get_count() const  // Deprecated
 
 template <typename ConvertT,
           rounding_mode RoundingMode = rounding_mode::automatic>
@@ -21609,26 +21759,26 @@ stream(std::size_t totalBufferSize, std::size_t workItemBufferSize, handler& cgh
 a@
 [source]
 ----
-size_t size() const noexcept
+std::size_t size() const noexcept
 ----
    a@ Returns the total buffer size, in bytes.
 a@
 [source]
 ----
-size_t get_size() const
+std::size_t get_size() const
 ----
    a@ Returns the same value as [code]#size()#. Deprecated.
 a@
 [source]
 ----
-size_t get_work_item_buffer_size() const
+std::size_t get_work_item_buffer_size() const
 ----
    a@ Returns the buffer size per work-item, in bytes.
 
 a@
 [source]
 ----
-size_t get_max_statement_size() const
+std::size_t get_max_statement_size() const
 ----
    a@ Deprecated query with same functionality as [code]#get_work_item_buffer_size()#.
 
