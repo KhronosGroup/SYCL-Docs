@@ -31,6 +31,12 @@ module Rouge
       style Comment,                          :fg => '#9acd32'
       style Comment::Multiline,               :fg => '#9acd32'
       style Comment::Single,                  :fg => '#9acd32'
+      # Give preprocessing statements a different color from comments.
+      # DarkOrchid3 (#9a32cd) is close to what Visual Studio Code uses in its
+      # Light Modern theme.  This is the same color we use for sycl_data_types
+      # (above), but those are very uncommon in our code listings now.
+      style Comment::Preproc,                 :fg => '#9a32cd'
+      style Comment::PreprocFile,             :fg => '#9a32cd'
       # Use a clearer white background
       style Text,                             :bg => '#ffffff'
 
