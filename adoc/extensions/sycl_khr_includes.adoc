@@ -15,8 +15,7 @@ This extension has no dependencies on other extensions.
 == Feature test macro
 
 An implementation supporting this extension must predefine the macro
-[code]#SYCL_KHR_INCLUDES# to one of the values defined in the table
-below.
+[code]#SYCL_KHR_INCLUDES# to one of the values defined in the table below.
 
 [%header,cols="1,5"]
 |===
@@ -27,9 +26,8 @@ below.
 |Initial version of this extension.
 |===
 
-{note}
-A <<subsec:library-only>> implementation of SYCL cannot predefine macros outside
-of header files.
+{note} A <<subsec:library-only>> implementation of SYCL cannot predefine macros
+outside of header files.
 See <<sec:khr-includes-version>> for a portable way to check for this extension.
 {endnote}
 
@@ -42,8 +40,9 @@ description of their content.
 All headers are provided under [code]#<sycl/khr/includes/># include path.
 
 The Description column in the table is intended to help you navigate the
-extension document quicker. It does not offer the exaustive listing of each new
-header file contents that provided in subsequent sections below.
+extension document quicker.
+It does not offer the exaustive listing of each new header file contents that
+provided in subsequent sections below.
 
 [[table.khr-includes-list]]
 .List of headers provided by the extension
@@ -173,20 +172,20 @@ exist within the [code]#::sycl# namespace as with the standard
 [code]#<sycl/sycl.hpp># header.
 
 There is no guarantee that headers documented by this extension contain anything
-else besides things listed in sections below. For example, [code]#queue# class
-has methods which accept [code]#accessor# objects, but
-[code]#<sycl/khr/includes/queue.hpp># is not required to provide a definition of
-[code]#accessor#.
+else besides things listed in sections below.
+For example, [code]#queue# class has methods which accept [code]#accessor#
+objects, but [code]#<sycl/khr/includes/queue.hpp># is not required to provide a
+definition of [code]#accessor#.
 Therefore, a portable application should include the corresponding header to
 define [code]#accessor# definition explicitly.
 
-{note}
-However, there is no requirement for the implementations to **only** provide
-through those headers exactly what's specified, i.e. they may contain other
-functions and classes than documented in this extension. In fact, some classes,
-functions or enumerations are documented to be available through multiple
-headers. Nevertheless, implementations are encouraged to keep headers contents
-as small as reasonably possible to provide maximum benefit for users.
+{note} However, there is no requirement for the implementations to **only**
+provide through those headers exactly what's specified, i.e. they may contain
+other functions and classes than documented in this extension.
+In fact, some classes, functions or enumerations are documented to be available
+through multiple headers.
+Nevertheless, implementations are encouraged to keep headers contents as small
+as reasonably possible to provide maximum benefit for users.
 {endnote}
 
 [[sec:khr-includes-new-headers]]
@@ -444,14 +443,14 @@ This header provides definitions of:
 * [code]#rounding_mode# enumeration
 * [code]#elem# struct and [code]#vec# class
 * Type aliases from <<subsec:marray-aliases>>
-* [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes
-  from <<swizzled-vec-class>>
+* [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes from
+  <<swizzled-vec-class>>
 
 In order to make simple swizzle functions ([code]#XYZW_SWIZZLE# and
 [code]#RGBA_SWIZZLE# from <<table.members.vec>>) available, the macro
-[code]#SYCL_SIMPLE_SWIZZLES# should be defined before *any* other
-[code]#sycl/# header is included. The recommended way of doing that is through
-command line options.
+[code]#SYCL_SIMPLE_SWIZZLES# should be defined before *any* other [code]#sycl/#
+header is included.
+The recommended way of doing that is through command line options.
 
 [[sec:khr-includes-marray]]
 === [code]#<sycl/khr/includes/marray.hpp># header
@@ -481,8 +480,8 @@ This header provides definitions of:
   [code]#flush# or [code]#endl#)
 * [code]#setprecision# and [code]#setw# functions
 * [code]#stream# class
-* [code]#template <typename T> const stream& operator<<(const stream& os, const T& rhs)#
-  operator
+* [code]#template <typename T> const stream& operator<<(const stream& os, const
+  T& rhs)# operator
 
 [[sec:khr-includes-type-traits]]
 === [code]#<sycl/khr/includes/type_traits.hpp># header
@@ -493,8 +492,8 @@ This header provides definitions of:
   [code]#is_property_of_v# from <<subsec:properties-interface>>
 * [code]#is_group# and [code]#is_group_v# from <<subsec:group-type-traits>>
 * [code]#is_device_copyable# from <<subsec:is-device-copyable-type-trait>>
-* [code]#any_device_has#, [code]#any_device_has_v#, [code]#all_devices_have#
-  and [code]#all_devices_have_v# from <<sec:device-aspect-traits>>
+* [code]#any_device_has#, [code]#any_device_has_v#, [code]#all_devices_have# and
+  [code]#all_devices_have_v# from <<sec:device-aspect-traits>>
 * [code]#remove_decoration# type trait
 * [code]#known_identity#, [code]#known_identity_v#, [code]#has_known_identity#
   and [code]#has_known_identity_v# type traits
