@@ -2,9 +2,9 @@
 
 This extension provides an alternative mechanism for submitting commands to a
 device via free-functions that require developers to opt-in to the handling of
-requirements and the creation of [code]#event# objects. It also adds an ability
-to reuse the same [code]#event# object to track completion of multiple command
-submissions.
+requirements and the creation of [code]#event# objects.
+It also adds an ability to reuse the same [code]#event# object to track
+completion of multiple command submissions.
 
 The creation of [code]#event# objects may incur overheads that increase the
 latency of submitting commands to devices, even if the [code]#event# object is
@@ -169,13 +169,14 @@ For each type, the [code]#is_requirement# type trait is specialized such that
 * [code]#kernel_bundle<bundle_state::executable>#: The command must be submitted
   using a <<device image>> from the kernel bundle.
 
-* [code]#wait_event#: The command must not begin executing until the event
-  is complete.
+* [code]#wait_event#: The command must not begin executing until the event is
+  complete.
 
-* [code]#wait_events#: The command must not begin executing until all
-  events in the vector are complete.
+* [code]#wait_events#: The command must not begin executing until all events in
+  the vector are complete.
 
-* [code]#signal_event#: When the command is complete, signals the provided event.
+* [code]#signal_event#: When the command is complete, signals the provided
+  event.
 
 '''
 
@@ -192,10 +193,9 @@ _Constraints_:
   [code]#Requirements#;
 * [code]#Requirements# contains at most one
   [code]#kernel_bundle<bundle_state::executable>#;
-* [code]#Requirements# contains at most one
-  [code]#wait_event# or [code]#wait_events#; and
-* [code]#Requirements# contains at most one
-  [code]#signal_event#;
+* [code]#Requirements# contains at most one [code]#wait_event# or
+  [code]#wait_events#; and
+* [code]#Requirements# contains at most one [code]#signal_event#;
 
 _Effects_: Constructs a [code]#requirements# object representing the set of
 requirements specified via the [code]#values# parameter pack.
@@ -247,9 +247,10 @@ This function is exposition only.
 It is shown only to help specify the effect of the functions below under "New
 free functions".
 
-_Effects_: Calls [code]#h.depends_on# for each [code]#event# (wrapped in wait_event
-object) or each event in [code]#std::vector<event># (wrapped in wait_events object)
-passed to the constructor of this [code]#requirements# object.
+_Effects_: Calls [code]#h.depends_on# for each [code]#event# (wrapped in
+wait_event object) or each event in [code]#std::vector<event># (wrapped in
+wait_events object) passed to the constructor of this [code]#requirements#
+object.
 
 '''
 
@@ -263,8 +264,8 @@ This function is exposition only.
 It is shown only to help specify the effect of the functions below under "New
 free functions".
 
-_Effects_: Registers an event (wrapped in signal_event object) to be signaled once
-the command is complete.
+_Effects_: Registers an event (wrapped in signal_event object) to be signaled
+once the command is complete.
 
 == New free functions
 
@@ -462,8 +463,7 @@ q.submit([&](handler& h) {
 });
 ----
 
-_Effects_ (4-6): Equivalent to [code]#launch_grouped(q, r, size, {},
-k);#.
+_Effects_ (4-6): Equivalent to [code]#launch_grouped(q, r, size, {}, k);#.
 
 '''
 
@@ -564,8 +564,8 @@ q.submit([&](handler& h) {
 });
 ----
 
-_Effects_ (4-6): Equivalent to [code]#+launch_grouped_reduce(q, r, size,
-{}, k, reductions...);+#.
+_Effects_ (4-6): Equivalent to [code]#+launch_grouped_reduce(q, r, size, {}, k,
+reductions...);+#.
 
 '''
 
@@ -671,8 +671,7 @@ q.submit([&](handler& h) {
 });
 ----
 
-_Effects_ (2): Equivalent to [code]#+launch_host(q, {},
-hostTaskCallable);+#.
+_Effects_ (2): Equivalent to [code]#+launch_host(q, {}, hostTaskCallable);+#.
 
 '''
 
@@ -1055,9 +1054,10 @@ Any commands submitted after this barrier cannot begin execution until:
 * All commands previously submitted to this queue have completed; and
 * All events (wrapped in wait_event or wait_events) in [code]#reqs# have completed.
 
-{note}If a barrier is submitted to an in-order queue with no
-requirements, then this operation may be a no-op. If an event wrapped in signal_event
-was provided in [code]#reqs#, it will be signaled.{endnote}
+{note}If a barrier is submitted to an in-order queue with no requirements, then
+this operation may be a no-op.
+If an event wrapped in signal_event was provided in [code]#reqs#, it will be
+signaled.{endnote}
 
 '''
 
@@ -1080,11 +1080,13 @@ _Effects_: Enqueues a command barrier, signals the provided event.
 Any commands submitted after this barrier cannot begin execution until:
 
 * All commands previously submitted to this queue have completed; and
-* All events (wrapped in wait_event or wait_events) in [code]#reqs# have completed.
+* All events (wrapped in wait_event or wait_events) in [code]#reqs# have
+  completed.
 
 Once the above conditions are met, signals the provided event ([code]#e#).
 
-{note}The event is disassociated from any previous command it was tracking.{endnote}
+{note}The event is disassociated from any previous command it was
+tracking.{endnote}
 
 '''
 
@@ -1104,10 +1106,11 @@ _Constraints_:
 * [code]#Requirements# is empty.
 
 _Effects_: Enqueues an event barrier.
-Any commands submitted after this barrier cannot begin execution until the provided event ([code]#e#)
-has completed.
+Any commands submitted after this barrier cannot begin execution until the
+provided event ([code]#e#) has completed.
 
-Once the above conditions are met, signals the event (wrapped in signal_event), if provided.
+Once the above conditions are met, signals the event (wrapped in signal_event),
+if provided.
 
 '''
 
@@ -1130,9 +1133,11 @@ _Constraints_ (1-2):
 * [code]#Requirements# is empty.
 
 _Effects_ (1-2): Enqueues an event barrier.
-Any commands submitted after this barrier cannot begin execution until the provided events ([code]#evts#) have completed.
+Any commands submitted after this barrier cannot begin execution until the
+provided events ([code]#evts#) have completed.
 
-Once the above conditions are met, signals the event (wrapped in signal_event), if provided.
+Once the above conditions are met, signals the event (wrapped in signal_event),
+if provided.
 
 '''
 
@@ -1147,6 +1152,8 @@ event make_event(context c);
 
 }
 ----
-_Effects_: Creates an event associated with a given context. The event can then be used with [code]#enqueue_signal_event# function, with signal_event object and as a dependency for other commands.
+_Effects_: Creates an event associated with a given context.
+The event can then be used with [code]#enqueue_signal_event# function, with
+signal_event object and as a dependency for other commands.
 
 '''
