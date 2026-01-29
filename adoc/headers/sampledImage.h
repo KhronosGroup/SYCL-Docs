@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -24,21 +24,41 @@ class sampled_image {
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const property_list& propList = {});
 
+  sampled_image(const void* hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                AllocatorT allocator,  const property_list& propList = {});
+
   /* Available only when: Dimensions > 1 */
   sampled_image(const void* hostPointer, image_format format,
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {});
 
+  /* Available only when: Dimensions > 1 */
+  sampled_image(const void* hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch, AllocatorT allocator,
+                const property_list& propList = {});
+
   sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const property_list& propList = {});
+
+  sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                AllocatorT allocator, const property_list& propList = {});
 
   /* Available only when: Dimensions > 1 */
   sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
                 image_sampler sampler, const range<Dimensions>& rangeRef,
                 const range<Dimensions - 1>& pitch,
                 const property_list& propList = {});
+
+  /* Available only when: Dimensions > 1 */
+  sampled_image(std::shared_ptr<const void>& hostPointer, image_format format,
+                image_sampler sampler, const range<Dimensions>& rangeRef,
+                const range<Dimensions - 1>& pitch,
+                AllocatorT allocator, const property_list& propList = {});
 
   /* -- common interface members -- */
 
@@ -49,9 +69,11 @@ class sampled_image {
   /* Available only when: Dimensions > 1 */
   range<Dimensions - 1> get_pitch() const;
 
-  size_t byte_size() const noexcept;
+  std::size_t byte_size() const noexcept;
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
+
+  AllocatorT get_allocator() const;
 
   template <typename DataT, image_target Targ = image_target::device>
   sampled_image_accessor<DataT, Dimensions, Targ>

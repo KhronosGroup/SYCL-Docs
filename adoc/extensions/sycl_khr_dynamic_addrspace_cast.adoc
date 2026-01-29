@@ -1,0 +1,91 @@
+[[sec:khr-dynamic-addrspace-cast]]
+= sycl_khr_dynamic_addrspace_cast
+
+This extension introduces a [code]#dynamic_addrspace_cast# function with the
+same semantics as [code]#sycl::address_space_cast# to align with the
+[code]#static_addrspace_cast# function defined by the
+<<sec:khr-static-addrspace-cast,sycl_khr_static_addrspace_cast>> extension, and
+clarifies the expected behavior of a dynamic address space cast.
+
+[[sec:khr-dynamic-addrspace-cast-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-dynamic-addrspace-cast-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_DYNAMIC_ADDRSPACE_CAST# to one of the values defined in the
+table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-dynamic-addrspace-cast-functions]]
+== Dynamic address space cast functions
+
+.[apidef]#dynamic_addrspace_cast#
+[source,role=synopsis,id=api:khr-dynamic-addrspace-cast-dynamic_addrspace_cast]
+----
+namespace sycl::khr {
+
+template <access::address_space Space, typename ElementType>
+multi_ptr<ElementType, Space, access::decorated::no>
+dynamic_addrspace_cast(ElementType* ptr);
+
+template <access::address_space Space, typename ElementType, access::decorated DecorateAddress>
+multi_ptr<ElementType, Space, DecorateAddress>
+dynamic_addrspace_cast(multi_ptr<ElementType, addrspace_generic, DecorateAddress> ptr);
+
+} // namespace khr::sycl
+----
+
+_Preconditions_: The memory at [code]#ptr# can be accessed by the calling
+work-item.
+
+_Returns_: A [code]#multi_ptr# with the specified address space that points to
+the same object as [code]#ptr# if [code]#ptr# points to an object allocated in
+the address space designated by [code]#Space#, and [code]#nullptr# otherwise.
+If [code]#ptr# is a [code]#multi_ptr# then the return value has the same
+decoration.
+
+{note}The precondition prevents reasoning about the address space of pointers
+originating from another work-item (in the case of [code]#private# pointers) or
+another work-group (in the case of [code]#local# pointers).
+Such pointers could not be dereferenced by the calling work-item, and it is thus
+unclear that being able to reason about the address space would be useful.
+Limiting usage to accessible pointers is expected to result in simpler and
+faster implementations.{endnote}
+
+[[sec:khr-dynamic-addrspace-cast-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL name
+
+// This function accepts raw pointers, but dispatches internally.
+template <typename T>
+void update(T* ptr, int x)
+{
+  // If cast to global returns non-null, call the global version.
+  if (khr::dynamic_addrspace_cast<access::address_space::global_space>(ptr).get() != nullptr) {
+    update_global(ptr, x);
+  }
+
+  // If cast to local returns non-null, call the local version.
+  else if (khr::dynamic_addrspace_cast<access::address_space::local_space>(ptr).get() != nullptr) {
+    update_local(ptr, x);
+  }
+}
+----

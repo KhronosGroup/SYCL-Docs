@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
@@ -23,7 +23,7 @@ class sampled_image_accessor {
 
   /* -- property interface members -- */
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   /* if Dimensions == 1, CoordT = float
      if Dimensions == 2, CoordT = float2
@@ -45,7 +45,7 @@ template <typename DataT, int Dimensions> class host_sampled_image_accessor {
 
   /* -- property interface members -- */
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
 
   /* if Dimensions == 1, CoordT = float
      if Dimensions == 2, CoordT = float2

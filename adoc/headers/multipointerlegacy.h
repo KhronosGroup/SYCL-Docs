@@ -1,10 +1,9 @@
-// Copyright (c) 2011-2024 The Khronos Group, Inc.
+// Copyright (c) 2011-2025 The Khronos Group, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 namespace sycl {
 
 // Legacy interface, inherited from 1.2.1.
-// Deprecated.
 template <typename ElementType, access::address_space Space>
 class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
  public:
@@ -119,7 +118,7 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
                              difference_type r) { /* ... */
   }
 
-  void prefetch(size_t numElements) const;
+  void prefetch(std::size_t numElements) const;
 
   friend bool operator==(const multi_ptr& lhs, const multi_ptr& rhs) { /* ... */
   }
@@ -162,7 +161,6 @@ class [[deprecated]] multi_ptr<ElementType, Space, access::decorated::legacy> {
 };
 
 // Legacy interface, inherited from 1.2.1.
-// Deprecated.
 // Specialization of multi_ptr for void and const void
 // VoidType can be either void or const void
 template <access::address_space Space>

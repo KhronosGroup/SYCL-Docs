@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright 2016-2024 The Khronos Group Inc.
+# Copyright 2016-2025 The Khronos Group Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -53,7 +53,7 @@ codePat = re.compile(r'code:(?P<param>\w+)')
 # A single letter followed by a period, typically a middle initial.
 endInitial = re.compile(r'^[A-Z]\.$')
 # An abbreviation, which does not (usually) end a line.
-endAbbrev = re.compile(r'(e\.g|i\.e|c\.f|\bvs\b|\bco\b|\bltd\b|\bch\b)\.$', re.IGNORECASE)
+endAbbrev = re.compile(r'(e\.g|i\.e|\bvs\b|\bco\b|\bltd\b|\bch\b|\bcf\b)\.$', re.IGNORECASE)
 # A lower case word.  When "etc." is followed by this, it does not end a line.
 startsLowerCase = re.compile(r'\(?[a-z]')
 
@@ -96,7 +96,7 @@ class ReflowCallbacks:
         """True if justification should break to a new line after the end of a
         sentence."""
 
-        self.breakInitial = True
+        self.breakInitial = False
         """True if justification should break to a new line after something
         that appears to be an initial in someone's name. **TBD**"""
 
