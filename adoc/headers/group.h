@@ -10,6 +10,8 @@ template <int Dimensions = 1> class group {
   static constexpr int dimensions = Dimensions;
   static constexpr memory_scope fence_scope = memory_scope::work_group;
 
+  group() = delete;
+
   /* -- common interface members -- */
 
   id<Dimensions> get_group_id() const noexcept;

@@ -12814,16 +12814,21 @@ Then return the initial copy of the [code]#id#.
 [[subsec:item.class]]
 ==== [code]#item# class
 
-<<item>> identifies an instance of the function object executing at each point
-in a [code]#range#.
-It is passed to a [code]#parallel_for# call or returned by member functions of
-[code]#h_item#.
+The [code]#item# class template identifies an instance of a kernel function
+object executing at each point in a <<range>>.
 It encapsulates enough information to identify the work-item's range of possible
 values and its ID in that range.
-It can optionally carry the offset of the range if provided to the
-[code]#parallel_for#; note this is deprecated in SYCL 2020.
-Instances of the [code]#item# class are not user-constructible and are passed by
-the runtime to each instance of the function object.
+
+The implementation constructs instances of the [code]#item# class template.
+Applications that attempt to default construct an [code]#item# object are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#item# class
+template is not an aggregate.
+{endnote}
+
+The [code]#item# class template can optionally carry the offset of the range if
+provided to the [code]#parallel_for#; note this is deprecated in SYCL 2020.
 
 The SYCL [code]#item# class template provides the common by-value semantics (see
 <<sec:byval-semantics>>).
@@ -12938,15 +12943,19 @@ std::size_t get_linear_id() const noexcept;
 [[nditem-class]]
 ==== [code]#nd_item# class
 
-[code]#nd_item<int Dimensions># identifies an instance of the function object
-executing at each point in an [code]#nd_range<int Dimensions># passed to a
-[code]#parallel_for# call.
-It encapsulates enough information to identify the <<work-item>>'s local and
-global <<id,ids>>, the <<work-group-id>> and also provides access to the
-[code]#group# and [code]#sub_group# classes.
-Instances of the [code]#nd_item<int Dimensions># class are not
-user-constructible and are passed by the runtime to each instance of the
-function object.
+The [code]#nd_item# class template identifies an instance of a kernel function
+object executing at each point in an <<nd-range>>.
+It encapsulates enough information to identify the work-item's local and global
+<<id,ids>>, the <<work-group-id>> and also provides access to the [code]#group#
+and [code]#sub_group# classes.
+
+The implementation constructs instances of the [code]#nd_item# class template.
+Applications that attempt to default construct an [code]#nd_item# object are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#nd_item#
+class template is not an aggregate.
+{endnote}
 
 The SYCL [code]#nd_item# class template provides the common by-value semantics
 (see <<sec:byval-semantics>>).
@@ -13264,7 +13273,7 @@ template <typename... EventTN> void wait_for(EventTN... events) const noexcept;
 
 The [code]#h_item# class is deprecated in SYCL 2020.
 
-[code]#h_item<int Dimensions># identifies an instance of a
+The [code]#h_item# class template identifies an instance of a
 [code]#group::parallel_for_work_item# function object executing at each point in
 a local [code]#range<int Dimensions># passed to a [code]#parallel_for_work_item#
 call or to the corresponding [code]#parallel_for_work_group# call if no
@@ -13274,8 +13283,14 @@ global <<item,items>> according to the information given to
 [code]#parallel_for_work_group# (physical ids) as well as the <<work-item>>'s
 logical local <<item,items>> in the logical local range.
 All returned <<item,items>> objects are offset-less.
-Instances of the [code]#h_item<int Dimensions># class are not user-constructible
-and are passed by the runtime to each instance of the function object.
+
+The implementation constructs instances of the [code]#h_item# class template.
+Applications that attempt to default construct an [code]#h_item# object are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#h_item#
+class template is not an aggregate.
+{endnote}
 
 The SYCL [code]#h_item# class template provides the common by-value semantics
 (see <<sec:byval-semantics>>).
@@ -13457,9 +13472,18 @@ std::size_t get_physical_local_id(int dimension) const noexcept;
 [[group-class]]
 ==== [code]#group# class
 
-The [code]#group<int Dimensions># encapsulates all functionality required to
-represent a particular <<work-group>> within a parallel execution.
-It is not user-constructible.
+The [code]#group# class template encapsulates all functionality required to
+represent a specific <<work-group>> within a kernel.
+
+The set of work-items represented by an instance of the [code]#group# class
+template is determined by the implementation, and there is subsequently no way
+for a user to construct arbitrary instances of the [code]#group# class template.
+Applications that attempt to default construct a [code]#group# object are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#group# class
+template is not an aggregate.
+{endnote}
 
 The local range stored in the group class is provided either by the programmer,
 when it is passed as an optional parameter to [code]#parallel_for_work_group#,
@@ -13791,8 +13815,17 @@ template <typename... EventTN> void wait_for(EventTN... events) const noexcept;
 ==== [code]#sub_group# class
 
 The [code]#sub_group# class encapsulates all functionality required to represent
-a particular <<sub-group>> within a parallel execution.
-It is not user-constructible.
+a specific <<sub-group>> within a kernel.
+
+The set of work-items represented by an instance of the [code]#sub_group# class
+is determined by the implementation, and there is subsequently no way for a user
+to construct arbitrary instances of the [code]#sub_group# class.
+Applications that attempt to default construct a [code]#sub_group# object are
+ill formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#sub_group#
+class is not an aggregate.
+{endnote}
 
 The SYCL [code]#sub_group# class provides the common by-value semantics (see
 <<sec:byval-semantics>>).
@@ -14576,10 +14609,16 @@ command group scope will be submitted to a queue.
 [[sec:handlerClass]]
 === Command group [code]#handler# class
 
-A <<handler>> object can only be constructed by the SYCL runtime.
-All of the accessors defined in <<command-group-scope>> take as a parameter an
-instance of the <<handler>>, and all the kernel invocation functions are member
-functions of this class.
+The implementation passes an instance of the [code]#handler# object to the
+<<command-group-function-object>>.
+
+The implementation constructs instances of the [code]#handler# class.
+Applications that attempt to default construct a [code]#handler# object are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#handler#
+class is not an aggregate.
+{endnote}
 
 It is disallowed for an instance of the SYCL [code]#handler# class to be moved
 or copied.
@@ -15896,8 +15935,13 @@ and any <<buffer,buffers>> or <<image,images>> that are captured in the callable
 being invoked in order to allow a <<host-task>> to be used for interoperability
 purposes.
 
-An [code]#interop_handle# cannot be constructed by user-code, only by the
-<<sycl-runtime>>.
+The implementation constructs instances of the [code]#interop_handle# class.
+Applications that attempt to default construct an [code]#interop_handle# object
+are ill formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the
+[code]#interop_handle# class is not an aggregate.
+{endnote}
 
 [source,,linenums]
 ----
@@ -16274,6 +16318,15 @@ bundle_state::executable
 
 Some of the functions related to kernel bundles take an input parameter of type
 [code]#kernel_id# which identifies a kernel.
+
+The implementation constructs instances of the [code]#kernel_id# class.
+Applications that attempt to default construct a [code]#kernel_id# object are
+ill formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#kernel_id#
+class is not an aggregate.
+{endnote}
+
 A synopsis of the [code]#kernel_id# class is shown below along with a
 description of its member functions.
 Additionally, this class provides the common special member functions and common
@@ -16888,7 +16941,13 @@ Two bundles of the same <<bundle-state>> are considered to be equal if they are
 associated with the same context, have the same set of associated devices, and
 contain the same set of device images.
 
-There is no public default constructor for this class.
+The implementation constructs instances of the [code]#kernel_bundle# class.
+Applications that attempt to default construct a [code]#kernel_bundle# object
+are ill formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the
+[code]#kernel_bundle# class is not an aggregate.
+{endnote}
 
 [source,,linenums]
 ----
@@ -17138,7 +17197,13 @@ member functions that are listed in <<sec:reference-semantics>> in
 <<table.specialmembers.common.reference>> and
 <<table.hiddenfriends.common.reference>>, respectively.
 
-There is no public default constructor for this class.
+The implementation constructs instances of the [code]#kernel# class.
+Applications that attempt to default construct a [code]#kernel# object are ill
+formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the [code]#kernel#
+class is not an aggregate.
+{endnote}
 
 [source,,linenums]
 ----
@@ -17388,12 +17453,18 @@ member functions that are listed in <<sec:reference-semantics>> in
 <<table.specialmembers.common.reference>> and
 <<table.hiddenfriends.common.reference>>, respectively.
 
+The implementation constructs instances of the [code]#device_image# class.
+Applications that attempt to default construct a [code]#device_image# object are
+ill formed, and the implementation must issue a diagnostic in this case.
+
+{note}If using {cpp17}, implementations must ensure that the
+[code]#device_image# class is not an aggregate.
+{endnote}
+
 [source,,linenums]
 ----
 include::{header_dir}/bundle/deviceImageClass.h[lines=4..-1]
 ----
-
-There is no public constructor for this class.
 
 [source]
 ----
