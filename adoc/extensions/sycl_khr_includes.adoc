@@ -1,0 +1,592 @@
+[[sec:khr-includes]]
+= sycl_khr_includes
+
+This extension provides an alternative set of header files, with each providing
+a limited set of APIs.
+This allows developers to avoid paying compilation time cost for features that
+are not used by an application.
+
+[[sec:khr-includes-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-includes-header-files]]
+== Header files
+
+The header files provided by this extension are located in the
+[code]#<sycl/khr/includes># directory.
+
+[[sec:khr-includes-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_INCLUDES# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+{note} A <<subsec:library-only>> implementation of SYCL cannot predefine macros
+outside of header files.
+See <<sec:khr-includes-version>> for a portable way to check for this extension.
+{endnote}
+
+[[sec:khr-includes-full-list-of-headers]]
+== Extension overview
+
+<<table.khr-includes-list>> provides a list of all new headers with high-level
+description of their content.
+
+All headers are provided under [code]#<sycl/khr/includes/># include path.
+
+The Description column in the table is intended to help you navigate the
+extension document quicker.
+It does not offer the exaustive listing of each new header file contents that
+provided in subsequent sections below.
+
+[[table.khr-includes-list]]
+.List of headers provided by the extension
+[width="100%",options="header",cols="1,2"]
+|====
+|Header
+|Description
+
+|[code]#<sycl/khr/includes/version.hpp>#
+|Provides various macro definitions.
+
+|[code]#<sycl/khr/includes/queue.hpp>#
+|Provides definition of the [code]#queue# class.
+
+|[code]#<sycl/khr/includes/handler.hpp>#
+|Provides definition of the [code]#handler# class.
+
+|[code]#<sycl/khr/includes/event.hpp>#
+|Provides definition of the [code]#event# class.
+
+|[code]#<sycl/khr/includes/device.hpp>#
+|Provides definitions of the [code]#device# class and device selectors.
+
+|[code]#<sycl/khr/includes/platform.hpp>#
+|Provides definition of the [code]#platform# class.
+
+|[code]#<sycl/khr/includes/context.hpp>#
+|Provides definition of the [code]#context# class.
+
+|[code]#<sycl/khr/includes/index_space.hpp>#
+|Provides definitions of most of the index space identifiers from
+<<ranges-identifiers>>. Classes like [code]#h_item#, [code]#group# and
+[code]#sub_group# are provided by other headers.
+
+|[code]#<sycl/khr/includes/usm.hpp>#
+|Provides definitions from <<sec:usm>>, such as [code]#usm_allocator#
+class and USM free functions for memory management like [code]#malloc_shared#.
+
+|[code]#<sycl/khr/includes/buffer.hpp>#
+|Provides definition of the [code]#buffer# class.
+
+|[code]#<sycl/khr/includes/accessor.hpp>#
+|Provides definitions of the [code]#accessor#, [code]#local_accessor# and
+[code]#host_accessor# classes.
+
+|[code]#<sycl/khr/includes/atomic.hpp>#
+|Provides definition of the [code]#atomic_ref# class.
+
+|[code]#<sycl/khr/includes/half.hpp>#
+|Provides definition of the [code]#half# data type.
+
+|[code]#<sycl/khr/includes/vec.hpp>#
+|Provides definitions from <<sec:vector.type>>, i.e. [code]#vec# class and
+related enumerations.
+
+|[code]#<sycl/khr/includes/marray.hpp>#
+|Provides definitions from <<sec:marray.type>>, i.e. [code]#marray# class.
+
+|[code]#<sycl/khr/includes/math.hpp>#
+|Provides definitions of built-in functions from <<sycl:builtins>>.
+
+|[code]#<sycl/khr/includes/groups.hpp>#
+|Provides definitions of the [code]#group# and [code]#sub_group# classes.
+
+|[code]#<sycl/khr/includes/group_algorithms.hpp>#
+|Provides definitions of group operations such as broadcasts or scans.
+
+|[code]#<sycl/khr/includes/multi_ptr.hpp>#
+|Provides definitions of the [code]#multi_ptr# class and related address space
+class aliases.
+
+|[code]#<sycl/khr/includes/functional.hpp>#
+|Provides definitions of function objects like [code]#plus# and
+[code]#logical_or# from <<sec:function-objects>>.
+
+|[code]#<sycl/khr/includes/reduction.hpp>#
+|Provides definitions from <<sec:reduction>>, such as [code]#reduction#
+interface and [code]#reducer# class. Note that this header does not provide
+definitions of group algorithm functions such as [code]#joint_reduce#.
+
+|[code]#<sycl/khr/includes/stream.hpp>#
+|Provides functionality from <<subsec:stream>>, i.e. [code]#stream# class
+and related functions.
+
+|[code]#<sycl/khr/includes/type_traits.hpp>#
+|Provides definitions of various type traits like [code]#is_property#,
+[code]#is_group#, [code]#is_device_copyable#, etc.
+
+|[code]#<sycl/khr/includes/property_list.hpp>#
+|Provides definition of the [code]#property_list# class.
+
+|[code]#<sycl/khr/includes/kernel_bundle.hpp>#
+|Provides definitions from <<sec:interfaces.bundles>>, such as
+[code]#kernel_bundle#, [code]#kernel#, [code]#kernel_id#, [code]#device_image#
+and [code]#specialization_id# classes.
+
+|[code]#<sycl/khr/includes/kernel_handler.hpp>#
+|Provides definition of the [code]#kernel_handler# class.
+
+|[code]#<sycl/khr/includes/images.hpp>#
+|Provides definitions of the [code]#sampler#, [code]#sampled_image#,
+[code]#unsampled_image# and corresponding accessors.
+
+|[code]#<sycl/khr/includes/exception.hpp>#
+|Provides definitions of error handling APIs from <<error-handling>>, such as
+[code]#exception# and [code]#exception_list# classes.
+
+|[code]#<sycl/khr/includes/hierarchical_parallelism.hpp>#
+|Provides definitions of the [code]#private_memory# and [code]#h_item# classes.
+
+|[code]#<sycl/khr/includes/interop_handle.hpp>#
+|Provides definition of the [code]#interop_handle# class.
+
+|[code]#<sycl/khr/includes/backend.hpp>#
+|Provides definition of the [code]#backend_traits# and [code]#make_*# functions.
+
+|[code]#<sycl/khr/includes/bit.hpp>#, [code]#<sycl/khr/includes/span.hpp>#
+|Headers in this set match by name with those provided by the next C++
+specification. They contain pre-adopted features from that standard.
+
+|[code]#<sycl/khr/includes/byte.hpp>#
+|Provides definition of the [code]#byte# alias.
+|====
+
+Classes, constants, types and functions provided by the headers listed above
+exist within the [code]#::sycl# namespace as with the standard
+[code]#<sycl/sycl.hpp># header.
+
+There is no guarantee that headers documented by this extension contain anything
+else besides things listed in sections below.
+For example, [code]#queue# class has methods which accept [code]#accessor#
+objects, but [code]#<sycl/khr/includes/queue.hpp># is not required to provide a
+definition of [code]#accessor#.
+Therefore, a portable application should include the corresponding header to
+define [code]#accessor# definition explicitly.
+
+{note} However, there is no requirement for the implementations to **only**
+provide through those headers exactly what's specified, i.e. they may contain
+other functions and classes than documented in this extension.
+In fact, some classes, functions or enumerations are documented to be available
+through multiple headers.
+Nevertheless, implementations are encouraged to keep headers contents as small
+as reasonably possible to provide maximum benefit for users.
+{endnote}
+
+[[sec:khr-includes-new-headers]]
+== New headers
+
+[[sec:khr-includes-version]]
+=== [code]#<sycl/khr/includes/version.hpp># header
+
+This header provides definitions of:
+
+* [code]#SYCL_KHR_INCLUDES# macro;
+* All macros defined in <<sec:preprocessor-directives-and-macros>>;
+* Any macros defined by other extensions supported by an implementation; and
+* Backend macros in the form of [code]#SYCL_BACKEND_<backend_name># defined by
+  <<sec:backend-macros>>.
+
+[code]#<sycl/khr/includes/version.hpp># header is included by every other header
+documented by this extension, as well as [code]#<sycl/sycl.hpp>#.
+
+There is no guarantee that the aforementioned macros are defined before
+[code]#<sycl/khr/includes/version.hpp># is included.
+
+The code below demonstrates a portable way to detect if this extension is
+supported:
+
+[source]
+----
+#if __has_include(<sycl/khr/includes/version.hpp>)
+// The file exists, but the SYCL_KHR_INCLUDES is not necessarily defined, i.e.
+// the extension may not be fully supported by an implementation.
+
+#include <sycl/khr/includes/version.hpp>
+// SYCL_KHR_INCLUDES macro is guaranteed to be defined if the extension is
+// supported.
+#endif
+
+#if SYCL_KHR_INCLUDES
+// Extension is supported
+#include <sycl/khr/includes/vec.hpp>
+#else
+// Extension is not supported
+#include <sycl/sycl.hpp>
+#endif
+----
+
+[[sec:khr-includes-backend]]
+=== [code]#<sycl/khr/includes/backend.hpp># header
+
+This header provides definitions of common SYCL backend APIs:
+
+* [code]#backend# enumeration
+* [code]#backend_traits#
+* [code]#backend_input_t#
+* [code]#backend_return_t#
+* [code]#get_native#
+* [code]#make_*# functions from <<sec:backend-interoperability-make>>
+
+[[sec:khr-includes-device]]
+=== [code]#<sycl/khr/includes/device.hpp># header
+
+This header provides definitions of:
+
+* [code]#default_selector_v#, [code]#gpu_selector_v#,
+  [code]#accelerator_selector_v#, [code]#cpu_selector_v#,
+  [code]#aspect_selector#
+* [code]#device# class
+* All [code]#info::device# information descriptors from
+  <<sec:device-info-descriptors>>
+* All other enumerations from <<sec:device-other-enumerations>>
+* [code]#enum class aspect#
+
+[[sec:khr-includes-platform]]
+=== [code]#<sycl/khr/includes/platform.hpp># header
+
+This header provides definitions of:
+
+* [code]#platform# class
+* All [code]#info::platform# information descriptors from
+  <<sec:platform-info-descriptors>>
+
+[[sec:khr-includes-context]]
+=== [code]#<sycl/khr/includes/context.hpp># header
+
+This header provides definitions of:
+
+* [code]#context# class
+* All [code]#info::context# information descriptors from
+  <<sec:context-info-descriptors>>
+
+[[sec:khr-includes-queue]]
+=== [code]#<sycl/khr/includes/queue.hpp># header
+
+This header provides definitions of:
+
+* [code]#queue# class
+* All [code]#info::queue# information descriptors from
+  <<sec:queue-info-descriptors>>
+* All [code]#properties::queue# types from <<sec:queue-properties>>
+
+[[sec:khr-includes-handler]]
+=== [code]#<sycl/khr/includes/handler.hpp># header
+
+This header provides definition of:
+
+* [code]#handler# class
+
+[[sec:khr-includes-event]]
+=== [code]#<sycl/khr/includes/event.hpp># header
+
+This header provides definitions of:
+
+* [code]#event# class
+* All [code]#info::event# information descriptors from
+  <<sec:event-info-descriptors>>
+* All [code]#info::event_command_status# descriptors from
+  <<sec:event-info-descriptors>>
+* All [code]#info::event_profiling# descriptors from
+  <<sec:event-info-descriptors>>
+
+[[sec:khr-includes-buffer]]
+=== [code]#<sycl/khr/includes/buffer.hpp># header
+
+This header provides definitions of:
+
+* [code]#buffer# class
+* [code]#buffer_allocator#
+* All [code]#property::buffer# types from <<sec:buffer-properties>>
+
+[[sec:khr-includes-image]]
+=== [code]#<sycl/khr/includes/image.hpp># header
+
+This header provides definitions of:
+
+* [code]#unsampled_image# and [code]#sampled_image# classes
+* [code]#image_allocator#
+* All [code]#property::image# types from <<sec:image-properties>>
+* [code]#unsampled_image_accessor#, [code]#sampled_image_accessor#,
+  [code]#host_unsampled_image_accessor# and [code]#host_sampled_image_accessor#
+  classes
+* [code]#property::no_init# and [code]#no_init# from <<sec:accessor-properties>>
+* [code]#addresing_mode#, [code]#filtering_mode#,
+  [code]#coordinate_normalization_mode# enumerations and [code]#image_sampler#
+  struct
+
+[[sec:khr-includes-accessor]]
+=== [code]#<sycl/khr/includes/accessor.hpp># header
+
+This header provides definitions of:
+
+* [code]#accessor#, [code]#host_accessor# and [code]#local_accessor# classes
+* [code]#property::no_init# and [code]#no_init# from <<sec:accessor-properties>>
+* [code]#target#, [code]#access::target#, [code]#access::placeholder#,
+  [code]#access_mode# and [code]#access::access_mode# enumerations
+* Deduction tags from <<subsec:accessor-deduction-tags>>
+
+[[sec:khr-includes-multi-ptr]]
+=== [code]#<sycl/khr/includes/multi_ptr.hpp># header
+
+This header provides definitions of:
+
+* [code]#multi_ptr# class
+* [code]#access::address_space#, [code]#access::decorated# enumerations
+* [code]#global_ptr#, [code]#raw_private_ptr#, [code]#decorated_local_ptr# and
+  other aliases from <<sec:pointerclasses>>
+
+[[sec:khr-includes-hierarchical-parallelism]]
+=== [code]#<sycl/khr/includes/hierarchical_parallelism.hpp># header
+
+This header provides definitions of:
+
+* [code]#private_memory# and [code]#h_item# classes
+
+[[sec:khr-includes-usm]]
+=== [code]#<sycl/khr/includes/usm.hpp># header
+
+This header provides definitions of:
+
+* [code]#usm::alloc# enumeration
+* [code]#usm_allocator# class
+* Free functions like [code]#malloc_device#, [code]#aligned_alloc_host#,
+  [code]#malloc# and [code]#get_pointer_type# from sections
+  <<sec:usm-allocations>> and <<subsec:usm-mem-ptr-queries>>
+
+[[sec:khr-includes-index-space]]
+=== [code]#<sycl/khr/includes/index_space.hpp># header
+
+This header provides definitions of:
+
+* [code]#id#
+* [code]#item#
+* [code]#nd_item#
+* [code]#range#
+* [code]#nd_range#
+
+[[sec:khr-includes-reduction]]
+=== [code]#<sycl/khr/includes/reduction.hpp># header
+
+This header provides definitions of:
+
+* [code]#reduction# interface
+* [code]#reducer# class
+* All [code]#property::reduction# types from <<sec:reduction-properties>>
+
+This header also includes [code]#<sycl/khr/includes/functional.hpp># for
+convenience.
+
+[[sec:khr-includes-interop-handle]]
+=== [code]#<sycl/khr/includes/interop_handle.hpp># header
+
+This header provides definition of:
+
+* [code]#interop_handle# class
+
+[[sec:khr-includes-kernel-bundle]]
+=== [code]#<sycl/khr/includes/kernel_bundle.hpp># header
+
+This header provides definitions of:
+
+* [code]#bundle_state# enumeration
+* [code]#kernel_id#, [code]#kernel#, [code]#device_image# and
+  [code]#kernel_bundle# classes
+* All [code]#info::kernel# and [code]#info::kernel_device_specific# information
+  descriptors from <<sec:kernel-info-descriptors>>
+* Free functions like [code]#get_kernel_bundle#, [code]#has_kernel_bundle#,
+  [code]#compile#, [code]#link#
+* [code]#specialization_id# class
+
+[[sec:khr-includes-kernel-handler]]
+=== [code]#<sycl/khr/includes/kernel_handler.hpp># header
+
+This header provides definition of [code]#kernel_handler# class
+
+[[sec:khr-includes-exception]]
+=== [code]#<sycl/khr/includes/exception.hpp># header
+
+This header provides definitions of:
+
+* [code]#async_handler# alias
+* [code]#exception# and [code]#exception_list# classes
+* [code]#errc# enumeration
+* [code]#make_error_code# and [code]#sycl_category# free functions
+* [code]#std::is_error_code_enum# type trait specialization for
+  [code]#sycl::errc#
+
+[[sec:khr-includes-half]]
+=== [code]#<sycl/khr/includes/half.hpp># header
+
+This header provides definition of [code]#half# data type
+
+[[sec:khr-includes-vec]]
+=== [code]#<sycl/khr/includes/vec.hpp># header
+
+This header provides definitions of:
+
+* [code]#rounding_mode# enumeration
+* [code]#elem# struct and [code]#vec# class
+* Type aliases from <<subsec:marray-aliases>>
+* [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes from
+  <<swizzled-vec-class>>
+
+In order to make simple swizzle functions ([code]#XYZW_SWIZZLE# and
+[code]#RGBA_SWIZZLE# from <<table.members.vec>>) available, the macro
+[code]#SYCL_SIMPLE_SWIZZLES# should be defined before *any* other [code]#sycl/#
+header is included.
+The recommended way of doing that is through command line options.
+
+[[sec:khr-includes-marray]]
+=== [code]#<sycl/khr/includes/marray.hpp># header
+
+This header provides definitions of:
+
+* [code]#marray# class
+* Type aliases from <<subsec:vec-aliases>>
+
+[[sec:khr-includes-atomic]]
+=== [code]#<sycl/khr/includes/atomic.hpp># header
+
+This header provides definitions of:
+
+* [code]#atomic_fence# function
+* [code]#memory_order#, [code]#memory_scope# enumerations
+* [code]#atomic_ref# class from <<sec:atomic-references>>
+* [code]#atomic# class and free functions like [code]#atomic_store#,
+  [code]#atomic_fetch_and# from <<sec:atom-types-depr>>
+
+[[sec:khr-includes-stream]]
+=== [code]#<sycl/khr/includes/stream.hpp># header
+
+This header provides definitions of:
+
+* [code]#stream_manipulator# enumeration and corresponding constants (like
+  [code]#flush# or [code]#endl#)
+* [code]#setprecision# and [code]#setw# functions
+* [code]#stream# class
+* [code]#template <typename T> const stream& operator<<(const stream& os, const
+  T& rhs)# operator
+
+[[sec:khr-includes-type-traits]]
+=== [code]#<sycl/khr/includes/type_traits.hpp># header
+
+This header provides definitions of:
+
+* [code]#is_property#, [code]#is_property_v#, [code]#is_property_of# and
+  [code]#is_property_of_v# from <<subsec:properties-interface>>
+* [code]#is_group# and [code]#is_group_v# from <<subsec:group-type-traits>>
+* [code]#is_device_copyable# from <<subsec:is-device-copyable-type-trait>>
+* [code]#any_device_has#, [code]#any_device_has_v#, [code]#all_devices_have# and
+  [code]#all_devices_have_v# from <<sec:device-aspect-traits>>
+* [code]#remove_decoration# type trait
+* [code]#known_identity#, [code]#known_identity_v#, [code]#has_known_identity#
+  and [code]#has_known_identity_v# type traits
+
+[[sec:khr-includes-property-list]]
+=== [code]#<sycl/khr/includes/property_list.hpp># header
+
+This header provides definition of:
+
+* [code]#property_list# class definition
+
+[[sec:khr-includes-functional]]
+=== [code]#<sycl/khr/includes/functional.hpp># header
+
+This header provides definitions of:
+
+* [code]#plus#
+* [code]#multiplies#
+* [code]#bit_and#
+* [code]#bit_or#
+* [code]#bit_xor#
+* [code]#logical_and#
+* [code]#logical_or#
+* [code]#minimum#
+* [code]#maximum#
+
+[[sec:khr-includes-groups]]
+=== [code]#<sycl/khr/includes/groups.hpp># header
+
+This header provides definitions of:
+
+* [code]#group# and [code]#sub_group# classes
+* [code]#device_event# class
+* [code]#group_barrier# function
+
+[[sec:khr-includes-group-algorithms]]
+=== [code]#<sycl/khr/includes/group_algorithms.hpp># header
+
+This header provides definitions of:
+
+* [code]#group_broadcast# function
+* [code]#any_of#, [code]#all_of# and [code]#none_of# functions
+* [code]#shift_left#, [code]#shift_right#, [code]#permute#, [code]#select# and
+  [code]#reduce# functions
+* [code]#exclusive_scan_over_group#, [code]#inclusive_scan_over_group#,
+  [code]#joint_exclusive_scan# and [code]#joint_inclusive_scan# functions
+  functions
+
+[[sec:khr-includes-math]]
+=== [code]#<sycl/khr/includes/math.hpp># header
+
+This header includes all SYCL built-in functions documented by sections:
+
+* <<sec:math-functions>>
+* <<sec:native-precision-math-functions>>
+* <<sec:half-precision-math-functions>>
+* <<sec:integer-functions>>
+* <<sec:common-functions>>
+* <<sec:geometric-functions>>
+* <<sec:relational-functions>>
+
+[[sec:khr-includes-bit]]
+=== [code]#<sycl/khr/includes/bit.hpp># header
+
+This header contains definition of [code]#bit_cast# pre-adopted from the next
+C++ specification.
+
+[[sec:khr-includes-span]]
+=== [code]#<sycl/khr/includes/span.hpp># header
+
+This header contains definitions of [code]#span# and [code]#dynamic_extent#
+pre-adopted from the next C++ specification.
+
+[[sec:khr-includes-byte]]
+=== [code]#<sycl/khr/includes/byte.hpp># header
+
+This header contains definition of [code]#byte# type alias
+
+[[sec:khr-includes-other-extensions]]
+== Co-existence with other extensions
+
+Any extension which does not explicitly document how it can be accessed through
+header files should be assumed to be available only through
+[code]#<sycl/sycl.hpp>#.
+
+If an implementation supports this extension, then any macro defined by other
+supported extensions must be defined in [code]#<sycl/khr/includes/version.hpp>#.
+
+== Open issues/questions
+
