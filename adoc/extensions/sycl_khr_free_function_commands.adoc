@@ -175,8 +175,9 @@ For each type, the [code]#is_requirement# type trait is specialized such that
 * [code]#wait_events#: The command must not begin executing until all events in
   the vector are complete.
 
-* [code]#signal_event#: When the command is complete, signals the provided
-  event.
+* [code]#signal_event#: When the command is submitted, the event is immediately disassociated
+  with any previous command, and its status is set to "submitted". When the command is complete,
+  the provided event is signaled.
 
 '''
 
@@ -659,8 +660,10 @@ _Constraints_:
 
 * [code]#Requirements# does not contain a [code]#kernel_bundle#;
 * Any accessor in [code]#Requirements# must have a target of
-[code]#target::host_task#; and
-* The host function does not make any SYCL API calls.
+[code]#target::host_task#.
+
+_Preconditions_: The callable function [code]#hostTaskCallable# does not call any function
+in the [code]#sycl# namespace.
 
 _Effects_ (1): Equivalent to: +
 [source,sycl]
@@ -1050,16 +1053,19 @@ _Constraints_:
 * [code]#Requirements# does not contain any accessors.
 
 _Effects_: Enqueues a command barrier.
-Any commands submitted after this barrier cannot begin execution until:
+Any commands submitted after this barrier cannot begin execution until the barrier
+completes.
+The barrier completes when:
 
 * All commands previously submitted to this queue have completed; and
-* All events (wrapped in wait_event or wait_events) in [code]#reqs# have
-  completed.
+* All events (wrapped in [code]#wait_event# or [code]#wait_events#) in
+[code]#reqs# have completed.
+
+if [code]#reqs# contains a [code]#signal_event# requirement, the event is signaled
+when the barrier completes.
 
 {note}If a barrier is submitted to an in-order queue with no requirements, then
-this operation may be a no-op.
-If an event wrapped in signal_event was provided in [code]#reqs#, it will be
-signaled.{endnote}
+this operation may be a no-op.{endnote}
 
 '''
 
@@ -1069,7 +1075,7 @@ signaled.{endnote}
 namespace sycl::khr {
 
 template <typename... Requirements>
-void enqueue_signal_event(const queue& q, const event& e, const requirements<Requirements...>& reqs = {});
+void enqueue_signal_event(const queue& q, event& e, const requirements<Requirements...>& reqs = {});
 
 }
 ----
@@ -1079,17 +1085,20 @@ _Constraints_:
 * [code]#Requirements# contains the [code]#wait_events# object; or
 * [code]#Requirements# is empty.
 
-_Effects_: Enqueues a command barrier, signals the provided event.
-Any commands submitted after this barrier cannot begin execution until:
+_Effects_: Enqueues a command barrier. The event [code]#e# is immediately disassociated
+with any previous command, and its status is set to "submitted".
+Any commands submitted after this barrier cannot begin execution until the barrier
+completes.
+The barrier completes when:
 
 * All commands previously submitted to this queue have completed; and
-* All events (wrapped in wait_event or wait_events) in [code]#reqs# have
-  completed.
+* All events (wrapped in [code]#wait_event# or [code]#wait_events#) in
+  [code]#reqs# have completed.
 
-Once the above conditions are met, signals the provided event ([code]#e#).
+Once the above conditions are met, the provided event [code]#e# is signaled.
 
-{note}The event is disassociated from any previous command it was
-tracking.{endnote}
+_Throws_: A synchronous [code]#exception# with the [code]#errc::invalid# error
+code if [code]#e# and [code]#q# don't have the same context.
 
 '''
 
@@ -1112,7 +1121,7 @@ _Effects_: Enqueues an event barrier.
 Any commands submitted after this barrier cannot begin execution until the
 provided event ([code]#e#) has completed.
 
-Once the above conditions are met, signals the event (wrapped in signal_event),
+Once the above conditions are met, the event (wrapped in signal_event) is signaled,
 if provided.
 
 '''
@@ -1139,7 +1148,7 @@ _Effects_ (1-2): Enqueues an event barrier.
 Any commands submitted after this barrier cannot begin execution until the
 provided events ([code]#evts#) have completed.
 
-Once the above conditions are met, signals the event (wrapped in signal_event),
+Once the above conditions are met, the event (wrapped in [code]#signal_event#) is signaled,
 if provided.
 
 '''
@@ -1155,8 +1164,31 @@ event make_event(const context& c);
 
 }
 ----
-_Effects_: Creates an event associated with a given context.
-The event can then be used with [code]#enqueue_signal_event# function, with
-signal_event object and as a dependency for other commands.
+_Returns_: An event that is associated with context [code]#c#. The event is in the "signaled"
+state.
 
-'''
+{note}The event can be passed to the [code]#enqueue_signal_event# function or included in the
+[code]#requirements# object (wrapped in the [code]#signal_event# object), and as a dependency for
+other commands.{endnote}
+
+== Interactions between event APIs
+
+An event [code]#e# created via [code]#make_event# can be used as a command dependency using the APIs
+introduced by this extension (e.g. via the requirements object or [code]#enqueue_wait_event#)
+or using other APIs (e.g. [code]#handler::depends_on#) for a command submitted to some queue
+[code]#q#. It is not necessary for the context of [code]#e# to match the context of [code]#q#.
+
+An event [code]#e# created via [code]#make_event# can also be used for signaling (using the
+[code]#enqueue_signal_event# function or included in the [code]#requirements# object), for a command
+submitted to some queue [code]#q#. In this case, the context of [code]#e# and [code]#q# must match.
+
+
+If an event [code]#e# is used as a command dependency for some command [code]#c#, the dependency
+is captured at the point when [code]#c# is submitted. It is legal to reassociate the event E to
+a new command via enqueue_signal_event even before command [code]#c# completes. Doing so does not
+change the dependency for command [code]#c#.
+
+If another host thread is blocked waiting for event [code]#e# to complete via [code]#event::wait#
+or [code]#event::wait_and_throw# when event [code]#e# is reassociated with a new command via
+[code]#enqueue_signal_event#, the behavior of the [code]#event::wait# or [code]#event::wait_and_throw#
+call is undefined.
