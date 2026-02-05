@@ -1086,6 +1086,31 @@ values:
     the memory allocation containing the referenced object, as defined by the
     capabilities of <<buffer,buffers>> and <<usm>>.
 
+{note}An atomic operation with work-item scope is effectively the same as a
+non-atomic operation.
+[code]#sycl::memory_scope::work_item# is primarily intended to simplify generic
+programming and to provide a meaningful way to describe the behavior of
+<<group,groups>> containing a single work-item.
+{endnote}
+
+Potentially concurrent conflicting actions with different memory scopes may lead
+to a data race, resulting in undefined behavior.
+An atomic operation _A_ with scope _S~1~_ operating on the same memory location
+as atomic operation _B_ with scope _S~2~_ is a data race if:
+
+* The work-items which executed _A_ and _B_ are not both in the same group of
+ work-items associated with scope _S~1~_; or
+* The work-items which executed _A_ and _B_ are not both in the same group of
+ work-items associated with scope _S~2~_.
+
+An atomic operation _A_ with scope _S~1~_ can only synchronize with another
+atomic operation _B_ with scope _S~2~_ if:
+
+* The work-items which executed _A_ and _B_ are both in the same group of
+  work-items associated with scope _S~1~_; and
+* The work-items which executed _A_ and _B_ are both in the same group of
+  work-items associated with scope _S~2~_.
+
 The memory scopes are listed above from narrowest
 ([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
 
@@ -1106,10 +1131,9 @@ supplied.
 ====
 The addition of memory scopes to the {cpp} memory model modifies the definition
 of some concepts from the {cpp} core language.
-For example: data races, the synchronizes-with relationship and sequential
-consistency must be defined in a way that accounts for atomic operations with
-differing (but compatible) scopes, in a manner similar to the <<opencl20, OpenCL
-2.0 specification>>.
+For example: sequential consistency must be defined in a way that accounts for
+atomic operations with differing (but compatible) scopes, in a manner similar to
+the <<opencl20, OpenCL 2.0 specification>>.
 Efforts to formalize the memory model of SYCL are ongoing, and a formal memory
 model will be included in a future version of the SYCL specification.
 ====
