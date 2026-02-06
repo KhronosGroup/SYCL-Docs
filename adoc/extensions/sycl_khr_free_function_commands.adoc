@@ -1174,9 +1174,9 @@ object), and as a dependency for other commands.{endnote}
 
 == Interactions between event APIs
 
-An event _E_ created via [code]#make_event# can be used as a command
-dependency using the APIs introduced by this extension (e.g. via the
-requirements object or [code]#enqueue_wait_event#) or using other APIs (e.g.
+An event _E_ created via [code]#make_event# can be used as a command dependency
+using the APIs introduced by this extension (e.g. via the requirements object or
+[code]#enqueue_wait_event#) or using other APIs (e.g.
 [code]#handler::depends_on#) for a command submitted to some queue _Q_.
 It is not necessary for the context of _E_ to match the context of _Q_.
 
@@ -1186,10 +1186,10 @@ An event _E_ created via [code]#make_event# can also be used for signaling
 In this case, the context of _E_ and _Q_ must match.
 
 
-If an event _E_ is used as a command dependency for some command _C_,
-the dependency is captured at the point when _C_ is submitted.
-It is legal to reassociate the event _E_ to a new command via enqueue_signal_event
-even before command _C_ completes.
+If an event _E_ is used as a command dependency for some command _C_, the
+dependency is captured at the point when _C_ is submitted.
+It is legal to reassociate the event _E_ to a new command via
+enqueue_signal_event even before command _C_ completes.
 Doing so does not change the dependency for command _C_.
 
 If another host thread is blocked waiting for event _E_ to complete via
