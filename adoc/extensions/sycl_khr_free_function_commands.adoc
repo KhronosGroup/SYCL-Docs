@@ -1075,14 +1075,14 @@ this operation may be a no-op.{endnote}
 namespace sycl::khr {
 
 template <typename... Requirements>
-void enqueue_signal_event(const queue& q, event& e, const requirements<Requirements...>& reqs = {});
+void enqueue_signal_event(const queue& q, const event& e, const requirements<Requirements...>& reqs = {});
 
 }
 ----
 _Constraints_:
 
-* [code]#Requirements# contains the [code]#wait_event# object; or
-* [code]#Requirements# contains the [code]#wait_events# object; or
+* [code]#Requirements# contains only the [code]#wait_event# object; or
+* [code]#Requirements# contains only the [code]#wait_events# object; or
 * [code]#Requirements# is empty.
 
 _Effects_: Enqueues a command barrier.
@@ -1115,7 +1115,7 @@ void enqueue_wait_event(const queue& q, const event& e, const requirements<Requi
 ----
 _Constraints_:
 
-* [code]#Requirements# contains the [code]#signal_event# object; or
+* [code]#Requirements# contains only the [code]#signal_event# object; or
 * [code]#Requirements# is empty.
 
 _Effects_: Enqueues an event barrier.
@@ -1142,7 +1142,7 @@ void enqueue_wait_events(const queue& q, const std::span<event>& evts, const req
 ----
 _Constraints_ (1-2):
 
-* [code]#Requirements# contains the [code]#signal_event# object; or
+* [code]#Requirements# contains only the [code]#signal_event# object; or
 * [code]#Requirements# is empty.
 
 _Effects_ (1-2): Enqueues an event barrier.
@@ -1174,26 +1174,25 @@ object), and as a dependency for other commands.{endnote}
 
 == Interactions between event APIs
 
-An event [code]#e# created via [code]#make_event# can be used as a command
+An event _E_ created via [code]#make_event# can be used as a command
 dependency using the APIs introduced by this extension (e.g. via the
 requirements object or [code]#enqueue_wait_event#) or using other APIs (e.g.
-[code]#handler::depends_on#) for a command submitted to some queue [code]#q#.
-It is not necessary for the context of [code]#e# to match the context of
-[code]#q#.
+[code]#handler::depends_on#) for a command submitted to some queue _Q_.
+It is not necessary for the context of _E_ to match the context of _Q_.
 
-An event [code]#e# created via [code]#make_event# can also be used for signaling
+An event _E_ created via [code]#make_event# can also be used for signaling
 (using the [code]#enqueue_signal_event# function or included in the
-[code]#requirements# object), for a command submitted to some queue [code]#q#.
-In this case, the context of [code]#e# and [code]#q# must match.
+[code]#requirements# object), for a command submitted to some queue _Q_.
+In this case, the context of _E_ and _Q_ must match.
 
 
-If an event [code]#e# is used as a command dependency for some command
-[code]#c#, the dependency is captured at the point when [code]#c# is submitted.
-It is legal to reassociate the event E to a new command via enqueue_signal_event
-even before command [code]#c# completes.
-Doing so does not change the dependency for command [code]#c#.
+If an event _E_ is used as a command dependency for some command _C_,
+the dependency is captured at the point when _C_ is submitted.
+It is legal to reassociate the event _E_ to a new command via enqueue_signal_event
+even before command _C_ completes.
+Doing so does not change the dependency for command _C_.
 
-If another host thread is blocked waiting for event [code]#e# to complete via
-[code]#event::wait# or [code]#event::wait_and_throw# when event [code]#e# is
+If another host thread is blocked waiting for event _E_ to complete via
+[code]#event::wait# or [code]#event::wait_and_throw# when event _E_ is
 reassociated with a new command via [code]#enqueue_signal_event#, the behavior
 of the [code]#event::wait# or [code]#event::wait_and_throw# call is undefined.
