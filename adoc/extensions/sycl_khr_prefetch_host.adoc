@@ -37,11 +37,14 @@ This extension adds the following function to the [code]#sycl::handler# class.
 void khr_prefetch_host(void* ptr, size_t numBytes)
 ----
 
-_Effects:_ Prefetches a number of elements specified by [code]#numElements# into
-the host memory cache.
+_Effects:_ Enqueues a prefetch host of [code]#num_bytes# of data starting at address
+[code]#ptr#. The [code]#ptr# must point within a USM allocation from the same
+context as the handler's queue, and the pointer must be accessible from the
+queue's device. For more detail on USM, please see <<sec:usm>>.
 
-{note} This operation is an implementation-defined optimization and does not
-effect the functional behavior of the SYCL kernel function.
+{note} [code]#prefetch_host# inform the SYCL runtime that the specified shared allocation is
+likely to be accessed on the host in the future, and that it is free
+to migrate the allocation to the host.
 {endnote}
 
 '''
