@@ -1,0 +1,122 @@
+[[sec:khr-prefetch-host]]
+= sycl_khr_prefetch_host
+
+This extension allows developers to prefetch data from the device to the host.
+
+[[sec:khr-prefetch-host-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-prefetch-host-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_PREFETCH_HOST# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-prefetch-host-queue]]
+== Extensions to the queue class
+
+This extension adds the following function to the [code]#sycl::handler# class.
+
+'''
+
+[source,role=synopsis,id=api:khr-prefetch-host-queue]
+----
+namespace sycl {
+class handler {
+  void khr_prefetch_host();
+  // ...
+};
+}
+----
+
+This extension adds the following function to the [code]#sycl::queue# class.
+
+'''
+
+[source,role=synopsis,id=api:khr-prefetch-host-queue]
+----
+namespace sycl {
+class queue {
+   event khr_prefetch_host(void* ptr, size_t numBytes);
+   event khr_prefetch_host(void* ptr, size_t numBytes, event depEvent);
+   event khr_prefetch_host(void* ptr, size_t numBytes, const std::vector<event>& depEvents);
+   // ...
+};
+}
+----
+
+[[sec:khr-prefetch-host-handle-menber-funcs]]
+=== Member functions
+
+.[apidef]#handle::khr_prefetch_host#
+[source,role=synopsis,id=api:handle-khr-prefetch-host]
+----
+void khr_prefetch_host(void* ptr, size_t numBytes)
+----
+
+_Effects:_ Prefetches a number of elements specified by #[code]numElements# into
+the host memory cache
+
+{note} This operation is an implementation-defined optimization and does not
+effect the functional behavior of the SYCL kernel function.
+{endnote}
+
+'''
+
+[[sec:khr-prefetch-host-queue-menber-funcs]]
+=== Member functions
+
+.[apidef]#queue::khr_prefetch_host#
+[source,role=synopsis,id=api:queue-khr-prefetch-host]
+----
+event khr_prefetch_host(void* ptr, size_t numBytes)                                      (1)
+
+event khr_prefetch_host(void* ptr, size_t numBytes, event depEvent)                      (2)
+
+event khr_prefetch_host(void* ptr, size_t numBytes, const std::vector<event>& depEvents) (3)
+
+----
+
+_Effects (1)_: Equivalent to calling #[code]queue::submit# with a command group
+function that calls #[code]handler::khr_prefetch_host(ptr, numBytes)#.
+
+_Effects (2)_: Equivalent to calling #[code]queue::submit# with a command group
+function that calls #[code]handler::depends_on(depEvent)# and
+#[code]handler::khr_prefetch_host(ptr, numBytes)#.
+
+_Effects (3)_: Equivalent to calling #[code]queue::submit# with a command group
+function that calls #[code]handler::depends_on(depEvents)# and
+#[code]handler::khr_prefetch_host(ptr, numBytes)#.
+
+_Returns_: An event which represents the command which is submitted to the
+queue.
+
+'''
+
+[[sec:khr-prefetch-host-example]]
+== Example
+
+The example below demonstrates the usage of this extension.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+int main() {
+  sycl::queue Q;
+  int *A = Q.malloc_shared<int>(1,Q);
+  Q.prefetch_host(sizeof(int)).wait();
+  A[0] = 10; // Maybe faster than without the prefetch_host
+}
+----
