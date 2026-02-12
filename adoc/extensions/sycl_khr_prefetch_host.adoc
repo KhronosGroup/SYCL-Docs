@@ -93,7 +93,7 @@ The example below demonstrates the usage of this extension.
 int main() {
   sycl::queue Q;
   int *A = Q.malloc_shared<int>(1,Q);
-  Q.prefetch_host(sizeof(int)).wait();
+  Q.prefetch_host(A, sizeof(int)).wait();
   A[0] = 10; // Maybe faster than without the prefetch_host
 }
 ----
