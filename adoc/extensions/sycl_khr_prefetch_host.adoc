@@ -23,40 +23,12 @@ An implementation supporting this extension must predefine the macro
 |Initial version of this extension.
 |===
 
-[[sec:khr-prefetch-host-queue]]
-== Extensions to the queue class
+[[sec:khr-prefetch-host-handle]]
+== Extensions to the handle class
 
 This extension adds the following function to the [code]#sycl::handler# class.
 
-'''
-
-[source,role=synopsis,id=api:khr-prefetch-host-queue]
-----
-namespace sycl {
-class handler {
-  void khr_prefetch_host();
-  // ...
-};
-}
-----
-
-This extension adds the following function to the [code]#sycl::queue# class.
-
-'''
-
-[source,role=synopsis,id=api:khr-prefetch-host-queue]
-----
-namespace sycl {
-class queue {
-   event khr_prefetch_host(void* ptr, size_t numBytes);
-   event khr_prefetch_host(void* ptr, size_t numBytes, event depEvent);
-   event khr_prefetch_host(void* ptr, size_t numBytes, const std::vector<event>& depEvents);
-   // ...
-};
-}
-----
-
-[[sec:khr-prefetch-host-handle-menber-funcs]]
+[[sec:khr-prefetch-host-handle-member-funcs]]
 === Member functions
 
 .[apidef]#handle::khr_prefetch_host#
@@ -74,7 +46,12 @@ effect the functional behavior of the SYCL kernel function.
 
 '''
 
-[[sec:khr-prefetch-host-queue-menber-funcs]]
+[[sec:khr-prefetch-host-queue]]
+== Extensions to the queue class
+
+This extension adds the following function to the [code]#sycl::queue# class.
+
+[[sec:khr-prefetch-host-queue-member-funcs]]
 === Member functions
 
 .[apidef]#queue::khr_prefetch_host#
