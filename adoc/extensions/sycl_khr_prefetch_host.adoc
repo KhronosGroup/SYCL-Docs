@@ -23,22 +23,22 @@ An implementation supporting this extension must predefine the macro
 |Initial version of this extension.
 |===
 
-[[sec:khr-prefetch-host-handle]]
-== Extensions to the handle class
+[[sec:khr-prefetch-host-handler]]
+== Extensions to the handler class
 
 This extension adds the following function to the [code]#sycl::handler# class.
 
-[[sec:khr-prefetch-host-handle-member-funcs]]
+[[sec:khr-prefetch-host-handler-member-funcs]]
 === Member functions
 
-.[apidef]#handle::khr_prefetch_host#
-[source,role=synopsis,id=api:handle-khr-prefetch-host]
+.[apidef]#handler::khr_prefetch_host#
+[source,role=synopsis,id=api:handler-khr-prefetch-host]
 ----
 void khr_prefetch_host(void* ptr, size_t numBytes)
 ----
 
-_Effects:_ Prefetches a number of elements specified by #[code]numElements# into
-the host memory cache
+_Effects:_ Prefetches a number of elements specified by [code]#numElements# into
+the host memory cache.
 
 {note} This operation is an implementation-defined optimization and does not
 effect the functional behavior of the SYCL kernel function.
@@ -65,16 +65,16 @@ event khr_prefetch_host(void* ptr, size_t numBytes, const std::vector<event>& de
 
 ----
 
-_Effects (1)_: Equivalent to calling #[code]queue::submit# with a command group
-function that calls #[code]handler::khr_prefetch_host(ptr, numBytes)#.
+_Effects (1)_: Equivalent to calling [code]#queue::submit# with a command group
+function that calls [code]#handler::khr_prefetch_host(ptr, numBytes)#.
 
-_Effects (2)_: Equivalent to calling #[code]queue::submit# with a command group
-function that calls #[code]handler::depends_on(depEvent)# and
-#[code]handler::khr_prefetch_host(ptr, numBytes)#.
+_Effects (2)_: Equivalent to calling [code]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvent)# and
+[code]#handler::khr_prefetch_host(ptr, numBytes)#.
 
-_Effects (3)_: Equivalent to calling #[code]queue::submit# with a command group
-function that calls #[code]handler::depends_on(depEvents)# and
-#[code]handler::khr_prefetch_host(ptr, numBytes)#.
+_Effects (3)_: Equivalent to calling [code]#queue::submit# with a command group
+function that calls [code]#handler::depends_on(depEvents)# and
+[code]#handler::khr_prefetch_host(ptr, numBytes)#.
 
 _Returns_: An event which represents the command which is submitted to the
 queue.
