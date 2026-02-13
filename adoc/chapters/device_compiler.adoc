@@ -888,10 +888,11 @@ device code.
 The macro has no effect when the function is called from host code.
 
 In order to declare a function with [code]#SYCL_EXTERNAL#, the macro name
-[code]#SYCL_EXTERNAL# must appear before the function declaration.
-If the function is also decorated with {cpp} attributes that appear before the
-declaration, the [code]#SYCL_EXTERNAL# may appear before, after, or between
-these attributes.
+[code]#SYCL_EXTERNAL# must appear after the template head (i.e.,
+[code]#+template <...>+#) if present, and before the function's return type or
+declaration specifiers (such as [code]#inline# or [code]#static#).
+[code]#SYCL_EXTERNAL# may appear before, after, or between C++ attributes in
+this location.
 The following example demonstrates the use of [code]#SYCL_EXTERNAL#.
 
 [source,,linenums]
