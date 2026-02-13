@@ -8068,7 +8068,7 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 ====== Member functions of the [code]#accessor# class
 
 .[apidef]#accessor::swap#
-[source,role=synopsis,id=api:accessors-command-buffer-members-swap]
+[source,role=synopsis,id=api:accessor-swap]
 ----
 void swap(accessor& other);
 ----
@@ -8078,7 +8078,7 @@ Swaps the contents of the current accessor with the contents of [code]#other#.
 '''
 
 .[apidef]#accessor::is_placeholder#
-[source,role=synopsis,id=api:accessors-command-buffer-members-is-placeholder]
+[source,role=synopsis,id=api:accessor-is-placeholder]
 ----
 bool is_placeholder() const
 ----
@@ -8089,7 +8089,7 @@ Otherwise returns [code]#false#.
 '''
 
 .[apidef]#accessor::get_offset#
-[source,role=synopsis,id=api:accessors-command-buffer-members-get-offset]
+[source,role=synopsis,id=api:accessor-get-offset]
 ----
 id<Dimensions> get_offset() const
 ----
@@ -8103,10 +8103,11 @@ For other accessors, returns the default constructed [code]#id<Dimensions>{}#.
 '''
 
 .[apidef]#accessor::get_pointer#
-[source,role=synopsis,id=api:accessors-command-buffer-members-get-pointer]
+[source,role=synopsis,id=api:accessor-get-pointer]
 ----
-global_ptr<value_type> get_pointer() const noexcept // (1)
-std::add_pointer_t<value_type> get_pointer() const noexcept // (2)
+global_ptr<value_type> get_pointer() const noexcept          (1)
+
+std::add_pointer_t<value_type> get_pointer() const noexcept  (2)
 ----
 
 (1) Available only when [code]#(AccessTarget == target::device)#.
@@ -8133,7 +8134,7 @@ _Preconditions_: Must be called within a <<command>>.
 '''
 
 .[apidef]#accessor::get_multi_ptr#
-[source,role=synopsis,id=api:accessors-command-buffer-members-get-multi-ptr]
+[source,role=synopsis,id=api:accessor-get-multi-ptr]
 ----
 template <access::decorated IsDecorated>
 accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
@@ -8151,10 +8152,11 @@ _Preconditions_: Must be called within a <<command>>.
 '''
 
 .[apidef]#accessor::operator=#
-[source,role=synopsis,id=api:accessors-command-buffer-members-operator-assign]
+[source,role=synopsis,id=api:accessor-operator-assign]
 ----
-const accessor& operator=(const value_type& other) const // (1)
-const accessor& operator=(value_type&& other) const // (2)
+const accessor& operator=(const value_type& other) const  (1)
+
+const accessor& operator=(value_type&& other) const       (2)
 ----
 
 (1) Available only when [code]#(AccessMode != access_mode::atomic && AccessMode
@@ -8172,7 +8174,6 @@ Assignment to the single element that is accessed by this accessor.
 _Preconditions_: Must be called within a <<command>>.
 
 '''
-
 
 
 [[sec:accessor.command.buffer.tags]]
