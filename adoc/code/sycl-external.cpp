@@ -3,9 +3,9 @@
 
 #include <sycl/sycl.hpp>
 
-SYCL_EXTERNAL void A1();  // OK
-void A1() { /* ... */ }   // OK; redeclaration
-void A2();                // OK
+SYCL_EXTERNAL void A1();               // OK
+void A1() { /* ... */ }                // OK; redeclaration
+void A2();                             // OK
 SYCL_EXTERNAL void A2() { /* ... */ }  // ERROR: SYCL_EXTERNAL not on first declaration.
 SYCL_EXTERNAL void A3() { /* ... */ }  // OK
 
