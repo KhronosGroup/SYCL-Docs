@@ -188,9 +188,6 @@ $(OUTDIR)/$(KATEXDIR)/README.md: katex/README.md
 	$(QUIET)$(RMRF)  $(OUTDIR)/$(KATEXDIR)
 	$(QUIET)$(CP) --archive katex $(OUTDIR)
 
-# Script to add href to anchors
-GENANCHORLINKS = $(SCRIPTS)/genanchorlinks.py
-
 # Spec targets
 # There is some complexity to try and avoid short virtual targets like 'html'
 # causing specs to *always* be regenerated.
@@ -221,7 +218,6 @@ html: $(HTMLDIR)/$(SPEC_BASE_NAME).html $(SPECSRC) $(COMMONDOCS)
 %.html: $(SPECSRC) $(COMMONDOCS) katexinst
 	$(QUIET)$(ASCIIDOC) --backend html5 $(ADOCOPTS) $(ADOCHTMLOPTS) \
 	  --out-file $@ $(SPECSRC)
-	$(QUIET)$(PYTHON) $(GENANCHORLINKS) $@ $@
 	$(QUIET)$(NODEJS) translate_math.js $@
 
 diff_html: $(HTMLDIR)/diff.html $(SPECSRC) $(COMMONDOCS)
