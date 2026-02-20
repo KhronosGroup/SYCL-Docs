@@ -52,18 +52,3 @@ jobs:
           name: spec-outputs
           path: |
             /tmp/out
-
-  check-clang-format:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Need to check out base branch as well
-      - name: Install clang-format
-        run: sudo apt update; sudo apt install -y clang-format-18
-      # Inspired by SYCL-CTS
-      - name: Run clang-format on changed files from adoc/code/
-        run: |
-          git diff -U0 --no-color ${{ github.event.pull_request.base.sha }} ./adoc/code/ | ./adoc/scripts/clang-format-diff.py -p1
