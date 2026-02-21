@@ -1,13 +1,11 @@
-headers / hostTask / classInteropHandle /
-    getnativeX.h
-    // Copyright (c) 2011-2026 The Khronos Group, Inc.
-    // SPDX-License-Identifier: MIT
+// Copyright (c) 2011-2026 The Khronos Group, Inc.
+// SPDX-License-Identifier: MIT
 
-    template <backend Backend, typename DataT, int Dims, access_mode AccMode,
-              target AccTarget, access::placeholder IsPlaceholder>
-    backend_return_t<Backend, buffer<DataT, Dims>>
-    get_native_mem(const accessor<DataT, Dims, AccMode, AccTarget, // (1)
-                                  IsPlaceholder>& bufferAcc) const;
+template <backend Backend, typename DataT, int Dims, access_mode AccMode,
+          target AccTarget, access::placeholder IsPlaceholder>
+backend_return_t<Backend, buffer<DataT, Dims>>
+get_native_mem(const accessor<DataT, Dims, AccMode, AccTarget, // (1)
+                              IsPlaceholder>& bufferAcc) const;
 
 template <backend Backend, typename DataT, int Dims, access_mode AccMode>
 backend_return_t<Backend, unsampled_image<Dims>> get_native_mem( // (2)
