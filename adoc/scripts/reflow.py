@@ -48,6 +48,14 @@ conventions = APIConventions()
 pnamePat = re.compile(r'pname:(?P<param>\{?\w+\}?)')
 codePat = re.compile(r'code:(?P<param>\w+)')
 
+# Word that ends a sentence.
+# (A word that ends with a period, question mark, or exclamation point;
+# possible inside a trailing parenthesis like "foo.)"
+# However, a punctuation mark with no preceding character does not end a
+# sentence.  This happens, for example, when a C++ expression appears in a
+# sentence like "cond ? a : b".
+endSentencePunct = re.compile(r'.([.?!]|[.?!]\))$')
+
 # Text that (may) not end sentences
 
 # A single letter followed by a period, typically a middle initial.
@@ -128,17 +136,18 @@ class ReflowCallbacks:
         """Count of markup check warnings encountered."""
 
     def endSentence(self, word, nextWord):
-        """Return True if word ends with a sentence-period, False otherwise.
+        """Return True if word ends with a sentence-ending punctuation
+        character, False otherwise.
 
         Allows for contraction cases which will not end a line:
 
          - A single letter (if breakInitial is True)
          - Abbreviations: 'c.f.', 'e.g.', 'i.e.' (or mixed-case versions)
          - The word "etc." when it is followed by a lower case word"""
-        if ((word[-1:] != '.' and word[-2:] != '.)') or
-            endAbbrev.search(word) or
-            word == "etc." and startsLowerCase.match(nextWord) or
-                (self.breakInitial and endInitial.match(word))):
+        if (not endSentencePunct.search(word) or
+              endAbbrev.search(word) or
+              (word == "etc." and startsLowerCase.match(nextWord)) or
+              (self.breakInitial and endInitial.match(word))):
             return False
 
         return True
