@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024-2025 The Khronos Group, Inc.
+# Copyright (c) 2024-2026 The Khronos Group, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # squash-commits.sh [--create] <branch>

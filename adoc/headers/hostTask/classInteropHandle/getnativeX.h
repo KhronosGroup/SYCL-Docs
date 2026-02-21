@@ -1,6 +1,6 @@
 headers / hostTask / classInteropHandle /
     getnativeX.h
-    // Copyright (c) 2011-2025 The Khronos Group, Inc.
+    // Copyright (c) 2011-2026 The Khronos Group, Inc.
     // SPDX-License-Identifier: MIT
 
     template <backend Backend, typename DataT, int Dims, access_mode AccMode,
