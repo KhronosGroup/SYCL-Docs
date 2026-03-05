@@ -70,7 +70,7 @@ namespace sycl::khr {
 
 // Property defined by the implementation.
 struct prop1 {
-  prop1(int v) : value(v) {}
+  constexpr prop1(int v) : value(v) {}
   int value;
 };
 
@@ -119,7 +119,7 @@ namespace sycl::khr {
 // Property defined by the implementation.
 template<int Value1>
 struct prop3 {
-  prop1(int v2) : value2(v2) {}
+  constexpr prop1(int v2) : value2(v2) {}
   static constexpr int value1 = Value1;
   int value2;
 };
@@ -228,7 +228,7 @@ template <typename... EncodedProperties>
 class properties {
  public:
   template<typename... Properties>
-  properties(Properties... props);
+  constexpr properties(Properties... props);
 
   template <typename PropertyKey>
   static constexpr bool has_property();
@@ -264,7 +264,7 @@ Applications should not assume that [code]#EncodedProperties# is the same as
 [source,role=synopsis,id=api:khr-properties-ctor]
 ----
 template<typename... Properties>
-properties(Properties... props);
+constexpr properties(Properties... props);
 ----
 
 _Constraints:_ [api]#khr::is_property_v# is [code]#true# for each
@@ -787,7 +787,7 @@ This extension adds the following new style properties that can be used with the
 namespace sycl::khr {
 
 struct enable_profiling {
-  enable_profiling(bool v = true) : value{v} {}
+  constexpr enable_profiling(bool v = true) : value{v} {}
   bool value;
 };
 
@@ -817,7 +817,7 @@ The [code]#enable_profiling# property is trivially copyable.
 namespace sycl::khr {
 
 struct in_order {
-  in_order(bool v = true) : value{v} {}
+  constexpr in_order(bool v = true) : value{v} {}
   bool value;
 };
 
@@ -917,7 +917,7 @@ with compile-time constant values.
 namespace sycl::khr {
 
 struct prop1 {
-  prop1(int v) : value(v) {}
+  constexpr prop1(int v) : value(v) {}
   int value;
 };
 
@@ -1003,7 +1003,7 @@ For example, two hypothetical boolean properties could be defined like this:
 namespace sycl::khr {
 
 struct enable_thing1 {
-  enable_thing1(bool enable) : value(enable) {}
+  constexpr enable_thing1(bool enable) : value(enable) {}
   bool value;
 };
 
