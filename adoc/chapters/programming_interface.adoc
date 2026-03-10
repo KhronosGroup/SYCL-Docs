@@ -7762,7 +7762,7 @@ The member types are listed in <<table.accessors.common.types>> and
 <<table.accessors.command.buffer.types>>.
 The constructors are listed in <<table.accessors.command.buffer.constructors>>,
 and the member functions are listed in <<table.accessors.common.members>> and
-<<table.accessors.command.buffer.members>>.
+<<sec:accessors-command-buffer-members>>.
 
 The additional common special member functions and common member functions are
 listed in <<sec:reference-semantics>> in
@@ -8064,109 +8064,116 @@ the sum of [code]#accessRange# and [code]#accessOffset# exceeds the range of
 |====
 
 
-[[table.accessors.command.buffer.members]]
-.Member functions of the [code]#accessor# class
-[width="100%",options="header",separator="@",cols="65%,35%"]
-|====
-@ Member function @ Description
-a@
-[source]
+[[sec:accessors-command-buffer-members]]
+====== Member functions
+
+.[apidef]#accessor::swap#
+[source,role=synopsis,id=api:accessor-swap]
 ----
 void swap(accessor& other);
 ----
-   a@ Swaps the contents of the current accessor with the contents of
-      [code]#other#.
 
-a@
-[source]
+Swaps the contents of the current accessor with the contents of [code]#other#.
+
+'''
+
+.[apidef]#accessor::is_placeholder#
+[source,role=synopsis,id=api:accessor-is-placeholder]
 ----
 bool is_placeholder() const
 ----
-   a@ Returns [code]#true# if the accessor is a placeholder.  Otherwise returns
-      [code]#false#.
 
-a@
-[source]
+Returns [code]#true# if the accessor is a placeholder.
+Otherwise returns [code]#false#.
+
+'''
+
+.[apidef]#accessor::get_offset#
+[source,role=synopsis,id=api:accessor-get-offset]
 ----
 id<Dimensions> get_offset() const
 ----
-   a@ Available only when [code]#(Dimensions > 0)#.
+
+Available only when [code]#(Dimensions > 0)#.
 
 If this is a <<ranged-accessor>>, returns the offset that was specified when the
-accessor was constructed.  For other accessors, returns the default constructed
-[code]#id<Dimensions>{}#.
+accessor was constructed.
+For other accessors, returns the default constructed [code]#id<Dimensions>{}#.
 
-a@
-[source]
+'''
+
+.[apidef]#accessor::get_pointer#
+[source,role=synopsis,id=api:accessor-get-pointer]
 ----
-global_ptr<value_type> get_pointer() const noexcept
+global_ptr<value_type> get_pointer() const noexcept         (1)
+
+std::add_pointer_t<value_type> get_pointer() const noexcept (2)
 ----
-   a@ Available only when [code]#(AccessTarget == target::device)#.
+
+(1) Available only when [code]#(AccessTarget == target::device)#.
 
 Returns a [code]#multi_ptr# to the start of this accessor's underlying buffer,
 even if this is a <<ranged-accessor>> whose range does not start at the
-beginning of the buffer.  The return value is unspecified if the accessor is
-empty.
+beginning of the buffer.
+The return value is unspecified if the accessor is empty.
 
 _Preconditions_: Must be called within a <<command>>.
 
-Deprecated in SYCL 2020.  Use [code]#get_multi_ptr# instead.
+Deprecated in SYCL 2020.
+Use [code]#get_multi_ptr# instead.
 
-a@
-[source]
-----
-std::add_pointer_t<value_type> get_pointer() const noexcept
-----
-   a@ Available only when [code]#(AccessTarget == target::host_task)#.
+(2) Available only when [code]#(AccessTarget == target::host_task)#.
 
 Returns a pointer to the start of this accessor's underlying buffer, even if
-this is a <<ranged-accessor>> whose range does not start at the beginning of
-the buffer.  The return value is unspecified if the accessor is empty.
+this is a <<ranged-accessor>> whose range does not start at the beginning of the
+buffer.
+The return value is unspecified if the accessor is empty.
 
 _Preconditions_: Must be called within a <<command>>.
 
-a@
-[source]
+'''
+
+.[apidef]#accessor::get_multi_ptr#
+[source,role=synopsis,id=api:accessor-get-multi-ptr]
 ----
 template <access::decorated IsDecorated>
 accessor_ptr<IsDecorated> get_multi_ptr() const noexcept
 ----
-   a@ Available only when [code]#(AccessTarget == target::device)#.
+
+Available only when [code]#(AccessTarget == target::device)#.
 
 Returns a [code]#multi_ptr# to the start of this accessor's underlying buffer,
 even if this is a <<ranged-accessor>> whose range does not start at the
-beginning of the buffer.  The return value is unspecified if the accessor is
-empty.
+beginning of the buffer.
+The return value is unspecified if the accessor is empty.
 
 _Preconditions_: Must be called within a <<command>>.
 
-a@
-[source]
+'''
+
+.[apidef]#accessor::operator=#
+[source,role=synopsis,id=api:accessor-operator-assign]
 ----
-const accessor& operator=(const value_type& other) const
+const accessor& operator=(const value_type& other) const (1)
+
+const accessor& operator=(value_type&& other) const      (2)
 ----
-   a@ Available only when
-      [code]#(AccessMode != access_mode::atomic &&
-      AccessMode != access_mode::read && Dimensions == 0)#.
+
+(1) Available only when [code]#(AccessMode != access_mode::atomic && AccessMode
+!= access_mode::read && Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
 _Preconditions_: Must be called within a <<command>>.
 
-a@
-[source]
-----
-const accessor& operator=(value_type&& other) const
-----
-   a@ Available only when
-      [code]#(AccessMode != access_mode::atomic &&
-      AccessMode != access_mode::read && Dimensions == 0)#.
+(2) Available only when [code]#(AccessMode != access_mode::atomic && AccessMode
+!= access_mode::read && Dimensions == 0)#.
 
 Assignment to the single element that is accessed by this accessor.
 
 _Preconditions_: Must be called within a <<command>>.
 
-|====
+'''
 
 
 [[sec:accessor.command.buffer.tags]]
