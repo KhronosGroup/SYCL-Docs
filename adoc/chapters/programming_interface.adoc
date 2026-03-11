@@ -4627,11 +4627,11 @@ queue.
 .[apidef]#queue::prefetch#
 [source,role=synopsis,id=api:queue-prefetch]
 ----
-event prefetch(void* ptr, std::size_t numBytes)                                      (1)
+event prefetch(const void* ptr, std::size_t numBytes)                                      (1)
 
-event prefetch(void* ptr, std::size_t numBytes, event depEvent)                      (2)
+event prefetch(const void* ptr, std::size_t numBytes, event depEvent)                      (2)
 
-event prefetch(void* ptr, std::size_t numBytes, const std::vector<event>& depEvents) (3)
+event prefetch(const void* ptr, std::size_t numBytes, const std::vector<event>& depEvents) (3)
 ----
 
 _Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
@@ -4653,11 +4653,11 @@ queue.
 .[apidef]#queue::mem_advise#
 [source,role=synopsis,id=api:queue-mem-advise]
 ----
-event mem_advise(void* ptr, std::size_t numBytes, int advice)                 (1)
+event mem_advise(const void* ptr, std::size_t numBytes, int advice)                 (1)
 
-event mem_advise(void* ptr, std::size_t numBytes, int advice, event depEvent) (2)
+event mem_advise(const void* ptr, std::size_t numBytes, int advice, event depEvent) (2)
 
-event mem_advise(void* ptr, std::size_t numBytes, int advice,                 (3)
+event mem_advise(const void* ptr, std::size_t numBytes, int advice,                 (3)
                  const std::vector<event>& depEvents)
 ----
 
@@ -15527,7 +15527,7 @@ The type [code]#T# must be <<device-copyable>>.
 a@
 [source]
 ----
-void prefetch(void* ptr, std::size_t numBytes)
+void prefetch(const void* ptr, std::size_t numBytes)
 ----
 a@ Enqueues a prefetch of [code]#num_bytes# of data starting at address
 [code]#ptr#.  The [code]#ptr# must point within a USM allocation from the same
@@ -15537,7 +15537,7 @@ queue's device.  For more detail on USM, please see <<sec:usm>>.
 a@
 [source]
 ----
-void mem_advise(void* ptr, std::size_t numBytes, int advice)
+void mem_advise(const void* ptr, std::size_t numBytes, int advice)
 ----
 a@ Enqueues a command that provides information to the implementation about a
 region of USM starting at [code]#ptr# and extending for [code]#numBytes# bytes.
