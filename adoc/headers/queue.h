@@ -174,16 +174,16 @@ class queue {
 
   /* -- Shortcut functions: prefetch -- */
 
-  event prefetch(void* ptr, std::size_t numBytes);
-  event prefetch(void* ptr, std::size_t numBytes, event depEvent);
-  event prefetch(void* ptr, std::size_t numBytes,
+  event prefetch(const void* ptr, std::size_t numBytes);
+  event prefetch(const void* ptr, std::size_t numBytes, event depEvent);
+  event prefetch(const void* ptr, std::size_t numBytes,
                  const std::vector<event>& depEvents);
 
   /* -- Shortcut functions: mem_advise -- */
 
-  event mem_advise(void* ptr, std::size_t numBytes, int advice);
-  event mem_advise(void* ptr, std::size_t numBytes, int advice, event depEvent);
-  event mem_advise(void* ptr, std::size_t numBytes, int advice,
+  event mem_advise(const void* ptr, std::size_t numBytes, int advice);
+  event mem_advise(const void* ptr, std::size_t numBytes, int advice, event depEvent);
+  event mem_advise(const void* ptr, std::size_t numBytes, int advice,
                    const std::vector<event>& depEvents);
 
   /* -- Shortcut functions: update_host -- */
