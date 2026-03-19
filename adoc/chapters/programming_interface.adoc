@@ -20654,6 +20654,11 @@ operations in device code with a syntax similar to the {cpp} standard
 [code]#std::atomic_ref#.
 The [code]#sycl::atomic_ref# class must not be used in host code.
 
+The referenced object of type [code]#T# must not reside in the private address
+space.
+If [code]#atomic_ref# is constructed with a reference to an object in the
+private address space, the behavior is undefined.
+
 Unlike [code]#std::atomic_ref#, [code]#sycl::atomic_ref# does not provide a
 default memory ordering for its operations.
 Instead, the application must specify a default ordering via the
