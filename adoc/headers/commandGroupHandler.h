@@ -82,9 +82,9 @@ class handler {
 
   template <typename T> void fill(void* ptr, const T& pattern, std::size_t count);
 
-  void prefetch(void* ptr, std::size_t numBytes);
+  void prefetch(const void* ptr, std::size_t numBytes);
 
-  void mem_advise(void* ptr, std::size_t numBytes, int advice);
+  void mem_advise(const void* ptr, std::size_t numBytes, int advice);
 
   //------ Explicit memory operation APIs
   //
