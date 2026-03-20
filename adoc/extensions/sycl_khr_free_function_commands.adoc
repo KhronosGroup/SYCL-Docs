@@ -1,0 +1,1198 @@
+= sycl_khr_free_function_commands
+
+This extension provides an alternative mechanism for submitting commands to a
+device via free-functions that require developers to opt-in to the handling of
+requirements and the creation of [code]#event# objects.
+It also adds an ability to reuse the same [code]#event# object to track
+completion of multiple command submissions.
+
+The creation of [code]#event# objects may incur overheads that increase the
+latency of submitting commands to devices, even if the [code]#event# object is
+immediately discarded and never used.
+Similarly, using a [code]#handler# can incur overheads even when there are no
+dependent events or accessors registered.
+Requiring developers to opt-in to these features is therefore expected to
+improve the performance of many SYCL programs, by ensuring that SYCL developers
+only pay the associated costs when necessary.
+
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_FREE_FUNCTION_COMMANDS# to one of the values defined in the
+table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+== Usage example
+
+The example below rewrites the application from
+<<subsec:example.sycl.application>> to demonstrate the usage of this extension.
+
+[source,role=synopsis]
+----
+#include <iostream>
+#include <sycl/sycl.hpp>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names.
+
+// Size of the matrices.
+constexpr size_t N = 2000;
+constexpr size_t M = 3000;
+
+int main() {
+  // Create a queue to work on.
+  queue myQueue;
+
+  // Create some 2D arrays of float for our matrices.
+  float* a = malloc_shared<float>(N * M, myQueue);
+  float* b = malloc_shared<float>(N * M, myQueue);
+  float* c = malloc_shared<float>(N * M, myQueue);
+
+  // Launch an asynchronous kernel to initialize a.
+  khr::launch(myQueue, range<2> { N, M }, [=](id<2> index) {
+    size_t i = index[0];
+    size_t j = index[1];
+    a[i * M + j] = i * 2 + j;
+  });
+
+  // Launch an asynchronous kernel to initialize b.
+  khr::launch(myQueue, range<2> { N, M }, [=](id<2> index) {
+    size_t i = index[0];
+    size_t j = index[1];
+    b[i * M + j] = i * 2014 + j * 42;
+  });
+
+  // Ensure that the two previous kernels complete before enqueueing more work.
+  // This does not block the host, but enforces dependencies on the device.
+  khr::enqueue_barrier(myQueue);
+
+  // Launch an asynchronous kernel to compute matrix addition c = a + b.
+  // Require that the scheduler create an event to track completion.
+  range<2> local = { 2, 2 };
+  range<2> global = { N, M };
+  event e = khr::make_event(myQueue.get_context());
+  auto reqs = khr::requirements(khr::signal_event(e));
+  khr::launch_grouped(myQueue, global, local, reqs, [=](nd_item<2> it) {
+    size_t i = it.get_global_id(0);
+    size_t j = it.get_global_id(1);
+    size_t index = i * M + j;
+    c[index] = a[index] + b[index];
+  });
+
+  // Wait for all three kernels to complete before accessing the results.
+  // This blocks the host until all previous kernels have completed.
+  e.wait();
+
+  std::cout << std::endl << "Result:" << std::endl;
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < M; j++) {
+      size_t index = i * M + j;
+      // Compare the result to the analytic value.
+      if (c[index] != i * (2 + 2014) + j * (1 + 42)) {
+        std::cout << "Wrong value " << c[index] << " on element " << i << " "
+                  << j << std::endl;
+        exit(-1);
+      }
+    }
+  }
+
+  std::cout << "Good computation!" << std::endl;
+  return 0;
+}
+----
+
+== Requirements
+
+An instance of the [code]#requirements# class template encapsulates all of the
+requirements for scheduling a command.
+
+[source,role=synopsis]
+----
+namespace sycl::khr {
+
+template <typename T>
+struct is_requirement;
+
+template <typename T>
+static constexpr bool is_requirement_v = is_requirement<T>::value_type;
+
+template <typename... Requirements>
+class requirements {
+public:
+  // Only available if: all Requirements satisfy is_requirement_v
+  requirements(Requirements... values);
+
+  void register-accessors(handler& h) const;     // exposition only
+  void register-kernel-bundle(handler& h) const; // exposition only
+  void register-wait-events(handler& h) const;   // exposition only
+  void register-signal-event(handler& h) const;  // exposition only
+};
+
+struct signal_event {
+  signal_event(const event& e);
+  event value;
+};
+
+struct wait_event {
+  wait_event(const event &e);
+  event value;
+};
+
+struct wait_events {
+  wait_events(const std::vector<event>& evts);
+  std::vector<event> value;
+};
+
+}
+----
+
+Each instance of a type listed below defines a specific scheduling requirement.
+For each type, the [code]#is_requirement# type trait is specialized such that
+[code]#is_requirement_v<T># returns [code]#true#.
+
+* [code]#accessor#: The command must not begin executing until the
+  [code]#buffer# associated with the [code]#accessor# can be accessed in a
+  manner compatible with the specified [code]#access_mode#.
+  The [code]#accessor# must have an [code]#AccessTarget# of
+  [code]#target::device# or [code]#target::host_task#.
+
+* [code]#kernel_bundle<bundle_state::executable>#: The command must be submitted
+  using a <<device image>> from the kernel bundle.
+
+* [code]#wait_event#: The command must not begin executing until the event is
+  complete.
+
+* [code]#wait_events#: The command must not begin executing until all events in
+  the vector are complete.
+
+* [code]#signal_event#: When the command is submitted, the event is immediately
+  disassociated with any previous command, and its status is set to "submitted".
+  When the command is complete, the provided event is signaled.
+
+'''
+
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:requirements-ctor]
+----
+template <typename... Requirements>
+requirements(Requirements... values);
+----
+
+_Constraints_:
+
+* [code]#is_requirement_v# returns [code]#true# for each type in
+  [code]#Requirements#;
+* [code]#Requirements# contains at most one
+  [code]#kernel_bundle<bundle_state::executable>#;
+* [code]#Requirements# contains at most one [code]#wait_event# or
+  [code]#wait_events#; and
+* [code]#Requirements# contains at most one [code]#signal_event#;
+
+_Effects_: Constructs a [code]#requirements# object representing the set of
+requirements specified via the [code]#values# parameter pack.
+
+_Remarks_: Unless otherwise specified, if an instance of a requirement appears
+more than once in the [code]#values# parameter pack, the [code]#requirements#
+object behaves as if it had only been specified once.
+
+'''
+
+.[apititle]#requirements::register-accessors#
+[source,role=synopsis,id=api:register-accessors]
+----
+void register-accessors(handler& h) const;
+----
+
+This function is exposition only.
+It is shown only to help specify the effect of the functions below under "New
+free functions".
+
+_Effects_: Calls [code]#h.require# for each [code]#accessor# passed to the
+constructor of this [code]#requirements# object.
+
+'''
+
+.[apititle]#requirements::register-kernel-bundle#
+[source,role=synopsis,id=api:register-kernel-bundle]
+----
+void register-kernel-bundle(handler& h) const;
+----
+
+This function is exposition only.
+It is shown only to help specify the effect of the functions below under "New
+free functions".
+
+_Effects_: Calls [code]#h.use_kernel_bundle# if a [code]#kernel_bundle# in
+executable state was passed to the constructor of this [code]#requirements#
+object and has no effect otherwise.
+
+'''
+
+.[apititle]#requirements::register-wait-events#
+[source,role=synopsis,id=api:register-wait-events]
+----
+void register-wait-events(handler& h) const;
+----
+
+This function is exposition only.
+It is shown only to help specify the effect of the functions below under "New
+free functions".
+
+_Effects_: Calls [code]#h.depends_on# for each [code]#event# (wrapped in
+wait_event object) or each event in [code]#std::vector<event># (wrapped in
+wait_events object) passed to the constructor of this [code]#requirements#
+object.
+
+'''
+
+.[apititle]#requirements::register-signal-event#
+[source,role=synopsis,id=api:register-signal-event]
+----
+void register-signal-event(handler& h) const;
+----
+
+This function is exposition only.
+It is shown only to help specify the effect of the functions below under "New
+free functions".
+
+_Effects_: Registers an event (wrapped in signal_event object) to be signaled
+once the command is complete.
+
+== New free functions
+
+=== Kernel launch
+
+// Launch a basic parallel_for with a function object.
+// New form of queue::parallel_for(range, ...)
+.[apititle]#launch# (kernel function)
+[source,role=synopsis,id=api:launch]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Requirements>
+void launch(const queue& q, range<1> r, const requirements<Requirements...>& reqs, const KernelType& k); (1)
+
+template <typename KernelType, typename... Requirements>
+void launch(const queue& q, range<2> r, const requirements<Requirements...>& reqs, const KernelType& k); (2)
+
+template <typename KernelType, typename... Requirements>
+void launch(const queue& q, range<3> r, const requirements<Requirements...>& reqs, const KernelType& k); (3)
+
+template <typename KernelType>
+void launch(const queue& q, range<1> r, const KernelType& k);                                            (4)
+
+template <typename KernelType>
+void launch(const queue& q, range<2> r, const KernelType& k);                                            (5)
+
+template <typename KernelType>
+void launch(const queue& q, range<3> r, const KernelType& k);                                            (6)
+
+}
+----
+
+_Constraints_ (1-3): Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.parallel_for(r, k);
+});
+----
+
+_Effects_ (4-6): Equivalent to: [code]#launch(q, r, {}, k);#.
+
+'''
+
+// Launch a basic parallel_for with a sycl::kernel object.
+// New form of handler::parallel_for(range, ...) without set_args.
+.[apititle]#launch# (kernel object)
+[source,role=synopsis,id=api:launch-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args, typename... Requirements>
+void launch(const queue& q, range<1> r, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (1)
+
+template <typename... Args, typename... Requirements>
+void launch(const queue& q, range<2> r, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (2)
+
+template <typename... Args, typename... Requirements>
+void launch(const queue& q, range<3> r, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (3)
+
+template <typename... Args>
+void launch(const queue& q, range<1> r, const kernel& k, Args&&... args);                                            (4)
+
+template <typename... Args>
+void launch(const queue& q, range<2> r, const kernel& k, Args&&... args);                                            (5)
+
+template <typename... Args>
+void launch(const queue& q, range<3> r, const kernel& k, Args&&... args);                                            (6)
+
+}
+----
+
+_Constraints_ (1-3):
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.set_args(args...);
+  h.parallel_for(r, k);
+});
+----
+
+_Effects_ (4-6): Equivalent to: [code]#+launch(q, r, {}, k, args...);+#.
+
+'''
+
+// Launch a basic parallel_for with a function object and reductions.
+// New form of parallel_for(range, reduction, ...)
+.[apititle]#launch_reduce# (kernel function)
+[source,role=synopsis,id=api:launch_reduce]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Requirements, typename... Reductions>
+void launch_reduce(const queue& q, range<1> r, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename... Requirements, typename... Reductions>
+void launch_reduce(const queue& q, range<2> r, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename... Requirements, typename... Reductions>
+void launch_reduce(const queue& q, range<3> r, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (3)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(const queue& q, range<1> r, const KernelType& k, Reductions&&... reductions);                                            (4)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(const queue& q, range<2> r, const KernelType& k, Reductions&&... reductions);                                            (5)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(const queue& q, range<3> r, const KernelType& k, Reductions&&... reductions);                                            (6)
+
+}
+----
+_Constraints_ (1-3):
+
+* The parameter pack consists of 1 or more objects created by the
+[code]#reduction# function; and
+* Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Constraints_ (4-6): The parameter pack consists of 1 or more objects created by
+the [code]#reduction# function.
+
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.parallel_for(r, reductions..., k);
+});
+----
+
+_Effects_ (4-6): Equivalent to [code]#+launch_reduce(q, r, {},
+reductions...);+#.
+
+'''
+
+// Launch an ND-range parallel_for with a function object.
+// New form of parallel_for(nd_range, ...)
+.[apititle]#launch_grouped# (kernel function)
+[source,role=synopsis,id=api:launch_grouped]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Requirements>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements...>& reqs, const KernelType& k); (1)
+
+template <typename KernelType, typename... Requirements>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements...>& reqs, const KernelType& k); (2)
+
+template <typename KernelType, typename... Requirements>
+void launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements...>& reqs, const KernelType& k); (3)
+
+template <typename KernelType>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const KernelType& k);                                            (4)
+
+template <typename KernelType>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const KernelType& k);                                            (5)
+
+template <typename KernelType>
+void launch_grouped(const queue& q, range<3> r, range<3> size, const KernelType& k);                                            (6)
+
+}
+----
+
+_Constraints_ (1-3): Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.parallel_for(nd_range(r, size), k);
+});
+----
+
+_Effects_ (4-6): Equivalent to [code]#launch_grouped(q, r, size, {}, k);#.
+
+'''
+
+// Launch an ND-range parallel_for with a sycl::kernel object.
+// New form of parallel_for(nd_range, ...) without set_args.
+.[apititle]#launch_grouped# (kernel object)
+[source,role=synopsis,id=api:launch_grouped-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args, typename... Requirements>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (1)
+
+template <typename... Args, typename... Requirements>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (2)
+
+template <typename... Args, typename... Requirements>
+void launch_grouped(const queue& q, range<3> r, range<3> size, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (3)
+
+template <typename... Args>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const kernel& k, Args&&... args);                                            (4)
+
+template <typename... Args>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                            (5)
+
+template <typename... Args>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                            (6)
+
+}
+----
+_Constraints_ (1-3):
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.set_args(args...);
+  h.parallel_for(nd_range(r, size), k);
+});
+----
+
+_Effects_ (4-6): Equivalent to: [code]#+launch_grouped(q, r, size, {}, k,
+args...);+#.
+
+'''
+
+// Launch an ND-range parallel_for with a function object and reductions.
+// New form of parallel_for(nd_range, ...)
+.[apititle]#launch_grouped_reduce# (kernel function)
+[source,role=synopsis,id=api:launch_grouped_reduce]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Reductions, typename... Requirements>
+void launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename... Reductions, typename... Requirements>
+void launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename... Reductions, typename... Requirements>
+void launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const requirements<Requirements...>& reqs, const KernelType& k, Reductions&&... reductions); (3)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const KernelType& k, Reductions&&... reductions);                                            (4)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const KernelType& k, Reductions&&... reductions);                                            (5)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const KernelType& k, Reductions&&... reductions);                                            (6)
+
+}
+----
+_Constraints_ (1-3):
+
+* The parameter pack consists of 1 or more objects created by the
+[code]#reduction# function; and
+* Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Constraints_ (4-6): The parameter pack consists of 1 or more objects created by
+the [code]#reduction# function.
+
+_Effects_ (1-3): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.parallel_for(nd_range(r, size), reductions..., k);
+});
+----
+
+_Effects_ (4-6): Equivalent to [code]#+launch_grouped_reduce(q, r, size, {}, k,
+reductions...);+#.
+
+'''
+
+// Launch a single work-item with a function object.
+// New form of single_task(...)
+.[apititle]#launch_task# (kernel function)
+[source,role=synopsis,id=api:launch_task]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename... Requirements>
+void launch_task(const queue& q, const requirements<Requirements...>& reqs, const KernelType& k); (1)
+
+template <typename KernelType>
+void launch_task(const queue& q, const KernelType& k);                                            (2)
+
+}
+----
+
+_Constraints_ (1): Any accessor in [code]#Requirements# must have a target of
+[code]#target::device#.
+
+_Effects_ (1): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-accessors(h);
+  reqs.register-kernel-bundle(h);
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.single_task(k);
+});
+----
+
+_Effects_ (2): Equivalent to [code]#launch_task(q, {}, k);#.
+
+'''
+
+// Launch a single work-item with a sycl::kernel object.
+// New form of single_task(...) without set_args.
+.[apititle]#launch_task# (kernel object)
+[source,role=synopsis,id=api:launch_task-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args, typename... Requirements>
+void launch_task(const queue& q, const requirements<Requirements...>& reqs, const kernel& k, Args&&... args); (1)
+
+template <typename... Args>
+void launch_task(const queue& q, const kernel& k, Args&&... args);                                            (2)
+
+}
+----
+_Constraints_ (1):
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_ (1): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.set_args(args...);
+  h.single_task(k);
+});
+----
+
+_Effects_ (2): Equivalent to [code]#+launch_task(q, {}, k, args...);+#.
+
+'''
+
+=== Host tasks
+
+.[apititle]#launch_host#
+[source,role=synopsis,id=api:launch_host]
+----
+namespace sycl::khr {
+
+template <typename T, typename... Requirements>
+void launch_host(const queue& q, const requirements<Requirements...>& reqs, T&& hostTaskCallable); (1)
+
+template <typename T>
+void launch_host(const queue& q, T&& hostTaskCallable); (2)
+
+}
+----
+
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#;
+* Any accessor in [code]#Requirements# must have a target of
+[code]#target::host_task#.
+
+_Preconditions_: The callable function [code]#hostTaskCallable# does not call
+any function in the [code]#sycl# namespace.
+
+_Effects_ (1): Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.host_task(hostTaskCallable);
+});
+----
+
+_Effects_ (2): Equivalent to [code]#+launch_host(q, {}, hostTaskCallable);+#.
+
+'''
+
+=== Memory operations
+
+.[apititle]#enqueue_memcpy#
+[source,role=synopsis,id=api:enqueue_memcpy]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_memcpy(const queue& q, void* dest, const void* src, size_t numBytes, const requirements<Requirements...>& reqs = {});
+
+}
+----
+
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.memcpy(dest, src, numBytes);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (USM pointers)
+[source,role=synopsis,id=api:enqueue_copy-pointer]
+----
+namespace sycl::khr {
+
+template <typename T, typename... Requirements>
+void enqueue_copy(const queue& q, const T* src, T* dest, size_t count, const requirements<Requirements...>& reqs = {});
+
+}
+----
+
+Copies between two USM pointers.
+
+_Constraints_:
+
+* [code]#T# is <<device-copyable>>;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Preconditions_:
+
+* [code]#src# is a host pointer or a pointer within a USM allocation that is
+  accessible on the device;
+* [code]#dest# is a host pointer or a pointer within a USM allocation that is
+  accessible on the device;
+* [code]#src# and [code]#dest# both point to allocations of at least
+  [code]#count# elements of type [code]#T#; and
+* If either [code]#src# or [code]#dest# is a pointer to a USM allocation, that
+  allocation was created from the same context associated with [code]#q#.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.copy(src, dest, count);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (accessors, host to device)
+[source,role=synopsis,id=api:enqueue_copy-accessor-h2d]
+----
+namespace sycl::khr {
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
+void enqueue_copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});           (1)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
+void enqueue_copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {}); (2)
+
+}
+----
+
+Copies from host to device.
+
+_Constraints_:
+
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
+* [code]#DestMode# is [code]#access_mode::write# or
+  [code]#access_mode::read_write#;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Preconditions_:
+
+* [code]#src# is a host pointer; and
+* [code]#src# points to an allocation of at least as many bytes as the range
+  represented by [code]#dest#.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.require(dest);
+  h.copy(src, dest);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (accessors, device to host)
+[source,role=synopsis,id=api:enqueue_copy-accessor-d2h]
+----
+namespace sycl::khr {
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
+void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, const requirements<Requirements...>& reqs = {});                 (1)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename... Requirements>
+void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, const requirements<Requirements...>& reqs = {}); (2)
+
+}
+----
+
+Copies from device to host.
+
+_Constraints_:
+
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
+* [code]#DestMode# is [code]#access_mode::read# or
+  [code]#access_mode::read_write#;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Preconditions_:
+
+* [code]#dest# is a host pointer; and
+* [code]#dest# points to an allocation of at least as many bytes as the range
+  represented by [code]#src#.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.require(src);
+  h.copy(src, dest);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (accessors, device to device)
+[source,role=synopsis,id=api:enqueue_copy-accessor-d2d]
+----
+namespace sycl::khr {
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, int DestDims, access_mode DestMode, typename... Requirements>
+void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, const requirements<Requirements...>& reqs = {});
+
+}
+----
+
+Copies between two device accessors.
+
+_Constraints_:
+
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
+* [code]#SrcMode# is [code]#access_mode::read# or
+  [code]#access_mode::read_write#;
+* [code]#DestMode# is [code]#access_mode::write# or
+  [code]#access_mode::read_write#;
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.require(src);
+  h.require(dest);
+  h.copy(src, dest);
+});
+----
+
+_Throws_: A synchronous [code]#exception# with the [code]#errc::invalid# error
+code if [code]#dest.get_count() < src.get_count()#.
+
+'''
+
+.[apititle]#enqueue_memset#
+[source,role=synopsis,id=api:enqueue_memset]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_memset(const queue& q, void* ptr, int value, size_t numBytes, const requirements<Requirements...>& reqs = {});
+
+}
+----
+
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.memset(ptr, value, numBytes);
+});
+----
+
+'''
+
+.[apititle]#enqueue_fill#
+[source,role=synopsis,id=api:enqueue_fill]
+----
+namespace sycl::khr {
+
+template <typename T, typename... Requirements>
+void enqueue_fill(const queue& q, T* ptr, const T& pattern, size_t count, const requirements<Requirements...>& reqs = {});                     (1)
+
+template <typename T, int Dims, access_mode Mode, typename... Requirements>
+void enqueue_fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, const requirements<Requirements...>& reqs = {}); (2)
+
+}
+----
+
+_Constraints (1)_:
+
+* [code]#T# is <<device-copyable>>; and
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Constraints (2)_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects (1)_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.fill(ptr, pattern, count);
+});
+----
+
+_Effects (2)_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.fill(dest, src);
+});
+----
+
+'''
+
+.[apititle]#enqueue_update_host#
+[source,role=synopsis,id=api:enqueue_update_host]
+----
+namespace sycl::khr {
+
+template <typename T, int Dims, access_mode Mode, typename...Requirements>
+void enqueue_update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, const requirements<Requirements...>& reqs = {});
+
+}
+----
+
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.require(acc);
+  h.update_host(acc);
+});
+----
+
+'''
+
+.[apititle]#enqueue_prefetch#
+[source,role=synopsis,id=api:enqueue_prefetch]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_prefetch(const queue& q, void* ptr, size_t numBytes, const requirements<Requirements...>& reqs = {});
+
+}
+----
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.prefetch(ptr, numBytes);
+});
+----
+
+'''
+
+.[apititle]#enqueue_mem_advise#
+[source,role=synopsis,id=api:enqueue_mem_advise]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, const requirements<Requirements...>& reqs = {});
+
+}
+----
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Equivalent to: +
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  reqs.register-wait-events(h);
+  reqs.register-signal-event(h);
+  h.mem_advise(ptr, numBytes, advice);
+});
+----
+
+'''
+
+=== Command and event barriers
+
+.[apititle]#enqueue_barrier#
+[source,role=synopsis,id=api:enqueue_barrier]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_barrier(const queue& q, const requirements<Requirements...>& reqs = {});
+
+}
+----
+_Constraints_:
+
+* [code]#Requirements# does not contain a [code]#kernel_bundle#; and
+* [code]#Requirements# does not contain any accessors.
+
+_Effects_: Enqueues a command barrier.
+Any commands submitted after this barrier cannot begin execution until the
+barrier completes.
+The barrier completes when:
+
+* All commands previously submitted to this queue have completed; and
+* All events (wrapped in [code]#wait_event# or [code]#wait_events#) in
+[code]#reqs# have completed.
+
+if [code]#reqs# contains a [code]#signal_event# requirement, the event is
+signaled when the barrier completes.
+
+{note}If a barrier is submitted to an in-order queue with no requirements, then
+this operation may be a no-op.{endnote}
+
+'''
+
+.[apititle]#enqueue_signal_event#
+[source,role=synopsis,id=api:enqueue_signal_event]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_signal_event(const queue& q, const event& e, const requirements<Requirements...>& reqs = {});
+
+}
+----
+_Constraints_:
+
+* [code]#Requirements# contains only the [code]#wait_event# object; or
+* [code]#Requirements# contains only the [code]#wait_events# object; or
+* [code]#Requirements# is empty.
+
+_Effects_: Enqueues a command barrier.
+The event [code]#e# is immediately disassociated with any previous command, and
+its status is set to "submitted".
+Any commands submitted after this barrier cannot begin execution until the
+barrier completes.
+The barrier completes when:
+
+* All commands previously submitted to this queue have completed; and
+* All events (wrapped in [code]#wait_event# or [code]#wait_events#) in
+  [code]#reqs# have completed.
+
+Once the above conditions are met, the provided event [code]#e# is signaled.
+
+_Throws_: A synchronous [code]#exception# with the [code]#errc::invalid# error
+code if [code]#e# and [code]#q# don't have the same context.
+
+'''
+
+.[apititle]#enqueue_wait_event#
+[source,role=synopsis,id=api:enqueue_wait_event]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_wait_event(const queue& q, const event& e, const requirements<Requirements...>& reqs = {});
+
+}
+----
+_Constraints_:
+
+* [code]#Requirements# contains only the [code]#signal_event# object; or
+* [code]#Requirements# is empty.
+
+_Effects_: Enqueues an event barrier.
+Any commands submitted after this barrier cannot begin execution until the
+provided event ([code]#e#) has completed.
+
+Once the above conditions are met, the event (wrapped in signal_event) is
+signaled, if provided.
+
+'''
+
+.[apititle]#enqueue_wait_events#
+[source,role=synopsis,id=api:enqueue_wait_events]
+----
+namespace sycl::khr {
+
+template <typename... Requirements>
+void enqueue_wait_events(const queue& q, const std::vector<event>& evts, const requirements<Requirements...>& reqs = {}); (1)
+
+template <typename... Requirements>
+void enqueue_wait_events(const queue& q, const std::span<event>& evts, const requirements<Requirements...>& reqs = {}); // Requires C++20 (2)
+
+}
+----
+_Constraints_ (1-2):
+
+* [code]#Requirements# contains only the [code]#signal_event# object; or
+* [code]#Requirements# is empty.
+
+_Effects_ (1-2): Enqueues an event barrier.
+Any commands submitted after this barrier cannot begin execution until the
+provided events ([code]#evts#) have completed.
+
+Once the above conditions are met, the event (wrapped in [code]#signal_event#)
+is signaled, if provided.
+
+'''
+
+=== Event-related helper functions
+
+.[apititle]#make_event#
+[source,role=synopsis,id=api:make_event]
+----
+namespace sycl::khr {
+
+event make_event(const context& c);
+
+}
+----
+_Returns_: An event that is associated with context [code]#c#.
+The event is in the "signaled" state.
+
+{note}The event can be passed to the [code]#enqueue_signal_event# function or
+included in the [code]#requirements# object (wrapped in the [code]#signal_event#
+object), and as a dependency for other commands.{endnote}
+
+== Interactions between event APIs
+
+An event _E_ created via [code]#make_event# can be used as a command dependency
+using the APIs introduced by this extension (e.g. via the requirements object or
+[code]#enqueue_wait_event#) or using other APIs (e.g.
+[code]#handler::depends_on#) for a command submitted to some queue _Q_.
+It is not necessary for the context of _E_ to match the context of _Q_.
+
+An event _E_ created via [code]#make_event# can also be used for signaling
+(using the [code]#enqueue_signal_event# function or included in the
+[code]#requirements# object), for a command submitted to some queue _Q_.
+In this case, the context of _E_ and _Q_ must match.
+
+
+If an event _E_ is used as a command dependency for some command _C_, the
+dependency is captured at the point when _C_ is submitted.
+It is legal to reassociate the event _E_ to a new command via
+enqueue_signal_event even before command _C_ completes.
+Doing so does not change the dependency for command _C_.
+
+If another host thread is blocked waiting for event _E_ to complete via
+[code]#event::wait# or [code]#event::wait_and_throw# when event _E_ is
+reassociated with a new command via [code]#enqueue_signal_event#, the behavior
+of the [code]#event::wait# or [code]#event::wait_and_throw# call is undefined.
