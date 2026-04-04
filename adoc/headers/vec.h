@@ -260,4 +260,11 @@ template <typename DataT, int NumElements> class vec {
 // Available only when: (std::is_same_v<T, U> && ...)
 template <class T, class... U> vec(T, U...) -> vec<T, sizeof...(U) + 1>;
 
+// Available only when: T is a scalar type that is one of the built-in scalar
+// data types, half, sycl::byte, or std::byte.
+template <typename ConvertT,
+          rounding_mode RoundingMode = rounding_mode::automatic,
+          typename T>
+ConvertT convert(T value);
+
 } // namespace sycl

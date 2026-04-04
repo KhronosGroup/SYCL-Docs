@@ -19930,11 +19930,12 @@ _Returns:_ A [code]#vec# object that represents the result of the operation.
 ==== Rounding modes
 
 The various rounding modes that can be used in the [code]#convert# member
-function template are described in <<table.vec.roundingmodes>>.
+function of [code]#vec# and in the [code]#sycl::convert# free function are
+described in <<table.vec.roundingmodes>>.
 
 
 [[table.vec.roundingmodes]]
-.Rounding modes for the SYCL [code]#vec# class template
+.Rounding modes for conversions using [code]#sycl::rounding_mode#
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Rounding mode @ Description
@@ -19943,7 +19944,7 @@ a@
 ----
 automatic
 ----
-   a@ Default rounding mode for the SYCL [code]#vec# class element type. [code]#rtz# (round toward zero) for integer types and [code]#rte# (round to nearest even) for floating-point types.
+   a@ Default rounding mode for the converted type. [code]#rtz# (round toward zero) for integer types and [code]#rte# (round to nearest even) for floating-point types.
 
 a@
 [source]
@@ -19975,6 +19976,36 @@ rtn
 
 |====
 
+
+
+[[sec:scalar.convert]]
+==== Scalar type conversion
+
+The [code]#sycl::convert# free function template provides a scalar equivalent
+of the [code]#vec::convert# member function, allowing scalar values to be
+converted between types with an explicit rounding mode.
+This makes it possible to ensure that scalar conversion results match the results
+produced by [code]#vec::convert# for the corresponding element types.
+
+[frame=all,grid=none,separator="@"]
+|====
+a@
+[source]
+----
+template <typename ConvertT,
+          rounding_mode RoundingMode = rounding_mode::automatic,
+          typename T>
+ConvertT convert(T value)
+----
+   a@ _Constraints:_ [code]#T# is a scalar type that is one of the built-in
+      scalar data types listed in <<subsec:scalartypes>>, [code]#half#,
+      [code]#sycl::byte#, or [code]#std::byte#.
+
+Converts [code]#value# from type [code]#T# to type [code]#ConvertT# using
+the rounding mode specified by [code]#RoundingMode#.
+The different rounding modes are described in <<table.vec.roundingmodes>>.
+
+|====
 
 
 [[memory-layout-and-alignment]]
