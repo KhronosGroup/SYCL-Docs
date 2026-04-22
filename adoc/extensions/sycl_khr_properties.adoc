@@ -66,7 +66,7 @@ An application obtains the property by constructing an instance of the class.
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 // Property defined by the implementation.
 struct prop1 {
@@ -77,7 +77,7 @@ struct prop1 {
 }
 
 // Application code that obtains the property.
-sycl::khr::prop1 p1{42};
+sycl::khr::property::prop1 p1{42};
 ----
 
 A property with one or more compile-time constant values is defined as a
@@ -88,7 +88,7 @@ An application obtains the property by instantiating the template.
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 // Property defined by the implementation.
 template<int Value>
@@ -102,7 +102,7 @@ inline constexpr __unspecified_type__<Value> prop2;
 }
 
 // Application code that obtains the property.
-auto p2 = sycl::khr::prop2<42>;
+auto p2 = sycl::khr::property::prop2<42>;
 ----
 
 A property with a mixture of runtime-supplied values and compile-time constant
@@ -114,7 +114,7 @@ template.
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 // Property defined by the implementation.
 template<int Value1>
@@ -127,7 +127,7 @@ struct prop3 {
 }
 
 // Application code that obtains the property.
-auto p3 = sycl::khr::prop3<42>{43};
+auto p3 = sycl::khr::property::prop3<42>{43};
 ----
 
 [[sec:khr-properties-overview-properties-lists]]
@@ -149,23 +149,21 @@ properties, and the template parameters are deduced through CTAD:
 [source,,linenums]
 ----
 sycl::khr::properties plist{
-  sycl::khr::prop1{42},
-  sycl::khr::prop2<42>,
-  sycl::khr::prop3<42>{43}
+  sycl::khr::property::prop1{42},
+  sycl::khr::property::prop2<42>,
+  sycl::khr::property::prop3<42>{43}
 };
 ----
 
 Applications can also query whether a [code]#properties# list contains a certain
 property, and they can get a copy of a property object from the list.
-For a property whose values are all runtime-supplied, the application uses the
-type of the property to make this query.
+Each property defines an associated class in the [code]#property::key# namespace
+for this purpose, and this class is known as the property's "key":
 
 [source,,linenums]
 ----
-// The type of the property is used as a template parameter to has_property, and
-// get_property.
-if constexpr (plist.has_property<sycl::khr::prop1>()) {
-  if (plist.get_property<sycl::khr::prop1>().value == 42) {
+if constexpr (plist.has_property<sycl::khr::property::key::prop2>()) {
+  if constexpr (plist.get_property<sycl::khr::property::key::prop2>().value == 42) {
     /*...*/
   }
 }
@@ -174,46 +172,22 @@ if constexpr (plist.has_property<sycl::khr::prop1>()) {
 Notice above that we can use [code]#if constexpr# to query for the property's
 existence because the type of [code]#plist# encodes the properties that it
 contains.
+When the property's value is a compile-time constant, we can also use [code]#if
+constexpr# to get the value of the property because the type of [code]#plist#
+also encodes the property's value.
 
-It is not possible to do this same sort of query for a property whose value is a
-compile-time constant because the property's type includes the values contained
-within the property.
-An application would therefore need to know the property's value in order to
-query it's existence, which is an unreasonable expectation.
-To solve this, properties with a compile-time constant value define a separate
-non-templated class type called a "property key", which allows the application
-to query the property without knowing its value.
+Querying a property list for a property with runtime-supplied values is similar,
+except that the call to [code]#get_property# returns a runtime value, so it is
+not possible to use [code]#if constexpr# to test the property's value:
 
 [source,,linenums]
 ----
-namespace sycl::khr {
-
-// Property defined by the implementation.
-template<int Value>
-struct __unspecified_type__ {
-  static constexpr int value = Value;
-};
-
-template<int Value>
-inline constexpr __unspecified_type__<Value> prop2;
-
-// Property key defined by the implementation.
-struct prop2_key{};
-
-}
-
-// Applications use the property key as a template parameter to has_property
-// and get_property.
-if constexpr (plist.has_property<sycl::khr::prop2_key>()) {
-  if constexpr (plist.get_property<sycl::khr::prop2_key>().value == 42) {
+if constexpr (plist.has_property<sycl::khr::property::key::prop1>()) {
+  if (plist.get_property<sycl::khr::property::key::prop1>().value == 42) {
     /*...*/
   }
 }
 ----
-
-Notice above that we can use [code]#if constexpr# also in the call to
-[code]#get_property# because the type of [code]#plist# encodes the compile-time
-constant values of the properties in the list.
 
 [[sec:khr-properties-properties]]
 == The properties class
@@ -244,9 +218,6 @@ using empty_properties_t = decltype(properties{});
 
 } // namespace sycl::khr
 ----
-
-The [code]#properties# class is trivially copyable unless it contains a property
-with a runtime-provided value that is not trivially copyable.
 
 {note}Implementations are expected to have a deduction guide that deduces
 [code]#EncodedProperties# from the constructor's [code]#Properties# pack.
@@ -375,12 +346,6 @@ inline constexpr bool is_property_key_v = is_property_key<T>::value;
 [code]#is_property_key# inherits from [code]#std::true_type# if [code]#T# is the
 type of a property key.
 Otherwise it inherits from [code]#std::false_type#.
-
-{note}Properties that contain only runtime-provided values do not normally
-define a separate "property key" class.
-Thus, this trait normally inherits from [code]#std::true_type# when [code]#T# is
-the type of a property whose values are all runtime-provided.
-{endnote}
 
 '''
 
@@ -784,12 +749,16 @@ This extension adds the following new style properties that can be used with the
 .[apidef]#khr::enable_profiling#
 [source,role=synopsis,id=api:khr-properties-enable-profiling]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 struct enable_profiling {
   constexpr enable_profiling(bool v = true) : value{v} {}
   bool value;
 };
+
+namespace key {
+struct enable_profiling {};
+}
 
 } // namespace sycl::khr
 ----
@@ -802,24 +771,29 @@ constructed queue.
 
 The following traits inherit from [code]#std::true#:
 
-* [code]#is_property<enable_profiling>#
-* [code]#is_property_key<enable_profiling>#
-* [code]#is_property_for<enable_profiling, queue>#
-* [code]#is_property_key_for<enable_profiling, queue>#
+* [code]#is_property<property::enable_profiling>#
+* [code]#is_property_key<property::key::enable_profiling>#
+* [code]#is_property_for<property::enable_profiling, queue>#
+* [code]#is_property_key_for<property::key::enable_profiling, queue>#
 
-The [code]#enable_profiling# property is trivially copyable.
+[code]#property::enable_profiling# and [code]#property::key::enable_profiling#
+are trivially copyable.
 
 '''
 
 .[apidef]#khr::in_order#
 [source,role=synopsis,id=api:khr-properties-in-order]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 struct in_order {
   constexpr in_order(bool v = true) : value{v} {}
   bool value;
 };
+
+namespace key {
+struct in_order {};
+}
 
 } // namespace sycl::khr
 ----
@@ -832,12 +806,13 @@ constructed queue.
 
 The following traits inherit from [code]#std::true#:
 
-* [code]#is_property<in_order>#
-* [code]#is_property_key<in_order>#
-* [code]#is_property_for<in_order, queue>#
-* [code]#is_property_key_for<in_order, queue>#
+* [code]#is_property<property::in_order>#
+* [code]#is_property_key<property::key::in_order>#
+* [code]#is_property_for<property::in_order, queue>#
+* [code]#is_property_key_for<property::key::in_order, queue>#
 
-The [code]#in_order# property is trivially copyable.
+[code]#property::in_order# and [code]#property::key::in_order# are trivially
+copyable.
 
 == Additions to the buffer and image classes
 
@@ -914,7 +889,7 @@ with compile-time constant values.
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 struct prop1 {
   constexpr prop1(int v) : value(v) {}
@@ -944,7 +919,7 @@ alias should be [code]#value_t#.
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 template<typename Value>
 struct __unspecified_type__ {
@@ -966,7 +941,7 @@ enumerators.
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 enum class access_type {read, write};
 
@@ -1000,7 +975,7 @@ For example, two hypothetical boolean properties could be defined like this:
 
 [source,,linenums]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property {
 
 struct enable_thing1 {
   constexpr enable_thing1(bool enable) : value(enable) {}
@@ -1032,8 +1007,8 @@ constexpr bool thing2 = false;
 #endif
 
 sycl::khr::properties props{
-  sycl::khr::enable_thing1{thing1},
-  sycl::khr::enable_thing2<thing2>,
+  sycl::khr::property::enable_thing1{thing1},
+  sycl::khr::property::enable_thing2<thing2>,
 };
 // use "props"
 ----
@@ -1048,9 +1023,9 @@ bool thing1 = /* determine at runtime if thing1 is enabled */;
 
 if (thing1) {
   sycl::khr::properties props{
-    sycl::khr::enable_thing1,
+    sycl::khr::property::enable_thing1,
 #ifdef THING2
-    sycl::khr::enable_thing2
+    sycl::khr::property::enable_thing2
 #endif
   };
   // use "props"
@@ -1058,7 +1033,7 @@ if (thing1) {
 else {
   sycl::khr::properties props{
 #ifdef THING2
-    sycl::khr::enable_thing2
+    sycl::khr::property::enable_thing2
 #endif
   };
   // use "props"
@@ -1067,27 +1042,6 @@ else {
 
 [[sec:khr-properties-issues]]
 == Issues
-
-* The properties defined and illustrated in this extension are all in the
-  [code]#sycl::khr# namespace rather than some nested namespace like
-  [code]#sycl::khr::properties#.
-  If this KHR is adopted into the core spec, properties will be defined directly
-  in [code]#sycl#.
-  This was intentional in order to reduce verbosity in applications that use the
-  extensions.
-  Is this a good idea, or will we end up polluting the top-level SYCL namespace
-  with lots of properties?
-
-* The [code]#properties# constructor has a _Mandates_ that no two properties in
-  the list have the same key.
-  Does it make sense for this to be a _Mandates_ instead of a _Constraint_?
-  I think the error message will be better with a _Mandates_, but you could make
-  that same argument for other cases where we decided to use _Constraints_
-  anyways.
-
-* Should we define [code]#operator==# and [code]#operator!=# for every property?
-  The {dpcpp} extension has this, but I left it out of this KHR because they
-  didn't seem very useful to me.
 
 * Should we define [code]#operator==# and [code]#operator!=# for the
   [code]#properties# list?
