@@ -24929,12 +24929,22 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 .[apidef]#nan#
 [source,role=synopsis,id=api:nan]
 ----
-float nan(std::uint32_t nancode)             (1)
-double nan(std::uint64_t nancode)            (2)
-half nan(std::uint16_t nancode)              (3)
+float nan(std::uint32_t nancode)                         (1)
+double nan(std::uint64_t nancode)                        (2)
+half nan(std::uint16_t nancode)                          (3)
 
-template<typename NonScalar>            (4)
+template<typename NonScalar>                             (4)
 /*return-type*/ nan(NonScalar nancode)
+
+float nan(const char* nancode)                           (5)
+double nan(const char* nancode)                          (6)
+half nan(const char* nancode)                            (7)
+
+template<typename T, int N>                              (8)
+vec<T, N> nan(std::array<const char*, N> nancode)
+
+template<typename T, std::size_t N>                      (9)
+marray<T, N> nan(std::array<const char*, N> nancode)
 ----
 
 *Overloads (1) - (3):*
@@ -24975,6 +24985,42 @@ The return type depends on [code]#NonScalar#:
  [code]#+__swizzle__+# that is convertible to [code]#vec<std::uint16_t, N>#
 @[code]#vec<half, N>#
 |====
+
+*Overloads (5) - (7):*
+
+_Returns:_ A quiet NaN.
+The [code]#nancode# is used in an implementation-defined manner to populate the
+significand of the resulting NaN, as with [code]#std::nanf#, [code]#std::nan#,
+or the equivalent for [code]#half# precision respectively.
+
+*Overloads (8) - (9):*
+
+_Constraints:_ Available only if [code]#T# is [code]#float#, [code]#double#, or
+[code]#half#.
+
+_Returns:_ A quiet NaN for each element.
+Each [code]#nancode[i]# is used in an implementation-defined manner to populate
+the significand of the resulting NaN for that element, as with [code]#std::nanf#
+or [code]#std::nan# for the corresponding element type.
+
+[NOTE]
+====
+Overloads (5) - (9) align [code]#sycl::nan# with [code]#std::nan#,
+[code]#std::nanf#, and [code]#std::nanl#, which take a [code]#const char*#
+argument.
+Unlike overloads (1) - (4), which allow placing a specific bit pattern in the
+NaN significand, overloads (5) - (9) produce a NaN whose significand is
+populated in an implementation-defined manner based on the string argument.
+For overloads (8) - (9), the template parameter [code]#T# must be specified
+explicitly since it cannot be deduced from the [code]#std::array<const char*,
+N># argument alone.
+For example:
+[source,c++]
+----
+auto v = sycl::nan<float, 4>(std::array<const char*, 4>{"", "", "", ""});
+auto m = sycl::nan<double, 4>(std::array<const char*, 4>{"", "", "", ""});
+----
+====
 
 '''
 
