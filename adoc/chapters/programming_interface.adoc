@@ -10387,6 +10387,28 @@ multi_ptr(std::nullptr_t)
 a@
 [source]
 ----
+template <access::address_space AS, access::decorated IsDecorated>
+multi_ptr(const multi_ptr<value_type, AS, IsDecorated>&)
+----
+   a@ Available only when:
+      [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
+
+Constructs a [code]#generic_ptr# by copying the value of the right hand side [code]#multi_ptr#.
+
+a@
+[source]
+----
+template <access::address_space AS, access::decorated IsDecorated>
+multi_ptr(multi_ptr<value_type, AS, IsDecorated>&&)
+----
+   a@ Available only when:
+      [code]#(Space == access::address_space::generic_space && AS != access::address_space::constant_space)#.
+
+Constructs a [code]#generic_ptr# by moving the value of the right hand side [code]#multi_ptr#.
+
+a@
+[source]
+----
 template <typename AccDataT, int Dimensions,
           access_mode Mode,
           access::placeholder IsPlaceholder>
