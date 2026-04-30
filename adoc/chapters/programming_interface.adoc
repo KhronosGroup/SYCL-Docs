@@ -6603,7 +6603,7 @@ template <typename DataT,
                                  : access_mode::read_write),
          image_target Targ = image_target::device>
 unsampled_image_accessor<DataT, Dimensions, Mode, Targ>
-get_access(handler& commandGroupHandler)
+get_access(handler& commandGroupHandler, const property_list& propList = {})
 ----
    a@ Returns a valid [code]#unsampled_image_accessor# to the unsampled image
       with the specified data type, access mode and target in the command group.
@@ -6614,7 +6614,8 @@ a@
 template <typename DataT, access_mode Mode = (std::is_const_v<DataT>
                                                    ? access_mode::read
                                                    : access_mode::read_write)>
-host_unsampled_image_accessor<DataT, Dimensions, Mode> get_host_access();
+host_unsampled_image_accessor<DataT, Dimensions, Mode>
+get_host_access(const property_list& propList = {})
 ----
    a@ Returns a valid [code]#host_unsampled_image_accessor# to the unsampled
       image with the specified data type and access mode.
@@ -7015,7 +7016,7 @@ a@
 ----
 template <typename DataT, image_target Targ = image_target::device>
 sampled_image_accessor<DataT, Dimensions, Targ>
-get_access(handler& commandGroupHandler)
+get_access(handler& commandGroupHandler, const property_list& propList = {})
 ----
    a@ Returns a valid [code]#sampled_image_accessor# to the sampled image with
       the specified data type and target in the command group.
@@ -7024,7 +7025,8 @@ a@
 [source]
 ----
 template <typename DataT>
-host_sampled_image_accessor<DataT, Dimensions> get_host_access()
+host_sampled_image_accessor<DataT, Dimensions>
+get_host_access(const property_list& propList = {})
 ----
    a@ Returns a valid [code]#host_sampled_image_accessor# to the sampled image
       with the specified data type in the command group.
