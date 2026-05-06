@@ -4,6 +4,8 @@
 namespace sycl {
 template <typename DataT, int Dimensions = 1> class local_accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+
   using value_type = DataT;
   using reference = value_type&;
   using const_reference = const DataT&;
