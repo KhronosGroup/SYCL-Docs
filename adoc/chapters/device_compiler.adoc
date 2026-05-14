@@ -410,17 +410,21 @@ The following aspects are those that correspond to optional kernel features:
   * [code]#fp64#
   * [code]#atomic64#
 
-In addition, the following {cpp} attributes from <<sec:kernel.attributes>> also
-correspond to optional kernel features because they force the kernel to be
-compiled in a way that might not run on all devices:
+In addition, the following {cpp} attributes from <sec:kernel.attributes>
+correspond to optional kernel features for some integer constant values of
+[code]#size#, since not all devices will support arbitrary work group and sub
+group sizes.
 
-  * [code]#reqd_work_group_size()#
-  * [code]#reqd_sub_group_size()#
+  * [code]#reqd_work_group_size(size)#
+  * [code]#reqd_sub_group_size(size)#
 
 In order to guarantee source code portability of SYCL applications that use
 optional kernel features, all SYCL implementations must be able to compile
 device code that uses these optional features regardless of whether the
 implementation supports the features on any of its devices.
+For the two C++ attributes listed above, all implementations must be able to
+compile kernels that are decorated with these attributes regardless of whether
+the implementation supports the specified work-group or sub-group size.
 
 Of course, applications that make use of optional kernel features should ensure
 that a kernel using such a feature is submitted only to a device that supports
