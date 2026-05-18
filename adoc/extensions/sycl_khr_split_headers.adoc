@@ -1,27 +1,27 @@
-[[sec:khr-includes]]
-= sycl_khr_includes
+[[sec:khr-split-headers]]
+= sycl_khr_split_headers
 
 This extension provides an alternative set of header files, with each providing
 a limited set of APIs.
 This allows developers to avoid paying compilation time cost for features that
 are not used by an application.
 
-[[sec:khr-includes-dependencies]]
+[[sec:khr-split-headers-dependencies]]
 == Dependencies
 
 This extension has no dependencies on other extensions.
 
-[[sec:khr-includes-header-files]]
+[[sec:khr-split-headers-header-files]]
 == Header files
 
 The header files provided by this extension are located in the
-[code]#<sycl/khr/includes># directory.
+[code]#<sycl/khr/split_headers># directory.
 
-[[sec:khr-includes-feature-test]]
+[[sec:khr-split-headers-feature-test]]
 == Feature test macro
 
 An implementation supporting this extension must predefine the macro
-[code]#SYCL_KHR_INCLUDES# to one of the values defined in the table below.
+[code]#SYCL_KHR_SPLIT_HEADERS# to one of the values defined in the table below.
 
 [%header,cols="1,5"]
 |===
@@ -34,160 +34,160 @@ An implementation supporting this extension must predefine the macro
 
 {note} A <<subsec:library-only>> implementation of SYCL cannot predefine macros
 outside of header files.
-See <<sec:khr-includes-version>> for a portable way to check for this extension.
+See <<sec:khr-split-headers-version>> for a portable way to check for this extension.
 {endnote}
 
-[[sec:khr-includes-full-list-of-headers]]
+[[sec:khr-split-headers-full-list-of-headers]]
 == Extension overview
 
-<<table.khr-includes-list>> provides a list of all new headers with high-level
+<<table.khr-split-headers-list>> provides a list of all new headers with high-level
 description of their content.
 
-All headers are provided under [code]#<sycl/khr/includes/># include path.
+All headers are provided under [code]#<sycl/khr/split_headers/># include path.
 
 The Description column in the table is intended to help you navigate the
 extension document quicker.
 It does not offer the exaustive listing of each new header file contents that
 provided in subsequent sections below.
 
-[[table.khr-includes-list]]
+[[table.khr-split-headers-list]]
 .List of headers provided by the extension
 [width="100%",options="header",cols="1,2"]
 |====
 |Header
 |Description
 
-|[code]#<sycl/khr/includes/version.hpp>#
+|[code]#<sycl/khr/split_headers/version.hpp>#
 |Provides various macro definitions.
 
-|[code]#<sycl/khr/includes/queue.hpp>#
+|[code]#<sycl/khr/split_headers/queue.hpp>#
 |Provides definition of the [code]#queue# class.
 
-|[code]#<sycl/khr/includes/handler.hpp>#
+|[code]#<sycl/khr/split_headers/handler.hpp>#
 |Provides definition of the [code]#handler# class.
 
-|[code]#<sycl/khr/includes/event.hpp>#
+|[code]#<sycl/khr/split_headers/event.hpp>#
 |Provides definition of the [code]#event# class.
 
-|[code]#<sycl/khr/includes/device.hpp>#
+|[code]#<sycl/khr/split_headers/device.hpp>#
 |Provides definitions of the [code]#device# class and device selectors.
 
-|[code]#<sycl/khr/includes/platform.hpp>#
+|[code]#<sycl/khr/split_headers/platform.hpp>#
 |Provides definition of the [code]#platform# class.
 
-|[code]#<sycl/khr/includes/context.hpp>#
+|[code]#<sycl/khr/split_headers/context.hpp>#
 |Provides definition of the [code]#context# class.
 
-|[code]#<sycl/khr/includes/index_space.hpp>#
+|[code]#<sycl/khr/split_headers/index_space.hpp>#
 |Provides definitions of most of the index space identifiers from
 <<ranges-identifiers>>. Classes like [code]#h_item#, [code]#group# and
 [code]#sub_group# are provided by other headers.
 
-|[code]#<sycl/khr/includes/usm.hpp>#
+|[code]#<sycl/khr/split_headers/usm.hpp>#
 |Provides definitions from <<sec:usm>>, such as [code]#usm_allocator#
 class and USM free functions for memory management like [code]#malloc_shared#.
 
-|[code]#<sycl/khr/includes/buffer.hpp>#
+|[code]#<sycl/khr/split_headers/buffer.hpp>#
 |Provides definition of the [code]#buffer# class.
 
-|[code]#<sycl/khr/includes/accessor.hpp>#
+|[code]#<sycl/khr/split_headers/accessor.hpp>#
 |Provides definitions of the [code]#accessor#, [code]#local_accessor# and
 [code]#host_accessor# classes.
 
-|[code]#<sycl/khr/includes/atomic.hpp>#
+|[code]#<sycl/khr/split_headers/atomic.hpp>#
 |Provides definition of the [code]#atomic_ref# class.
 
-|[code]#<sycl/khr/includes/half.hpp>#
+|[code]#<sycl/khr/split_headers/half.hpp>#
 |Provides definition of the [code]#half# data type.
 
-|[code]#<sycl/khr/includes/vec.hpp>#
+|[code]#<sycl/khr/split_headers/vec.hpp>#
 |Provides definitions from <<sec:vector.type>>, i.e. [code]#vec# class and
 related enumerations.
 
-|[code]#<sycl/khr/includes/marray.hpp>#
+|[code]#<sycl/khr/split_headers/marray.hpp>#
 |Provides definitions from <<sec:marray.type>>, i.e. [code]#marray# class.
 
-|[code]#<sycl/khr/includes/math.hpp>#
+|[code]#<sycl/khr/split_headers/math.hpp>#
 |Provides definitions of built-in functions from <<sec:math-functions>>
 through <<sec:relational-functions>>.
 
-|[code]#<sycl/khr/includes/builtins_math.hpp>#
+|[code]#<sycl/khr/split_headers/builtins_math.hpp>#
 |Provides definitions of built-in functions from <<sec:math-functions>>,
 <<sec:native-precision-math-functions>> and
 <<sec:half-precision-math-functions>>.
 
-|[code]#<sycl/khr/includes/builtins_integer.hpp>#
+|[code]#<sycl/khr/split_headers/builtins_integer.hpp>#
 |Provides definitions of built-in functions from <<sec:integer-functions>>.
 
-|[code]#<sycl/khr/includes/builtins_common.hpp>#
+|[code]#<sycl/khr/split_headers/builtins_common.hpp>#
 |Provides definitions of built-in functions from <<sec:common-functions>>.
 
-|[code]#<sycl/khr/includes/builtins_geometric.hpp>#
+|[code]#<sycl/khr/split_headers/builtins_geometric.hpp>#
 |Provides definitions of built-in functions from <<sec:geometric-functions>>.
 
-|[code]#<sycl/khr/includes/builtins_relational.hpp>#
+|[code]#<sycl/khr/split_headers/builtins_relational.hpp>#
 |Provides definitions of built-in functions from <<sec:relational-functions>>.
 
-|[code]#<sycl/khr/includes/groups.hpp>#
+|[code]#<sycl/khr/split_headers/groups.hpp>#
 |Provides definitions of the [code]#group# and [code]#sub_group# classes.
 
-|[code]#<sycl/khr/includes/group_algorithms.hpp>#
+|[code]#<sycl/khr/split_headers/group_algorithms.hpp>#
 |Provides definitions of group operations such as broadcasts or scans.
 
-|[code]#<sycl/khr/includes/multi_ptr.hpp>#
+|[code]#<sycl/khr/split_headers/multi_ptr.hpp>#
 |Provides definitions of the [code]#multi_ptr# class and related address space
 class aliases.
 
-|[code]#<sycl/khr/includes/functional.hpp>#
+|[code]#<sycl/khr/split_headers/functional.hpp>#
 |Provides definitions of function objects like [code]#plus# and
 [code]#logical_or# from <<sec:function-objects>>.
 
-|[code]#<sycl/khr/includes/reduction.hpp>#
+|[code]#<sycl/khr/split_headers/reduction.hpp>#
 |Provides definitions from <<sec:reduction>>, such as [code]#reduction#
 interface and [code]#reducer# class. Note that this header does not provide
 definitions of group algorithm functions such as [code]#joint_reduce#.
 
-|[code]#<sycl/khr/includes/stream.hpp>#
+|[code]#<sycl/khr/split_headers/stream.hpp>#
 |Provides functionality from <<subsec:stream>>, i.e. [code]#stream# class
 and related functions.
 
-|[code]#<sycl/khr/includes/type_traits.hpp>#
+|[code]#<sycl/khr/split_headers/type_traits.hpp>#
 |Provides definitions of various type traits like [code]#is_property#,
 [code]#is_group#, [code]#is_device_copyable#, etc.
 
-|[code]#<sycl/khr/includes/property_list.hpp>#
+|[code]#<sycl/khr/split_headers/property_list.hpp>#
 |Provides definition of the [code]#property_list# class.
 
-|[code]#<sycl/khr/includes/kernel_bundle.hpp>#
+|[code]#<sycl/khr/split_headers/kernel_bundle.hpp>#
 |Provides definitions from <<sec:interfaces.bundles>>, such as
 [code]#kernel_bundle#, [code]#kernel#, [code]#kernel_id#, [code]#device_image#
 and [code]#specialization_id# classes.
 
-|[code]#<sycl/khr/includes/kernel_handler.hpp>#
+|[code]#<sycl/khr/split_headers/kernel_handler.hpp>#
 |Provides definition of the [code]#kernel_handler# class.
 
-|[code]#<sycl/khr/includes/images.hpp>#
+|[code]#<sycl/khr/split_headers/images.hpp>#
 |Provides definitions of the [code]#sampler#, [code]#sampled_image#,
 [code]#unsampled_image# and corresponding accessors.
 
-|[code]#<sycl/khr/includes/exception.hpp>#
+|[code]#<sycl/khr/split_headers/exception.hpp>#
 |Provides definitions of error handling APIs from <<error-handling>>, such as
 [code]#exception# and [code]#exception_list# classes.
 
-|[code]#<sycl/khr/includes/hierarchical_parallelism.hpp>#
+|[code]#<sycl/khr/split_headers/hierarchical_parallelism.hpp>#
 |Provides definitions of the [code]#private_memory# and [code]#h_item# classes.
 
-|[code]#<sycl/khr/includes/interop_handle.hpp>#
+|[code]#<sycl/khr/split_headers/interop_handle.hpp>#
 |Provides definition of the [code]#interop_handle# class.
 
-|[code]#<sycl/khr/includes/backend.hpp>#
+|[code]#<sycl/khr/split_headers/backend.hpp>#
 |Provides definition of the [code]#backend_traits# and [code]#make_*# functions.
 
-|[code]#<sycl/khr/includes/bit.hpp>#, [code]#<sycl/khr/includes/span.hpp>#
+|[code]#<sycl/khr/split_headers/bit.hpp>#, [code]#<sycl/khr/split_headers/span.hpp>#
 |Headers in this set match by name with those provided by the next C++
 specification. They contain pre-adopted features from that standard.
 
-|[code]#<sycl/khr/includes/byte.hpp>#
+|[code]#<sycl/khr/split_headers/byte.hpp>#
 |Provides definition of the [code]#byte# alias.
 |====
 
@@ -198,7 +198,7 @@ exist within the [code]#::sycl# namespace as with the standard
 There is no guarantee that headers documented by this extension contain anything
 else besides things listed in sections below.
 For example, [code]#queue# class has methods which accept [code]#accessor#
-objects, but [code]#<sycl/khr/includes/queue.hpp># is not required to provide a
+objects, but [code]#<sycl/khr/split_headers/queue.hpp># is not required to provide a
 definition of [code]#accessor#.
 Therefore, a portable application should include the corresponding header to
 define [code]#accessor# definition explicitly.
@@ -212,51 +212,51 @@ Nevertheless, implementations are encouraged to keep headers contents as small
 as reasonably possible to provide maximum benefit for users.
 {endnote}
 
-[[sec:khr-includes-new-headers]]
+[[sec:khr-split-headers-new-headers]]
 == New headers
 
-[[sec:khr-includes-version]]
-=== [code]#<sycl/khr/includes/version.hpp># header
+[[sec:khr-split-headers-version]]
+=== [code]#<sycl/khr/split_headers/version.hpp># header
 
 This header provides definitions of:
 
-* [code]#SYCL_KHR_INCLUDES# macro;
+* [code]#SYCL_KHR_SPLIT_HEADERS# macro;
 * All macros defined in <<sec:preprocessor-directives-and-macros>>;
 * Any macros defined by other extensions supported by an implementation; and
 * Backend macros in the form of [code]#SYCL_BACKEND_<backend_name># defined by
   <<sec:backend-macros>>.
 
-[code]#<sycl/khr/includes/version.hpp># header is included by every other header
+[code]#<sycl/khr/split_headers/version.hpp># header is included by every other header
 documented by this extension, as well as [code]#<sycl/sycl.hpp>#.
 
 There is no guarantee that the aforementioned macros are defined before
-[code]#<sycl/khr/includes/version.hpp># is included.
+[code]#<sycl/khr/split_headers/version.hpp># is included.
 
 The code below demonstrates a portable way to detect if this extension is
 supported:
 
 [source]
 ----
-#if __has_include(<sycl/khr/includes/version.hpp>)
-// The file exists, but the SYCL_KHR_INCLUDES is not necessarily defined, i.e.
+#if __has_include(<sycl/khr/split_headers/version.hpp>)
+// The file exists, but the SYCL_KHR_SPLIT_HEADERS is not necessarily defined, i.e.
 // the extension may not be fully supported by an implementation.
 
-#include <sycl/khr/includes/version.hpp>
-// SYCL_KHR_INCLUDES macro is guaranteed to be defined if the extension is
+#include <sycl/khr/split_headers/version.hpp>
+// SYCL_KHR_SPLIT_HEADERS macro is guaranteed to be defined if the extension is
 // supported.
 #endif
 
-#if SYCL_KHR_INCLUDES
+#if SYCL_KHR_SPLIT_HEADERS
 // Extension is supported
-#include <sycl/khr/includes/vec.hpp>
+#include <sycl/khr/split_headers/vec.hpp>
 #else
 // Extension is not supported
 #include <sycl/sycl.hpp>
 #endif
 ----
 
-[[sec:khr-includes-backend]]
-=== [code]#<sycl/khr/includes/backend.hpp># header
+[[sec:khr-split-headers-backend]]
+=== [code]#<sycl/khr/split_headers/backend.hpp># header
 
 This header provides definitions of common SYCL backend APIs:
 
@@ -267,8 +267,8 @@ This header provides definitions of common SYCL backend APIs:
 * [code]#get_native#
 * [code]#make_*# functions from <<sec:backend-interoperability-make>>
 
-[[sec:khr-includes-device]]
-=== [code]#<sycl/khr/includes/device.hpp># header
+[[sec:khr-split-headers-device]]
+=== [code]#<sycl/khr/split_headers/device.hpp># header
 
 This header provides definitions of:
 
@@ -281,8 +281,8 @@ This header provides definitions of:
 * All other enumerations from <<sec:device-other-enumerations>>
 * [code]#enum class aspect#
 
-[[sec:khr-includes-platform]]
-=== [code]#<sycl/khr/includes/platform.hpp># header
+[[sec:khr-split-headers-platform]]
+=== [code]#<sycl/khr/split_headers/platform.hpp># header
 
 This header provides definitions of:
 
@@ -290,8 +290,8 @@ This header provides definitions of:
 * All [code]#info::platform# information descriptors from
   <<sec:platform-info-descriptors>>
 
-[[sec:khr-includes-context]]
-=== [code]#<sycl/khr/includes/context.hpp># header
+[[sec:khr-split-headers-context]]
+=== [code]#<sycl/khr/split_headers/context.hpp># header
 
 This header provides definitions of:
 
@@ -299,8 +299,8 @@ This header provides definitions of:
 * All [code]#info::context# information descriptors from
   <<sec:context-info-descriptors>>
 
-[[sec:khr-includes-queue]]
-=== [code]#<sycl/khr/includes/queue.hpp># header
+[[sec:khr-split-headers-queue]]
+=== [code]#<sycl/khr/split_headers/queue.hpp># header
 
 This header provides definitions of:
 
@@ -309,15 +309,15 @@ This header provides definitions of:
   <<sec:queue-info-descriptors>>
 * All [code]#properties::queue# types from <<sec:queue-properties>>
 
-[[sec:khr-includes-handler]]
-=== [code]#<sycl/khr/includes/handler.hpp># header
+[[sec:khr-split-headers-handler]]
+=== [code]#<sycl/khr/split_headers/handler.hpp># header
 
 This header provides definition of:
 
 * [code]#handler# class
 
-[[sec:khr-includes-event]]
-=== [code]#<sycl/khr/includes/event.hpp># header
+[[sec:khr-split-headers-event]]
+=== [code]#<sycl/khr/split_headers/event.hpp># header
 
 This header provides definitions of:
 
@@ -329,8 +329,8 @@ This header provides definitions of:
 * All [code]#info::event_profiling# descriptors from
   <<sec:event-info-descriptors>>
 
-[[sec:khr-includes-buffer]]
-=== [code]#<sycl/khr/includes/buffer.hpp># header
+[[sec:khr-split-headers-buffer]]
+=== [code]#<sycl/khr/split_headers/buffer.hpp># header
 
 This header provides definitions of:
 
@@ -338,8 +338,8 @@ This header provides definitions of:
 * [code]#buffer_allocator#
 * All [code]#property::buffer# types from <<sec:buffer-properties>>
 
-[[sec:khr-includes-image]]
-=== [code]#<sycl/khr/includes/image.hpp># header
+[[sec:khr-split-headers-image]]
+=== [code]#<sycl/khr/split_headers/image.hpp># header
 
 This header provides definitions of:
 
@@ -354,8 +354,8 @@ This header provides definitions of:
   [code]#coordinate_normalization_mode# enumerations and [code]#image_sampler#
   struct
 
-[[sec:khr-includes-accessor]]
-=== [code]#<sycl/khr/includes/accessor.hpp># header
+[[sec:khr-split-headers-accessor]]
+=== [code]#<sycl/khr/split_headers/accessor.hpp># header
 
 This header provides definitions of:
 
@@ -365,8 +365,8 @@ This header provides definitions of:
   [code]#access_mode# and [code]#access::access_mode# enumerations
 * Deduction tags from <<subsec:accessor-deduction-tags>>
 
-[[sec:khr-includes-multi-ptr]]
-=== [code]#<sycl/khr/includes/multi_ptr.hpp># header
+[[sec:khr-split-headers-multi-ptr]]
+=== [code]#<sycl/khr/split_headers/multi_ptr.hpp># header
 
 This header provides definitions of:
 
@@ -375,15 +375,15 @@ This header provides definitions of:
 * [code]#global_ptr#, [code]#raw_private_ptr#, [code]#decorated_local_ptr# and
   other aliases from <<sec:pointerclasses>>
 
-[[sec:khr-includes-hierarchical-parallelism]]
-=== [code]#<sycl/khr/includes/hierarchical_parallelism.hpp># header
+[[sec:khr-split-headers-hierarchical-parallelism]]
+=== [code]#<sycl/khr/split_headers/hierarchical_parallelism.hpp># header
 
 This header provides definitions of:
 
 * [code]#private_memory# and [code]#h_item# classes
 
-[[sec:khr-includes-usm]]
-=== [code]#<sycl/khr/includes/usm.hpp># header
+[[sec:khr-split-headers-usm]]
+=== [code]#<sycl/khr/split_headers/usm.hpp># header
 
 This header provides definitions of:
 
@@ -393,8 +393,8 @@ This header provides definitions of:
   [code]#malloc# and [code]#get_pointer_type# from sections
   <<sec:usm-allocations>> and <<subsec:usm-mem-ptr-queries>>
 
-[[sec:khr-includes-index-space]]
-=== [code]#<sycl/khr/includes/index_space.hpp># header
+[[sec:khr-split-headers-index-space]]
+=== [code]#<sycl/khr/split_headers/index_space.hpp># header
 
 This header provides definitions of:
 
@@ -404,8 +404,8 @@ This header provides definitions of:
 * [code]#range#
 * [code]#nd_range#
 
-[[sec:khr-includes-reduction]]
-=== [code]#<sycl/khr/includes/reduction.hpp># header
+[[sec:khr-split-headers-reduction]]
+=== [code]#<sycl/khr/split_headers/reduction.hpp># header
 
 This header provides definitions of:
 
@@ -413,18 +413,18 @@ This header provides definitions of:
 * [code]#reducer# class
 * All [code]#property::reduction# types from <<sec:reduction-properties>>
 
-This header also includes [code]#<sycl/khr/includes/functional.hpp># for
+This header also includes [code]#<sycl/khr/split_headers/functional.hpp># for
 convenience.
 
-[[sec:khr-includes-interop-handle]]
-=== [code]#<sycl/khr/includes/interop_handle.hpp># header
+[[sec:khr-split-headers-interop-handle]]
+=== [code]#<sycl/khr/split_headers/interop_handle.hpp># header
 
 This header provides definition of:
 
 * [code]#interop_handle# class
 
-[[sec:khr-includes-kernel-bundle]]
-=== [code]#<sycl/khr/includes/kernel_bundle.hpp># header
+[[sec:khr-split-headers-kernel-bundle]]
+=== [code]#<sycl/khr/split_headers/kernel_bundle.hpp># header
 
 This header provides definitions of:
 
@@ -437,13 +437,13 @@ This header provides definitions of:
   [code]#compile#, [code]#link#
 * [code]#specialization_id# class
 
-[[sec:khr-includes-kernel-handler]]
-=== [code]#<sycl/khr/includes/kernel_handler.hpp># header
+[[sec:khr-split-headers-kernel-handler]]
+=== [code]#<sycl/khr/split_headers/kernel_handler.hpp># header
 
 This header provides definition of [code]#kernel_handler# class
 
-[[sec:khr-includes-exception]]
-=== [code]#<sycl/khr/includes/exception.hpp># header
+[[sec:khr-split-headers-exception]]
+=== [code]#<sycl/khr/split_headers/exception.hpp># header
 
 This header provides definitions of:
 
@@ -454,13 +454,13 @@ This header provides definitions of:
 * [code]#std::is_error_code_enum# type trait specialization for
   [code]#sycl::errc#
 
-[[sec:khr-includes-half]]
-=== [code]#<sycl/khr/includes/half.hpp># header
+[[sec:khr-split-headers-half]]
+=== [code]#<sycl/khr/split_headers/half.hpp># header
 
 This header provides definition of [code]#half# data type
 
-[[sec:khr-includes-vec]]
-=== [code]#<sycl/khr/includes/vec.hpp># header
+[[sec:khr-split-headers-vec]]
+=== [code]#<sycl/khr/split_headers/vec.hpp># header
 
 This header provides definitions of:
 
@@ -476,16 +476,16 @@ In order to make simple swizzle functions ([code]#XYZW_SWIZZLE# and
 header is included.
 The recommended way of doing that is through command line options.
 
-[[sec:khr-includes-marray]]
-=== [code]#<sycl/khr/includes/marray.hpp># header
+[[sec:khr-split-headers-marray]]
+=== [code]#<sycl/khr/split_headers/marray.hpp># header
 
 This header provides definitions of:
 
 * [code]#marray# class
 * Type aliases from <<subsec:vec-aliases>>
 
-[[sec:khr-includes-atomic]]
-=== [code]#<sycl/khr/includes/atomic.hpp># header
+[[sec:khr-split-headers-atomic]]
+=== [code]#<sycl/khr/split_headers/atomic.hpp># header
 
 This header provides definitions of:
 
@@ -495,8 +495,8 @@ This header provides definitions of:
 * [code]#atomic# class and free functions like [code]#atomic_store#,
   [code]#atomic_fetch_and# from <<sec:atom-types-depr>>
 
-[[sec:khr-includes-stream]]
-=== [code]#<sycl/khr/includes/stream.hpp># header
+[[sec:khr-split-headers-stream]]
+=== [code]#<sycl/khr/split_headers/stream.hpp># header
 
 This header provides definitions of:
 
@@ -507,8 +507,8 @@ This header provides definitions of:
 * [code]#template <typename T> const stream& operator<<(const stream& os, const
   T& rhs)# operator
 
-[[sec:khr-includes-type-traits]]
-=== [code]#<sycl/khr/includes/type_traits.hpp># header
+[[sec:khr-split-headers-type-traits]]
+=== [code]#<sycl/khr/split_headers/type_traits.hpp># header
 
 This header provides definitions of:
 
@@ -522,15 +522,15 @@ This header provides definitions of:
 * [code]#known_identity#, [code]#known_identity_v#, [code]#has_known_identity#
   and [code]#has_known_identity_v# type traits
 
-[[sec:khr-includes-property-list]]
-=== [code]#<sycl/khr/includes/property_list.hpp># header
+[[sec:khr-split-headers-property-list]]
+=== [code]#<sycl/khr/split_headers/property_list.hpp># header
 
 This header provides definition of:
 
 * [code]#property_list# class definition
 
-[[sec:khr-includes-functional]]
-=== [code]#<sycl/khr/includes/functional.hpp># header
+[[sec:khr-split-headers-functional]]
+=== [code]#<sycl/khr/split_headers/functional.hpp># header
 
 This header provides definitions of:
 
@@ -544,8 +544,8 @@ This header provides definitions of:
 * [code]#minimum#
 * [code]#maximum#
 
-[[sec:khr-includes-groups]]
-=== [code]#<sycl/khr/includes/groups.hpp># header
+[[sec:khr-split-headers-groups]]
+=== [code]#<sycl/khr/split_headers/groups.hpp># header
 
 This header provides definitions of:
 
@@ -553,8 +553,8 @@ This header provides definitions of:
 * [code]#device_event# class
 * [code]#group_barrier# function
 
-[[sec:khr-includes-group-algorithms]]
-=== [code]#<sycl/khr/includes/group_algorithms.hpp># header
+[[sec:khr-split-headers-group-algorithms]]
+=== [code]#<sycl/khr/split_headers/group_algorithms.hpp># header
 
 This header provides definitions of:
 
@@ -566,8 +566,8 @@ This header provides definitions of:
   [code]#joint_exclusive_scan# and [code]#joint_inclusive_scan# functions
   functions
 
-[[sec:khr-includes-math]]
-=== [code]#<sycl/khr/includes/math.hpp># header
+[[sec:khr-split-headers-math]]
+=== [code]#<sycl/khr/split_headers/math.hpp># header
 
 This header includes all SYCL built-in functions documented by sections:
 
@@ -579,8 +579,8 @@ This header includes all SYCL built-in functions documented by sections:
 * <<sec:geometric-functions>>
 * <<sec:relational-functions>>
 
-[[sec:khr-includes-builtins-math]]
-=== [code]#<sycl/khr/includes/builtins_math.hpp># header
+[[sec:khr-split-headers-builtins-math]]
+=== [code]#<sycl/khr/split_headers/builtins_math.hpp># header
 
 This header includes all SYCL built-in functions documented by sections:
 
@@ -588,48 +588,48 @@ This header includes all SYCL built-in functions documented by sections:
 * <<sec:native-precision-math-functions>>
 * <<sec:half-precision-math-functions>>
 
-[[sec:khr-includes-builtins-integer]]
-=== [code]#<sycl/khr/includes/builtins_integer.hpp># header
+[[sec:khr-split-headers-builtins-integer]]
+=== [code]#<sycl/khr/split_headers/builtins_integer.hpp># header
 
 This header includes all SYCL built-in functions documented by
 <<sec:integer-functions>>.
 
-[[sec:khr-includes-builtins-common]]
-=== [code]#<sycl/khr/includes/builtins_common.hpp># header
+[[sec:khr-split-headers-builtins-common]]
+=== [code]#<sycl/khr/split_headers/builtins_common.hpp># header
 
 This header includes all SYCL built-in functions documented by
 <<sec:common-functions>>.
 
-[[sec:khr-includes-builtins-geometric]]
-=== [code]#<sycl/khr/includes/builtins_geometric.hpp># header
+[[sec:khr-split-headers-builtins-geometric]]
+=== [code]#<sycl/khr/split_headers/builtins_geometric.hpp># header
 
 This header includes all SYCL built-in functions documented by
 <<sec:geometric-functions>>.
 
-[[sec:khr-includes-builtins-relational]]
-=== [code]#<sycl/khr/includes/builtins_relational.hpp># header
+[[sec:khr-split-headers-builtins-relational]]
+=== [code]#<sycl/khr/split_headers/builtins_relational.hpp># header
 
 This header includes all SYCL built-in functions documented by
 <<sec:relational-functions>>.
 
-[[sec:khr-includes-bit]]
-=== [code]#<sycl/khr/includes/bit.hpp># header
+[[sec:khr-split-headers-bit]]
+=== [code]#<sycl/khr/split_headers/bit.hpp># header
 
 This header contains definition of [code]#bit_cast# pre-adopted from the next
 C++ specification.
 
-[[sec:khr-includes-span]]
-=== [code]#<sycl/khr/includes/span.hpp># header
+[[sec:khr-split-headers-span]]
+=== [code]#<sycl/khr/split_headers/span.hpp># header
 
 This header contains definitions of [code]#span# and [code]#dynamic_extent#
 pre-adopted from the next C++ specification.
 
-[[sec:khr-includes-byte]]
-=== [code]#<sycl/khr/includes/byte.hpp># header
+[[sec:khr-split-headers-byte]]
+=== [code]#<sycl/khr/split_headers/byte.hpp># header
 
 This header contains definition of [code]#byte# type alias
 
-[[sec:khr-includes-other-extensions]]
+[[sec:khr-split-headers-other-extensions]]
 == Co-existence with other extensions
 
 Any extension which does not explicitly document how it can be accessed through
@@ -637,7 +637,7 @@ header files should be assumed to be available only through
 [code]#<sycl/sycl.hpp>#.
 
 If an implementation supports this extension, then any macro defined by other
-supported extensions must be defined in [code]#<sycl/khr/includes/version.hpp>#.
+supported extensions must be defined in [code]#<sycl/khr/split_headers/version.hpp>#.
 
 == Open issues/questions
 
