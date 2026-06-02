@@ -167,8 +167,8 @@ and [code]#specialization_id# classes.
 |[code]#<sycl/khr/split_headers/kernel_handler.hpp>#
 |Provides definition of the [code]#kernel_handler# class.
 
-|[code]#<sycl/khr/split_headers/images.hpp>#
-|Provides definitions of the [code]#sampler#, [code]#sampled_image#,
+|[code]#<sycl/khr/split_headers/image.hpp>#
+|Provides definitions of the [code]#image_sampler#, [code]#sampled_image#,
 [code]#unsampled_image# and corresponding accessors.
 
 |[code]#<sycl/khr/split_headers/exception.hpp>#
@@ -308,7 +308,7 @@ This header provides definitions of:
 * [code]#queue# class
 * All [code]#info::queue# information descriptors from
   <<sec:queue-info-descriptors>>
-* All [code]#properties::queue# types from <<sec:queue-properties>>
+* All [code]#property::queue# types from <<sec:queue-properties>>
 
 [[sec:khr-split-headers-handler]]
 === [code]#<sycl/khr/split_headers/handler.hpp># header
@@ -328,7 +328,7 @@ This header provides definitions of:
 * All [code]#info::event_command_status# descriptors from
   <<sec:event-info-descriptors>>
 * All [code]#info::event_profiling# descriptors from
-  <<sec:event-info-descriptors>>
+  <<sec:event-profiling-info-descriptors>>
 
 [[sec:khr-split-headers-buffer]]
 === [code]#<sycl/khr/split_headers/buffer.hpp># header
@@ -351,9 +351,9 @@ This header provides definitions of:
   [code]#host_unsampled_image_accessor# and [code]#host_sampled_image_accessor#
   classes
 * [code]#property::no_init# and [code]#no_init# from <<sec:accessor-properties>>
-* [code]#addresing_mode#, [code]#filtering_mode#,
-  [code]#coordinate_normalization_mode# enumerations and [code]#image_sampler#
-  struct
+* [code]#addressing_mode#, [code]#filtering_mode#,
+  [code]#coordinate_normalization_mode#, [code]#image_target# enumerations and
+  [code]#image_sampler# struct
 
 [[sec:khr-split-headers-accessor]]
 === [code]#<sycl/khr/split_headers/accessor.hpp># header
@@ -434,8 +434,9 @@ This header provides definitions of:
   [code]#kernel_bundle# classes
 * All [code]#info::kernel# and [code]#info::kernel_device_specific# information
   descriptors from <<sec:kernel-info-descriptors>>
-* Free functions like [code]#get_kernel_bundle#, [code]#has_kernel_bundle#,
-  [code]#compile#, [code]#link#
+* Free functions [code]#get_kernel_bundle#, [code]#has_kernel_bundle#,
+  [code]#compile#, [code]#link#, [code]#build#, [code]#join#,
+  [code]#is_compatible#, [code]#get_kernel_id#, [code]#get_kernel_ids#
 * [code]#specialization_id# class
 
 [[sec:khr-split-headers-kernel-handler]]
@@ -467,7 +468,7 @@ This header provides definitions of:
 
 * [code]#rounding_mode# enumeration
 * [code]#elem# struct and [code]#vec# class
-* Type aliases from <<subsec:marray-aliases>>
+* Type aliases from <<subsec:vec-aliases>>
 * [code]#+__writeable_swizzle__+# and [code]#+__const_swizzle__+# classes from
   <<swizzled-vec-class>>
 
@@ -483,7 +484,7 @@ The recommended way of doing that is through command line options.
 This header provides definitions of:
 
 * [code]#marray# class
-* Type aliases from <<subsec:vec-aliases>>
+* Type aliases from <<subsec:marray-aliases>>
 
 [[sec:khr-split-headers-atomic]]
 === [code]#<sycl/khr/split_headers/atomic.hpp># header
@@ -560,12 +561,14 @@ This header provides definitions of:
 This header provides definitions of:
 
 * [code]#group_broadcast# function
-* [code]#any_of#, [code]#all_of# and [code]#none_of# functions
-* [code]#shift_left#, [code]#shift_right#, [code]#permute#, [code]#select# and
-  [code]#reduce# functions
+* [code]#any_of_group#, [code]#joint_any_of#, [code]#all_of_group#,
+  [code]#joint_all_of#, [code]#none_of_group# and [code]#joint_none_of#
+  functions
+* [code]#reduce_over_group# and [code]#joint_reduce# functions
+* [code]#shift_group_left#, [code]#shift_group_right#,
+  [code]#permute_group_by_xor# and [code]#select_from_group# functions
 * [code]#exclusive_scan_over_group#, [code]#inclusive_scan_over_group#,
   [code]#joint_exclusive_scan# and [code]#joint_inclusive_scan# functions
-  functions
 
 [[sec:khr-split-headers-math]]
 === [code]#<sycl/khr/split_headers/math.hpp># header
