@@ -11014,13 +11014,20 @@ include::{code_dir}/usm_device.cpp[lines=4..-1]
 
 === Unified addressing
 
-Unified Addressing guarantees that all devices will use a unified address space.
-Pointer values in the unified address space will always refer to the same
-location in memory.
-The unified address space encompasses the host and one or more devices.
-Note that this does not require addresses in the unified address space to be
-accessible on all devices, just that pointer values will be consistent.
+The following guarantees apply to the pointer values of USM allocations for
+objects with overlapping lifetimes:
 
+  * A USM pointer is different from all non-USM memory addresses on the host.
+  * A USM host memory pointer allocated from context _C_ has a value that is
+    different from all other USM host memory pointers (regardless of context),
+    different from all USM shared memory pointers (regardless of context), and
+    different from all USM device memory pointers allocated from context _C_.
+  * A USM shared memory pointer allocated from context _C_ has a value that is
+    different from all other USM shared memory pointers (regardless of context),
+    different from all USM host memory pointers (regardless of context), and
+    different from all USM device memory pointers allocated from context _C_.
+  * A USM device memory pointer allocated from context _C_ has a value that is
+    different from all other USM pointers allocated from context _C_.
 
 === Kinds of unified shared memory
 
