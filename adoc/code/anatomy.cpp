@@ -1,3 +1,6 @@
+// Copyright (c) 2011-2026 The Khronos Group, Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 #include <iostream>
 #include <sycl/sycl.hpp>
 #include <vector>
