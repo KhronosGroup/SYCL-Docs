@@ -116,15 +116,9 @@ executed over the given range from 0 to 1023.
 The different member functions to execute kernels can be found in
 <<subsec:invokingkernels>>.
 
-A <<command-group-scope>> is the syntactic scope wrapped by the construction of
-a <<command-group-function-object>>.
 In this example the [code]#parallel_for# queue shortcut on lines 17 to 20 is
 used to implicitly define a command group containing a single
-<<sycl-kernel-function>>.
-Alternatively, [code]#myQueue.submit# may be called with an explicit
-<<command-group-function-object>>, which takes a parameter of type command group
-[code]#handler# constructed by the runtime, and may invoke only a single
-<<sycl-kernel-function>>.
+<<sycl-kernel-function>>. All queue shortcuts can be found in <<sec:queue-class>>.
 
 All the requirements for a kernel to execute are defined in this
 <<command-group-scope>>, as described in <<sec:executionmodel>>.
@@ -135,14 +129,14 @@ No <<device>> is specified, so the queue selects the best underlying device to
 execute on, leaving the decision up to the runtime.
 
 In SYCL, data that is required within a <<sycl-kernel-function>> must be
-contained within a <<buffer>>, <<image>>, or <<usm>> allocation, as described in
+contained within a <<usm>>, <<image>>, or <<buffer>> allocation, as described in
 <<sec:memory.model>>.
 In this example we use a USM device allocation, created with
 [code]#malloc_device# on line 14, which returns a pointer to memory accessible
 on the <<device>> associated with [code]#myQueue#.
 The kernel writes through this pointer on line 19.
 Because device allocations are not accessible from the host, the results are
-explicitly copied back into a host [code]##std::vector## using
+explicitly copied back to the host [code]##std::vector## using
 [code]#myQueue.copy# on line 23, and the call to [code]#myQueue.wait# on line 25
 ensures all enqueued operations have completed before the host reads the data.
 Finally, the device allocation is released with [code]#free# on line 32.
