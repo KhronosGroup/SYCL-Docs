@@ -79,7 +79,7 @@ the SYCL features that will be used.
 A SYCL application runs on a <<sec:platformmodel, SYCL Platform>>.
 The application is structured in three scopes which specify the different
 sections; <<application-scope>>, <<command-group-scope>> and <<kernel-scope>>.
-The <<kernel-scope>> specifies a single kernel function that will be, or has
+The <<kernel-scope>> specifies a <<sycl-kernel-function>> that will be, or has
 been, compiled by a <<device-compiler>> and executed on a <<device>>.
 In this example <<kernel-scope>> is defined by lines 18 to 19, the body of the
 lambda passed to [code]#parallel_for#.
@@ -87,7 +87,8 @@ The <<command-group-scope>> specifies a unit of work which is comprised of a
 <<sycl-kernel-function>> and any associated requirements.
 In this example the kernel is launched using the [code]#parallel_for# queue
 shortcut on lines 17 to 20, which implicitly defines the <<command-group-scope>>
-around the kernel invocation.
+around the <<kernel-scope>>.
+All queue shortcuts can be found in <<sec:queue-class>>.
 The <<application-scope>> specifies all other code outside of a
 <<command-group-scope>>.
 These three scopes are used to control the application flow and the construction
@@ -115,21 +116,17 @@ In the case of [code]#parallel_for# the <<sycl-kernel-function>> will be
 executed over the given range from 0 to 1023.
 The different member functions to execute kernels can be found in
 <<subsec:invokingkernels>>.
-
-In this example the [code]#parallel_for# queue shortcut on lines 17 to 20 is
-used to implicitly define a command group containing a single
-<<sycl-kernel-function>>. All queue shortcuts can be found in <<sec:queue-class>>.
-
 All the requirements for a kernel to execute are defined in this
 <<command-group-scope>>, as described in <<sec:executionmodel>>.
-In this case [code]#myQueue# is constructed on line 11 with the
-[code]#property::queue::in_order# property, which causes commands submitted to
-the queue to execute in the order they are enqueued.
-No <<device>> is specified, so the queue selects the best underlying device to
-execute on, leaving the decision up to the runtime.
+Additionally, in this example, [code]#myQueue# is constructed on line 11 with
+the [code]#property::queue::in_order# property, which causes commands submitted
+to the queue to execute in the order they were enqueued.
+No <<device>> is specified in the queue constructor, so the constructor selects
+the best underlying device to execute on, leaving the decision up to the
+runtime.
 
 In SYCL, data that is required within a <<sycl-kernel-function>> must be
-contained within a <<usm>>, <<image>>, or <<buffer>> allocation, as described in
+contained within a <<usm>> allocation, <<image>>, or <<buffer>> as described in
 <<sec:memory.model>>.
 In this example we use a USM device allocation, created with
 [code]#malloc_device# on line 14, which returns a pointer to memory accessible
