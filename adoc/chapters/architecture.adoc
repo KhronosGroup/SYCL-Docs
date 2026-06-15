@@ -75,61 +75,46 @@ include::{code_dir}/anatomy.cpp[lines=4..-1]
 At line 2 we [code]#{hash}include# the SYCL header files, which provide all of
 of the SYCL features that will be used.
 
-A SYCL application runs on a <<sec:platformmodel, SYCL Platform>>.
-The application is primarily comprised of two components: host code, and device
-code.
-The device code is defined inside of the lambda function passed as the second
-argument to [code]#myQueue.parallel_for# on line 17.
-The device code, also known as a kernel, will be compiled by a
-<<device-compiler>> in order to be executed on a <<device>>.
-The kernel body is found on lines 18-19 and belongs to the <<kernel-scope>>.
-All the surrounding code belongs to the <<application-scope>>.
-
-The [code]#parallel_for# member function creates an instance of a <<kernel>>,
-which is the entity that will be enqueued within a command group.
-In the case of [code]#parallel_for# the <<sycl-kernel-function>> will be
-executed over the given range from 0 to 1023.
-The different member functions to execute kernels can be found in
-<<subsec:invokingkernels>>.
-
-This example makes use of a universal shared memory (<<usm>>)
-[code]#malloc_device# allocation.
-On line 14 [code]#dataDevice# is a pointer to memory acecssible on the
-<<device>> associated with [code]#myQueue#.
-Once kernel execution is complete the results must be moved back to host so that
-it can be accessed by the host to print to the console.
-This is done on line 23 with [code]#myQueue.copy()#.
-
-By default a <<queue>> executes command submitted to it out of order.
-In this case there are two commands submitted to [code]#myQueue#:
-[code]#myQueue.parallel_for()#, and [code]#myQueue.copy()#.
-Out of order execution creates the possibility for the copy command to be
-executed before parallel_for the application would output nonsense.
-In order to prevent this race condition we make use of the [code]#in_order()#
-property passed to the queue constructor.
-[code]#in_order()# tells the queue to execute commands in the order that they
-are submitted to the queue.
-This is very useful for simple applications, like our example, it is important
-to consider the behavior very carefully in more complex applications as you
-could potentially be leaving performance on the table.
-Instead dependences should be expressed explicitly by passing the <<event>>
-returned by each command to all commands that depend upon its completion.
-
+At line 11 we instantiate a <<queue>> with the [code]#in_order# property.
+A queue is bound to a <<device>>, if you do not specify a device with a selector
+function, the SYCL runtime will choose one automatically.
+A queue will execute commands submitted to it on it's associated device.
+In our case commands will be executed in a first in first out (FIFO) fashion
+because of the [code]#in_order# property passed to our queue's constructor.
 The commands submitted to [code]#myQueue# are executed asynchronously from the
 host code.
+
+At line 14 we use [code]#malloc_device# to allocate memory on the <<device>>
+associated with our queue and store a universal shared memory (USM) pointer to
+the memory in [code]#dataDevice#.
+This memory is only accessible on the device.
+
+The application can be decomposed in to two components: code that is executed on
+the host, and code that is executed on a device.
+From line 17 to line 20 the device code is defined as a <<sycl-kernel-function>>
+passed as the second argument to [code]#myQueue.parallel_for#.
+The device code will be compiled by a <<device-compiler>> in order to be able to
+be executed on the <<device>> associated with [code]#myQueue#.
+
+The [code]#parallel_for# queue member function will invoke the compiled
+<<sycl-kernel-function>> over the given range from 0 to 1023.
+The different member functions to execute <<kernel>> can be found in
+<<subsec:invokingkernels>>.
+
+At line 23 we copy back the result from the device memory back into the vector
+in host memory.
+
+At line 25 we call [code]#myQueue.wait()#.
 The host code will continue to execute unless explicitly told to wait.
 This is useful if there are other tasks that can be performed on the host while
 a device is executing it's command(s).
 But similar to dependences between commands, the application should ensure that
 results from a device are availble on the host before executing any code that
 relies on those results.
-On lines 28 and 29 we output the result of the device code to the console, so we
-make sure to call [code]#myQueue.wait()# before attempting to do so.
 
-On line 32 we call [code]#free()# to deallocate the memory on the device.
+At line 32 we call [code]#free()# to deallocate the memory on the device.
 It is important to do this to prevent memory leaks on a device, as c++ will not
 do so for you.
-
 
 [[sec:platformmodel]]
 == The SYCL platform model
