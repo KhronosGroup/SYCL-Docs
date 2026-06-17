@@ -95,8 +95,9 @@ In lines 17 to 20, [code]#parallel_for# does three conceptual things:
     second argument to [code]#parallel_for#, is compiled by a
     <<device-compiler>> into a <<kernel>> that can be ran on the <<device>>
     associated with [code]#myQueue#.
-  2. A command that invokes the <<kernel>> on the <<device>> is submitted to [code]#myQueue#, 
-    and the <<kernel>> is executed asynchronously from the host. 
+  2. A command that invokes the <<kernel>> on the <<device>> is submitted to
+    [code]#myQueue#, and the <<kernel>> is executed asynchronously from the
+    host.
   3. The command decomposes the range 0 to 1023 into <<work-item, work-items>>.
     For each <<work-item>> the <<sycl-kernel-function>> is invoked once on the
     device.
@@ -104,8 +105,8 @@ In lines 17 to 20, [code]#parallel_for# does three conceptual things:
 The different <<queue>> member functions used to invoke a
 <<sycl-kernel-function>> can be found in <<subsec:invokingkernels>>.
 
-At line 23 we use the [code]#copy# member function to submit a copy command to copy the results from the 
-<<device, device's>> memory back into host memory.
+At line 23 we use the [code]#copy# member function to submit a copy command to
+copy the results from the <<device, device's>> memory back into host memory.
 
 At line 25 we call [code]#wait# to block the host until all commands submitted
 to [code]#myQueue# (the [code]#parallel_for# and the [code]#copy#) have
