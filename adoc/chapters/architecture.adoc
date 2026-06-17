@@ -89,32 +89,33 @@ associated with our queue and store a universal shared memory (USM) pointer to
 the memory in [code]#dataDevice#.
 This memory is only accessible on the device.
 
-The application can be decomposed in to two components: code that is executed on
-the host, and code that is executed on a device.
-From line 17 to line 20 the device code is defined as a <<sycl-kernel-function>>
-passed as the second argument to [code]#myQueue.parallel_for#.
-The device code will be compiled by a <<device-compiler>> in order to be able to
-be executed on the <<device>> associated with [code]#myQueue#.
+In lines 17 to 20, [code]#parallel_for# does three conceptual things:
 
-The [code]#parallel_for# queue member function will invoke the compiled
-<<sycl-kernel-function>> over the given range from 0 to 1023.
-The different member functions to execute <<kernel>> can be found in
-<<subsec:invokingkernels>>.
+  1. The <<sycl-kernel-function>> (defined here as a lambda), passed as the
+    second argument to [code]#parallel_for#, is compiled by a
+    <<device-compiler>> into a <<kernel>> that can be ran on the <<device>>
+    associated with [code]#myQueue#.
+  2. A command that invokes the <<kernel>> on the <<device>> is submitted to [code]#myQueue#, 
+    and the <<kernel>> is executed asynchronously from the host. 
+  3. The command decomposes the range 0 to 1023 into <<work-item, work-items>>.
+    For each <<work-item>> the <<sycl-kernel-function>> is invoked once on the
+    device.
 
-At line 23 we copy back the result from the device memory back into the vector
-in host memory.
+The different <<queue>> member functions used to invoke a
+<<sycl-kernel-function>> can be found in <<subsec:invokingkernels>>.
 
-At line 25 we call [code]#myQueue.wait()#.
-The host code will continue to execute unless explicitly told to wait.
-This is useful if there are other tasks that can be performed on the host while
-a device is executing it's command(s).
-But similar to dependences between commands, the application should ensure that
-results from a device are availble on the host before executing any code that
-relies on those results.
+At line 23 we use the [code]#copy# member function to submit a copy command to copy the results from the 
+<<device, device's>> memory back into host memory.
 
-At line 32 we call [code]#free()# to deallocate the memory on the device.
-It is important to do this to prevent memory leaks on a device, as c++ will not
-do so for you.
+At line 25 we call [code]#wait# to block the host until all commands submitted
+to [code]#myQueue# (the [code]#parallel_for# and the [code]#copy#) have
+completed.
+
+At lines 28 to 29 we print the host memory, which now contains a copy of the
+device memory.
+
+At line 32, the device allocation [code]#dataDevice# is released with
+[code]#free#.
 
 [[sec:platformmodel]]
 == The SYCL platform model
