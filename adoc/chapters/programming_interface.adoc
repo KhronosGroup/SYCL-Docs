@@ -20687,6 +20687,10 @@ The [code]#sycl::atomic_ref# class has a template parameter
 scope for the atomic operations.
 Most member functions also provide an optional parameter that allows the
 application to override this default.
+A member function must not be invoked with [code]#memory_scope::work_item#,
+whether by using the default scope or by explicitly specifying a scope.
+If a member function is invoked with [code]#memory_scope::work_item# the
+behavior is undefined.
 
 The [code]#sycl::atomic_ref# class also has a template parameter
 [code]#AddressSpace#, which allows the application to make an assertion about
@@ -20813,6 +20817,8 @@ void store(T operand, memory_order order = default_write_order,
       This function is only supported for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20832,6 +20838,8 @@ T load(memory_order order = default_read_order, memory_scope scope =
       or [code]#memory_order::seq_cst#.  This function is only supported for
       64-bit data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20850,6 +20858,8 @@ T exchange(T operand, memory_order order = default_read_modify_write_order,
       returns the original value of the referenced object.
       This function is only supported for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -20873,6 +20883,8 @@ successful. The [code]#failure# memory order of this atomic operation must be
 This function is only supported for 64-bit data types on devices that have
 [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20894,6 +20906,7 @@ if (order == memory_order::acq_rel) {
 }
 return compare_exchange_weak(expected, desired, success, failure, scope);
 ----
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -20915,6 +20928,8 @@ successful. The [code]#failure# memory order of this atomic operation must be
 
 This function is only supported for 64-bit data types on devices that have
 [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -20959,6 +20974,8 @@ T fetch_add(T operand, memory_order order = default_read_modify_write_order,
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20991,6 +21008,8 @@ T fetch_sub(T operand, memory_order order = default_read_modify_write_order,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21026,6 +21045,8 @@ T fetch_and(T operand, memory_order order = default_read_modify_write_order,
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21045,6 +21066,8 @@ T fetch_or(T operand, memory_order order = default_read_modify_write_order,
       original value of the referenced object.  This function is only supported
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21066,6 +21089,8 @@ T fetch_xor(T operand, memory_order order = default_read_modify_write_order,
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21086,6 +21111,8 @@ T fetch_min(T operand, memory_order order = default_read_modify_write_order,
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21098,6 +21125,8 @@ T fetch_max(T operand, memory_order order = default_read_modify_write_order,
       original value of the referenced object.  This function is only supported
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 |====
 
@@ -21120,6 +21149,8 @@ T fetch_add(T operand, memory_order order = default_read_modify_write_order,
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21138,6 +21169,8 @@ T fetch_sub(T operand, memory_order order = default_read_modify_write_order,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21158,6 +21191,8 @@ T fetch_min(T operand, memory_order order = default_read_modify_write_order,
       original value of the referenced object.  This function is only supported for
       64-bit data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21169,6 +21204,8 @@ T fetch_max(T operand, memory_order order = default_read_modify_write_order,
       and assigns the result to the value of the referenced object. Returns the
       original value of the referenced object.  This function is only supported for
       64-bit data types on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 |====
 
@@ -21191,6 +21228,8 @@ T* fetch_add(ptrdiff_t operand,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       pointers on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21225,6 +21264,8 @@ T* fetch_sub(ptrdiff_t operand,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       pointers on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
