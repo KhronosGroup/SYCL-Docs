@@ -1,0 +1,77 @@
+[[sec:khr-convert]]
+= sycl_khr_convert
+
+This extension provides a scalar equivalent of the [code]#vec::convert# member
+function, allowing scalar values to be converted between types with an explicit
+rounding mode.
+This makes it possible to ensure that scalar conversion results match those
+produced by [code]#vec::convert# for the corresponding element types.
+
+[[sec:khr-convert-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-convert-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_CONVERT# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-convert-function]]
+== Scalar type conversion function
+
+.[apidef]#khr::convert#
+[source,role=synopsis,id=api:khr-convert]
+----
+namespace sycl::khr {
+
+template <typename ConvertT,
+          rounding_mode RoundingMode = rounding_mode::automatic,
+          typename T>
+ConvertT convert(T value);
+
+} // namespace sycl::khr
+----
+
+_Constraints:_ [code]#T# is a scalar type that is one of the built-in scalar
+data types listed in <<subsec:scalartypes>>, [code]#half#, [code]#sycl::byte#,
+or [code]#std::byte#.
+[code]#ConvertT# must be one of the same set of scalar types.
+
+_Returns:_ [code]#value# converted from type [code]#T# to type [code]#ConvertT#
+using the rounding mode specified by [code]#RoundingMode#.
+The rounding modes are described in <<table.vec.roundingmodes>>.
+
+[[sec:khr-convert-example]]
+== Example
+
+The example below demonstrates converting a scalar value using an explicit
+rounding mode, matching the behavior of [code]#vec::convert# for a single
+element.
+
+[source,c++,linenums]
+----
+#include <sycl/sycl.hpp>
+
+int main() {
+  float f = 1.7f;
+
+  // Scalar conversion with explicit rounding mode
+  int i = sycl::khr::convert<int, sycl::rounding_mode::rtz>(f); // truncates to 1
+
+  // Matches vec::convert behavior for the same element type and rounding mode
+  sycl::vec<float, 1> vf{f};
+  auto vi = vf.convert<int, sycl::rounding_mode::rtz>();
+  // i == vi[0]
+}
+----
