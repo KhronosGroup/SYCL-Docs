@@ -1602,12 +1602,14 @@ struct atomic_memory_scope_capabilities {
 _Remarks:_ Template parameter to [api]#context::get_info#.
 
 _Returns:_ The set of memory scopes supported by atomic operations on all
-devices in the context.
+devices in the context, which is a subset of {[code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, [code]#memory_scope::work_group#,
+[code]#memory_scope::device#, [code]#memory_scope::system#}.
 When a context returns a "wider" memory scope in this set, it must also return
 all "narrower" memory scopes.
 (See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
-At a minimum, each context must support [code]#memory_scope::work_item#,
-[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+At a minimum, each context must support [code]#memory_scope::sub_group#, and
+[code]#memory_scope::work_group#.
 
 '''
 
@@ -2831,12 +2833,14 @@ struct atomic_memory_scope_capabilities {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The set of memory scopes supported by atomic operations on this
-device.
+device, which is a subset of {[code]#memory_scope::work_item#,
+[code]#memory_scope::sub_group#, [code]#memory_scope::work_group#,
+[code]#memory_scope::device#, [code]#memory_scope::system#}.
 When a device returns a "wider" memory scope in this set, it must also return
 all "narrower" memory scopes.
 (See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
-At a minimum, each device must support [code]#memory_scope::work_item#,
-[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+At a minimum, each device must support [code]#memory_scope::sub_group#, and
+[code]#memory_scope::work_group#.
 
 '''
 
