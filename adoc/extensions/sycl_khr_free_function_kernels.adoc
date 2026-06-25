@@ -1,27 +1,16 @@
 [[sec:khr-free-function-kernels]]
 = sycl_khr_free_function_kernels
 
-// SKELETON — scaffolding only (Step A + Step B scope trim). Structure +
-// boilerplate are real; every content section below is intentionally EMPTY with
-// a placeholder comment naming (a) what normative content goes there, (b) which
-// section of the experimental spec it ports from
-// (sycl/doc/extensions/experimental/sycl_ext_oneapi_free_function_kernels.asciidoc),
-// and (c) a `// COVERAGE:` marker pointing at the prototype step(s) + test that
-// prove it implementable (see playground/ffk-khr-coverage.md for the full
-// claim-by-claim map). Do NOT treat any prose here as final.
-//
-// SCOPE (Step B, project memory "MAJOR SCOPE CUT"): the kernel-bundle and
-// native-backend sections are CUT — this KHR is self-contained on core SYCL,
-// no vendor/native dependency. Do NOT reintroduce them. The __sycl_kernel_
-// prefix / one-symbol naming is now a dpcpp impl detail + an off-spec opt-in
-// flag, NOT a spec concern.
-
-// INTRO PARAGRAPH (port from experimental "== Overview", :80-110)
-// One paragraph, no heading: a free function kernel is an ordinary C++ function,
-// decorated so it becomes a device kernel entry point; enables defining kernels
-// at namespace scope and launching/looking them up by the function itself.
-// Keep it vendor-neutral (no JIT/OpenVINO mention — see project memory charter).
-// TODO(Step B): write intro prose.
+This extension introduces _free function kernels_.
+A free function kernel is an ordinary C++ function, defined at namespace scope or
+as a static member function, that is decorated with the [code]#SYCL_KHR_KERNEL#
+macro so that it becomes a device kernel entry point.
+Its kernel arguments are the parameters of the function, rather than the captures
+of a lambda expression or the member variables of a function object, which gives
+the arguments a defined order.
+Because the kernel is a named function, it is identified by the function itself
+--- by its address --- so it can be launched and queried by reference to that
+function, instead of only as a lambda.
 
 [[sec:khr-free-function-kernels-dependencies]]
 == Dependencies
@@ -705,12 +694,82 @@ shape when a future extension adds a runtime launch property.{endnote}
 [[sec:khr-free-function-kernels-example]]
 == Example
 
-// PORT: experimental "== Examples" (:974-1064): "Basic invocation" +
-// "Free function kernels which are templates or overloaded". Provide one (or
-// two) full compilable programs: #include <sycl/sycl.hpp>, define a kernel with
-// SYCL_KHR_KERNEL(nd_kernel<1>), launch with khr::nd_launch, verify result.
-// Use [source,,linenums]. Mirror the style of
-// sycl_khr_work_item_queries.adoc Example. Keep vendor-neutral — NO native
-// backend launch in the example (native section cut).
-// COVERAGE: steps 5 + 7 (positive e2e, khr_must_match.cpp on PVC). See coverage map.
-// TODO: write the example program(s).
+// COVERAGE: steps 5 + 7 (positive e2e, khr_must_match.cpp on PVC). See
+// playground/ffk-khr-coverage.md.
+
+The example below defines a free function kernel at namespace scope, decorates it
+with [code]#SYCL_KHR_KERNEL#, and launches it with [code]#sycl::khr::nd_launch#.
+The kernel obtains its work-item position with the
+<<sec:khr-work-item-queries,sycl_khr_work_item_queries>> query
+[code]#sycl::khr::this_nd_item#, rather than receiving an [code]#nd_item#
+parameter.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+constexpr size_t N = 1024;
+constexpr size_t WGSIZE = 32;
+
+// A free function kernel: an ordinary function, decorated with the kind.
+SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+void scale(float factor, float *data) {
+  size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
+  data[i] *= factor;
+}
+
+int main() {
+  sycl::queue q;
+
+  float *data = sycl::malloc_shared<float>(N, q);
+  for (size_t i = 0; i < N; ++i)
+    data[i] = static_cast<float>(i);
+
+  // Identify the kernel by the function itself and launch it.
+  sycl::khr::nd_launch(q, sycl::nd_range<1>{N, WGSIZE},
+                       sycl::khr::kernel_function<scale>, 2.0f, data);
+  q.wait();
+
+  for (size_t i = 0; i < N; ++i)
+    assert(data[i] == 2.0f * static_cast<float>(i));
+
+  sycl::free(data, q);
+  return 0;
+}
+----
+
+A free function kernel may also be a function template.
+The address passed through [code]#kernel_function# is then the address of a
+particular specialization.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+constexpr size_t N = 1024;
+constexpr size_t WGSIZE = 32;
+
+template<typename T>
+SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+void fill(T value, T *data) {
+  size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
+  data[i] = value;
+}
+
+int main() {
+  sycl::queue q;
+
+  int *data = sycl::malloc_shared<int>(N, q);
+
+  // For a templated kernel, pass the address of a specific instantiation.
+  sycl::khr::nd_launch(q, sycl::nd_range<1>{N, WGSIZE},
+                       sycl::khr::kernel_function<fill<int>>, 42, data);
+  q.wait();
+
+  for (size_t i = 0; i < N; ++i)
+    assert(data[i] == 42);
+
+  sycl::free(data, q);
+  return 0;
+}
+----
