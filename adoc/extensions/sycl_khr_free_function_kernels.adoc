@@ -26,17 +26,33 @@
 [[sec:khr-free-function-kernels-dependencies]]
 == Dependencies
 
-// PORT/NEW: experimental "== Dependencies" (:38-70) lists no extension deps;
-// the KHR ADDS two normative dependencies (project memory):
-//   - sycl_khr_properties  (PR #980, gmlueck — UNMERGED forward dep; anchor
-//     will be sec:khr-properties once landed). Defines the CT/RT property
-//     type-shape convention (var-template = compile-time, class-w-ctor =
-//     runtime) that the decoration + launch property surfaces must follow.
-//   - sycl_khr_work_item_queries (<<sec:khr-work-item-queries>>) — the in-kernel
-//     iteration-id queries (this_nd_item etc.) used from a free function body.
-// Also note the C++17 baseline (variadic macro is C++17-safe).
-// TODO(Step B): write the dependency sentences + cross-refs; flag the #980
-// unmerged-dependency risk.
+// COVERAGE: this section OWNS the #980 (sycl_khr_properties) unmerged
+// forward-dependency caveat for the whole document — the editorial note below is
+// the single place that explains why every <<sec:khr-properties,...>> cross-ref
+// in this extension dangles in a build until #980 lands. Do not restate the
+// property model here (see <<sec:khr-free-function-kernels-properties>>). See
+// playground/ffk-khr-pr-step-C7-dependencies.md.
+
+This extension depends on the
+<<sec:khr-properties,sycl_khr_properties>> extension, whose property
+infrastructure it uses to associate properties with a free function kernel ---
+both the compile-time properties that decorate the kernel and the runtime
+properties supplied through the launch property list (see
+<<sec:khr-free-function-kernels-properties>>).
+
+This extension depends on the
+<<sec:khr-work-item-queries,sycl_khr_work_item_queries>> extension, which
+provides the in-kernel queries (such as [code]#sycl::khr::this_nd_item#) that the
+body of a [code]#sycl::khr::nd_kernel<Dims># free function kernel uses to obtain
+its work-item's position in the iteration space.
+
+{note}At the time of writing, [code]#sycl_khr_properties# is a proposed extension
+(SYCL specification PR #980) and is not yet part of the SYCL specification.
+Until it is incorporated, the [code]#sec:khr-properties# cross-references in this
+extension do not resolve.{endnote}
+
+Some features of this extension are only available when a SYCL implementation
+conforms to {cpp17} or later.
 
 [[sec:khr-free-function-kernels-feature-test]]
 == Feature test macro
