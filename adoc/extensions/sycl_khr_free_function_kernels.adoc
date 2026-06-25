@@ -57,17 +57,124 @@ below.
 [[sec:khr-free-function-kernels-defining]]
 == Defining a free function kernel
 
-// PORT: experimental "=== Defining a free function kernel" (:156-335).
-// Define the SYCL_KHR_KERNEL(kind, modifiers...) decoration macro:
-//   - MANDATORY first arg = kind (single_task_kernel | nd_kernel<Dims>); empty
-//     macro is ill-formed (prototype step 12 — empty-macro limbo retired).
-//   - variadic tail = optional tuning property modifiers (work_group_size, etc.).
-//   - the function IS the entry point; calling it as an ordinary function or
-//     from another kernel = undefined behavior.
-//   - return type must be void; arg constraints -> see arg-types section.
-// COVERAGE: step 1 (variadic macro, khr_free_kernel_macro.cpp) + step 12
-// (mandatory kind / empty-is-error, khr_free_kernel_macro.cpp). See coverage map.
-// TODO: normative macro definition + decoration semantics.
+// COVERAGE: step 1 (variadic SYCL_KHR_KERNEL macro, khr_free_kernel_macro.cpp) +
+// step 12 (mandatory kind / empty-macro-is-error, khr_free_kernel_macro.cpp).
+// Ported from experimental "=== Defining a free function kernel" (:156-205,
+// :324-330). Reframed onto the mandatory-kind macro SYCL_KHR_KERNEL(kind, ...)
+// (project memory step 12) rather than the experimental
+// SYCL_EXT_ONEAPI_FUNCTION_PROPERTY((property)) decoration. Arg-type rule is NOT
+// restated here — cross-refs <<sec:khr-free-function-kernels-arg-types>>.
+// SYCL_EXTERNAL is left as an OPEN note (not a normative rule, per project
+// memory). Call-as-a-function is stated as UB only (impl is not claimed to
+// reject it). See playground/ffk-khr-coverage.md.
+
+A free function kernel is an ordinary C++ function whose declaration is decorated
+with the [code]#SYCL_KHR_KERNEL# macro.
+The first argument to the macro is the kernel's _kind_, which is mandatory.
+The kind is one of the following:
+
+* [code]#sycl::khr::single_task_kernel# --- the function is launched as a single
+  task, without any iteration space; or
+
+* [code]#sycl::khr::nd_kernel<Dims>#  --- the function is launched over an
+  [code]#nd_range# iteration space of [code]#Dims# dimensions.
+
+Any remaining arguments to the macro are optional properties that further
+describe the kernel, such as a required work-group size.
+These properties are compile-time properties as defined by
+<<sec:khr-properties,sycl_khr_properties>>; this extension does not require any
+particular property to be supported.
+
+[source,role=synopsis,id=api:khr-free-function-kernels-macro]
+----
+// Decorate a function declaration to define a free function kernel.
+#define SYCL_KHR_KERNEL(kind, ...) /* see below */
+----
+
+The first declaration of the function in the translation unit must be the
+decorated declaration (see the rules below).
+For example:
+
+[source]
+----
+SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+void scale(float factor, float *data) {
+  // ...
+}
+----
+
+A free function kernel must obey all of the following rules.
+A program that violates any of them is ill formed unless stated otherwise.
+
+* The macro's kind argument must be present.
+  Invoking the macro with no kind --- [code]#SYCL_KHR_KERNEL()# --- is ill
+  formed.
+
+* The function must be declared at namespace scope, or at class scope as a
+  static member function.
+
+* The function's return type must be [code]#void#.
+
+* The function must not accept a variadic argument list.
+
+* Each of the function's parameters must have a type that is permitted as a free
+  function kernel argument, as defined in
+  <<sec:khr-free-function-kernels-arg-types>>.
+
+* No declaration of the function may specify a default argument for any
+  parameter.
+
+* The decoration must appear on the first declaration of the function in the
+  translation unit.
+  A redeclaration of the function may also be decorated, provided it is decorated
+  with the same kind (and, where present, the same property arguments).
+  The effect is the same whether or not a redeclaration is decorated.
+
+* The same function must be decorated with exactly one kind.
+  Decorating the same function with more than one kind, or with the same kind but
+  conflicting property arguments, is ill formed.
+  Decorating it more than once with the same kind and the same property arguments
+  is permitted and has the same effect as decorating it once.
+
+* If the function is decorated in one translation unit, every other translation
+  unit that declares the same function must decorate it identically (the same
+  kind and the same property arguments).
+
+* The way the function's body obtains its iteration ID must be consistent with
+  the declared kind: a function whose kind is
+  [code]#sycl::khr::nd_kernel<Dims># must obtain its iteration ID for an
+  [code]#nd_range# of [code]#Dims# dimensions, and a function whose kind is
+  [code]#sycl::khr::single_task_kernel# must not obtain an iteration ID.
+  A program that violates this rule is ill formed, no diagnostic required.
+
+[_Note:_ An implementation may, but need not, diagnose an inconsistency between
+the function's body and its declared kind.
+Such a diagnosis is not always possible, for example when the body is provided in
+another translation unit or as a precompiled device object.
+_{endnote}_]
+
+A function decorated with [code]#SYCL_KHR_KERNEL# is a kernel entry point.
+Calling it as an ordinary function, in either host or device code, results in
+undefined behavior.
+The function's address may still be taken; this address identifies the kernel and
+is the value passed to the launch and query APIs described below (the
+[code]#Func# parameter).
+
+[_Note:_ Because calling a free function kernel as an ordinary function is
+undefined behavior rather than an ill-formed program, an implementation is not
+required to diagnose such a call.
+An implementation is nevertheless permitted, as a quality-of-implementation
+matter, to diagnose a call that appears in host code.
+_{endnote}_]
+
+// OPEN (raise in PR discussion, not a normative rule): may a free function
+// kernel entry point be declared SYCL_EXTERNAL? Tension — the host needs the
+// symbol visible (to name/launch it) but never calls it, while SYCL_EXTERNAL is
+// a device cross-TU linkage contract that is meaningless for an entry point
+// (calling a kernel from device code is UB). The experimental spec (:204)
+// contemplates SYCL_EXTERNAL free function kernel bodies; whether the KHR should
+// permit, forbid, or stay silent on this is deferred to the PR. Do NOT add a
+// normative SYCL_EXTERNAL rule here until that is resolved.
 
 [[sec:khr-free-function-kernels-arg-types]]
 == Restrictions on kernel argument types
