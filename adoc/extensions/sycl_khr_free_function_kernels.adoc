@@ -331,7 +331,129 @@ constant expression.
 // errc::nd_range, decoration propagated onto wrapper; e2e khr_must_match.cpp,
 // khr_must_match_negative.cpp on PVC — work_group_size proven, max_*/sub_group
 // designed-not-e2e-tested). See coverage map.
-// TODO: launcher synopses + Constraints/Effects.
+
+A free function kernel is launched by passing its address to one of the launch
+functions defined in this section.
+The kernel's address is supplied through the [code]#kernel_function# handle,
+which carries the address as a template parameter.
+A launch function deduces the kernel function [code]#Func# from this handle, so
+the kernel is identified by the _value_ [code]#sycl::khr::kernel_function<Func>#
+that is passed as an argument --- not by an explicit template argument on the
+launch function itself.
+
+.[apidef]#kernel_function#
+[source,role=synopsis,id=api:khr-free-function-kernels-kernel_function]
+----
+namespace sycl::khr {
+
+template<auto *Func>
+struct kernel_function_s {};
+
+template<auto *Func>
+inline constexpr kernel_function_s<Func> kernel_function;
+
+} // namespace sycl::khr
+----
+
+_Remarks:_ [code]#Func# is the address of a function that is decorated as a free
+function kernel (see <<sec:khr-free-function-kernels-defining>>).
+The variable template [code]#kernel_function<Func># is the value passed to
+[code]#single_task# and [code]#nd_launch# to identify the kernel to launch.
+
+{note}For a free function kernel that is a template, the address of a particular
+specialization is used, for example
+[code]#kernel_function<scale<int>>#.{endnote}
+
+[[sec:khr-free-function-kernels-launch-single_task]]
+=== single_task
+
+'''
+
+.[apidef]#single_task#
+[source,role=synopsis,id=api:khr-free-function-kernels-single_task]
+----
+namespace sycl::khr {
+
+template<auto *Func, typename... Args>
+void single_task(queue q, kernel_function_s<Func> k, Args&&... args);
+
+template<auto *Func, typename... Args>
+void single_task(handler &h, kernel_function_s<Func> k, Args&&... args);
+
+} // namespace sycl::khr
+----
+
+_Constraints:_ Available only if [code]#is_single_task_kernel_v<Func># is
+[code]#true# and [code]#std::is_invocable_v<decltype(Func), Args...># is
+[code]#true#.
+
+_Effects:_ Enqueues the free function kernel [code]#Func# to the queue
+[code]#q# (or to the command group of the handler [code]#h#) as a single task.
+Each value in the [code]#args# pack is passed to the corresponding parameter of
+[code]#Func#, converting it to the parameter's type if necessary.
+
+[[sec:khr-free-function-kernels-launch-nd_launch]]
+=== nd_launch
+
+'''
+
+.[apidef]#nd_launch#
+[source,role=synopsis,id=api:khr-free-function-kernels-nd_launch]
+----
+namespace sycl::khr {
+
+template<auto *Func, int Dims, typename... Args>
+void nd_launch(queue q, nd_range<Dims> r,
+               kernel_function_s<Func> k, Args&&... args);
+
+template<auto *Func, int Dims, typename... Args>
+void nd_launch(handler &h, nd_range<Dims> r,
+               kernel_function_s<Func> k, Args&&... args);
+
+} // namespace sycl::khr
+----
+
+_Constraints:_ Available only if [code]#is_nd_kernel_v<Func, Dims># is
+[code]#true# and [code]#std::is_invocable_v<decltype(Func), Args...># is
+[code]#true#.
+
+_Effects:_ Enqueues the free function kernel [code]#Func# to the queue
+[code]#q# (or to the command group of the handler [code]#h#) as an ND-range
+kernel, using the number of work-items specified by the [code]#nd_range#
+[code]#r#.
+Each value in the [code]#args# pack is passed to the corresponding parameter of
+[code]#Func#, converting it to the parameter's type if necessary.
+
+The launch functions enqueue the kernel by its address; the kernel is selected
+by the [code]#kernel_function<Func># value, as in:
+
+[source]
+----
+sycl::khr::nd_launch(q, r, sycl::khr::kernel_function<scale>, factor, data);
+----
+
+The [code]#Constraints# above check, at compile time, only the kernel's _kind_
+and _dimensionality_ and that the supplied arguments can be passed to
+[code]#Func#.
+They do not check the values carried by the kernel's compile-time properties,
+such as a required work-group size: a required work-group size is compared
+against the local size of the [code]#nd_range# at launch, and the local size of
+an [code]#nd_range# is generally a run-time value, so this comparison is
+performed at run time rather than at compile time.
+
+Any launch requirements that a free function kernel carries through its
+compile-time properties are enforced at launch in the same way as for any other
+SYCL kernel, as described in <<sec:kernel.attributes>>.
+In particular, launching a kernel that declares a required work-group size with
+an [code]#nd_range# whose local size does not match that requirement throws a
+synchronous [code]#exception# with the [code]#errc::nd_range# error code,
+exactly as for a SYCL kernel decorated with [code]#reqd_work_group_size#.
+
+{note}A future version of this extension is expected to add launch functions
+that accept a launch property list, allowing launch-time properties --- such as
+a dynamic work-group local memory size --- to be specified when a kernel is
+launched.
+See <<sec:khr-free-function-kernels-launch-properties>>.{endnote}
 
 [[sec:khr-free-function-kernels-launch-properties]]
 == Launch properties
