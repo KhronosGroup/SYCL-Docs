@@ -79,11 +79,12 @@ The kind is one of the following:
 * [code]#sycl::khr::nd_kernel<Dims>#  --- the function is launched over an
   [code]#nd_range# iteration space of [code]#Dims# dimensions.
 
-Any remaining arguments to the macro are optional properties that further
-describe the kernel, such as a required work-group size.
-These properties are compile-time properties as defined by
-<<sec:khr-properties,sycl_khr_properties>>; this extension does not require any
-particular property to be supported.
+Any remaining arguments to the macro are optional compile-time properties that
+are applicable to a free function kernel, as described in
+<<sec:khr-free-function-kernels-properties>>.
+Apart from the _kind_ properties, this extension does not define any such
+property; any additional property is defined by the SYCL implementation or by
+another extension.
 
 [source,role=synopsis,id=api:khr-free-function-kernels-macro]
 ----
@@ -175,6 +176,110 @@ _{endnote}_]
 // contemplates SYCL_EXTERNAL free function kernel bodies; whether the KHR should
 // permit, forbid, or stay silent on this is deferred to the PR. Do NOT add a
 // normative SYCL_EXTERNAL rule here until that is resolved.
+
+[[sec:khr-free-function-kernels-properties]]
+== Kernel properties
+
+// COVERAGE: the _kind_ properties (single_task_kernel / nd_kernel<Dims>) are
+// PROVEN (step 1 macro + step 12 mandatory-kind validator,
+// khr_free_kernel_macro.cpp). The free_function_kernel TAG TYPE and the
+// is_property_for-keyed applicability model are a NEW SPEC CONSTRUCT (design
+// proposal, project memory "FFK NEEDS A PROPERTY-TAG TYPE"): the prototype used
+// khr::detail introspection of the property bundle, NOT a public tag. The
+// compile-time vs runtime split reuses Greg's is_property_key_compile_time
+// discriminator (step 6, khr_launch_properties*.cpp). DEPENDS on the unmerged
+// sycl_khr_properties (#980) — the is_property_for / is_property_key_compile_time
+// cross-refs below dangle (sec:khr-properties) until it lands. See
+// playground/ffk-khr-coverage.md and ffk-khr-pr-step-C5-property-model.md.
+
+A free function kernel can carry _properties_, using the property infrastructure
+defined by <<sec:khr-properties,sycl_khr_properties>>.
+There are two contexts in which a property is associated with a free function
+kernel:
+
+* _Compile-time properties_ are placed on the kernel by listing them as the
+  remaining arguments of the [code]#SYCL_KHR_KERNEL# decoration (see
+  <<sec:khr-free-function-kernels-defining>>).
+
+* _Runtime properties_ are supplied when the kernel is launched, through the
+  launch property list (see <<sec:khr-free-function-kernels-launch-properties>>).
+
+[[sec:khr-free-function-kernels-properties-tag]]
+=== The free_function_kernel property tag
+
+The [code]#sycl_khr_properties# extension expresses the set of classes that a
+property may be used with through the [api]#khr::is_property_for# trait, which is
+keyed on a _class_ type: [code]#khr::is_property_for_v<P, Class># is [code]#true#
+when the property [code]#P# can be used with the class [code]#Class#.
+A free function kernel, however, is a decorated _function_ rather than an object
+of some class, so there is no class type to use as the [code]#Class# argument.
+This extension therefore introduces an empty tag type that stands in for the
+free function kernel as that class.
+
+'''
+
+.[apidef]#khr::free_function_kernel#
+[source,role=synopsis,id=api:khr-free-function-kernels-tag]
+----
+namespace sycl::khr {
+
+struct free_function_kernel;
+
+} // namespace sycl::khr
+----
+
+_Remarks:_ [code]#free_function_kernel# is an incomplete tag type that is never
+instantiated.
+It serves only as the [code]#Class# argument of the
+<<sec:khr-properties,sycl_khr_properties>> property traits, identifying the
+properties that may be associated with a free function kernel.
+
+A property [code]#P# is _applicable to a free function kernel_ if, and only if,
+[code]#khr::is_property_for_v<P, khr::free_function_kernel># is [code]#true#.
+
+{note}A tag type is needed because [code]#khr::is_property_for# keys property
+applicability on a class, and a free function kernel has no class object to key
+on.
+The [code]#free_function_kernel# tag stands in for that class, so the existing
+<<sec:khr-properties,sycl_khr_properties>> machinery is reused unchanged: no new
+applicability trait is introduced.{endnote}
+
+[[sec:khr-free-function-kernels-properties-ct-rt]]
+=== Compile-time and runtime properties
+
+Whether a property is associated with a free function kernel through the
+decoration or through the launch property list is determined by whether it is a
+compile-time property or a runtime property, as classified by the
+[api]#khr::is_property_key_compile_time# trait of
+<<sec:khr-properties,sycl_khr_properties>>.
+
+* The [code]#SYCL_KHR_KERNEL# decoration accepts a property [code]#P# only if
+  [code]#P# is applicable to a free function kernel and the key of [code]#P# is a
+  compile-time property, that is
+  [code]#khr::is_property_key_compile_time_v<key-of-P># is [code]#true#.
+
+* The launch property list (see
+  <<sec:khr-free-function-kernels-launch-properties>>) accepts a property
+  [code]#P# only if [code]#P# is applicable to a free function kernel and the key
+  of [code]#P# is a runtime property, that is
+  [code]#khr::is_property_key_compile_time_v<key-of-P># is [code]#false#.
+
+[[sec:khr-free-function-kernels-properties-kind]]
+=== Properties defined by this extension
+
+This extension defines only the _kind_ properties,
+[code]#sycl::khr::single_task_kernel# and [code]#sycl::khr::nd_kernel<Dims>#
+(see <<sec:khr-free-function-kernels-defining>> for their meaning).
+These are compile-time properties that are applicable to a free function kernel,
+so they fit the model described above and may appear as the mandatory first
+argument of the [code]#SYCL_KHR_KERNEL# decoration.
+
+As with all SYCL properties, properties can only be defined by the SYCL
+implementation, so the SYCL specification (or an extension specification)
+provides a formal specification for each property.
+Apart from the _kind_ properties, any property that is applicable to a free
+function kernel is defined by the SYCL implementation or by another extension
+specification; this extension does not define any such property.
 
 [[sec:khr-free-function-kernels-arg-types]]
 == Restrictions on kernel argument types
