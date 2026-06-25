@@ -4888,12 +4888,17 @@ _Returns:_ The <<backend>> associated with this event.
 std::vector<event> get_wait_list()
 ----
 
+Deprecated by SYCL 2020.
+
 _Returns:_ The list of events that this event waits for in the dependence graph.
 Only direct dependencies are returned, and not transitive dependencies that
 direct dependencies wait on.
 
 _Remarks:_ Whether already completed events are included in the returned list is
 implementation-defined.
+If the event is associated with a command submitted to an in-order queue, then
+it is implementation-defined whether this function returns any dependent events
+or if it returns an empty vector.
 
 '''
 
