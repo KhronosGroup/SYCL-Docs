@@ -554,27 +554,137 @@ an [code]#nd_range# whose local size does not match that requirement throws a
 synchronous [code]#exception# with the [code]#errc::nd_range# error code,
 exactly as for a SYCL kernel decorated with [code]#reqd_work_group_size#.
 
-{note}A future version of this extension is expected to add launch functions
-that accept a launch property list, allowing launch-time properties --- such as
-a dynamic work-group local memory size --- to be specified when a kernel is
-launched.
-See <<sec:khr-free-function-kernels-launch-properties>>.{endnote}
+{note}The launch functions above do not accept a launch property list.
+Overloads that do are defined in
+<<sec:khr-free-function-kernels-launch-properties>>; this version of the
+extension reserves the shape of those overloads but defines no runtime property
+that can be passed through them.{endnote}
 
 [[sec:khr-free-function-kernels-launch-properties]]
 == Launch properties
 
-// PORT: experimental "=== Interaction with kernel properties" (:864-887).
-// Optional khr::properties{} argument to the launchers (Greg: naked property
-// list, NOT a launch_config wrapper), carrying RUNTIME-only launch properties.
-// Compile-time-value properties are rejected at the launch site (static
-// constraint). v1 in-scope payload is minimal (work_group_scratch_size
-// deferred); reserve the overload shape. Express which property keys are valid
-// at launch via the sycl_khr_properties CT/RT classification.
 // COVERAGE: step 6 (runtime-property launch overload, CT props rejected;
-// khr_launch_properties.cpp, khr_launch_properties_errors.cpp). v1 in-scope
-// payload empty (work_group_scratch_size deferred) — reserve overload shape
-// only. See coverage map.
-// TODO: overload synopsis + Constraints; defer-list note.
+// khr_launch_properties.cpp, khr_launch_properties_errors.cpp). The overload
+// shape is RESERVED on BOTH nd_launch and single_task (project memory
+// "LAUNCH-PROPERTY SECTION DESIGN"): symmetric and future-proof, even though
+// single_task has no in-scope launch property in this version. The CT/RT split
+// reuses Greg's is_property_key_compile_time discriminator; applicability reuses
+// the free_function_kernel tag (C5). v1 in-scope payload is EMPTY
+// (work_group_scratch_size is deferred to another extension) — this version
+// defines no runtime launch property. DEPENDS on the unmerged sycl_khr_properties
+// (#980): is_property_list_for / is_property_key_compile_time / sec:khr-properties
+// dangle until it lands. See playground/ffk-khr-coverage.md.
+
+The launch functions in <<sec:khr-free-function-kernels-launch>> have
+additional overloads that accept a _launch property list_ --- a
+<<sec:khr-properties,sycl_khr_properties>> properties list supplied at the launch
+site.
+The property list is passed as a separate argument, immediately before the
+[code]#kernel_function# handle; it is not wrapped in any launch-configuration
+type.
+The properties in the list carry _runtime_ information that applies to the
+individual launch, as distinct from the compile-time properties that decorate the
+kernel itself (see <<sec:khr-free-function-kernels-properties-ct-rt>>).
+
+A launch property list accepts only properties that are _applicable to a free
+function kernel_ (see <<sec:khr-free-function-kernels-properties-tag>>) and whose
+keys are _runtime properties_.
+This version of the extension defines no such property: the in-scope set of
+runtime launch properties is empty, and the overloads below exist to reserve the
+shape that future runtime launch properties will use.
+
+{note}A runtime launch property is one whose value is not known until the kernel
+is launched, so it cannot be carried by the compile-time decoration on the kernel.
+A likely future example, defined by another extension, is a dynamic work-group
+local memory size, whose byte count is a run-time value supplied at launch.
+This extension reserves the launch-property overloads so that such a property can
+be added without changing the shape of the launch API.{endnote}
+
+[[sec:khr-free-function-kernels-launch-properties-single_task]]
+=== single_task
+
+'''
+
+.[apidef]#single_task#
+[source,role=synopsis,id=api:khr-free-function-kernels-single_task-props]
+----
+namespace sycl::khr {
+
+template<auto *Func, typename Properties, typename... Args>
+void single_task(queue q, Properties props,
+                 kernel_function_s<Func> k, Args&&... args);
+
+template<auto *Func, typename Properties, typename... Args>
+void single_task(handler &h, Properties props,
+                 kernel_function_s<Func> k, Args&&... args);
+
+} // namespace sycl::khr
+----
+
+_Constraints:_ Available only if all of the following hold:
+
+* [code]#Properties# is a <<sec:khr-properties,sycl_khr_properties>> properties
+  list, that is [code]#khr::is_property_list_for_v<Properties, khr::free_function_kernel>#
+  is [code]#true#.
+  This requires every property in [code]#props# to be applicable to a free
+  function kernel (see <<sec:khr-free-function-kernels-properties-tag>>).
+* For every property in [code]#props#, the key of that property is a runtime
+  property, that is [code]#khr::is_property_key_compile_time_v<key-of-P># is
+  [code]#false#.
+  Supplying a compile-time property in the launch property list is ill formed.
+* [code]#is_single_task_kernel_v<Func># is [code]#true# and
+  [code]#std::is_invocable_v<decltype(Func), Args...># is [code]#true#, as for
+  the launch function without a property list.
+
+_Effects:_ Equivalent to the [code]#single_task# overload without a property list
+(see <<sec:khr-free-function-kernels-launch-single_task>>), additionally applying
+the runtime properties in [code]#props# to the launch.
+
+[[sec:khr-free-function-kernels-launch-properties-nd_launch]]
+=== nd_launch
+
+'''
+
+.[apidef]#nd_launch#
+[source,role=synopsis,id=api:khr-free-function-kernels-nd_launch-props]
+----
+namespace sycl::khr {
+
+template<auto *Func, int Dims, typename Properties, typename... Args>
+void nd_launch(queue q, nd_range<Dims> r, Properties props,
+               kernel_function_s<Func> k, Args&&... args);
+
+template<auto *Func, int Dims, typename Properties, typename... Args>
+void nd_launch(handler &h, nd_range<Dims> r, Properties props,
+               kernel_function_s<Func> k, Args&&... args);
+
+} // namespace sycl::khr
+----
+
+_Constraints:_ Available only if all of the following hold:
+
+* [code]#Properties# is a <<sec:khr-properties,sycl_khr_properties>> properties
+  list, that is [code]#khr::is_property_list_for_v<Properties, khr::free_function_kernel>#
+  is [code]#true#.
+  This requires every property in [code]#props# to be applicable to a free
+  function kernel (see <<sec:khr-free-function-kernels-properties-tag>>).
+* For every property in [code]#props#, the key of that property is a runtime
+  property, that is [code]#khr::is_property_key_compile_time_v<key-of-P># is
+  [code]#false#.
+  Supplying a compile-time property in the launch property list is ill formed.
+* [code]#is_nd_kernel_v<Func, Dims># is [code]#true# and
+  [code]#std::is_invocable_v<decltype(Func), Args...># is [code]#true#, as for
+  the launch function without a property list.
+
+_Effects:_ Equivalent to the [code]#nd_launch# overload without a property list
+(see <<sec:khr-free-function-kernels-launch-nd_launch>>), additionally applying
+the runtime properties in [code]#props# to the launch.
+
+{note}Because this version of the extension defines no runtime property that is
+applicable to a free function kernel, the only property list that satisfies the
+[code]#Constraints# above is the empty properties list.
+The overloads are nonetheless specified so that the launch API does not change
+shape when a future extension adds a runtime launch property.{endnote}
 
 [[sec:khr-free-function-kernels-example]]
 == Example
