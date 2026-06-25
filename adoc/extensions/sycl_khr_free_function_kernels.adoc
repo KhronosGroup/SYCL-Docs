@@ -1,0 +1,171 @@
+[[sec:khr-free-function-kernels]]
+= sycl_khr_free_function_kernels
+
+// SKELETON — scaffolding only (Step A + Step B scope trim). Structure +
+// boilerplate are real; every content section below is intentionally EMPTY with
+// a placeholder comment naming (a) what normative content goes there, (b) which
+// section of the experimental spec it ports from
+// (sycl/doc/extensions/experimental/sycl_ext_oneapi_free_function_kernels.asciidoc),
+// and (c) a `// COVERAGE:` marker pointing at the prototype step(s) + test that
+// prove it implementable (see playground/ffk-khr-coverage.md for the full
+// claim-by-claim map). Do NOT treat any prose here as final.
+//
+// SCOPE (Step B, project memory "MAJOR SCOPE CUT"): the kernel-bundle and
+// native-backend sections are CUT — this KHR is self-contained on core SYCL,
+// no vendor/native dependency. Do NOT reintroduce them. The __sycl_kernel_
+// prefix / one-symbol naming is now a dpcpp impl detail + an off-spec opt-in
+// flag, NOT a spec concern.
+
+// INTRO PARAGRAPH (port from experimental "== Overview", :80-110)
+// One paragraph, no heading: a free function kernel is an ordinary C++ function,
+// decorated so it becomes a device kernel entry point; enables defining kernels
+// at namespace scope and launching/looking them up by the function itself.
+// Keep it vendor-neutral (no JIT/OpenVINO mention — see project memory charter).
+// TODO(Step B): write intro prose.
+
+[[sec:khr-free-function-kernels-dependencies]]
+== Dependencies
+
+// PORT/NEW: experimental "== Dependencies" (:38-70) lists no extension deps;
+// the KHR ADDS two normative dependencies (project memory):
+//   - sycl_khr_properties  (PR #980, gmlueck — UNMERGED forward dep; anchor
+//     will be sec:khr-properties once landed). Defines the CT/RT property
+//     type-shape convention (var-template = compile-time, class-w-ctor =
+//     runtime) that the decoration + launch property surfaces must follow.
+//   - sycl_khr_work_item_queries (<<sec:khr-work-item-queries>>) — the in-kernel
+//     iteration-id queries (this_nd_item etc.) used from a free function body.
+// Also note the C++17 baseline (variadic macro is C++17-safe).
+// TODO(Step B): write the dependency sentences + cross-refs; flag the #980
+// unmerged-dependency risk.
+
+[[sec:khr-free-function-kernels-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_FREE_FUNCTION_KERNELS# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-free-function-kernels-defining]]
+== Defining a free function kernel
+
+// PORT: experimental "=== Defining a free function kernel" (:156-335).
+// Define the SYCL_KHR_KERNEL(kind, modifiers...) decoration macro:
+//   - MANDATORY first arg = kind (single_task_kernel | nd_kernel<Dims>); empty
+//     macro is ill-formed (prototype step 12 — empty-macro limbo retired).
+//   - variadic tail = optional tuning property modifiers (work_group_size, etc.).
+//   - the function IS the entry point; calling it as an ordinary function or
+//     from another kernel = undefined behavior.
+//   - return type must be void; arg constraints -> see arg-types section.
+// COVERAGE: step 1 (variadic macro, khr_free_kernel_macro.cpp) + step 12
+// (mandatory kind / empty-is-error, khr_free_kernel_macro.cpp). See coverage map.
+// TODO: normative macro definition + decoration semantics.
+
+[[sec:khr-free-function-kernels-arg-types]]
+== Restrictions on kernel argument types
+
+// COVERAGE: arg type rule = device-copyable, the SAME rule as any SYCL kernel
+// argument (<<sec:kernel.parameter.passing>>); reuse core is_device_copyable_v
+// rather than a new trait (project memory "ARG-TYPE TWO-TIER DECISION": spec
+// tier = DEVICE COPYABLE; the tighter cross-ABI ceiling is off-spec flag-mode
+// dpcpp, NOT in this spec). Prototype steps 2/3 (is_valid_kernel_arg_v +
+// narrowing) implement the off-spec flag tier, not this section. See
+// playground/ffk-khr-coverage.md and ffk-khr-pr-step-C-args-RESULT.md.
+
+A free function kernel passes each of its kernel arguments as a parameter of the
+function, rather than as a member of a function object or a lambda capture.
+Each parameter of a free function kernel must have a type that is
+<<device-copyable>>.
+An application can query whether a type [code]#T# is device copyable with the
+core [code]#sycl::is_device_copyable_v<T># type trait.
+
+A free function kernel admits only device-copyable parameters.
+The rules for parameter passing to kernels (<<sec:kernel.parameter.passing>>)
+permit two categories of kernel parameter type: any <<device-copyable>> type,
+and a separate set of special SYCL types — such as [code]#accessor#,
+[code]#local_accessor#, the image accessors, [code]#stream#, [code]#reducer#,
+and [code]#kernel_handler# — that are legal only because the implementation
+passes them in a special, non-positional way.
+A free function kernel does not provide this second allowance: only the first
+category applies.
+A program that uses any of these special types, or any other type that is not
+<<device-copyable>>, as a free function kernel parameter is ill formed.
+
+[_Note:_ A free function kernel receives every parameter positionally, as an
+ordinary device-copyable kernel argument.
+The special types above are not device copyable; they are legal parameters for
+general SYCL kernels only through the separate special-passing allowance of
+<<sec:kernel.parameter.passing>>, which this extension does not provide.
+_{endnote}_]
+
+[[sec:khr-free-function-kernels-traits]]
+== Traits for kernel functions
+
+// PORT: experimental "=== New traits for kernel functions" (:336-417).
+// Compile-time-queryable traits keyed on the kernel function:
+// is_kernel_v<Func>, is_nd_range_kernel_v<Func,Dims>,
+// is_single_task_kernel_v<Func>, plus property queries (has_property /
+// get_property). Spec the CONTRACT "queryable at compile time" — these read
+// off the host-visible declaration, NO integration header required (project
+// memory dissolution chain). Property type-shape follows sycl_khr_properties.
+// COVERAGE: step 4 (host-readable __builtin_sycl_has_property/get_property +
+// is_kernel/is_nd_kernel/is_single_task_kernel traits;
+// sycl-property-builtins.cpp, khr_kernel_property_traits.cpp). Spec promises
+// only the OBSERVABLE (traits queryable at compile time), NOT the builtin /
+// integration-header mechanism. See coverage map.
+// TODO: trait synopses + Constraints/Returns.
+
+[[sec:khr-free-function-kernels-launch]]
+== Launching a free function kernel
+
+// PORT: experimental "=== New free functions to launch a kernel" (:418-502) +
+// "=== Enqueuing a free function kernel and setting parameter values"
+// (:800-841). Define khr::nd_launch / khr::single_task (queue + handler forms),
+// kernel identity = khr::kernel_function<Func> value, both return void.
+// Compile-time checks: kind/dimensionality (is_nd_range_kernel_v<Func,Dims>) +
+// arg-type (is_valid_kernel_arg_v<Args...>) via Constraints. NO compile-time
+// work-group-size value check (Greg feedback — constant nd_ranges are rare).
+// Runtime must-match (work_group_size etc.) noted as runtime exceptions.
+// COVERAGE: step 5 (checked nd_launch/single_task; khr_checked_launch.cpp,
+// khr_checked_launch_errors.cpp) + step 7/8 (runtime must-match throws
+// errc::nd_range, decoration propagated onto wrapper; e2e khr_must_match.cpp,
+// khr_must_match_negative.cpp on PVC — work_group_size proven, max_*/sub_group
+// designed-not-e2e-tested). See coverage map.
+// TODO: launcher synopses + Constraints/Effects.
+
+[[sec:khr-free-function-kernels-launch-properties]]
+== Launch properties
+
+// PORT: experimental "=== Interaction with kernel properties" (:864-887).
+// Optional khr::properties{} argument to the launchers (Greg: naked property
+// list, NOT a launch_config wrapper), carrying RUNTIME-only launch properties.
+// Compile-time-value properties are rejected at the launch site (static
+// constraint). v1 in-scope payload is minimal (work_group_scratch_size
+// deferred); reserve the overload shape. Express which property keys are valid
+// at launch via the sycl_khr_properties CT/RT classification.
+// COVERAGE: step 6 (runtime-property launch overload, CT props rejected;
+// khr_launch_properties.cpp, khr_launch_properties_errors.cpp). v1 in-scope
+// payload empty (work_group_scratch_size deferred) — reserve overload shape
+// only. See coverage map.
+// TODO: overload synopsis + Constraints; defer-list note.
+
+[[sec:khr-free-function-kernels-example]]
+== Example
+
+// PORT: experimental "== Examples" (:974-1064): "Basic invocation" +
+// "Free function kernels which are templates or overloaded". Provide one (or
+// two) full compilable programs: #include <sycl/sycl.hpp>, define a kernel with
+// SYCL_KHR_KERNEL(nd_kernel<1>), launch with khr::nd_launch, verify result.
+// Use [source,,linenums]. Mirror the style of
+// sycl_khr_work_item_queries.adoc Example. Keep vendor-neutral — NO native
+// backend launch in the example (native section cut).
+// COVERAGE: steps 5 + 7 (positive e2e, khr_must_match.cpp on PVC). See coverage map.
+// TODO: write the example program(s).
