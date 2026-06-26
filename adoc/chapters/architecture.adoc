@@ -72,70 +72,51 @@ run in parallel on any device available.
 ----
 include::{code_dir}/anatomy.cpp[lines=4..-1]
 ----
+At line 2 we [code]#{hash}include# the SYCL header files, which provide all of
+of the SYCL features that will be used.
 
-At line 1, we [code]#{hash}include# the SYCL header files, which provide all of
-the SYCL features that will be used.
+At line 11 we instantiate a <<queue>> with the [code]#in_order# property.
+A queue is bound to a <<device>>, if you do not specify a device with a selector
+function, the SYCL runtime will choose one automatically.
+A queue will execute commands submitted to it on it's associated device.
+In our case commands will be executed in a first in first out (FIFO) fashion
+because of the [code]#in_order# property passed to our queue's constructor.
+The commands submitted to [code]#myQueue# are executed asynchronously from the
+host code.
 
-A SYCL application runs on a <<sec:platformmodel, SYCL Platform>>.
-The application is structured in three scopes which specify the different
-sections; <<application-scope>>, <<command-group-scope>> and <<kernel-scope>>.
-The <<kernel-scope>> specifies a single kernel function that will be, or has
-been, compiled by a <<device-compiler>> and executed on a <<device>>.
-In this example <<kernel-scope>> is defined by lines 25 to 26.
-The <<command-group-scope>> specifies a unit of work which is comprised of a
-<<sycl-kernel-function>> and <<accessor,accessors>>.
-In this example <<command-group-scope>> is defined by lines 20 to 28.
-The <<application-scope>> specifies all other code outside of a
-<<command-group-scope>>.
-These three scopes are used to control the application flow and the construction
-and lifetimes of the various objects used within SYCL, as explained in
-<<sec:managing-object-lifetimes>>.
+At line 14 we use [code]#malloc_device# to allocate memory on the <<device>>
+associated with our queue and store a universal shared memory <<usm>> pointer to
+the memory in [code]#dataDevice#.
+This memory is only accessible on the device.
 
-A <<sycl-kernel-function>> is the scoped block of code that will be compiled
-using a device compiler.
-This code may be defined by the body of a lambda expression or by the
-[code]#operator()# function of a function object.
-Each instance of the <<sycl-kernel-function>> will be executed as a single,
-though not necessarily entirely independent, flow of execution and has to adhere
-to restrictions on what operations may be allowed to enable device compilers to
-safely compile it to a range of underlying devices.
+In lines 17 to 20, [code]#parallel_for# does three conceptual things:
 
-The [code]#parallel_for# member function can be templated with a class.
-This class is used to manually name the kernel when desired, such as to avoid a
-compiler-generated name when debugging a kernel defined through a lambda, to
-provide a known name with which to apply build options to a kernel, or to ensure
-compatibility with multiple compiler-pass implementations.
+  1. The <<sycl-kernel-function>> (defined here as a lambda), passed as the
+    second argument to [code]#parallel_for#, is compiled by a
+    <<device-compiler>> into a <<kernel>> that can be ran on the <<device>>
+    associated with [code]#myQueue#.
+  2. A command that invokes the <<kernel>> on the <<device>> is submitted to
+    [code]#myQueue#, and the <<kernel>> is executed asynchronously from the
+    host.
+  3. The command decomposes the range 0 to 1023 into <<work-item, work-items>>.
+    For each <<work-item>> the <<sycl-kernel-function>> is invoked once on the
+    device.
 
-The [code]#parallel_for# member function creates an instance of a <<kernel>>,
-which is the entity that will be enqueued within a command group.
-In the case of [code]#parallel_for# the <<sycl-kernel-function>> will be
-executed over the given range from 0 to 1023.
-The different member functions to execute kernels can be found in
-<<subsec:invokingkernels>>.
+The different <<queue>> member functions used to invoke a
+<<sycl-kernel-function>> can be found in <<subsec:invokingkernels>>.
 
-A <<command-group-scope>> is the syntactic scope wrapped by the construction of
-a <<command-group-function-object>> as seen on line 19.
-The <<command-group-function-object>> may invoke only a single
-<<sycl-kernel-function>>, and it takes a parameter of type command group
-[code]#handler#, which is constructed by the runtime.
+At line 23 we use the [code]#copy# member function to submit a copy command to
+copy the results from the <<device, device's>> memory back into host memory.
 
-All the requirements for a kernel to execute are defined in this
-<<command-group-scope>>, as described in <<sec:executionmodel>>.
-In this case the constructor used for [code]#myQueue# on line 9 is the default
-constructor, which allows the queue to select the best underlying device to
-execute on, leaving the decision up to the runtime.
+At line 25 we call [code]#wait# to block the host until all commands submitted
+to [code]#myQueue# (the [code]#parallel_for# and the [code]#copy#) have
+completed.
 
-In SYCL, data that is required within a <<sycl-kernel-function>> must be
-contained within a <<buffer>>, <<image>>, or <<usm>> allocation, as described in
-<<sec:memory.model>>.
-We construct a buffer on line 16.
-Access to the <<buffer>> is controlled via an <<accessor>> which is constructed
-on line 21.
-The <<buffer>> is used to keep track of access to the data and the <<accessor>>
-is used to request access to the data on a queue, as well as to track the
-dependencies between <<sycl-kernel-function>>.
-In this example the <<accessor>> is used to write to the data buffer on line 26.
+At lines 28 to 29 we print the host memory, which now contains a copy of the
+device memory.
 
+At line 32 the device allocation [code]#dataDevice# is released with
+[code]#free#.
 
 [[sec:platformmodel]]
 == The SYCL platform model

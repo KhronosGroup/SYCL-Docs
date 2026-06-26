@@ -3,37 +3,36 @@
 
 #include <iostream>
 #include <sycl/sycl.hpp>
-using namespace sycl;  // (optional) avoids need for "sycl::" before SYCL names
+#include <vector>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
 
 int main() {
-  int data[1024];  // Allocate data to be worked on
+  // Allocate host memory to store the results
+  std::vector<int> dataHost(1024);
 
-  // Create a default queue to enqueue work to the default device
-  queue myQueue;
+  // Create an in order queue to enqueue work to the default device
+  queue myQueue{property::queue::in_order()};
 
-  // By wrapping all the SYCL work in a {} block, we ensure
-  // all SYCL tasks must complete before exiting the block,
-  // because the destructor of resultBuf will wait
-  {
-    // Wrap our data variable in a buffer
-    buffer resultBuf{data, {1024}};
+  // Allocate device memory to be worked on
+  int *dataDevice = malloc_device<int>(1024, myQueue);
 
-    // Create a command group to issue commands to the queue
-    myQueue.submit([&](handler& cgh) {
-      // Request write access to the buffer without initialization
-      accessor writeResult{resultBuf, cgh, write_only, no_init};
+  // Enqueue a parallel_for task with 1024 work-items
+  myQueue.parallel_for(1024, [=](id<1> idx) {
+    // Initialize each buffer element with its own rank number starting at 0
+    dataDevice[idx] = idx;
+  }); // End of the kernel function
 
-      // Enqueue a parallel_for task with 1024 work-items
-      cgh.parallel_for(1024, [=](id<1> idx) {
-        // Initialize each buffer element with its own rank number starting at 0
-        writeResult[idx] = idx;
-      });  // End of the kernel function
-    });    // End of our commands for this queue
-  }  // End of scope, so we wait for work producing resultBuf to complete
+  // Copy the results back to the host from the device
+  myQueue.copy(dataDevice, dataHost.data(), 1024);
+
+  myQueue.wait(); // Wait for the queue to finish executing all the tasks
 
   // Print result
   for (int i = 0; i < 1024; i++)
-    std::cout << "data[" << i << "] = " << data[i] << std::endl;
+    std::cout << "dataHost[" << i << "] = " << dataHost[i] << std::endl;
+
+  // Free device memory
+  free(dataDevice, myQueue);
 
   return 0;
 }
