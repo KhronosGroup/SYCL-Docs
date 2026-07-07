@@ -3,8 +3,8 @@
 
 This extension introduces _free function kernels_.
 A free function kernel is an ordinary C++ function, defined at namespace scope,
-that is decorated with one of the [code]#SYCL_KHR_ND_KERNEL# or
-[code]#SYCL_KHR_TASK_KERNEL# macros so that it becomes a device kernel entry
+that is decorated with either the [code]#SYCL_KHR_ND_KERNEL# or
+the [code]#SYCL_KHR_TASK_KERNEL# macro so that it becomes a device kernel entry
 point.
 Its kernel arguments are the function's parameters, rather than the captures of a
 lambda or the members of a function object, which gives them a defined order.
@@ -15,13 +15,7 @@ a lambda.
 [[sec:khr-free-function-kernels-dependencies]]
 == Dependencies
 
-This extension depends on the
-<<sec:khr-work-item-queries,sycl_khr_work_item_queries>> extension. A free
-function kernel obtains its work-item's position in the iteration space, when it
-needs one, through the in-kernel queries provided by that extension (such as
-[code]#sycl::khr::this_nd_item#). A kernel that does not need a position --- a
-single-task free function kernel, or an ND-range free function kernel whose body
-never queries one --- uses no such query.
+This extension has no dependencies on other extensions.
 
 [[sec:khr-free-function-kernels-feature-test]]
 == Feature test macro
@@ -43,8 +37,8 @@ below.
 == Defining a free function kernel
 
 A free function kernel is an ordinary C++ function whose declaration is decorated
-with one of the [code]#SYCL_KHR_ND_KERNEL# or [code]#SYCL_KHR_TASK_KERNEL#
-macros.
+with either the [code]#SYCL_KHR_ND_KERNEL# or the [code]#SYCL_KHR_TASK_KERNEL#
+macro.
 The kernel's _kind_ is determined by which macro is used:
 
 * [code]#SYCL_KHR_ND_KERNEL(N)# --- the function is launched over an
@@ -93,9 +87,6 @@ A program that violates any of them is ill formed unless stated otherwise.
   an application can query this with the core
   [code]#sycl::is_device_copyable_v<T># type trait.
 
-* No declaration of the function may specify a default argument for any
-  parameter.
-
 * The decoration must appear on the first declaration of the function in the
   translation unit.
   A redeclaration of the function may also be decorated, provided it is decorated
@@ -135,8 +126,8 @@ below are parameterized on it through a non-type template parameter
 == Traits for kernel functions
 
 This extension defines traits that report, at compile time, whether a given
-[code]#Func# is a free function kernel (see
-<<sec:khr-free-function-kernels-defining>>) and, if so, what kind it has.
+[code]#Func# is decorated as a free function kernel of a particular kind (see
+<<sec:khr-free-function-kernels-defining>>).
 In each trait, [code]#Func# is the address of a function, and the trait reports
 [code]#true# only when [code]#Func# is decorated as a free function kernel of the
 relevant kind.
@@ -149,29 +140,6 @@ translation unit as the use of the trait; the decorated declaration (with
 [code]#SYCL_KHR_ND_KERNEL# or [code]#SYCL_KHR_TASK_KERNEL#) is sufficient.
 How an implementation makes the decoration observable in a constant expression
 is unspecified.{endnote}
-
-'''
-
-.[apidef]#is_kernel#
-[source,role=synopsis,id=api:khr-free-function-kernels-is_kernel]
-----
-namespace sycl::khr {
-
-template<auto *Func>
-struct is_kernel;
-
-template<auto *Func>
-inline constexpr bool is_kernel_v = is_kernel<Func>::value;
-
-} // namespace sycl::khr
-----
-
-_Returns:_ [code]#is_kernel<Func>::value# is [code]#true# if [code]#Func# is the
-address of a function that is decorated as a free function kernel (with any
-kind), and [code]#false# otherwise.
-
-_Remarks:_ The expression [code]#is_kernel_v<Func># is usable in a constant
-expression.
 
 '''
 
