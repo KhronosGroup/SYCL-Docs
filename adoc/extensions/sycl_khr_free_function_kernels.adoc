@@ -3,8 +3,9 @@
 
 This extension introduces _free function kernels_.
 A free function kernel is an ordinary C++ function, defined at namespace scope,
-that is decorated with the [code]#SYCL_KHR_KERNEL#
-macro so that it becomes a device kernel entry point.
+that is decorated with one of the [code]#SYCL_KHR_ND_KERNEL# or
+[code]#SYCL_KHR_TASK_KERNEL# macros so that it becomes a device kernel entry
+point.
 Its kernel arguments are the function's parameters, rather than the captures of a
 lambda or the members of a function object, which gives them a defined order.
 Because it is a named function, the kernel is identified by the function itself,
@@ -14,33 +15,13 @@ a lambda.
 [[sec:khr-free-function-kernels-dependencies]]
 == Dependencies
 
-// COVERAGE: this section OWNS the #980 (sycl_khr_properties) unmerged
-// forward-dependency caveat for the whole document — the editorial note below is
-// the single place that explains why every <<sec:khr-properties,...>> cross-ref
-// in this extension dangles in a build until #980 lands. Do not restate the
-// property model here (see <<sec:khr-free-function-kernels-properties>>). See
-// playground/ffk-khr-pr-step-C7-dependencies.md.
-
-This extension depends on the
-<<sec:khr-properties,sycl_khr_properties>> extension, whose property
-infrastructure it uses to associate properties with a free function kernel (see
-<<sec:khr-free-function-kernels-properties>>).
-
 This extension depends on the
 <<sec:khr-work-item-queries,sycl_khr_work_item_queries>> extension. A free
 function kernel obtains its work-item's position in the iteration space, when it
 needs one, through the in-kernel queries provided by that extension (such as
 [code]#sycl::khr::this_nd_item#). A kernel that does not need a position --- a
-[code]#sycl::khr::single_task_kernel#, or a [code]#sycl::khr::nd_kernel<Dims>#
-whose body never queries one --- uses no such query.
-
-{note}At the time of writing, [code]#sycl_khr_properties# is a proposed extension
-(SYCL specification PR #980) and is not yet part of the SYCL specification.
-Until it is incorporated, the cross-references to it in this extension do not
-resolve.{endnote}
-
-Some features of this extension are only available when a SYCL implementation
-conforms to {cpp17} or later.
+single-task free function kernel, or an ND-range free function kernel whose body
+never queries one --- uses no such query.
 
 [[sec:khr-free-function-kernels-feature-test]]
 == Feature test macro
@@ -61,35 +42,28 @@ below.
 [[sec:khr-free-function-kernels-defining]]
 == Defining a free function kernel
 
-// COVERAGE: step 1 (variadic SYCL_KHR_KERNEL macro, khr_free_kernel_macro.cpp) +
-// step 12 (mandatory kind / empty-macro-is-error, khr_free_kernel_macro.cpp).
-// Ported from experimental "=== Defining a free function kernel" (:156-205,
-// :324-330). Reframed onto the mandatory-kind macro SYCL_KHR_KERNEL(kind, ...)
-// (project memory step 12) rather than the experimental
-// SYCL_EXT_ONEAPI_FUNCTION_PROPERTY((property)) decoration.
-// SYCL_EXTERNAL is left as an OPEN note (not a normative rule, per project
-// memory). Call-as-a-function is stated as UB only (impl is not claimed to
-// reject it). See playground/ffk-khr-coverage.md.
-
 A free function kernel is an ordinary C++ function whose declaration is decorated
-with the [code]#SYCL_KHR_KERNEL# macro.
-The first argument to the macro is the kernel's _kind_, which is mandatory.
-The kind is one of the following:
+with one of the [code]#SYCL_KHR_ND_KERNEL# or [code]#SYCL_KHR_TASK_KERNEL#
+macros.
+The kernel's _kind_ is determined by which macro is used:
 
-* [code]#sycl::khr::single_task_kernel# --- the function is launched as a single
-  task, without any iteration space; or
+* [code]#SYCL_KHR_ND_KERNEL(N)# --- the function is launched over an
+  [code]#nd_range# iteration space of [code]#N# dimensions; or
 
-* [code]#sycl::khr::nd_kernel<Dims>#  --- the function is launched over an
-  [code]#nd_range# iteration space of [code]#Dims# dimensions.
+* [code]#SYCL_KHR_TASK_KERNEL()# --- the function is launched as a single task,
+  without any iteration space.
 
-Any remaining arguments to the macro are optional compile-time properties that
-are applicable to a free function kernel, as described in
-<<sec:khr-free-function-kernels-properties>>.
+Neither macro takes any arguments beyond those shown above, though a future
+extension may define more.
 
 [source,role=synopsis,id=api:khr-free-function-kernels-macro]
 ----
-// Decorate a function declaration to define a free function kernel.
-#define SYCL_KHR_KERNEL(kind, ...) /* see below */
+// Decorate a function declaration to define an ND-range free function kernel
+// over N dimensions.
+#define SYCL_KHR_ND_KERNEL(N) /* see below */
+
+// Decorate a function declaration to define a single-task free function kernel.
+#define SYCL_KHR_TASK_KERNEL() /* see below */
 ----
 
 The first declaration of the function in the translation unit must be the
@@ -98,7 +72,7 @@ For example:
 
 [source]
 ----
-SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+SYCL_KHR_ND_KERNEL(1)
 void scale(float factor, float *data) {
   // ...
 }
@@ -107,9 +81,7 @@ void scale(float factor, float *data) {
 A free function kernel must obey all of the following rules.
 A program that violates any of them is ill formed unless stated otherwise.
 
-* The macro's kind argument must be present.
-  Invoking the macro with no kind --- [code]#SYCL_KHR_KERNEL()# --- is ill
-  formed.
+* The function must be decorated with exactly one of the two macros.
 
 * The function must be declared at namespace scope.
 
@@ -127,28 +99,31 @@ A program that violates any of them is ill formed unless stated otherwise.
 * The decoration must appear on the first declaration of the function in the
   translation unit.
   A redeclaration of the function may also be decorated, provided it is decorated
-  with the same kind (and, where present, the same property arguments).
+  with the same macro (the same kind, and for [code]#SYCL_KHR_ND_KERNEL# the same
+  [code]#N#).
   The effect is the same whether or not a redeclaration is decorated.
 
-* The same function must be decorated with exactly one kind.
-  Decorating the same function with more than one kind, or with the same kind but
-  conflicting property arguments, is ill formed.
-  Decorating it more than once with the same kind and the same property arguments
-  is permitted and has the same effect as decorating it once.
-
 * If the function is decorated in one translation unit, every other translation
-  unit that declares the same function must decorate it identically (the same
-  kind and the same property arguments).
+  unit that declares the same function must decorate it with the same macro (the
+  same kind, and for [code]#SYCL_KHR_ND_KERNEL# the same [code]#N#).
+
+{note}Some SYCL types that are legal parameters for an ordinary SYCL kernel are
+not legal parameters for a free function kernel, because a free function kernel
+requires each parameter to be device-copyable (see the rule above).
+For example, [code]#accessor#, [code]#local_accessor#, image accessors,
+[code]#stream#, and [code]#reducer# are legal kernel parameters under
+<<sec:kernel.parameter.passing>> but are not device-copyable and so cannot be
+used as free function kernel parameters.{endnote}
 
 The way the function's body obtains its position in the iteration space must be
-consistent with the declared kind: a function whose kind is
-[code]#sycl::khr::nd_kernel<Dims># obtains its position for an
-[code]#nd_range# of [code]#Dims# dimensions, while a function whose kind is
-[code]#sycl::khr::single_task_kernel# executes as a single work-item, with no
-iteration space, and must not query an iteration position.
-A program that violates this rule is ill formed, no diagnostic required.
+consistent with the kind implied by the macro used: a function decorated with
+[code]#SYCL_KHR_ND_KERNEL(N)# obtains its position for an [code]#nd_range# of
+[code]#N# dimensions, while a function decorated with
+[code]#SYCL_KHR_TASK_KERNEL()# executes as a single work-item, with no iteration
+space, and must not query an iteration position.
+A program that violates this rule is ill formed, no diagnostic is required.
 
-A function decorated with [code]#SYCL_KHR_KERNEL# is a kernel entry point.
+A function decorated with one of these macros is a kernel entry point.
 Calling it as an ordinary function, in either host or device code, results in
 undefined behavior.
 
@@ -156,115 +131,8 @@ The function itself identifies the kernel: the launch and query APIs described
 below are parameterized on it through a non-type template parameter
 [code]#Func# (for example, [code]#sycl::khr::kernel_function<scale>#).
 
-// OPEN (raise in PR discussion, not a normative rule): may a free function
-// kernel entry point be declared SYCL_EXTERNAL? Tension — the host needs the
-// symbol visible (to name/launch it) but never calls it, while SYCL_EXTERNAL is
-// a device cross-TU linkage contract that is meaningless for an entry point
-// (calling a kernel from device code is UB). The experimental spec (:204)
-// contemplates SYCL_EXTERNAL free function kernel bodies; whether the KHR should
-// permit, forbid, or stay silent on this is deferred to the PR. Do NOT add a
-// normative SYCL_EXTERNAL rule here until that is resolved.
-
-[[sec:khr-free-function-kernels-properties]]
-== Kernel properties
-
-// COVERAGE: the _kind_ properties (single_task_kernel / nd_kernel<Dims>) are
-// PROVEN (step 1 macro + step 12 mandatory-kind validator,
-// khr_free_kernel_macro.cpp). The free_function_kernel TAG TYPE and the
-// is_property_for-keyed applicability model are a NEW SPEC CONSTRUCT (design
-// proposal, project memory "FFK NEEDS A PROPERTY-TAG TYPE"): the prototype used
-// khr::detail introspection of the property bundle, NOT a public tag. The
-// compile-time vs runtime split reuses Greg's is_property_key_compile_time
-// discriminator (step 6, khr_launch_properties*.cpp). DEPENDS on the unmerged
-// sycl_khr_properties (#980) — the is_property_for / is_property_key_compile_time
-// cross-refs below dangle (sec:khr-properties) until it lands. See
-// playground/ffk-khr-coverage.md and ffk-khr-pr-step-C5-property-model.md.
-
-A free function kernel can carry _properties_, using the property infrastructure
-defined by <<sec:khr-properties,sycl_khr_properties>>.
-There are two contexts in which a property is associated with a free function
-kernel:
-
-* _Compile-time properties_ are placed on the kernel by listing them as the
-  remaining arguments of the [code]#SYCL_KHR_KERNEL# decoration (see
-  <<sec:khr-free-function-kernels-defining>>).
-
-* _Runtime properties_ are supplied when the kernel is launched, through the
-  launch property list (see <<sec:khr-free-function-kernels-launch-properties>>).
-
-[[sec:khr-free-function-kernels-properties-tag]]
-=== The free_function_kernel property tag
-
-The tag type [code]#sycl::khr::free_function_kernel# identifies a free function
-kernel for the purpose of property applicability: a property [code]#P# is
-applicable to a free function kernel if
-[code]#khr::is_property_for_v<P, khr::free_function_kernel># is [code]#true#.
-
-'''
-
-.[apidef]#khr::free_function_kernel#
-[source,role=synopsis,id=api:khr-free-function-kernels-tag]
-----
-namespace sycl::khr {
-
-struct free_function_kernel;
-
-} // namespace sycl::khr
-----
-
-_Remarks:_ [code]#free_function_kernel# is an incomplete tag type that is never
-instantiated.
-It serves only as the [code]#Class# argument of the
-<<sec:khr-properties,sycl_khr_properties>> property traits.
-
-[[sec:khr-free-function-kernels-properties-ct-rt]]
-=== Compile-time and runtime properties
-
-Whether a property is associated with a free function kernel through the
-decoration or through the launch property list is determined by whether it is a
-compile-time property or a runtime property, as classified by the
-[api]#khr::is_property_key_compile_time# trait of
-<<sec:khr-properties,sycl_khr_properties>>.
-
-* The [code]#SYCL_KHR_KERNEL# decoration accepts a property [code]#P# only if
-  [code]#P# is applicable to a free function kernel and the key of [code]#P# is a
-  compile-time property, that is
-  [code]#khr::is_property_key_compile_time_v<key-of-P># is [code]#true#.
-
-* The launch property list (see
-  <<sec:khr-free-function-kernels-launch-properties>>) accepts a property
-  [code]#P# only if [code]#P# is applicable to a free function kernel and the key
-  of [code]#P# is a runtime property, that is
-  [code]#khr::is_property_key_compile_time_v<key-of-P># is [code]#false#.
-
-[[sec:khr-free-function-kernels-properties-kind]]
-=== Properties defined by this extension
-
-This extension defines the compile-time _kind_ properties,
-[code]#sycl::khr::single_task_kernel# and [code]#sycl::khr::nd_kernel<Dims>#
-(see <<sec:khr-free-function-kernels-defining>> for their meaning).
-These are applicable to a free function kernel,
-and appear as the mandatory first
-argument of the [code]#SYCL_KHR_KERNEL# decoration.
-
-Apart from the _kind_ properties, this extension does not define any property
-applicable to a free function kernel; any such property is defined by the SYCL
-implementation or by another extension.
-
 [[sec:khr-free-function-kernels-traits]]
 == Traits for kernel functions
-
-// COVERAGE: step 4 (is_kernel / is_nd_kernel / is_single_task_kernel traits
-// queryable at host compile time off the decorated declaration, NO integration
-// header — sycl-property-builtins.cpp, khr_kernel_property_traits.cpp). Ported
-// from experimental "=== New traits for kernel functions" (:336-417); renamed
-// is_nd_range_kernel -> is_nd_kernel (khr kind name) and moved to sycl::khr.
-// Spec states ONLY the OBSERVABLE contract ("usable in constant expressions /
-// SFINAE at compile time"); the builtin / integration-header / device-compile
-// mechanism is an implementation detail and is deliberately not specified.
-// A general has_property / get_property query surface is DEFERRED (it belongs
-// with sycl_khr_properties, #980) — only the three kind/dimensionality traits
-// are exposed here, matching the experimental spec. See coverage map.
 
 This extension defines traits that report, at compile time, whether a given
 [code]#Func# is a free function kernel (see
@@ -277,8 +145,8 @@ application can branch on, or constrain a template against, the kind of a free
 function kernel without launching it.
 
 {note}The kernel whose address is [code]#Func# need not be defined in the same
-translation unit as the use of the trait; the declaration decorated with
-[code]#SYCL_KHR_KERNEL# is sufficient.
+translation unit as the use of the trait; the decorated declaration (with
+[code]#SYCL_KHR_ND_KERNEL# or [code]#SYCL_KHR_TASK_KERNEL#) is sufficient.
 How an implementation makes the decoration observable in a constant expression
 is unspecified.{endnote}
 
@@ -322,51 +190,38 @@ inline constexpr bool is_nd_kernel_v = is_nd_kernel<Func, Dims>::value;
 ----
 
 _Returns:_ [code]#is_nd_kernel<Func, Dims>::value# is [code]#true# if
-[code]#Func# is the address of a function whose kind is
-[code]#sycl::khr::nd_kernel<Dims>#, and [code]#false# otherwise.
+[code]#Func# is the address of a function that is decorated as an ND-range free
+function kernel over [code]#Dims# dimensions (with
+[code]#SYCL_KHR_ND_KERNEL(Dims)#), and [code]#false# otherwise.
 
 _Remarks:_ The expression [code]#is_nd_kernel_v<Func, Dims># is usable in a
 constant expression.
 
 '''
 
-.[apidef]#is_single_task_kernel#
-[source,role=synopsis,id=api:khr-free-function-kernels-is_single_task_kernel]
+.[apidef]#is_task_kernel#
+[source,role=synopsis,id=api:khr-free-function-kernels-is_task_kernel]
 ----
 namespace sycl::khr {
 
 template<auto *Func>
-struct is_single_task_kernel;
+struct is_task_kernel;
 
 template<auto *Func>
-inline constexpr bool is_single_task_kernel_v = is_single_task_kernel<Func>::value;
+inline constexpr bool is_task_kernel_v = is_task_kernel<Func>::value;
 
 } // namespace sycl::khr
 ----
 
-_Returns:_ [code]#is_single_task_kernel<Func>::value# is [code]#true# if
-[code]#Func# is the address of a function whose kind is
-[code]#sycl::khr::single_task_kernel#, and [code]#false# otherwise.
+_Returns:_ [code]#is_task_kernel<Func>::value# is [code]#true# if
+[code]#Func# is the address of a function that is decorated as a single-task free
+function kernel (with [code]#SYCL_KHR_TASK_KERNEL#), and [code]#false# otherwise.
 
-_Remarks:_ The expression [code]#is_single_task_kernel_v<Func># is usable in a
+_Remarks:_ The expression [code]#is_task_kernel_v<Func># is usable in a
 constant expression.
 
 [[sec:khr-free-function-kernels-launch]]
 == Launching a free function kernel
-
-// PORT: experimental "=== New free functions to launch a kernel" (:418-502) +
-// "=== Enqueuing a free function kernel and setting parameter values"
-// (:800-841). Define khr::nd_launch / khr::single_task (queue + handler forms),
-// kernel identity = khr::kernel_function<Func> value, both return void.
-// Compile-time checks: kind/dimensionality (is_nd_range_kernel_v<Func,Dims>) +
-// arg-type (is_valid_kernel_arg_v<Args...>) via Constraints. NO compile-time
-// work-group-size value check (Greg feedback — constant nd_ranges are rare).
-// Runtime must-match (work_group_size etc.) noted as runtime exceptions.
-// COVERAGE: step 5 (checked nd_launch/single_task; khr_checked_launch.cpp,
-// khr_checked_launch_errors.cpp) + step 7/8 (runtime must-match throws
-// errc::nd_range, decoration propagated onto wrapper; e2e khr_must_match.cpp,
-// khr_must_match_negative.cpp on PVC — work_group_size proven, max_*/sub_group
-// designed-not-e2e-tested). See coverage map.
 
 A free function kernel is launched by passing its address to one of the launch
 functions defined in this section.
@@ -392,32 +247,32 @@ inline constexpr kernel_function_s<Func> kernel_function;
 _Remarks:_ [code]#Func# is the address of a function that is decorated as a free
 function kernel (see <<sec:khr-free-function-kernels-defining>>).
 The variable template [code]#kernel_function<Func># is the value passed to
-[code]#single_task# and [code]#nd_launch# to identify the kernel to launch.
+[code]#launch_task# and [code]#launch_grouped# to identify the kernel to launch.
 
 {note}For a free function kernel that is a template, the address of a particular
 specialization is used, for example
 [code]#kernel_function<scale<int>>#.{endnote}
 
-[[sec:khr-free-function-kernels-launch-single_task]]
-=== single_task
+[[sec:khr-free-function-kernels-launch-launch_task]]
+=== launch_task
 
 '''
 
-.[apidef]#single_task#
-[source,role=synopsis,id=api:khr-free-function-kernels-single_task]
+.[apidef]#launch_task#
+[source,role=synopsis,id=api:khr-free-function-kernels-launch_task]
 ----
 namespace sycl::khr {
 
 template<auto *Func, typename... Args>
-void single_task(queue q, kernel_function_s<Func> k, Args&&... args);
+void launch_task(const queue &q, kernel_function_s<Func> k, Args&&... args);
 
 template<auto *Func, typename... Args>
-void single_task(handler &h, kernel_function_s<Func> k, Args&&... args);
+void launch_task(handler &h, kernel_function_s<Func> k, Args&&... args);
 
 } // namespace sycl::khr
 ----
 
-_Constraints:_ Available only if [code]#is_single_task_kernel_v<Func># is
+_Constraints:_ Available only if [code]#is_task_kernel_v<Func># is
 [code]#true# and [code]#std::is_invocable_v<decltype(Func), Args...># is
 [code]#true#.
 
@@ -426,23 +281,23 @@ _Effects:_ Enqueues the free function kernel [code]#Func# to the queue
 Each value in the [code]#args# pack is passed to the corresponding parameter of
 [code]#Func#, converting it to the parameter's type if necessary.
 
-[[sec:khr-free-function-kernels-launch-nd_launch]]
-=== nd_launch
+[[sec:khr-free-function-kernels-launch-launch_grouped]]
+=== launch_grouped
 
 '''
 
-.[apidef]#nd_launch#
-[source,role=synopsis,id=api:khr-free-function-kernels-nd_launch]
+.[apidef]#launch_grouped#
+[source,role=synopsis,id=api:khr-free-function-kernels-launch_grouped]
 ----
 namespace sycl::khr {
 
 template<auto *Func, int Dims, typename... Args>
-void nd_launch(queue q, nd_range<Dims> r,
-               kernel_function_s<Func> k, Args&&... args);
+void launch_grouped(const queue &q, range<Dims> global, range<Dims> local,
+                    kernel_function_s<Func> k, Args&&... args);
 
 template<auto *Func, int Dims, typename... Args>
-void nd_launch(handler &h, nd_range<Dims> r,
-               kernel_function_s<Func> k, Args&&... args);
+void launch_grouped(handler &h, range<Dims> global, range<Dims> local,
+                    kernel_function_s<Func> k, Args&&... args);
 
 } // namespace sycl::khr
 ----
@@ -453,8 +308,8 @@ _Constraints:_ Available only if [code]#is_nd_kernel_v<Func, Dims># is
 
 _Effects:_ Enqueues the free function kernel [code]#Func# to the queue
 [code]#q# (or to the command group of the handler [code]#h#) as an ND-range
-kernel, using the number of work-items specified by the [code]#nd_range#
-[code]#r#.
+kernel, over the iteration space defined by the global range [code]#global# with
+work-group (local) size [code]#local#.
 Each value in the [code]#args# pack is passed to the corresponding parameter of
 [code]#Func#, converting it to the parameter's type if necessary.
 
@@ -462,149 +317,29 @@ For example:
 
 [source]
 ----
-sycl::khr::nd_launch(q, r, sycl::khr::kernel_function<scale>, factor, data);
+sycl::khr::launch_grouped(q, global, local, sycl::khr::kernel_function<scale>, factor, data);
 ----
 
 The [code]#Constraints# above check, at compile time, only the kernel's _kind_
 and _dimensionality_ and that the supplied arguments can be passed to
 [code]#Func#.
-They do not check the values carried by the kernel's compile-time properties,
-such as a required work-group size, because such a value is compared against the
-local size of the [code]#nd_range#, which is generally a run-time value.
+They do not check the required work-group size of the kernel, if any, because
+that value is compared against the local range, which is generally a run-time
+value.
 
-Launch requirements that a free function kernel carries through its compile-time
-properties are enforced at launch in the same way as for any other SYCL kernel
-(<<sec:kernel.attributes>>).
-In particular, launching a kernel that declares a required work-group size with
-an [code]#nd_range# whose local size does not match that requirement throws a
-synchronous [code]#exception# with the [code]#errc::nd_range# error code,
-exactly as for a SYCL kernel decorated with [code]#reqd_work_group_size#.
-
-{note}The launch functions above do not accept a launch property list.
-Overloads that do are defined in
-<<sec:khr-free-function-kernels-launch-properties>>; this version of the
-extension reserves the shape of those overloads but defines no runtime property
-that can be passed through them.{endnote}
-
-[[sec:khr-free-function-kernels-launch-properties]]
-== Launch properties
-
-// COVERAGE: step 6 (runtime-property launch overload, CT props rejected;
-// khr_launch_properties.cpp, khr_launch_properties_errors.cpp). The overload
-// shape is RESERVED on BOTH nd_launch and single_task (project memory
-// "LAUNCH-PROPERTY SECTION DESIGN"): symmetric and future-proof, even though
-// single_task has no in-scope launch property in this version. The CT/RT split
-// reuses Greg's is_property_key_compile_time discriminator; applicability reuses
-// the free_function_kernel tag (C5). v1 in-scope payload is EMPTY
-// (work_group_scratch_size is deferred to another extension) — this version
-// defines no runtime launch property. DEPENDS on the unmerged sycl_khr_properties
-// (#980): is_property_list_for / is_property_key_compile_time / sec:khr-properties
-// dangle until it lands. See playground/ffk-khr-coverage.md.
-
-The launch functions in <<sec:khr-free-function-kernels-launch>> have
-additional overloads that accept a _launch property list_ --- a
-<<sec:khr-properties,sycl_khr_properties>> properties list supplied at the launch
-site, passed as a separate argument immediately before the
-[code]#kernel_function# handle and not wrapped in any launch-configuration type.
-The properties in the list carry _runtime_ information that applies to the
-individual launch, as distinct from the compile-time properties that decorate the
-kernel itself (see <<sec:khr-free-function-kernels-properties-ct-rt>>).
-
-A launch property list accepts only properties that are _applicable to a free
-function kernel_ (see <<sec:khr-free-function-kernels-properties-tag>>) and whose
-keys are _runtime properties_.
-This version of the extension defines no such property: the in-scope set of
-runtime launch properties is empty, and the overloads below exist to reserve the
-shape that future runtime launch properties will use.
-
-[[sec:khr-free-function-kernels-launch-properties-single_task]]
-=== single_task
-
-'''
-
-.[apidef]#single_task#
-[source,role=synopsis,id=api:khr-free-function-kernels-single_task-props]
-----
-namespace sycl::khr {
-
-template<auto *Func, typename Properties, typename... Args>
-void single_task(queue q, Properties props,
-                 kernel_function_s<Func> k, Args&&... args);
-
-template<auto *Func, typename Properties, typename... Args>
-void single_task(handler &h, Properties props,
-                 kernel_function_s<Func> k, Args&&... args);
-
-} // namespace sycl::khr
-----
-
-_Constraints:_ Available only if all of the following hold:
-
-* [code]#Properties# is a <<sec:khr-properties,sycl_khr_properties>> properties
-  list, that is [code]#khr::is_property_list_for_v<Properties, khr::free_function_kernel>#
-  is [code]#true#.
-  This requires every property in [code]#props# to be applicable to a free
-  function kernel (see <<sec:khr-free-function-kernels-properties-tag>>).
-* For every property in [code]#props#, the key of that property is a runtime
-  property, that is [code]#khr::is_property_key_compile_time_v<key-of-P># is
-  [code]#false#.
-  Supplying a compile-time property in the launch property list is ill formed.
-* [code]#is_single_task_kernel_v<Func># is [code]#true# and
-  [code]#std::is_invocable_v<decltype(Func), Args...># is [code]#true#, as for
-  the launch function without a property list.
-
-_Effects:_ Equivalent to the [code]#single_task# overload without a property list
-(see <<sec:khr-free-function-kernels-launch-single_task>>), additionally applying
-the runtime properties in [code]#props# to the launch.
-
-[[sec:khr-free-function-kernels-launch-properties-nd_launch]]
-=== nd_launch
-
-'''
-
-.[apidef]#nd_launch#
-[source,role=synopsis,id=api:khr-free-function-kernels-nd_launch-props]
-----
-namespace sycl::khr {
-
-template<auto *Func, int Dims, typename Properties, typename... Args>
-void nd_launch(queue q, nd_range<Dims> r, Properties props,
-               kernel_function_s<Func> k, Args&&... args);
-
-template<auto *Func, int Dims, typename Properties, typename... Args>
-void nd_launch(handler &h, nd_range<Dims> r, Properties props,
-               kernel_function_s<Func> k, Args&&... args);
-
-} // namespace sycl::khr
-----
-
-_Constraints:_ Available only if all of the following hold:
-
-* [code]#Properties# is a <<sec:khr-properties,sycl_khr_properties>> properties
-  list, that is [code]#khr::is_property_list_for_v<Properties, khr::free_function_kernel>#
-  is [code]#true#.
-  This requires every property in [code]#props# to be applicable to a free
-  function kernel (see <<sec:khr-free-function-kernels-properties-tag>>).
-* For every property in [code]#props#, the key of that property is a runtime
-  property, that is [code]#khr::is_property_key_compile_time_v<key-of-P># is
-  [code]#false#.
-  Supplying a compile-time property in the launch property list is ill formed.
-* [code]#is_nd_kernel_v<Func, Dims># is [code]#true# and
-  [code]#std::is_invocable_v<decltype(Func), Args...># is [code]#true#, as for
-  the launch function without a property list.
-
-_Effects:_ Equivalent to the [code]#nd_launch# overload without a property list
-(see <<sec:khr-free-function-kernels-launch-nd_launch>>), additionally applying
-the runtime properties in [code]#props# to the launch.
+A free function kernel is subject to the same launch-time requirements as any
+other SYCL kernel (<<sec:kernel.attributes>>).
+In particular, launching a kernel that requires a specific work-group size with a
+local range that does not match that requirement throws a synchronous
+[code]#exception# with the [code]#errc::nd_range# error code, exactly as for a
+SYCL kernel decorated with [code]#reqd_work_group_size#.
 
 [[sec:khr-free-function-kernels-example]]
 == Example
 
-// COVERAGE: steps 5 + 7 (positive e2e, khr_must_match.cpp on PVC). See
-// playground/ffk-khr-coverage.md.
-
 The example below defines a free function kernel at namespace scope, decorates it
-with [code]#SYCL_KHR_KERNEL#, and launches it with [code]#sycl::khr::nd_launch#.
+with [code]#SYCL_KHR_ND_KERNEL#, and launches it with
+[code]#sycl::khr::launch_grouped#.
 The kernel obtains its work-item position with the
 <<sec:khr-work-item-queries,sycl_khr_work_item_queries>> query
 [code]#sycl::khr::this_nd_item#, rather than receiving an [code]#nd_item#
@@ -612,13 +347,14 @@ parameter.
 
 [source,,linenums]
 ----
+#include <cassert>
 #include <sycl/sycl.hpp>
 
 constexpr size_t N = 1024;
 constexpr size_t WGSIZE = 32;
 
 // A free function kernel: an ordinary function, decorated with the kind.
-SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+SYCL_KHR_ND_KERNEL(1)
 void scale(float factor, float *data) {
   size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
   data[i] *= factor;
@@ -632,8 +368,8 @@ int main() {
     data[i] = static_cast<float>(i);
 
   // Identify the kernel by the function itself and launch it.
-  sycl::khr::nd_launch(q, sycl::nd_range<1>{N, WGSIZE},
-                       sycl::khr::kernel_function<scale>, 2.0f, data);
+  sycl::khr::launch_grouped(q, sycl::range<1>{N}, sycl::range<1>{WGSIZE},
+                            sycl::khr::kernel_function<scale>, 2.0f, data);
   q.wait();
 
   for (size_t i = 0; i < N; ++i)
@@ -660,20 +396,20 @@ constexpr size_t WGSIZE = 32;
 
 // A templated free function kernel.
 template<typename T>
-SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+SYCL_KHR_ND_KERNEL(1)
 void iota(T start, T *p) {
   size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
   p[i] = start + static_cast<T>(i);
 }
 
 // Two overloads of a free function kernel.
-SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+SYCL_KHR_ND_KERNEL(1)
 void ping(float *p) {
   size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
   p[i] = 1.0f;
 }
 
-SYCL_KHR_KERNEL(sycl::khr::nd_kernel<1>)
+SYCL_KHR_ND_KERNEL(1)
 void ping(int *p) {
   size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
   p[i] = 1;
@@ -684,16 +420,16 @@ int main() {
 
   float *fptr = sycl::malloc_shared<float>(N, q);
   int *iptr = sycl::malloc_shared<int>(N, q);
-  sycl::nd_range<1> ndr{N, WGSIZE};
+  sycl::range<1> global{N}, local{WGSIZE};
 
   // For a templated kernel, pass the address of a specific instantiation.
-  sycl::khr::nd_launch(q, ndr, sycl::khr::kernel_function<iota<float>>, 3.14f, fptr);
-  sycl::khr::nd_launch(q, ndr, sycl::khr::kernel_function<iota<int>>, 3, iptr);
+  sycl::khr::launch_grouped(q, global, local, sycl::khr::kernel_function<iota<float>>, 3.14f, fptr);
+  sycl::khr::launch_grouped(q, global, local, sycl::khr::kernel_function<iota<int>>, 3, iptr);
 
   // For an overloaded kernel, cast to the desired function type to select the
   // overload.
-  sycl::khr::nd_launch(q, ndr, sycl::khr::kernel_function<(void(*)(float*))ping>, fptr);
-  sycl::khr::nd_launch(q, ndr, sycl::khr::kernel_function<(void(*)(int*))ping>, iptr);
+  sycl::khr::launch_grouped(q, global, local, sycl::khr::kernel_function<(void(*)(float*))ping>, fptr);
+  sycl::khr::launch_grouped(q, global, local, sycl::khr::kernel_function<(void(*)(int*))ping>, iptr);
 
   q.wait();
 
