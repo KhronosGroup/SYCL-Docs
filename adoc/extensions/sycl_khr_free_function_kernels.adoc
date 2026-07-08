@@ -83,6 +83,11 @@ A program that violates any of them is ill formed unless stated otherwise.
 
 * The function must not accept a variadic argument list.
 
+* The function must not be declared [code]#SYCL_EXTERNAL#.
+  A free function kernel is a kernel entry point, not a device function that is
+  called from device code, so the cross-translation-unit device linkage that
+  [code]#SYCL_EXTERNAL# provides does not apply to it.
+
 * Each of the function's parameters must have a type that is <<device-copyable>>;
   an application can query this with the core
   [code]#sycl::is_device_copyable_v<T># type trait.
@@ -97,6 +102,7 @@ A program that violates any of them is ill formed unless stated otherwise.
 * If the function is decorated in one translation unit, every other translation
   unit that declares the same function must decorate it with the same macro (the
   same kind, and for [code]#SYCL_KHR_ND_KERNEL# the same [code]#N#).
+  A program that violates this rule is ill formed, no diagnostic is required.
 
 {note}Some SYCL types that are legal parameters for an ordinary SYCL kernel are
 not legal parameters for a free function kernel, because a free function kernel
