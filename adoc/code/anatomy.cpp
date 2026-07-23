@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sycl/sycl.hpp>
 #include <vector>
-using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names
 
 int main() {
   // Declare number of work items
@@ -14,13 +13,13 @@ int main() {
   std::vector<int> dataHost(N);
 
   // Create an in order queue to enqueue work to the default device
-  queue myQueue{property::queue::in_order()};
+  sycl::queue myQueue{sycl::property::queue::in_order()};
 
   // Allocate device memory to be worked on
-  int *dataDevice = malloc_device<int>(N, myQueue);
+  int *dataDevice = sycl::malloc_device<int>(N, myQueue);
 
   // Enqueue a parallel_for task with 1024 work-items
-  myQueue.parallel_for(N, [=](id<1> idx) {
+  myQueue.parallel_for(N, [=](sycl::id<1> idx) {
     // Initialize each buffer element with its own rank number starting at 0
     dataDevice[idx] = idx;
   }); // End of the kernel function
@@ -35,7 +34,7 @@ int main() {
     std::cout << "dataHost[" << i << "] = " << dataHost[i] << std::endl;
 
   // Free device memory
-  free(dataDevice, myQueue);
+  sycl::free(dataDevice, myQueue);
 
   return 0;
 }
