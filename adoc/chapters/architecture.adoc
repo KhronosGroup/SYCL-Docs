@@ -1086,23 +1086,26 @@ values:
     the memory allocation containing the referenced object, as defined by the
     capabilities of <<buffer,buffers>> and <<usm>>.
 
-Potentially concurrent conflicting actions with different memory scopes may lead
-to a data race, resulting in undefined behavior.
-An atomic operation _A_ with scope _S~1~_ operating on the same memory location
-as atomic operation _B_ with scope _S~2~_ is a data race if:
+Atomic operations on the same memory location must have inclusive scope,
+otherwise the behaviour is undefined.
+Atomic operations _A_ and _B_ are defined to have an inclusive scope if:
 
-* The work-items which executed _A_ and _B_ are not both in the same group of
- work-items associated with scope _S~1~_; or
-* The work-items which executed _A_ and _B_ are not both in the same group of
- work-items associated with scope _S~2~_.
+  * _A_ and _B_ are executed by work-items within the same sub-group and the
+    memory scope of _A_ and _B_ is [code]#sycl::memory_scope::sub_group# or
+    wider.
+  * _A_ and _B_ are executed by work-items within the same work-group and the
+    memory scope of _A_ and _B_ is [code]#sycl::memory_scope::work_group# or
+    wider.
+  * _A_ and _B_ are executed by work-items in the same kernel instance, and the
+    memory scope of _A_ and _B_ is [code]#sycl::memory_scope::device# or wider.
+  * _A_ and _B_ are executed by work-items on the same device, and the memory
+    scope of _A_ and _B_ is [code]#sycl::memory_scope::device# or wider.
+  * _A_ and _B_ are executed by a host thread or by work-items, and the memory
+    scope of _A_ and _B_ is [code]#sycl::memory_scope::system#.
 
-An atomic operation _A_ with scope _S~1~_ can only synchronize with another
-atomic operation _B_ with scope _S~2~_ if:
-
-* The work-items which executed _A_ and _B_ are both in the same group of
-  work-items associated with scope _S~1~_; and
-* The work-items which executed _A_ and _B_ are both in the same group of
-  work-items associated with scope _S~2~_.
+In SYCL 2020 the memory scope of _A_ and _B_ must additionally be the same for
+the operations to have an inclusive scope.
+From SYCL {SYCL_VERSION} the memory scope of _A_ and _B_ may be different.
 
 The memory scopes are listed above from narrowest
 ([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
