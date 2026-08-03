@@ -65,6 +65,18 @@ class multi_ptr {
   multi_ptr(std::nullptr_t);
 
   // Available only when:
+  //   (Space == access::address_space::generic_space &&
+  //    AS != access::address_space::constant_space)
+  template <access::address_space AS, access::decorated IsDecorated>
+  multi_ptr(const multi_ptr<value_type, AS, IsDecorated>&);
+
+  // Available only when:
+  //   (Space == access::address_space::generic_space &&
+  //    AS != access::address_space::constant_space)
+  template <access::address_space AS, access::decorated IsDecorated>
+  multi_ptr(multi_ptr<value_type, AS, IsDecorated>&&);
+
+  // Available only when:
   //   (Space == access::address_space::global_space ||
   //    Space == access::address_space::generic_space) &&
   //   (std::is_same_v<std::remove_const_t<ElementType>, std::remove_const_t<AccDataT>>) &&
