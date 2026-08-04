@@ -1086,6 +1086,22 @@ values:
     the memory allocation containing the referenced object, as defined by the
     capabilities of <<buffer,buffers>> and <<usm>>.
 
+The memory scopes are listed above from narrowest
+([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
+
+The complete set of memory scopes is not guaranteed to be supported by every
+device.
+The set of supported memory scopes can be queried via the information
+descriptors for the [code]#sycl::device# and [code]#sycl::context# classes.
+
+The widest scope that can be applied to an atomic operation corresponds to the
+set of work-items which can access the associated memory location.
+For example, the widest scope that can be applied to atomic operations in
+work-group local memory is [code]#sycl::memory_scope::work_group#.
+If a wider scope is supplied, the behavior is as-if the narrowest scope
+containing all work-items which can access the associated memory location was
+supplied.
+
 Atomic operations on the same memory location must have inclusive scope,
 otherwise the behaviour is undefined.
 Atomic operations _A_ and _B_ are defined to have an inclusive scope if:
@@ -1106,22 +1122,6 @@ Atomic operations _A_ and _B_ are defined to have an inclusive scope if:
 In SYCL 2020 the memory scope of _A_ and _B_ must additionally be the same for
 the operations to have an inclusive scope.
 From SYCL {SYCL_VERSION} the memory scope of _A_ and _B_ may be different.
-
-The memory scopes are listed above from narrowest
-([code]#memory_scope::work_item#) to widest ([code]#memory_scope::system#).
-
-The complete set of memory scopes is not guaranteed to be supported by every
-device.
-The set of supported memory scopes can be queried via the information
-descriptors for the [code]#sycl::device# and [code]#sycl::context# classes.
-
-The widest scope that can be applied to an atomic operation corresponds to the
-set of work-items which can access the associated memory location.
-For example, the widest scope that can be applied to atomic operations in
-work-group local memory is [code]#sycl::memory_scope::work_group#.
-If a wider scope is supplied, the behavior is as-if the narrowest scope
-containing all work-items which can access the associated memory location was
-supplied.
 
 [NOTE]
 ====
