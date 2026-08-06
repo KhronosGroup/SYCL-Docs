@@ -1083,16 +1083,31 @@ If a wider scope is supplied, the behavior is as-if the narrowest scope
 containing all work-items which can access the associated memory location was
 supplied.
 
+Atomic operations on the same memory location must have inclusive scope,
+otherwise the behaviour is undefined.
+Atomic operations _A_ and _B_ are defined to have an inclusive scope if:
+
+  * _A_ and _B_ are executed by work-items within the same sub-group and the
+    memory scope of _A_ and _B_ is [code]#sycl::memory_scope::sub_group# or
+    wider.
+  * _A_ and _B_ are executed by work-items within the same work-group and the
+    memory scope of _A_ and _B_ is [code]#sycl::memory_scope::work_group# or
+    wider.
+  * _A_ and _B_ are executed by work-items in the same kernel instance, and the
+    memory scope of _A_ and _B_ is [code]#sycl::memory_scope::device# or wider.
+  * _A_ and _B_ are executed by work-items on the same device, and the memory
+    scope of _A_ and _B_ is [code]#sycl::memory_scope::device# or wider.
+  * _A_ and _B_ are executed by a host thread or by work-items, and the memory
+    scope of _A_ and _B_ is [code]#sycl::memory_scope::system#.
+
+In SYCL 2020 the memory scope of _A_ and _B_ must additionally be the same for
+the operations to have an inclusive scope.
+From SYCL {SYCL_VERSION} the memory scope of _A_ and _B_ may be different.
+
 [NOTE]
 ====
 The addition of memory scopes to the {cpp} memory model modifies the definition
 of some concepts from the {cpp} core language.
-For example: data races, the synchronizes-with relationship and sequential
-consistency must be defined in a way that accounts for atomic operations with
-differing (but compatible) scopes, in a manner similar to the <<opencl20, OpenCL
-2.0 specification>>.
-Efforts to formalize the memory model of SYCL are ongoing, and a formal memory
-model will be included in a future version of the SYCL specification.
 ====
 
 ==== Atomic operations
