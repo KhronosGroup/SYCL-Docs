@@ -31,6 +31,10 @@ template <typename DataT, int Dimensions = 1,
           access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+  static constexpr sycl::access_mode access_mode = AccessMode;
+  static constexpr target access_target = AccessTarget;
+
   using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type&;
