@@ -8,11 +8,11 @@ template <int Dimensions = 1> class nd_range {
 
   nd_range() noexcept;
 
-  /* -- common interface members -- */
-
   // The offset is deprecated in SYCL 2020.
   nd_range(range<Dimensions> globalSize, range<Dimensions> localSize,
            id<Dimensions> offset = id<Dimensions>()) noexcept;
+
+  /* -- common interface members -- */
 
   range<Dimensions> get_global_range() const noexcept;
   range<Dimensions> get_local_range() const noexcept;
