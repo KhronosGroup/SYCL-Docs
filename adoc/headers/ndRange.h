@@ -6,6 +6,8 @@ template <int Dimensions = 1> class nd_range {
  public:
   static constexpr int dimensions = Dimensions;
 
+  nd_range() noexcept;
+
   /* -- common interface members -- */
 
   // The offset is deprecated in SYCL 2020.
