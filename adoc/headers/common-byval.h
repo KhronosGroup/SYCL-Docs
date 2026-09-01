@@ -14,21 +14,21 @@ public:
   // Otherwise, none of them should be explicitly declared
   // (see rule of zero).
 
-  T(const T &rhs);
+  T(const T& rhs);
 
-  T(T &&rhs) noexcept;
+  T(T&& rhs) noexcept;
 
-  T &operator=(const T &rhs);
+  T& operator=(const T& rhs);
 
-  T &operator=(T &&rhs) noexcept;
+  T& operator=(T&& rhs) noexcept;
 
   ~T();
 
   // ...
 
-  friend bool operator==(const T &lhs, const T &rhs);
+  friend bool operator==(const T& lhs, const T& rhs);
 
-  friend bool operator!=(const T &lhs, const T &rhs);
+  friend bool operator!=(const T& lhs, const T& rhs);
 
   // ...
 };
