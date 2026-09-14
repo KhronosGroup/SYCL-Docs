@@ -8,6 +8,9 @@ template <typename DataT, int Dimensions = 1,
                                       : access_mode::read_write)>
 class host_accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+  static constexpr sycl::access_mode access_mode = AccessMode;
+
   using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type&;
