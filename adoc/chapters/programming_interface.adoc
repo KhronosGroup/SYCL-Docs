@@ -11249,26 +11249,6 @@ A SYCL application can use the [code]#device::has()# function to determine the
 level of USM support for a device.
 See <<sec:device-aspects>> for more details.
 
-The characteristics of USM allocations are summarized in
-<<table.USM.allocation.characteristics>>.
-
-[[table.USM.allocation.characteristics]]
-.Characteristics of the different kinds of USM allocation
-[width="100%",options="header",cols="16%,16%,16%,16%,16%,16%"]
-|====
-| Allocation Type | Initial Location | Accessible By | | Migratable To |
-.3+| [code]#device# .3+| [code]#device# | [code]#host#      | No            | [code]#host#          | No
-|                                         [code]#device#    | Yes           | [code]#device#        | N/A
-|                                 Another [code]#device#    | Optional (P2P)| Another [code]#device#| No
-
-.2+| [code]#host#    .2+| [code]#host#  | [code]#host#      | Yes           | [code]#host#          | N/A
-|                                     Any [code]#device#    | Yes           | [code]#device#        | No
-
-.3+| [code]#shared#  .3+| Unspecified   | [code]#host#      | Yes           | [code]#host#          | Yes
-|                                         [code]#device#    | Yes           | [code]#device#        | Yes
-|                                 Another [code]#device#    | Optional  | Another [code]#device#| Optional
-|====
-
 Each USM allocation has an associated SYCL <<context>>, and any access to that
 memory must use the same context.
 Specifically, any <<sycl-kernel-function>> that dereferences a pointer to a USM
