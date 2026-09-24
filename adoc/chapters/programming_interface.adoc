@@ -11249,31 +11249,26 @@ A SYCL application can use the [code]#device::has()# function to determine the
 level of USM support for a device.
 See <<sec:device-aspects>> for more details.
 
-Each USM allocation has an associated SYCL <<context>>, and any access to that
-memory must use the same context.
+Each USM allocation has an associated SYCL <<context>>.
+Device and shared USM allocations also have an associated SYCL <<device>>.
+An allocation must be accessible in the location where it is used.
+ * A USM host allocation is accessible from the host and from any device that is
+   in the same context as the USM allocation.
+ * A USM device allocation is accessible only from the device and context
+   associated with the allocation.
+ * A USM shared allocation is accessible from the host, from the device
+   associated with the USM allocation, and from any device that has the
+   `aspect::usm_atomic_shared_allocations` and is in the same context as the USM
+   allocation.
+
 Specifically, any <<sycl-kernel-function>> that dereferences a pointer to a USM
-allocation must be submitted to a <<queue>> that was constructed with the same
-context that was used to allocate that memory.
+allocation must be submitted to a <<queue>> that is associated with a device on
+which the allocation is accessible.
 The explicit memory operation <<command, commands>> that take USM pointers have
 a similar restriction.
 (See <<subsec:explicitmemory>> for details.)
+
 Violations of these requirements result in undefined behavior.
-
-[NOTE]
-====
-There are no similar restrictions for dereferencing a USM pointer in a
-<<host-task>>.
-This is legal regardless of which <<queue>> the host task was submitted to so
-long as the USM pointer is accessible on the host.
-====
-
-Each type of USM allocation has different rules for where that memory is
-accessible.
-Attempting to dereference a USM pointer on the host or on a device in violation
-of these rules results in undefined behavior.
-Passing a USM pointer to one of the explicit memory functions where the pointer
-is not accessible to the device generally results in undefined behavior.
-See <<subsec:explicitmemory>> for the exact rules.
 
 Device allocations are used for explicitly managing device memory.
 Programmers directly allocate device memory and explicitly copy data between
