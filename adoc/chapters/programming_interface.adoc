@@ -11610,8 +11610,10 @@ void* sycl::aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                                  const context& syclContext,
                                  const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory, which is allocated on
-[code]#syclDevice#.  The allocation is specified in bytes and aligned according
+a@ Return [code]#nullptr# if the alignment is not supported by the
+implementation.  Otherwise returns a pointer to the newly allocated memory,
+which is allocated on [code]#syclDevice#.
+The allocation is specified in bytes and aligned according
 to [code]#alignment#.  Throws a synchronous [code]#exception# with the
 [code]#errc::feature_not_supported# error code if the [code]#syclDevice# does
 not have [code]#aspect::usm_device_allocations#.  The [code]#syclDevice# must
@@ -11629,8 +11631,10 @@ T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
                               const context& syclContext,
                               const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory, which is allocated on
-[code]#syclDevice#.  The allocation is specified in number of elements of type
+a@ Return [code]#nullptr# if the alignment is not supported by the
+implementation. Otherwise returns a pointer to the newly allocated memory,
+which is allocated on [code]#syclDevice#.
+The allocation is specified in number of elements of type
 [code]#T# and aligned according to [code]#alignment#.  Throws a synchronous
 [code]#exception# with the [code]#errc::feature_not_supported# error code if
 the [code]#syclDevice# does not have [code]#aspect::usm_device_allocations#.
@@ -11731,11 +11735,12 @@ void* sycl::aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                                const context& syclContext,
                                const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory.  This allocation is
-specified in bytes and aligned according to [code]#alignment#.  Throws a
-synchronous [code]#exception# with the [code]#errc::feature_not_supported#
-error code if no device in [code]#syclContext# has
-[code]#aspect::usm_host_allocations#.
+a@ Return [code]#nullptr# if the alignment is not supported by the
+implementation. Otherwise returns a pointer to the newly allocated memory.
+This allocation is specified in bytes and aligned according to
+[code]#alignment#.  Throws a synchronous [code]#exception# with the
+[code]#errc::feature_not_supported# error code if no device in
+[code]#syclContext# has [code]#aspect::usm_host_allocations#.
 
 a@
 [source]
@@ -11745,10 +11750,11 @@ T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
                             const context& syclContext,
                             const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory.  This allocation is
-specified in elements of type [code]#T# and aligned according to
-[code]#alignment#.  Throws a synchronous [code]#exception# with the
-[code]#errc::feature_not_supported# error code if no device in
+a@ Return [code]#nullptr# if the alignment is not supported by the
+implementation. Otherwise returns a pointer to the newly allocated memory.
+This allocation is specified in elements of type [code]#T# and aligned
+according to [code]#alignment#.  Throws a synchronous [code]#exception#
+with the [code]#errc::feature_not_supported# error code if no device in
 [code]#syclContext# has [code]#aspect::usm_host_allocations#.
 
 a@
@@ -11855,8 +11861,10 @@ void* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                                  const context& syclContext,
                                  const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory, which is associated with
-[code]#syclDevice#.  This allocation is specified in bytes and aligned
+a@ Return [code]#nullptr# if the alignment is not supported by the
+implementation.  Otherwise returns a pointer to the newly allocated memory,
+which is associated with [code]#syclDevice#.
+This allocation is specified in bytes and aligned
 according to [code]#alignment#.  Throws a synchronous [code]#exception# with
 the [code]#errc::feature_not_supported# error code if the [code]#syclDevice#
 does not have [code]#aspect::usm_shared_allocations#.  The [code]#syclDevice#
@@ -11874,8 +11882,10 @@ T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
                               const context& syclContext,
                               const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory, which is associated with
-[code]#syclDevice#.  This allocation is specified in number of elements of
+a@ Return [code]#nullptr# if the alignment is not supported by the
+implementation.  Otherwise returns a pointer to the newly allocated memory,
+which is associated with [code]#syclDevice#.
+This allocation is specified in number of elements of
 type [code]#T# and aligned aligned according to [code]#alignment#.  Throws a
 synchronous [code]#exception# with the [code]#errc::feature_not_supported#
 error code if the [code]#syclDevice# does not have
@@ -11997,8 +12007,10 @@ void* sycl::aligned_alloc(std::size_t alignment, std::size_t numBytes,
                           const device& syclDevice, const context& syclContext,
                           usm::alloc kind, const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
-allocation is specified in bytes and is aligned according to [code]#alignment#.
+a@ Return [code]#nullptr# if the
+alignment is not supported by the implementation.  Otherwise returns a pointer
+to the newly allocated memory of type [code]#kind#.  This allocation is
+specified in bytes and is aligned according to [code]#alignment#.
 The [code]#syclDevice# parameter is ignored if [code]#kind# is
 [code]#usm::alloc::host#.  If [code]#kind# is not [code]#usm::alloc::host#,
 [code]#syclDevice# must either be contained by [code]#syclContext# or it must
@@ -12014,9 +12026,12 @@ T* sycl::aligned_alloc(std::size_t alignment, std::size_t count, const device& s
                        const context& syclContext, usm::alloc kind,
                        const property_list& propList = {})
 ----
-a@ Returns a pointer to the newly allocated memory of type [code]#kind#.  This
-allocation is specified in number of elements of type [code]#T# and is aligned
-according to [code]#alignment#.  The [code]#syclDevice# parameter is ignored if
+a@ Return [code]#nullptr# if the
+alignment is not supported by the implementation.  Otherwise returns a pointer
+to the newly allocated memory of type [code]#kind#.  This allocation is
+specified in number of elements of type [code]#T# and is aligned according to
+[code]#alignment#.
+The [code]#syclDevice# parameter is ignored if
 [code]#kind# is [code]#usm::alloc::host#.  If [code]#kind# is not
 [code]#usm::alloc::host#, [code]#syclDevice# must either be contained by
 [code]#syclContext# or it must be a <<descendent-device>> of some device that
