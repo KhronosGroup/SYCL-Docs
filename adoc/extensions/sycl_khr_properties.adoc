@@ -1788,44 +1788,61 @@ constructor from the <<core-spec>> except that the properties are specified by
 This extension adds the following new overloads of the device USM allocation
 functions.
 
-TODO: Missing overloads with "count"
-
 '''
 
 [source,role=synopsis,id=api:khr-properties-usm-malloc-device]
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                                                (1)
+template <typename PropertyOrList>
 void* malloc_device(std::size_t numBytes, const device& syclDevice,
                     const context& syclContext, PropertyOrList props);
 
-template <typename PropertyOrList>                                                (2)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc_device(std::size_t count, const device& syclDevice,
+                       const context& syclContext,
+                       PropertyOrList props);
+
+template <typename PropertyOrList>
 void* malloc_device(std::size_t numBytes, const queue& syclQueue,
                     PropertyOrList props);
 
-template <typename PropertyOrList>                                                (3)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc_device(std::size_t count, const queue& syclQueue,
+                       PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                            const device& syclDevice, const context& syclContext,
                            PropertyOrList props);
 
-template <typename PropertyOrList>                                                (4)
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
+                              const device& syclDevice,
+                              const context& syclContext,
+                              PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                            const queue& syclQueue, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
+                              const queue& syclQueue,
+                              PropertyOrList props)
 
 } // namespace sycl
 ----
 
-_Constraints:_ For all overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
   or
 * [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
   [code]#true#.
 
-_Effects (1)-(4):_ The same effect as the corresponding device USM allocation
-function from the <<core-spec>> except that the properties are specified by
-[code]#props#.
+_Effects:_ The same as the corresponding device USM allocation function from the
+<<core-spec>> except that the properties are specified by [code]#props#.
 
 [[sec:khr-properties-usm-host-allocs]]
 === New host allocation functions
@@ -1833,42 +1850,58 @@ function from the <<core-spec>> except that the properties are specified by
 This extension adds the following new overloads of the host USM allocation
 functions.
 
-TODO: Missing overloads with "count"
-
 '''
 
 [source,role=synopsis,id=api:khr-properties-usm-malloc-host]
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                                           (1)
+template <typename PropertyOrList>
 void* malloc_host(std::size_t numBytes, const context& syclContext,
                   PropertyOrList props);
 
-template <typename PropertyOrList>                                           (2)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc_host(std::size_t count, const context& syclContext,
+                     PropertyOrList props);
+
+template <typename PropertyOrList>
 void* malloc_host(std::size_t numBytes, const queue& syclQueue,
                   PropertyOrList props);
 
-template <typename PropertyOrList>                                           (3)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc_host(std::size_t count, const queue& syclQueue,
+                     PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                          const context& syclContext, PropertyOrList props);
 
-template <typename PropertyOrList>                                           (4)
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
+                            const context& syclContext,
+                            PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                          const queue& syclQueue, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
+                               const queue& syclQueue,
+                               PropertyOrList props);
 
 } // namespace sycl
 ----
 
-_Constraints:_ For all overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
   or
 * [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
   [code]#true#.
 
-_Effects (1)-(4):_ The same effect as the corresponding host USM allocation
-function from the <<core-spec>> except that the properties are specified by
+_Effects:_ The same effect as the corresponding host USM allocation function
+from the <<core-spec>> except that the properties are specified by
 [code]#props#.
 
 [[sec:khr-properties-usm-shared-allocs]]
@@ -1877,43 +1910,61 @@ function from the <<core-spec>> except that the properties are specified by
 This extension adds the following new overloads of the shared USM allocation
 functions.
 
-TODO: Missing overloads with "count"
-
 '''
 
 [source,role=synopsis,id=api:khr-properties-usm-malloc-shared]
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                                                (1)
+template <typename PropertyOrList>
 void* malloc_shared(std::size_t numBytes, const device& syclDevice,
                     const context& syclContext, PropertyOrList props);
 
-template <typename PropertyOrList>                                                (2)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc_shared(std::size_t count, const device& syclDevice,
+                       const context& syclContext,
+                       PropertyOrList props);
+
+template <typename PropertyOrList>
 void* malloc_shared(std::size_t numBytes, const queue& syclQueue,
                     PropertyOrList props);
 
-template <typename PropertyOrList>                                                (3)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc_shared(std::size_t count, const queue& syclQueue,
+                       PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                            const device& syclDevice, const context& syclContext,
                            PropertyOrList props);
 
-template <typename PropertyOrList>                                                (4)
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
+                              const device& syclDevice,
+                              const context& syclContext,
+                              PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                            const queue& syclQueue, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
+                              const queue& syclQueue,
+                              PropertyOrList props);
 
 } // namespace sycl
 ----
 
-_Constraints:_ For all overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
   or
 * [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
   [code]#true#.
 
-_Effects (1)-(4):_ The same effect as the corresponding shared USM allocation
-function from the <<core-spec>> except that the properties are specified by
+_Effects:_ The same effect as the corresponding shared USM allocation function
+from the <<core-spec>> except that the properties are specified by
 [code]#props#.
 
 [[sec:khr-properties-usm-parameterized-allocs]]
@@ -1923,46 +1974,63 @@ This extension adds the following new overloads of the parameterized USM
 allocation functions, which select the kind of allocation through a
 [code]#usm::alloc# parameter.
 
-TODO: Missing overloads with "count"
-
 '''
 
 [source,role=synopsis,id=api:khr-properties-usm-malloc]
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                                           (1)
+template <typename PropertyOrList>
 void* malloc(std::size_t numBytes, const device& syclDevice,
              const context& syclContext, usm::alloc kind,
              PropertyOrList props);
 
-template <typename PropertyOrList>                                           (2)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc(std::size_t count, const device& syclDevice,
+                const context& syclContext, usm::alloc kind,
+                PropertyOrList props);
+
+template <typename PropertyOrList>
 void* malloc(std::size_t numBytes, const queue& syclQueue, usm::alloc kind,
              PropertyOrList props);
 
-template <typename PropertyOrList>                                           (3)
+template <typename T, typename PropertyOrList>
+T* sycl::malloc(std::size_t count, const queue& syclQueue, usm::alloc kind,
+                PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
                     const device& syclDevice, const context& syclContext,
                     usm::alloc kind, PropertyOrList props);
 
-template <typename PropertyOrList>                                           (4)
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc(std::size_t alignment, std::size_t count,
+                       const device& syclDevice, const context& syclContext,
+                       usm::alloc kind, PropertyOrList props);
+
+template <typename PropertyOrList>
 void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
                     const queue& syclQueue, usm::alloc kind,
                     PropertyOrList props);
 
+template <typename T, typename PropertyOrList>
+T* sycl::aligned_alloc(std::size_t alignment, std::size_t count,
+                       const queue& syclQueue, usm::alloc kind,
+                       PropertyOrList props);
+
 } // namespace sycl
 ----
 
-_Constraints:_ For all overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
   or
 * [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
   [code]#true#.
 
-_Effects (1)-(4):_ The same effect as the corresponding parameterized USM
-allocation function from the <<core-spec>> except that the properties are
-specified by [code]#props#.
+_Effects:_ The same effect as the corresponding parameterized USM allocation
+function from the <<core-spec>> except that the properties are specified by
+[code]#props#.
 
 [[sec:khr-properties-usm-properties]]
 === New USM properties
