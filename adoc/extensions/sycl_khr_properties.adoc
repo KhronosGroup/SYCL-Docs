@@ -449,7 +449,190 @@ When [code]#T# is the empty properties list, this trait inherits from
 [[sec:khr-properties-context-constructors]]
 === New context constructors
 
-TODO
+This extension adds the following new constructors to the [api]#context# class,
+which allow a context to be constructed with the new style properties defined in
+this extension.
+
+'''
+
+[source,role=synopsis,id=api:khr-properties-context]
+----
+namespace sycl {
+
+class context {
+  template <typename PropertyOrList>
+  explicit context(PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(async_handler asyncHandler, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const device& dev, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const device& dev, async_handler asyncHandler,
+                   PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const platform& plt, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const platform& plt, async_handler asyncHandler,
+                   PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const std::vector<device>& deviceList,
+                   PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const std::vector<device>& deviceList,
+                   async_handler asyncHandler, PropertyOrList props);
+
+  // ...
+};
+
+} // namespace sycl
+----
+
+'''
+
+.[apititle]#Default constructor#
+[source,role=synopsis,id=api:khr-properties-context-ctor]
+----
+template <typename PropertyOrList>
+explicit context(PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(propList)# except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(async_handler asyncHandler, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(asyncHandler, propList)# except
+that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device #
+[source,role=synopsis,id=api:khr-properties-context-ctor-device]
+----
+template <typename PropertyOrList>
+explicit context(const device& dev, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(dev, propList)# except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device and async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(const device& dev, async_handler asyncHandler,
+                 PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(dev, asyncHandler, propList)#
+except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with platform#
+[source,role=synopsis,id=api:khr-properties-context-ctor-platform]
+----
+template <typename PropertyOrList>
+explicit context(const platform& plt, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(plt, propList)# except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with platform and async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-platform-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(const platform& plt, async_handler asyncHandler,
+                 PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(plt, asyncHandler, propList)#
+except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device list#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device-list]
+----
+template <typename PropertyOrList>
+explicit context(const std::vector<device>& deviceList,
+                 PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(deviceList, propList)# except that
+the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device list and async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device-list-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(const std::vector<device>& deviceList,
+                 async_handler asyncHandler, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(deviceList, asyncHandler,
+propList)# except that the properties are specified by [code]#props#.
 
 [[sec:khr-properties-queue-additions]]
 == Additions and modifications to the queue class
