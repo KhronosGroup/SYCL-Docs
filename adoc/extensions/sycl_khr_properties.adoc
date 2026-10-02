@@ -281,7 +281,7 @@ _Constraints_ (1):
 _Constraints_ (2):
 
 * [code]#has_property<PropertyKey>()# is [code]#true#, and
-* [code]#khr::is_property_key_compile_time_v<PropertyKey># is false.
+* [code]#khr::is_property_key_compile_time_v<PropertyKey># is [code]#false#.
 
 _Returns:_ A copy of the property from this properties list whose associated key
 is [code]#PropertyKey#.
@@ -393,7 +393,7 @@ Otherwise it inherits from [code]#std::false_type#.
 When a property is used to construct a class, [code]#Class# is often the type of
 that class.
 When a property is used in another way, the specification which defines the
-property normally defines a class which can be used for the [code]#Class#
+property normally defines a "tag" class which can be used for the [code]#Class#
 parameter in this trait.
 {endnote}
 
@@ -435,8 +435,8 @@ inline constexpr bool is_property_list_for_v = is_property_list_for<T, Class>::v
 ----
 
 [code]#is_property_list_for# inherits from [code]#std::true_type# if [code]#T#
-is the type of a properties list and all of the properties that it contains can
-be used with class [code]#Class#.
+is the type of a [api]#khr::properties# list and all of the properties that it
+contains can be used with class [code]#Class#.
 Otherwise it inherits from [code]#std::false_type#.
 When [code]#T# is the empty properties list, this trait inherits from
 [code]#std::true_type#.
@@ -952,13 +952,13 @@ constructed queue.
 
 The following traits inherit from [code]#std::true#:
 
-* [code]#is_property<property::enable_profiling>#
-* [code]#is_property_key<property::key::enable_profiling>#
-* [code]#is_property_for<property::enable_profiling, queue>#
-* [code]#is_property_key_for<property::key::enable_profiling, queue>#
+* [code]#khr::is_property<khr::property::enable_profiling>#
+* [code]#khr::is_property_key<khr::property::key::enable_profiling>#
+* [code]#khr::is_property_for<khr::property::enable_profiling, queue>#
+* [code]#khr::is_property_key_for<khr::property::key::enable_profiling, queue>#
 
-[code]#property::enable_profiling# and [code]#property::key::enable_profiling#
-are trivially copyable.
+[code]#khr::property::enable_profiling# and
+[code]#khr::property::key::enable_profiling# are trivially copyable.
 
 '''
 
@@ -987,13 +987,13 @@ constructed queue.
 
 The following traits inherit from [code]#std::true#:
 
-* [code]#is_property<property::in_order>#
-* [code]#is_property_key<property::key::in_order>#
-* [code]#is_property_for<property::in_order, queue>#
-* [code]#is_property_key_for<property::key::in_order, queue>#
+* [code]#khr::is_property<khr::property::in_order>#
+* [code]#khr::is_property_key<khr::property::key::in_order>#
+* [code]#khr::is_property_for<khr::property::in_order, queue>#
+* [code]#khr::is_property_key_for<khr::property::key::in_order, queue>#
 
-[code]#property::in_order# and [code]#property::key::in_order# are trivially
-copyable.
+[code]#khr::property::in_order# and [code]#khr::property::key::in_order# are
+trivially copyable.
 
 == Additions to the buffer and image classes
 
@@ -2193,13 +2193,14 @@ reduction.
 
 The following traits inherit from [code]#std::true#:
 
-* [code]#is_property<property::initialize_to_identity>#
-* [code]#is_property_key<property::key::initialize_to_identity>#
-* [code]#is_property_for<property::initialize_to_identity, reduction>#
-* [code]#is_property_key_for<property::key::initialize_to_identity, reduction>#
+* [code]#khr::is_property<khr::property::initialize_to_identity>#
+* [code]#khr::is_property_key<khr::property::key::initialize_to_identity>#
+* [code]#khr::is_property_for<khr::property::initialize_to_identity, reduction>#
+* [code]#khr::is_property_key_for<khr::property::key::initialize_to_identity,
+  reduction>#
 
-[code]#property::initialize_to_identity# and
-[code]#property::key::initialize_to_identity# are trivially copyable.
+[code]#khr::property::initialize_to_identity# and
+[code]#khr::property::key::initialize_to_identity# are trivially copyable.
 
 [[sec:khr-properties-kernel-bundle-additions]]
 == Additions to the kernel bundle functions
