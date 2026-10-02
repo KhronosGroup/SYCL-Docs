@@ -1723,24 +1723,21 @@ The following traits inherit from [code]#std::true#:
 [[sec:khr-properties-usm-additions]]
 == Additions to the USM functions
 
-This extension adds new property-accepting overloads to the
-[code]#usm_allocator# constructors and to the USM allocation functions.
+[[sec:khr-properties-usm-property-tags]]
+=== New property tag types
 
-Most of the USM allocation entry points are free functions, which are not
-classes, so this extension defines an empty tag type [code]#khr::usm_allocation#
-to serve as the [code]#Class# parameter of the [api]#khr::is_property_for# trait
-for properties that can be used with the USM allocator and the USM allocation
-functions.
+This extension adds the following property tag types, which are used to classify
+properties that can be used with the USM allocation functions.
 
-'''
-
-[source,role=synopsis,id=api:khr-properties-usm-allocation-tag]
+[source,role=synopsis,id=api:khr-properties-usm-allocation-tags]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property::tag {
 
-struct usm_allocation; // tag type, never defined
+struct usm_device;
+struct usm_host;
+struct usm_shared;
 
-} // namespace sycl::khr
+} // namespace sycl::khr::property::tag
 ----
 
 [[sec:khr-properties-usm-allocator-constructors]]
@@ -1758,11 +1755,11 @@ namespace sycl {
 
 template <typename T, usm::alloc AllocKind, std::size_t Alignment = 0>
 class usm_allocator {
-  template <typename PropertyOrList>                                   // (1)
+  template <typename PropertyOrList>
   usm_allocator(const context& syclContext, const device& syclDevice,
                 PropertyOrList props);
 
-  template <typename PropertyOrList>                                   // (2)
+  template <typename PropertyOrList>
   usm_allocator(const queue& syclQueue, PropertyOrList props);
 
   // ...
@@ -1771,14 +1768,28 @@ class usm_allocator {
 } // namespace sycl
 ----
 
-_Constraints:_ For both overloads, either
+_Constraints:_
 
-* [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
-  [code]#true#.
+* [code]#AllocKind# is [code]#usm::alloc::device# and
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
+  is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::host# and
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
+  is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::shared# and
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
+  is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::device# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_device># is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::host# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_host># is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::shared# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># is [code]#true#.
 
-_Effects (1)-(2):_ The same effect as the corresponding [code]#usm_allocator#
+_Effects:_ The same effect as the corresponding [code]#usm_allocator#
 constructor from the <<core-spec>> except that the properties are specified by
 [code]#props#.
 
@@ -1836,10 +1847,10 @@ T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
-  [code]#true#.
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_device># is [code]#true#.
 
 _Effects:_ The same as the corresponding device USM allocation function from the
 <<core-spec>> except that the properties are specified by [code]#props#.
@@ -1895,10 +1906,10 @@ T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
-  [code]#true#.
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::alloc_host>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::alloc_host># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding host USM allocation function
 from the <<core-spec>> except that the properties are specified by
@@ -1958,10 +1969,10 @@ T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
-  [code]#true#.
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding shared USM allocation function
 from the <<core-spec>> except that the properties are specified by
@@ -2023,22 +2034,46 @@ T* sycl::aligned_alloc(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [api]#khr::is_property_for_v<PropertyOrList, usm_allocation># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, usm_allocation># is
-  [code]#true#.
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_device>#
+  is [code]#true#, or
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_host># is
+  [code]#true#, or
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_shared>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property:tag::usm_device># is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property:tag::usm_host># is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property:tag::usm_shared># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding parameterized USM allocation
 function from the <<core-spec>> except that the properties are specified by
 [code]#props#.
 
+_Throws:_
+
+* An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
+  [code]#usm::alloc::device# and both
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_device>#
+  and [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property:tag::usm_device># are [code]#false#.
+* An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
+  [code]#usm::alloc::host# and both
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_host>#
+  and [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property:tag::usm_host># are [code]#false#.
+* An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
+  [code]#usm::alloc::shared# and both
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_shared>#
+  and [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property:tag::usm_shared># are [code]#false#.
+
 [[sec:khr-properties-usm-properties]]
 === New USM properties
 
-This extension defines no USM property.
-The overloads above are added so that a future USM property (defined by the
-<<core-spec>> or by another extension) can be passed through the new style
-[code]#properties# mechanism.
+This extension defines no USM allocation properties.
+The overloads above are added for extensibility.
 
 == Additions to the reduction interface
 
@@ -2573,15 +2608,6 @@ else {
   As with the accessor classes, the benefit of adding these overloads now is
   small relative to the surface they introduce, so we should decide whether to
   keep them or omit the kernel bundle additions until an actual property exists.
-
-* For the USM allocation entry points, is a single tag type
-  [code]#khr::usm_allocation# the right way to express property applicability,
-  or should the [code]#usm_allocator# class (which is a real class) be used
-  directly as the [code]#Class# operand, with the tag reserved for the free
-  allocation functions only?
-  This extension currently keys both the [code]#usm_allocator# constructors and
-  the free allocation functions on the single [code]#usm_allocation# tag, on the
-  assumption that a USM property would apply to the whole allocation domain.
 
 * Do we want to extend the accessor classes with new-style property support at
   all?
