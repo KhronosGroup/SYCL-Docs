@@ -11249,17 +11249,21 @@ A SYCL application can use the [code]#device::has()# function to determine the
 level of USM support for a device.
 See <<sec:device-aspects>> for more details.
 
-Each USM allocation has an associated SYCL <<context>>.
-Device and shared USM allocations also have an associated SYCL <<device>>.
 An allocation must be accessible in the location where it is used.
- * A USM host allocation is accessible from the host and from any device that is
-   in the same context as the USM allocation.
- * A USM device allocation is accessible only from the device and context
-   associated with the allocation.
- * A USM shared allocation is accessible from the host, from the device
-   associated with the USM allocation, and from any device that has the
-   `aspect::usm_atomic_shared_allocations` and is in the same context as the USM
-   allocation.
+USM host and USM shared allocations are accessible on the host.
+USM allocations are accessible on devices according to the following rules.
+Each USM allocation is associated with a context, call it C1.
+Each USM device allocation or USM shared allocation is also associated with a
+device, call it D1.
+
+ * A USM host allocation is accessible on a device D2 in a context C2 only if
+ C1 and C2 compare equal and D2 has [code]#aspect::usm_host_allocations#.
+ * A USM device allocation is accessible on a device D2 in a context C2 if C1
+ and C2 compare equal and if D1 and D2 compare equal.
+ * A USM shared allocation is accessible on a device D2 in a context C2 if C1
+ and C2 compare equal and if one of the following is true:
+ ** D1 and D2 compare equal, or
+ ** D1 and D2 both have [code]#aspect::usm_atomic_shared_allocations#.
 
 Specifically, any <<sycl-kernel-function>> that dereferences a pointer to a USM
 allocation must be submitted to a <<queue>> that is associated with a device on
