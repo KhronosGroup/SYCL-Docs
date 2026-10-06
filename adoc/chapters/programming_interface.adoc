@@ -12021,10 +12021,12 @@ void* sycl::aligned_alloc(std::size_t alignment, std::size_t numBytes,
                           const device& syclDevice, const context& syclContext,
                           usm::alloc kind, const property_list& propList = {})
 ----
-a@ Return [code]#nullptr# if the
-alignment is not supported by the implementation.  Otherwise returns a pointer
-to the newly allocated memory of type [code]#kind#.  This allocation is
-specified in bytes and is aligned according to [code]#alignment#.
+a@ Returns a pointer to the newly allocated memory of type [code]#kind# if the
+alignment is supported by the implementation.
+This allocation is specified in bytes and is aligned according to
+[code]#alignment#.
+Returns [code]#nullptr# if the alignment is not supported by the
+implementation.
 The [code]#syclDevice# parameter is ignored if [code]#kind# is
 [code]#usm::alloc::host#.  If [code]#kind# is not [code]#usm::alloc::host#,
 [code]#syclDevice# must either be contained by [code]#syclContext# or it must
@@ -12040,11 +12042,12 @@ T* sycl::aligned_alloc(std::size_t alignment, std::size_t count, const device& s
                        const context& syclContext, usm::alloc kind,
                        const property_list& propList = {})
 ----
-a@ Return [code]#nullptr# if the
-alignment is not supported by the implementation.  Otherwise returns a pointer
-to the newly allocated memory of type [code]#kind#.  This allocation is
-specified in number of elements of type [code]#T# and is aligned according to
-[code]#alignment#.
+a@ Returns a pointer to the newly allocated memory of type [code]#kind# if the
+alignment is supported by the implementation.
+This allocation is specified in number of elements of type [code]#T# and is
+aligned according to [code]#alignment#.
+Returns [code]#nullptr# if the alignment is not supported by the
+implementation.
 The [code]#syclDevice# parameter is ignored if
 [code]#kind# is [code]#usm::alloc::host#.  If [code]#kind# is not
 [code]#usm::alloc::host#, [code]#syclDevice# must either be contained by
