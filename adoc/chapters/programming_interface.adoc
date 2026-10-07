@@ -11250,28 +11250,24 @@ level of USM support for a device.
 See <<sec:device-aspects>> for more details.
 
 An allocation must be accessible in the location where it is used.
-USM host and USM shared allocations are accessible on the host.
+USM host and USM shared allocations are accessible on the host and by any host
+task.
 USM allocations are accessible on devices according to the following rules.
 Each USM allocation is associated with a context, call it _C1_.
 Each USM device allocation or USM shared allocation is also associated with a
 device, call it _D1_.
 
- * A USM host allocation is accessible on a device _D2_ in a context _C2_ only
- if _C1_ and _C2_ compare equal and _D2_ has
- [code]#aspect::usm_host_allocations#.
- * A USM device allocation is accessible on a device _D2_ in a context _C2_ if
- _C1_ and _C2_ compare equal and if _D1_ and _D2_ compare equal.
- * A USM shared allocation is accessible on a device _D2_ in a context _C2_ if
- _C1_ and _C2_ compare equal and if one of the following is true:
+ * A USM host allocation is accessible from a kernel or explicit memory
+ operation submitted to a device _D2_ using a context _C2_ only if _C1_ and _C2_
+ compare equal and _D2_ has [code]#aspect::usm_host_allocations#.
+ * A USM device allocation is accessible from a kernel or explicit memory
+ operation submitted to a device _D2_ using a context _C2_ if _C1_ and _C2_
+ compare equal and if _D1_ and _D2_ compare equal.
+ * A USM shared allocation is accessible from a kernel or explicit memory
+ operation submitted to a device _D2_ in a context _C2_ if _C1_ and _C2_ compare
+ equal and if one of the following is true:
  ** _D1_ and _D2_ compare equal, or
  ** _D1_ and _D2_ both have [code]#aspect::usm_atomic_shared_allocations#.
-
-Specifically, any <<sycl-kernel-function>> that dereferences a pointer to a USM
-allocation must be submitted to a <<queue>> that is associated with a device on
-which the allocation is accessible.
-The explicit memory operation <<command, commands>> that take USM pointers have
-a similar restriction.
-(See <<subsec:explicitmemory>> for details.)
 
 Violations of these requirements result in undefined behavior.
 
