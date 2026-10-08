@@ -1906,10 +1906,10 @@ T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::alloc_host>#
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
   is [code]#true#, or
 * [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::alloc_host># is [code]#true#.
+  khr::property::tag::usm_host># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding host USM allocation function
 from the <<core-spec>> except that the properties are specified by
@@ -2034,18 +2034,18 @@ T* sycl::aligned_alloc(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_device>#
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
   is [code]#true#, or
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_host># is
-  [code]#true#, or
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_shared>#
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
+  is [code]#true#, or
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
   is [code]#true#, or
 * [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property:tag::usm_device># is [code]#true#, or
+  khr::property::tag::usm_device># is [code]#true#, or
 * [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property:tag::usm_host># is [code]#true#, or
+  khr::property::tag::usm_host># is [code]#true#, or
 * [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property:tag::usm_shared># is [code]#true#.
+  khr::property::tag::usm_shared># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding parameterized USM allocation
 function from the <<core-spec>> except that the properties are specified by
@@ -2055,19 +2055,19 @@ _Throws:_
 
 * An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
   [code]#usm::alloc::device# and both
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_device>#
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
   and [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property:tag::usm_device># are [code]#false#.
+  khr::property::tag::usm_device># are [code]#false#.
 * An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
   [code]#usm::alloc::host# and both
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_host>#
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
   and [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property:tag::usm_host># are [code]#false#.
+  khr::property::tag::usm_host># are [code]#false#.
 * An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
   [code]#usm::alloc::shared# and both
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property:tag::usm_shared>#
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
   and [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property:tag::usm_shared># are [code]#false#.
+  khr::property::tag::usm_shared># are [code]#false#.
 
 [[sec:khr-properties-usm-properties]]
 === New USM properties
@@ -2085,19 +2085,19 @@ interface, which allow a reduction to be created with the new style properties
 defined in this extension.
 
 The [code]#reduction# interface is not a class, so this extension defines an
-empty tag type [code]#khr::reduction# to serve as the [code]#Class# parameter of
-the [api]#khr::is_property_for# trait for properties that can be used with the
-[code]#reduction# interface.
+empty tag type [code]#khr::property::tag::reduction# to serve as the
+[code]#Class# parameter of the [api]#khr::is_property_for# trait for properties
+that can be used with the [code]#reduction# interface.
 
 '''
 
 [source,role=synopsis,id=api:khr-properties-reduction-tag]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property::tag {
 
 struct reduction; // tag type, never defined
 
-} // namespace sycl::khr
+} // namespace sycl::khr::property::tag
 ----
 
 '''
@@ -2158,8 +2158,10 @@ __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
 _Constraints:_ Overload (3) is available only when [code]#Extent !=
 sycl::dynamic_extent#, and for all overloads either
 
-* [api]#khr::is_property_for_v<PropertyOrList, reduction># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, reduction># is [code]#true#.
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
 
 _Effects (1)-(3):_ The same effect as the corresponding [code]#reduction#
 overload without an identity value from the <<core-spec>> except that the
@@ -2188,8 +2190,10 @@ __unspecified__ reduction(span<T, Extent> vars, const T& identity,
 _Constraints:_ Overload (3) is available only when [code]#Extent !=
 sycl::dynamic_extent#, and for all overloads either
 
-* [api]#khr::is_property_for_v<PropertyOrList, reduction># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, reduction># is [code]#true#.
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
 
 _Effects (1)-(3):_ The same effect as the corresponding [code]#reduction#
 overload with an identity value from the <<core-spec>> except that the
@@ -2230,9 +2234,10 @@ The following traits inherit from [code]#std::true#:
 
 * [code]#khr::is_property<khr::property::initialize_to_identity>#
 * [code]#khr::is_property_key<khr::property::key::initialize_to_identity>#
-* [code]#khr::is_property_for<khr::property::initialize_to_identity, reduction>#
+* [code]#khr::is_property_for<khr::property::initialize_to_identity,
+  khr::property::tag::reduction>#
 * [code]#khr::is_property_key_for<khr::property::key::initialize_to_identity,
-  reduction>#
+  khr::property::tag::reduction>#
 
 [code]#khr::property::initialize_to_identity# and
 [code]#khr::property::key::initialize_to_identity# are trivially copyable.
@@ -2243,20 +2248,21 @@ The following traits inherit from [code]#std::true#:
 This extension adds new property-accepting overloads to the free functions
 [code]#compile#, [code]#link#, and [code]#build#.
 
-These are free functions, not classes, so this extension defines an empty tag
-type [code]#khr::kernel_bundle# to serve as the [code]#Class# parameter of the
-[api]#khr::is_property_for# trait for properties that can be used with these
-functions.
+This extension adds the following property tag types, which are used to classify
+properties that can be used with the [code]#compile#, [code]#link#, and
+[code]#build# functions.
 
 '''
 
 [source,role=synopsis,id=api:khr-properties-kernel-bundle-tag]
 ----
-namespace sycl::khr {
+namespace sycl::khr::property::tag {
 
-struct kernel_bundle; // tag type, never defined
+struct compile; // tag type, never defined
+struct link;    // tag type, never defined
+struct build;   // tag type, never defined
 
-} // namespace sycl::khr
+} // namespace sycl::khr::property::tag
 ----
 
 [[sec:khr-properties-kernel-bundle-compile]]
@@ -2285,10 +2291,10 @@ compile(const kernel_bundle<bundle_state::input>& inputBundle,
 
 _Constraints:_ For both overloads, either
 
-* [api]#khr::is_property_for_v<PropertyOrList, kernel_bundle># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, kernel_bundle># is
-  [code]#true#.
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::compile># is
+  [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::compile># is [code]#true#.
 
 _Effects (1)-(2):_ The same effect as the corresponding [code]#compile# overload
 from the <<core-spec>> except that the properties are specified by
@@ -2330,10 +2336,10 @@ link(const kernel_bundle<bundle_state::object>& objectBundle,
 
 _Constraints:_ For all overloads, either
 
-* [api]#khr::is_property_for_v<PropertyOrList, kernel_bundle># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, kernel_bundle># is
-  [code]#true#.
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::link># is
+  [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::link>#
+  is [code]#true#.
 
 _Effects (1)-(4):_ The same effect as the corresponding [code]#link# overload
 from the <<core-spec>> except that the properties are specified by
@@ -2365,10 +2371,10 @@ build(const kernel_bundle<bundle_state::input>& inputBundle,
 
 _Constraints:_ For both overloads, either
 
-* [api]#khr::is_property_for_v<PropertyOrList, kernel_bundle># is [code]#true#,
-  or
-* [api]#khr::is_property_list_for_v<PropertyOrList, kernel_bundle># is
-  [code]#true#.
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::build># is
+  [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::build>#
+  is [code]#true#.
 
 _Effects (1)-(2):_ The same effect as the corresponding [code]#build# overload
 from the <<core-spec>> except that the properties are specified by
