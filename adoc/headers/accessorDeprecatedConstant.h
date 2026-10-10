@@ -7,6 +7,10 @@ template <typename DataT, int Dimensions, access_mode AccessMode,
           target AccessTarget, access::placeholder IsPlaceholder>
 class accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+  static constexpr sycl::access_mode access_mode = AccessMode;
+  static constexpr target access_target = AccessTarget;
+
   using value_type = const DataT;
   using reference = const DataT&;
   using const_reference = const DataT&;

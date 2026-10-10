@@ -9,6 +9,10 @@ template <typename DataT, int Dimensions, access_mode AccessMode,
           image_target AccessTarget = image_target::device>
 class unsampled_image_accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+  static constexpr sycl::access_mode access_mode = AccessMode;
+  static constexpr image_target access_target = AccessTarget;
+
   using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type&;
@@ -45,6 +49,9 @@ template <typename DataT, int Dimensions = 1,
                                       : access_mode::read_write)>
 class host_unsampled_image_accessor {
  public:
+  static constexpr int dimensions = Dimensions;
+  static constexpr sycl::access_mode access_mode = AccessMode;
+
   using value_type = // const DataT for read-only accessors, DataT otherwise
       __value_type__;
   using reference = value_type&;
