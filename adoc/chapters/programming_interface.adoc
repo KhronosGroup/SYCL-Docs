@@ -4386,14 +4386,14 @@ include::{code_dir}/queueShortcuts.cpp[lines=4..-1]
 [source,role=synopsis,id=api:queue-single-task]
 ----
 template <typename KernelName, typename KernelType>             (1)
-event single_task(const KernelType& kernelFunc)
+event single_task(KernelType&& kernelFunc)
 
 template <typename KernelName, typename KernelType>             (2)
-event single_task(event depEvent, const KernelType& kernelFunc)
+event single_task(event depEvent, KernelType&& kernelFunc)
 
 template <typename KernelName, typename KernelType>             (3)
 event single_task(const std::vector<event>& depEvents,
-                  const KernelType& kernelFunc)
+                  KernelType&& kernelFunc)
 ----
 
 _Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
@@ -14719,6 +14719,13 @@ Each function takes an optional kernel name template parameter.
 The user may optionally provide a <<kernel-name>>, otherwise an
 implementation-defined name will be generated for the kernel.
 
+When a <<sycl-kernel-function>> is passed as a lambda expression or a named
+function object, the <<sycl-runtime>> may copy that object, and may move from
+the object if it is an rvalue.
+The number of copies is unspecified.
+The <<sycl-runtime>> does not access the object after the kernel invocation
+function returns.
+
 All the functions for invoking kernels are member functions of the command group
 [code]#handler# class (<<sec:handlerClass>>), which is used to encapsulate all
 the member functions provided in a command group scope.
@@ -14756,7 +14763,7 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-void single_task(const KernelType& kernelFunc)
+void single_task(KernelType&& kernelFunc)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type.
@@ -16108,6 +16115,9 @@ include::{header_dir}/hostTask/classHandler/hostTask.h[lines=4..-1]
 
   . _Effects:_ Enqueues an implementation-defined command to the
     <<sycl-runtime>> to invoke [code]#hostTaskCallable# exactly once.
+    The <<sycl-runtime>> stores its own copy of [code]#hostTaskCallable#, which
+    is move-constructed if [code]#hostTaskCallable# is an rvalue, and invokes
+    that copy.
     The scheduling of the invocation of [code]#hostTaskCallable# in relation to
     other <<command,commands>> enqueued to the <<sycl-runtime>> must be in
     accordance with the dependency model described in
@@ -17779,6 +17789,8 @@ any subsequent invocations of the <<async-handler>>.
 
 The <<async-handler>> may be a named function object type, a lambda expression
 or a [code]#std::function#.
+The queue or context stores its own copy of the <<async-handler>>, so the object
+passed on construction does not need to outlive the queue or context.
 The [code]#exception_list# object passed to the <<async-handler>> is constructed
 by the <<sycl-runtime>>.
 

@@ -75,14 +75,14 @@ class queue {
   /* -- Shortcut functions: single_task -- */
 
   template <typename KernelName, typename KernelType>
-  event single_task(const KernelType& kernelFunc);
+  event single_task(KernelType&& kernelFunc);
 
   template <typename KernelName, typename KernelType>
-  event single_task(event depEvent, const KernelType& kernelFunc);
+  event single_task(event depEvent, KernelType&& kernelFunc);
 
   template <typename KernelName, typename KernelType>
   event single_task(const std::vector<event>& depEvents,
-                    const KernelType& kernelFunc);
+                    KernelType&& kernelFunc);
 
   /* -- Shortcut functions: parallel_for -- */
 

@@ -34,7 +34,7 @@ class handler {
   // "typename KernelName" is optional.
   //
   template <typename KernelName, typename KernelType>
-  void single_task(const KernelType& kernelFunc);
+  void single_task(KernelType&& kernelFunc);
 
   // Parameter pack acts as-if: Reductions&&... reductions, const KernelType
   // &kernelFunc
