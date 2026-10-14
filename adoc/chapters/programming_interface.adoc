@@ -4386,14 +4386,14 @@ include::{code_dir}/queueShortcuts.cpp[lines=4..-1]
 [source,role=synopsis,id=api:queue-single-task]
 ----
 template <typename KernelName, typename KernelType>             (1)
-event single_task(KernelType&& kernelFunc)
+event single_task(const KernelType& kernelFunc)
 
 template <typename KernelName, typename KernelType>             (2)
-event single_task(event depEvent, KernelType&& kernelFunc)
+event single_task(event depEvent, const KernelType& kernelFunc)
 
 template <typename KernelName, typename KernelType>             (3)
 event single_task(const std::vector<event>& depEvents,
-                  KernelType&& kernelFunc)
+                  const KernelType& kernelFunc)
 ----
 
 _Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
@@ -14720,8 +14720,7 @@ The user may optionally provide a <<kernel-name>>, otherwise an
 implementation-defined name will be generated for the kernel.
 
 When a <<sycl-kernel-function>> is passed as a lambda expression or a named
-function object, the <<sycl-runtime>> may copy that object, and may move from
-the object if it is an rvalue.
+function object, the <<sycl-runtime>> may copy that object.
 The number of copies is unspecified.
 The <<sycl-runtime>> does not access the object after the kernel invocation
 function returns.
@@ -14763,7 +14762,7 @@ a@
 [source]
 ----
 template <typename KernelName, typename KernelType>
-void single_task(KernelType&& kernelFunc)
+void single_task(const KernelType& kernelFunc)
 ----
    a@ Defines and invokes a <<sycl-kernel-function>> as a lambda expression
       or a named function object type.

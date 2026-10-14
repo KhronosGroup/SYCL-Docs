@@ -34,10 +34,10 @@ class handler {
   // "typename KernelName" is optional.
   //
   template <typename KernelName, typename KernelType>
-  void single_task(KernelType&& kernelFunc);
+  void single_task(const KernelType& kernelFunc);
 
-  // Parameter pack acts as-if: Reductions&&... reductions, KernelType&&
-  // kernelFunc
+  // Parameter pack acts as-if: Reductions&&... reductions, const KernelType
+  // &kernelFunc
   template <typename KernelName, int Dimensions, typename... Rest>
   void parallel_for(range<Dimensions> numWorkItems, Rest&&... rest);
 
@@ -47,8 +47,8 @@ class handler {
                     id<Dimensions> workItemOffset,
                     const KernelType& kernelFunc);
 
-  // Parameter pack acts as-if: Reductions&&... reductions, KernelType&&
-  // kernelFunc
+  // Parameter pack acts as-if: Reductions&&... reductions, const KernelType
+  // &kernelFunc
   template <typename KernelName, int Dimensions, typename... Rest>
   void parallel_for(nd_range<Dimensions> executionRange, Rest&&... rest);
 
