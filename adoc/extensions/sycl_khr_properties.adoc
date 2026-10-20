@@ -1,5 +1,3 @@
-:dpcpp: pass:[DPC++]
-
 [[sec:khr-properties]]
 = sycl_khr_properties
 
@@ -23,9 +21,10 @@ This extension has no dependencies on other extensions.
 The APIs defined in this extension are provided by the [code]#<sycl/sycl.hpp>#
 header file.
 
-If the implementation also implements the [code]#sycl_khr_split_headers#
-extension, then the APIs defined in this extension are additionally provided by
-the header files listed in <<table.khr-properties-headers>>.
+If the implementation also implements the <<sec:khr-split-headers,
+sycl_khr_split_headers>> extension, then the APIs defined in this extension are
+additionally provided by the header files listed in
+<<table.khr-properties-headers>>.
 
 [[table.khr-properties-headers]]
 .Header files that provide the APIs of this extension
@@ -35,39 +34,39 @@ the header files listed in <<table.khr-properties-headers>>.
 |APIs
 
 |[code]#<sycl/khr/split_headers/version.hpp>#
-|The [code]#SYCL_KHR_PROPERTIES# feature test macro from
+|The [api]#SYCL_KHR_PROPERTIES# feature test macro from
 <<sec:khr-properties-feature-test>>.
 
 |[code]#<sycl/khr/properties.hpp>#
-|The [code]#khr::properties# class and [code]#khr::empty_properties_t# from
+|The [api]#khr::properties# class and [api]#khr::empty_properties_t# from
 <<sec:khr-properties-properties>>, and the traits from
 <<sec:khr-properties-traits>>.
 
 |[code]#<sycl/khr/split_headers/context.hpp>#
-|The new [code]#context# constructors from
+|The new [api]#context# constructors from
 <<sec:khr-properties-context-additions>>.
 
 |[code]#<sycl/khr/split_headers/queue.hpp>#
-|The new [code]#queue# constructors and member functions, and the
-[code]#khr::property::enable_profiling# and [code]#khr::property::in_order#
+|The new [api]#queue# constructors and member functions, and the
+[api]#khr::property::enable_profiling# and [api]#khr::property::in_order#
 properties and their keys, from <<sec:khr-properties-queue-additions>>.
 
 |[code]#<sycl/khr/split_headers/usm.hpp>#
-|The [code]#khr::property::tag::usm_device#,
-[code]#khr::property::tag::usm_host#, and
-[code]#khr::property::tag::usm_shared# tag types, the new
+|The [api]#khr::property::tag::usm_device#,
+[api]#khr::property::tag::usm_host#, and
+[api]#khr::property::tag::usm_shared# tag types, the new
 [code]#usm_allocator# constructors, and the new USM allocation function
 overloads from <<sec:khr-properties-usm-additions>>.
 
 |[code]#<sycl/khr/split_headers/reduction.hpp>#
-|The [code]#khr::property::tag::reduction# tag type, the new
+|The [api]#khr::property::tag::reduction# tag type, the new
 [code]#reduction# overloads, and the
-[code]#khr::property::initialize_to_identity# property and its key, from
+[api]#khr::property::initialize_to_identity# property and its key, from
 <<sec:khr-properties-reduction-additions>>.
 
 |[code]#<sycl/khr/split_headers/kernel_bundle.hpp>#
-|The [code]#khr::property::tag::compile#, [code]#khr::property::tag::link#,
-and [code]#khr::property::tag::build# tag types and the new [code]#compile#,
+|The [api]#khr::property::tag::compile#, [api]#khr::property::tag::link#,
+and [api]#khr::property::tag::build# tag types and the new [code]#compile#,
 [code]#link#, and [code]#build# overloads from
 <<sec:khr-properties-kernel-bundle-additions>>.
 
@@ -194,15 +193,15 @@ auto p3 = sycl::khr::property::prop3<42>{43};
 
 Applications often need to collect a set of properties into a container, for
 example when constructing an object with more than one property.
-This extension introduces a [code]#properties# class for this purpose, which
+This extension introduces a [api]#khr::properties# class for this purpose, which
 improves upon [code]#property_list# from the <<core-spec>>.
-The [code]#properties# class is templated on the types of all the properties
+The [api]#khr::properties# class is templated on the types of all the properties
 that it contains.
 This means that the template parameters also encode the compile-time constant
 values for any properties it contains because those values are also part of
 their property's type.
 
-Applications can construct a [code]#properties# object from a list of
+Applications can construct a [api]#khr::properties# object from a list of
 properties, and the template parameters are deduced through CTAD:
 
 [source,,linenums]
@@ -214,8 +213,8 @@ sycl::khr::properties plist{
 };
 ----
 
-Applications can also query whether a [code]#properties# list contains a certain
-property, and they can get a copy of a property object from the list.
+Applications can also query whether a [api]#khr::properties# list contains a
+certain property, and they can get a copy of a property object from the list.
 Each property defines an associated class in the [code]#property::key# namespace
 for this purpose, and this class is known as the property's "key":
 
@@ -253,7 +252,7 @@ if constexpr (plist.has_property<sycl::khr::property::key::prop1>()) {
 
 This extension adds the following new class, which holds a list of properties.
 
-[source,role=synopsis,id=api:khr-properties-properties]
+[source,role=synopsis]
 ----
 namespace sycl::khr {
 
@@ -514,7 +513,7 @@ this extension.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-context]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -705,7 +704,7 @@ this extension.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-queue]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -986,8 +985,8 @@ This extension adds the following new style properties that can be used with the
 
 '''
 
-.[apidef]#khr::enable_profiling#
-[source,role=synopsis,id=api:khr-properties-enable-profiling]
+.[apidef]#khr::property::enable_profiling#
+[source,role=synopsis,id=api:khr-properties-property-enable-profiling]
 ----
 namespace sycl::khr::property {
 
@@ -1000,7 +999,7 @@ namespace key {
 struct enable_profiling {};
 }
 
-} // namespace sycl::khr
+} // namespace sycl::khr::property
 ----
 
 When a queue is constructed with this property and the [code]#value# is
@@ -1021,8 +1020,8 @@ The following traits inherit from [code]#std::true#:
 
 '''
 
-.[apidef]#khr::in_order#
-[source,role=synopsis,id=api:khr-properties-in-order]
+.[apidef]#khr::property::in_order#
+[source,role=synopsis,id=api:khr-properties-property-in-order]
 ----
 namespace sycl::khr::property {
 
@@ -1035,7 +1034,7 @@ namespace key {
 struct in_order {};
 }
 
-} // namespace sycl::khr
+} // namespace sycl::khr::property
 ----
 
 When a queue is constructed with this property and the [code]#value# is
@@ -1063,7 +1062,7 @@ trivially copyable.
 This extension adds the following property tag types, which are used to classify
 properties that can be used with the USM allocation functions.
 
-[source,role=synopsis,id=api:khr-properties-usm-allocation-tags]
+[source,role=synopsis]
 ----
 namespace sycl::khr::property::tag {
 
@@ -1083,7 +1082,7 @@ defined in this extension.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-usm-allocator]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1130,7 +1129,7 @@ functions.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-usm-malloc-device]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1192,7 +1191,7 @@ functions.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-usm-malloc-host]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1252,7 +1251,7 @@ functions.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-usm-malloc-shared]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1316,7 +1315,7 @@ allocation functions, which select the kind of allocation through a
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-usm-malloc]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1407,6 +1406,21 @@ The overloads above are added for extensibility.
 [[sec:khr-properties-reduction-additions]]
 == Additions to the reduction interface
 
+[[sec:khr-properties-reduction-property-tag]]
+=== New property tag type
+
+This extension adds the following property tag type, which is used to classify
+properties that can be used with the reduction interface.
+
+[source,role=synopsis]
+----
+namespace sycl::khr::property::tag {
+
+struct reduction;
+
+} // namespace sycl::khr::property::tag
+----
+
 [[sec:khr-properties-reduction-overloads]]
 === New reduction function overloads
 
@@ -1414,25 +1428,9 @@ This extension adds the following new overloads to the [code]#reduction#
 interface, which allow a reduction to be created with the new style properties
 defined in this extension.
 
-The [code]#reduction# interface is not a class, so this extension defines an
-empty tag type [code]#khr::property::tag::reduction# to serve as the
-[code]#Class# parameter of the [api]#khr::is_property_for# trait for properties
-that can be used with the [code]#reduction# interface.
-
 '''
 
-[source,role=synopsis,id=api:khr-properties-reduction-tag]
-----
-namespace sycl::khr::property::tag {
-
-struct reduction; // tag type, never defined
-
-} // namespace sycl::khr::property::tag
-----
-
-'''
-
-[source,role=synopsis,id=api:khr-properties-reduction]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1519,8 +1517,8 @@ This extension adds the following new style property that can be used with the
 
 '''
 
-.[apidef]#khr::initialize_to_identity#
-[source,role=synopsis,id=api:khr-properties-initialize-to-identity]
+.[apidef]#khr::property::initialize_to_identity#
+[source,role=synopsis,id=api:khr-properties-property-initialize-to-identity]
 ----
 namespace sycl::khr::property {
 
@@ -1533,7 +1531,7 @@ namespace key {
 struct initialize_to_identity {};
 }
 
-} // namespace sycl::khr
+} // namespace sycl::khr::property
 ----
 
 When a reduction is created with this property and the [code]#value# is
@@ -1560,19 +1558,20 @@ The following traits inherit from [code]#std::true#:
 This extension adds new property-accepting overloads to the free functions
 [code]#compile#, [code]#link#, and [code]#build#.
 
+[[sec:khr-properties-kernel-bundle-property-tags]]
+=== New property tag types
+
 This extension adds the following property tag types, which are used to classify
 properties that can be used with the [code]#compile#, [code]#link#, and
 [code]#build# functions.
 
-'''
-
-[source,role=synopsis,id=api:khr-properties-kernel-bundle-tag]
+[source,role=synopsis]
 ----
 namespace sycl::khr::property::tag {
 
-struct compile; // tag type, never defined
-struct link;    // tag type, never defined
-struct build;   // tag type, never defined
+struct compile;
+struct link;
+struct build;
 
 } // namespace sycl::khr::property::tag
 ----
@@ -1584,7 +1583,7 @@ This extension adds the following new overloads of the [code]#compile# function.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-compile]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1619,7 +1618,7 @@ This extension adds the following new overloads of the [code]#link# function.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-link]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1664,7 +1663,7 @@ This extension adds the following new overloads of the [code]#build# function.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-build]
+[source,role=synopsis]
 ----
 namespace sycl {
 
@@ -1713,7 +1712,7 @@ this extension.
 
 '''
 
-[source,role=synopsis,id=api:khr-properties-stream]
+[source,role=synopsis]
 ----
 namespace sycl {
 
