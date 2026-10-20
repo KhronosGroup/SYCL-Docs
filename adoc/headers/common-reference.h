@@ -4,26 +4,25 @@
 namespace sycl {
 
 class T {
-  ...
+  // ...
 
-      public : T(const T& rhs);
+public:
+  T(const T& rhs);
 
-  T(T&& rhs);
+  T(T&& rhs) noexcept;
 
   T& operator=(const T& rhs);
 
-  T& operator=(T&& rhs);
+  T& operator=(T&& rhs) noexcept;
 
   ~T();
 
-  ...
+  // ...
 
-      friend bool
-      operator==(const T& lhs, const T& rhs) { /* ... */
-  }
+  friend bool operator==(const T& lhs, const T& rhs);
 
-  friend bool operator!=(const T& lhs, const T& rhs) { /* ... */ }
+  friend bool operator!=(const T& lhs, const T& rhs);
 
-  ...
+  // ...
 };
 } // namespace sycl

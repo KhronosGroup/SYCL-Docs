@@ -281,13 +281,13 @@ include::{header_dir}/interop/templateFunctionMakeX.h[lines=4..-1]
 
 For each <<sycl-runtime>> class [code]#T# which supports <<sycl-application>>
 interoperability, a specialization of the appropriate template function
-[code]#make_{sycl_class}# where [code]#{sycl_class}# is the class name of
+[code]#+make_{sycl_class}+# where [code]#+{sycl_class}+# is the class name of
 [code]#T#, must be defined, which takes a <<sycl-application>> interoperability
 <<native-backend-object>> and constructs and returns an instance of [code]#T#.
 The availability and behavior of these template functions are defined by the
 <<backend>> specification document.
 
-Overloads of the [code]#make_{sycl_class}# function which take a SYCL
+Overloads of the [code]#+make_{sycl_class}+# function which take a SYCL
 <<context>> object as an argument must throw an [code]#exception# with the
 [code]#errc::backend_mismatch# error code if the backend of the provided SYCL
 context doesn't match the target backend.
@@ -387,7 +387,7 @@ T(const T& rhs)
 a@
 [source]
 ----
-T(T&& rhs)
+T(T&& rhs) noexcept
 ----
    a@ Constructs a SYCL [code]#T# instance as a move of the RHS SYCL
       [code]#T# in accordance with the requirements set out above.
@@ -403,7 +403,7 @@ T& operator=(const T& rhs)
 a@
 [source]
 ----
-T& operator=(T&& rhs)
+T& operator=(T&& rhs) noexcept
 ----
    a@ Assigns this SYCL [code]#T# instance with a move of the RHS SYCL
       [code]#T# in accordance with the requirements set out above.
@@ -513,7 +513,7 @@ T(const T& rhs);
 a@
 [source]
 ----
-T(T&& rhs);
+T(T&& rhs) noexcept;
 ----
    a@ Move constructor.
 
@@ -527,7 +527,7 @@ T& operator=(const T& rhs);
 a@
 [source]
 ----
-T& operator=(T&& rhs);
+T& operator=(T&& rhs) noexcept;
 ----
    a@ Move assignment operator.
 
@@ -607,6 +607,7 @@ A SYCL implementation or a <<backend>> may provide additional properties other
 than those defined here, provided they are defined in accordance with the
 requirements described in <<sec:headers-and-namespaces>>.
 
+[[subsec:properties-interface]]
 ==== Properties interface
 
 Each of the runtime classes mentioned above must provide a common interface of
@@ -1603,12 +1604,14 @@ struct atomic_memory_scope_capabilities {
 _Remarks:_ Template parameter to [api]#context::get_info#.
 
 _Returns:_ The set of memory scopes supported by atomic operations on all
-devices in the context.
+devices in the context, which is a subset of {[code]#memory_scope::sub_group#,
+[code]#memory_scope::work_group#, [code]#memory_scope::device#,
+[code]#memory_scope::system#}.
 When a context returns a "wider" memory scope in this set, it must also return
-all "narrower" memory scopes.
+all "narrower" memory scopes in this subset.
 (See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
-At a minimum, each context must support [code]#memory_scope::work_item#,
-[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+At a minimum, each context must support [code]#memory_scope::sub_group# and
+[code]#memory_scope::work_group#.
 
 '''
 
@@ -2155,6 +2158,9 @@ struct preferred_vector_width_int {
 struct preferred_vector_width_long {
   using return_type = std::uint32_t;
 };
+struct preferred_vector_width_long_long {
+  using return_type = std::uint32_t;
+};
 struct preferred_vector_width_float {
   using return_type = std::uint32_t;
 };
@@ -2194,6 +2200,9 @@ struct native_vector_width_int {
   using return_type = std::uint32_t;
 };
 struct native_vector_width_long {
+  using return_type = std::uint32_t;
+};
+struct native_vector_width_long_long {
   using return_type = std::uint32_t;
 };
 struct native_vector_width_float {
@@ -2826,12 +2835,14 @@ struct atomic_memory_scope_capabilities {
 _Remarks:_ Template parameter to [api]#device::get_info#.
 
 _Returns:_ The set of memory scopes supported by atomic operations on this
-device.
+device, which is a subset of {[code]#memory_scope::sub_group#,
+[code]#memory_scope::work_group#, [code]#memory_scope::device#,
+[code]#memory_scope::system#}.
 When a device returns a "wider" memory scope in this set, it must also return
-all "narrower" memory scopes.
+all "narrower" memory scopes in this subset.
 (See <<sec:memory-scope>> for a definition of "wider" and "narrower" scopes.)
-At a minimum, each device must support [code]#memory_scope::work_item#,
-[code]#memory_scope::sub_group#, and [code]#memory_scope::work_group#.
+At a minimum, each device must support [code]#memory_scope::sub_group# and
+[code]#memory_scope::work_group#.
 
 '''
 
@@ -3596,8 +3607,8 @@ Indicates that the device supports explicit USM allocations as described in
 --
 Indicates that the device can access USM memory allocated via
 [code]#usm::alloc::host#.
-The device only supports atomic modification of a host allocation if
-[api]#aspect::usm_atomic_host_allocations# is also supported.
+Concurrent access and atomic modification of a host allocation is only supported
+if [api]#aspect::usm_atomic_host_allocations# is also supported.
 (See <<sec:usm>>.)
 --
 
@@ -4628,11 +4639,11 @@ queue.
 .[apidef]#queue::prefetch#
 [source,role=synopsis,id=api:queue-prefetch]
 ----
-event prefetch(void* ptr, std::size_t numBytes)                                      (1)
+event prefetch(const void* ptr, std::size_t numBytes)                                      (1)
 
-event prefetch(void* ptr, std::size_t numBytes, event depEvent)                      (2)
+event prefetch(const void* ptr, std::size_t numBytes, event depEvent)                      (2)
 
-event prefetch(void* ptr, std::size_t numBytes, const std::vector<event>& depEvents) (3)
+event prefetch(const void* ptr, std::size_t numBytes, const std::vector<event>& depEvents) (3)
 ----
 
 _Effects (1):_ Equivalent to calling [api]#queue::submit# with a command group
@@ -4654,11 +4665,11 @@ queue.
 .[apidef]#queue::mem_advise#
 [source,role=synopsis,id=api:queue-mem-advise]
 ----
-event mem_advise(void* ptr, std::size_t numBytes, int advice)                 (1)
+event mem_advise(const void* ptr, std::size_t numBytes, int advice)                 (1)
 
-event mem_advise(void* ptr, std::size_t numBytes, int advice, event depEvent) (2)
+event mem_advise(const void* ptr, std::size_t numBytes, int advice, event depEvent) (2)
 
-event mem_advise(void* ptr, std::size_t numBytes, int advice,                 (3)
+event mem_advise(const void* ptr, std::size_t numBytes, int advice,                 (3)
                  const std::vector<event>& depEvents)
 ----
 
@@ -4883,12 +4894,17 @@ _Returns:_ The <<backend>> associated with this event.
 std::vector<event> get_wait_list()
 ----
 
+Deprecated by SYCL {SYCL_VERSION}.
+
 _Returns:_ The list of events that this event waits for in the dependence graph.
 Only direct dependencies are returned, and not transitive dependencies that
 direct dependencies wait on.
 
 _Remarks:_ Whether already completed events are included in the returned list is
 implementation-defined.
+If the event is associated with a command submitted to an in-order queue, then
+it is implementation-defined whether this function returns any dependent events
+or if it returns an empty vector.
 
 '''
 
@@ -7448,6 +7464,7 @@ access_mode::read_write
 |====
 
 
+[[subsec:accessor-deduction-tags]]
 ==== Deduction tags
 
 Some accessor constructors take a [code]#DeductionTagT# parameter, which is used
@@ -7468,6 +7485,7 @@ being constructed, so they are described more fully below in the section that
 pertains to each of the accessor types.
 
 
+[[sec:accessor-properties]]
 ==== Properties
 
 All accessor constructors accept a [code]#property_list# parameter, which
@@ -11169,13 +11187,20 @@ include::{code_dir}/usm_device.cpp[lines=4..-1]
 
 === Unified addressing
 
-Unified Addressing guarantees that all devices will use a unified address space.
-Pointer values in the unified address space will always refer to the same
-location in memory.
-The unified address space encompasses the host and one or more devices.
-Note that this does not require addresses in the unified address space to be
-accessible on all devices, just that pointer values will be consistent.
+The following guarantees apply to the pointer values of USM allocations for
+objects with overlapping lifetimes:
 
+  * A USM pointer is different from all non-USM memory addresses on the host.
+  * A USM host memory pointer allocated from context _C_ has a value that is
+    different from all other USM host memory pointers (regardless of context),
+    different from all USM shared memory pointers (regardless of context), and
+    different from all USM device memory pointers allocated from context _C_.
+  * A USM shared memory pointer allocated from context _C_ has a value that is
+    different from all other USM shared memory pointers (regardless of context),
+    different from all USM host memory pointers (regardless of context), and
+    different from all USM device memory pointers allocated from context _C_.
+  * A USM device memory pointer allocated from context _C_ has a value that is
+    different from all other USM pointers allocated from context _C_.
 
 === Kinds of unified shared memory
 
@@ -11224,26 +11249,6 @@ devices that support USM may not support all types of USM allocation.
 A SYCL application can use the [code]#device::has()# function to determine the
 level of USM support for a device.
 See <<sec:device-aspects>> for more details.
-
-The characteristics of USM allocations are summarized in
-<<table.USM.allocation.characteristics>>.
-
-[[table.USM.allocation.characteristics]]
-.Characteristics of the different kinds of USM allocation
-[width="100%",options="header",cols="16%,16%,16%,16%,16%,16%"]
-|====
-| Allocation Type | Initial Location | Accessible By | | Migratable To |
-.3+| [code]#device# .3+| [code]#device# | [code]#host#      | No            | [code]#host#          | No
-|                                         [code]#device#    | Yes           | [code]#device#        | N/A
-|                                 Another [code]#device#    | Optional (P2P)| Another [code]#device#| No
-
-.2+| [code]#host#    .2+| [code]#host#  | [code]#host#      | Yes           | [code]#host#          | N/A
-|                                     Any [code]#device#    | Yes           | [code]#device#        | No
-
-.3+| [code]#shared#  .3+| Unspecified   | [code]#host#      | Yes           | [code]#host#          | Yes
-|                                         [code]#device#    | Yes           | [code]#device#        | Yes
-|                                 Another [code]#device#    | Optional  | Another [code]#device#| Optional
-|====
 
 Each USM allocation has an associated SYCL <<context>>, and any access to that
 memory must use the same context.
@@ -11368,6 +11373,7 @@ Users may query the device to determine if system allocations are supported for
 use on the device, through [code]#aspect::usm_system_allocations#.
 
 
+[[sec:usm-allocations]]
 === USM allocations
 
 USM provides several allocation functions.
@@ -12082,6 +12088,7 @@ _Effects_: Equivalent to [code]#return free(ptr, q.get_context());#.
 submit a "free" <<command>> to the device; the [code]#queue# argument is only
 used to determine the [code]#context# associated with [code]#ptr#.{endnote}
 
+[[subsec:usm-mem-ptr-queries]]
 === Unified shared memory pointer queries
 
 Since USM pointers look like raw {cpp} pointers, users cannot deduce what kind
@@ -12498,6 +12505,15 @@ listed in <<sec:byval-semantics>> in <<table.specialmembers.common.byval>> and
 [width="100%",options="header",separator="@",cols="65%,35%"]
 |====
 @ Constructor @ Description
+a@
+[source]
+----
+nd_range() noexcept;
+----
+   a@ Construct an [code]#nd_range# whose global range, local range and
+      offset are each default constructed, which means that each of their
+      components has the value [code]#0#.
+
 a@
 [source]
 ----
@@ -13690,9 +13706,8 @@ representing the work-item computation.
 
 Note that the logical range does not need to be uniform
 across all work-groups in a kernel.  For example the logical range may depend on
-a work-group varying query (e.g. [code]#group::get_linear_id)#,
-such that different work-groups in the same kernel invocation execute
-different logical range sizes.
+a work-group varying query such that different work-groups in the same kernel
+invocation execute different logical range sizes.
 
 This member function can only be invoked within a
 [code]#parallel_for_work_group# context.
@@ -15528,7 +15543,7 @@ The type [code]#T# must be <<device-copyable>>.
 a@
 [source]
 ----
-void prefetch(void* ptr, std::size_t numBytes)
+void prefetch(const void* ptr, std::size_t numBytes)
 ----
 a@ Enqueues a prefetch of [code]#num_bytes# of data starting at address
 [code]#ptr#.  The [code]#ptr# must point within a USM allocation from the same
@@ -15538,7 +15553,7 @@ queue's device.  For more detail on USM, please see <<sec:usm>>.
 a@
 [source]
 ----
-void mem_advise(void* ptr, std::size_t numBytes, int advice)
+void mem_advise(const void* ptr, std::size_t numBytes, int advice)
 ----
 a@ Enqueues a command that provides information to the implementation about a
 region of USM starting at [code]#ptr# and extending for [code]#numBytes# bytes.
@@ -17286,6 +17301,7 @@ _Throws:_
     the <<backend>> that corresponds with [code]#Param# is different from the
     <<backend>> that is associated with this kernel bundle.
 
+[[sec:kernel-info-descriptors]]
 ==== Kernel information descriptors
 
 A <<kernel>> can be queried for information using the [code]#get_info()# member
@@ -17619,6 +17635,7 @@ declarable ([code]#std::complex#).
 include::{code_dir}/lambdaNameExamples.cpp[lines=4..-1]
 ----
 
+[[subsec:is-device-copyable-type-trait]]
 === [code]#is_device_copyable# type trait
 
 ....
@@ -17662,10 +17679,8 @@ a device copyable type in that case and the specialization is ignored.
 
 A SYCL application passes parameters to a kernel in different ways depending on
 whether the kernel is a named function object or a lambda expression.
-If the kernel is a named function object, the [code]#operator()# member function
-(or other member functions that it calls) may reference member variables inside
-the same named function object.
-Any such member variables become parameters to the kernel.
+If the kernel is a named function object, all non-static member variables of the
+named function object become parameters to the kernel.
 If the kernel is a lambda expression, any variables captured by the lambda
 become parameters to the kernel.
 
@@ -19094,6 +19109,7 @@ defined integer type.
 |====
 
 
+[[subsec:vec-aliases]]
 ==== Aliases
 
 The SYCL programming API provides all permutations of the type alias:
@@ -20504,6 +20520,7 @@ marray<bool, NumElements> operator!(const marray& v)
 
 
 
+[[subsec:marray-aliases]]
 ==== Aliases
 
 The SYCL programming API provides all permutations of the type alias:
@@ -20649,6 +20666,11 @@ operations in device code with a syntax similar to the {cpp} standard
 [code]#std::atomic_ref#.
 The [code]#sycl::atomic_ref# class must not be used in host code.
 
+The referenced object of type [code]#T# must not reside in the private address
+space.
+If [code]#atomic_ref# is constructed with a reference to an object in the
+private address space, the behavior is undefined.
+
 Unlike [code]#std::atomic_ref#, [code]#sycl::atomic_ref# does not provide a
 default memory ordering for its operations.
 Instead, the application must specify a default ordering via the
@@ -20672,6 +20694,10 @@ The [code]#sycl::atomic_ref# class has a template parameter
 scope for the atomic operations.
 Most member functions also provide an optional parameter that allows the
 application to override this default.
+A member function must not be invoked with [code]#memory_scope::work_item#,
+whether by using the default scope or by explicitly specifying a scope.
+If a member function is invoked with [code]#memory_scope::work_item# the
+behavior is undefined.
 
 The [code]#sycl::atomic_ref# class also has a template parameter
 [code]#AddressSpace#, which allows the application to make an assertion about
@@ -20798,6 +20824,8 @@ void store(T operand, memory_order order = default_write_order,
       This function is only supported for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20817,6 +20845,8 @@ T load(memory_order order = default_read_order, memory_scope scope =
       or [code]#memory_order::seq_cst#.  This function is only supported for
       64-bit data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20835,6 +20865,8 @@ T exchange(T operand, memory_order order = default_read_modify_write_order,
       returns the original value of the referenced object.
       This function is only supported for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -20858,6 +20890,8 @@ successful. The [code]#failure# memory order of this atomic operation must be
 This function is only supported for 64-bit data types on devices that have
 [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20879,6 +20913,7 @@ if (order == memory_order::acq_rel) {
 }
 return compare_exchange_weak(expected, desired, success, failure, scope);
 ----
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -20900,6 +20935,8 @@ successful. The [code]#failure# memory order of this atomic operation must be
 
 This function is only supported for 64-bit data types on devices that have
 [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -20944,6 +20981,8 @@ T fetch_add(T operand, memory_order order = default_read_modify_write_order,
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -20976,6 +21015,8 @@ T fetch_sub(T operand, memory_order order = default_read_modify_write_order,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21011,6 +21052,8 @@ T fetch_and(T operand, memory_order order = default_read_modify_write_order,
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21030,6 +21073,8 @@ T fetch_or(T operand, memory_order order = default_read_modify_write_order,
       original value of the referenced object.  This function is only supported
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21051,6 +21096,8 @@ T fetch_xor(T operand, memory_order order = default_read_modify_write_order,
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21071,6 +21118,8 @@ T fetch_min(T operand, memory_order order = default_read_modify_write_order,
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21083,6 +21132,8 @@ T fetch_max(T operand, memory_order order = default_read_modify_write_order,
       original value of the referenced object.  This function is only supported
       for 64-bit data types on devices that have
       [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 |====
 
@@ -21105,6 +21156,8 @@ T fetch_add(T operand, memory_order order = default_read_modify_write_order,
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21123,6 +21176,8 @@ T fetch_sub(T operand, memory_order order = default_read_modify_write_order,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       data types on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21143,6 +21198,8 @@ T fetch_min(T operand, memory_order order = default_read_modify_write_order,
       original value of the referenced object.  This function is only supported for
       64-bit data types on devices that have [code]#aspect::atomic64#.
 
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
+
 a@
 [source]
 ----
@@ -21154,6 +21211,8 @@ T fetch_max(T operand, memory_order order = default_read_modify_write_order,
       and assigns the result to the value of the referenced object. Returns the
       original value of the referenced object.  This function is only supported for
       64-bit data types on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 |====
 
@@ -21176,6 +21235,8 @@ T* fetch_add(ptrdiff_t operand,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       pointers on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -21210,6 +21271,8 @@ T* fetch_sub(ptrdiff_t operand,
       the result to the value of the referenced object.  Returns the original
       value of the referenced object.  This function is only supported for 64-bit
       pointers on devices that have [code]#aspect::atomic64#.
+
+The behavior is undefined if scope is [code]#memory_scope::work_item#.
 
 a@
 [source]
@@ -22220,6 +22283,7 @@ described in <<sec:kernel.query>>.
 It is undefined behavior for any group function to be invoked within a
 [code]#parallel_for_work_group# or [code]#parallel_for_work_item# context.
 
+[[subsec:group-type-traits]]
 ==== Group type trait
 
 [source,,linenums]
@@ -25744,6 +25808,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 '''
 
 
+[[sec:native-precision-math-functions]]
 === Native precision math functions
 
 This section describes the native precision math functions that are available in
@@ -26182,6 +26247,7 @@ The return type is [code]#NonScalar# unless [code]#NonScalar# is the
 '''
 
 
+[[sec:half-precision-math-functions]]
 === Half precision math functions (deprecated)
 
 This section describes the half precision math functions that are available in
@@ -27445,6 +27511,7 @@ The return type is [code]#Int32Bit1# unless [code]#Int32Bit1# is the
 '''
 
 
+[[sec:common-functions]]
 === Common functions
 
 This section describes the common functions that are available in the
