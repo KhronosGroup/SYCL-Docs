@@ -1089,6 +1089,7 @@ namespace sycl {
 
 template <typename T, usm::alloc AllocKind, std::size_t Alignment = 0>
 class usm_allocator {
+ public:
   template <typename PropertyOrList>
   usm_allocator(const context& syclContext, const device& syclDevice,
                 PropertyOrList props);
@@ -1104,18 +1105,12 @@ class usm_allocator {
 
 _Constraints:_
 
-* [code]#AllocKind# is [code]#usm::alloc::device# and
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
-  is [code]#true#, or
 * [code]#AllocKind# is [code]#usm::alloc::host# and
   [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
   is [code]#true#, or
 * [code]#AllocKind# is [code]#usm::alloc::shared# and
   [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
   is [code]#true#, or
-* [code]#AllocKind# is [code]#usm::alloc::device# and
-  [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_device># is [code]#true#, or
 * [code]#AllocKind# is [code]#usm::alloc::host# and
   [code]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::usm_host># is [code]#true#, or
@@ -1144,17 +1139,17 @@ void* malloc_device(std::size_t numBytes, const device& syclDevice,
                     const context& syclContext, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc_device(std::size_t count, const device& syclDevice,
-                       const context& syclContext,
-                       PropertyOrList props);
+T* malloc_device(std::size_t count, const device& syclDevice,
+                 const context& syclContext,
+                 PropertyOrList props);
 
 template <typename PropertyOrList>
 void* malloc_device(std::size_t numBytes, const queue& syclQueue,
                     PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc_device(std::size_t count, const queue& syclQueue,
-                       PropertyOrList props);
+T* malloc_device(std::size_t count, const queue& syclQueue,
+                 PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
@@ -1162,19 +1157,19 @@ void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                            PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
-                              const device& syclDevice,
-                              const context& syclContext,
-                              PropertyOrList props);
+T* aligned_alloc_device(std::size_t alignment, std::size_t count,
+                        const device& syclDevice,
+                        const context& syclContext,
+                        PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
                            const queue& syclQueue, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc_device(std::size_t alignment, std::size_t count,
-                              const queue& syclQueue,
-                              PropertyOrList props)
+T* aligned_alloc_device(std::size_t alignment, std::size_t count,
+                        const queue& syclQueue,
+                        PropertyOrList props);
 
 } // namespace sycl
 ----
