@@ -17,6 +17,65 @@ compiler generates.
 
 This extension has no dependencies on other extensions.
 
+[[sec:khr-properties-header-files]]
+== Header files
+
+The APIs defined in this extension are provided by the [code]#<sycl/sycl.hpp>#
+header file.
+
+If the implementation also implements the [code]#sycl_khr_split_headers#
+extension, then the APIs defined in this extension are additionally provided by
+the header files listed in <<table.khr-properties-headers>>.
+
+[[table.khr-properties-headers]]
+.Header files that provide the APIs of this extension
+[width="100%",options="header",cols="1,2"]
+|====
+|Header
+|APIs
+
+|[code]#<sycl/khr/split_headers/version.hpp>#
+|The [code]#SYCL_KHR_PROPERTIES# feature test macro from
+<<sec:khr-properties-feature-test>>.
+
+|[code]#<sycl/khr/properties.hpp>#
+|The [code]#khr::properties# class and [code]#khr::empty_properties_t# from
+<<sec:khr-properties-properties>>, and the traits from
+<<sec:khr-properties-traits>>.
+
+|[code]#<sycl/khr/split_headers/context.hpp>#
+|The new [code]#context# constructors from
+<<sec:khr-properties-context-additions>>.
+
+|[code]#<sycl/khr/split_headers/queue.hpp>#
+|The new [code]#queue# constructors and member functions, and the
+[code]#khr::property::enable_profiling# and [code]#khr::property::in_order#
+properties and their keys, from <<sec:khr-properties-queue-additions>>.
+
+|[code]#<sycl/khr/split_headers/usm.hpp>#
+|The [code]#khr::property::tag::usm_device#,
+[code]#khr::property::tag::usm_host#, and
+[code]#khr::property::tag::usm_shared# tag types, the new
+[code]#usm_allocator# constructors, and the new USM allocation function
+overloads from <<sec:khr-properties-usm-additions>>.
+
+|[code]#<sycl/khr/split_headers/reduction.hpp>#
+|The [code]#khr::property::tag::reduction# tag type, the new
+[code]#reduction# overloads, and the
+[code]#khr::property::initialize_to_identity# property and its key, from
+<<sec:khr-properties-reduction-additions>>.
+
+|[code]#<sycl/khr/split_headers/kernel_bundle.hpp>#
+|The [code]#khr::property::tag::compile#, [code]#khr::property::tag::link#,
+and [code]#khr::property::tag::build# tag types and the new [code]#compile#,
+[code]#link#, and [code]#build# overloads from
+<<sec:khr-properties-kernel-bundle-additions>>.
+
+|[code]#<sycl/khr/split_headers/stream.hpp>#
+|The new [code]#stream# constructor from
+<<sec:khr-properties-stream-additions>>.
+|====
+
 [[sec:khr-properties-feature-test]]
 == Feature test macro
 
@@ -1350,6 +1409,7 @@ _Throws:_
 This extension defines no USM allocation properties.
 The overloads above are added for extensibility.
 
+[[sec:khr-properties-reduction-additions]]
 == Additions to the reduction interface
 
 [[sec:khr-properties-reduction-overloads]]
