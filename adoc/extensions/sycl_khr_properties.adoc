@@ -1431,36 +1431,11 @@ defined in this extension.
 
 '''
 
-[source,role=synopsis]
-----
-namespace sycl {
-
-template <typename T, typename BinaryOperation, typename PropertyOrList>
-__unspecified__ reduction(T* var, BinaryOperation combiner,
-                          PropertyOrList props);
-
-template <typename T, typename Extent, typename BinaryOperation,
-          typename PropertyOrList>
-__unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
-                          PropertyOrList props);
-
-template <typename T, typename BinaryOperation, typename PropertyOrList>
-__unspecified__ reduction(T* var, const T& identity, BinaryOperation combiner,
-                          PropertyOrList props);
-
-template <typename T, typename Extent, typename BinaryOperation,
-          typename PropertyOrList>
-__unspecified__ reduction(span<T, Extent> vars, const T& identity,
-                          BinaryOperation combiner, PropertyOrList props);
-
-} // namespace sycl
-----
-
-'''
-
 .[apititle]#Reduction without an identity value#
 [source,role=synopsis,id=api:khr-properties-reduction-no-identity]
 ----
+namespace sycl {
+
 template <typename T, typename BinaryOperation, typename PropertyOrList>         (1)
 __unspecified__ reduction(T* var, BinaryOperation combiner,
                           PropertyOrList props);
@@ -1469,6 +1444,8 @@ template <typename T, typename Extent, typename BinaryOperation,                
           typename PropertyOrList>
 __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
                           PropertyOrList props);
+
+} // namespace sycl
 ----
 
 _Constraints:_ Overload (2) is available only when [code]#Extent !=
@@ -1488,6 +1465,8 @@ properties are specified by [code]#props#.
 .[apititle]#Reduction with an identity value#
 [source,role=synopsis,id=api:khr-properties-reduction-identity]
 ----
+namespace sycl {
+
 template <typename T, typename BinaryOperation, typename PropertyOrList>        (1)
 __unspecified__ reduction(T* var, const T& identity, BinaryOperation combiner,
                           PropertyOrList props);
@@ -1496,6 +1475,8 @@ template <typename T, typename Extent, typename BinaryOperation,                
           typename PropertyOrList>
 __unspecified__ reduction(span<T, Extent> vars, const T& identity,
                           BinaryOperation combiner, PropertyOrList props);
+
+} // namespace sycl
 ----
 
 _Constraints:_ Overload (2) is available only when [code]#Extent !=
