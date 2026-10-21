@@ -177,7 +177,7 @@ namespace sycl::khr::property {
 // Property defined by the implementation.
 template<int Value1>
 struct prop3 {
-  constexpr prop1(int v2) : value2(v2) {}
+  constexpr prop3(int v2) : value2(v2) {}
   static constexpr int value1 = Value1;
   int value2;
 };
@@ -269,7 +269,7 @@ class properties {
   static constexpr auto get_property();
 
   template <typename PropertyKey>
-  constexpr auto get_property();
+  constexpr auto get_property() const;
 };
 
 using empty_properties_t = decltype(properties{});
@@ -328,7 +328,7 @@ template <typename PropertyKey>         (1)
 static constexpr auto get_property();
 
 template <typename PropertyKey>         (2)
-constexpr auto get_property();
+constexpr auto get_property() const;
 ----
 
 _Constraints_ (1):
@@ -1016,7 +1016,7 @@ When a queue is constructed with this property and the [code]#value# is
 If the [code]#value# is [code]#false#, this property has no effect on the
 constructed queue.
 
-The following traits inherit from [code]#std::true#:
+The following traits inherit from [code]#std::true_type#:
 
 * [code]#khr::is_property<khr::property::enable_profiling>#
 * [code]#khr::is_property_key<khr::property::key::enable_profiling>#
@@ -1050,7 +1050,7 @@ When a queue is constructed with this property and the [code]#value# is
 If the [code]#value# is [code]#false#, this property has no effect on the
 constructed queue.
 
-The following traits inherit from [code]#std::true#:
+The following traits inherit from [code]#std::true_type#:
 
 * [code]#khr::is_property<khr::property::in_order>#
 * [code]#khr::is_property_key<khr::property::key::in_order>#
@@ -1207,34 +1207,34 @@ void* malloc_host(std::size_t numBytes, const context& syclContext,
                   PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc_host(std::size_t count, const context& syclContext,
-                     PropertyOrList props);
+T* malloc_host(std::size_t count, const context& syclContext,
+               PropertyOrList props);
 
 template <typename PropertyOrList>
 void* malloc_host(std::size_t numBytes, const queue& syclQueue,
                   PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc_host(std::size_t count, const queue& syclQueue,
-                     PropertyOrList props);
+T* malloc_host(std::size_t count, const queue& syclQueue,
+               PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                          const context& syclContext, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
-                            const context& syclContext,
-                            PropertyOrList props);
+T* aligned_alloc_host(std::size_t alignment, std::size_t count,
+                      const context& syclContext,
+                      PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
                          const queue& syclQueue, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc_host(std::size_t alignment, std::size_t count,
-                               const queue& syclQueue,
-                               PropertyOrList props);
+T* aligned_alloc_host(std::size_t alignment, std::size_t count,
+                      const queue& syclQueue,
+                      PropertyOrList props);
 
 } // namespace sycl
 ----
@@ -1267,17 +1267,17 @@ void* malloc_shared(std::size_t numBytes, const device& syclDevice,
                     const context& syclContext, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc_shared(std::size_t count, const device& syclDevice,
-                       const context& syclContext,
-                       PropertyOrList props);
+T* malloc_shared(std::size_t count, const device& syclDevice,
+                 const context& syclContext,
+                 PropertyOrList props);
 
 template <typename PropertyOrList>
 void* malloc_shared(std::size_t numBytes, const queue& syclQueue,
                     PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc_shared(std::size_t count, const queue& syclQueue,
-                       PropertyOrList props);
+T* malloc_shared(std::size_t count, const queue& syclQueue,
+                 PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
@@ -1285,19 +1285,19 @@ void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                            PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
-                              const device& syclDevice,
-                              const context& syclContext,
-                              PropertyOrList props);
+T* aligned_alloc_shared(std::size_t alignment, std::size_t count,
+                        const device& syclDevice,
+                        const context& syclContext,
+                        PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
                            const queue& syclQueue, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc_shared(std::size_t alignment, std::size_t count,
-                              const queue& syclQueue,
-                              PropertyOrList props);
+T* aligned_alloc_shared(std::size_t alignment, std::size_t count,
+                        const queue& syclQueue,
+                        PropertyOrList props);
 
 } // namespace sycl
 ----
@@ -1332,17 +1332,17 @@ void* malloc(std::size_t numBytes, const device& syclDevice,
              PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc(std::size_t count, const device& syclDevice,
-                const context& syclContext, usm::alloc kind,
-                PropertyOrList props);
+T* malloc(std::size_t count, const device& syclDevice,
+          const context& syclContext, usm::alloc kind,
+          PropertyOrList props);
 
 template <typename PropertyOrList>
 void* malloc(std::size_t numBytes, const queue& syclQueue, usm::alloc kind,
              PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::malloc(std::size_t count, const queue& syclQueue, usm::alloc kind,
-                PropertyOrList props);
+T* malloc(std::size_t count, const queue& syclQueue, usm::alloc kind,
+          PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
@@ -1350,9 +1350,9 @@ void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
                     usm::alloc kind, PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc(std::size_t alignment, std::size_t count,
-                       const device& syclDevice, const context& syclContext,
-                       usm::alloc kind, PropertyOrList props);
+T* aligned_alloc(std::size_t alignment, std::size_t count,
+                 const device& syclDevice, const context& syclContext,
+                 usm::alloc kind, PropertyOrList props);
 
 template <typename PropertyOrList>
 void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
@@ -1360,9 +1360,9 @@ void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
                     PropertyOrList props);
 
 template <typename T, typename PropertyOrList>
-T* sycl::aligned_alloc(std::size_t alignment, std::size_t count,
-                       const queue& syclQueue, usm::alloc kind,
-                       PropertyOrList props);
+T* aligned_alloc(std::size_t alignment, std::size_t count,
+                 const queue& syclQueue, usm::alloc kind,
+                 PropertyOrList props);
 
 } // namespace sycl
 ----
@@ -1446,7 +1446,7 @@ template <typename T, typename BinaryOperation, typename PropertyOrList>   (1)
 __unspecified__ reduction(T* var, BinaryOperation combiner,
                           PropertyOrList props);
 
-template <typename T, typename Extent, typename BinaryOperation,           (2)
+template <typename T, std::size_t Extent, typename BinaryOperation,        (2)
           typename PropertyOrList>
 __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
                           PropertyOrList props);
@@ -1483,7 +1483,7 @@ template <typename T, typename BinaryOperation, typename PropertyOrList>        
 __unspecified__ reduction(T* var, const T& identity, BinaryOperation combiner,
                           PropertyOrList props);
 
-template <typename T, typename Extent, typename BinaryOperation,                (2)
+template <typename T, std::size_t Extent, typename BinaryOperation,             (2)
           typename PropertyOrList>
 __unspecified__ reduction(span<T, Extent> vars, const T& identity,
                           BinaryOperation combiner, PropertyOrList props);
@@ -1540,7 +1540,7 @@ When a reduction is created with this property and the [code]#value# is
 If the [code]#value# is [code]#false#, this property has no effect on the
 reduction.
 
-The following traits inherit from [code]#std::true#:
+The following traits inherit from [code]#std::true_type#:
 
 * [code]#khr::is_property<khr::property::initialize_to_identity>#
 * [code]#khr::is_property_key<khr::property::key::initialize_to_identity>#
@@ -1883,6 +1883,8 @@ sycl::khr::properties props{
 If we did not use this pattern, an application would have to define two
 different [code]#props# variables like this because the type of [code]#props# is
 different depending on whether it contains the [code]#enable_thing1# property.
+In this example, [code]#enable_thing1# and [code]#enable_thing2# are instead
+defined as presence-only properties with no boolean value.
 
 [source,,linenums]
 ----
