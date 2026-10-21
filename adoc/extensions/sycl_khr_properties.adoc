@@ -1910,13 +1910,9 @@ else {
 [[sec:khr-properties-issues]]
 == Issues
 
-* Do we want to extend the kernel bundle functions ([code]#compile#,
-  [code]#link#, [code]#build#) with new-style property support at all?
-  The <<core-spec>> states that it defines no [code]#compile#, [code]#link#, or
-  [code]#build# property and that such properties may be specified by a vendor
-  extension.
-  This extension therefore adds the property-accepting overloads only as a
-  vehicle for a future property; no kernel bundle property is defined today.
-  The benefit of adding these overloads now is small relative to the surface
-  they introduce, so we should decide whether to keep them or omit the kernel
-  bundle additions until an actual property exists.
+* Nevin suggested that the constructor for a runtime property like
+  `enable_profiling` should be declared `explicit`.
+
+* The new free functions introduced in this KHR (e.g. the `malloc_device`
+  overloads) are currently declared in the `sycl` namespace.
+  It seems like they should instead be declared in the `sycl::khr` namespace.
