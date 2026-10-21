@@ -1436,11 +1436,11 @@ defined in this extension.
 ----
 namespace sycl {
 
-template <typename T, typename BinaryOperation, typename PropertyOrList>         (1)
+template <typename T, typename BinaryOperation, typename PropertyOrList>   (1)
 __unspecified__ reduction(T* var, BinaryOperation combiner,
                           PropertyOrList props);
 
-template <typename T, typename Extent, typename BinaryOperation,                 (2)
+template <typename T, typename Extent, typename BinaryOperation,           (2)
           typename PropertyOrList>
 __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
                           PropertyOrList props);
@@ -1448,16 +1448,22 @@ __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
 } // namespace sycl
 ----
 
-_Constraints:_ Overload (2) is available only when [code]#Extent !=
-sycl::dynamic_extent#, and for all overloads either
+_Constraints_ (1):
 
 * [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
   is [code]#true#, or
 * [api]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::reduction># is [code]#true#.
 
-_Effects (1)-(2):_ The same effect as the corresponding [code]#reduction#
-overload without an identity value from the <<core-spec>> except that the
+_Constraints_ (2): [code]#Extent != sycl::dynamic_extent#, and either:
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#reduction# overload
+without an identity value from <<sec:reduction-interface>> except that the
 properties are specified by [code]#props#.
 
 '''
@@ -1479,17 +1485,23 @@ __unspecified__ reduction(span<T, Extent> vars, const T& identity,
 } // namespace sycl
 ----
 
-_Constraints:_ Overload (2) is available only when [code]#Extent !=
-sycl::dynamic_extent#, and for all overloads either
+_Constraints_ (1):
 
 * [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
   is [code]#true#, or
 * [api]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::reduction># is [code]#true#.
 
-_Effects (1)-(2):_ The same effect as the corresponding [code]#reduction#
-overload with an identity value from the <<core-spec>> except that the
-properties are specified by [code]#props#.
+_Constraints_ (2): [code]#Extent != sycl::dynamic_extent#, and either:
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#reduction# overload with
+an identity value from <<sec:reduction-interface>> except that the properties
+are specified by [code]#props#.
 
 [[sec:khr-properties-reduction-properties]]
 === New reduction properties
