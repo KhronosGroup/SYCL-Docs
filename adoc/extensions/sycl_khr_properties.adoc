@@ -1580,12 +1580,12 @@ This extension adds the following new overloads of the [code]#compile# function.
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                               (1)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::object>
 compile(const kernel_bundle<bundle_state::input>& inputBundle,
         const std::vector<device>& devs, PropertyOrList props);
 
-template <typename PropertyOrList>                               (2)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::object>
 compile(const kernel_bundle<bundle_state::input>& inputBundle,
         PropertyOrList props);
@@ -1593,15 +1593,15 @@ compile(const kernel_bundle<bundle_state::input>& inputBundle,
 } // namespace sycl
 ----
 
-_Constraints:_ For both overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::compile># is
   [code]#true#, or
 * [api]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::compile># is [code]#true#.
 
-_Effects (1)-(2):_ The same effect as the corresponding [code]#compile# overload
-from the <<core-spec>> except that the properties are specified by
+_Effects:_ The same effect as the corresponding [code]#compile# overload from
+<<sec:bundles.compile-link>> except that the properties are specified by
 [code]#props#.
 
 [[sec:khr-properties-kernel-bundle-link]]
@@ -1615,22 +1615,22 @@ This extension adds the following new overloads of the [code]#link# function.
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                                           (1)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::executable>
 link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
      const std::vector<device>& devs, PropertyOrList props);
 
-template <typename PropertyOrList>                                           (2)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::executable>
 link(const kernel_bundle<bundle_state::object>& objectBundle,
      const std::vector<device>& devs, PropertyOrList props);
 
-template <typename PropertyOrList>                                           (3)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::executable>
 link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
      PropertyOrList props);
 
-template <typename PropertyOrList>                                           (4)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::executable>
 link(const kernel_bundle<bundle_state::object>& objectBundle,
      PropertyOrList props);
@@ -1638,15 +1638,15 @@ link(const kernel_bundle<bundle_state::object>& objectBundle,
 } // namespace sycl
 ----
 
-_Constraints:_ For all overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::link># is
   [code]#true#, or
 * [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::link>#
   is [code]#true#.
 
-_Effects (1)-(4):_ The same effect as the corresponding [code]#link# overload
-from the <<core-spec>> except that the properties are specified by
+_Effects:_ The same effect as the corresponding [code]#link# overload from
+<<sec:bundles.compile-link>> except that the properties are specified by
 [code]#props#.
 
 [[sec:khr-properties-kernel-bundle-build]]
@@ -1660,12 +1660,12 @@ This extension adds the following new overloads of the [code]#build# function.
 ----
 namespace sycl {
 
-template <typename PropertyOrList>                             (1)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::executable>
 build(const kernel_bundle<bundle_state::input>& inputBundle,
       const std::vector<device>& devs, PropertyOrList props);
 
-template <typename PropertyOrList>                             (2)
+template <typename PropertyOrList>
 kernel_bundle<bundle_state::executable>
 build(const kernel_bundle<bundle_state::input>& inputBundle,
       PropertyOrList props);
@@ -1673,25 +1673,22 @@ build(const kernel_bundle<bundle_state::input>& inputBundle,
 } // namespace sycl
 ----
 
-_Constraints:_ For both overloads, either
+_Constraints:_
 
 * [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::build># is
   [code]#true#, or
 * [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::build>#
   is [code]#true#.
 
-_Effects (1)-(2):_ The same effect as the corresponding [code]#build# overload
-from the <<core-spec>> except that the properties are specified by
+_Effects:_ The same effect as the corresponding [code]#build# overload from
+<<sec:bundles.compile-link>> except that the properties are specified by
 [code]#props#.
 
 [[sec:khr-properties-kernel-bundle-properties]]
 === New kernel bundle properties
 
-This extension defines no kernel bundle property.
-The <<core-spec>> states that [code]#compile#, [code]#link#, and [code]#build#
-accept a [code]#property_list# but does not itself define any such property; the
-overloads above are added so that a future property (defined by an extension)
-can be passed through the new style [code]#properties# mechanism.
+This extension defines no kernel bundle properties.
+The overloads above are added for extensibility.
 
 [[sec:khr-properties-stream-additions]]
 == Additions to the stream class
