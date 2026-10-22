@@ -501,6 +501,17 @@ When [code]#T# is the empty properties list, this trait inherits from
 
 '''
 
+[[sec:khr-properties-interaction-with-old-traits]]
+== Interaction with old style property traits
+
+<<subsec:properties-interface>> defines several traits for classifying the old
+style properties defined in SYCL 2020 (e.g. [code]#is_property# and
+[code]#is_property_of#).
+These traits do not inherits from [code]#std::true_type# when classifying the
+new style properties defined in this extension.
+Consequently, it is impossible to create an old style [code]#property_list# that
+contains these new style properties.
+
 [[sec:khr-properties-context-additions]]
 == Additions to the context class
 
@@ -1058,6 +1069,33 @@ The following traits inherit from [code]#std::true_type#:
 * [code]#khr::is_property_key_for<khr::property::key::in_order, queue>#
 
 [code]#khr::property::in_order# is trivially copyable.
+
+[[sec:khr-properties-queue-interaction-with-old-props]]
+=== Interaction with the old style properties interface
+
+The queue class supports [code]#has_property# and [code]#get_property# as
+described in <<subsec:properties-interface>> which query the queue for the old
+style properties.
+It is unspecified whether constructing a queue with a new style property causes
+the queue to "contain" the corresponding old style property.
+For example, if a queue is constructed with the new style property
+[code]#khr::property::enable_profiling{true}#, it is unspecified whether a query
+for the corresponding old style property
+[code]#has_property<property::queue::enable_profiling>()# returns [code]#true#
+or [code]#false#.
+
+The new style properties take a boolean parameter to indicate whether the
+property is enabled.
+For example, constructing a queue with
+[code]#khr::property::enable_profiling{false}# does not enable profiling on the
+queue.
+When a queue is constructed with a new style property that has a "false"
+parameter, the queue is guaranteed not to "contain" the corresponding old style
+property.
+For example, if a queue is constructed with the new style property
+[code]#khr::property::enable_profiling{false}#, a query for the corresponding
+old style property [code]#has_property<property::queue::enable_profiling>()# is
+guaranteed to return [code]#false#.
 
 [[sec:khr-properties-usm-additions]]
 == Additions to the USM functions
