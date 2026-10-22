@@ -1,0 +1,1971 @@
+[[sec:khr-properties]]
+= sycl_khr_properties
+
+This extension provides an alternative to the [code]#sycl::property_list# class,
+the properties that are defined in the [code]#sycl::property# namespace, and the
+APIs defined in <<sec:properties>>.
+This new properties infrastructure provides all the same functionality, but also
+provides a way to convey compile-time property information.
+As a result, APIs that accept properties can detect errors at compilation time
+(vs. runtime), and properties can be used to influence the code that the
+compiler generates.
+
+[[sec:khr-properties-dependencies]]
+== Dependencies
+
+This extension has no dependencies on other extensions.
+
+[[sec:khr-properties-header-files]]
+== Header files
+
+The APIs defined in this extension are provided by the [code]#<sycl/sycl.hpp>#
+header file.
+
+If the implementation also implements the <<sec:khr-split-headers,
+sycl_khr_split_headers>> extension, then the APIs defined in this extension are
+additionally provided by the header files listed in
+<<table.khr-properties-headers>>.
+
+[[table.khr-properties-headers]]
+.Header files that provide the APIs of this extension
+[width="100%",options="header",cols="1,2"]
+|====
+|Header
+|APIs
+
+|[code]#<sycl/khr/split_headers/version.hpp>#
+|The [api]#SYCL_KHR_PROPERTIES# feature test macro from
+<<sec:khr-properties-feature-test>>.
+
+|[code]#<sycl/khr/properties.hpp>#
+|The [api]#khr::properties# class and [api]#khr::empty_properties_t# from
+<<sec:khr-properties-properties>>, and the traits from
+<<sec:khr-properties-traits>>.
+
+|[code]#<sycl/khr/split_headers/context.hpp>#
+|The new [api]#context# constructors from
+<<sec:khr-properties-context-additions>>.
+
+|[code]#<sycl/khr/split_headers/queue.hpp>#
+|The new [api]#queue# constructors and member functions, and the
+[api]#khr::property::enable_profiling# and [api]#khr::property::in_order#
+properties and their keys, from <<sec:khr-properties-queue-additions>>.
+
+|[code]#<sycl/khr/split_headers/usm.hpp>#
+|The [api]#khr::property::tag::usm_device#,
+[api]#khr::property::tag::usm_host#, and
+[api]#khr::property::tag::usm_shared# tag types, the new
+[code]#usm_allocator# constructors, and the new USM allocation function
+overloads from <<sec:khr-properties-usm-additions>>.
+
+|[code]#<sycl/khr/split_headers/reduction.hpp>#
+|The [api]#khr::property::tag::reduction# tag type, the new
+[code]#reduction# overloads, and the
+[api]#khr::property::initialize_to_identity# property and its key, from
+<<sec:khr-properties-reduction-additions>>.
+
+|[code]#<sycl/khr/split_headers/kernel_bundle.hpp>#
+|The [api]#khr::property::tag::compile#, [api]#khr::property::tag::link#,
+and [api]#khr::property::tag::build# tag types and the new [code]#compile#,
+[code]#link#, and [code]#build# overloads from
+<<sec:khr-properties-kernel-bundle-additions>>.
+
+|[code]#<sycl/khr/split_headers/stream.hpp>#
+|The new [code]#stream# constructor from
+<<sec:khr-properties-stream-additions>>.
+|====
+
+[[sec:khr-properties-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_PROPERTIES# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-properties-overview]]
+== Overview
+
+This section illustrates the overall usage of the new property APIs introduced
+by this extension.
+The text in this section is non-normative, but it is intended to help readers
+understand the formal specification that follows.
+
+[[sec:khr-properties-overview-defining-properties]]
+=== Defining and obtaining a property
+
+There is no formal specification for a property because there is no facility to
+allow an application to define their own properties.
+Properties can only be defined by the SYCL implementation, so the SYCL
+specification (or an extension specification) provides a formal specification
+for each property.
+Still, implementations are expected to follow a regular pattern when defining
+properties.
+This section describes the basics of that pattern, and more guidance is given
+below in the examples in <<sec:khr-properties-examples-for-implementors>>.
+
+A property can contain zero or more values.
+Each value can either be a compile-time constant or a runtime-supplied value.
+Any single property normally contains only compile-time constant values or
+contains only runtime-supplied values, however, it is possible for a property to
+contain a mixture of both value types.
+
+A property with one or more runtime-supplied values is defined as a class with
+constructors that set the property's values and public member variables that
+hold the property's values.
+An application obtains the property by constructing an instance of the class.
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+// Property defined by the implementation.
+struct prop1 {
+  constexpr explicit prop1(int v) : value(v) {}
+  int value;
+};
+
+}
+
+// Application code that obtains the property.
+sycl::khr::property::prop1 p1{42};
+----
+
+A property with one or more compile-time constant values is defined as a
+variable template, where the template parameters set the property's values.
+The variable's type is unspecified, but it is a class with static constexpr
+member variables that hold the property's values.
+An application obtains the property by instantiating the template.
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+// Property defined by the implementation.
+template<int Value>
+struct __unspecified_type__ {
+  static constexpr int value = Value;
+};
+
+template<int Value>
+inline constexpr __unspecified_type__<Value> prop2;
+
+}
+
+// Application code that obtains the property.
+auto p2 = sycl::khr::property::prop2<42>;
+----
+
+A property with a mixture of runtime-supplied values and compile-time constant
+values is defined as a class template.
+The template parameters set the compile-time constant values, and the class
+constructors set the runtime-supplied values.
+An application obtains the property by constructing an instance of the class
+template.
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+// Property defined by the implementation.
+template<int Value1>
+struct prop3 {
+  constexpr explicit prop3(int v2) : value2(v2) {}
+  static constexpr int value1 = Value1;
+  int value2;
+};
+
+}
+
+// Application code that obtains the property.
+auto p3 = sycl::khr::property::prop3<42>{43};
+----
+
+[[sec:khr-properties-overview-properties-lists]]
+=== Properties lists
+
+Applications often need to collect a set of properties into a container, for
+example when constructing an object with more than one property.
+This extension introduces a [api]#khr::properties# class for this purpose, which
+improves upon [code]#property_list# from the <<core-spec>>.
+The [api]#khr::properties# class is templated on the types of all the properties
+that it contains.
+This means that the template parameters also encode the compile-time constant
+values for any properties it contains because those values are also part of
+their property's type.
+
+Applications can construct a [api]#khr::properties# object from a list of
+properties, and the template parameters are deduced through CTAD:
+
+[source,,linenums]
+----
+sycl::khr::properties plist{
+  sycl::khr::property::prop1{42},
+  sycl::khr::property::prop2<42>,
+  sycl::khr::property::prop3<42>{43}
+};
+----
+
+Applications can also query whether a [api]#khr::properties# list contains a
+certain property, and they can get a copy of a property object from the list.
+Each property defines an associated class in the [code]#property::key# namespace
+for this purpose, and this class is known as the property's "key":
+
+[source,,linenums]
+----
+if constexpr (plist.has_property<sycl::khr::property::key::prop2>()) {
+  if constexpr (plist.get_property<sycl::khr::property::key::prop2>().value == 42) {
+    /*...*/
+  }
+}
+----
+
+Notice above that we can use [code]#if constexpr# to query for the property's
+existence because the type of [code]#plist# encodes the properties that it
+contains.
+When the property's value is a compile-time constant, we can also use [code]#if
+constexpr# to get the value of the property because the type of [code]#plist#
+also encodes the property's value.
+
+Querying a property list for a property with runtime-supplied values is similar,
+except that the call to [code]#get_property# returns a runtime value, so it is
+not possible to use [code]#if constexpr# to test the property's value:
+
+[source,,linenums]
+----
+if constexpr (plist.has_property<sycl::khr::property::key::prop1>()) {
+  if (plist.get_property<sycl::khr::property::key::prop1>().value == 42) {
+    /*...*/
+  }
+}
+----
+
+[[sec:khr-properties-properties]]
+== The properties class
+
+This extension adds the following new class, which holds a list of properties.
+
+[source,role=synopsis]
+----
+namespace sycl::khr {
+
+template <typename... EncodedProperties>
+class properties {
+ public:
+  template<typename... Properties>
+  constexpr properties(Properties... props);
+
+  template <typename PropertyKey>
+  static constexpr bool has_property();
+
+  template <typename PropertyKey>
+  static constexpr auto get_property();
+
+  template <typename PropertyKey>
+  constexpr auto get_property() const;
+};
+
+using empty_properties_t = decltype(properties{});
+
+} // namespace sycl::khr
+----
+
+{note}Implementations are expected to have a deduction guide that deduces
+[code]#EncodedProperties# from the constructor's [code]#Properties# pack.
+This deduction guide could trivially deduce [code]#EncodedProperties# as exactly
+the same pack as [code]#Properties#.
+However, in the future, this KHR extension might be extended in a way that
+requires a more complex deduction.
+Applications should not assume that [code]#EncodedProperties# is the same as
+[code]#Properties#.
+{endnote}
+
+'''
+
+.[apititle]#Constructor#
+[source,role=synopsis,id=api:khr-properties-ctor]
+----
+template<typename... Properties>
+constexpr properties(Properties... props);
+----
+
+_Constraints:_ [api]#khr::is_property_v# is [code]#true# for each
+[code]#Properties#.
+
+_Mandates:_ No two properties in [code]#Properties# have the same associated
+key.
+
+_Effects:_ Constructs a [code]#khr::properties# object from zero or more
+properties.
+
+'''
+
+.[apidef]#khr::properties::has_property#
+[source,role=synopsis,id=api:khr-properties-has-property]
+----
+template <typename PropertyKey>
+static constexpr bool has_property();
+----
+
+_Constraints:_ [code]#khr::is_property_key_v<PropertyKey># is [code]#true#.
+
+_Returns:_ The value [code]#true# only if this properties list contains a
+property whose key is [code]#PropertyKey#.
+
+'''
+
+.[apidef]#khr::properties::get_property#
+[source,role=synopsis,id=api:khr-properties-get-property]
+----
+template <typename PropertyKey>         (1)
+static constexpr auto get_property();
+
+template <typename PropertyKey>         (2)
+constexpr auto get_property() const;
+----
+
+_Constraints_ (1):
+
+* [code]#has_property<PropertyKey>()# is [code]#true#, and
+* [code]#khr::is_property_key_compile_time_v<PropertyKey># is [code]#true#.
+
+_Constraints_ (2):
+
+* [code]#has_property<PropertyKey>()# is [code]#true#, and
+* [code]#khr::is_property_key_compile_time_v<PropertyKey># is [code]#false#.
+
+_Returns:_ A copy of the property from this properties list whose associated key
+is [code]#PropertyKey#.
+
+'''
+
+.[apidef]#khr::empty_properties_t#
+[source,role=synopsis,id=api:khr-properties-empty-properties-t]
+----
+using empty_properties_t = decltype(properties{});
+----
+
+[code]#empty_properties_t# is the type of an empty properties list.
+
+'''
+
+[[sec:khr-properties-traits]]
+== Property traits
+
+This extension adds the following traits that classify properties, their keys,
+and properties lists.
+
+If the program adds specializations for any of the traits defined in this
+section, the behavior is undefined.
+
+'''
+
+.[apidef]#khr::is_property#
+[source,role=synopsis,id=api:khr-properties-is-property]
+----
+namespace sycl::khr {
+
+template <typename T>
+struct is_property;
+
+template <typename T>
+inline constexpr bool is_property_v = is_property<T>::value;
+
+} // namespace sycl::khr
+----
+
+[code]#is_property# inherits from [code]#std::true_type# if [code]#T# is the
+type of a new-style property that can be used in the APIs of this extension.
+Otherwise it inherits from [code]#std::false_type#.
+
+'''
+
+.[apidef]#khr::is_property_key#
+[source,role=synopsis,id=api:khr-properties-is-property-key]
+----
+namespace sycl::khr {
+
+template <typename T>
+struct is_property_key;
+
+template <typename T>
+inline constexpr bool is_property_key_v = is_property_key<T>::value;
+
+} // namespace sycl::khr
+----
+
+[code]#is_property_key# inherits from [code]#std::true_type# if [code]#T# is the
+type of a property key.
+Otherwise it inherits from [code]#std::false_type#.
+
+'''
+
+.[apidef]#khr::is_property_key_compile_time#
+[source,role=synopsis,id=api:khr-properties-is-property-key-compile-time]
+----
+namespace sycl::khr {
+
+template <typename T>
+struct is_property_key_compile_time;
+
+template <typename T>
+inline constexpr bool is_property_key_compile_time_v =
+  is_property_key_compile_time<T>::value;
+
+} // namespace sycl::khr
+----
+
+[code]#is_property_key_compile_time# inherits from [code]#std::true_type# if
+[code]#T# is the type of a property key whose associated property contains no
+values that are runtime-provided.
+Otherwise it inherits from [code]#std::false_type#.
+
+'''
+
+.[apidef]#khr::is_property_for#
+[source,role=synopsis,id=api:khr-properties-is-property-for]
+----
+namespace sycl::khr {
+
+template <typename T, typename Class>
+struct is_property_for;
+
+template <typename T, typename Class>
+inline constexpr bool is_property_for_v = is_property_for<T, Class>::value;
+
+} // namespace sycl::khr
+----
+
+[code]#is_property_for# inherits from [code]#std::true_type# if [code]#T# is the
+type of a property which can be used with class [code]#Class#.
+Otherwise it inherits from [code]#std::false_type#.
+
+{note}Each property defines which classes it can be used with.
+When a property is used to construct a class, [code]#Class# is often the type of
+that class.
+When a property is used in another way, the specification which defines the
+property normally defines a "tag" class which can be used for the [code]#Class#
+parameter in this trait.
+{endnote}
+
+'''
+
+.[apidef]#khr::is_property_key_for#
+[source,role=synopsis,id=api:khr-properties-is-property-key-for]
+----
+namespace sycl::khr {
+
+template <typename T, typename Class>
+struct is_property_key_for;
+
+template <typename T, typename Class>
+inline constexpr bool is_property_key_for_v = is_property_key_for<T, Class>::value;
+
+} // namespace sycl::khr
+----
+
+[code]#is_property_key_for# inherits from [code]#std::true_type# if [code]#T# is
+the type of a property key whose associated property can be used with class
+[code]#Class#.
+Otherwise it inherits from [code]#std::false_type#.
+
+'''
+
+.[apidef]#khr::is_property_list_for#
+[source,role=synopsis,id=api:khr-properties-is-property-list-for]
+----
+namespace sycl::khr {
+
+template <typename T, typename Class>
+struct is_property_list_for;
+
+template <typename T, typename Class>
+inline constexpr bool is_property_list_for_v = is_property_list_for<T, Class>::value;
+
+} // namespace sycl::khr
+----
+
+[code]#is_property_list_for# inherits from [code]#std::true_type# if [code]#T#
+is the type of a [api]#khr::properties# list and all of the properties that it
+contains can be used with class [code]#Class#.
+Otherwise it inherits from [code]#std::false_type#.
+When [code]#T# is the empty properties list, this trait inherits from
+[code]#std::true_type#.
+
+'''
+
+[[sec:khr-properties-interaction-with-old-traits]]
+== Interaction with old style property traits
+
+<<subsec:properties-interface>> defines several traits for classifying the old
+style properties defined in SYCL 2020 (e.g. [code]#is_property# and
+[code]#is_property_of#).
+These traits do not inherit from [code]#std::true_type# when classifying the new
+style properties defined in this extension.
+Consequently, it is impossible to create an old style [code]#property_list# that
+contains these new style properties.
+
+[[sec:khr-properties-context-additions]]
+== Additions to the context class
+
+[[sec:khr-properties-context-constructors]]
+=== New context constructors
+
+This extension adds the following new constructors to the [api]#context# class,
+which allow a context to be constructed with the new style properties defined in
+this extension.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+class context {
+ public:
+  template <typename PropertyOrList>
+  explicit context(PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(async_handler asyncHandler, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const device& dev, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const device& dev, async_handler asyncHandler,
+                   PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const platform& plt, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const platform& plt, async_handler asyncHandler,
+                   PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const std::vector<device>& deviceList,
+                   PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit context(const std::vector<device>& deviceList,
+                   async_handler asyncHandler, PropertyOrList props);
+
+  // ...
+};
+
+} // namespace sycl
+----
+
+'''
+
+.[apititle]#Constructor with new property list#
+[source,role=synopsis,id=api:khr-properties-context-ctor]
+----
+template <typename PropertyOrList>
+explicit context(PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(propList)# except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(async_handler asyncHandler, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(asyncHandler, propList)# except
+that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device]
+----
+template <typename PropertyOrList>
+explicit context(const device& dev, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(dev, propList)# except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device and async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(const device& dev, async_handler asyncHandler,
+                 PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(dev, asyncHandler, propList)#
+except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with platform#
+[source,role=synopsis,id=api:khr-properties-context-ctor-platform]
+----
+template <typename PropertyOrList>
+explicit context(const platform& plt, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(plt, propList)# except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with platform and async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-platform-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(const platform& plt, async_handler asyncHandler,
+                 PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(plt, asyncHandler, propList)#
+except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device list#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device-list]
+----
+template <typename PropertyOrList>
+explicit context(const std::vector<device>& deviceList,
+                 PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(deviceList, propList)# except that
+the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device list and async handler#
+[source,role=synopsis,id=api:khr-properties-context-ctor-device-list-async-handler]
+----
+template <typename PropertyOrList>
+explicit context(const std::vector<device>& deviceList,
+                 async_handler asyncHandler, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+
+_Effects:_ The same effect as [code]#context(deviceList, asyncHandler,
+propList)# except that the properties are specified by [code]#props#.
+
+[[sec:khr-properties-context-properties]]
+=== New context properties
+
+This extension defines no context properties.
+The overloads above are added for extensibility.
+
+[[sec:khr-properties-queue-additions]]
+== Additions and modifications to the queue class
+
+[[sec:khr-properties-queue-constructors]]
+=== New queue constructors
+
+This extension adds the following new constructors to the [api]#queue# class,
+which allow a queue to be constructed with the new style properties defined in
+this extension.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+class queue {
+ public:
+  template <typename PropertyOrList>
+  explicit queue(PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit queue(const async_handler& asyncHandler, PropertyOrList props);
+
+  template <typename DeviceSelector, typename PropertyOrList>
+  explicit queue(const DeviceSelector& deviceSelector,
+                 PropertyOrList props);
+
+  template <typename DeviceSelector, typename PropertyOrList>
+  explicit queue(const DeviceSelector& deviceSelector,
+                 const async_handler& asyncHandler,
+                 PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit queue(const device& syclDevice, PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit queue(const device& syclDevice, const async_handler& asyncHandler,
+                 PropertyOrList props);
+
+  template <typename DeviceSelector, typename PropertyOrList>
+  explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
+                 PropertyOrList props);
+
+  template <typename DeviceSelector, typename PropertyOrList>
+  explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
+                 const async_handler& asyncHandler,
+                 PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit queue(const context& syclContext, const device& syclDevice,
+                 PropertyOrList props);
+
+  template <typename PropertyOrList>
+  explicit queue(const context& syclContext, const device& syclDevice,
+                 const async_handler& asyncHandler,
+                 PropertyOrList props);
+
+  bool is_in_order() const;
+
+  bool khr_is_profiling_enabled() const;
+
+  // ...
+};
+
+} // namespace sycl
+----
+
+'''
+
+.[apititle]#Constructor with new property list#
+[source,role=synopsis,id=api:khr-properties-queue-ctor]
+----
+template <typename PropertyOrList>
+explicit queue(PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(propList)# except that the properties
+are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with async handler#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-async-handler]
+----
+template <typename PropertyOrList>
+explicit queue(const async_handler& asyncHandler, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(asyncHandler, propList)# except that
+the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device selector#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-selector]
+----
+template <typename DeviceSelector, typename PropertyOrList>
+explicit queue(const DeviceSelector& deviceSelector,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [code]#DeviceSelector# is a type that satisfies the requirements of a
+  <<device-selector>> as defined in <<sec:device-selector>>, and either
+** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(deviceSelector, propList)# except
+that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device selector and async handler#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-selector-async-handler]
+----
+template <typename DeviceSelector, typename PropertyOrList>
+explicit queue(const DeviceSelector& deviceSelector,
+               const async_handler& asyncHandler,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [code]#DeviceSelector# is a type that satisfies the requirements of a
+  <<device-selector>> as defined in <<sec:device-selector>>, and either
+** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(deviceSelector, asyncHandler,
+propList)# except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-device]
+----
+template <typename PropertyOrList>
+explicit queue(const device& syclDevice, PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(syclDevice, propList)# except that
+the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with device and async handler#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-device-async-handler]
+----
+template <typename PropertyOrList>
+explicit queue(const device& syclDevice, const async_handler& asyncHandler,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(syclDevice, asyncHandler, propList)#
+except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with context and device selector#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-context-selector]
+----
+template <typename DeviceSelector, typename PropertyOrList>
+explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [code]#DeviceSelector# is a type that satisfies the requirements of a
+  <<device-selector>> as defined in <<sec:device-selector>>, and either
+** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(syclContext, deviceSelector,
+propList)# except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with context, device selector, and async handler#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-context-selector-async-handler]
+----
+template <typename DeviceSelector, typename PropertyOrList>
+explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
+               const async_handler& asyncHandler,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [code]#DeviceSelector# is a type that satisfies the requirements of a
+  <<device-selector>> as defined in <<sec:device-selector>>, and either
+** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(syclContext, deviceSelector,
+asyncHandler, propList)# except that the properties are specified by
+[code]#props#.
+
+'''
+
+.[apititle]#Constructor with context and device#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-context-device]
+----
+template <typename PropertyOrList>
+explicit queue(const context& syclContext, const device& syclDevice,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(syclContext, syclDevice, propList)#
+except that the properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Constructor with context, device, and async handler#
+[source,role=synopsis,id=api:khr-properties-queue-ctor-context-device-async-handler]
+----
+template <typename PropertyOrList>
+explicit queue(const context& syclContext, const device& syclDevice,
+               const async_handler& asyncHandler,
+               PropertyOrList props);
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+
+_Effects:_ The same effect as [code]#queue(syclContext, syclDevice,
+asyncHandler, propList)# except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-queue-member-funcs]]
+=== New and modified queue member functions
+
+This extension adds a new member function and modifies an existing one.
+
+'''
+
+.[apititle]#queue::is_in_order#
+[source,role=synopsis,id=api:khr-properties-queue-is-in-order]
+----
+bool is_in_order() const;
+----
+
+_Returns:_ [code]#true# only if this queue was constructed as an in-order queue.
+
+'''
+
+.[apidef]#queue::khr_is_profiling_enabled#
+[source,role=synopsis,id=api:khr-properties-queue-is-profiling-enabled]
+----
+bool khr_is_profiling_enabled() const;
+----
+
+_Returns:_ [code]#true# only if this queue was constructed with profiling
+enabled.
+
+'''
+
+[[sec:khr-properties-queue-properties]]
+=== New queue properties
+
+This extension adds the following new style properties that can be used with the
+[code]#queue# class.
+
+'''
+
+.[apidef]#khr::property::enable_profiling#
+[source,role=synopsis,id=api:khr-properties-property-enable-profiling]
+----
+namespace sycl::khr::property {
+
+struct enable_profiling {
+  constexpr enable_profiling() : value{true} {}
+  constexpr explicit enable_profiling(bool v) : value{v} {}
+  bool value;
+};
+
+namespace key {
+struct enable_profiling;
+}
+
+} // namespace sycl::khr::property
+----
+
+When a queue is constructed with this property and the [code]#value# is
+[code]#true#, the effect is the same as if the queue was constructed with
+[api]#property::queue::enable_profiling#.
+If the [code]#value# is [code]#false#, this property has no effect on the
+constructed queue.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#khr::is_property<khr::property::enable_profiling>#
+* [code]#khr::is_property_key<khr::property::key::enable_profiling>#
+* [code]#khr::is_property_for<khr::property::enable_profiling, queue>#
+* [code]#khr::is_property_key_for<khr::property::key::enable_profiling, queue>#
+
+[code]#khr::property::enable_profiling# is trivially copyable.
+
+'''
+
+.[apidef]#khr::property::in_order#
+[source,role=synopsis,id=api:khr-properties-property-in-order]
+----
+namespace sycl::khr::property {
+
+struct in_order {
+  constexpr in_order() : value{true} {}
+  constexpr explicit in_order(bool v) : value{v} {}
+  bool value;
+};
+
+namespace key {
+struct in_order;
+}
+
+} // namespace sycl::khr::property
+----
+
+When a queue is constructed with this property and the [code]#value# is
+[code]#true#, the effect is the same as if the queue was constructed with
+[api]#property::queue::in_order#.
+If the [code]#value# is [code]#false#, this property has no effect on the
+constructed queue.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#khr::is_property<khr::property::in_order>#
+* [code]#khr::is_property_key<khr::property::key::in_order>#
+* [code]#khr::is_property_for<khr::property::in_order, queue>#
+* [code]#khr::is_property_key_for<khr::property::key::in_order, queue>#
+
+[code]#khr::property::in_order# is trivially copyable.
+
+[[sec:khr-properties-queue-interaction-with-old-props]]
+=== Interaction with the old style properties interface
+
+The queue class supports [code]#has_property# and [code]#get_property# as
+described in <<subsec:properties-interface>> which query the queue for the old
+style properties.
+The new style properties defined in <<sec:khr-properties-queue-properties>> take
+a boolean parameter to indicate whether the property is enabled.
+For example, constructing a queue with
+[code]#khr::property::enable_profiling{true}# enables profiling on the queue,
+while constructing a queue with [code]#khr::property::enable_profiling{false}#
+does not enable profiling.
+
+When a queue is constructed with a new style property that has a "true"
+parameter, the queue behaves as though it "contains" the corresponding old style
+property.
+For example, if a queue is constructed with the new style property
+[code]#khr::property::enable_profiling{true}#, a query for the corresponding old
+style property [code]#has_property<property::queue::enable_profiling>()# returns
+[code]#true#, and [code]#get_property<property::queue::enable_profiling>()#
+returns an old style [code]#property::queue::enable_profiling# property.
+
+When a queue is constructed with a new style property that has a "false"
+parameter, the queue behaves as though it does not "contain" the corresponding
+old style.
+For example, if a queue is constructed with the new style property
+[code]#khr::property::enable_profiling{false}#, a query for the corresponding
+old style property [code]#has_property<property::queue::enable_profiling>()#
+returns [code]#false#.
+
+{note}This behavior makes it easier to pass a queue object between code that
+uses the new style and the old style properties.
+Consider the case where a library function takes a [api]#queue# parameter and
+calls the old style [code]#has_property<property::queue::enable_profiling>()#
+function to determine whether the queue has profiling enabled.
+Without the behavior described in this section, it would be impossible for an
+application to call that library function when the queue was constructed with
+the new style property [code]#khr::property::enable_profiling{true}#.
+{endnote}
+
+[[sec:khr-properties-usm-additions]]
+== Additions to the USM functions
+
+[[sec:khr-properties-usm-property-tags]]
+=== New property tag types
+
+This extension adds the following property tag types, which are used to classify
+properties that can be used with the USM allocation functions.
+
+[source,role=synopsis]
+----
+namespace sycl::khr::property::tag {
+
+struct usm_device;
+struct usm_host;
+struct usm_shared;
+
+} // namespace sycl::khr::property::tag
+----
+
+[[sec:khr-properties-usm-allocator-constructors]]
+=== New USM allocator constructors
+
+This extension adds the following new constructors to the [code]#usm_allocator#
+class, which allow an allocator to be constructed with the new style properties
+defined in this extension.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename T, usm::alloc AllocKind, std::size_t Alignment = 0>
+class usm_allocator {
+ public:
+  template <typename PropertyOrList>
+  usm_allocator(const context& syclContext, const device& syclDevice,
+                PropertyOrList props);
+
+  template <typename PropertyOrList>
+  usm_allocator(const queue& syclQueue, PropertyOrList props);
+
+  // ...
+};
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [code]#AllocKind# is [code]#usm::alloc::host# and
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
+  is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::shared# and
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
+  is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::host# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_host># is [code]#true#, or
+* [code]#AllocKind# is [code]#usm::alloc::shared# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#usm_allocator#
+constructor from <<sec:usm-allocator-interface>> except that the properties are
+specified by [code]#props#.
+
+[[sec:khr-properties-usm-device-allocs]]
+=== New device allocation functions
+
+This extension adds the following new overloads of the device USM allocation
+functions.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+void* malloc_device(std::size_t numBytes, const device& syclDevice,
+                    const context& syclContext, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc_device(std::size_t count, const device& syclDevice,
+                 const context& syclContext,
+                 PropertyOrList props);
+
+template <typename PropertyOrList>
+void* malloc_device(std::size_t numBytes, const queue& syclQueue,
+                    PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc_device(std::size_t count, const queue& syclQueue,
+                 PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
+                           const device& syclDevice, const context& syclContext,
+                           PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc_device(std::size_t alignment, std::size_t count,
+                        const device& syclDevice,
+                        const context& syclContext,
+                        PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc_device(std::size_t alignment, std::size_t numBytes,
+                           const queue& syclQueue, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc_device(std::size_t alignment, std::size_t count,
+                        const queue& syclQueue,
+                        PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_device># is [code]#true#.
+
+_Effects:_ The same as the corresponding device USM allocation function from
+<<sec:usm-device-allocation>> except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-usm-host-allocs]]
+=== New host allocation functions
+
+This extension adds the following new overloads of the host USM allocation
+functions.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+void* malloc_host(std::size_t numBytes, const context& syclContext,
+                  PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc_host(std::size_t count, const context& syclContext,
+               PropertyOrList props);
+
+template <typename PropertyOrList>
+void* malloc_host(std::size_t numBytes, const queue& syclQueue,
+                  PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc_host(std::size_t count, const queue& syclQueue,
+               PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
+                         const context& syclContext, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc_host(std::size_t alignment, std::size_t count,
+                      const context& syclContext,
+                      PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc_host(std::size_t alignment, std::size_t numBytes,
+                         const queue& syclQueue, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc_host(std::size_t alignment, std::size_t count,
+                      const queue& syclQueue,
+                      PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_host># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding host USM allocation function
+from <<sec:usm-host-allocation>> except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-usm-shared-allocs]]
+=== New shared allocation functions
+
+This extension adds the following new overloads of the shared USM allocation
+functions.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+void* malloc_shared(std::size_t numBytes, const device& syclDevice,
+                    const context& syclContext, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc_shared(std::size_t count, const device& syclDevice,
+                 const context& syclContext,
+                 PropertyOrList props);
+
+template <typename PropertyOrList>
+void* malloc_shared(std::size_t numBytes, const queue& syclQueue,
+                    PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc_shared(std::size_t count, const queue& syclQueue,
+                 PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
+                           const device& syclDevice, const context& syclContext,
+                           PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc_shared(std::size_t alignment, std::size_t count,
+                        const device& syclDevice,
+                        const context& syclContext,
+                        PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc_shared(std::size_t alignment, std::size_t numBytes,
+                           const queue& syclQueue, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc_shared(std::size_t alignment, std::size_t count,
+                        const queue& syclQueue,
+                        PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding shared USM allocation function
+from <<sec:usm-shared-allocation>> except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-usm-parameterized-allocs]]
+=== New parameterized allocation functions
+
+This extension adds the following new overloads of the parameterized USM
+allocation functions, which select the kind of allocation through a
+[code]#usm::alloc# parameter.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+void* malloc(std::size_t numBytes, const device& syclDevice,
+             const context& syclContext, usm::alloc kind,
+             PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc(std::size_t count, const device& syclDevice,
+          const context& syclContext, usm::alloc kind,
+          PropertyOrList props);
+
+template <typename PropertyOrList>
+void* malloc(std::size_t numBytes, const queue& syclQueue, usm::alloc kind,
+             PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* malloc(std::size_t count, const queue& syclQueue, usm::alloc kind,
+          PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
+                    const device& syclDevice, const context& syclContext,
+                    usm::alloc kind, PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc(std::size_t alignment, std::size_t count,
+                 const device& syclDevice, const context& syclContext,
+                 usm::alloc kind, PropertyOrList props);
+
+template <typename PropertyOrList>
+void* aligned_alloc(std::size_t alignment, std::size_t numBytes,
+                    const queue& syclQueue, usm::alloc kind,
+                    PropertyOrList props);
+
+template <typename T, typename PropertyOrList>
+T* aligned_alloc(std::size_t alignment, std::size_t count,
+                 const queue& syclQueue, usm::alloc kind,
+                 PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
+  is [code]#true#, or
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
+  is [code]#true#, or
+* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
+  is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_device># is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_host># is [code]#true#, or
+* [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding parameterized USM allocation
+function from <<sec:usm-parameterized-allocation>> except that the properties
+are specified by [code]#props#.
+
+_Throws:_
+
+* An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
+  [code]#usm::alloc::device# and both
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
+  and [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_device># are [code]#false#.
+* An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
+  [code]#usm::alloc::host# and both
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
+  and [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_host># are [code]#false#.
+* An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
+  [code]#usm::alloc::shared# and both
+  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
+  and [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># are [code]#false#.
+
+[[sec:khr-properties-usm-properties]]
+=== New USM properties
+
+This extension defines no USM allocation properties.
+The overloads above are added for extensibility.
+
+[[sec:khr-properties-reduction-additions]]
+== Additions to the reduction interface
+
+[[sec:khr-properties-reduction-property-tag]]
+=== New property tag type
+
+This extension adds the following property tag type, which is used to classify
+properties that can be used with the reduction interface.
+
+[source,role=synopsis]
+----
+namespace sycl::khr::property::tag {
+
+struct reduction;
+
+} // namespace sycl::khr::property::tag
+----
+
+[[sec:khr-properties-reduction-overloads]]
+=== New reduction function overloads
+
+This extension adds the following new overloads to the [code]#reduction#
+interface, which allow a reduction to be created with the new style properties
+defined in this extension.
+
+'''
+
+.[apititle]#Reduction without an identity value#
+[source,role=synopsis,id=api:khr-properties-reduction-no-identity]
+----
+namespace sycl {
+
+template <typename T, typename BinaryOperation, typename PropertyOrList>   (1)
+__unspecified__ reduction(T* var, BinaryOperation combiner,
+                          PropertyOrList props);
+
+template <typename T, std::size_t Extent, typename BinaryOperation,        (2)
+          typename PropertyOrList>
+__unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
+                          PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints_ (1):
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
+
+_Constraints_ (2): [code]#Extent != sycl::dynamic_extent#, and either:
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#reduction# overload
+without an identity value from <<sec:reduction-interface>> except that the
+properties are specified by [code]#props#.
+
+'''
+
+.[apititle]#Reduction with an identity value#
+[source,role=synopsis,id=api:khr-properties-reduction-identity]
+----
+namespace sycl {
+
+template <typename T, typename BinaryOperation, typename PropertyOrList>        (1)
+__unspecified__ reduction(T* var, const T& identity, BinaryOperation combiner,
+                          PropertyOrList props);
+
+template <typename T, std::size_t Extent, typename BinaryOperation,             (2)
+          typename PropertyOrList>
+__unspecified__ reduction(span<T, Extent> vars, const T& identity,
+                          BinaryOperation combiner, PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints_ (1):
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
+
+_Constraints_ (2): [code]#Extent != sycl::dynamic_extent#, and either:
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
+  is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::reduction># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#reduction# overload with
+an identity value from <<sec:reduction-interface>> except that the properties
+are specified by [code]#props#.
+
+[[sec:khr-properties-reduction-properties]]
+=== New reduction properties
+
+This extension adds the following new style property that can be used with the
+[code]#reduction# interface.
+
+'''
+
+.[apidef]#khr::property::initialize_to_identity#
+[source,role=synopsis,id=api:khr-properties-property-initialize-to-identity]
+----
+namespace sycl::khr::property {
+
+struct initialize_to_identity {
+  constexpr initialize_to_identity() : value{true} {}
+  constexpr explicit initialize_to_identity(bool v) : value{v} {}
+  bool value;
+};
+
+namespace key {
+struct initialize_to_identity;
+}
+
+} // namespace sycl::khr::property
+----
+
+When a reduction is created with this property and the [code]#value# is
+[code]#true#, the effect is the same as if the reduction was created with
+[code]#property::reduction::initialize_to_identity#.
+If the [code]#value# is [code]#false#, this property has no effect on the
+reduction.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#khr::is_property<khr::property::initialize_to_identity>#
+* [code]#khr::is_property_key<khr::property::key::initialize_to_identity>#
+* [code]#khr::is_property_for<khr::property::initialize_to_identity,
+  khr::property::tag::reduction>#
+* [code]#khr::is_property_key_for<khr::property::key::initialize_to_identity,
+  khr::property::tag::reduction>#
+
+[code]#khr::property::initialize_to_identity# is trivially copyable.
+
+[[sec:khr-properties-kernel-bundle-additions]]
+== Additions to the kernel bundle functions
+
+This extension adds new property-accepting overloads to the free functions
+[code]#compile#, [code]#link#, and [code]#build#.
+
+[[sec:khr-properties-kernel-bundle-property-tags]]
+=== New property tag types
+
+This extension adds the following property tag types, which are used to classify
+properties that can be used with the [code]#compile#, [code]#link#, and
+[code]#build# functions.
+
+[source,role=synopsis]
+----
+namespace sycl::khr::property::tag {
+
+struct compile;
+struct link;
+struct build;
+
+} // namespace sycl::khr::property::tag
+----
+
+[[sec:khr-properties-kernel-bundle-compile]]
+=== New compile function overloads
+
+This extension adds the following new overloads of the [code]#compile# function.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::object>
+compile(const kernel_bundle<bundle_state::input>& inputBundle,
+        const std::vector<device>& devs, PropertyOrList props);
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::object>
+compile(const kernel_bundle<bundle_state::input>& inputBundle,
+        PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::compile># is
+  [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::compile># is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#compile# overload from
+<<sec:bundles.compile-link>> except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-kernel-bundle-link]]
+=== New link function overloads
+
+This extension adds the following new overloads of the [code]#link# function.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::executable>
+link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
+     const std::vector<device>& devs, PropertyOrList props);
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::executable>
+link(const kernel_bundle<bundle_state::object>& objectBundle,
+     const std::vector<device>& devs, PropertyOrList props);
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::executable>
+link(const std::vector<kernel_bundle<bundle_state::object>>& objectBundles,
+     PropertyOrList props);
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::executable>
+link(const kernel_bundle<bundle_state::object>& objectBundle,
+     PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::link># is
+  [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::link>#
+  is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#link# overload from
+<<sec:bundles.compile-link>> except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-kernel-bundle-build]]
+=== New build function overloads
+
+This extension adds the following new overloads of the [code]#build# function.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::executable>
+build(const kernel_bundle<bundle_state::input>& inputBundle,
+      const std::vector<device>& devs, PropertyOrList props);
+
+template <typename PropertyOrList>
+kernel_bundle<bundle_state::executable>
+build(const kernel_bundle<bundle_state::input>& inputBundle,
+      PropertyOrList props);
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::build># is
+  [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::build>#
+  is [code]#true#.
+
+_Effects:_ The same effect as the corresponding [code]#build# overload from
+<<sec:bundles.compile-link>> except that the properties are specified by
+[code]#props#.
+
+[[sec:khr-properties-kernel-bundle-properties]]
+=== New kernel bundle properties
+
+This extension defines no kernel bundle properties.
+The overloads above are added for extensibility.
+
+[[sec:khr-properties-stream-additions]]
+== Additions to the stream class
+
+[[sec:khr-properties-stream-constructors]]
+=== New stream constructors
+
+This extension adds the following new constructor to the [code]#stream# class,
+which allows a stream to be constructed with the new style properties defined in
+this extension.
+
+'''
+
+[source,role=synopsis]
+----
+namespace sycl {
+
+class stream {
+ public:
+  template <typename PropertyOrList>
+  stream(std::size_t totalBufferSize, std::size_t workItemBufferSize,
+         handler& cgh, PropertyOrList props);
+
+  // ...
+};
+
+} // namespace sycl
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, stream># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, stream># is [code]#true#.
+
+_Effects:_ The same effect as [code]#stream(totalBufferSize, workItemBufferSize,
+cgh, propList)# from <<sec:stream-class-interface>> except that the properties
+are specified by [code]#props#.
+
+[[sec:khr-properties-stream-properties]]
+=== New stream properties
+
+This extension defines no stream properties.
+The overload above is added for extensibility.
+
+[[sec:khr-properties-examples-for-implementors]]
+== Examples for implementors
+
+This section demonstrates various common patterns for property definitions.
+Implementors are encouraged to follow these patterns for properties that have
+similar characteristics.
+
+[[sec:khr-properties-examples-single-value]]
+=== Properties with a single non-type value
+
+When a property has a single value that is non-type, the name of the member
+variable holding that value should be named [code]#value#.
+This applies to both properties with runtime-supplied values and to properties
+with compile-time constant values.
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+struct prop1 {
+  constexpr explicit prop1(int v) : value(v) {}
+  int value;
+};
+
+template<int Value>
+struct __unspecified_type__ {
+  static constexpr int value = Value;
+};
+
+template<int Value>
+inline constexpr __unspecified_type__<Value> prop2;
+
+}
+----
+
+[[sec:khr-properties-examples-type-value]]
+=== Properties with a type value
+
+Properties that have a compile-time value may define the value as a type instead
+of a constant.
+In such cases, the property defines a member type alias to hold the property's
+value instead of a static constexpr member variable.
+When a property has a single value that is a type, the name of the member type
+alias should be [code]#value_t#.
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+template<typename Value>
+struct __unspecified_type__ {
+  using value_t = Value;
+};
+
+template<typename Value>
+inline constexpr __unspecified_type__<Value> prop;
+
+}
+----
+
+[[sec:khr-properties-examples-compile-time-enumeration]]
+=== Compile-time properties with an enumeration
+
+When a property has a single compile-time constant value that is a small
+enumeration, it is recommended to define a property variable for each of the
+enumerators.
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+enum class access_type {read, write};
+
+template<access_type Access>
+struct __unspecified_type__ {
+  static constexpr access_type value = Access;
+};
+
+// Define a property variable for each enumerator to reduce verbosity in
+// application code.
+inline constexpr __unspecified_type__<access_type::read> access_read;
+inline constexpr __unspecified_type__<access_type::write> access_write;
+
+// There should still be a variable template to enable applications that set
+// the value via metaprogramming.
+template<access_type Access>
+inline constexpr __unspecified_type__<Access> access;
+
+}
+----
+
+[[sec:khr-properties-examples-boolean]]
+=== Boolean properties
+
+When a property is a boolean flag, it is recommended to define the property with
+a boolean value, rather than relying on the existence of the property to convey
+the flag.
+This recommendation applies to both properties with runtime-supplied values and
+to properties with compile-time constant values.
+For example, two hypothetical boolean properties could be defined like this:
+
+[source,,linenums]
+----
+namespace sycl::khr::property {
+
+struct enable_thing1 {
+  constexpr explicit enable_thing1(bool enable) : value(enable) {}
+  bool value;
+};
+
+template<bool Enable>
+struct __unspecified_type__ {
+  static constexpr bool value = Enable;
+};
+
+template<bool Enable>
+inline constexpr __unspecified_type__<Enable> enable_thing2;
+
+}
+----
+
+An application can then select whether the properties are on or off using code
+like this:
+
+[source,,linenums]
+----
+bool thing1 = /* determine at runtime if thing1 is enabled */;
+
+#ifdef THING2
+constexpr bool thing2 = true;
+#else
+constexpr bool thing2 = false;
+#endif
+
+sycl::khr::properties props{
+  sycl::khr::property::enable_thing1{thing1},
+  sycl::khr::property::enable_thing2<thing2>,
+};
+// use "props"
+----
+
+If we did not use this pattern, an application would have to define two
+different [code]#props# variables like this because the type of [code]#props# is
+different depending on whether it contains the [code]#enable_thing1# property.
+In this example, [code]#enable_thing1# and [code]#enable_thing2# are instead
+defined as presence-only properties with no boolean value.
+
+[source,,linenums]
+----
+bool thing1 = /* determine at runtime if thing1 is enabled */;
+
+if (thing1) {
+  sycl::khr::properties props{
+    sycl::khr::property::enable_thing1,
+#ifdef THING2
+    sycl::khr::property::enable_thing2
+#endif
+  };
+  // use "props"
+}
+else {
+  sycl::khr::properties props{
+#ifdef THING2
+    sycl::khr::property::enable_thing2
+#endif
+  };
+  // use "props"
+}
+----
+
+[[sec:khr-properties-issues]]
+== Issues
+
+* The new free functions introduced in this KHR (e.g. the `malloc_device`
+  overloads) are currently declared in the `sycl` namespace.
+  It seems like they should instead be declared in the `sycl::khr` namespace.
