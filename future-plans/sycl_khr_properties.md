@@ -3,8 +3,7 @@
 ## The current situation with the properties KHR
 
 The sycl\_khr\_properties extension adds a new property mechanism to SYCL, which
-is completely independent from the properties in the core SYCL 2020
-specification.
+is mostly independent from the properties in the core SYCL 2020 specification.
 An application can use both types of properties simultaneously so long as the
 new-style properties from sycl\_khr\_properties are added only to the new-style
 property container `sycl::khr::properties` and the old-style properties from the
@@ -19,13 +18,13 @@ The `sycl::khr::is_property` trait classifies only the new-style properties, and
 the `sycl::is_property` trait classifies only the old-style properties.
 
 This strict separation of properties seems reasonable.
-Each function in the core specification that takes a `sycl::property_list` has a
-corresponding overload in the KHR that takes a `sycl::khr::properties`, and each
-property in the core specification has a corresponding new-style property in the
-KHR.
+Most functions in the core specification that takes a `sycl::property_list` have
+a corresponding overload in the KHR that takes a `sycl::khr::properties`, and
+most properties in the core specification have a corresponding new-style
+property in the KHR.
 Therefore, applications can use either the new-style properties or the old-style
-properties when calling any of the functions in the core specification, and it
-is safe for an application to pass new-style properties to some functions while
+properties when calling these functions in the core specification, and it is
+safe for an application to pass new-style properties to some functions while
 passing old-style properties to others.
 We do not allow a single function call to take a mixture of new- and old-style
 properties, but it does not seem like a burden to require applications to adopt
@@ -59,20 +58,18 @@ If we decide to adopt the properties from sycl\_khr\_properties into a future
 version of the core specification, most of the APIs will remain distinct.
 For example, the `properties` and `property_list` containers are different
 type names, so they can both safely live in the `sycl` namespace.
-Most of the properties themselves will also remain distinct because the SYCL
-2020 core properties (mostly) live in the `sycl::property::XXX` namespaces,
-where `XXX` is the name of the class to which the property belongs.
+The properties themselves will also remain distinct because the SYCL 2020 core
+properties live in the `sycl::property::XXX` namespaces, where `XXX` is the name
+of the class to which the property belongs.
 (For example, queue related properties live in the `sycl::property::queue`
 namespace.)
 By contrast, the new-style properties don't live in the `XXX` sub-namespace, so
 after adopting them into the core specification, they would live directly in
 `sycl::property`.
 
-There are only two identifiers that will conflict if we adopt the new-style
+There is only one identifier that will conflict if we adopt the new-style
 properties into the core specification: the `is_property` (and `is_property_v`)
-trait, and the `no_init` property.
-The `no_init` property is an outlier in the core SYCL 2020 specification because
-it is the only property that doesn't live in an `XXX` sub-namespace.
+trait.
 None of the other traits conflict because no other trait has the same name in
 both property styles.
 
@@ -95,14 +92,6 @@ It makes sense to mark the `sycl::is_deprecated_property` trait as deprecated
 immediately as soon as we add it.
 This trait is needed only so long as we have the old-style properties, and it
 can be removed whenever we decide to remove them from the core specification.
-
-## Managing the conflicting `no_init` property
-
-TODO: I think there are several ways to deal with this.
-The simplest would be to name the equivalent new-style property something else,
-which would avoid the conflict.
-Since the draft KHR doesn't even contain this property yet, let's wait before
-filling in this section.
 
 ## Alternate solution (rejected)
 
