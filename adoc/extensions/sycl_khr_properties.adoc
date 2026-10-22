@@ -128,7 +128,7 @@ namespace sycl::khr::property {
 
 // Property defined by the implementation.
 struct prop1 {
-  constexpr prop1(int v) : value(v) {}
+  constexpr explicit prop1(int v) : value(v) {}
   int value;
 };
 
@@ -177,7 +177,7 @@ namespace sycl::khr::property {
 // Property defined by the implementation.
 template<int Value1>
 struct prop3 {
-  constexpr prop3(int v2) : value2(v2) {}
+  constexpr explicit prop3(int v2) : value2(v2) {}
   static constexpr int value1 = Value1;
   int value2;
 };
@@ -1010,7 +1010,8 @@ This extension adds the following new style properties that can be used with the
 namespace sycl::khr::property {
 
 struct enable_profiling {
-  constexpr enable_profiling(bool v = true) : value{v} {}
+  constexpr enable_profiling() : value{true} {}
+  constexpr explicit enable_profiling(bool v) : value{v} {}
   bool value;
 };
 
@@ -1044,7 +1045,8 @@ The following traits inherit from [code]#std::true_type#:
 namespace sycl::khr::property {
 
 struct in_order {
-  constexpr in_order(bool v = true) : value{v} {}
+  constexpr in_order() : value{true} {}
+  constexpr explicit in_order(bool v) : value{v} {}
   bool value;
 };
 
@@ -1561,7 +1563,8 @@ This extension adds the following new style property that can be used with the
 namespace sycl::khr::property {
 
 struct initialize_to_identity {
-  constexpr initialize_to_identity(bool v = true) : value{v} {}
+  constexpr initialize_to_identity() : value{true} {}
+  constexpr explicit initialize_to_identity(bool v) : value{v} {}
   bool value;
 };
 
@@ -1797,7 +1800,7 @@ with compile-time constant values.
 namespace sycl::khr::property {
 
 struct prop1 {
-  constexpr prop1(int v) : value(v) {}
+  constexpr explicit prop1(int v) : value(v) {}
   int value;
 };
 
@@ -1883,7 +1886,7 @@ For example, two hypothetical boolean properties could be defined like this:
 namespace sycl::khr::property {
 
 struct enable_thing1 {
-  constexpr enable_thing1(bool enable) : value(enable) {}
+  constexpr explicit enable_thing1(bool enable) : value(enable) {}
   bool value;
 };
 
@@ -1949,9 +1952,6 @@ else {
 
 [[sec:khr-properties-issues]]
 == Issues
-
-* Nevin suggested that the constructor for a runtime property like
-  `enable_profiling` should be declared `explicit`.
 
 * The new free functions introduced in this KHR (e.g. the `malloc_device`
   overloads) are currently declared in the `sycl` namespace.
