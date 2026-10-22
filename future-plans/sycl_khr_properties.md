@@ -1,4 +1,4 @@
-# Plan for adopting sycl\_khr\_properties into core spec
+# Plan for adopting sycl\_khr\_properties into core specification
 
 ## The current situation with the properties KHR
 
@@ -146,3 +146,108 @@ Because old-style properties do not have a "key", these functions expect the
 name of a property (not a property key) as their template parameter.
 Therefore, applications wanting to use these functions to query new-style
 properties would pass the property itself instead of the property's key.
+
+## Interaction between new-style KHR properties and new-style core properties
+
+If we decide to adopt the properties from sycl\_khr\_properties into a future
+version of the core specification, we also need to manage interaction between
+the KHR versions of these properties and the core specification version.
+To illustrate, we would have the following pairs of distinct but corresponding
+types:
+
+* Both `sycl::khr::property::in_order` and `sycl::property::in_order`.
+* Both `sycl::khr::properties` and `sycl::properties`.
+* Both `sycl::khr::is_property` and `sycl::is_property`.
+
+For the most part, the KHR and core specification versions of the properties
+will not interact.
+For example, `sycl::khr::is_property` will classify the KHR properties as
+"true", but it will classify the core specification properties as "false".
+As a result, `sycl::khr::properties` will be able to contain only KHR properties
+but not core specification properties.
+Likewise, `sycl::properties` will be able to contain core specification
+properties but not KHR properties.
+
+There is some interaction, though, for the functions that accept a
+`PropertyOrList` parameter such as the queue constructor:
+
+```
+template <typename PropertyOrList>
+explicit queue(PropertyOrList props);
+```
+
+This single function needs to work with either the KHR or the core specification
+versions of the new-style properties.
+To achieve this, we need to expand the constraint on the `PropertyOrList`
+template parameter to allow both KHR properties and core specification
+properties.
+A nice way to document this is to define two overloads with mutually exclusive
+constraints.
+This overload is documented already in the KHR, and it can remain there:
+
+> ```
+> template <typename PropertyOrList>
+> explicit queue(PropertyOrList props);
+> ```
+>
+> _Constraints:_
+>
+> * `khr::is_property_for_v<PropertyOrList, queue>` is `true`, or
+> * `khr::is_property_list_for_v<PropertyOrList, queue>` is `true`.
+
+The core specification would add a new overload:
+
+> ```
+> template <typename PropertyOrList>
+> explicit queue(PropertyOrList props);
+> ```
+>
+> Missing before SYCL-Next
+>
+> _Constraints:_
+>
+> * `is_property_for_v<PropertyOrList, queue>` is `true`, or
+> * `is_property_list_for_v<PropertyOrList, queue>` is `true`.
+
+It's possible that we may decide to change some semantic about the new-style
+properties when we adopt them into the core specification.
+If this happens, we can document that new semantic only in the core
+specification version of the overload.
+
+## Impact on other extensions that define properties
+
+It's also worth considering what will happen to a property defined in some other
+extension if the KHR properties are adopted into the core specification.
+Consider some property defined in an extension, which uses the KHR property
+infrastructure:
+
+> ```
+> namespace sycl::ext::acme::property {
+>
+> struct prop {
+>   constexpr explicit prop(bool v) : value{v} {}
+> };
+>
+> } // namespace sycl::ext::acme::property
+> ```
+>
+> The following traits inherit from `std::true_type`:
+>
+> * `khr::is_property<ext::acme::property::prop>`
+> * `khr::is_property_for<ext::acme::property::prop, bar>`
+
+Once the KHR properties are adopted into the core specification, this extension
+will probably want to make its property available for use with the core
+property APIs also.
+It can do this by expanding the set of trait specializations like this:
+
+> The following traits inherit from `std::true_type`:
+>
+> * `khr::is_property<ext::acme::property::prop>`
+> * `khr::is_property_for<ext::acme::property::prop, bar>`
+>
+> Beginning in SYCL-Next, the following additional traits inherit from
+> `std::true_type`:
+>
+> * `is_property<ext::acme::property::prop>`
+> * `is_property_for<ext::acme::property::prop, bar>`
