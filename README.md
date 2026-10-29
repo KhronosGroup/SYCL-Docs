@@ -139,3 +139,33 @@ the zip file of build artifacts, or click on `Passed` to see build details.
 
 The Gitlab CI script is functionally equivalent to the Github CI script, but
 is located under `.gitlab-ci.yml`, using a different YAML scheme.
+
+
+## Formatting specification sources
+
+CI checks that the AsciiDoc files in `adoc/chapters/` and `adoc/extensions/`
+match the output of the repository's reflow script. After editing these files,
+run the script with Python 3 to normalize their formatting. For example, from
+the repository root:
+
+```bash
+python3 adoc/scripts/reflow.py -overwrite adoc/chapters/architecture.adoc
+```
+
+Replace the example path with the files you edited. The `-overwrite` option
+updates those files in place. To reflow all specification sources, including
+the top-level AsciiDoc files in `adoc/`, use `make -C adoc reflow` instead.
+Review the resulting diff and include the formatting changes with your edits.
+Rebuild the HTML and PDF targets as described above, then check that reflow has
+not changed the rendered specification.
+
+Before submitting a pull request, run the same check as CI from the repository
+root:
+
+```bash
+./adoc/scripts/verify_reflow_conformance.sh
+```
+
+The check writes reflowed copies to `tmp_ci/` without modifying the source
+files, prints any differences, and fails if the sources are not already
+reflowed. Do not commit the generated `tmp_ci/` directory.
