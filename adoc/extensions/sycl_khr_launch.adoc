@@ -1,0 +1,1287 @@
+[[sec:khr-launch]]
+= sycl_khr_launch
+
+This extension provides an alternative mechanism for submitting commands to a
+device via free-functions that require developers to opt-in to the handling of
+properties and the creation of [code]#event# objects.
+It also adds an ability to reuse the same [code]#event# object to track
+completion of multiple command submissions.
+
+The creation of [code]#event# objects may incur overheads that increase the
+latency of submitting commands to devices, even if the [code]#event# object is
+immediately discarded and never used.
+Similarly, using a [code]#handler# can incur overheads even when there are no
+dependent events or accessors registered.
+Requiring developers to opt-in to these features is therefore expected to
+improve the performance of many SYCL programs, by ensuring that SYCL developers
+only pay the associated costs when necessary.
+
+== Dependencies
+
+This extension depends on the following other KHR extensions:
+
+* sycl_khr_properties
+
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_LAUNCH# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+== Usage example
+
+The example below rewrites the application from
+<<subsec:example.sycl.application>> to demonstrate the usage of this extension.
+
+[source,role=synopsis]
+----
+#include <iostream>
+#include <sycl/sycl.hpp>
+using namespace sycl; // (optional) avoids need for "sycl::" before SYCL names.
+
+// Size of the matrices.
+constexpr size_t N = 2000;
+constexpr size_t M = 3000;
+
+int main() {
+  // Create a queue to work on.
+  queue myQueue;
+
+  // Create some 2D arrays of float for our matrices.
+  float* a = malloc_shared<float>(N * M, myQueue);
+  float* b = malloc_shared<float>(N * M, myQueue);
+  float* c = malloc_shared<float>(N * M, myQueue);
+
+  // Launch an asynchronous kernel to initialize a.
+  khr::launch(myQueue, range<2> { N, M }, [=](id<2> index) {
+    size_t i = index[0];
+    size_t j = index[1];
+    a[i * M + j] = i * 2 + j;
+  });
+
+  // Launch an asynchronous kernel to initialize b.
+  khr::launch(myQueue, range<2> { N, M }, [=](id<2> index) {
+    size_t i = index[0];
+    size_t j = index[1];
+    b[i * M + j] = i * 2014 + j * 42;
+  });
+
+  // Ensure that the two previous kernels complete before enqueueing more work.
+  // This does not block the host, but enforces dependencies on the device.
+  khr::enqueue_barrier(myQueue);
+
+  // Launch an asynchronous kernel to compute matrix addition c = a + b.
+  // Require that the scheduler create an event to track completion.
+  range<2> local = { 2, 2 };
+  range<2> global = { N, M };
+  event e = khr::make_event(myQueue.get_context());
+  khr::properties props{khr::property::signal_event{e}};
+  khr::launch_grouped(myQueue, global, local, [=](nd_item<2> it) {
+    size_t i = it.get_global_id(0);
+    size_t j = it.get_global_id(1);
+    size_t index = i * M + j;
+    c[index] = a[index] + b[index];
+  }, props);
+
+  // Wait for all three kernels to complete before accessing the results.
+  // This blocks the host until all previous kernels have completed.
+  e.wait();
+
+  std::cout << std::endl << "Result:" << std::endl;
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < M; j++) {
+      size_t index = i * M + j;
+      // Compare the result to the analytic value.
+      if (c[index] != i * (2 + 2014) + j * (1 + 42)) {
+        std::cout << "Wrong value " << c[index] << " on element " << i << " "
+                  << j << std::endl;
+        exit(-1);
+      }
+    }
+  }
+
+  std::cout << "Good computation!" << std::endl;
+  return 0;
+}
+----
+
+== Properties
+
+This extension uses the classes defined by the sycl_khr_properties extension to
+define properties for submitting commands.
+
+A [code]#PropertyOrList# template parameter in this extension may be deduced as
+either a single property or a [code]#khr::properties# list.
+When it is deduced as a single property, the corresponding [code]#props#
+argument is treated as though it were [code]#khr::properties{props}#.
+
+The following structure is used to define the relationship between the
+properties and command submission functions defined in this extension.
+
+.[apidef]#khr::command#
+[source,role=synopsis,id=api:command]
+----
+namespace sycl::khr {
+
+// Never defined; used only as the "Class" argument of the property traits.
+struct command;
+
+} // namespace sycl::khr
+----
+
+.[apidef]#khr::property::signal_event#
+[source,role=synopsis,id=api:properties-signal-event]
+----
+namespace sycl::khr::property {
+
+struct signal_event {
+  signal_event(const event& e);
+  event value;
+};
+
+namespace key {
+struct signal_event {};
+}
+
+} // namespace sycl::khr::property
+----
+
+When a command is submitted with this property, the event the property holds is
+immediately disassociated with any previous command, and its status is set to
+"submitted".
+When the command is complete, the provided event is signaled.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#is_property<property::signal_event>#
+* [code]#is_property_key<property::key::signal_event>#
+* [code]#is_property_for<property::signal_event, command>#
+* [code]#is_property_key_for<property::key::signal_event, command>#
+
+[code]#property::signal_event# is not trivially copyable.
+[code]#property::key::signal_event# is trivially copyable.
+
+'''
+
+.[apidef]#khr::property::wait_event#
+[source,role=synopsis,id=api:properties-wait-event]
+----
+namespace sycl::khr::property {
+
+struct wait_event {
+  wait_event(const event& e);
+  event value;
+};
+
+namespace key {
+struct wait_event {};
+}
+
+} // namespace sycl::khr::property
+----
+
+When a command is submitted with this property, the command must not begin
+executing until the event the property holds is complete.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#is_property<property::wait_event>#
+* [code]#is_property_key<property::key::wait_event>#
+* [code]#is_property_for<property::wait_event, command>#
+* [code]#is_property_key_for<property::key::wait_event, command>#
+
+[code]#property::wait_event# is not trivially copyable.
+[code]#property::key::wait_event# is trivially copyable.
+
+'''
+
+.[apidef]#khr::property::wait_events#
+[source,role=synopsis,id=api:properties-wait-events]
+----
+namespace sycl::khr::property {
+
+struct wait_events {
+  wait_events(const std::vector<event>& evts);
+  std::vector<event> value;
+};
+
+namespace key {
+struct wait_events {};
+}
+
+} // namespace sycl::khr::property
+----
+
+When a command is submitted with this property, the command must not begin
+executing until all events in the [code]#evts# vector are complete.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#is_property<property::wait_events>#
+* [code]#is_property_key<property::key::wait_events>#
+* [code]#is_property_for<property::wait_events, command>#
+* [code]#is_property_key_for<property::key::wait_events, command>#
+
+[code]#property::wait_events# is not trivially copyable.
+[code]#property::key::wait_events# is trivially copyable.
+
+'''
+
+.[apidef]#khr::property::use_accessors#
+[source,role=synopsis,id=api:properties-use-accessors]
+----
+namespace sycl::khr::property {
+
+template<typename... AccessorTs>
+struct use_accessors {
+  use_accessors(const AccessorTs& ...accs);
+  std::tuple<AccessorTs...> value;
+};
+
+namespace key {
+struct use_accessors {};
+}
+
+} // namespace sycl::khr::property
+----
+
+_Constraints:_ Each type in [code]#AccessorTs# is a specialization of
+[code]#accessor#.
+
+When a command is submitted with this property, the command must not begin
+executing until the [code]#buffer# associated with each accessor that the
+property holds can be accessed in a manner compatible with that accessor's
+[code]#access_mode#.
+Each of those accessors must have an [code]#AccessTarget# of
+[code]#target::device# or [code]#target::host_task#.
+
+Because all specializations of this property share a single key
+[code]#property::key::use_accessors#, a properties list can contain at most one
+[code]#use_accessors# property.
+All accessors that a command requires must therefore be passed to a single
+[code]#use_accessors# property.
+
+{note}Unlike the other properties defined by this extension, this property is a
+class template whose template parameters are the types of its runtime-supplied
+values rather than compile-time property values.
+An application obtains it by constructing an instance and letting
+[code]#AccessorTs# be deduced, as in [code]#khr::property::use_accessors{accA,
+accB}#.
+One consequence is that [code]#get_property<property::key::use_accessors>()#
+returns a type that depends on [code]#AccessorTs#, so code which retrieves this
+property must be templated.{endnote}
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#is_property<property::use_accessors<AccessorTs...>>#, for any
+  [code]#AccessorTs...#
+* [code]#is_property_key<property::key::use_accessors>#
+* [code]#is_property_for<property::use_accessors<AccessorTs...>, command>#
+* [code]#is_property_key_for<property::key::use_accessors, command>#
+
+[code]#property::use_accessors# is not trivially copyable.
+[code]#property::key::use_accessors# is trivially copyable.
+
+'''
+
+.[apidef]#khr::property::use_kernel_bundle#
+[source,role=synopsis,id=api:properties-use-kernel-bundle]
+----
+namespace sycl::khr::property {
+
+struct use_kernel_bundle {
+  use_kernel_bundle(const kernel_bundle<bundle_state::executable>& execBundle);
+  kernel_bundle<bundle_state::executable> value;
+};
+
+namespace key {
+struct use_kernel_bundle {};
+}
+
+} // namespace sycl::khr::property
+----
+
+When a command is submitted with this property, the command must be submitted
+using a <<device-image>> from the kernel bundle.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#is_property<property::use_kernel_bundle>#
+* [code]#is_property_key<property::key::use_kernel_bundle>#
+* [code]#is_property_for<property::use_kernel_bundle, command>#
+* [code]#is_property_key_for<property::key::use_kernel_bundle, command>#
+
+[code]#property::use_kernel_bundle# is not trivially copyable.
+[code]#property::key::use_kernel_bundle# is trivially copyable.
+
+'''
+
+=== Applying properties to a command
+
+Several of the functions below specify their effects in terms of a
+[code]#handler# [code]#h#.
+In those specifications, _applying_ [code]#props# to [code]#h# means:
+
+* If [code]#props# contains [code]#property::signal_event#, registering the
+  event that property holds to be signaled once the command is complete;
+* If [code]#props# contains [code]#property::wait_event# or
+  [code]#property::wait_events#, calling [code]#h.depends_on# with the event or
+  events that property holds;
+* If [code]#props# contains [code]#property::use_accessors#, calling
+  [code]#h.require# for each accessor that property holds; and
+* If [code]#props# contains [code]#property::use_kernel_bundle#, calling
+  [code]#h.use_kernel_bundle# with the kernel bundle that property holds.
+
+{note}No [code]#event# object is created for the command unless [code]#props#
+contains [code]#property::signal_event#.{endnote}
+
+=== Combining properties
+
+A [code]#props# argument must not contain both [code]#property::wait_event# and
+[code]#property::wait_events#.
+Programs that do so are ill formed, and the implementation must issue a
+diagnostic in this case.
+
+'''
+
+== New free functions
+
+=== Kernel launch
+
+// Launch a basic parallel_for with a function object.
+// New form of queue::parallel_for(range, ...)
+.[apititle]#launch# (kernel function)
+[source,role=synopsis,id=api:launch]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch(const queue& q, range<1> r, const KernelType& k, PropertyOrList props = {}); (1)
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch(const queue& q, range<2> r, const KernelType& k, PropertyOrList props = {}); (2)
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch(const queue& q, range<3> r, const KernelType& k, PropertyOrList props = {}); (3)
+
+}
+----
+
+_Constraints (1-3):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+  and
+* Any accessor in [code]#property::use_accessors# must have a target of
+  [code]#target::device#.
+
+_Effects (1-3):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.parallel_for(r, k);
+});
+----
+
+'''
+
+// Launch a basic parallel_for with a sycl::kernel object.
+// New form of handler::parallel_for(range, ...) without set_args.
+.[apititle]#launch# (kernel object)
+[source,role=synopsis,id=api:launch-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args, typename PropertyOrList>
+void launch(const queue& q, range<1> r, const kernel& k, PropertyOrList props, Args&&... args); (1)
+
+template <typename... Args, typename PropertyOrList>
+void launch(const queue& q, range<2> r, const kernel& k, PropertyOrList props, Args&&... args); (2)
+
+template <typename... Args, typename PropertyOrList>
+void launch(const queue& q, range<3> r, const kernel& k, PropertyOrList props, Args&&... args); (3)
+
+template <typename... Args>
+void launch(const queue& q, range<1> r, const kernel& k, Args&&... args);                                            (4)
+
+template <typename... Args>
+void launch(const queue& q, range<2> r, const kernel& k, Args&&... args);                                            (5)
+
+template <typename... Args>
+void launch(const queue& q, range<3> r, const kernel& k, Args&&... args);                                            (6)
+
+}
+----
+
+_Constraints (1-3):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects (1-3):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.set_args(args...);
+  h.parallel_for(r, k);
+});
+----
+
+_Effects (4-6):_ Equivalent to: [code]#+launch(q, r, k,
+khr::empty_properties_t{}, args...);+#.
+
+'''
+
+// Launch a basic parallel_for with a function object and reductions.
+// New form of parallel_for(range, reduction, ...)
+.[apititle]#launch_reduce# (kernel function)
+[source,role=synopsis,id=api:launch_reduce]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename PropertyOrList, typename... Reductions>
+void launch_reduce(const queue& q, range<1> r, const KernelType& k, PropertyOrList props, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename PropertyOrList, typename... Reductions>
+void launch_reduce(const queue& q, range<2> r, const KernelType& k, PropertyOrList props, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename PropertyOrList, typename... Reductions>
+void launch_reduce(const queue& q, range<3> r, const KernelType& k, PropertyOrList props, Reductions&&... reductions); (3)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(const queue& q, range<1> r, const KernelType& k, Reductions&&... reductions);                                            (4)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(const queue& q, range<2> r, const KernelType& k, Reductions&&... reductions);                                            (5)
+
+template <typename KernelType, typename... Reductions>
+void launch_reduce(const queue& q, range<3> r, const KernelType& k, Reductions&&... reductions);                                            (6)
+
+}
+----
+_Constraints (1-3):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* The parameter pack consists of 1 or more objects created by the
+  [code]#reduction# function; and
+* Any accessor in [code]#property::use_accessors# must have a target of
+  [code]#target::device#.
+
+_Constraints (4-6):_ The parameter pack consists of 1 or more objects created by
+the [code]#reduction# function.
+
+_Effects (1-3):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.parallel_for(r, reductions..., k);
+});
+----
+
+_Effects (4-6):_ Equivalent to [code]#+launch_reduce(q, r, k,
+khr::empty_properties_t{}, reductions...);+#.
+
+'''
+
+// Launch an ND-range parallel_for with a function object.
+// New form of parallel_for(nd_range, ...)
+.[apititle]#launch_grouped# (kernel function)
+[source,role=synopsis,id=api:launch_grouped]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const KernelType& k, PropertyOrList props = {}); (1)
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const KernelType& k, PropertyOrList props = {}); (2)
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch_grouped(const queue& q, range<3> r, range<3> size, const KernelType& k, PropertyOrList props = {}); (3)
+
+}
+----
+
+_Constraints (1-3):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+  and
+* Any accessor in [code]#property::use_accessors# must have a target of
+  [code]#target::device#.
+
+_Effects (1-3):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.parallel_for(nd_range(r, size), k);
+});
+----
+
+'''
+
+// Launch an ND-range parallel_for with a sycl::kernel object.
+// New form of parallel_for(nd_range, ...) without set_args.
+.[apititle]#launch_grouped# (kernel object)
+[source,role=synopsis,id=api:launch_grouped-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args, typename PropertyOrList>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const kernel& k, PropertyOrList props, Args&&... args); (1)
+
+template <typename... Args, typename PropertyOrList>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, PropertyOrList props, Args&&... args); (2)
+
+template <typename... Args, typename PropertyOrList>
+void launch_grouped(const queue& q, range<3> r, range<3> size, const kernel& k, PropertyOrList props, Args&&... args); (3)
+
+template <typename... Args>
+void launch_grouped(const queue& q, range<1> r, range<1> size, const kernel& k, Args&&... args);                                            (4)
+
+template <typename... Args>
+void launch_grouped(const queue& q, range<2> r, range<2> size, const kernel& k, Args&&... args);                                            (5)
+
+template <typename... Args>
+void launch_grouped(const queue& q, range<3> r, range<3> size, const kernel& k, Args&&... args);                                            (6)
+
+}
+----
+_Constraints (1-3):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects (1-3):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.set_args(args...);
+  h.parallel_for(nd_range(r, size), k);
+});
+----
+
+_Effects (4-6):_ Equivalent to: [code]#+launch_grouped(q, r, size, k,
+khr::empty_properties_t{}, args...);+#.
+
+'''
+
+// Launch an ND-range parallel_for with a function object and reductions.
+// New form of parallel_for(nd_range, ...)
+.[apititle]#launch_grouped_reduce# (kernel function)
+[source,role=synopsis,id=api:launch_grouped_reduce]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename PropertyOrList, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const KernelType& k, PropertyOrList props, Reductions&&... reductions); (1)
+
+template <typename KernelType, typename PropertyOrList, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const KernelType& k, PropertyOrList props, Reductions&&... reductions); (2)
+
+template <typename KernelType, typename PropertyOrList, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const KernelType& k, PropertyOrList props, Reductions&&... reductions); (3)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<1> r, range<1> size, const KernelType& k, Reductions&&... reductions);                                            (4)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<2> r, range<2> size, const KernelType& k, Reductions&&... reductions);                                            (5)
+
+template <typename KernelType, typename... Reductions>
+void launch_grouped_reduce(const queue& q, range<3> r, range<3> size, const KernelType& k, Reductions&&... reductions);                                            (6)
+
+}
+----
+_Constraints (1-3):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* The parameter pack consists of 1 or more objects created by the
+  [code]#reduction# function; and
+* Any accessor in [code]#property::use_accessors# must have a target of
+  [code]#target::device#.
+
+_Constraints (4-6):_ The parameter pack consists of 1 or more objects created by
+the [code]#reduction# function.
+
+_Effects (1-3):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.parallel_for(nd_range(r, size), reductions..., k);
+});
+----
+
+_Effects (4-6):_ Equivalent to [code]#+launch_grouped_reduce(q, r, size, k,
+khr::empty_properties_t{}, reductions...);+#.
+
+'''
+
+// Launch a single work-item with a function object.
+// New form of single_task(...)
+.[apititle]#launch_task# (kernel function)
+[source,role=synopsis,id=api:launch_task]
+----
+namespace sycl::khr {
+
+template <typename KernelType, typename PropertyOrList = khr::empty_properties_t>
+void launch_task(const queue& q, const KernelType& k, PropertyOrList props = {});
+
+}
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+  and
+* Any accessor in [code]#property::use_accessors# must have a target of
+  [code]#target::device#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.single_task(k);
+});
+----
+
+'''
+
+// Launch a single work-item with a sycl::kernel object.
+// New form of single_task(...) without set_args.
+.[apititle]#launch_task# (kernel object)
+[source,role=synopsis,id=api:launch_task-kernel]
+----
+namespace sycl::khr {
+
+template <typename... Args, typename PropertyOrList>
+void launch_task(const queue& q, const kernel& k, PropertyOrList props, Args&&... args); (1)
+
+template <typename... Args>
+void launch_task(const queue& q, const kernel& k, Args&&... args);                                            (2)
+
+}
+----
+_Constraints (1):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects (1):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.set_args(args...);
+  h.single_task(k);
+});
+----
+
+_Effects (2):_ Equivalent to [code]#+launch_task(q, k,
+khr::empty_properties_t{}, args...);+#.
+
+'''
+
+=== Host tasks
+
+.[apititle]#launch_host#
+[source,role=synopsis,id=api:launch_host]
+----
+namespace sycl::khr {
+
+template <typename T, typename PropertyOrList = khr::empty_properties_t>
+void launch_host(const queue& q, T&& hostTaskCallable, PropertyOrList props = {});
+
+}
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* Any accessor in [code]#property::use_accessors# must have a target of
+  [code]#target::host_task#.
+
+_Preconditions:_ The callable function [code]#hostTaskCallable# does not call
+any function in the [code]#sycl# namespace.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.host_task(hostTaskCallable);
+});
+----
+
+'''
+
+=== Memory operations
+
+.[apititle]#enqueue_memcpy#
+[source,role=synopsis,id=api:enqueue_memcpy]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_memcpy(const queue& q, void* dest, const void* src, size_t numBytes, PropertyOrList props = {});
+
+}
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.memcpy(dest, src, numBytes);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (USM pointers)
+[source,role=synopsis,id=api:enqueue_copy-pointer]
+----
+namespace sycl::khr {
+
+template <typename T, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_copy(const queue& q, const T* src, T* dest, size_t count, PropertyOrList props = {});
+
+}
+----
+
+Copies between two USM pointers.
+
+_Constraints:_
+
+* [code]#T# is <<device-copyable>>;
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Preconditions:_
+
+* [code]#src# is a host pointer or a pointer within a USM allocation that is
+  accessible on the device;
+* [code]#dest# is a host pointer or a pointer within a USM allocation that is
+  accessible on the device;
+* [code]#src# and [code]#dest# both point to allocations of at least
+  [code]#count# elements of type [code]#T#; and
+* If either [code]#src# or [code]#dest# is a pointer to a USM allocation, that
+  allocation was created from the same context associated with [code]#q#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.copy(src, dest, count);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (accessors, host to device)
+[source,role=synopsis,id=api:enqueue_copy-accessor-h2d]
+----
+namespace sycl::khr {
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, PropertyOrList props = {});           (1)
+
+template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, PropertyOrList props = {}); (2)
+
+}
+----
+
+Copies from host to device.
+
+_Constraints:_
+
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
+* [code]#DestMode# is [code]#access_mode::write# or
+  [code]#access_mode::read_write#;
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Preconditions:_
+
+* [code]#src# is a host pointer; and
+* [code]#src# points to an allocation of at least as many bytes as the range
+  represented by [code]#dest#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.require(dest);
+  h.copy(src, dest);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (accessors, device to host)
+[source,role=synopsis,id=api:enqueue_copy-accessor-d2h]
+----
+namespace sycl::khr {
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, PropertyOrList props = {});                 (1)
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, PropertyOrList props = {}); (2)
+
+}
+----
+
+Copies from device to host.
+
+_Constraints:_
+
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
+* [code]#DestMode# is [code]#access_mode::read# or
+  [code]#access_mode::read_write#;
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Preconditions:_
+
+* [code]#dest# is a host pointer; and
+* [code]#dest# points to an allocation of at least as many bytes as the range
+  represented by [code]#src#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.require(src);
+  h.copy(src, dest);
+});
+----
+
+'''
+
+.[apititle]#enqueue_copy# (accessors, device to device)
+[source,role=synopsis,id=api:enqueue_copy-accessor-d2d]
+----
+namespace sycl::khr {
+
+template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, int DestDims, access_mode DestMode, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, PropertyOrList props = {});
+
+}
+----
+
+Copies between two device accessors.
+
+_Constraints:_
+
+* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
+* [code]#SrcMode# is [code]#access_mode::read# or
+  [code]#access_mode::read_write#;
+* [code]#DestMode# is [code]#access_mode::write# or
+  [code]#access_mode::read_write#;
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.require(src);
+  h.require(dest);
+  h.copy(src, dest);
+});
+----
+
+_Throws:_ A synchronous [code]#exception# with the [code]#errc::invalid# error
+code if [code]#dest.get_count() < src.get_count()#.
+
+'''
+
+.[apititle]#enqueue_memset#
+[source,role=synopsis,id=api:enqueue_memset]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_memset(const queue& q, void* ptr, int value, size_t numBytes, PropertyOrList props = {});
+
+}
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.memset(ptr, value, numBytes);
+});
+----
+
+'''
+
+.[apititle]#enqueue_fill#
+[source,role=synopsis,id=api:enqueue_fill]
+----
+namespace sycl::khr {
+
+template <typename T, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_fill(const queue& q, T* ptr, const T& pattern, size_t count, PropertyOrList props = {});                     (1)
+
+template <typename T, int Dims, access_mode Mode, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, PropertyOrList props = {}); (2)
+
+}
+----
+
+_Constraints (1):_
+
+* [code]#T# is <<device-copyable>>;
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Constraints (2):_
+
+* [code]#T# is <<device-copyable>>;
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects (1):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.fill(ptr, pattern, count);
+});
+----
+
+_Effects (2):_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.require(dest);
+  h.fill(dest, src);
+});
+----
+
+'''
+
+.[apititle]#enqueue_update_host#
+[source,role=synopsis,id=api:enqueue_update_host]
+----
+namespace sycl::khr {
+
+template <typename T, int Dims, access_mode Mode, typename PropertyOrList = khr::empty_properties_t>
+void enqueue_update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, PropertyOrList props = {});
+
+}
+----
+
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.require(acc);
+  h.update_host(acc);
+});
+----
+
+'''
+
+.[apititle]#enqueue_prefetch#
+[source,role=synopsis,id=api:enqueue_prefetch]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_prefetch(const queue& q, void* ptr, size_t numBytes, PropertyOrList props = {});
+
+}
+----
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.prefetch(ptr, numBytes);
+});
+----
+
+'''
+
+.[apititle]#enqueue_mem_advise#
+[source,role=synopsis,id=api:enqueue_mem_advise]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_mem_advise(const queue& q, void* ptr, size_t numBytes, int advice, PropertyOrList props = {});
+
+}
+----
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Equivalent to:
+[source,sycl]
+----
+q.submit([&](handler& h) {
+  /* apply props to h */
+  h.mem_advise(ptr, numBytes, advice);
+});
+----
+
+'''
+
+=== Command and event barriers
+
+.[apititle]#enqueue_barrier#
+[source,role=synopsis,id=api:enqueue_barrier]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_barrier(const queue& q, PropertyOrList props = {});
+
+}
+----
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
+* [code]#props# does not contain [code]#property::use_accessors#.
+
+_Effects:_ Enqueues a command barrier.
+Any commands submitted after this barrier cannot begin execution until the
+barrier completes.
+The barrier completes when:
+
+* All commands previously submitted to this queue have completed; and
+* All events (specified by [code]#property::wait_event# or
+  [code]#property::wait_events#) in [code]#props# have completed.
+
+If [code]#props# contains [code]#property::signal_event#, the event is signaled
+when the barrier completes.
+
+{note}If a barrier is submitted to an in-order queue with no properties, then
+this operation may be a no-op.{endnote}
+
+'''
+
+.[apititle]#enqueue_signal_event#
+[source,role=synopsis,id=api:enqueue_signal_event]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_signal_event(const queue& q, const event& e, PropertyOrList props = {});
+
+}
+----
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+  and
+* either
+** [code]#props# contains only [code]#property::wait_event#,
+** [code]#props# contains only [code]#property::wait_events#, or
+** [code]#props# is empty.
+
+_Effects:_ Enqueues a command barrier.
+The event [code]#e# is immediately disassociated with any previous command, and
+its status is set to "submitted".
+Any commands submitted after this barrier cannot begin execution until the
+barrier completes.
+The barrier completes when:
+
+* All commands previously submitted to this queue have completed; and
+* All events (specified by [code]#property::wait_event# or
+  [code]#property::wait_events#) in [code]#props# have completed.
+
+Once the above conditions are met, the provided event [code]#e# is signaled.
+
+_Throws:_ A synchronous [code]#exception# with the [code]#errc::invalid# error
+code if [code]#e# and [code]#q# don't have the same context.
+
+'''
+
+.[apititle]#enqueue_wait_event#
+[source,role=synopsis,id=api:enqueue_wait_event]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_wait_event(const queue& q, const event& e, PropertyOrList props = {});
+
+}
+----
+_Constraints:_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+  and
+* either
+** [code]#props# contains only [code]#property::signal_event#, or
+** [code]#props# is empty.
+
+_Effects:_ Enqueues an event barrier.
+Any commands submitted after this barrier cannot begin execution until the
+provided event ([code]#e#) has completed.
+
+Once the above conditions are met, the event (specified by
+[code]#property::signal_event#) is signaled, if provided.
+
+'''
+
+.[apititle]#enqueue_wait_events#
+[source,role=synopsis,id=api:enqueue_wait_events]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_wait_events(const queue& q, const std::vector<event>& evts, PropertyOrList props = {}); (1)
+
+template <typename PropertyOrList = khr::empty_properties_t>
+void enqueue_wait_events(const queue& q, std::span<const event> evts, PropertyOrList props = {}); // Requires C++20 (2)
+
+}
+----
+_Constraints (1-2):_
+
+* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
+  and
+* either
+** [code]#props# contains only [code]#property::signal_event#, or
+** [code]#props# is empty.
+
+_Effects (1-2):_ Enqueues an event barrier.
+Any commands submitted after this barrier cannot begin execution until the
+provided events ([code]#evts#) have completed.
+
+Once the above conditions are met, the event (specified by
+[code]#property::signal_event#) is signaled, if provided.
+
+'''
+
+=== Event-related helper functions
+
+.[apititle]#make_event#
+[source,role=synopsis,id=api:make_event]
+----
+namespace sycl::khr {
+
+event make_event(const context& c);
+
+}
+----
+_Returns:_ An event that is associated with context [code]#c#.
+The event is in the "signaled" state.
+
+{note}The event can be passed to the [code]#enqueue_signal_event# function or
+included in a [code]#khr::properties# list (through
+[code]#property::signal_event#), and as a dependency for other
+commands.{endnote}
+
+== Interactions between event APIs
+
+An event _E_ created via [code]#make_event# can be used as a command dependency
+using the APIs introduced by this extension (e.g. [code]#enqueue_wait_event#) or
+using other APIs (e.g. [code]#handler::depends_on#) for a command submitted to
+some queue _Q_.
+It is not necessary for the context of _E_ to match the context of _Q_.
+
+An event _E_ created via [code]#make_event# can also be used for signaling
+(using the [code]#enqueue_signal_event# function or using
+[code]#property::signal_event#), for a command submitted to some queue _Q_.
+In this case, the context of _E_ and _Q_ must match.
+
+If an event _E_ is used as a command dependency for some command _C_, the
+dependency is captured at the point when _C_ is submitted.
+It is legal to reassociate the event _E_ to a new command via
+[code]#enqueue_signal_event# even before command _C_ completes.
+Doing so does not change the dependency for command _C_.
+
+If another host thread is blocked waiting for event _E_ to complete via
+[code]#event::wait# or [code]#event::wait_and_throw# when event _E_ is
+reassociated with a new command via [code]#enqueue_signal_event#, the behavior
+of the [code]#event::wait# or [code]#event::wait_and_throw# call is undefined.
