@@ -214,6 +214,51 @@ passed to [code]#Func#.
 They do not check the required work-group size of the kernel, if any; that is
 checked at launch against the local range.
 
+[[sec:khr-free-function-kernels-kernel-id]]
+== Obtaining a kernel identifier
+
+A free function kernel is a kernel that is defined in the <<sycl-application>>
+for the purposes of the kernel bundle functions defined in
+<<sec:interfaces.bundles>>.
+
+An application can obtain the identifier of a free function kernel by calling
+the function below.
+The identifier can then be passed to the kernel bundle functions, for example to
+obtain a [code]#kernel# object and query its information descriptors.
+
+.[apidef]#get_kernel_id#
+[source,role=synopsis,id=api:khr-free-function-kernels-get_kernel_id]
+----
+namespace sycl::khr {
+
+template<auto *Func>
+kernel_id get_kernel_id();
+
+} // namespace sycl::khr
+----
+
+_Constraints:_ Available only if [code]#Func# is decorated with the
+[code]#SYCL_KHR_KERNEL# macro.
+
+_Returns:_ The identifier of the free function kernel [code]#Func#.
+
+{note}For a free function kernel that is a template, the address of a particular
+specialization is used, for example
+[code]#get_kernel_id<iota<float>>()#.{endnote}
+
+For example, the following code queries the maximum work-group size with which
+the kernel [code]#scale# can be launched on the device [code]#dev#:
+
+[source]
+----
+sycl::kernel_id id = sycl::khr::get_kernel_id<scale>();
+auto bundle =
+    sycl::get_kernel_bundle<sycl::bundle_state::executable>(ctx, {dev}, {id});
+sycl::kernel k = bundle.get_kernel(id);
+size_t wgsize =
+    k.get_info<sycl::info::kernel_device_specific::work_group_size>(dev);
+----
+
 [[sec:khr-free-function-kernels-example]]
 == Example
 
