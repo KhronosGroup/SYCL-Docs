@@ -3,13 +3,12 @@
 
 This extension introduces _free function kernels_.
 A free function kernel is an ordinary C++ function, defined at namespace scope,
-that is decorated with the [code]#SYCL_KHR_KERNEL# macro so that it becomes
-a device kernel entry point.
-Its kernel arguments are the function's parameters, rather than the captures of a
-lambda or the members of a function object, which gives them a defined order.
+that is decorated with the [code]#SYCL_KHR_KERNEL# macro so that it becomes a
+device kernel entry point.
+Its kernel arguments are the function's parameters, rather than the captures of
+a lambda or the members of a function object, which gives them a defined order.
 Because it is a named function, the kernel is identified by the function itself,
-so it can be launched by reference to the function rather than only as
-a lambda.
+so it can be launched by reference to the function rather than only as a lambda.
 
 [[sec:khr-free-function-kernels-dependencies]]
 == Dependencies
@@ -35,8 +34,8 @@ below.
 [[sec:khr-free-function-kernels-defining]]
 == Defining a free function kernel
 
-A free function kernel is an ordinary C++ function whose declaration is decorated
-with the [code]#SYCL_KHR_KERNEL# macro.
+A free function kernel is an ordinary C++ function whose declaration is
+decorated with the [code]#SYCL_KHR_KERNEL# macro.
 
 The macro takes no arguments, though a future extension may define more.
 
@@ -74,12 +73,13 @@ A program that violates any of them is ill formed unless stated otherwise.
   called from device code, so the cross-translation-unit device linkage that
   [code]#SYCL_EXTERNAL# provides does not apply to it.
 
-* Each of the function's parameters must have a type that is <<device-copyable>>;
-  an application can query this with the core
+* Each of the function's parameters must have a type that is
+  <<device-copyable>>; an application can query this with the core
   [code]#sycl::is_device_copyable_v<T># type trait.
 
 * The decoration must appear on the first declaration of the function in the
-  translation unit. A redeclaration of the function must be decorated as well.
+  translation unit.
+  A redeclaration of the function must be decorated as well.
 
 * If the function is decorated in one translation unit, every other translation
   unit that declares the same function must decorate it with the same macro.
@@ -93,27 +93,29 @@ For example, [code]#accessor#, [code]#local_accessor#, image accessors,
 <<sec:kernel.parameter.passing>> but are not device-copyable and so cannot be
 used as free function kernel parameters.{endnote}
 
-A function decorated with the [code]#SYCL_KHR_KERNEL# macro is a kernel entry point.
-Calling the function as an ordinary function, in either host or device code, results in
-undefined behavior.
+A function decorated with the [code]#SYCL_KHR_KERNEL# macro is a kernel entry
+point.
+Calling the function as an ordinary function, in either host or device code,
+results in undefined behavior.
 
 {note}A free function kernel obtains its work-item position through the queries
 provided by <<sec:khr-work-item-queries,sycl_khr_work_item_queries>>, such as
-[code]#sycl::khr::this_nd_item#. The preconditions of those queries require the
-query's dimensionality to match the dimensionality with which the kernel is
-launched. See that extension for details.{endnote}
+[code]#sycl::khr::this_nd_item#.
+The preconditions of those queries require the query's dimensionality to match
+the dimensionality with which the kernel is launched.
+See that extension for details.{endnote}
 
-The function itself identifies the kernel: the launch APIs described
-below are parameterized on it through a non-type template parameter
-[code]#Func# (for example, [code]#sycl::khr::kernel_function<scale>#).
+The function itself identifies the kernel: the launch APIs described below are
+parameterized on it through a non-type template parameter [code]#Func# (for
+example, [code]#sycl::khr::kernel_function<scale>#).
 
 [[sec:khr-free-function-kernels-launch]]
 == Launching a free function kernel
 
 A free function kernel is launched by passing its address to one of the launch
 functions defined in this section.
-The address is supplied through the [code]#kernel_function# handle, which carries
-it as a template parameter, so the kernel is identified by the _value_
+The address is supplied through the [code]#kernel_function# handle, which
+carries it as a template parameter, so the kernel is identified by the _value_
 [code]#sycl::khr::kernel_function<Func># passed as an argument rather than by an
 explicit template argument on the launch function.
 
@@ -159,11 +161,12 @@ void launch_task(handler &h, kernel_function_s<Func> k, Args&&... args);
 } // namespace sycl::khr
 ----
 
-_Constraints:_ Available only if [code]#std::is_invocable_v<decltype(Func), Args...># is
-[code]#true# and [code]#Func# is decorated with the [code]#SYCL_KHR_KERNEL# macro.
+_Constraints:_ Available only if [code]#std::is_invocable_v<decltype(Func),
+Args...># is [code]#true# and [code]#Func# is decorated with the
+[code]#SYCL_KHR_KERNEL# macro.
 
-_Effects:_ Enqueues the free function kernel [code]#Func# to the queue
-[code]#q# (or to the command group of the handler [code]#h#) as a single task.
+_Effects:_ Enqueues the free function kernel [code]#Func# to the queue [code]#q#
+(or to the command group of the handler [code]#h#) as a single task.
 Each value in the [code]#args# pack is passed to the corresponding parameter of
 [code]#Func#.
 
@@ -188,13 +191,14 @@ void launch_grouped(handler &h, range<Dims> global, range<Dims> local,
 } // namespace sycl::khr
 ----
 
-_Constraints:_ Available only if [code]#std::is_invocable_v<decltype(Func), Args...># is
-[code]#true# and [code]#Func# is decorated with the [code]#SYCL_KHR_KERNEL# macro.
+_Constraints:_ Available only if [code]#std::is_invocable_v<decltype(Func),
+Args...># is [code]#true# and [code]#Func# is decorated with the
+[code]#SYCL_KHR_KERNEL# macro.
 
-_Effects:_ Enqueues the free function kernel [code]#Func# to the queue
-[code]#q# (or to the command group of the handler [code]#h#) as an ND-range
-kernel, over the iteration space defined by the global range [code]#global# with
-work-group (local) size [code]#local#.
+_Effects:_ Enqueues the free function kernel [code]#Func# to the queue [code]#q#
+(or to the command group of the handler [code]#h#) as an ND-range kernel, over
+the iteration space defined by the global range [code]#global# with work-group
+(local) size [code]#local#.
 Each value in the [code]#args# pack is passed to the corresponding parameter of
 [code]#Func#.
 
@@ -205,15 +209,16 @@ For example:
 sycl::khr::launch_grouped(q, global, local, sycl::khr::kernel_function<scale>, factor, data);
 ----
 
-The [code]#Constraints# above check, at compile time, that arguments can be passed to
-[code]#Func#. They do not check the required work-group size of the kernel, 
-if any; that is checked at launch against the local range.
+The [code]#Constraints# above check, at compile time, that arguments can be
+passed to [code]#Func#.
+They do not check the required work-group size of the kernel, if any; that is
+checked at launch against the local range.
 
 [[sec:khr-free-function-kernels-example]]
 == Example
 
-The example below defines a free function kernel at namespace scope, decorates it
-with [code]#SYCL_KHR_KERNEL#, and launches it with
+The example below defines a free function kernel at namespace scope, decorates
+it with [code]#SYCL_KHR_KERNEL#, and launches it with
 [code]#sycl::khr::launch_grouped#.
 The kernel obtains its work-item position with the
 <<sec:khr-work-item-queries,sycl_khr_work_item_queries>> query
@@ -324,8 +329,8 @@ the application must therefore name a specific specialization (such as
 [code]#kernel_function<iota<float>>#) or select the overload with a cast (such
 as [code]#kernel_function<(void(*)(float*))ping>#).
 
-An implementation may also provide the [code]#SYCL_KHR_KERNEL_CALL# macro,
-which lets the application name the kernel by its identifier and resolves the
+An implementation may also provide the [code]#SYCL_KHR_KERNEL_CALL# macro, which
+lets the application name the kernel by its identifier and resolves the
 specialization or overload from the launch arguments.
 
 [source,role=synopsis,id=api:khr-free-function-kernels-kernel-call]
@@ -336,9 +341,9 @@ specialization or overload from the launch arguments.
 
 _Effects:_ Expands to the [code]#kernel_function# argument and the kernel
 arguments of a call to [code]#launch_task# or [code]#launch_grouped#.
-The name [code]#kernel-name# is resolved against the types of [code]#args#
-using ordinary C++ overload resolution and template argument deduction, exactly
-as the expression [code]#kernel-name(args...)# would be resolved.
+The name [code]#kernel-name# is resolved against the types of [code]#args# using
+ordinary C++ overload resolution and template argument deduction, exactly as the
+expression [code]#kernel-name(args...)# would be resolved.
 The resolved free function kernel is launched with [code]#args# as its kernel
 arguments.
 Each value in the [code]#args# pack is evaluated exactly once.
@@ -365,21 +370,21 @@ A program is ill formed if any of the following is true.
 * The free function kernel that [code]#kernel-name# resolves to is not declared
   before the use of the macro.
 
-{note}The macro does not call the function. It forms a launch of the free
-function kernel, and calling the function as an ordinary function results in
-undefined behavior (see <<sec:khr-free-function-kernels-defining>>).{endnote}
+{note}The macro does not call the function.
+It forms a launch of the free function kernel, and calling the function as an
+ordinary function results in undefined behavior (see
+<<sec:khr-free-function-kernels-defining>>).{endnote}
 
 Ordinary C++ template argument deduction applies to [code]#kernel-name#.
-A template parameter of the kernel that cannot be deduced from [code]#args#,
-for example a non-type template parameter that does not appear in any function
+A template parameter of the kernel that cannot be deduced from [code]#args#, for
+example a non-type template parameter that does not appear in any function
 parameter, must be specified explicitly, just as it would be in a direct call to
 the kernel, for example [code]#SYCL_KHR_KERNEL_CALL(fill<1>, fptr, 1.0f)#.
-A template argument list that contains a comma must be enclosed in parentheses so
-that the preprocessor does not split it into separate macro arguments, for example
-[code]#SYCL_KHR_KERNEL_CALL((scale<1, 2>), fptr, 2.0f)#.
+A template argument list that contains a comma must be enclosed in parentheses
+so that the preprocessor does not split it into separate macro arguments, for
+example [code]#SYCL_KHR_KERNEL_CALL((scale<1, 2>), fptr, 2.0f)#.
 
-The [code]#SYCL_KHR_KERNEL_CALL# macro is an optional feature of this
-extension.
+The [code]#SYCL_KHR_KERNEL_CALL# macro is an optional feature of this extension.
 An implementation that does not support the feature does not define the macro,
 so an application can test whether the macro is defined to determine whether the
 feature is supported.
