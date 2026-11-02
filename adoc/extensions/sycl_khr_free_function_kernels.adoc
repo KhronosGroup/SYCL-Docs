@@ -313,3 +313,165 @@ int main() {
   return 0;
 }
 ----
+
+[[sec:khr-free-function-kernels-launch-by-name]]
+== Launching a free function kernel by name
+
+The launch functions in <<sec:khr-free-function-kernels-launch>> identify the
+kernel through [code]#kernel_function<Func>#, which names a single function.
+When a free function kernel is a function template or one of several overloads,
+the application must therefore name a specific specialization (such as
+[code]#kernel_function<iota<float>>#) or select the overload with a cast (such
+as [code]#kernel_function<(void(*)(float*))ping>#).
+
+An implementation may also provide the [code]#SYCL_KHR_KERNEL_CALL# macro,
+which lets the application name the kernel by its identifier and resolves the
+specialization or overload from the launch arguments.
+
+[source,role=synopsis,id=api:khr-free-function-kernels-kernel-call]
+----
+// Name a free function kernel and its arguments in a launch.
+#define SYCL_KHR_KERNEL_CALL(kernel-name, args...)
+----
+
+_Effects:_ Expands to the [code]#kernel_function# argument and the kernel
+arguments of a call to [code]#launch_task# or [code]#launch_grouped#.
+The name [code]#kernel-name# is resolved against the types of [code]#args#
+using ordinary C++ overload resolution and template argument deduction, exactly
+as the expression [code]#kernel-name(args...)# would be resolved.
+The resolved free function kernel is launched with [code]#args# as its kernel
+arguments.
+Each value in the [code]#args# pack is evaluated exactly once.
+
+_Remarks:_ The type of the expansion is unspecified.
+The macro may be used only in place of the [code]#kernel_function# argument and
+the kernel arguments of [code]#launch_task# or [code]#launch_grouped#.
+
+For example:
+
+[source]
+----
+// Equivalent to:
+//   sycl::khr::launch_grouped(q, global, local,
+//                             sycl::khr::kernel_function<iota<float>>, 3.14f, fptr);
+sycl::khr::launch_grouped(q, global, local, SYCL_KHR_KERNEL_CALL(iota, 3.14f, fptr));
+----
+
+A program is ill formed if any of the following is true.
+
+* [code]#kernel-name#, resolved against the types of [code]#args#, does not name
+  a function that is decorated with the [code]#SYCL_KHR_KERNEL# macro.
+
+* The free function kernel that [code]#kernel-name# resolves to is not declared
+  before the use of the macro.
+
+{note}The macro does not call the function. It forms a launch of the free
+function kernel, and calling the function as an ordinary function results in
+undefined behavior (see <<sec:khr-free-function-kernels-defining>>).{endnote}
+
+Ordinary C++ template argument deduction applies to [code]#kernel-name#.
+A template parameter of the kernel that cannot be deduced from [code]#args#,
+for example a non-type template parameter that does not appear in any function
+parameter, must be specified explicitly, just as it would be in a direct call to
+the kernel, for example [code]#SYCL_KHR_KERNEL_CALL(fill<1>, fptr, 1.0f)#.
+A template argument list that contains a comma must be enclosed in parentheses so
+that the preprocessor does not split it into separate macro arguments, for example
+[code]#SYCL_KHR_KERNEL_CALL((scale<1, 2>), fptr, 2.0f)#.
+
+The [code]#SYCL_KHR_KERNEL_CALL# macro is an optional feature of this
+extension.
+An implementation that does not support the feature does not define the macro,
+so an application can test whether the macro is defined to determine whether the
+feature is supported.
+
+{note}For implementations that use separate host and device compilation passes,
+this macro normally requires special support in the host compiler.
+Because some implementations cannot add such support to the host compiler, the
+macro is an optional feature.
+The remaining APIs of this extension need support only from the device compiler,
+so they can be used with any host compiler.{endnote}
+
+[[sec:khr-free-function-kernels-launch-by-name-example]]
+=== Example
+
+The example below launches the [code]#iota# and [code]#ping# kernels from
+<<sec:khr-free-function-kernels-example>> by name, letting the compiler deduce
+the template arguments and resolve the overload from the launch arguments.
+It requires an implementation that defines [code]#SYCL_KHR_KERNEL_CALL#.
+A template argument that cannot be deduced is given explicitly.
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+constexpr size_t N = 1024;
+constexpr size_t WGSIZE = 32;
+
+template<typename T>
+SYCL_KHR_KERNEL()
+void iota(T start, T *p) {
+  size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
+  p[i] = start + static_cast<T>(i);
+}
+
+SYCL_KHR_KERNEL()
+void ping(float *p) {
+  size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
+  p[i] = 1.0f;
+}
+
+SYCL_KHR_KERNEL()
+void ping(int *p) {
+  size_t i = sycl::khr::this_nd_item<1>().get_global_linear_id();
+  p[i] = 1;
+}
+
+// Dims appears in no function parameter, so it cannot be deduced from the
+// launch arguments and must be given explicitly.
+template<int Dims, typename T>
+SYCL_KHR_KERNEL()
+void fill(T *p, T value) {
+  size_t i = sycl::khr::this_nd_item<Dims>().get_global_linear_id();
+  p[i] = value;
+}
+
+template<int Dims, int Stride, typename T>
+SYCL_KHR_KERNEL()
+void scale(T *p, T factor) {
+  size_t i = sycl::khr::this_nd_item<Dims>().get_global_linear_id();
+  if (i % Stride == 0)
+    p[i] *= factor;
+}
+
+int main() {
+  sycl::queue q{sycl::property::queue::in_order()};
+
+  float *fptr = sycl::malloc_shared<float>(N, q);
+  int *iptr = sycl::malloc_shared<int>(N, q);
+  sycl::range<1> global{N}, local{WGSIZE};
+
+  // T is deduced as float and as int from the launch arguments.
+  sycl::khr::launch_grouped(q, global, local, SYCL_KHR_KERNEL_CALL(iota, 3.14f, fptr));
+  sycl::khr::launch_grouped(q, global, local, SYCL_KHR_KERNEL_CALL(iota, 3, iptr));
+
+  // The ping overload is selected from the argument type.
+  sycl::khr::launch_grouped(q, global, local, SYCL_KHR_KERNEL_CALL(ping, fptr));
+  sycl::khr::launch_grouped(q, global, local, SYCL_KHR_KERNEL_CALL(ping, iptr));
+
+  // The non-deducible Dims is given explicitly; T is still deduced.
+  // Writing SYCL_KHR_KERNEL_CALL(fill, fptr, 1.0f) would be ill formed, just as
+  // the call fill(fptr, 1.0f) is.
+  sycl::khr::launch_grouped(q, global, local, SYCL_KHR_KERNEL_CALL(fill<1>, fptr, 1.0f));
+
+  // A template argument list that contains a comma must be parenthesized so
+  // that the preprocessor does not split it into separate macro arguments.
+  sycl::khr::launch_grouped(q, global, local,
+                            SYCL_KHR_KERNEL_CALL((scale<1, 2>), fptr, 2.0f));
+
+  q.wait();
+
+  sycl::free(fptr, q);
+  sycl::free(iptr, q);
+  return 0;
+}
+----
