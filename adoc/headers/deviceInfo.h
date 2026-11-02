@@ -62,7 +62,7 @@ struct atomic_fence_order_capabilities;
 struct atomic_memory_scope_capabilities;
 struct atomic_fence_scope_capabilities;
 struct profiling_timer_resolution;
-struct is_endian_little;
+struct is_endian_little; // Deprecated
 struct is_available;
 struct is_compiler_available; // Deprecated
 struct is_linker_available;   // Deprecated
@@ -74,13 +74,13 @@ struct platform;
 struct name;
 struct vendor;
 struct driver_version;
-struct profile;
+struct profile; // Deprecated
 struct version;
 struct backend_version;
 struct aspects;
 struct extensions; // Deprecated
-struct printf_buffer_size;
-struct preferred_interop_user_sync;
+struct printf_buffer_size; // Deprecated
+struct preferred_interop_user_sync; // Deprecated
 struct parent_device;
 struct partition_max_sub_devices;
 struct partition_properties;

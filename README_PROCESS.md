@@ -170,9 +170,7 @@ major version as `<current>`.
 
   Note that this PR is created against the "main" branch even if you are making
   a release from the "sycl-xxxx" branch.
-  You can use [this PR][5] and [this PR][5a] as a model.
-  (TODO: When the next revision is published, update this README with a single
-  example PR that combines these two things.)
+  You can use [this PR][5] as a model.
 
 * When you are sure that you want to publish this release, do the following in
   quick succession and in this order:
@@ -181,7 +179,7 @@ major version as `<current>`.
   * Publish the draft release you created above.
   * Merge the PR to the "main" branch of SYCL-Docs.
 
-  Note that the draft release must be published before Merging the second PR,
+  Note that the draft release must be published before merging the second PR,
   otherwise the release tag will be created at the wrong commit.
 
 * After publishing, you should also prepare for the next revision of the
@@ -197,8 +195,7 @@ major version as `<current>`.
 [2]: <https://github.com/KhronosGroup/SYCL-Registry>
 [3]: <https://github.com/KhronosGroup/SYCL-Registry/pull/27>
 [4]: <https://github.com/KhronosGroup/SYCL-Docs/releases>
-[5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/793>
-[5a]: <https://github.com/KhronosGroup/SYCL-Docs/pull/946>
+[5]: <https://github.com/KhronosGroup/SYCL-Docs/pull/1037>
 [6]: <https://github.com/KhronosGroup/SYCL-Docs/pull/795>
 
 
