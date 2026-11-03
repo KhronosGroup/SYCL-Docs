@@ -1,0 +1,220 @@
+[[sec:khr-kernel-properties]]
+= sycl_khr_kernel_properties
+
+This extension defines compile-time kernel properties that provide the same
+functionality as the kernel attributes in <<sec:kernel.attributes>>, and a
+mechanism to embed these properties into the type of a kernel that is defined as
+a named function object.
+
+[[sec:khr-kernel-properties-dependencies]]
+== Dependencies
+
+This extension depends on the following other KHR extensions:
+
+* <<sec:khr-properties,sycl_khr_properties>>
+
+[[sec:khr-kernel-properties-header-files]]
+== Header files
+
+The APIs defined in this extension are provided by the [code]#<sycl/sycl.hpp>#
+header file.
+
+If the implementation also implements the
+<<sec:khr-split-headers,sycl_khr_split_headers>> extension, then the APIs
+defined in this extension are additionally provided by the header
+[code]#<sycl/khr/kernel_properties.hpp>#, and the feature test macro is
+additionally provided by [code]#<sycl/khr/split_headers/version.hpp>#.
+
+[[sec:khr-kernel-properties-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_KERNEL_PROPERTIES# to one of the values defined in the table
+below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-kernel-properties-embedding]]
+== Embedding properties in a kernel
+
+This extension adds the following property tag type, which is used to classify
+properties that can be applied to a kernel.
+
+'''
+
+.[apidef]#khr::property::tag::kernel#
+[source,role=synopsis,id=api:khr-kernel-properties-tag-kernel]
+----
+namespace sycl::khr::property::tag {
+
+struct kernel {
+  explicit kernel() = default;
+};
+
+} // namespace sycl::khr::property::tag
+----
+
+'''
+
+A named function object type [code]#T# has embedded kernel properties if
+[code]#std::declval<const T&>().get(khr::property::tag::kernel{})# is
+well-formed.
+Let [code]#R# be the type of that expression with cv-qualifiers and references
+removed.
+[code]#R# must be a property or properties list for which
+[api]#khr::is_property_for_v<R, khr::property::tag::kernel># or
+[api]#khr::is_property_list_for_v<R, khr::property::tag::kernel># is
+[code]#true#; otherwise the program is ill formed and the implementation must
+issue a diagnostic.
+The implementation determines the properties from [code]#R# alone and does not
+call [code]#get#.
+
+When [code]#T# is used as the kernel function of a kernel invocation function,
+the embedded properties apply to every function call operator of [code]#T#.
+
+A function call operator of [code]#T# may also be decorated with the attribute
+that corresponds to an embedded property, provided that the attribute arguments
+and the property values are the same.
+Otherwise, the program is ill formed and the implementation must issue a
+diagnostic.
+
+{note}A lambda expression cannot declare a [code]#get# member function, so a
+kernel defined as a lambda expression must use the attributes in
+<<sec:kernel.attributes>> instead.
+{endnote}
+
+[[sec:khr-kernel-properties-properties]]
+== Kernel properties
+
+This extension adds the following new style properties that can be used with the
+[api]#khr::property::tag::kernel# tag type.
+Each property has the same effect as the corresponding attribute in
+<<sec:kernel.attributes>>, including the effect on kernel information queries.
+
+'''
+
+.[apidef]#khr::property::work_group_size#
+[source,role=synopsis,id=api:khr-kernel-properties-property-work-group-size]
+----
+namespace sycl::khr::property {
+
+template <std::size_t... Dims>
+struct __unspecified_type__ {
+  static constexpr std::size_t value[sizeof...(Dims)] = {Dims...};
+};
+
+template <std::size_t... Dims>
+inline constexpr __unspecified_type__<Dims...> work_group_size;
+
+namespace key {
+struct work_group_size;
+}
+
+} // namespace sycl::khr::property
+----
+
+_Mandates:_ [code]#sizeof...(Dims)# is 1, 2, or 3.
+
+Equivalent to [code]#+[[sycl::reqd_work_group_size(Dims...)]]+#.
+
+'''
+
+.[apidef]#khr::property::work_group_size_hint#
+[source,role=synopsis,id=api:khr-kernel-properties-property-work-group-size-hint]
+----
+namespace sycl::khr::property {
+
+template <std::size_t... Dims>
+struct __unspecified_type__ {
+  static constexpr std::size_t value[sizeof...(Dims)] = {Dims...};
+};
+
+template <std::size_t... Dims>
+inline constexpr __unspecified_type__<Dims...> work_group_size_hint;
+
+namespace key {
+struct work_group_size_hint;
+}
+
+} // namespace sycl::khr::property
+----
+
+_Mandates:_ [code]#sizeof...(Dims)# is 1, 2, or 3.
+
+Equivalent to [code]#+[[sycl::work_group_size_hint(Dims...)]]+#.
+
+'''
+
+.[apidef]#khr::property::sub_group_size#
+[source,role=synopsis,id=api:khr-kernel-properties-property-sub-group-size]
+----
+namespace sycl::khr::property {
+
+template <std::uint32_t Size>
+struct __unspecified_type__ {
+  static constexpr std::uint32_t value = Size;
+};
+
+template <std::uint32_t Size>
+inline constexpr __unspecified_type__<Size> sub_group_size;
+
+namespace key {
+struct sub_group_size;
+}
+
+} // namespace sycl::khr::property
+----
+
+Equivalent to [code]#+[[sycl::reqd_sub_group_size(Size)]]+#.
+
+'''
+
+For each property [code]#P# above with key [code]#K#, the following traits
+inherit from [code]#std::true_type#:
+
+* [code]#khr::is_property<P>#
+* [code]#khr::is_property_key<K>#
+* [code]#khr::is_property_key_compile_time<K>#
+* [code]#khr::is_property_for<P, khr::property::tag::kernel>#
+* [code]#khr::is_property_key_for<K, khr::property::tag::kernel>#
+
+The type of each property is trivially copyable.
+
+[[sec:khr-kernel-properties-example]]
+== Example
+
+[source,,linenums]
+----
+#include <sycl/sycl.hpp>
+
+template <std::size_t WG, std::uint32_t SG>
+struct Scale {
+  float* data;
+
+  void operator()(sycl::nd_item<1> it) const {
+    data[it.get_global_linear_id()] *= 2.0f;
+  }
+
+  auto get(sycl::khr::property::tag::kernel) const {
+    return sycl::khr::properties{sycl::khr::property::work_group_size<WG>,
+                                 sycl::khr::property::sub_group_size<SG>};
+  }
+};
+
+int main() {
+  sycl::queue q;
+  float* data = sycl::malloc_shared<float>(1024, q);
+
+  // The embedded properties apply without any change to the launch site.
+  q.parallel_for(sycl::nd_range<1>{1024, 64}, Scale<64, 16>{data}).wait();
+
+  sycl::free(data, q);
+}
+----
