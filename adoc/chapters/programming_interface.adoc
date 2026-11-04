@@ -1312,7 +1312,8 @@ The context's platform is the platform that contains this device.
 The context contains the selected device.
 The context may also contain other devices from the same platform.
 Whether this happens is implementation defined.
-The context has the asynchronous error handler [code]#asyncHandler#.
+The context has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 '''
 
@@ -1338,7 +1339,8 @@ explicit context(const device& dev, async_handler asyncHandler,
 _Effects:_ Constructs a [code]#context# object that contains the device
 [code]#dev#.
 The context's platform is the platform that contains [code]#dev#.
-The context has the asynchronous error handler [code]#asyncHandler#.
+The context has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 '''
 
@@ -1367,7 +1369,8 @@ explicit context(const platform& plt, async_handler asyncHandler,
 _Effects:_ Constructs a [code]#context# object that contains all of the devices
 in the platform [code]#plt#.
 The context's platform is [code]#plt#.
-The context has the asynchronous error handler [code]#asyncHandler#.
+The context has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if the
 platform [code]#plt# contains no devices.
@@ -1407,7 +1410,8 @@ _Effects:_ Constructs a [code]#context# object that contains all of the devices
 in [code]#deviceList#.
 The context's platform is the platform that contains the devices in
 [code]#deviceList#.
-The context has the asynchronous error handler [code]#asyncHandler#.
+The context has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#deviceList# is empty.
@@ -4018,7 +4022,8 @@ _Effects:_ Constructs a [code]#queue# object using the device selected by
 The queue's platform is the platform that contains this device.
 The queue's context is this platform's default context as described in
 <<sec:platform-class>>.
-The queue has the asynchronous error handler [code]#asyncHandler#.
+The queue has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 '''
 
@@ -4062,7 +4067,8 @@ using the device it selects.
 The queue's platform is the platform that contains this device.
 The queue's context is this platform's default context as described in
 <<sec:platform-class>>.
-The queue has the asynchronous error handler [code]#asyncHandler#.
+The queue has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 '''
 
@@ -4092,7 +4098,8 @@ _Effects:_ Constructs a [code]#queue# object using the device
 The queue's platform is the platform that contains this device.
 The queue's context is this platform's default context as described in
 <<sec:platform-class>>.
-The queue has the asynchronous error handler [code]#asyncHandler#.
+The queue has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 '''
 
@@ -4138,7 +4145,8 @@ described in <<sec:device-selector>>, and a [code]#queue# object is constructed
 using the device it selects.
 The queue's platform is the platform that contains this device.
 The queue's context is [code]#syclContext#.
-The queue has the asynchronous error handler [code]#asyncHandler#.
+The queue has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code if
 [code]#syclContext# does not contain the device selected by
@@ -4176,7 +4184,8 @@ _Effects:_ Constructs a [code]#queue# object using the device
 [code]#syclDevice#.
 The queue's platform is the platform that contains this device.
 The queue's context is [code]#syclContext#.
-The queue has the asynchronous error handler [code]#asyncHandler#.
+The queue has its own copy of the asynchronous error handler
+[code]#asyncHandler#.
 
 _Throws:_ An [code]#exception# with the [code]#errc::invalid# error code unless
 [code]#syclDevice# is contained by [code]#syclContext# or is a
@@ -17788,8 +17797,6 @@ any subsequent invocations of the <<async-handler>>.
 
 The <<async-handler>> may be a named function object type, a lambda expression
 or a [code]#std::function#.
-The queue or context stores its own copy of the <<async-handler>>, so the object
-passed on construction does not need to outlive the queue or context.
 The [code]#exception_list# object passed to the <<async-handler>> is constructed
 by the <<sycl-runtime>>.
 
