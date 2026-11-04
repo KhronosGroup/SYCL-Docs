@@ -18,7 +18,7 @@ The `sycl::khr::is_property` trait classifies only the new-style properties, and
 the `sycl::is_property` trait classifies only the old-style properties.
 
 This strict separation of properties seems reasonable.
-Most functions in the core specification that takes a `sycl::property_list` have
+Most functions in the core specification that take a `sycl::property_list` have
 a corresponding overload in the KHR that takes a `sycl::khr::properties`, and
 most properties in the core specification have a corresponding new-style
 property in the KHR.
