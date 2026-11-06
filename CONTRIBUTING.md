@@ -44,10 +44,8 @@ toward these requirements.
 ### Editorial changes
 
 Changes that do not alter the meaning of the specification (e.g., typos,
-formatting, broken links, CI or build updates) require:
-
-* At least **1 approving review** from a SYCL WG member who works for a
-  different company than the PR author.
+formatting, broken links, CI or build updates) may be merged by the
+**Spec Editor** at their discretion.
 
 ### Conformance tests (SYCL-CTS)
 
