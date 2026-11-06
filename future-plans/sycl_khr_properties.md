@@ -1,6 +1,175 @@
-# Plan for adopting sycl\_khr\_properties into core specification
+# Ancillary documents for the sycl\_khr\_properties extension
 
-## The current situation with the properties KHR
+## Example design patterns for properties
+
+The text of the sycl\_khr\_properties extension does not mandate a specific
+design pattern for our new style of properties because end users are not allowed
+to define their own properties.
+However, we would like implementors to follow some common design patterns, and
+this section proposes patterns to follow in some common scenarios.
+
+### Properties with a single non-type value
+
+When a property has a single value that is non-type, the name of the member
+variable holding that value should be named `value`.
+This applies to both properties with runtime-supplied values and to properties
+with compile-time constant values.
+
+```
+namespace sycl::khr::property {
+
+struct prop1 {
+  constexpr explicit prop1(int v) : value(v) {}
+  int value;
+};
+
+template<int Value>
+struct __unspecified_type__ {
+  static constexpr int value = Value;
+};
+
+template<int Value>
+inline constexpr __unspecified_type__<Value> prop2;
+
+}
+```
+
+### Properties with a type value
+
+Properties that have a compile-time value may define the value as a type instead
+of a constant.
+In such cases, the property defines a member type alias to hold the property's
+value instead of a static constexpr member variable.
+When a property has a single value that is a type, the name of the member type
+alias should be `value_t`.
+
+```
+namespace sycl::khr::property {
+
+template<typename Value>
+struct __unspecified_type__ {
+  using value_t = Value;
+};
+
+template<typename Value>
+inline constexpr __unspecified_type__<Value> prop;
+
+}
+```
+
+### Compile-time properties with an enumeration
+
+When a property has a single compile-time constant value that is a small
+enumeration, it is recommended to define a property variable for each of the
+enumerators.
+
+```
+namespace sycl::khr::property {
+
+enum class access_type {read, write};
+
+template<access_type Access>
+struct __unspecified_type__ {
+  static constexpr access_type value = Access;
+};
+
+// Define a property variable for each enumerator to reduce verbosity in
+// application code.
+inline constexpr __unspecified_type__<access_type::read> access_read;
+inline constexpr __unspecified_type__<access_type::write> access_write;
+
+// There should still be a variable template to enable applications that set
+// the value via metaprogramming.
+template<access_type Access>
+inline constexpr __unspecified_type__<Access> access;
+
+}
+```
+
+### Boolean properties
+
+When a property is a boolean flag, it is recommended to define the property with
+a boolean value, rather than relying on the existence of the property to convey
+the flag.
+This recommendation applies to both properties with runtime-supplied values and
+to properties with compile-time constant values.
+For example, two hypothetical boolean properties could be defined like this:
+
+```
+namespace sycl::khr::property {
+
+struct enable_thing1 {
+  constexpr explicit enable_thing1(bool enable) : value(enable) {}
+  bool value;
+};
+
+template<bool Enable>
+struct __unspecified_type__ {
+  static constexpr bool value = Enable;
+};
+
+template<bool Enable>
+inline constexpr __unspecified_type__<Enable> enable_thing2;
+
+}
+```
+
+An application can then select whether the properties are on or off using code
+like this:
+
+```
+bool thing1 = /* determine at runtime if thing1 is enabled */;
+
+#ifdef THING2
+constexpr bool thing2 = true;
+#else
+constexpr bool thing2 = false;
+#endif
+
+sycl::khr::properties props{
+  sycl::khr::property::enable_thing1{thing1},
+  sycl::khr::property::enable_thing2<thing2>,
+};
+// use "props"
+```
+
+If we did not use this pattern, an application would have to define two
+different `props` variables like this because the type of `props` is different
+depending on whether it contains the `enable_thing1` property.
+In this example, `enable_thing1` and `enable_thing2` are instead defined as
+presence-only properties with no boolean value.
+
+```
+// Anti-pattern: Do not do this!!
+//
+// This illustrates how application code would look like if boolean properties did not
+// have a `bool` parameter and instead relied only on the presence of the property.
+
+bool thing1 = /* determine at runtime if thing1 is enabled */;
+
+if (thing1) {
+  sycl::khr::properties props{
+    sycl::khr::property::enable_thing1,
+#ifdef THING2
+    sycl::khr::property::enable_thing2
+#endif
+  };
+  // use "props"
+}
+else {
+  sycl::khr::properties props{
+#ifdef THING2
+    sycl::khr::property::enable_thing2
+#endif
+  };
+  // use "props"
+}
+```
+
+
+## Plan for adopting sycl\_khr\_properties into core specification
+
+### The current situation with the properties KHR
 
 The sycl\_khr\_properties extension adds a new property mechanism to SYCL, which
 is mostly independent from the properties in the core SYCL 2020 specification.
@@ -30,7 +199,7 @@ We do not allow a single function call to take a mixture of new- and old-style
 properties, but it does not seem like a burden to require applications to adopt
 one property style for any single function call.
 
-## Goal of adopting KHR properties into the core specification
+### Goal of adopting KHR properties into the core specification
 
 We would only adopt the properties from sycl\_khr\_properties into a future
 version of the core specification if we have a goal of deprecating the existing
@@ -52,7 +221,7 @@ core specification for some period of time.
 Therefore, we need a plan for how both property styles will coexist in this
 scenario.
 
-## API conflict if we adopt the KHR properties into the core specification
+### API conflict if we adopt the KHR properties into the core specification
 
 If we decide to adopt the properties from sycl\_khr\_properties into a future
 version of the core specification, most of the APIs will remain distinct.
@@ -73,7 +242,7 @@ trait.
 None of the other traits conflict because no other trait has the same name in
 both property styles.
 
-## Managing the conflicting `is_property` trait
+### Managing the conflicting `is_property` trait
 
 It makes sense for the `sycl::is_property` trait to classify both new-style and
 old-style properties as "true".
@@ -93,7 +262,7 @@ immediately as soon as we add it.
 This trait is needed only so long as we have the old-style properties, and it
 can be removed whenever we decide to remove them from the core specification.
 
-## Alternate solution (rejected)
+### Alternate solution (rejected)
 
 Another possibility is to allow `sycl::properties` and `sycl::property_list` to
 contain a mixture of both new- and old-style properties.
@@ -147,7 +316,7 @@ name of a property (not a property key) as their template parameter.
 Therefore, applications wanting to use these functions to query new-style
 properties would pass the property itself instead of the property's key.
 
-## Interaction between new-style KHR properties and new-style core properties
+### Interaction between new-style KHR properties and new-style core properties
 
 If we decide to adopt the properties from sycl\_khr\_properties into a future
 version of the core specification, we also need to manage interaction between
@@ -214,7 +383,7 @@ properties when we adopt them into the core specification.
 If this happens, we can document that new semantic only in the core
 specification version of the overload.
 
-## Impact on other extensions that define properties
+### Impact on other extensions that define properties
 
 It's also worth considering what will happen to a property defined in some other
 extension if the KHR properties are adopted into the core specification.
