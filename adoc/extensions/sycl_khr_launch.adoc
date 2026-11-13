@@ -118,6 +118,67 @@ int main() {
 }
 ----
 
+== Creating an event
+
+=== Function to create an event
+
+This extension adds the following function to create an event.
+
+'''
+
+.[apidef]#khr::make_event#
+[source,role=synopsis,id=api:make_event]
+----
+namespace sycl::khr {
+
+template <typename PropertyOrList = khr::empty_properties_t>
+event make_event(const context& c, PropertyOrList props = {});
+
+} // namespace sycl::khr
+----
+
+_Constraints:_
+
+* [api]#khr::is_property_for_v<PropertyOrList, event># is [code]#true#, or
+* [api]#khr::is_property_list_for_v<PropertyOrList, event># is [code]#true#.
+
+_Returns:_ An event that is associated with context [code]#c#.
+The event is in the "signaled" state.
+
+_Remarks:_ An event _E_ created with [code]#khr::make_event# can be used as a
+command dependency (e.g. via [api]#khr::enqueue_wait_event#,
+[api]#khr::property::wait_event#, or [code]#handler::depends_on#) for a command
+submitted to some queue _Q_.
+It is not necessary for the context of _E_ to match the context of _Q_.
+
+An event _E_ created with [code]#khr::make_event# can also be associated with a
+command submitted to some queue _Q_ such that _E_ is signaled when the command
+completes (e.g. via [api]#khr::enqueue_signal_event# or
+[api]#khr::property::signal_event#).
+In this case, the context of _E_ and _Q_ must match.
+
+If an event _E_ is used as a command dependency for some command _C_, the
+dependency is captured at the point when _C_ is submitted.
+It is legal to reassociate the event _E_ to a new command (e.g. via
+[api]#khr::enqueue_signal_event# or [api]#khr::property::signal_event#) even
+before command _C_ completes.
+Doing so does not change the dependency for command _C_.
+
+If another host thread is blocked waiting for event _E_ to complete via
+[api]#event::wait# or [api]#event::wait_and_throw# when event _E_ is
+reassociated with a new command (e.g. via [api]#khr::enqueue_signal_event# or
+[api]#khr::property::signal_event#), the behavior of the [api]#event::wait# or
+[api]#event::wait_and_throw# call is undefined.
+
+An event created with the default [api]#event# constructor is equivalent to an
+event created with [code]#khr::make_event# using the default platform's default
+context.
+
+=== Event properties
+
+This extension defines no event properties.
+The [code]#props# above is added for extensibility.
+
 == Properties
 
 This extension uses the classes defined by the sycl_khr_properties extension to
@@ -887,7 +948,7 @@ this operation may be a no-op.{endnote}
 
 '''
 
-.[apititle]#enqueue_signal_event#
+.[apidef]#khr::enqueue_signal_event#
 [source,role=synopsis,id=api:enqueue_signal_event]
 ----
 namespace sycl::khr {
@@ -925,7 +986,7 @@ code if [code]#e# and [code]#q# don't have the same context.
 
 '''
 
-.[apititle]#enqueue_wait_event#
+.[apidef]#khr::enqueue_wait_event#
 [source,role=synopsis,id=api:enqueue_wait_event]
 ----
 namespace sycl::khr {
@@ -983,46 +1044,3 @@ Once the above conditions are met, the event (specified by
 [code]#property::signal_event#) is signaled, if provided.
 
 '''
-
-=== Event-related helper functions
-
-.[apititle]#make_event#
-[source,role=synopsis,id=api:make_event]
-----
-namespace sycl::khr {
-
-event make_event(const context& c);
-
-}
-----
-_Returns:_ An event that is associated with context [code]#c#.
-The event is in the "signaled" state.
-
-{note}The event can be passed to the [code]#enqueue_signal_event# function or
-included in a [code]#khr::properties# list (through
-[code]#property::signal_event#), and as a dependency for other
-commands.{endnote}
-
-== Interactions between event APIs
-
-An event _E_ created via [code]#make_event# can be used as a command dependency
-using the APIs introduced by this extension (e.g. [code]#enqueue_wait_event#) or
-using other APIs (e.g. [code]#handler::depends_on#) for a command submitted to
-some queue _Q_.
-It is not necessary for the context of _E_ to match the context of _Q_.
-
-An event _E_ created via [code]#make_event# can also be used for signaling
-(using the [code]#enqueue_signal_event# function or using
-[code]#property::signal_event#), for a command submitted to some queue _Q_.
-In this case, the context of _E_ and _Q_ must match.
-
-If an event _E_ is used as a command dependency for some command _C_, the
-dependency is captured at the point when _C_ is submitted.
-It is legal to reassociate the event _E_ to a new command via
-[code]#enqueue_signal_event# even before command _C_ completes.
-Doing so does not change the dependency for command _C_.
-
-If another host thread is blocked waiting for event _E_ to complete via
-[code]#event::wait# or [code]#event::wait_and_throw# when event _E_ is
-reassociated with a new command via [code]#enqueue_signal_event#, the behavior
-of the [code]#event::wait# or [code]#event::wait_and_throw# call is undefined.
