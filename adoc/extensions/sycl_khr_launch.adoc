@@ -240,63 +240,6 @@ The following traits inherit from [code]#std::true_type#:
 
 '''
 
-.[apidef]#khr::property::use_accessors#
-[source,role=synopsis,id=api:properties-use-accessors]
-----
-namespace sycl::khr::property {
-
-template<typename... AccessorTs>
-struct use_accessors {
-  use_accessors(const AccessorTs& ...accs);
-  std::tuple<AccessorTs...> value;
-};
-
-namespace key {
-struct use_accessors {};
-}
-
-} // namespace sycl::khr::property
-----
-
-_Constraints:_ Each type in [code]#AccessorTs# is a specialization of
-[code]#accessor#.
-
-When a command is submitted with this property, the command must not begin
-executing until the [code]#buffer# associated with each accessor that the
-property holds can be accessed in a manner compatible with that accessor's
-[code]#access_mode#.
-Each of those accessors must have an [code]#AccessTarget# of
-[code]#target::device# or [code]#target::host_task#.
-
-Because all specializations of this property share a single key
-[code]#property::key::use_accessors#, a properties list can contain at most one
-[code]#use_accessors# property.
-All accessors that a command requires must therefore be passed to a single
-[code]#use_accessors# property.
-
-{note}Unlike the other properties defined by this extension, this property is a
-class template whose template parameters are the types of its runtime-supplied
-values rather than compile-time property values.
-An application obtains it by constructing an instance and letting
-[code]#AccessorTs# be deduced, as in [code]#khr::property::use_accessors{accA,
-accB}#.
-One consequence is that [code]#get_property<property::key::use_accessors>()#
-returns a type that depends on [code]#AccessorTs#, so code which retrieves this
-property must be templated.{endnote}
-
-The following traits inherit from [code]#std::true_type#:
-
-* [code]#is_property<property::use_accessors<AccessorTs...>>#, for any
-  [code]#AccessorTs...#
-* [code]#is_property_key<property::key::use_accessors>#
-* [code]#is_property_for<property::use_accessors<AccessorTs...>, command>#
-* [code]#is_property_key_for<property::key::use_accessors, command>#
-
-[code]#property::use_accessors# is not trivially copyable.
-[code]#property::key::use_accessors# is trivially copyable.
-
-'''
-
 .[apidef]#khr::property::use_kernel_bundle#
 [source,role=synopsis,id=api:properties-use-kernel-bundle]
 ----
@@ -339,9 +282,7 @@ In those specifications, _applying_ [code]#props# to [code]#h# means:
   event that property holds to be signaled once the command is complete;
 * If [code]#props# contains [code]#property::wait_event# or
   [code]#property::wait_events#, calling [code]#h.depends_on# with the event or
-  events that property holds;
-* If [code]#props# contains [code]#property::use_accessors#, calling
-  [code]#h.require# for each accessor that property holds; and
+  events that property holds; and
 * If [code]#props# contains [code]#property::use_kernel_bundle#, calling
   [code]#h.use_kernel_bundle# with the kernel bundle that property holds.
 
@@ -383,10 +324,7 @@ void launch(const queue& q, range<3> r, const KernelType& k, PropertyOrList prop
 _Constraints (1-3):_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-  and
-* Any accessor in [code]#property::use_accessors# must have a target of
-  [code]#target::device#.
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#.
 
 _Effects (1-3):_ Equivalent to:
 [source,sycl]
@@ -431,8 +369,7 @@ _Constraints (1-3):_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects (1-3):_ Equivalent to:
 [source,sycl]
@@ -481,9 +418,7 @@ _Constraints (1-3):_
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
 * The parameter pack consists of 1 or more objects created by the
-  [code]#reduction# function; and
-* Any accessor in [code]#property::use_accessors# must have a target of
-  [code]#target::device#.
+  [code]#reduction# function.
 
 _Constraints (4-6):_ The parameter pack consists of 1 or more objects created by
 the [code]#reduction# function.
@@ -524,10 +459,7 @@ void launch_grouped(const queue& q, range<3> r, range<3> size, const KernelType&
 _Constraints (1-3):_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-  and
-* Any accessor in [code]#property::use_accessors# must have a target of
-  [code]#target::device#.
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#.
 
 _Effects (1-3):_ Equivalent to:
 [source,sycl]
@@ -571,8 +503,7 @@ _Constraints (1-3):_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects (1-3):_ Equivalent to:
 [source,sycl]
@@ -621,9 +552,7 @@ _Constraints (1-3):_
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
 * The parameter pack consists of 1 or more objects created by the
-  [code]#reduction# function; and
-* Any accessor in [code]#property::use_accessors# must have a target of
-  [code]#target::device#.
+  [code]#reduction# function.
 
 _Constraints (4-6):_ The parameter pack consists of 1 or more objects created by
 the [code]#reduction# function.
@@ -658,10 +587,7 @@ void launch_task(const queue& q, const KernelType& k, PropertyOrList props = {})
 _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-  and
-* Any accessor in [code]#property::use_accessors# must have a target of
-  [code]#target::device#.
+  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#.
 
 _Effects:_ Equivalent to:
 [source,sycl]
@@ -693,8 +619,7 @@ _Constraints (1):_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects (1):_ Equivalent to:
 [source,sycl]
@@ -728,9 +653,7 @@ _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* Any accessor in [code]#property::use_accessors# must have a target of
-  [code]#target::host_task#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Preconditions:_ The callable function [code]#hostTaskCallable# does not call
 any function in the [code]#sycl# namespace.
@@ -763,8 +686,7 @@ _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects:_ Equivalent to:
 [source,sycl]
@@ -795,8 +717,7 @@ _Constraints:_
 * [code]#T# is <<device-copyable>>;
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Preconditions:_
 
@@ -820,135 +741,6 @@ q.submit([&](handler& h) {
 
 '''
 
-.[apititle]#enqueue_copy# (accessors, host to device)
-[source,role=synopsis,id=api:enqueue_copy-accessor-h2d]
-----
-namespace sycl::khr {
-
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_copy(const queue& q, const SrcT* src, accessor<DestT, DestDims, DestMode, target::device> dest, PropertyOrList props = {});           (1)
-
-template <typename SrcT, typename DestT, int DestDims, access_mode DestMode, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_copy(const queue& q, std::shared_ptr<SrcT> src, accessor<DestT, DestDims, DestMode, target::device> dest, PropertyOrList props = {}); (2)
-
-}
-----
-
-Copies from host to device.
-
-_Constraints:_
-
-* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
-* [code]#DestMode# is [code]#access_mode::write# or
-  [code]#access_mode::read_write#;
-* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
-
-_Preconditions:_
-
-* [code]#src# is a host pointer; and
-* [code]#src# points to an allocation of at least as many bytes as the range
-  represented by [code]#dest#.
-
-_Effects:_ Equivalent to:
-[source,sycl]
-----
-q.submit([&](handler& h) {
-  /* apply props to h */
-  h.require(dest);
-  h.copy(src, dest);
-});
-----
-
-'''
-
-.[apititle]#enqueue_copy# (accessors, device to host)
-[source,role=synopsis,id=api:enqueue_copy-accessor-d2h]
-----
-namespace sycl::khr {
-
-template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, DestT* dest, PropertyOrList props = {});                 (1)
-
-template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, std::shared_ptr<DestT> dest, PropertyOrList props = {}); (2)
-
-}
-----
-
-Copies from device to host.
-
-_Constraints:_
-
-* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
-* [code]#DestMode# is [code]#access_mode::read# or
-  [code]#access_mode::read_write#;
-* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
-
-_Preconditions:_
-
-* [code]#dest# is a host pointer; and
-* [code]#dest# points to an allocation of at least as many bytes as the range
-  represented by [code]#src#.
-
-_Effects:_ Equivalent to:
-[source,sycl]
-----
-q.submit([&](handler& h) {
-  /* apply props to h */
-  h.require(src);
-  h.copy(src, dest);
-});
-----
-
-'''
-
-.[apititle]#enqueue_copy# (accessors, device to device)
-[source,role=synopsis,id=api:enqueue_copy-accessor-d2d]
-----
-namespace sycl::khr {
-
-template <typename SrcT, int SrcDims, access_mode SrcMode, typename DestT, int DestDims, access_mode DestMode, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_copy(const queue& q, accessor<SrcT, SrcDims, SrcMode, target::device> src, accessor<DestT, DestDims, DestMode, target::device> dest, PropertyOrList props = {});
-
-}
-----
-
-Copies between two device accessors.
-
-_Constraints:_
-
-* [code]#SrcT# and [code]#DestT# are <<device-copyable>>;
-* [code]#SrcMode# is [code]#access_mode::read# or
-  [code]#access_mode::read_write#;
-* [code]#DestMode# is [code]#access_mode::write# or
-  [code]#access_mode::read_write#;
-* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
-
-_Effects:_ Equivalent to:
-[source,sycl]
-----
-q.submit([&](handler& h) {
-  /* apply props to h */
-  h.require(src);
-  h.require(dest);
-  h.copy(src, dest);
-});
-----
-
-_Throws:_ A synchronous [code]#exception# with the [code]#errc::invalid# error
-code if [code]#dest.get_count() < src.get_count()#.
-
-'''
-
 .[apititle]#enqueue_memset#
 [source,role=synopsis,id=api:enqueue_memset]
 ----
@@ -964,8 +756,7 @@ _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects:_ Equivalent to:
 [source,sycl]
@@ -984,76 +775,24 @@ q.submit([&](handler& h) {
 namespace sycl::khr {
 
 template <typename T, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_fill(const queue& q, T* ptr, const T& pattern, size_t count, PropertyOrList props = {});                     (1)
-
-template <typename T, int Dims, access_mode Mode, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_fill(const queue& q, accessor<T, Dims, Mode, target::device> dest, const T& src, PropertyOrList props = {}); (2)
-
-}
-----
-
-_Constraints (1):_
-
-* [code]#T# is <<device-copyable>>;
-* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
-
-_Constraints (2):_
-
-* [code]#T# is <<device-copyable>>;
-* [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
-  [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
-
-_Effects (1):_ Equivalent to:
-[source,sycl]
-----
-q.submit([&](handler& h) {
-  /* apply props to h */
-  h.fill(ptr, pattern, count);
-});
-----
-
-_Effects (2):_ Equivalent to:
-[source,sycl]
-----
-q.submit([&](handler& h) {
-  /* apply props to h */
-  h.require(dest);
-  h.fill(dest, src);
-});
-----
-
-'''
-
-.[apititle]#enqueue_update_host#
-[source,role=synopsis,id=api:enqueue_update_host]
-----
-namespace sycl::khr {
-
-template <typename T, int Dims, access_mode Mode, typename PropertyOrList = khr::empty_properties_t>
-void enqueue_update_host(const queue& q, accessor<T, Dims, Mode, target::device> acc, PropertyOrList props = {});
+void enqueue_fill(const queue& q, T* ptr, const T& pattern, size_t count, PropertyOrList props = {});
 
 }
 ----
 
 _Constraints:_
 
+* [code]#T# is <<device-copyable>>;
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects:_ Equivalent to:
 [source,sycl]
 ----
 q.submit([&](handler& h) {
   /* apply props to h */
-  h.require(acc);
-  h.update_host(acc);
+  h.fill(ptr, pattern, count);
 });
 ----
 
@@ -1073,8 +812,7 @@ _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects:_ Equivalent to:
 [source,sycl]
@@ -1101,8 +839,7 @@ _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects:_ Equivalent to:
 [source,sycl]
@@ -1131,8 +868,7 @@ _Constraints:_
 
 * [code]#khr::is_property_for_v<PropertyOrList, command># is [code]#true#, or
   [code]#khr::is_property_list_for_v<PropertyOrList, command># is [code]#true#;
-* [code]#props# does not contain [code]#property::use_kernel_bundle#; and
-* [code]#props# does not contain [code]#property::use_accessors#.
+* [code]#props# does not contain [code]#property::use_kernel_bundle#.
 
 _Effects:_ Enqueues a command barrier.
 Any commands submitted after this barrier cannot begin execution until the
