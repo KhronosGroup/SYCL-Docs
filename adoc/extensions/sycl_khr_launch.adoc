@@ -1,20 +1,25 @@
 [[sec:khr-launch]]
 = sycl_khr_launch
 
-This extension provides an alternative mechanism for submitting commands to a
-device via free-functions that require developers to opt-in to the handling of
-properties and the creation of [code]#event# objects.
-It also adds an ability to reuse the same [code]#event# object to track
-completion of multiple command submissions.
-
-The creation of [code]#event# objects may incur overheads that increase the
-latency of submitting commands to devices, even if the [code]#event# object is
-immediately discarded and never used.
-Similarly, using a [code]#handler# can incur overheads even when there are no
-dependent events or accessors registered.
-Requiring developers to opt-in to these features is therefore expected to
-improve the performance of many SYCL programs, by ensuring that SYCL developers
-only pay the associated costs when necessary.
+This extension helps reduce the latency when submitting commands to a queue by
+restructuring the queue submission APIs.
+There are three main changes.
+First, the APIs in this extension no longer support the [code]#handler#
+parameter.
+Instead, functionality related to the handler has been replaced by a properties
+parameter, which provides the same features without needing to store information
+in a temporary [code]#handler# object.
+Second, the APIs in this extension no longer return an event for each command
+submission.
+This allows applications to elide creation of an event in cases where the
+application doesn't need one.
+In cases where the application does need an event for a particular submission,
+it can request that an event be signaled for that particular submission.
+Finally, the model for events has been changed, so that an event object no
+longer has a 1:1 correspondence with a single command.
+An event can now be created independent from any command, and then later
+associated with a particular command submission.
+This allows a single event object to be reused across many submissions.
 
 == Dependencies
 
