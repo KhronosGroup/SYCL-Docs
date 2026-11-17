@@ -492,8 +492,9 @@ inline constexpr bool is_property_list_for_v = is_property_list_for<T, Class>::v
 ----
 
 [code]#is_property_list_for# inherits from [code]#std::true_type# if [code]#T#
-is the type of a [api]#khr::properties# list and all of the properties that it
-contains can be used with class [code]#Class#.
+is the type of a property which can be used with class [code]#Class# or if
+[code]#T# is the type of a [api]#khr::properties# list and all of the properties
+that it contains can be used with class [code]#Class#.
 Otherwise it inherits from [code]#std::false_type#.
 When [code]#T# is the empty properties list, this trait inherits from
 [code]#std::true_type#.
@@ -572,10 +573,8 @@ template <typename PropertyOrList>
 explicit context(PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as xref:api:context-ctor[[code]#+context(propList)+#]
 except that the properties are specified by [code]#props#.
@@ -589,10 +588,8 @@ template <typename PropertyOrList>
 explicit context(async_handler asyncHandler, PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:context-ctor-async-handler[[code]#+context(asyncHandler, propList)+#]
@@ -607,10 +604,8 @@ template <typename PropertyOrList>
 explicit context(const device& dev, PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as xref:api:context-ctor-device[[code]#+context(dev,
 propList)+#] except that the properties are specified by [code]#props#.
@@ -625,10 +620,8 @@ explicit context(const device& dev, async_handler asyncHandler,
                  PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:context-ctor-device-async-handler[[code]#+context(dev, asyncHandler,
@@ -643,10 +636,8 @@ template <typename PropertyOrList>
 explicit context(const platform& plt, PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:context-ctor-platform[[code]#+context(plt, propList)+#] except that the
@@ -662,10 +653,8 @@ explicit context(const platform& plt, async_handler asyncHandler,
                  PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:context-ctor-platform-async-handler[[code]#+context(plt, asyncHandler,
@@ -681,10 +670,8 @@ explicit context(const std::vector<device>& deviceList,
                  PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:context-ctor-device-list[[code]#+context(deviceList, propList)+#]
@@ -700,10 +687,8 @@ explicit context(const std::vector<device>& deviceList,
                  async_handler asyncHandler, PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, context># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, context># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, context># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:context-ctor-device-list-async-handler[[code]#+context(deviceList,
@@ -793,10 +778,8 @@ template <typename PropertyOrList>
 explicit queue(PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, queue># is
+[code]#true#.
 
 _Effects:_ The same effect as xref:api:queue-ctor[[code]#+queue(propList)+#]
 except that the properties are specified by [code]#props#.
@@ -810,10 +793,8 @@ template <typename PropertyOrList>
 explicit queue(const async_handler& asyncHandler, PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, queue># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-async-handler[[code]#+queue(asyncHandler, propList)+#]
@@ -832,9 +813,8 @@ explicit queue(const DeviceSelector& deviceSelector,
 _Constraints:_
 
 * [code]#DeviceSelector# is a type that satisfies the requirements of a
-  <<device-selector>> as defined in <<sec:device-selector>>, and either
-** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+  <<device-selector>> as defined in <<sec:device-selector>>, and
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-selector[[code]#+queue(deviceSelector, propList)+#] except
@@ -854,9 +834,8 @@ explicit queue(const DeviceSelector& deviceSelector,
 _Constraints:_
 
 * [code]#DeviceSelector# is a type that satisfies the requirements of a
-  <<device-selector>> as defined in <<sec:device-selector>>, and either
-** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+  <<device-selector>> as defined in <<sec:device-selector>>, and
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-selector-async-handler[[code]#+queue(deviceSelector,
@@ -872,10 +851,8 @@ template <typename PropertyOrList>
 explicit queue(const device& syclDevice, PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, queue># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-device[[code]#+queue(syclDevice, propList)+#] except that
@@ -891,10 +868,8 @@ explicit queue(const device& syclDevice, const async_handler& asyncHandler,
                PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, queue># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-device-async-handler[[code]#+queue(syclDevice, asyncHandler,
@@ -913,9 +888,8 @@ explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
 _Constraints:_
 
 * [code]#DeviceSelector# is a type that satisfies the requirements of a
-  <<device-selector>> as defined in <<sec:device-selector>>, and either
-** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+  <<device-selector>> as defined in <<sec:device-selector>>, and
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-context-selector[[code]#+queue(syclContext, deviceSelector,
@@ -935,9 +909,8 @@ explicit queue(const context& syclContext, const DeviceSelector& deviceSelector,
 _Constraints:_
 
 * [code]#DeviceSelector# is a type that satisfies the requirements of a
-  <<device-selector>> as defined in <<sec:device-selector>>, and either
-** [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-** [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+  <<device-selector>> as defined in <<sec:device-selector>>, and
+* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-context-selector-async-handler[[code]#+queue(syclContext,
@@ -954,10 +927,8 @@ explicit queue(const context& syclContext, const device& syclDevice,
                PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, queue># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-context-device[[code]#+queue(syclContext, syclDevice,
@@ -974,10 +945,8 @@ explicit queue(const context& syclContext, const device& syclDevice,
                PropertyOrList props);
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, queue># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, queue># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, queue># is
+[code]#true#.
 
 _Effects:_ The same effect as
 xref:api:queue-ctor-context-device-async-handler[[code]#+queue(syclContext,
@@ -1182,12 +1151,6 @@ class usm_allocator {
 _Constraints:_
 
 * [code]#AllocKind# is [code]#usm::alloc::host# and
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
-  is [code]#true#, or
-* [code]#AllocKind# is [code]#usm::alloc::shared# and
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
-  is [code]#true#, or
-* [code]#AllocKind# is [code]#usm::alloc::host# and
   [code]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::usm_host># is [code]#true#, or
 * [code]#AllocKind# is [code]#usm::alloc::shared# and
@@ -1250,12 +1213,8 @@ T* aligned_alloc_device(std::size_t alignment, std::size_t count,
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
-  is [code]#true#, or
-* [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_device># is [code]#true#.
+_Constraints:_ [code]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::usm_device># is [code]#true#.
 
 _Effects:_ The same as the corresponding device USM allocation function from
 <<sec:usm-device-allocation>> except that the properties are specified by
@@ -1310,12 +1269,8 @@ T* aligned_alloc_host(std::size_t alignment, std::size_t count,
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
-  is [code]#true#, or
-* [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_host># is [code]#true#.
+_Constraints:_ [code]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::usm_host># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding host USM allocation function
 from <<sec:usm-host-allocation>> except that the properties are specified by
@@ -1373,12 +1328,8 @@ T* aligned_alloc_shared(std::size_t alignment, std::size_t count,
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
-  is [code]#true#, or
-* [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_shared># is [code]#true#.
+_Constraints:_ [code]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::usm_shared># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding shared USM allocation function
 from <<sec:usm-shared-allocation>> except that the properties are specified by
@@ -1440,12 +1391,6 @@ T* aligned_alloc(std::size_t alignment, std::size_t count,
 
 _Constraints:_
 
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
-  is [code]#true#, or
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
-  is [code]#true#, or
-* [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
-  is [code]#true#, or
 * [code]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::usm_device># is [code]#true#, or
 * [code]#khr::is_property_list_for_v<PropertyOrList,
@@ -1460,20 +1405,17 @@ are specified by [code]#props#.
 _Throws:_
 
 * An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
-  [code]#usm::alloc::device# and both
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_device>#
-  and [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_device># are [code]#false#.
+  [code]#usm::alloc::device# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_device># is [code]#false#.
 * An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
-  [code]#usm::alloc::host# and both
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_host>#
-  and [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_host># are [code]#false#.
+  [code]#usm::alloc::host# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_host># is [code]#false#.
 * An [code]#exception# with error code [code]#errc::invalid# if [code]#kind# is
-  [code]#usm::alloc::shared# and both
-  [code]#khr::is_property_for_v<PropertyOrList, khr::property::tag::usm_shared>#
-  and [code]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::usm_shared># are [code]#false#.
+  [code]#usm::alloc::shared# and
+  [code]#khr::is_property_list_for_v<PropertyOrList,
+  khr::property::tag::usm_shared># is [code]#false#.
 
 [[sec:khr-properties-usm-properties]]
 === New USM properties
@@ -1525,17 +1467,12 @@ __unspecified__ reduction(span<T, Extent> vars, BinaryOperation combiner,
 } // namespace sycl
 ----
 
-_Constraints_ (1):
+_Constraints_ (1): [api]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::reduction># is [code]#true#.
 
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
-  is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::reduction># is [code]#true#.
+_Constraints_ (2):
 
-_Constraints_ (2): [code]#Extent != sycl::dynamic_extent#, and either:
-
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
-  is [code]#true#, or
+* [code]#Extent != sycl::dynamic_extent#, and
 * [api]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::reduction># is [code]#true#.
 
@@ -1562,17 +1499,12 @@ __unspecified__ reduction(span<T, Extent> vars, const T& identity,
 } // namespace sycl
 ----
 
-_Constraints_ (1):
+_Constraints_ (1): [api]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::reduction># is [code]#true#.
 
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
-  is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::reduction># is [code]#true#.
+_Constraints_ (2):
 
-_Constraints_ (2): [code]#Extent != sycl::dynamic_extent#, and either:
-
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::reduction>#
-  is [code]#true#, or
+* [code]#Extent != sycl::dynamic_extent#, and
 * [api]#khr::is_property_list_for_v<PropertyOrList,
   khr::property::tag::reduction># is [code]#true#.
 
@@ -1671,12 +1603,8 @@ compile(const kernel_bundle<bundle_state::input>& inputBundle,
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::compile># is
-  [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList,
-  khr::property::tag::compile># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::compile># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding [code]#compile# overload from
 <<sec:bundles.compile-link>> except that the properties are specified by
@@ -1716,12 +1644,8 @@ link(const kernel_bundle<bundle_state::object>& objectBundle,
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::link># is
-  [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::link>#
-  is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::link># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding [code]#link# overload from
 <<sec:bundles.compile-link>> except that the properties are specified by
@@ -1751,12 +1675,8 @@ build(const kernel_bundle<bundle_state::input>& inputBundle,
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, khr::property::tag::build># is
-  [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, khr::property::tag::build>#
-  is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList,
+khr::property::tag::build># is [code]#true#.
 
 _Effects:_ The same effect as the corresponding [code]#build# overload from
 <<sec:bundles.compile-link>> except that the properties are specified by
@@ -1796,10 +1716,8 @@ class stream {
 } // namespace sycl
 ----
 
-_Constraints:_
-
-* [api]#khr::is_property_for_v<PropertyOrList, stream># is [code]#true#, or
-* [api]#khr::is_property_list_for_v<PropertyOrList, stream># is [code]#true#.
+_Constraints:_ [api]#khr::is_property_list_for_v<PropertyOrList, stream># is
+[code]#true#.
 
 _Effects:_ The same effect as [code]#stream(totalBufferSize, workItemBufferSize,
 cgh, propList)# from <<sec:stream-class-interface>> except that the properties
