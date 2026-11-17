@@ -1,0 +1,307 @@
+[[sec:khr-work-group-scratch-memory]]
+= sycl_khr_work_group_scratch_memory
+
+This extension allows a kernel to use an allocation of <<local-memory>> whose
+size is chosen at the time the kernel is launched, without passing a
+[code]#local_accessor# as a kernel argument.
+The size of the allocation is passed as a property to the kernel launch
+function, and the kernel obtains a pointer to the allocation by calling a free
+function.
+
+{note} Other GPU programming models provide similar functionality through
+dynamically-sized [code]#+extern __shared__+# arrays.
+Unlike those arrays, this extension provides a single function which returns a
+pointer to the start of the allocation, so it is clear that all uses of the
+allocation within a kernel refer to the same memory.
+{endnote}
+
+[[sec:khr-work-group-scratch-memory-dependencies]]
+== Dependencies
+
+This extension depends on the following other KHR extensions:
+
+* <<sec:khr-properties,sycl_khr_properties>>
+* <<sec:khr-launch,sycl_khr_launch>>
+
+[[sec:khr-work-group-scratch-memory-header-files]]
+== Header files
+
+The APIs defined in this extension are provided by the [code]#<sycl/sycl.hpp>#
+header file.
+
+If the implementation also implements the
+<<sec:khr-split-headers,sycl_khr_split_headers>> extension, then the APIs
+defined in this extension are additionally provided by the header files listed
+in <<table.khr-work-group-scratch-memory-headers>>.
+
+[[table.khr-work-group-scratch-memory-headers]]
+.Header files that provide the APIs of this extension
+[width="100%",options="header",cols="1,2"]
+|====
+|Header
+|APIs
+
+|[code]#<sycl/khr/split_headers/version.hpp>#
+|The [code]#SYCL_KHR_WORK_GROUP_SCRATCH_MEMORY# feature test macro from
+<<sec:khr-work-group-scratch-memory-feature-test>>.
+
+|[code]#<sycl/khr/work_group_scratch_memory.hpp>#
+|The [api]#khr::property::work_group_scratch_size# property and its key from
+<<sec:khr-work-group-scratch-memory-size-property>>, and the
+[api]#khr::get_work_group_scratch_memory# functions from
+<<sec:khr-work-group-scratch-memory-functions>>.
+|====
+
+[[sec:khr-work-group-scratch-memory-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_WORK_GROUP_SCRATCH_MEMORY# to one of the values defined in the
+table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-work-group-scratch-memory-allocation]]
+== Work-group scratch memory
+
+When a kernel is launched with the [api]#khr::property::work_group_scratch_size#
+property, each <<work-group>> of the kernel invocation receives its own
+independent allocation of <<local-memory>>, called the _scratch allocation_.
+The size of the scratch allocation in bytes is the [code]#value# of the
+property.
+The scratch allocation is shared between all <<work-item,work-items>> of the
+work-group.
+
+The scratch allocation has the following characteristics:
+
+* The scratch allocation is allocated before any work-item in the work-group
+  begins executing the kernel, and it is deallocated after all work-items in the
+  work-group have completed executing the kernel.
+* When the scratch allocation is allocated, it implicitly creates objects of
+  implicit-lifetime types (as defined in the {cpp} core language) with
+  indeterminate values.
+  The application is responsible for constructing objects of other types in that
+  memory (e.g. by calling placement-new).
+* The address of the scratch allocation is aligned to at least
+  [code]#alignof(std::max_align_t)#.
+* The scratch allocation does not overlap any other <<local-memory>> allocated
+  for the kernel invocation, such as the memory allocated by a
+  [code]#local_accessor#.
+
+Accessing memory outside of the scratch allocation through a pointer returned by
+[api]#khr::get_work_group_scratch_memory# results in undefined behavior.
+
+{note} As with any other <<local-memory>>, a work-item must synchronize with
+other work-items in the work-group (for example, by calling
+[code]#group_barrier#) before reading values that those work-items have written
+to the scratch allocation.
+{endnote}
+
+[[sec:khr-work-group-scratch-memory-size-property]]
+== Scratch size property
+
+This extension adds the following new style property, which can be used with the
+grouped kernel launch functions defined by the
+<<sec:khr-launch,sycl_khr_launch>> extension.
+
+'''
+
+.[apidef]#khr::property::work_group_scratch_size#
+[source,role=synopsis,id=api:khr-property-work-group-scratch-size]
+----
+namespace sycl::khr::property {
+
+struct work_group_scratch_size {
+  constexpr explicit work_group_scratch_size(std::size_t bytes)
+      : value{bytes} {}
+  std::size_t value;
+};
+
+namespace key {
+struct work_group_scratch_size;
+}
+
+} // namespace sycl::khr::property
+----
+
+When a kernel is launched with this property, the [code]#value# of the property
+is the size in bytes of the scratch allocation of each work-group, as described
+in <<sec:khr-work-group-scratch-memory-allocation>>.
+
+The following traits inherit from [code]#std::true_type#:
+
+* [code]#khr::is_property<khr::property::work_group_scratch_size>#
+* [code]#khr::is_property_key<khr::property::key::work_group_scratch_size>#
+* [code]#khr::is_property_for<khr::property::work_group_scratch_size,
+  khr::property::tag::launch_grouped>#
+* [code]#khr::is_property_key_for<khr::property::key::work_group_scratch_size,
+  khr::property::tag::launch_grouped>#
+
+[code]#khr::property::work_group_scratch_size# is trivially copyable.
+
+'''
+
+[[sec:khr-work-group-scratch-memory-launch]]
+=== Launching a kernel with scratch memory
+
+{note} Because this property is classified only for
+[code]#khr::property::tag::launch_grouped#, the _Constraints_ of the functions
+defined by <<sec:khr-launch,sycl_khr_launch>> allow it only for grouped kernel
+launches, such as [code]#khr::launch_grouped#.
+{endnote}
+
+The scratch allocation is counted as part of the <<local-memory>> required by
+the kernel invocation, together with the memory allocated by any
+[code]#local_accessor# used by the kernel and any <<local-memory>> that the
+implementation requires to execute the kernel, including memory needed to
+satisfy alignment requirements.
+If the device cannot provide the <<local-memory>> required by a kernel
+invocation, the kernel launch function must throw a synchronous
+[code]#exception# with the [code]#errc::memory_allocation# error code.
+
+{note} The total amount of <<local-memory>> on a device is reported by
+[api]#info::device::local_mem_size#.
+Because an implementation may require <<local-memory>> for its own use, a kernel
+launch can fail with this error even if the size of the scratch allocation and
+the sizes of all [code]#local_accessor# allocations together do not exceed that
+value.
+{endnote}
+
+[[sec:khr-work-group-scratch-memory-functions]]
+== Obtaining a pointer to scratch memory
+
+This extension adds the following free functions to the [code]#sycl::khr#
+namespace.
+
+'''
+
+.[apidef]#khr::get_work_group_scratch_memory#
+[source,role=synopsis,id=api:khr-get-work-group-scratch-memory]
+----
+namespace sycl::khr {
+
+void* get_work_group_scratch_memory();
+
+} // namespace sycl::khr
+----
+
+_Preconditions:_ This function is called from within a <<sycl-kernel-function>>
+(or any of the functions it calls) whose kernel invocation was launched with an
+explicit work-group size and with the
+[api]#khr::property::work_group_scratch_size# property.
+
+_Returns:_ A pointer to the start of the scratch allocation of the
+<<work-group>> to which the calling work-item belongs.
+The returned pointer points to <<local-memory>>.
+
+{note} Implementations are encouraged to diagnose a launch that omits the
+[api]#khr::property::work_group_scratch_size# property when they can determine
+that the kernel calls this function, for example by throwing a synchronous
+[code]#exception# with the [code]#errc::memory_allocation# error code from the
+kernel launch function.
+{endnote}
+
+{note} Because the returned pointer points to <<local-memory>>, an application
+can convert it to a [code]#multi_ptr# in the local address space without a
+run-time check, for example by calling
+[code]#khr::static_addrspace_cast<access::address_space::local_space>#.
+{endnote}
+
+'''
+
+.[apititle]#khr::get_work_group_scratch_memory# (typed)
+[source,role=synopsis,id=api:khr-get-work-group-scratch-memory-typed]
+----
+namespace sycl::khr {
+
+template <typename T>
+T* get_work_group_scratch_memory();
+
+} // namespace sycl::khr
+----
+
+_Mandates:_ [code]#T# is a complete object type, and [code]#alignof(T)# is less
+than or equal to [code]#alignof(std::max_align_t)#.
+
+_Preconditions:_ This function is called from within a <<sycl-kernel-function>>
+(or any of the functions it calls) whose kernel invocation was launched with an
+explicit work-group size and with the
+[api]#khr::property::work_group_scratch_size# property.
+
+_Returns:_ [code]#static_cast<T*>(khr::get_work_group_scratch_memory())#.
+
+{note} To store an object whose alignment is greater than
+[code]#alignof(std::max_align_t)#, an application can request additional bytes
+in the [api]#khr::property::work_group_scratch_size# property and compute a
+suitably aligned address within the scratch allocation by rounding the returned
+address up to the required alignment.
+{endnote}
+
+'''
+
+[[sec:khr-work-group-scratch-memory-example]]
+== Example
+
+The example below computes the sum of the elements handled by each work-group.
+The amount of scratch memory depends on the work-group size, which is a run-time
+value.
+
+[source,,linenums]
+----
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <sycl/sycl.hpp>
+
+int main(int argc, char* argv[]) {
+  constexpr size_t N = 1024;
+
+  // The work-group size is chosen at run time and must divide N.
+  size_t wg = (argc > 1) ? std::atoi(argv[1]) : 64;
+
+  sycl::queue q;
+  int* in = sycl::malloc_shared<int>(N, q);
+  int* out = sycl::malloc_shared<int>(N / wg, q);
+  std::fill(in, in + N, 1);
+
+  // Request one int of scratch memory per work-item.
+  sycl::khr::properties props{
+      sycl::khr::property::work_group_scratch_size{wg * sizeof(int)}};
+
+  sycl::khr::launch_grouped(q, sycl::range<1>{N}, sycl::range<1>{wg},
+                            [=](sycl::nd_item<1> it) {
+    int* scratch = sycl::khr::get_work_group_scratch_memory<int>();
+    size_t lid = it.get_local_id(0);
+
+    scratch[lid] = in[it.get_global_id(0)];
+    sycl::group_barrier(it.get_group());
+
+    if (lid == 0) {
+      int sum = 0;
+      for (size_t i = 0; i < wg; ++i)
+        sum += scratch[i];
+      out[it.get_group_linear_id()] = sum;
+    }
+  }, props);
+  q.wait();
+
+  for (size_t g = 0; g < N / wg; ++g) {
+    if (out[g] != static_cast<int>(wg)) {
+      std::cout << "Wrong value " << out[g] << " for group " << g << std::endl;
+      return 1;
+    }
+  }
+  std::cout << "Good computation!" << std::endl;
+
+  sycl::free(in, q);
+  sycl::free(out, q);
+  return 0;
+}
+----
