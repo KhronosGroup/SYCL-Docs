@@ -11440,7 +11440,7 @@ underlying [code]#value_type# or at the alignment specified by
 [code]#Alignment#, whichever is greater.
 
 Two [code]#usm_allocator# objects compare equal if and only if they have the
-same context and the same device.
+same USM kind, the same context and the same device.
 Storage allocated by either of two allocators that compare equal can be
 deallocated via the other, as required by the {cpp} named requirement
 [code]#Allocator#.
@@ -11492,8 +11492,8 @@ public:
 
   /// Equality Comparison
   ///
-  /// Allocators compare equal if and only if they have the same context and
-  /// device, regardless of their USM kind or alignment
+  /// Allocators compare equal if and only if they have the same USM kind,
+  /// context, and device, regardless of their alignment
   template <class U, usm::alloc AllocKindU, std::size_t AlignmentU>
   friend bool operator==(const usm_allocator<T, AllocKind, Alignment>&,
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
