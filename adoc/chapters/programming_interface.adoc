@@ -11441,8 +11441,16 @@ Memory allocated by this allocator is suitably aligned for objects of its
 underlying [code]#value_type# or at the alignment specified by
 [code]#Alignment#, whichever is greater.
 
+Two [code]#usm_allocator# objects compare equal if and only if they have the
+same USM kind, the same context and the same device.
+Storage allocated by either of two allocators that compare equal can be
+deallocated via the other, as required by the {cpp} named requirement
+[code]#Allocator#.
+
 A synopsis of the [code]#usm_allocator# class is provided below.
 The constructors are listed in <<table.constructors.usm-allocator>>.
+The [code]#has_property# and [code]#get_property# member functions are described
+in <<subsec:properties-interface>>.
 
 [source,,linenums]
 ----
@@ -11468,7 +11476,7 @@ public:
   usm_allocator(const usm_allocator& other);
   usm_allocator(usm_allocator&&) noexcept;
   usm_allocator& operator=(const usm_allocator&);
-  usm_allocator& operator=(usm_allocator&&);
+  usm_allocator& operator=(usm_allocator&&) noexcept;
 
   template <class U>
   usm_allocator(usm_allocator<U, AllocKind, Alignment> const&) noexcept;
@@ -11479,17 +11487,22 @@ public:
   /// Deallocate memory
   void deallocate(T* Ptr, std::size_t count);
 
+  /// Property interface
+  template <typename Property> bool has_property() const noexcept;
+
+  template <typename Property> Property get_property() const;
+
   /// Equality Comparison
   ///
-  /// Allocators only compare equal if they are of the same USM kind, alignment,
-  /// context, and device
+  /// Allocators compare equal if and only if they have the same USM kind,
+  /// context, and device, regardless of their alignment
   template <class U, usm::alloc AllocKindU, std::size_t AlignmentU>
   friend bool operator==(const usm_allocator<T, AllocKind, Alignment>&,
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
 
   /// Inequality Comparison
-  /// Allocators only compare unequal if they are not of the same USM kind, alignment,
-  /// context, or device
+  ///
+  /// Equivalent to !(lhs == rhs)
   template <class U, usm::alloc AllocKindU, std::size_t AlignmentU>
   friend bool operator!=(const usm_allocator<T, AllocKind, Alignment>&,
                          const usm_allocator<U, AllocKindU, AlignmentU>&);
