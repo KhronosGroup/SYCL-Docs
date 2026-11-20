@@ -1,0 +1,491 @@
+[[sec:khr-virtual-mem]]
+= sycl_khr_virtual_mem
+
+This extension adds virtual memory support to SYCL, allowing applications to
+reserve virtual address ranges and map them to physical memory allocations.
+This can avoid expensive reallocations and reduce the need to have all physical
+memory resident while relocating data.
+
+[[sec:khr-virtual-mem-dependencies]]
+== Dependencies
+
+This extension depends on the <<sec:khr-properties,sycl_khr_properties>>
+extension.
+
+[[sec:khr-virtual-mem-feature-test]]
+== Feature test macro
+
+An implementation supporting this extension must predefine the macro
+[code]#SYCL_KHR_VIRTUAL_MEM# to one of the values defined in the table below.
+
+[%header,cols="1,5"]
+|===
+|Value
+|Description
+
+|1
+|Initial version of this extension.
+|===
+
+[[sec:khr-virtual-mem-overview]]
+== Overview
+
+Virtual address ranges are reserved in a context and can be mapped to
+allocations of physical memory.
+The application is responsible for managing the reservations, mappings, and
+access modes, and for ensuring that commands are no longer using a range before
+it is unmapped.
+
+[[sec:khr-virtual-mem-backend-support]]
+== Backend support status
+
+The APIs in this extension may be used only with devices that have
+[api]#aspect::khr_virtual_mem#.
+The application must check that the relevant devices have this aspect before
+using the APIs.
+If it does not, the implementation throws a synchronous exception with the
+[api]#errc::feature_not_supported# error code.
+
+[[sec:khr-virtual-mem-device-aspect]]
+== Device aspect
+
+This extension adds the following aspect to [api]#sycl::aspect#:
+
+[source,c++,role=synopsis,id=api:aspect-khr-virtual-mem]
+----
+namespace sycl {
+enum class aspect : /* unspecified */ {
+  ...,
+  khr_virtual_mem
+};
+} // namespace sycl
+----
+
+The aspect indicates that the device supports the virtual memory operations
+defined by this extension.
+
+[[sec:khr-virtual-mem-granularity]]
+== Memory granularity
+
+Working with virtual address ranges and physical memory requires the application
+to align and size ranges according to minimum granularities.
+Unless stated otherwise, alignment and size requirements below use the minimum
+granularity, not the recommended granularity.
+The extension distinguishes device granularity, required for physical memory
+allocations, from context granularity, required for virtual memory range
+reservations.
+Queries provide minimum and recommended granularities.
+A minimum is the smallest supported size for the corresponding operation; a
+recommended value may be larger and may provide better performance.
+For a given device and context, the recommended device granularity must be an
+integer multiple of the minimum device granularity, and the recommended context
+granularity must be an integer multiple of the minimum context granularity.
+
+[source,c++,role=synopsis]
+----
+namespace sycl::khr {
+
+enum class granularity_mode : /* unspecified */ {
+  minimum,
+  recommended
+};
+
+std::size_t get_mem_granularity(const device &syclDevice,
+                                const context &syclContext,
+                                granularity_mode mode = granularity_mode::recommended);
+
+std::size_t get_mem_granularity(const context &syclContext,
+                                granularity_mode mode = granularity_mode::recommended);
+
+} // namespace sycl::khr
+----
+
+.[apidef]#khr::get_mem_granularity(device, context, granularity_mode)#
+[source,c++,role=synopsis,id=api:khr-get-mem-granularity-device-context]
+----
+std::size_t get_mem_granularity(const device &syclDevice,
+                                const context &syclContext,
+                                granularity_mode mode = granularity_mode::recommended);
+----
+
+_Effects:_ The value of the function call is the granularity of physical memory
+allocations on [code]#syclDevice# in [code]#syclContext#.
+[code]#mode# selects whether the minimum or recommended granularity is returned.
+
+_Throws:_
+
+* An exception with error code [api]#errc::invalid# if [code]#syclDevice# is
+  neither contained in [code]#syclContext# nor a descendant device of a device
+  contained in that context.
+* An exception with error code [api]#errc::feature_not_supported# if
+  [code]#syclDevice# does not have [api]#aspect::khr_virtual_mem#.
+
+If both conditions apply, the implementation may throw either exception.
+
+.[apidef]#khr::get_mem_granularity(context, granularity_mode)#
+[source,c++,role=synopsis,id=api:khr-get-mem-granularity-context]
+----
+std::size_t get_mem_granularity(const context &syclContext,
+                                granularity_mode mode = granularity_mode::recommended);
+----
+
+_Effects:_ The value of the function call is the granularity of virtual memory
+range reservations in [code]#syclContext#.
+[code]#mode# selects whether the minimum or recommended granularity is used.
+
+_Throws:_ An exception with error code [api]#errc::feature_not_supported# if any
+device in [code]#syclContext# does not have [api]#aspect::khr_virtual_mem#.
+
+[[sec:khr-virtual-mem-reservations]]
+== Reserving virtual address ranges
+
+[source,c++,role=synopsis]
+----
+namespace sycl::khr {
+
+std::uintptr_t reserve_virtual_mem(std::uintptr_t start, std::size_t numBytes,
+                                   const context &syclContext);
+
+std::uintptr_t reserve_virtual_mem(std::size_t numBytes, const context &syclContext);
+
+void free_virtual_mem(std::uintptr_t ptr, std::size_t numBytes,
+                      const context &syclContext);
+
+} // namespace sycl::khr
+----
+
+.[apidef]#khr::reserve_virtual_mem(std::uintptr_t, std::size_t, context)#
+[source,c++,role=synopsis,id=api:khr-reserve-virtual-mem-at]
+----
+std::uintptr_t reserve_virtual_mem(std::uintptr_t start, std::size_t numBytes,
+                                   const context &syclContext);
+----
+
+_Preconditions:_ [code]#start# is aligned to the minimum context granularity
+returned by [code]#khr::get_mem_granularity(syclContext,
+granularity_mode::minimum)# and [code]#numBytes# is a multiple of that
+granularity.
+
+_Effects:_ Reserves a virtual memory range of [code]#numBytes# bytes in
+[code]#syclContext#.
+The value of the function call is the starting address of the reserved range.
+The implementation attempts to reserve the range at [code]#start#; if it cannot
+do so, it selects another suitable address.
+
+A reservation is aligned to the context granularity, which need not equal or
+divide the device granularity used for mapping.
+Consequently, the address returned by this function is not necessarily a valid
+mapping address for a particular device.
+An application that intends to map memory into a reservation may need to reserve
+additional space and select an appropriately aligned subrange within the
+reservation.
+
+_Throws:_
+
+* An exception with error code [api]#errc::feature_not_supported# if any device
+  in [code]#syclContext# does not have [api]#aspect::khr_virtual_mem#.
+* An exception with error code [api]#errc::invalid# if the implementation is
+  unable to reserve a suitable virtual memory range at [code]#start# and is also
+  unable to reserve a range at another suitable address.
+* An exception with error code [api]#errc::invalid# if [code]#numBytes# is zero.
+
+If more than one condition applies, the implementation may throw any one of the
+exceptions specified for the applicable conditions.
+
+.[apidef]#khr::reserve_virtual_mem(std::size_t, context)#
+[source,c++,role=synopsis,id=api:khr-reserve-virtual-mem]
+----
+std::uintptr_t reserve_virtual_mem(std::size_t numBytes, const context &syclContext);
+----
+
+_Effects:_ Equivalent to calling [api]#khr::reserve_virtual_mem(std::uintptr_t,
+std::size_t, const context&)# with [code]#start# equal to zero and the given
+[code]#numBytes# and [code]#syclContext#.
+
+.[apidef]#khr::free_virtual_mem#
+[source,c++,role=synopsis,id=api:khr-free-virtual-mem]
+----
+void free_virtual_mem(std::uintptr_t ptr, std::size_t numBytes,
+                      const context &syclContext);
+----
+
+_Preconditions:_ [code]#ptr# is the starting address returned by a call to
+[api]#khr::reserve_virtual_mem#, [code]#numBytes# is the same size as in that
+reservation call, the range is not currently mapped to physical memory, and the
+range has not already been freed.
+
+_Effects:_ Frees the virtual memory range specified by [code]#ptr# and
+[code]#numBytes# in [code]#syclContext#.
+
+[[sec:khr-virtual-mem-physical-memory]]
+== Physical memory representation
+
+The [code]#physical_mem# class represents physical device memory that can be
+mapped to a virtual address range.
+
+[source,c++,role=synopsis]
+----
+namespace sycl::khr {
+
+enum class address_access_mode : /* unspecified */ {
+  none,
+  read,
+  read_write
+};
+
+class physical_mem {
+public:
+  template <typename PropertyOrList = empty_properties_t>
+  physical_mem(const device &syclDevice, const context &syclContext,
+               std::size_t numBytes, PropertyOrList props = {});
+
+  template <typename PropertyOrList = empty_properties_t>
+  physical_mem(const queue &syclQueue, std::size_t numBytes,
+               PropertyOrList props = {});
+
+  /* -- common interface members -- */
+
+  void *map(std::uintptr_t ptr, std::size_t numBytes, address_access_mode mode,
+            std::size_t offset = 0) const;
+
+  context get_context() const;
+  device get_device() const;
+  std::size_t size() const noexcept;
+};
+
+} // namespace sycl::khr
+----
+
+[code]#physical_mem# has common reference semantics, as described in section
+4.5.2, "Common reference semantics," of the SYCL specification.
+
+[[sec:khr-virtual-mem-physical-mem-constructors]]
+=== Constructors
+
+.[apititle]#physical_mem(const device&, const context&, std::size_t, PropertyOrList)#
+[source,c++,role=synopsis,id=api:khr-physical-mem-ctor-device-context]
+----
+template <typename PropertyOrList = empty_properties_t>
+physical_mem(const device &syclDevice, const context &syclContext,
+             std::size_t numBytes, PropertyOrList props = {});
+----
+
+_Constraints:_ [api]#khr::is_property_or_list_for_v<PropertyOrList,
+physical_mem># is [code]#true#.
+
+_Preconditions:_ [code]#numBytes# is a multiple of the minimum device
+granularity returned by [code]#khr::get_mem_granularity(syclDevice, syclContext,
+granularity_mode::minimum)#.
+
+_Effects:_ Constructs a [code]#physical_mem# object and allocates
+[code]#numBytes# of physical memory on [code]#syclDevice#.
+[code]#props# provides the physical-memory properties, if any.
+
+_Throws:_
+
+* An exception with error code [api]#errc::invalid# if [code]#syclDevice# is
+  neither contained in [code]#syclContext# nor a descendant device of a device
+  contained in [code]#syclContext#.
+* An exception with error code [api]#errc::feature_not_supported# if
+  [code]#syclDevice# does not have [api]#aspect::khr_virtual_mem#.
+* An exception with error code [api]#errc::memory_allocation# if the required
+  physical memory cannot be allocated on [code]#syclDevice#.
+* An exception with error code [api]#errc::invalid# if [code]#numBytes# is zero.
+
+If more than one condition applies, the implementation may throw any one of the
+exceptions specified for the applicable conditions.
+
+.[apititle]#physical_mem(const queue&, std::size_t, PropertyOrList)#
+[source,c++,role=synopsis,id=api:khr-physical-mem-ctor-queue]
+----
+template <typename PropertyOrList = empty_properties_t>
+physical_mem(const queue &syclQueue, std::size_t numBytes,
+             PropertyOrList props = {});
+----
+
+_Constraints:_ [api]#khr::is_property_or_list_for_v<PropertyOrList,
+physical_mem># is [code]#true#.
+
+_Effects:_ Equivalent to constructing
+[code]#physical_mem(syclQueue.get_device(), syclQueue.get_context(), numBytes,
+props)#.
+
+[[sec:khr-virtual-mem-map]]
+=== Mapping physical memory
+
+.[apidef]#physical_mem::map#
+[source,c++,role=synopsis,id=api:khr-physical-mem-map]
+----
+void *map(std::uintptr_t ptr, std::size_t numBytes, address_access_mode mode,
+          std::size_t offset = 0) const;
+----
+
+_Preconditions:_
+
+* [code]#offset# is less than or equal to [api]#physical_mem::size()#.
+* [code]#numBytes# is less than or equal to [api]#physical_mem::size()# minus
+  [code]#offset#.
+* The virtual memory range is a subrange of a range previously reserved in the
+  context returned by [api]#physical_mem::get_context#.
+* [code]#ptr#, [code]#numBytes#, and [code]#offset# are multiples of the minimum
+  device granularity returned by [code]#khr::get_mem_granularity(get_device(),
+  get_context(), granularity_mode::minimum)# for this object.
+* The virtual memory range is not already mapped to a physical memory region,
+  and the physical memory subrange beginning at [code]#offset# and spanning
+  [code]#numBytes# bytes is not already mapped to another virtual memory range.
+
+_Effects:_ Maps the virtual memory range beginning at [code]#ptr# and spanning
+[code]#numBytes# bytes to the physical memory represented by this object,
+starting at [code]#offset# bytes into that physical memory.
+The value of the function call is a pointer equivalent to
+[code]#reinterpret_cast<void *>(ptr)#.
+
+After the call, the returned pointer is accessible for reading if [code]#mode#
+is [api]#address_access_mode::read# or [api]#address_access_mode::read_write#,
+and is accessible for writing only if [code]#mode# is
+[api]#address_access_mode::read_write#.
+If [code]#mode# is [api]#address_access_mode::none#, the range is inaccessible;
+accessing it has undefined behavior.
+Writing to the range when [code]#mode# is [api]#address_access_mode::read# has
+undefined behavior.
+
+An accessible pointer behaves like a pointer to device USM memory and can be
+used in any interface that accepts a device USM pointer.
+
+_Throws:_ An exception with error code [api]#errc::invalid# if [code]#numBytes#
+is zero.
+
+[[sec:khr-virtual-mem-physical-mem-accessors]]
+=== physical_mem accessors
+
+.[apidef]#physical_mem::get_context#
+[source,c++,role=synopsis,id=api:khr-physical-mem-get-context]
+----
+context get_context() const;
+----
+
+_Effects:_ The value of the function call is the context associated with this
+[code]#physical_mem# object.
+
+.[apidef]#physical_mem::get_device#
+[source,c++,role=synopsis,id=api:khr-physical-mem-get-device]
+----
+device get_device() const;
+----
+
+_Effects:_ The value of the function call is the device associated with this
+[code]#physical_mem# object.
+
+.[apidef]#physical_mem::size#
+[source,c++,role=synopsis,id=api:khr-physical-mem-size]
+----
+std::size_t size() const noexcept;
+----
+
+_Effects:_ The value of the function call is the size, in bytes, of the physical
+memory represented by this object.
+
+[[sec:khr-virtual-mem-access-mode-functions]]
+=== Access mode and unmapping functions
+
+[source,c++,role=synopsis]
+----
+namespace sycl::khr {
+
+void set_access_mode(const void *ptr, std::size_t numBytes,
+                     address_access_mode mode, const context &syclContext);
+
+address_access_mode get_access_mode(const void *ptr, std::size_t numBytes,
+                                    const context &syclContext);
+
+void unmap(const void *ptr, std::size_t numBytes, const context &syclContext);
+
+} // namespace sycl::khr
+----
+
+.[apidef]#khr::set_access_mode#
+[source,c++,role=synopsis,id=api:khr-set-access-mode]
+----
+void set_access_mode(const void *ptr, std::size_t numBytes,
+                     address_access_mode mode, const context &syclContext);
+----
+
+_Preconditions:_ The range is a sub-range of a virtual memory range previously
+mapped to a [code]#physical_mem# object, [code]#ptr# and [code]#numBytes# are
+multiples of the minimum device granularity returned by a call to
+[code]#khr::get_mem_granularity# with [code]#granularity_mode::minimum# for the
+device and context associated with that object, and [code]#syclContext# is the
+same context as returned by [code]#get_context()# on that object.
+
+_Effects:_ Changes the access mode of the mapped virtual memory range beginning
+at [code]#ptr# and spanning [code]#numBytes# bytes.
+After the call, the range is accessible for reading if [code]#mode# is
+[api]#address_access_mode::read# or [api]#address_access_mode::read_write#, and
+is accessible for writing only if [code]#mode# is
+[api]#address_access_mode::read_write#.
+The range is inaccessible when [code]#mode# is [api]#address_access_mode::none#.
+Writing to the range when [code]#mode# is [api]#address_access_mode::read# has
+undefined behavior.
+
+An accessible pointer behaves like a pointer to device USM memory and can be
+used in any interface that accepts a device USM pointer.
+
+.[apidef]#khr::get_access_mode#
+[source,c++,role=synopsis,id=api:khr-get-access-mode]
+----
+address_access_mode get_access_mode(const void *ptr, std::size_t numBytes,
+                                    const context &syclContext);
+----
+
+_Preconditions:_
+
+* The range beginning at [code]#ptr# and spanning [code]#numBytes# bytes is a
+  sub-range of a virtual memory range previously mapped to a
+  [code]#physical_mem# object.
+* [code]#ptr# and [code]#numBytes# are multiples of the minimum device
+  granularity returned by a call to [code]#khr::get_mem_granularity# with
+  [code]#granularity_mode::minimum# for the device and context associated with
+  that object.
+* [code]#syclContext# is the same context as returned by [code]#get_context()#
+  on that object.
+* The access mode is uniform throughout the queried range.
+
+_Effects:_ The value of the function call is the access mode of the mapped
+virtual memory range specified by [code]#ptr# and [code]#numBytes#.
+
+.[apidef]#khr::unmap#
+[source,c++,role=synopsis,id=api:khr-unmap]
+----
+void unmap(const void *ptr, std::size_t numBytes, const context &syclContext);
+----
+
+_Preconditions:_
+
+* The range was mapped by a previous call to [api]#physical_mem::map#.
+* The range is the full range previously mapped; a sub-range is not sufficient.
+* [code]#syclContext# is the same context as returned by
+  [api]#physical_mem::get_context# on the object to which the range is mapped.
+* No in-progress or enqueued command on any device accesses any address in the
+  range.
+
+_Effects:_ Unmaps the virtual memory range beginning at [code]#ptr# and spanning
+[code]#numBytes# bytes.
+After the call, the range is ready to be mapped again through
+[api]#physical_mem::map#.
+
+Unmapping a range that spans multiple contiguous mapped ranges is not supported
+and has undefined behavior.
+This function is not guaranteed to wait for commands that access the range to
+complete.
+The application can satisfy the command-completion requirement by waiting for
+the relevant events or queues before calling this function.
+
+The destructor of [code]#physical_mem# does not unmap ranges mapped to the
+object.
+The application must unmap those ranges before the object is destroyed.
+
+[[sec:khr-virtual-mem-properties]]
+== Physical memory properties
+
+This extension defines no physical memory properties.
+The [code]#physical_mem# constructors accept properties for extensibility.
