@@ -15,14 +15,14 @@ inline constexpr bool is_property_of_v =
     is_property_of<Property, SyclObject>::value;
 
 class T {
-  ...
+  // ...
 
   template <typename Property>
   bool has_property() const noexcept;
 
   template <typename Property> Property get_property() const;
 
-  ...
+  // ...
 };
 
 class property_list {
